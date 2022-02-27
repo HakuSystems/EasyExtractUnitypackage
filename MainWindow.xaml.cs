@@ -104,6 +104,7 @@ namespace EasyExtractUnitypackage
                     if (File.Exists(System.IO.Path.Combine(d, "pathname")))
                     {
                         relativePath = File.ReadAllText(System.IO.Path.Combine(d, "pathname"));
+                        
                         targetFullPath = System.IO.Path.GetDirectoryName(System.IO.Path.Combine(targetFolder, relativePath));
                         targetFullFile = System.IO.Path.Combine(targetFolder, relativePath);
                     }

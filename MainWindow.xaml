@@ -37,10 +37,13 @@
         <Label x:Name="InfoText" Foreground="White" Grid.Row="3" Grid.Column="1" Grid.ColumnSpan="2" HorizontalAlignment="Center" Margin="5" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" FontSize="20"/>
         <StackPanel Grid.Row="1" Grid.RowSpan="2" Grid.Column="1" Grid.ColumnSpan="2">
             <TextBlock Text="EasyExtractUnitypackge is a Program to Extract Unitypackages to get files from .Unitypackage Files." HorizontalAlignment="Center" Margin="5" FontSize="10" Foreground="White"/>
-            <Border Height="180" BorderThickness="1" BorderBrush="White">
-                <TextBlock VerticalAlignment="Bottom" Text="Search or just Drag Drop .Unitypackage" HorizontalAlignment="Center" Margin="5" FontSize="10" Foreground="White"/>
-            </Border>
-            <Button x:Name="searchUnitybtn" Click="searchUnitybtn_Click" Margin="5" Content="Search Unitypackage" Foreground="White" Width="150" FontSize="10" VerticalAlignment="Bottom"/>
+            <TextBlock VerticalAlignment="Bottom" Text="Search or just Drag Drop .Unitypackage" HorizontalAlignment="Center" Margin="5" FontSize="10" Foreground="White"/>
+
+            <ListView x:Name="Testlist">
+                
+            </ListView>
+            <Button materialDesign:ButtonAssist.CornerRadius="5" x:Name="searchUnitybtn" Click="searchUnitybtn_Click" Margin="5" Content="Search Unitypackage" Foreground="White" Width="150" FontSize="10" VerticalAlignment="Bottom"/>
         </StackPanel>
     </Grid>
 </Window>
+    
