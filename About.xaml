@@ -6,24 +6,30 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:EasyExtractUnitypackage"
         mc:Ignorable="d"
-        Title="EasyExtractUnitypackage"
-        Height="292.318"
-        Width="306.334"
+        Title="About"
+        Height="400"
+        Width="350"
         WindowStartupLocation="CenterScreen"
-        WindowStyle="ToolWindow"
+        WindowStyle="None"
+        AllowsTransparency="True"
         Background="{DynamicResource MaterialDesignDarkBackground}"
         Loaded="Window_Loaded"
+        MouseDown="Window_MouseDown"
         >
-    <Border>
+    <Border Style="{DynamicResource MaterialDesignToolBarMainPanelBorderStyle}"
+            BorderBrush="{DynamicResource MaterialDesignDarkForeground}"
+            BorderThickness="1"
+            Margin="0"
+            >
         <Grid>
-            <!--#region grids + tabs-->
+            <!--#region grids-->
             <Grid.ColumnDefinitions>
                 <ColumnDefinition/>
                 <ColumnDefinition/>
                 <ColumnDefinition/>
                 <ColumnDefinition/>
                 <ColumnDefinition/>
-                <ColumnDefinition Width="20"/>
+                <ColumnDefinition Width="100"/>
             </Grid.ColumnDefinitions>
             <Grid.RowDefinitions>
                 <RowDefinition Height="35"/>
@@ -34,21 +40,9 @@
                 <RowDefinition/>
                 <RowDefinition Height="40"/>
             </Grid.RowDefinitions>
-            <Frame x:Name="currentTabPage" Panel.ZIndex="1"
-                   NavigationUIVisibility="Hidden"
-                   Grid.Column="2" Grid.ColumnSpan="2" Margin="0,0,84,0"/>
-            <Frame x:Name="currentPage"
-                   NavigationUIVisibility="Hidden"
-                   Grid.Row="1"
-                   Grid.Column="0"
-                   Grid.ColumnSpan="6"
-                   Grid.RowSpan="6"
-                   />
             <!--#endregion-->
 
-            <!--#region versionString and Title-->
-
-
+            <!--#region versionString and Close-->
             <materialDesign:Card  Grid.ColumnSpan="6">
                 <StackPanel Orientation="Horizontal">
                     <materialDesign:Card VerticalAlignment="Center" Width="Auto" >
@@ -67,27 +61,106 @@
                             </Label.Content>
                         </Label>
                     </materialDesign:Card>
-                    <materialDesign:Card VerticalAlignment="Center"/>
-
 
                 </StackPanel>
             </materialDesign:Card>
-            <!--#endregion-->
 
-            <!--#region control Buttons-->
-
-            <!--Check for Update Btn-->
-            <materialDesign:Card Grid.ColumnSpan="6" HorizontalAlignment="Right">
-                <StackPanel Orientation="Horizontal">
-                    <materialDesign:Card/>
-
-                    <!--About Btn-->
-                    <materialDesign:Card/>
-                </StackPanel>
+            <materialDesign:Card Grid.Column="6">
+                <RadioButton x:Name="Closebtn" Click="Closebtn_Click" Style="{DynamicResource MaterialDesignFlatButton}">
+                    <RadioButton.Content>
+                        <StackPanel Orientation="Horizontal">
+                            <materialDesign:PackIcon
+                                        Kind="Close"
+                                        Foreground="{DynamicResource MaterialDesignDarkForeground}"
+                                        VerticalAlignment="Center" Margin="0,0,5,0"/>
+                            <TextBlock Text="Close"
+                                               Style="{DynamicResource MaterialDesignBody2TextBlock}"
+                                               Foreground="White"
+                                               VerticalAlignment="Center"/>
+                        </StackPanel>
+                    </RadioButton.Content>
+                </RadioButton>
             </materialDesign:Card>
+
+
             <!--#endregion-->
+<!--#region about section-->
+            <StackPanel Orientation="Vertical" Grid.Row="1" Grid.RowSpan="6" Grid.ColumnSpan="6">
+                <materialDesign:Card 
+                    Background="{DynamicResource MaterialDesignDarkSeparatorBackground}"
+                    >
+                    <TextBlock Text="About"
+                           Style="{DynamicResource MaterialDesignHeadline3TextBlock}"
+                           Foreground="{DynamicResource MaterialDesignDarkForeground}"
+                           Margin="15"
+                           />
+                </materialDesign:Card>
 
+                <materialDesign:Card
+                    >
+                    <TextBlock Text="Shorter"
+                           Style="{DynamicResource MaterialDesignSubtitle2TextBlock}"
+                           Foreground="{DynamicResource MaterialDesignDarkForeground}"
+                           Margin="5"
+                           />
+                </materialDesign:Card>
+                <materialDesign:Card
+                    Background="{DynamicResource AttentionToActionBrush}"
+                    >
+                    <TextBlock Text="some longer text here or something idk what to put here your turn to put something here"
+                           Margin="10"
+                           TextWrapping="WrapWithOverflow" 
+                           Style="{DynamicResource MaterialDesignBody2TextBlock}"
+                           Foreground="{DynamicResource MaterialDesignDarkForeground}"/>
+                </materialDesign:Card>
+                
+            </StackPanel>
+<!--#endregion-->
+<!--#region Bottom Button and Info (github)-->
+            <StackPanel Orientation="Horizontal"
+                        Grid.Row="6"
+                        Grid.ColumnSpan="6">
+                <materialDesign:Card Background="Transparent">
+                    <StackPanel Orientation="Horizontal">
+                        <materialDesign:Card Background="{DynamicResource MaterialDesignShadowBrush}"
+                                             Margin="5"
+                                             >
+                            <TextBlock Margin="5">
+                                    <StackPanel Orientation="Horizontal">
+                                        <materialDesign:PackIcon
+                                        Kind="Github"
+                                        Foreground="{DynamicResource MaterialDesignDarkForeground}"
+                                        VerticalAlignment="Center" Margin="0,0,5,0"/>
+                                        <TextBlock x:Name="AuthorText" Text="HakuSystems, Jan-Fcloud"
+                                               Style="{DynamicResource MaterialDesignBody2TextBlock}"
+                                               Foreground="White"/>
+                                    </StackPanel>
+                            </TextBlock>
+                        </materialDesign:Card>
+                        <materialDesign:Card Background="{DynamicResource MaterialDesignLightSeparatorBackground}"
+                                             Margin="45,5,5,5"
+                                             >
+                            <RadioButton HorizontalAlignment="Right"
+                                         Style="{DynamicResource MaterialDesignFlatButton}"
+                                         x:Name="websiteBtn"
+                                         Click="websiteBtn_Click"
+                                         >
+                                    <StackPanel Orientation="Horizontal">
+                                        <materialDesign:PackIcon
+                                        Kind="Web"
+                                        Foreground="{DynamicResource MaterialDesignDarkForeground}"
+                                        VerticalAlignment="Center" Margin="0,0,5,0"/>
+                                        <TextBlock x:Name="WebsiteBtn" Text="Website"
+                                               Style="{DynamicResource MaterialDesignBody2TextBlock}"
+                                               Foreground="White"/>
+                                    </StackPanel>
+                            </RadioButton>
+                        </materialDesign:Card>
 
+                    </StackPanel>
+                </materialDesign:Card>
+            </StackPanel>
+<!--#endregion-->
         </Grid>
     </Border>
 </Window>

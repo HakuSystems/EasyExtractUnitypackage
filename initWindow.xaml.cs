@@ -41,10 +41,8 @@ namespace EasyExtractUnitypackage
         {
             //currentPage.Navigate(new Uri("About.xaml", UriKind.RelativeOrAbsolute));
 
-            About about = new About();
-            about.Show();
-
-
+            About aboutWin = new About();
+            aboutWin.Show();
         }
 
         private void checkUpdateBtn_Click(object sender, RoutedEventArgs e)

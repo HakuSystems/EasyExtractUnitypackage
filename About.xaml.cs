@@ -15,6 +15,7 @@ using System.IO;
 using ICSharpCode.SharpZipLib.Tar;
 using ICSharpCode.SharpZipLib.GZip;
 using Microsoft.Win32;
+using System.Diagnostics;
 
 namespace EasyExtractUnitypackage
 {
@@ -27,13 +28,26 @@ namespace EasyExtractUnitypackage
         public About()
         {
             InitializeComponent();
-            this.Title = "About";
         }
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
             currentVersionText.Text = Application.ResourceAssembly.GetName().Version.ToString() + " - 2022";
-            currentPage.Navigate(new Uri("UnpackUserControl.xaml", UriKind.RelativeOrAbsolute));
+        }
+
+        private void Closebtn_Click(object sender, RoutedEventArgs e)
+        {
+            Close();
+        }
+
+        private void Window_MouseDown(object sender, MouseButtonEventArgs e)
+        {
+            DragMove();
+        }
+
+        private void websiteBtn_Click(object sender, RoutedEventArgs e)
+        {
+            Process.Start("https://nanosdk.net/");
         }
     }
 }
