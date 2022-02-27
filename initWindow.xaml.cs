@@ -35,9 +35,9 @@ namespace EasyExtractUnitypackage
             currentPage.Navigate(new Uri("AboutUserControl.xaml", UriKind.RelativeOrAbsolute));
         }
 
-        private void EasyExtractBtn_Click(object sender, RoutedEventArgs e)
+        private void checkUpdateBtn_Click(object sender, RoutedEventArgs e)
         {
-            currentPage.Navigate(new Uri("UnpackUserControl.xaml", UriKind.RelativeOrAbsolute));
+            currentTabPage.Navigate(new Uri("UpdateCheckUserControl.xaml", UriKind.RelativeOrAbsolute));
         }
     }
 }

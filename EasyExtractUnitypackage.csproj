@@ -54,6 +54,8 @@
     </Reference>
     <Reference Include="MaterialDesignThemes.Wpf, Version=4.3.0.3, Culture=neutral, PublicKeyToken=df2a72020bd7962a, processorArchitecture=MSIL">
       <HintPath>packages\MaterialDesignThemes.4.3.0\lib\net452\MaterialDesignThemes.Wpf.dll</HintPath>
+      <Private>True</Private>
+      <EmbedInteropTypes>False</EmbedInteropTypes>
     </Reference>
     <Reference Include="Microsoft.Win32.Primitives, Version=4.0.2.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
       <HintPath>packages\Microsoft.Win32.Primitives.4.3.0\lib\net46\Microsoft.Win32.Primitives.dll</HintPath>
@@ -223,6 +225,9 @@
     <Compile Include="UnpackUserControl.xaml.cs">
       <DependentUpon>UnpackUserControl.xaml</DependentUpon>
     </Compile>
+    <Compile Include="UpdateCheckUserControl.xaml.cs">
+      <DependentUpon>UpdateCheckUserControl.xaml</DependentUpon>
+    </Compile>
     <Page Include="AboutUserControl.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -247,6 +252,10 @@
       <SubType>Code</SubType>
     </Compile>
     <Page Include="UnpackUserControl.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="UpdateCheckUserControl.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

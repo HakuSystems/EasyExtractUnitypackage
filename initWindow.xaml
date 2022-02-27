@@ -34,6 +34,9 @@
                 <RowDefinition/>
                 <RowDefinition Height="40"/>
             </Grid.RowDefinitions>
+            <Frame x:Name="currentTabPage" Panel.ZIndex="1"
+                   NavigationUIVisibility="Hidden"
+                   Grid.Column="2" Grid.ColumnSpan="2" Margin="0,0,84,0"/>
             <Frame x:Name="currentPage"
                    NavigationUIVisibility="Hidden"
                    Grid.Row="1"
@@ -44,6 +47,8 @@
             <!--#endregion-->
             
             <!--#region versionString and Title-->
+            
+
             <materialDesign:Card  Grid.ColumnSpan="6">
                 <StackPanel Orientation="Horizontal">
                     <materialDesign:Card VerticalAlignment="Center"  >
@@ -77,7 +82,7 @@
                             </Label.Content>
                         </Label>
                     </materialDesign:Card>
-
+                    
 
                 </StackPanel>
             </materialDesign:Card>
@@ -89,9 +94,9 @@
             <materialDesign:Card Grid.ColumnSpan="6" HorizontalAlignment="Right">
                 <StackPanel Orientation="Horizontal">
                     <materialDesign:Card>
-                        <RadioButton x:Name="EasyExtractBtn"
+                        <RadioButton x:Name="checkUpdateBtn"
                                      Style="{DynamicResource MaterialDesignFlatDarkButton}"
-                                     Click="EasyExtractBtn_Click"
+                                     Click="checkUpdateBtn_Click"
                                      >
                             <RadioButton.Content>
                                 <StackPanel Orientation="Horizontal">
