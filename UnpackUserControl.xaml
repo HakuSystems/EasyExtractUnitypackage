@@ -6,6 +6,9 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:EasyExtractUnitypackage"
              mc:Ignorable="d" 
+             AllowDrop="true"
+             DragEnter="Window_DragEnter"
+             Drop="Window_Drop"
              d:DesignHeight="450" d:DesignWidth="800">
     <Grid>
         <Label Content="Unpacking" Foreground="White"/>

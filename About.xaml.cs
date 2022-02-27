@@ -21,35 +21,19 @@ namespace EasyExtractUnitypackage
     /// <summary>
     /// Interaktionslogik für initWindow.xaml
     /// </summary>
-    public partial class initWindow : Window
+    public partial class About : Window
     {
 
-        private int assetCounter;
-
-        public initWindow()
+        public About()
         {
             InitializeComponent();
+            this.Title = "About";
         }
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
             currentVersionText.Text = Application.ResourceAssembly.GetName().Version.ToString() + " - 2022";
             currentPage.Navigate(new Uri("UnpackUserControl.xaml", UriKind.RelativeOrAbsolute));
-        }
-
-        private void AboutBtn_Click(object sender, RoutedEventArgs e)
-        {
-            //currentPage.Navigate(new Uri("About.xaml", UriKind.RelativeOrAbsolute));
-
-            About about = new About();
-            about.Show();
-
-
-        }
-
-        private void checkUpdateBtn_Click(object sender, RoutedEventArgs e)
-        {
-            currentTabPage.Navigate(new Uri("UpdateCheckUserControl.xaml", UriKind.RelativeOrAbsolute));
         }
     }
 }

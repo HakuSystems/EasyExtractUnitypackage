@@ -1,0 +1,93 @@
+﻿<Window x:Class="EasyExtractUnitypackage.About"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:EasyExtractUnitypackage"
+        mc:Ignorable="d"
+        Title="EasyExtractUnitypackage"
+        Height="292.318"
+        Width="306.334"
+        WindowStartupLocation="CenterScreen"
+        WindowStyle="ToolWindow"
+        Background="{DynamicResource MaterialDesignDarkBackground}"
+        Loaded="Window_Loaded"
+        >
+    <Border>
+        <Grid>
+            <!--#region grids + tabs-->
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition/>
+                <ColumnDefinition/>
+                <ColumnDefinition/>
+                <ColumnDefinition/>
+                <ColumnDefinition/>
+                <ColumnDefinition Width="20"/>
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="35"/>
+                <RowDefinition/>
+                <RowDefinition/>
+                <RowDefinition/>
+                <RowDefinition/>
+                <RowDefinition/>
+                <RowDefinition Height="40"/>
+            </Grid.RowDefinitions>
+            <Frame x:Name="currentTabPage" Panel.ZIndex="1"
+                   NavigationUIVisibility="Hidden"
+                   Grid.Column="2" Grid.ColumnSpan="2" Margin="0,0,84,0"/>
+            <Frame x:Name="currentPage"
+                   NavigationUIVisibility="Hidden"
+                   Grid.Row="1"
+                   Grid.Column="0"
+                   Grid.ColumnSpan="6"
+                   Grid.RowSpan="6"
+                   />
+            <!--#endregion-->
+
+            <!--#region versionString and Title-->
+
+
+            <materialDesign:Card  Grid.ColumnSpan="6">
+                <StackPanel Orientation="Horizontal">
+                    <materialDesign:Card VerticalAlignment="Center" Width="Auto" >
+                        <Label Margin="5">
+                            <Label.Content>
+                                <StackPanel Orientation="Horizontal">
+
+                                    <materialDesign:PackIcon
+                                        Kind="EmoticonCool"
+                                        Foreground="{DynamicResource MaterialDesignDarkForeground}"
+                                        VerticalAlignment="Center" Margin="0,0,5,0"/>
+                                    <TextBlock x:Name="currentVersionText" Text="currentVersion"
+                                               Style="{DynamicResource MaterialDesignBody2TextBlock}"
+                                               Foreground="White"/>
+                                </StackPanel>
+                            </Label.Content>
+                        </Label>
+                    </materialDesign:Card>
+                    <materialDesign:Card VerticalAlignment="Center"/>
+
+
+                </StackPanel>
+            </materialDesign:Card>
+            <!--#endregion-->
+
+            <!--#region control Buttons-->
+
+            <!--Check for Update Btn-->
+            <materialDesign:Card Grid.ColumnSpan="6" HorizontalAlignment="Right">
+                <StackPanel Orientation="Horizontal">
+                    <materialDesign:Card/>
+
+                    <!--About Btn-->
+                    <materialDesign:Card/>
+                </StackPanel>
+            </materialDesign:Card>
+            <!--#endregion-->
+
+
+        </Grid>
+    </Border>
+</Window>

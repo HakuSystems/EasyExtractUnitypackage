@@ -222,6 +222,9 @@
     <Compile Include="AboutUserControl.xaml.cs">
       <DependentUpon>AboutUserControl.xaml</DependentUpon>
     </Compile>
+    <Compile Include="About.xaml.cs">
+      <DependentUpon>About.xaml</DependentUpon>
+    </Compile>
     <Compile Include="UnpackUserControl.xaml.cs">
       <DependentUpon>UnpackUserControl.xaml</DependentUpon>
     </Compile>
@@ -231,6 +234,10 @@
     <Page Include="AboutUserControl.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="About.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
     </Page>
     <Page Include="initWindow.xaml">
       <SubType>Designer</SubType>
