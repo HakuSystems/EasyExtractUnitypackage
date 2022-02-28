@@ -27,7 +27,7 @@ namespace EasyExtractUnitypackage
         public string serverVersion = "https://nanosdk.net/EasyExtractUnitypackage/version.txt"; //website - .txt bc fuck json this is just a small project this is why i use .txt instead of json :)
         public string serverApplicationLoc = "https://nanosdk.net/EasyExtractUnitypackage/EasyExtractUnitypackage.exe"; //website exe
         public static string serverVersNumber;
-        public string serverApplicationName = $"EasyExtractUnitypackage V{serverVersNumber}.exe"; //output name
+        public string serverApplicationName; //output name
         public UpdateCheckUserControl()
         {
             InitializeComponent();
@@ -40,8 +40,6 @@ namespace EasyExtractUnitypackage
 
         private async void runDownloadProgress()
         {
-            statusTxt.Text = "up to date";
-            openNewCard.Visibility = Visibility.Collapsed;
 
             HttpClient httpClient = new HttpClient();
             var result = await httpClient.GetAsync(serverVersion);
@@ -50,6 +48,7 @@ namespace EasyExtractUnitypackage
             var currentVersion = Application.ResourceAssembly.ManifestModule.Assembly.GetName().Version;
 
             serverVersNumber = serverVersionParsed.ToString();
+            serverApplicationName = $"EasyExtractUnitypackage V{serverVersNumber}.exe";
 
             if (serverVersionParsed > currentVersion)
             {
@@ -60,6 +59,11 @@ namespace EasyExtractUnitypackage
                     client.DownloadProgressChanged += Client_DownloadProgressChanged;
                     client.DownloadFileCompleted += Client_DownloadFileCompleted;
                 };
+            }
+            else
+            {
+                statusTxt.Text = "up to date";
+                openNewCard.Visibility = Visibility.Collapsed;
             }
         }
 

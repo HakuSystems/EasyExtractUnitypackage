@@ -107,12 +107,31 @@
                 <materialDesign:Card
                     Background="{DynamicResource AttentionToActionBrush}"
                     >
-                    <TextBlock Text="some longer text here or something idk what to put here your turn to put something here"
+                    <TextBlock Text="EasyExtractUnitypackage is a Program to get files out of a .unitypackage by using it's .gz file structure without importing it into Unity."
                            Margin="10"
                            TextWrapping="WrapWithOverflow" 
                            Style="{DynamicResource MaterialDesignBody2TextBlock}"
                            Foreground="{DynamicResource MaterialDesignDarkForeground}"/>
                 </materialDesign:Card>
+                <materialDesign:Card
+                    Background="{DynamicResource AttentionToActionBrush}"
+                    >
+                    <TextBlock Text="{Binding Path=TFiles}"
+                           Margin="10"
+                           TextWrapping="WrapWithOverflow" 
+                           Style="{DynamicResource MaterialDesignBody2TextBlock}"
+                           Foreground="{DynamicResource MaterialDesignDarkForeground}"/>
+                </materialDesign:Card>
+                <materialDesign:Card
+                    Background="{DynamicResource AttentionToActionBrush}"
+                    >
+                    <TextBlock Text="{Binding Path=UFiles}"
+                           Margin="10"
+                           TextWrapping="WrapWithOverflow" 
+                           Style="{DynamicResource MaterialDesignBody2TextBlock}"
+                           Foreground="{DynamicResource MaterialDesignDarkForeground}"/>
+                </materialDesign:Card>
+                
                 
             </StackPanel>
 <!--#endregion-->

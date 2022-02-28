@@ -24,7 +24,8 @@ namespace EasyExtractUnitypackage
     /// </summary>
     public partial class UnpackUserControl : UserControl
     {
-        private int assetCounter;
+        private int assetCounter = 0;
+        private int fileCounter = 0;
 
         public UnpackUserControl()
         {
@@ -48,16 +49,32 @@ namespace EasyExtractUnitypackage
         private void Window_Drop(object sender, DragEventArgs e)
         {
             string[] files = (string[])e.Data.GetData(DataFormats.FileDrop);
-            if (System.IO.Path.GetExtension(files[0]).Equals(".unitypackage"))
+
+            foreach(string file in files)
             {
-                ExtractUnitypackage(files[0]);
-                Mouse.OverrideCursor = Cursors.Arrow;
+                if (System.IO.Path.GetExtension(file).Equals(".unitypackage"))
+                {
+                    fileCounter++;
+                  ExtractUnitypackage(file);
+                  Mouse.OverrideCursor = Cursors.Arrow;
+                }
+                else
+                {
+                  //InfoText.Content = "not an .unitypackage";
+                  Mouse.OverrideCursor = Cursors.No;
+                }
             }
-            else
-            {
-                //InfoText.Content = "not an .unitypackage";
-                Mouse.OverrideCursor = Cursors.No;
-            }
+
+            MessageBox.Show(assetCounter + " Files EasyExtracted from " + fileCounter + " packages" , "EasyExtractUnitypackage");
+
+            Properties.Settings.Default.files += assetCounter;
+            Properties.Settings.Default.packages += fileCounter;
+            Properties.Settings.Default.Save();
+
+            assetCounter = 0;
+            fileCounter = 0;
+
+
         }
 
         private void ExtractUnitypackage(string filename)
@@ -82,7 +99,6 @@ namespace EasyExtractUnitypackage
             ProcessExtracted(tempFolder, targetFolder);
 
             Directory.Delete(tempFolder, true);
-            MessageBox.Show(assetCounter + " Files EasyExtracted", "EasyExtractUnitypackage");
             //InfoText.Content = "Completed";
             Mouse.OverrideCursor = Cursors.Arrow;
 
@@ -104,7 +120,6 @@ namespace EasyExtractUnitypackage
 
         private void ProcessExtracted(string tempFolder, string targetFolder)
         {
-            assetCounter = 0;
             foreach (string d in Directory.EnumerateDirectories(tempFolder))
             {
                 string relativePath = "";

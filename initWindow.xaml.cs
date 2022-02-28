@@ -29,6 +29,11 @@ namespace EasyExtractUnitypackage
         public initWindow()
         {
             InitializeComponent();
+
+            // Uncomment the 3 lines bellow to reset about stats upon launch //
+            //Properties.Settings.Default.files = 0;
+            //Properties.Settings.Default.packages = 0;
+            //Properties.Settings.Default.Save();
         }
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
