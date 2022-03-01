@@ -74,7 +74,7 @@
                                         Kind="Files"
                                         Foreground="{DynamicResource MaterialDesignDarkForeground}"
                                         VerticalAlignment="Center" Margin="0,0,5,0"/>
-                                        <TextBlock Text="{Binding Path=TFiles, UpdateSourceTrigger=PropertyChanged}"
+                                        <TextBlock x:Name="tFilesV" Text="{Binding TFiles, UpdateSourceTrigger=Explicit}"
                                                Style="{DynamicResource MaterialDesignCaptionTextBlock}"
                                                Foreground="White"/>
                                     </StackPanel>
@@ -89,7 +89,7 @@
                                         Kind="Unity"
                                         Foreground="{DynamicResource MaterialDesignDarkForeground}"
                                         VerticalAlignment="Center" Margin="0,0,5,0"/>
-                                        <TextBlock Text="{Binding Path=UFiles, UpdateSourceTrigger=PropertyChanged}"
+                                        <TextBlock x:Name="uFilesV" Text="{Binding UFiles, UpdateSourceTrigger=Explicit}"
                                                Style="{DynamicResource MaterialDesignCaptionTextBlock}"
                                                Foreground="White"/>
                                     </StackPanel>

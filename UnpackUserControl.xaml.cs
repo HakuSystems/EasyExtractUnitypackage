@@ -35,16 +35,18 @@ namespace EasyExtractUnitypackage
         public string TFiles
         {
             get { return tfiles; }
+            set { tfiles = value; }
         }
         public string UFiles
         {
             get { return ufiles; }
+            set{ ufiles = value; }
         }
 
         public UnpackUserControl()
         {
-            DataContext = this;
             InitializeComponent();
+            DataContext = this;
         }
 
         private void Window_DragEnter(object sender, DragEventArgs e)
@@ -78,11 +80,19 @@ namespace EasyExtractUnitypackage
 
             //MessageBox.Show(assetCounter + " Files EasyExtracted from " + fileCounter + " packages" , "EasyExtractUnitypackage");
 
-            WNotification();
 
             Properties.Settings.Default.files += assetCounter;
             Properties.Settings.Default.packages += fileCounter;
             Properties.Settings.Default.Save();
+
+
+            WNotification();
+
+            tfiles = "Total Files Extracted: " + Properties.Settings.Default.files;
+            ufiles = ".unitypackage Files Extracted: " + Properties.Settings.Default.packages;
+
+            tFilesV.Text = tfiles;
+            uFilesV.Text = ufiles;
 
             assetCounter = 0;
             fileCounter = 0;
@@ -209,6 +219,7 @@ namespace EasyExtractUnitypackage
             {
                 if (System.IO.Path.GetExtension(file).Equals(".unitypackage"))
                 {
+                    
                     fileCounter++;
                     ExtractUnitypackage(file);
                     Mouse.OverrideCursor = Cursors.Arrow;
@@ -222,22 +233,32 @@ namespace EasyExtractUnitypackage
 
             //MessageBox.Show(assetCounter + " Files EasyExtracted from " + fileCounter + " packages", "EasyExtractUnitypackage");
 
-            WNotification();
 
             Properties.Settings.Default.files += assetCounter;
             Properties.Settings.Default.packages += fileCounter;
             Properties.Settings.Default.Save();
+
+            WNotification();
 
             assetCounter = 0;
             fileCounter = 0;
 
             Mouse.OverrideCursor = Cursors.Arrow;
 
-            
+            tfiles = "Total Files Extracted: " + Properties.Settings.Default.files;
+            ufiles = ".unitypackage Files Extracted: " + Properties.Settings.Default.packages;
+
+            tFilesV.Text = tfiles;
+            uFilesV.Text = ufiles;
         }
 
-        private void WNotification() // Windows Notification
+        private void WNotification() // Windows Notification and data refresh
         {
+            /*BindingExpression be = tFilesV.GetBindingExpression(TextBox.TextProperty);
+            be.UpdateSource();
+            be = BindingOperations.GetBindingExpression(uFilesV, TextBox.TextProperty);
+            be.UpdateSource();*/
+
             new ToastContentBuilder()
                 .AddArgument("action", "viewConversation")
                 .AddArgument("conversationId", 9813)
