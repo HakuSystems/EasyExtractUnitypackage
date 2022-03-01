@@ -16,6 +16,8 @@ using System.IO;
 using ICSharpCode.SharpZipLib.Tar;
 using ICSharpCode.SharpZipLib.GZip;
 using Microsoft.Win32;
+using System.ComponentModel;
+using Microsoft.Toolkit.Uwp.Notifications;
 
 namespace EasyExtractUnitypackage
 {
@@ -74,8 +76,10 @@ namespace EasyExtractUnitypackage
                 }
             }
 
-            MessageBox.Show(assetCounter + " Files EasyExtracted from " + fileCounter + " packages" , "EasyExtractUnitypackage");
-            
+            //MessageBox.Show(assetCounter + " Files EasyExtracted from " + fileCounter + " packages" , "EasyExtractUnitypackage");
+
+            WNotification();
+
             Properties.Settings.Default.files += assetCounter;
             Properties.Settings.Default.packages += fileCounter;
             Properties.Settings.Default.Save();
@@ -180,5 +184,67 @@ namespace EasyExtractUnitypackage
             DragDropIcon.Kind = MaterialDesignThemes.Wpf.PackIconKind.FileImportOutline;
             Mouse.OverrideCursor = Cursors.Arrow;
         }
+
+        private void RadioButton_Click(object sender, RoutedEventArgs e)
+        {
+            OpenFileDialog openFile = new OpenFileDialog();
+            openFile.Multiselect = true;
+
+            List<string> fList = new List<string>();
+
+            openFile.Filter = "Unitypackages (*.Unitypackage)|*.Unitypackage";
+            openFile.ShowDialog();
+
+            foreach(string file in openFile.FileNames)
+            {
+                if (!string.IsNullOrEmpty(file))
+                {
+                    fList.Add(file);
+                }
+            }
+
+            string[] files = fList.ToArray();
+
+            foreach (string file in files)
+            {
+                if (System.IO.Path.GetExtension(file).Equals(".unitypackage"))
+                {
+                    fileCounter++;
+                    ExtractUnitypackage(file);
+                    Mouse.OverrideCursor = Cursors.Arrow;
+                }
+                else
+                {
+                    //InfoText.Content = "not an .unitypackage";
+                    Mouse.OverrideCursor = Cursors.No;
+                }
+            }
+
+            //MessageBox.Show(assetCounter + " Files EasyExtracted from " + fileCounter + " packages", "EasyExtractUnitypackage");
+
+            WNotification();
+
+            Properties.Settings.Default.files += assetCounter;
+            Properties.Settings.Default.packages += fileCounter;
+            Properties.Settings.Default.Save();
+
+            assetCounter = 0;
+            fileCounter = 0;
+
+            Mouse.OverrideCursor = Cursors.Arrow;
+
+            
+        }
+
+        private void WNotification() // Windows Notification
+        {
+            new ToastContentBuilder()
+                .AddArgument("action", "viewConversation")
+                .AddArgument("conversationId", 9813)
+                .AddText("EasyExtract has finished extracting...")
+                .AddText($"Extracted {assetCounter} files, from {fileCounter} packages!")
+                .Show();
+        }
+
     }
 }

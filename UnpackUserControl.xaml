@@ -44,7 +44,7 @@
                                    Style="{DynamicResource MaterialDesignCaptionTextBlock}"
                                    HorizontalAlignment="Center"
                                    />
-                        <RadioButton Style="{DynamicResource MaterialDesignRaisedSecondaryLightButton}" HorizontalAlignment="Center" Margin="5">
+                        <RadioButton Style="{DynamicResource MaterialDesignRaisedSecondaryLightButton}" HorizontalAlignment="Center" Margin="5" Click="RadioButton_Click">
                             <RadioButton.Content>
                                 <StackPanel Orientation="Horizontal">
                                     <materialDesign:PackIcon Kind="Search"
@@ -74,7 +74,7 @@
                                         Kind="Files"
                                         Foreground="{DynamicResource MaterialDesignDarkForeground}"
                                         VerticalAlignment="Center" Margin="0,0,5,0"/>
-                                        <TextBlock Text="{Binding Path=TFiles}"
+                                        <TextBlock Text="{Binding Path=TFiles, UpdateSourceTrigger=PropertyChanged}"
                                                Style="{DynamicResource MaterialDesignCaptionTextBlock}"
                                                Foreground="White"/>
                                     </StackPanel>
@@ -89,7 +89,7 @@
                                         Kind="Unity"
                                         Foreground="{DynamicResource MaterialDesignDarkForeground}"
                                         VerticalAlignment="Center" Margin="0,0,5,0"/>
-                                        <TextBlock Text="{Binding Path=UFiles}"
+                                        <TextBlock Text="{Binding Path=UFiles, UpdateSourceTrigger=PropertyChanged}"
                                                Style="{DynamicResource MaterialDesignCaptionTextBlock}"
                                                Foreground="White"/>
                                     </StackPanel>
