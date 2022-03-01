@@ -35,10 +35,10 @@ namespace EasyExtractUnitypackage
 
         private void UserControl_Loaded(object sender, RoutedEventArgs e)
         {
-            runDownloadProgress();
+            RunDownloadProgress();
         }
 
-        private async void runDownloadProgress()
+        private async void RunDownloadProgress()
         {
 
             HttpClient httpClient = new HttpClient();
@@ -54,22 +54,19 @@ namespace EasyExtractUnitypackage
             {
                 using (WebClient client = new WebClient())
                 {
-                    statusTxt.Text = "Downloading";
                     client.DownloadFileAsync(new Uri(serverApplicationLoc), serverApplicationName);
                     client.DownloadProgressChanged += Client_DownloadProgressChanged;
                     client.DownloadFileCompleted += Client_DownloadFileCompleted;
                 };
             }
-            else
-            {
-                statusTxt.Text = "up to date";
-                openNewCard.Visibility = Visibility.Collapsed;
-            }
+            statusTxt.Text = "up to date";
+            openNewCard.Visibility = Visibility.Collapsed;
+            progBar.Visibility = Visibility.Collapsed;
         }
 
         private void Client_DownloadFileCompleted(object sender, System.ComponentModel.AsyncCompletedEventArgs e)
         {
-            statusTxt.Text = "up to date";
+            statusTxt.Text = "Download Complete!";
             openNewCard.Visibility = Visibility.Collapsed;
             MessageBoxResult msgboxres = MessageBox.Show("Download Complete do you want to Open it?", "EasyExtractUnitypackage", MessageBoxButton.YesNo);
             switch (msgboxres)

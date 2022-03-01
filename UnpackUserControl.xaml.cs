@@ -27,8 +27,21 @@ namespace EasyExtractUnitypackage
         private int assetCounter = 0;
         private int fileCounter = 0;
 
+        private string tfiles = "Total Files Extracted: " + Properties.Settings.Default.files;
+        private string ufiles = ".unitypackage Files Extracted: " + Properties.Settings.Default.packages;
+
+        public string TFiles
+        {
+            get { return tfiles; }
+        }
+        public string UFiles
+        {
+            get { return ufiles; }
+        }
+
         public UnpackUserControl()
         {
+            DataContext = this;
             InitializeComponent();
         }
 
@@ -37,12 +50,8 @@ namespace EasyExtractUnitypackage
             if (e.Data.GetDataPresent(DataFormats.FileDrop))
             {
                 e.Effects = DragDropEffects.Copy;
+                DragDropIcon.Kind = MaterialDesignThemes.Wpf.PackIconKind.FileImport;
                 Mouse.OverrideCursor = Cursors.AppStarting;
-            }
-            else
-            {
-                e.Effects = DragDropEffects.None;
-                Mouse.OverrideCursor = Cursors.Arrow;
             }
         }
 
@@ -55,7 +64,7 @@ namespace EasyExtractUnitypackage
                 if (System.IO.Path.GetExtension(file).Equals(".unitypackage"))
                 {
                     fileCounter++;
-                  ExtractUnitypackage(file);
+                    ExtractUnitypackage(file);
                   Mouse.OverrideCursor = Cursors.Arrow;
                 }
                 else
@@ -66,7 +75,7 @@ namespace EasyExtractUnitypackage
             }
 
             MessageBox.Show(assetCounter + " Files EasyExtracted from " + fileCounter + " packages" , "EasyExtractUnitypackage");
-
+            
             Properties.Settings.Default.files += assetCounter;
             Properties.Settings.Default.packages += fileCounter;
             Properties.Settings.Default.Save();
@@ -74,6 +83,9 @@ namespace EasyExtractUnitypackage
             assetCounter = 0;
             fileCounter = 0;
 
+            e.Effects = DragDropEffects.None;
+            DragDropIcon.Kind = MaterialDesignThemes.Wpf.PackIconKind.FileImportOutline;
+            Mouse.OverrideCursor = Cursors.Arrow;
 
         }
 
@@ -162,6 +174,11 @@ namespace EasyExtractUnitypackage
             }
         }
 
-
+        private void UserControl_DragLeave(object sender, DragEventArgs e)
+        {
+            e.Effects = DragDropEffects.None;
+            DragDropIcon.Kind = MaterialDesignThemes.Wpf.PackIconKind.FileImportOutline;
+            Mouse.OverrideCursor = Cursors.Arrow;
+        }
     }
 }

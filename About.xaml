@@ -98,7 +98,7 @@
 
                 <materialDesign:Card
                     >
-                    <TextBlock Text="Shorter"
+                    <TextBlock Text="EasyExtractUnitypackage"
                            Style="{DynamicResource MaterialDesignSubtitle2TextBlock}"
                            Foreground="{DynamicResource MaterialDesignDarkForeground}"
                            Margin="5"
@@ -113,26 +113,8 @@
                            Style="{DynamicResource MaterialDesignBody2TextBlock}"
                            Foreground="{DynamicResource MaterialDesignDarkForeground}"/>
                 </materialDesign:Card>
-                <materialDesign:Card
-                    Background="{DynamicResource AttentionToActionBrush}"
-                    >
-                    <TextBlock Text="{Binding Path=TFiles}"
-                           Margin="10"
-                           TextWrapping="WrapWithOverflow" 
-                           Style="{DynamicResource MaterialDesignBody2TextBlock}"
-                           Foreground="{DynamicResource MaterialDesignDarkForeground}"/>
-                </materialDesign:Card>
-                <materialDesign:Card
-                    Background="{DynamicResource AttentionToActionBrush}"
-                    >
-                    <TextBlock Text="{Binding Path=UFiles}"
-                           Margin="10"
-                           TextWrapping="WrapWithOverflow" 
-                           Style="{DynamicResource MaterialDesignBody2TextBlock}"
-                           Foreground="{DynamicResource MaterialDesignDarkForeground}"/>
-                </materialDesign:Card>
-                
-                
+
+
             </StackPanel>
 <!--#endregion-->
 <!--#region Bottom Button and Info (github)-->

@@ -27,7 +27,6 @@
             Visibility="Visible"
             Style="{DynamicResource MaterialDesignBody2TextBlock}"
                     x:Name="statusTxt"
-                    Text="status"
                     HorizontalAlignment="Center"
                     VerticalAlignment="Center"
                     Foreground="{DynamicResource MaterialDesignDarkForeground}"

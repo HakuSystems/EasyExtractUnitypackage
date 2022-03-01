@@ -7,7 +7,7 @@
         xmlns:local="clr-namespace:EasyExtractUnitypackage"
         mc:Ignorable="d"
         Title="EasyExtractUnitypackage"
-        Height="450"
+        Height="500"
         Width="800"
         MinHeight="450"
         MinWidth="800"

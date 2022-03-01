@@ -24,21 +24,9 @@ namespace EasyExtractUnitypackage
     /// </summary>
     public partial class About : Window
     {
-        private string tfiles = "Total Files Extracted: " + (Properties.Settings.Default.files).ToString();
-        private string ufiles = ".unitypackage Files Extracted: " + (Properties.Settings.Default.packages).ToString();
-
-        public string TFiles
-        {
-            get { return tfiles; } 
-        }
-        public string UFiles
-        {
-            get { return ufiles; }
-        }
 
         public About()
         {
-            this.DataContext = this;
             InitializeComponent();
         }
 

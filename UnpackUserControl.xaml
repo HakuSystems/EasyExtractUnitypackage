@@ -8,9 +8,99 @@
              mc:Ignorable="d" 
              AllowDrop="true"
              DragEnter="Window_DragEnter"
+             DragLeave="UserControl_DragLeave"
              Drop="Window_Drop"
              d:DesignHeight="450" d:DesignWidth="800">
-    <Grid>
-        <Label Content="Unpacking" Foreground="White"/>
-    </Grid>
+    <Border>
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="20"/>
+                <ColumnDefinition/>
+                <ColumnDefinition/>
+                <ColumnDefinition/>
+                <ColumnDefinition/>
+                <ColumnDefinition Width="20"/>
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="20"/>
+                <RowDefinition/>
+                <RowDefinition/>
+                <RowDefinition/>
+                <RowDefinition/>
+                <RowDefinition Height="20"/>
+            </Grid.RowDefinitions>
+            <StackPanel Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="4" Grid.RowSpan="4">
+                <materialDesign:Card materialDesign:ShadowAssist.ShadowDepth="Depth5">
+                    <StackPanel Orientation="Vertical" Margin="5">
+                        <materialDesign:PackIcon Kind="FileImportOutline"
+                                                 x:Name="DragDropIcon"
+                                                 Foreground="{DynamicResource MaterialDesignDarkForeground}"
+                                                 Width="250"
+                                                 Height="250"
+                                                 HorizontalAlignment="Center"
+                                                 />
+                        <TextBlock Foreground="{DynamicResource MaterialDesignDarkForeground}"
+                                   Text="Drag and Drop .Unitypackage file to extract it"
+                                   Style="{DynamicResource MaterialDesignCaptionTextBlock}"
+                                   HorizontalAlignment="Center"
+                                   />
+                        <RadioButton Style="{DynamicResource MaterialDesignRaisedSecondaryLightButton}" HorizontalAlignment="Center" Margin="5">
+                            <RadioButton.Content>
+                                <StackPanel Orientation="Horizontal">
+                                    <materialDesign:PackIcon Kind="Search"
+                                                             Margin="5"
+                                                         Foreground="{DynamicResource MaterialDesignDarkForeground}"
+                                                         />
+                                    <TextBlock
+                                        Text="Search Instead"
+                                        VerticalAlignment="Center"
+                                        Margin="5"
+                                        Style="{DynamicResource MaterialDesignCaptionTextBlock}"
+                                        Foreground="{DynamicResource MaterialDesignDarkForeground}"
+                                        />
+                                </StackPanel>
+                            </RadioButton.Content>
+                        </RadioButton>
+                        
+                        
+                        
+                        <StackPanel Orientation="Horizontal">
+                            <materialDesign:Card Background="{DynamicResource MaterialDesignShadowBrush}"
+                                             Margin="5"
+                                             >
+                                <TextBlock Margin="5">
+                                    <StackPanel Orientation="Horizontal">
+                                        <materialDesign:PackIcon
+                                        Kind="Files"
+                                        Foreground="{DynamicResource MaterialDesignDarkForeground}"
+                                        VerticalAlignment="Center" Margin="0,0,5,0"/>
+                                        <TextBlock Text="{Binding Path=TFiles}"
+                                               Style="{DynamicResource MaterialDesignCaptionTextBlock}"
+                                               Foreground="White"/>
+                                    </StackPanel>
+                            </TextBlock>
+                            </materialDesign:Card>
+                            <materialDesign:Card Background="{DynamicResource MaterialDesignShadowBrush}"
+                                             Margin="5"
+                                             >
+                                <TextBlock Margin="5">
+                                    <StackPanel Orientation="Horizontal">
+                                        <materialDesign:PackIcon
+                                        Kind="Unity"
+                                        Foreground="{DynamicResource MaterialDesignDarkForeground}"
+                                        VerticalAlignment="Center" Margin="0,0,5,0"/>
+                                        <TextBlock Text="{Binding Path=UFiles}"
+                                               Style="{DynamicResource MaterialDesignCaptionTextBlock}"
+                                               Foreground="White"/>
+                                    </StackPanel>
+                            </TextBlock>
+                            </materialDesign:Card>
+                        </StackPanel>
+                    </StackPanel>
+                    
+                </materialDesign:Card>
+                
+            </StackPanel>
+        </Grid>
+    </Border>
 </UserControl>
