@@ -9,8 +9,6 @@
         Height="350"
         Width="500"
         AllowDrop="True"
-        DragEnter="Window_DragEnter"
-        Drop="Window_Drop"
         Title="EasyExtractUnitypackage"
         WindowStyle="ToolWindow"
         WindowStartupLocation="CenterScreen"
