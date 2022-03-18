@@ -1,0 +1,112 @@
+﻿<Window x:Class="EasyExtractUnitypackageRework.Theme.MessageBox.EasyMessageBox"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:EasyExtractUnitypackageRework.Theme.MessageBox"
+        xmlns:icons="http://metro.mahapps.com/winfx/xaml/iconpacks"
+        mc:Ignorable="d"
+        Title="EasyMessageBox" Height="230" Width="510" 
+        WindowStartupLocation="CenterScreen"
+        WindowStyle="None"
+        Background="#1B1D1E"
+        BorderBrush="#FFCC3B5D"
+        AllowsTransparency="True"
+        ResizeMode="NoResize"
+        BorderThickness="0,1,0,1"
+        Topmost="True"
+        ShowInTaskbar="False"
+        MouseDown="Window_MouseDown"
+        >
+    
+    <Window.Clip>
+        <RectangleGeometry Rect="0,0,510,230" RadiusX="25" RadiusY="25"/>
+    </Window.Clip>
+
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="197*"/>
+            <ColumnDefinition Width="295*"/>
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+        <StackPanel Orientation="Horizontal">
+            <TextBlock x:Name="txtTitle" HorizontalAlignment="Left" Foreground="White" VerticalAlignment="Stretch" FontSize="20" Margin="10" >Message Title</TextBlock>
+        </StackPanel>
+        <StackPanel  HorizontalAlignment="Right" Margin="0,5,5,0"  VerticalAlignment="Top" Grid.Column="1">
+            <Button x:Name="BtnClose" Click="BtnClose_Click" Style="{DynamicResource EasyButton.style}" Height="30" Width="30" Foreground="White" Margin="175,0,0,0">
+                <Button.Content>
+                    <icons:MaterialDesign Kind="Close"/>
+                </Button.Content>
+            </Button>
+        </StackPanel>
+        <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto" CanContentScroll="True" Grid.Row="1" Grid.ColumnSpan="2">
+            <Grid Grid.Row="1" Grid.ColumnSpan="2">
+                <Grid Margin="20">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="auto"/>
+                        <RowDefinition Height="auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+
+                    <Grid Grid.Row="0">
+                        <TextBlock 
+                            x:Name="txtMessage"
+                            Text="Actual Mesasage"
+                                   Foreground="White"
+                            TextAlignment="Center"
+                            />
+                    </Grid>
+                    <Grid Grid.Row="1" Margin="0,20,0,5">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="auto"/>
+                            <ColumnDefinition Width="auto"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+
+                        <Button x:Name="BtnOk"
+                                Style="{DynamicResource EasyButton.style}"
+                                     Click="BtnOk_Click"
+                                     Foreground="White"
+                                     Grid.Column="1"
+                                     Margin="5"
+                                     Width="100"
+                                     Content="OK"
+                                     />
+                        <Button x:Name="BtnCancel"
+                                     Style="{DynamicResource EasyButton.style}"
+                                     Click="BtnCancel_Click"
+                                     Foreground="White"
+                                     Grid.Column="2"
+                                     Margin="5"
+                                     Width="100"
+                                     Content="Cancel"
+                                     />
+                        <Button x:Name="BtnYes"
+                                Style="{DynamicResource EasyButton.style}"
+                                     Click="BtnYes_Click"
+                                     Foreground="White"
+                                     Grid.Column="1"
+                                     Margin="5"
+                                     Width="100"
+                                     Content="Yes"
+                                     />
+                        <Button x:Name="BtnNo"
+                                Style="{DynamicResource EasyButton.style}"
+                                     Click="BtnNo_Click"
+                                     Foreground="White"
+                                     Grid.Column="2"
+                                     Margin="5"
+                                     Width="100"
+                                     Content="No"
+                                     />
+                    </Grid>
+
+                </Grid>
+            </Grid>
+        </ScrollViewer>
+    </Grid>
+</Window>
