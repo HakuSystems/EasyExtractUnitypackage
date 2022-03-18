@@ -38,6 +38,10 @@
       "frameworks": {
         "net472": {
           "dependencies": {
+            "Costura.Fody": {
+              "target": "Package",
+              "version": "[5.7.0, )"
+            },
             "MahApps.Metro.IconPacks": {
               "target": "Package",
               "version": "[4.11.0, )"

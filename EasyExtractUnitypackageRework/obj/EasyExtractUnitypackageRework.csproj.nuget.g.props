@@ -13,4 +13,7 @@
     <SourceRoot Include="C:\Users\Tiger\.nuget\packages\" />
     <SourceRoot Include="C:\Program Files (x86)\Microsoft Visual Studio\Shared\NuGetPackages\" />
   </ItemGroup>
+  <ImportGroup Condition="'$(ExcludeRestorePackageImports)' != 'true'">
+    <Import Project="$(NuGetPackageRoot)costura.fody\5.7.0\build\Costura.Fody.props" Condition="Exists('$(NuGetPackageRoot)costura.fody\5.7.0\build\Costura.Fody.props')" />
+  </ImportGroup>
 </Project>
