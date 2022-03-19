@@ -74,6 +74,8 @@ namespace EasyExtractUnitypackageRework {
         [System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [System.CodeDom.Compiler.GeneratedCodeAttribute("PresentationBuildTasks", "4.0.0.0")]
         public static void Main() {
+            SplashScreen splashScreen = new SplashScreen("theme/icon%20-%20logo/easyunity.png");
+            splashScreen.Show(true);
             EasyExtractUnitypackageRework.App app = new EasyExtractUnitypackageRework.App();
             app.InitializeComponent();
             app.Run();
