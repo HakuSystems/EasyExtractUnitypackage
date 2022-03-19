@@ -9,5 +9,10 @@ The current functions of the program cover the use of it's ".gz" file structure 
 # Roadmap
 Current plans include a UI redesign and mutliple new features, including quality of life improvements of existing ones for a better experience and wider usability for all users!
 
+# Discord Server
+Every Application has a discord server Nowdays, so we do too!
+https://discord.gg/Wn7XfhPCyD
+Feel free to join and sugguest some Features!
+
 ## Authors
 EasyExtractUnitypackage is being developed by **HakuSystems** and **Jan-Fcloud**.
