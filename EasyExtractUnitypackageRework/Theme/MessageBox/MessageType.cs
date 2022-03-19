@@ -13,5 +13,6 @@ namespace EasyExtractUnitypackageRework.Theme.MessageBox
         Success,
         Warning,
         Error,
+        EasterEgg,
     }
 }

@@ -61,7 +61,9 @@
                         <Label.Content>
                             <StackPanel Orientation="Horizontal">
                                 <icons:PackIconMaterial Kind="EmoticonCool"
-                                                       Height="15"
+                                                        Height="15"
+                                                        x:Name="CoolEmote"
+                                                        MouseDown="CoolEmote_MouseDown"
                                                        Foreground="White"/>
                                 <TextBlock
                                     x:Name="currentVersion"

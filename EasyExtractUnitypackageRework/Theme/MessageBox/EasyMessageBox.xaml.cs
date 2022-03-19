@@ -44,6 +44,11 @@ namespace EasyExtractUnitypackageRework.Theme.MessageBox
                         txtTitle.Text = "Error";
                     }
                     break;
+                case MessageType.EasterEgg:
+                    {
+                        txtTitle.Text = "EasterEgg";
+                    }
+                    break;
             }
             switch (Buttons)
             {
@@ -91,9 +96,5 @@ namespace EasyExtractUnitypackageRework.Theme.MessageBox
             Close();
         }
 
-        private void Window_MouseDown(object sender, MouseButtonEventArgs e)
-        {
-            DragMove();
-        }
     }
 }

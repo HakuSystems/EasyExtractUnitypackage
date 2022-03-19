@@ -16,7 +16,6 @@
         BorderThickness="0,1,0,1"
         Topmost="True"
         ShowInTaskbar="False"
-        MouseDown="Window_MouseDown"
         >
     
     <Window.Clip>
@@ -53,6 +52,7 @@
 
                     <Grid Grid.Row="0">
                         <TextBlock 
+                            FontSize="20"
                             x:Name="txtMessage"
                             Text="Actual Mesasage"
                                    Foreground="White"

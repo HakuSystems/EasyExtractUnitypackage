@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.Toolkit.Uwp.Notifications;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
@@ -45,7 +46,8 @@ namespace EasyExtractUnitypackageRework
 
         private void Window_MouseDown(object sender, MouseButtonEventArgs e)
         {
-            DragMove();
+            if (e.ChangedButton == MouseButton.Left)
+                DragMove();
         }
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
@@ -139,6 +141,48 @@ namespace EasyExtractUnitypackageRework
         private void AbtBtn_Click(object sender, RoutedEventArgs e)
         {
             currentPage2.Navigate(new Uri("UserControls/About.xaml", UriKind.RelativeOrAbsolute));
+        }
+
+        private void CoolEmote_MouseDown(object sender, MouseButtonEventArgs e)
+        {
+            //EasterEgg Suggested by ᴍʏsᴛɪᴄ#8876 - Known as erp Button (EroticRoleplay Button)
+            if (new Theme.MessageBox.EasyMessageBox("do you want to have ERP? (EroticRoleplay)",
+                   Theme.MessageBox.MessageType.EasterEgg,
+                   Theme.MessageBox.MessageButtons.YesNo).ShowDialog().Value)
+            {
+                if (new Theme.MessageBox.EasyMessageBox("ERP Patrol is coming after you.",
+                   Theme.MessageBox.MessageType.EasterEgg,
+                   Theme.MessageBox.MessageButtons.Ok).ShowDialog().Value)
+                {
+                    WNotificationEasterEgg("Send to Jail", "Achievement unlocked!");
+                    Environment.Exit(0);
+                }
+            }
+            else
+            {
+                if (new Theme.MessageBox.EasyMessageBox("ERP Patrol is proud of you for picking no",
+                   Theme.MessageBox.MessageType.EasterEgg,
+                   Theme.MessageBox.MessageButtons.Ok).ShowDialog().Value)
+                {
+                    //opening the same window again bc otherwise program would crash for some reason
+                    WNotificationEasterEgg("no ERP Zone", "Achievement unlocked!");
+                    MainWindow main = new MainWindow();
+                    main.Show();
+                    Close();
+
+                }
+            }
+
+        }
+
+        private void WNotificationEasterEgg(string message, string title)
+        {
+            new ToastContentBuilder()
+                .AddArgument("action", "viewConversation")
+                .AddArgument("conversationId", 9813)
+                .AddText(title)
+                .AddText(message)
+                .Show();
         }
     }
 }
