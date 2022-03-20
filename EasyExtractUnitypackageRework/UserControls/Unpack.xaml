@@ -51,6 +51,17 @@
                            HorizontalAlignment="Center"/>
             </StackPanel>
         </Grid>
+        <Grid Grid.Row="5" Grid.RowSpan="2" Grid.Column="2" Grid.ColumnSpan="3" Margin="0,60,0,0">
+            <Border Background="#202325" Visibility="Collapsed" x:Name="DirOutputBar" CornerRadius="0,0,20,20">
+                <Border.Effect>
+                    <DropShadowEffect ShadowDepth="1" Direction="270" Color="#1B1D1E" Opacity="0.25" BlurRadius="10"/>
+                </Border.Effect>
+                <StackPanel Orientation="Horizontal">
+                    <Label Content="Output:" VerticalAlignment="Center" Foreground="White"/>
+                    <Button Foreground="White" Click="DirOutputName_Click" Style="{DynamicResource EasyTextButton.style}" Content="DIRECTORY NAME" Margin="5" x:Name="DirOutputName"/>
+                </StackPanel>
+            </Border>
+        </Grid>
         <Grid Grid.Row="5" Margin="10" Grid.Column="1" Grid.ColumnSpan="5">
             <Border Background="#202325" BorderThickness="1" CornerRadius="10,10,10,10">
                 <Border.Effect>
@@ -70,7 +81,7 @@
 
                     </Label.Content>
                 </Label>
-                
+
             </StackPanel>
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
                 <Button Style="{DynamicResource EasyTextButton.style}"
@@ -82,5 +93,6 @@
                         Content="Search Instead"/>
             </StackPanel>
         </Grid>
+        
     </Grid>
 </UserControl>

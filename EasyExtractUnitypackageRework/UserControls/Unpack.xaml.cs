@@ -4,6 +4,7 @@ using Microsoft.Toolkit.Uwp.Notifications;
 using Microsoft.Win32;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -59,29 +60,42 @@ namespace EasyExtractUnitypackageRework.UserControls
 
         private void ExtractUnitypackage(string filename)
         {
-
-            Mouse.OverrideCursor = Cursors.Wait;
-            var tempFolder = System.IO.Path.Combine(System.IO.Path.GetTempPath(), "tmp_" + System.IO.Path.GetFileNameWithoutExtension(filename));
-            var targetFolder = System.IO.Path.Combine(System.IO.Path.GetDirectoryName(filename), System.IO.Path.GetFileNameWithoutExtension(filename) + "_extracted");
-
-            if (Directory.Exists(tempFolder))
-                Directory.Delete(tempFolder, true);
-            if (Directory.Exists(targetFolder))
+            try
             {
-                MessageBox.Show("Folder already exists", "Error");
+                Mouse.OverrideCursor = Cursors.Wait;
+                var tempFolder = System.IO.Path.Combine(System.IO.Path.GetTempPath(), "tmp_" + System.IO.Path.GetFileNameWithoutExtension(filename));
+                var targetFolder = System.IO.Path.Combine(System.IO.Path.GetDirectoryName(filename), System.IO.Path.GetFileNameWithoutExtension(filename) + "_extracted");
+
+                if (Directory.Exists(tempFolder))
+                    Directory.Delete(tempFolder, true);
+                if (Directory.Exists(targetFolder))
+                {
+                    Mouse.OverrideCursor = Cursors.Arrow;
+                    DirOutputBar.Visibility = Visibility.Visible;
+                    DirOutputName.Content = targetFolder;
+                    return;
+                }
+                Directory.CreateDirectory(tempFolder);
+                Directory.CreateDirectory(targetFolder);
+
+                ExtractTGZ(filename, tempFolder);
+                ProcessExtracted(tempFolder, targetFolder);
+
+                Directory.Delete(tempFolder, true);
+                //InfoText.Content = "Completed";
                 Mouse.OverrideCursor = Cursors.Arrow;
-                return;
+
+                DirOutputBar.Visibility = Visibility.Visible;
+                DirOutputName.Content = targetFolder;
             }
-            Directory.CreateDirectory(tempFolder);
-            Directory.CreateDirectory(targetFolder);
-
-            ExtractTGZ(filename, tempFolder);
-            ProcessExtracted(tempFolder, targetFolder);
-
-            Directory.Delete(tempFolder, true);
-            //InfoText.Content = "Completed";
-            Mouse.OverrideCursor = Cursors.Arrow;
-
+            catch (PathTooLongException)
+            {
+                if (new Theme.MessageBox.EasyMessageBox("Filename is too long.",
+                   Theme.MessageBox.MessageType.Error,
+                   Theme.MessageBox.MessageButtons.Ok).ShowDialog().Value)
+                {
+                }
+            }
         }
 
         public void ExtractTGZ(string gzArchiveName, string destFolder)
@@ -262,6 +276,11 @@ namespace EasyExtractUnitypackageRework.UserControls
             e.Effects = DragDropEffects.None;
             DragDropIcon.Kind = (MahApps.Metro.IconPacks.PackIconMaterialKind)MahApps.Metro.IconPacks.PackIconMaterialKind.FileImportOutline;
             Mouse.OverrideCursor = Cursors.Arrow;
+        }
+
+        private void DirOutputName_Click(object sender, RoutedEventArgs e)
+        {
+            Process.Start("explorer.exe", $@"{DirOutputName.Content}");
         }
     }
 }
