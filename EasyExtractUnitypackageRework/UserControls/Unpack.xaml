@@ -10,6 +10,7 @@
              DragLeave="UserControl_DragLeave"
              Drop="UserControl_Drop"
              FontFamily="Roboto"
+             AllowDrop="True"
              d:DesignHeight="450" d:DesignWidth="800"
              >
     <Grid>

@@ -245,11 +245,13 @@ namespace EasyExtractUnitypackageRework.UserControls
                 {
                     fileCounter++;
                     ExtractUnitypackage(file);
+                    DragDropIcon.Kind = (MahApps.Metro.IconPacks.PackIconMaterialKind)MahApps.Metro.IconPacks.PackIconMaterialKind.Unity;
                     Mouse.OverrideCursor = Cursors.Arrow;
                 }
                 else
                 {
                     //InfoText.Content = "not an .unitypackage";
+                    DragDropIcon.Kind = (MahApps.Metro.IconPacks.PackIconMaterialKind)MahApps.Metro.IconPacks.PackIconMaterialKind.FileQuestionOutline;
                     Mouse.OverrideCursor = Cursors.No;
                 }
             }
@@ -274,7 +276,7 @@ namespace EasyExtractUnitypackageRework.UserControls
             fileCounter = 0;
 
             e.Effects = DragDropEffects.None;
-            DragDropIcon.Kind = (MahApps.Metro.IconPacks.PackIconMaterialKind)MahApps.Metro.IconPacks.PackIconMaterialKind.FileImportOutline;
+
             Mouse.OverrideCursor = Cursors.Arrow;
         }
 
