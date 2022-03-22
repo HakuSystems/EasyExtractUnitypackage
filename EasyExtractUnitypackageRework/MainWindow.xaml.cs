@@ -84,7 +84,7 @@ namespace EasyExtractUnitypackageRework
                 else
                 {
                     UpdateStatusTxt.Text = "Running on old Version!";
-                    CheckUpdateIcon.Kind = (MahApps.Metro.IconPacks.PackIconMaterialKind)MahApps.Metro.IconPacks.PackIconMaterialDesignKind.OpenInNew;
+                    CheckUpdateIcon.Kind = (MahApps.Metro.IconPacks.PackIconMaterialKind)MahApps.Metro.IconPacks.PackIconMaterialDesignKind.OpenWith;
                     CheckUpdateTxt.Text = "Open new Version";
                     ProgBar.Visibility = Visibility.Collapsed;
                 }
@@ -95,20 +95,8 @@ namespace EasyExtractUnitypackageRework
         private void Client_DownloadFileCompleted(object sender, AsyncCompletedEventArgs e)
         {
             UpdateStatusTxt.Text = "Download Complete!";
-            if (new Theme.MessageBox.EasyMessageBox("Download Complete do you want to Open it?",
-                   Theme.MessageBox.MessageType.Info,
-                   Theme.MessageBox.MessageButtons.OkCancel).ShowDialog().Value)
-            {
-                Process.Start(serverApplicationName, Directory.GetCurrentDirectory());
-                Window.GetWindow(this).Close();
-            }
-            else
-            {
-                UpdateStatusTxt.Text = "Running on old Version!";
-                CheckUpdateIcon.Kind = (MahApps.Metro.IconPacks.PackIconMaterialKind)MahApps.Metro.IconPacks.PackIconMaterialDesignKind.OpenInNew;
-                CheckUpdateTxt.Text = "Open new Version";
-                ProgBar.Visibility = Visibility.Collapsed;
-            }
+            Process.Start(serverApplicationName, Directory.GetCurrentDirectory());
+            Close();
         }
 
         private void Client_DownloadProgressChanged(object sender, DownloadProgressChangedEventArgs e)
@@ -130,12 +118,20 @@ namespace EasyExtractUnitypackageRework
 
         private void CheckUpdateBtn_Click(object sender, RoutedEventArgs e)
         {
-            if (UpdateStatusTxt.Text.Contains("old Version"))
+            if (UpdateStatusTxt.Text.Equals("Running on old Version!"))
             {
-                Process.Start(serverApplicationName, Directory.GetCurrentDirectory());
-                Window.GetWindow(this).Close();
+                using (WebClient client = new WebClient())
+                {
+                    client.DownloadFileAsync(new Uri(serverApplicationLoc), serverApplicationName);
+                    client.DownloadProgressChanged += Client_DownloadProgressChanged;
+                    client.DownloadFileCompleted += Client_DownloadFileCompleted;
+                };
             }
-            UpdateCheck();
+            else
+            {
+                UpdateCheck();
+            }
+            
         }
 
         private void AbtBtn_Click(object sender, RoutedEventArgs e)
