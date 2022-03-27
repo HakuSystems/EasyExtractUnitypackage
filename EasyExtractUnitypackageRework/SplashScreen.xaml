@@ -1,0 +1,72 @@
+﻿<Window x:Class="EasyExtractUnitypackageRework.SplashScreen"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:icons="http://metro.mahapps.com/winfx/xaml/iconpacks"
+        xmlns:local="clr-namespace:EasyExtractUnitypackageRework"
+        
+        mc:Ignorable="d"
+        Height="450"
+        Width="800"
+        Background="Transparent"
+        AllowsTransparency="True"
+        Topmost="True"
+        WindowStyle="None"
+        WindowStartupLocation="CenterScreen"
+        ShowInTaskbar="False"
+        Loaded="Window_Loaded"
+        >
+    <Border>
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition/>
+                <ColumnDefinition/>
+                <ColumnDefinition/>
+                <ColumnDefinition/>
+                <ColumnDefinition/>
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition/>
+                <RowDefinition/>
+                <RowDefinition/>
+                <RowDefinition/>
+                <RowDefinition/>
+            </Grid.RowDefinitions>
+            
+            <StackPanel Orientation="Vertical"
+                        Grid.Row="3"
+                        Grid.Column="1"
+                        Grid.ColumnSpan="3"
+                        Grid.RowSpan="4"
+                            >
+                <TextBlock Text="small text from the web here" Foreground="White"
+                           x:Name="SplashText"
+                           HorizontalAlignment="Center"
+                           FontSize="20"
+                           Margin="5"/>
+                <ProgressBar Style="{DynamicResource EasyProgressBar.style}"
+                             Height="15"
+                             IsIndeterminate="True"
+                             Margin="5"/>
+            </StackPanel>
+            <StackPanel Orientation="Horizontal"
+                        Grid.Row="0"
+                        Grid.Column="1"
+                        Grid.ColumnSpan="3"
+                        Grid.RowSpan="4">
+                <Image Source="{DynamicResource EasyExtractLogo}"
+                       Height="150"
+                       Width="150"
+                       />
+                <TextBlock Text="Please Wait"
+                           Foreground="White"
+                           FontSize="50"
+                           HorizontalAlignment="Center"
+                           VerticalAlignment="Center"/>
+
+            </StackPanel>
+            
+        </Grid>
+    </Border>
+</Window>

@@ -45,7 +45,7 @@ namespace EasyExtractUnitypackageRework.UserControls
         public Unpack()
         {
             InitializeComponent();
-            DataContext = this;
+            DataContext = this;     
         }
 
         private void UserControl_DragEnter(object sender, DragEventArgs e)
@@ -283,6 +283,15 @@ namespace EasyExtractUnitypackageRework.UserControls
         private void DirOutputName_Click(object sender, RoutedEventArgs e)
         {
             Process.Start("explorer.exe", $@"{DirOutputName.Content}");
+        }
+
+        private void UserControl_Loaded(object sender, RoutedEventArgs e)
+        {
+            tfiles = "Total Files Extracted: " + Properties.Settings.Default.files;
+            ufiles = ".unitypackage Files Extracted: " + Properties.Settings.Default.packages;
+
+            tFilesV.Text = tfiles;
+            uFilesV.Text = ufiles;
         }
     }
 }

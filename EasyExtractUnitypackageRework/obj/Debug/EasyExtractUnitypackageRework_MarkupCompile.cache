@@ -10,11 +10,11 @@ none
 false
 DEBUG;TRACE
 G:\xxx\EasyExtractUnitypackage\EasyExtractUnitypackage\EasyExtractUnitypackageRework\App.xaml
-71186230835
+8-937895328
 
-10-1806880043
+11-1206246319
 242-133375303
-MainWindow.xaml;Theme\Buttons\EasyButton.style.xaml;Theme\MessageBox\EasyMessageBox.xaml;Theme\ProgressBar\EasyProgressBar.style.xaml;Theme\Buttons\EasyTextButton.style.xaml;UserControls\About.xaml;UserControls\Unpack.xaml;
-theme\icon - logo\easyunity.png
+MainWindow.xaml;SplashScreen.xaml;Theme\Buttons\EasyButton.style.xaml;Theme\MessageBox\EasyMessageBox.xaml;Theme\ProgressBar\EasyProgressBar.style.xaml;Theme\Buttons\EasyTextButton.style.xaml;UserControls\About.xaml;UserControls\Unpack.xaml;
+
 False
 

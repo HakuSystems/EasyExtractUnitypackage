@@ -122,3 +122,5 @@ G:\xxx\EasyExtractUnitypackage\EasyExtractUnitypackage\EasyExtractUnitypackageRe
 G:\xxx\EasyExtractUnitypackage\EasyExtractUnitypackage\EasyExtractUnitypackageRework\obj\Debug\EasyExtractUnitypackageRework.exe
 G:\xxx\EasyExtractUnitypackage\EasyExtractUnitypackage\EasyExtractUnitypackageRework\obj\Debug\EasyExtractUnitypackageRework.pdb
 G:\xxx\EasyExtractUnitypackage\EasyExtractUnitypackage\EasyExtractUnitypackageRework\obj\Debug\EasyExtractUnitypackageRework.csproj.Fody.CopyLocal.cache
+G:\xxx\EasyExtractUnitypackage\EasyExtractUnitypackage\EasyExtractUnitypackageRework\obj\Debug\SplashScreen.g.cs
+G:\xxx\EasyExtractUnitypackage\EasyExtractUnitypackage\EasyExtractUnitypackageRework\obj\Debug\SplashScreen.baml
