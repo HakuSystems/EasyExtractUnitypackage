@@ -1,13 +1,17 @@
 ﻿# EasyExtractUnitypackage
 EasyExtractUnitypackage is a Program to get files out of a .unitypackage without importing them into unity.
 
-![EasyExtractUnitypackage_qy1varpM3F](https://user-images.githubusercontent.com/47220014/155371334-2c00a26e-d384-4934-9a4d-5a18c1b772a8.gif)
+![NVIDIA_Share_7IW0tKkgW2](https://user-images.githubusercontent.com/47220014/161437318-87a4cbfa-0d82-45d7-8e4f-9f9ec2d23346.gif)
+
 
 # Functions
-The current functions of the program cover the use of it's ".gz" file structure to extract the contents of the .unitypackage file without importing the package into Unity which also allows users to keep safe from any malitious files/scripts that might be found inside.
+EEU offers a fast and easy way to extract your .unitypackage files without it ever touching Unity's front door! The program uses the file's .gz file structure to access it's contents and safely extract them.
 
-# Roadmap
-Current plans include a UI redesign and mutliple new features, including quality of life improvements of existing ones for a better experience and wider usability for all users!
+# Notifications
+No need to stare at the program anymore while it's working it's thing, just let it handle and you'll recieve a neat notification at the end!
+
+![NVIDIA_Share_twcPjy1IHE2](https://user-images.githubusercontent.com/47220014/161437421-4988aa3c-6cb4-487b-b864-29d9d940499f.gif)
+
 
 # Discord Server
 Every Application has a discord server Nowdays, so we do too!
