@@ -4,17 +4,17 @@
 winexe
 C#
 .cs
-G:\xxx\EasyExtractUnitypackage\EasyExtractUnitypackage\EasyExtractUnitypackageRework\obj\Debug\
+G:\xxx\TEST\EasyExtractUnitypackage\EasyExtractUnitypackageRework\obj\Debug\
 EasyExtractUnitypackageRework
 none
 false
 DEBUG;TRACE
-G:\xxx\EasyExtractUnitypackage\EasyExtractUnitypackage\EasyExtractUnitypackageRework\App.xaml
+G:\xxx\TEST\EasyExtractUnitypackage\EasyExtractUnitypackageRework\App.xaml
 8-937895328
 
 11-1206246319
-242-133375303
+247-588184250
 MainWindow.xaml;SplashScreen.xaml;Theme\Buttons\EasyButton.style.xaml;Theme\MessageBox\EasyMessageBox.xaml;Theme\ProgressBar\EasyProgressBar.style.xaml;Theme\Buttons\EasyTextButton.style.xaml;UserControls\About.xaml;UserControls\Unpack.xaml;
 
-False
+True
 

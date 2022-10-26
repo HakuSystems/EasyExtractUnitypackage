@@ -1,25 +1,29 @@
 {
   "version": 3,
   "targets": {
-    ".NETFramework,Version=v4.7.2": {
-      "Costura.Fody/5.7.0": {
+    ".NETFramework,Version=v4.8.1": {
+      "Costura.Fody/5.8.0-alpha0098": {
         "type": "package",
         "dependencies": {
-          "Fody": "6.5.5",
+          "Fody": "6.6.0",
           "NETStandard.Library": "1.6.1"
         },
         "compile": {
-          "lib/netstandard1.0/_._": {}
+          "lib/netstandard1.0/_._": {
+            "related": ".pdb;.xml"
+          }
         },
         "runtime": {
-          "lib/netstandard1.0/Costura.dll": {}
+          "lib/netstandard1.0/Costura.dll": {
+            "related": ".pdb;.xml"
+          }
         },
         "build": {
           "build/Costura.Fody.props": {},
           "build/Costura.Fody.targets": {}
         }
       },
-      "Fody/6.5.5": {
+      "Fody/6.6.0": {
         "type": "package",
         "build": {
           "build/Fody.targets": {}
@@ -28,74 +32,206 @@
       "MahApps.Metro.IconPacks/4.11.0": {
         "type": "package",
         "compile": {
-          "lib/net47/MahApps.Metro.IconPacks.BootstrapIcons.dll": {},
-          "lib/net47/MahApps.Metro.IconPacks.BoxIcons.dll": {},
-          "lib/net47/MahApps.Metro.IconPacks.Codicons.dll": {},
-          "lib/net47/MahApps.Metro.IconPacks.Coolicons.dll": {},
-          "lib/net47/MahApps.Metro.IconPacks.Core.dll": {},
-          "lib/net47/MahApps.Metro.IconPacks.Entypo.dll": {},
-          "lib/net47/MahApps.Metro.IconPacks.EvaIcons.dll": {},
-          "lib/net47/MahApps.Metro.IconPacks.FeatherIcons.dll": {},
-          "lib/net47/MahApps.Metro.IconPacks.FileIcons.dll": {},
-          "lib/net47/MahApps.Metro.IconPacks.FontAwesome.dll": {},
-          "lib/net47/MahApps.Metro.IconPacks.Fontaudio.dll": {},
-          "lib/net47/MahApps.Metro.IconPacks.Fontisto.dll": {},
-          "lib/net47/MahApps.Metro.IconPacks.ForkAwesome.dll": {},
-          "lib/net47/MahApps.Metro.IconPacks.Ionicons.dll": {},
-          "lib/net47/MahApps.Metro.IconPacks.JamIcons.dll": {},
-          "lib/net47/MahApps.Metro.IconPacks.Material.dll": {},
-          "lib/net47/MahApps.Metro.IconPacks.MaterialDesign.dll": {},
-          "lib/net47/MahApps.Metro.IconPacks.MaterialLight.dll": {},
-          "lib/net47/MahApps.Metro.IconPacks.Microns.dll": {},
-          "lib/net47/MahApps.Metro.IconPacks.Modern.dll": {},
-          "lib/net47/MahApps.Metro.IconPacks.Octicons.dll": {},
-          "lib/net47/MahApps.Metro.IconPacks.PicolIcons.dll": {},
-          "lib/net47/MahApps.Metro.IconPacks.PixelartIcons.dll": {},
-          "lib/net47/MahApps.Metro.IconPacks.RPGAwesome.dll": {},
-          "lib/net47/MahApps.Metro.IconPacks.RadixIcons.dll": {},
-          "lib/net47/MahApps.Metro.IconPacks.RemixIcon.dll": {},
-          "lib/net47/MahApps.Metro.IconPacks.SimpleIcons.dll": {},
-          "lib/net47/MahApps.Metro.IconPacks.Typicons.dll": {},
-          "lib/net47/MahApps.Metro.IconPacks.Unicons.dll": {},
-          "lib/net47/MahApps.Metro.IconPacks.VaadinIcons.dll": {},
-          "lib/net47/MahApps.Metro.IconPacks.WeatherIcons.dll": {},
-          "lib/net47/MahApps.Metro.IconPacks.Zondicons.dll": {},
-          "lib/net47/MahApps.Metro.IconPacks.dll": {}
+          "lib/net47/MahApps.Metro.IconPacks.BootstrapIcons.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net47/MahApps.Metro.IconPacks.BoxIcons.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net47/MahApps.Metro.IconPacks.Codicons.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net47/MahApps.Metro.IconPacks.Coolicons.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net47/MahApps.Metro.IconPacks.Core.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net47/MahApps.Metro.IconPacks.Entypo.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net47/MahApps.Metro.IconPacks.EvaIcons.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net47/MahApps.Metro.IconPacks.FeatherIcons.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net47/MahApps.Metro.IconPacks.FileIcons.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net47/MahApps.Metro.IconPacks.FontAwesome.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net47/MahApps.Metro.IconPacks.Fontaudio.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net47/MahApps.Metro.IconPacks.Fontisto.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net47/MahApps.Metro.IconPacks.ForkAwesome.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net47/MahApps.Metro.IconPacks.Ionicons.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net47/MahApps.Metro.IconPacks.JamIcons.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net47/MahApps.Metro.IconPacks.Material.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net47/MahApps.Metro.IconPacks.MaterialDesign.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net47/MahApps.Metro.IconPacks.MaterialLight.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net47/MahApps.Metro.IconPacks.Microns.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net47/MahApps.Metro.IconPacks.Modern.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net47/MahApps.Metro.IconPacks.Octicons.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net47/MahApps.Metro.IconPacks.PicolIcons.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net47/MahApps.Metro.IconPacks.PixelartIcons.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net47/MahApps.Metro.IconPacks.RPGAwesome.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net47/MahApps.Metro.IconPacks.RadixIcons.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net47/MahApps.Metro.IconPacks.RemixIcon.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net47/MahApps.Metro.IconPacks.SimpleIcons.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net47/MahApps.Metro.IconPacks.Typicons.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net47/MahApps.Metro.IconPacks.Unicons.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net47/MahApps.Metro.IconPacks.VaadinIcons.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net47/MahApps.Metro.IconPacks.WeatherIcons.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net47/MahApps.Metro.IconPacks.Zondicons.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net47/MahApps.Metro.IconPacks.dll": {
+            "related": ".BootstrapIcons.pdb;.BootstrapIcons.xml;.BoxIcons.pdb;.BoxIcons.xml;.Codicons.pdb;.Codicons.xml;.Coolicons.pdb;.Coolicons.xml;.Core.pdb;.Core.xml;.Entypo.pdb;.Entypo.xml;.EvaIcons.pdb;.EvaIcons.xml;.FeatherIcons.pdb;.FeatherIcons.xml;.FileIcons.pdb;.FileIcons.xml;.Fontaudio.pdb;.Fontaudio.xml;.FontAwesome.pdb;.FontAwesome.xml;.Fontisto.pdb;.Fontisto.xml;.ForkAwesome.pdb;.ForkAwesome.xml;.Ionicons.pdb;.Ionicons.xml;.JamIcons.pdb;.JamIcons.xml;.Material.pdb;.Material.xml;.MaterialDesign.pdb;.MaterialDesign.xml;.MaterialLight.pdb;.MaterialLight.xml;.Microns.pdb;.Microns.xml;.Modern.pdb;.Modern.xml;.Octicons.pdb;.Octicons.xml;.pdb;.PicolIcons.pdb;.PicolIcons.xml;.PixelartIcons.pdb;.PixelartIcons.xml;.RadixIcons.pdb;.RadixIcons.xml;.RemixIcon.pdb;.RemixIcon.xml;.RPGAwesome.pdb;.RPGAwesome.xml;.SimpleIcons.pdb;.SimpleIcons.xml;.Typicons.pdb;.Typicons.xml;.Unicons.pdb;.Unicons.xml;.VaadinIcons.pdb;.VaadinIcons.xml;.WeatherIcons.pdb;.WeatherIcons.xml;.xml;.Zondicons.pdb;.Zondicons.xml"
+          }
         },
         "runtime": {
-          "lib/net47/MahApps.Metro.IconPacks.BootstrapIcons.dll": {},
-          "lib/net47/MahApps.Metro.IconPacks.BoxIcons.dll": {},
-          "lib/net47/MahApps.Metro.IconPacks.Codicons.dll": {},
-          "lib/net47/MahApps.Metro.IconPacks.Coolicons.dll": {},
-          "lib/net47/MahApps.Metro.IconPacks.Core.dll": {},
-          "lib/net47/MahApps.Metro.IconPacks.Entypo.dll": {},
-          "lib/net47/MahApps.Metro.IconPacks.EvaIcons.dll": {},
-          "lib/net47/MahApps.Metro.IconPacks.FeatherIcons.dll": {},
-          "lib/net47/MahApps.Metro.IconPacks.FileIcons.dll": {},
-          "lib/net47/MahApps.Metro.IconPacks.FontAwesome.dll": {},
-          "lib/net47/MahApps.Metro.IconPacks.Fontaudio.dll": {},
-          "lib/net47/MahApps.Metro.IconPacks.Fontisto.dll": {},
-          "lib/net47/MahApps.Metro.IconPacks.ForkAwesome.dll": {},
-          "lib/net47/MahApps.Metro.IconPacks.Ionicons.dll": {},
-          "lib/net47/MahApps.Metro.IconPacks.JamIcons.dll": {},
-          "lib/net47/MahApps.Metro.IconPacks.Material.dll": {},
-          "lib/net47/MahApps.Metro.IconPacks.MaterialDesign.dll": {},
-          "lib/net47/MahApps.Metro.IconPacks.MaterialLight.dll": {},
-          "lib/net47/MahApps.Metro.IconPacks.Microns.dll": {},
-          "lib/net47/MahApps.Metro.IconPacks.Modern.dll": {},
-          "lib/net47/MahApps.Metro.IconPacks.Octicons.dll": {},
-          "lib/net47/MahApps.Metro.IconPacks.PicolIcons.dll": {},
-          "lib/net47/MahApps.Metro.IconPacks.PixelartIcons.dll": {},
-          "lib/net47/MahApps.Metro.IconPacks.RPGAwesome.dll": {},
-          "lib/net47/MahApps.Metro.IconPacks.RadixIcons.dll": {},
-          "lib/net47/MahApps.Metro.IconPacks.RemixIcon.dll": {},
-          "lib/net47/MahApps.Metro.IconPacks.SimpleIcons.dll": {},
-          "lib/net47/MahApps.Metro.IconPacks.Typicons.dll": {},
-          "lib/net47/MahApps.Metro.IconPacks.Unicons.dll": {},
-          "lib/net47/MahApps.Metro.IconPacks.VaadinIcons.dll": {},
-          "lib/net47/MahApps.Metro.IconPacks.WeatherIcons.dll": {},
-          "lib/net47/MahApps.Metro.IconPacks.Zondicons.dll": {},
-          "lib/net47/MahApps.Metro.IconPacks.dll": {}
+          "lib/net47/MahApps.Metro.IconPacks.BootstrapIcons.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net47/MahApps.Metro.IconPacks.BoxIcons.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net47/MahApps.Metro.IconPacks.Codicons.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net47/MahApps.Metro.IconPacks.Coolicons.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net47/MahApps.Metro.IconPacks.Core.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net47/MahApps.Metro.IconPacks.Entypo.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net47/MahApps.Metro.IconPacks.EvaIcons.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net47/MahApps.Metro.IconPacks.FeatherIcons.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net47/MahApps.Metro.IconPacks.FileIcons.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net47/MahApps.Metro.IconPacks.FontAwesome.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net47/MahApps.Metro.IconPacks.Fontaudio.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net47/MahApps.Metro.IconPacks.Fontisto.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net47/MahApps.Metro.IconPacks.ForkAwesome.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net47/MahApps.Metro.IconPacks.Ionicons.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net47/MahApps.Metro.IconPacks.JamIcons.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net47/MahApps.Metro.IconPacks.Material.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net47/MahApps.Metro.IconPacks.MaterialDesign.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net47/MahApps.Metro.IconPacks.MaterialLight.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net47/MahApps.Metro.IconPacks.Microns.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net47/MahApps.Metro.IconPacks.Modern.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net47/MahApps.Metro.IconPacks.Octicons.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net47/MahApps.Metro.IconPacks.PicolIcons.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net47/MahApps.Metro.IconPacks.PixelartIcons.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net47/MahApps.Metro.IconPacks.RPGAwesome.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net47/MahApps.Metro.IconPacks.RadixIcons.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net47/MahApps.Metro.IconPacks.RemixIcon.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net47/MahApps.Metro.IconPacks.SimpleIcons.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net47/MahApps.Metro.IconPacks.Typicons.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net47/MahApps.Metro.IconPacks.Unicons.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net47/MahApps.Metro.IconPacks.VaadinIcons.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net47/MahApps.Metro.IconPacks.WeatherIcons.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net47/MahApps.Metro.IconPacks.Zondicons.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net47/MahApps.Metro.IconPacks.dll": {
+            "related": ".BootstrapIcons.pdb;.BootstrapIcons.xml;.BoxIcons.pdb;.BoxIcons.xml;.Codicons.pdb;.Codicons.xml;.Coolicons.pdb;.Coolicons.xml;.Core.pdb;.Core.xml;.Entypo.pdb;.Entypo.xml;.EvaIcons.pdb;.EvaIcons.xml;.FeatherIcons.pdb;.FeatherIcons.xml;.FileIcons.pdb;.FileIcons.xml;.Fontaudio.pdb;.Fontaudio.xml;.FontAwesome.pdb;.FontAwesome.xml;.Fontisto.pdb;.Fontisto.xml;.ForkAwesome.pdb;.ForkAwesome.xml;.Ionicons.pdb;.Ionicons.xml;.JamIcons.pdb;.JamIcons.xml;.Material.pdb;.Material.xml;.MaterialDesign.pdb;.MaterialDesign.xml;.MaterialLight.pdb;.MaterialLight.xml;.Microns.pdb;.Microns.xml;.Modern.pdb;.Modern.xml;.Octicons.pdb;.Octicons.xml;.pdb;.PicolIcons.pdb;.PicolIcons.xml;.PixelartIcons.pdb;.PixelartIcons.xml;.RadixIcons.pdb;.RadixIcons.xml;.RemixIcon.pdb;.RemixIcon.xml;.RPGAwesome.pdb;.RPGAwesome.xml;.SimpleIcons.pdb;.SimpleIcons.xml;.Typicons.pdb;.Typicons.xml;.Unicons.pdb;.Unicons.xml;.VaadinIcons.pdb;.VaadinIcons.xml;.WeatherIcons.pdb;.WeatherIcons.xml;.xml;.Zondicons.pdb;.Zondicons.xml"
+          }
         }
       },
       "Microsoft.NETCore.Platforms/1.1.0": {
@@ -110,16 +246,16 @@
       "Microsoft.NETFramework.ReferenceAssemblies/1.0.0": {
         "type": "package",
         "dependencies": {
-          "Microsoft.NETFramework.ReferenceAssemblies.net472": "1.0.0"
+          "Microsoft.NETFramework.ReferenceAssemblies.net48": "1.0.0"
         }
       },
-      "Microsoft.NETFramework.ReferenceAssemblies.net472/1.0.0": {
+      "Microsoft.NETFramework.ReferenceAssemblies.net48/1.0.0": {
         "type": "package",
         "build": {
           "build/_._": {}
         }
       },
-      "Microsoft.Toolkit.Uwp.Notifications/7.1.2": {
+      "Microsoft.Toolkit.Uwp.Notifications/7.1.3-rc": {
         "type": "package",
         "dependencies": {
           "Microsoft.NETFramework.ReferenceAssemblies": "1.0.0",
@@ -127,10 +263,14 @@
           "System.ValueTuple": "4.5.0"
         },
         "compile": {
-          "lib/net461/Microsoft.Toolkit.Uwp.Notifications.dll": {}
+          "lib/net461/Microsoft.Toolkit.Uwp.Notifications.dll": {
+            "related": ".pdb;.xml"
+          }
         },
         "runtime": {
-          "lib/net461/Microsoft.Toolkit.Uwp.Notifications.dll": {}
+          "lib/net461/Microsoft.Toolkit.Uwp.Notifications.dll": {
+            "related": ".pdb;.xml"
+          }
         }
       },
       "Microsoft.Win32.Primitives/4.3.0": {
@@ -293,13 +433,21 @@
           "System.Xml.XDocument": "4.3.0"
         }
       },
-      "SharpZipLib/1.3.3": {
+      "SharpZipLib/1.4.0": {
         "type": "package",
+        "dependencies": {
+          "System.Memory": "4.5.4",
+          "System.Threading.Tasks.Extensions": "4.5.2"
+        },
         "compile": {
-          "lib/net45/ICSharpCode.SharpZipLib.dll": {}
+          "lib/netstandard2.0/ICSharpCode.SharpZipLib.dll": {
+            "related": ".pdb;.xml"
+          }
         },
         "runtime": {
-          "lib/net45/ICSharpCode.SharpZipLib.dll": {}
+          "lib/netstandard2.0/ICSharpCode.SharpZipLib.dll": {
+            "related": ".pdb;.xml"
+          }
         }
       },
       "System.AppContext/4.3.0": {
@@ -312,6 +460,22 @@
         },
         "runtime": {
           "lib/net463/System.AppContext.dll": {}
+        }
+      },
+      "System.Buffers/4.5.1": {
+        "type": "package",
+        "frameworkAssemblies": [
+          "mscorlib"
+        ],
+        "compile": {
+          "ref/net45/System.Buffers.dll": {
+            "related": ".xml"
+          }
+        },
+        "runtime": {
+          "lib/net461/System.Buffers.dll": {
+            "related": ".xml"
+          }
         }
       },
       "System.Collections/4.3.0": {
@@ -366,10 +530,14 @@
       "System.Diagnostics.DiagnosticSource/4.3.0": {
         "type": "package",
         "compile": {
-          "lib/net46/_._": {}
+          "lib/net46/_._": {
+            "related": ".xml"
+          }
         },
         "runtime": {
-          "lib/net46/System.Diagnostics.DiagnosticSource.dll": {}
+          "lib/net46/System.Diagnostics.DiagnosticSource.dll": {
+            "related": ".xml"
+          }
         }
       },
       "System.Diagnostics.Tools/4.3.0": {
@@ -519,6 +687,28 @@
           "lib/net463/System.Linq.Expressions.dll": {}
         }
       },
+      "System.Memory/4.5.4": {
+        "type": "package",
+        "dependencies": {
+          "System.Buffers": "4.5.1",
+          "System.Numerics.Vectors": "4.5.0",
+          "System.Runtime.CompilerServices.Unsafe": "4.5.3"
+        },
+        "frameworkAssemblies": [
+          "System",
+          "mscorlib"
+        ],
+        "compile": {
+          "lib/net461/System.Memory.dll": {
+            "related": ".xml"
+          }
+        },
+        "runtime": {
+          "lib/net461/System.Memory.dll": {
+            "related": ".xml"
+          }
+        }
+      },
       "System.Net.Http/4.3.0": {
         "type": "package",
         "dependencies": {
@@ -531,7 +721,9 @@
           "mscorlib"
         ],
         "compile": {
-          "ref/net46/_._": {}
+          "ref/net46/_._": {
+            "related": ".xml"
+          }
         },
         "runtime": {
           "lib/net46/System.Net.Http.dll": {}
@@ -570,6 +762,23 @@
         },
         "runtime": {
           "lib/net46/System.Net.Sockets.dll": {}
+        }
+      },
+      "System.Numerics.Vectors/4.5.0": {
+        "type": "package",
+        "frameworkAssemblies": [
+          "System.Numerics",
+          "mscorlib"
+        ],
+        "compile": {
+          "ref/net46/System.Numerics.Vectors.dll": {
+            "related": ".xml"
+          }
+        },
+        "runtime": {
+          "lib/net46/System.Numerics.Vectors.dll": {
+            "related": ".xml"
+          }
         }
       },
       "System.ObjectModel/4.3.0": {
@@ -636,6 +845,22 @@
         },
         "runtime": {
           "lib/net462/System.Runtime.dll": {}
+        }
+      },
+      "System.Runtime.CompilerServices.Unsafe/4.5.3": {
+        "type": "package",
+        "frameworkAssemblies": [
+          "mscorlib"
+        ],
+        "compile": {
+          "ref/net461/System.Runtime.CompilerServices.Unsafe.dll": {
+            "related": ".xml"
+          }
+        },
+        "runtime": {
+          "lib/net461/System.Runtime.CompilerServices.Unsafe.dll": {
+            "related": ".xml"
+          }
         }
       },
       "System.Runtime.Extensions/4.3.0": {
@@ -890,6 +1115,22 @@
           "lib/net45/_._": {}
         }
       },
+      "System.Threading.Tasks.Extensions/4.5.2": {
+        "type": "package",
+        "dependencies": {
+          "System.Runtime.CompilerServices.Unsafe": "4.5.2"
+        },
+        "compile": {
+          "lib/netstandard2.0/System.Threading.Tasks.Extensions.dll": {
+            "related": ".xml"
+          }
+        },
+        "runtime": {
+          "lib/netstandard2.0/System.Threading.Tasks.Extensions.dll": {
+            "related": ".xml"
+          }
+        }
+      },
       "System.Threading.Timer/4.3.0": {
         "type": "package",
         "compile": {
@@ -908,7 +1149,9 @@
           "ref/net47/System.ValueTuple.dll": {}
         },
         "runtime": {
-          "lib/net47/System.ValueTuple.dll": {}
+          "lib/net47/System.ValueTuple.dll": {
+            "related": ".xml"
+          }
         }
       },
       "System.Xml.ReaderWriter/4.3.0": {
@@ -937,25 +1180,29 @@
         }
       }
     },
-    ".NETFramework,Version=v4.7.2/win": {
-      "Costura.Fody/5.7.0": {
+    ".NETFramework,Version=v4.8.1/win": {
+      "Costura.Fody/5.8.0-alpha0098": {
         "type": "package",
         "dependencies": {
-          "Fody": "6.5.5",
+          "Fody": "6.6.0",
           "NETStandard.Library": "1.6.1"
         },
         "compile": {
-          "lib/netstandard1.0/_._": {}
+          "lib/netstandard1.0/_._": {
+            "related": ".pdb;.xml"
+          }
         },
         "runtime": {
-          "lib/netstandard1.0/Costura.dll": {}
+          "lib/netstandard1.0/Costura.dll": {
+            "related": ".pdb;.xml"
+          }
         },
         "build": {
           "build/Costura.Fody.props": {},
           "build/Costura.Fody.targets": {}
         }
       },
-      "Fody/6.5.5": {
+      "Fody/6.6.0": {
         "type": "package",
         "build": {
           "build/Fody.targets": {}
@@ -964,74 +1211,206 @@
       "MahApps.Metro.IconPacks/4.11.0": {
         "type": "package",
         "compile": {
-          "lib/net47/MahApps.Metro.IconPacks.BootstrapIcons.dll": {},
-          "lib/net47/MahApps.Metro.IconPacks.BoxIcons.dll": {},
-          "lib/net47/MahApps.Metro.IconPacks.Codicons.dll": {},
-          "lib/net47/MahApps.Metro.IconPacks.Coolicons.dll": {},
-          "lib/net47/MahApps.Metro.IconPacks.Core.dll": {},
-          "lib/net47/MahApps.Metro.IconPacks.Entypo.dll": {},
-          "lib/net47/MahApps.Metro.IconPacks.EvaIcons.dll": {},
-          "lib/net47/MahApps.Metro.IconPacks.FeatherIcons.dll": {},
-          "lib/net47/MahApps.Metro.IconPacks.FileIcons.dll": {},
-          "lib/net47/MahApps.Metro.IconPacks.FontAwesome.dll": {},
-          "lib/net47/MahApps.Metro.IconPacks.Fontaudio.dll": {},
-          "lib/net47/MahApps.Metro.IconPacks.Fontisto.dll": {},
-          "lib/net47/MahApps.Metro.IconPacks.ForkAwesome.dll": {},
-          "lib/net47/MahApps.Metro.IconPacks.Ionicons.dll": {},
-          "lib/net47/MahApps.Metro.IconPacks.JamIcons.dll": {},
-          "lib/net47/MahApps.Metro.IconPacks.Material.dll": {},
-          "lib/net47/MahApps.Metro.IconPacks.MaterialDesign.dll": {},
-          "lib/net47/MahApps.Metro.IconPacks.MaterialLight.dll": {},
-          "lib/net47/MahApps.Metro.IconPacks.Microns.dll": {},
-          "lib/net47/MahApps.Metro.IconPacks.Modern.dll": {},
-          "lib/net47/MahApps.Metro.IconPacks.Octicons.dll": {},
-          "lib/net47/MahApps.Metro.IconPacks.PicolIcons.dll": {},
-          "lib/net47/MahApps.Metro.IconPacks.PixelartIcons.dll": {},
-          "lib/net47/MahApps.Metro.IconPacks.RPGAwesome.dll": {},
-          "lib/net47/MahApps.Metro.IconPacks.RadixIcons.dll": {},
-          "lib/net47/MahApps.Metro.IconPacks.RemixIcon.dll": {},
-          "lib/net47/MahApps.Metro.IconPacks.SimpleIcons.dll": {},
-          "lib/net47/MahApps.Metro.IconPacks.Typicons.dll": {},
-          "lib/net47/MahApps.Metro.IconPacks.Unicons.dll": {},
-          "lib/net47/MahApps.Metro.IconPacks.VaadinIcons.dll": {},
-          "lib/net47/MahApps.Metro.IconPacks.WeatherIcons.dll": {},
-          "lib/net47/MahApps.Metro.IconPacks.Zondicons.dll": {},
-          "lib/net47/MahApps.Metro.IconPacks.dll": {}
+          "lib/net47/MahApps.Metro.IconPacks.BootstrapIcons.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net47/MahApps.Metro.IconPacks.BoxIcons.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net47/MahApps.Metro.IconPacks.Codicons.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net47/MahApps.Metro.IconPacks.Coolicons.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net47/MahApps.Metro.IconPacks.Core.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net47/MahApps.Metro.IconPacks.Entypo.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net47/MahApps.Metro.IconPacks.EvaIcons.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net47/MahApps.Metro.IconPacks.FeatherIcons.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net47/MahApps.Metro.IconPacks.FileIcons.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net47/MahApps.Metro.IconPacks.FontAwesome.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net47/MahApps.Metro.IconPacks.Fontaudio.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net47/MahApps.Metro.IconPacks.Fontisto.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net47/MahApps.Metro.IconPacks.ForkAwesome.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net47/MahApps.Metro.IconPacks.Ionicons.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net47/MahApps.Metro.IconPacks.JamIcons.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net47/MahApps.Metro.IconPacks.Material.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net47/MahApps.Metro.IconPacks.MaterialDesign.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net47/MahApps.Metro.IconPacks.MaterialLight.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net47/MahApps.Metro.IconPacks.Microns.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net47/MahApps.Metro.IconPacks.Modern.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net47/MahApps.Metro.IconPacks.Octicons.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net47/MahApps.Metro.IconPacks.PicolIcons.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net47/MahApps.Metro.IconPacks.PixelartIcons.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net47/MahApps.Metro.IconPacks.RPGAwesome.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net47/MahApps.Metro.IconPacks.RadixIcons.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net47/MahApps.Metro.IconPacks.RemixIcon.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net47/MahApps.Metro.IconPacks.SimpleIcons.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net47/MahApps.Metro.IconPacks.Typicons.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net47/MahApps.Metro.IconPacks.Unicons.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net47/MahApps.Metro.IconPacks.VaadinIcons.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net47/MahApps.Metro.IconPacks.WeatherIcons.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net47/MahApps.Metro.IconPacks.Zondicons.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net47/MahApps.Metro.IconPacks.dll": {
+            "related": ".BootstrapIcons.pdb;.BootstrapIcons.xml;.BoxIcons.pdb;.BoxIcons.xml;.Codicons.pdb;.Codicons.xml;.Coolicons.pdb;.Coolicons.xml;.Core.pdb;.Core.xml;.Entypo.pdb;.Entypo.xml;.EvaIcons.pdb;.EvaIcons.xml;.FeatherIcons.pdb;.FeatherIcons.xml;.FileIcons.pdb;.FileIcons.xml;.Fontaudio.pdb;.Fontaudio.xml;.FontAwesome.pdb;.FontAwesome.xml;.Fontisto.pdb;.Fontisto.xml;.ForkAwesome.pdb;.ForkAwesome.xml;.Ionicons.pdb;.Ionicons.xml;.JamIcons.pdb;.JamIcons.xml;.Material.pdb;.Material.xml;.MaterialDesign.pdb;.MaterialDesign.xml;.MaterialLight.pdb;.MaterialLight.xml;.Microns.pdb;.Microns.xml;.Modern.pdb;.Modern.xml;.Octicons.pdb;.Octicons.xml;.pdb;.PicolIcons.pdb;.PicolIcons.xml;.PixelartIcons.pdb;.PixelartIcons.xml;.RadixIcons.pdb;.RadixIcons.xml;.RemixIcon.pdb;.RemixIcon.xml;.RPGAwesome.pdb;.RPGAwesome.xml;.SimpleIcons.pdb;.SimpleIcons.xml;.Typicons.pdb;.Typicons.xml;.Unicons.pdb;.Unicons.xml;.VaadinIcons.pdb;.VaadinIcons.xml;.WeatherIcons.pdb;.WeatherIcons.xml;.xml;.Zondicons.pdb;.Zondicons.xml"
+          }
         },
         "runtime": {
-          "lib/net47/MahApps.Metro.IconPacks.BootstrapIcons.dll": {},
-          "lib/net47/MahApps.Metro.IconPacks.BoxIcons.dll": {},
-          "lib/net47/MahApps.Metro.IconPacks.Codicons.dll": {},
-          "lib/net47/MahApps.Metro.IconPacks.Coolicons.dll": {},
-          "lib/net47/MahApps.Metro.IconPacks.Core.dll": {},
-          "lib/net47/MahApps.Metro.IconPacks.Entypo.dll": {},
-          "lib/net47/MahApps.Metro.IconPacks.EvaIcons.dll": {},
-          "lib/net47/MahApps.Metro.IconPacks.FeatherIcons.dll": {},
-          "lib/net47/MahApps.Metro.IconPacks.FileIcons.dll": {},
-          "lib/net47/MahApps.Metro.IconPacks.FontAwesome.dll": {},
-          "lib/net47/MahApps.Metro.IconPacks.Fontaudio.dll": {},
-          "lib/net47/MahApps.Metro.IconPacks.Fontisto.dll": {},
-          "lib/net47/MahApps.Metro.IconPacks.ForkAwesome.dll": {},
-          "lib/net47/MahApps.Metro.IconPacks.Ionicons.dll": {},
-          "lib/net47/MahApps.Metro.IconPacks.JamIcons.dll": {},
-          "lib/net47/MahApps.Metro.IconPacks.Material.dll": {},
-          "lib/net47/MahApps.Metro.IconPacks.MaterialDesign.dll": {},
-          "lib/net47/MahApps.Metro.IconPacks.MaterialLight.dll": {},
-          "lib/net47/MahApps.Metro.IconPacks.Microns.dll": {},
-          "lib/net47/MahApps.Metro.IconPacks.Modern.dll": {},
-          "lib/net47/MahApps.Metro.IconPacks.Octicons.dll": {},
-          "lib/net47/MahApps.Metro.IconPacks.PicolIcons.dll": {},
-          "lib/net47/MahApps.Metro.IconPacks.PixelartIcons.dll": {},
-          "lib/net47/MahApps.Metro.IconPacks.RPGAwesome.dll": {},
-          "lib/net47/MahApps.Metro.IconPacks.RadixIcons.dll": {},
-          "lib/net47/MahApps.Metro.IconPacks.RemixIcon.dll": {},
-          "lib/net47/MahApps.Metro.IconPacks.SimpleIcons.dll": {},
-          "lib/net47/MahApps.Metro.IconPacks.Typicons.dll": {},
-          "lib/net47/MahApps.Metro.IconPacks.Unicons.dll": {},
-          "lib/net47/MahApps.Metro.IconPacks.VaadinIcons.dll": {},
-          "lib/net47/MahApps.Metro.IconPacks.WeatherIcons.dll": {},
-          "lib/net47/MahApps.Metro.IconPacks.Zondicons.dll": {},
-          "lib/net47/MahApps.Metro.IconPacks.dll": {}
+          "lib/net47/MahApps.Metro.IconPacks.BootstrapIcons.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net47/MahApps.Metro.IconPacks.BoxIcons.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net47/MahApps.Metro.IconPacks.Codicons.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net47/MahApps.Metro.IconPacks.Coolicons.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net47/MahApps.Metro.IconPacks.Core.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net47/MahApps.Metro.IconPacks.Entypo.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net47/MahApps.Metro.IconPacks.EvaIcons.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net47/MahApps.Metro.IconPacks.FeatherIcons.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net47/MahApps.Metro.IconPacks.FileIcons.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net47/MahApps.Metro.IconPacks.FontAwesome.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net47/MahApps.Metro.IconPacks.Fontaudio.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net47/MahApps.Metro.IconPacks.Fontisto.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net47/MahApps.Metro.IconPacks.ForkAwesome.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net47/MahApps.Metro.IconPacks.Ionicons.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net47/MahApps.Metro.IconPacks.JamIcons.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net47/MahApps.Metro.IconPacks.Material.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net47/MahApps.Metro.IconPacks.MaterialDesign.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net47/MahApps.Metro.IconPacks.MaterialLight.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net47/MahApps.Metro.IconPacks.Microns.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net47/MahApps.Metro.IconPacks.Modern.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net47/MahApps.Metro.IconPacks.Octicons.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net47/MahApps.Metro.IconPacks.PicolIcons.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net47/MahApps.Metro.IconPacks.PixelartIcons.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net47/MahApps.Metro.IconPacks.RPGAwesome.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net47/MahApps.Metro.IconPacks.RadixIcons.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net47/MahApps.Metro.IconPacks.RemixIcon.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net47/MahApps.Metro.IconPacks.SimpleIcons.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net47/MahApps.Metro.IconPacks.Typicons.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net47/MahApps.Metro.IconPacks.Unicons.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net47/MahApps.Metro.IconPacks.VaadinIcons.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net47/MahApps.Metro.IconPacks.WeatherIcons.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net47/MahApps.Metro.IconPacks.Zondicons.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net47/MahApps.Metro.IconPacks.dll": {
+            "related": ".BootstrapIcons.pdb;.BootstrapIcons.xml;.BoxIcons.pdb;.BoxIcons.xml;.Codicons.pdb;.Codicons.xml;.Coolicons.pdb;.Coolicons.xml;.Core.pdb;.Core.xml;.Entypo.pdb;.Entypo.xml;.EvaIcons.pdb;.EvaIcons.xml;.FeatherIcons.pdb;.FeatherIcons.xml;.FileIcons.pdb;.FileIcons.xml;.Fontaudio.pdb;.Fontaudio.xml;.FontAwesome.pdb;.FontAwesome.xml;.Fontisto.pdb;.Fontisto.xml;.ForkAwesome.pdb;.ForkAwesome.xml;.Ionicons.pdb;.Ionicons.xml;.JamIcons.pdb;.JamIcons.xml;.Material.pdb;.Material.xml;.MaterialDesign.pdb;.MaterialDesign.xml;.MaterialLight.pdb;.MaterialLight.xml;.Microns.pdb;.Microns.xml;.Modern.pdb;.Modern.xml;.Octicons.pdb;.Octicons.xml;.pdb;.PicolIcons.pdb;.PicolIcons.xml;.PixelartIcons.pdb;.PixelartIcons.xml;.RadixIcons.pdb;.RadixIcons.xml;.RemixIcon.pdb;.RemixIcon.xml;.RPGAwesome.pdb;.RPGAwesome.xml;.SimpleIcons.pdb;.SimpleIcons.xml;.Typicons.pdb;.Typicons.xml;.Unicons.pdb;.Unicons.xml;.VaadinIcons.pdb;.VaadinIcons.xml;.WeatherIcons.pdb;.WeatherIcons.xml;.xml;.Zondicons.pdb;.Zondicons.xml"
+          }
         }
       },
       "Microsoft.NETCore.Platforms/1.1.0": {
@@ -1046,16 +1425,16 @@
       "Microsoft.NETFramework.ReferenceAssemblies/1.0.0": {
         "type": "package",
         "dependencies": {
-          "Microsoft.NETFramework.ReferenceAssemblies.net472": "1.0.0"
+          "Microsoft.NETFramework.ReferenceAssemblies.net48": "1.0.0"
         }
       },
-      "Microsoft.NETFramework.ReferenceAssemblies.net472/1.0.0": {
+      "Microsoft.NETFramework.ReferenceAssemblies.net48/1.0.0": {
         "type": "package",
         "build": {
           "build/_._": {}
         }
       },
-      "Microsoft.Toolkit.Uwp.Notifications/7.1.2": {
+      "Microsoft.Toolkit.Uwp.Notifications/7.1.3-rc": {
         "type": "package",
         "dependencies": {
           "Microsoft.NETFramework.ReferenceAssemblies": "1.0.0",
@@ -1063,10 +1442,14 @@
           "System.ValueTuple": "4.5.0"
         },
         "compile": {
-          "lib/net461/Microsoft.Toolkit.Uwp.Notifications.dll": {}
+          "lib/net461/Microsoft.Toolkit.Uwp.Notifications.dll": {
+            "related": ".pdb;.xml"
+          }
         },
         "runtime": {
-          "lib/net461/Microsoft.Toolkit.Uwp.Notifications.dll": {}
+          "lib/net461/Microsoft.Toolkit.Uwp.Notifications.dll": {
+            "related": ".pdb;.xml"
+          }
         }
       },
       "Microsoft.Win32.Primitives/4.3.0": {
@@ -1229,13 +1612,21 @@
           "System.Xml.XDocument": "4.3.0"
         }
       },
-      "SharpZipLib/1.3.3": {
+      "SharpZipLib/1.4.0": {
         "type": "package",
+        "dependencies": {
+          "System.Memory": "4.5.4",
+          "System.Threading.Tasks.Extensions": "4.5.2"
+        },
         "compile": {
-          "lib/net45/ICSharpCode.SharpZipLib.dll": {}
+          "lib/netstandard2.0/ICSharpCode.SharpZipLib.dll": {
+            "related": ".pdb;.xml"
+          }
         },
         "runtime": {
-          "lib/net45/ICSharpCode.SharpZipLib.dll": {}
+          "lib/netstandard2.0/ICSharpCode.SharpZipLib.dll": {
+            "related": ".pdb;.xml"
+          }
         }
       },
       "System.AppContext/4.3.0": {
@@ -1248,6 +1639,22 @@
         },
         "runtime": {
           "lib/net463/System.AppContext.dll": {}
+        }
+      },
+      "System.Buffers/4.5.1": {
+        "type": "package",
+        "frameworkAssemblies": [
+          "mscorlib"
+        ],
+        "compile": {
+          "ref/net45/System.Buffers.dll": {
+            "related": ".xml"
+          }
+        },
+        "runtime": {
+          "lib/net461/System.Buffers.dll": {
+            "related": ".xml"
+          }
         }
       },
       "System.Collections/4.3.0": {
@@ -1302,10 +1709,14 @@
       "System.Diagnostics.DiagnosticSource/4.3.0": {
         "type": "package",
         "compile": {
-          "lib/net46/_._": {}
+          "lib/net46/_._": {
+            "related": ".xml"
+          }
         },
         "runtime": {
-          "lib/net46/System.Diagnostics.DiagnosticSource.dll": {}
+          "lib/net46/System.Diagnostics.DiagnosticSource.dll": {
+            "related": ".xml"
+          }
         }
       },
       "System.Diagnostics.Tools/4.3.0": {
@@ -1445,6 +1856,28 @@
           "lib/net463/System.Linq.Expressions.dll": {}
         }
       },
+      "System.Memory/4.5.4": {
+        "type": "package",
+        "dependencies": {
+          "System.Buffers": "4.5.1",
+          "System.Numerics.Vectors": "4.5.0",
+          "System.Runtime.CompilerServices.Unsafe": "4.5.3"
+        },
+        "frameworkAssemblies": [
+          "System",
+          "mscorlib"
+        ],
+        "compile": {
+          "lib/net461/System.Memory.dll": {
+            "related": ".xml"
+          }
+        },
+        "runtime": {
+          "lib/net461/System.Memory.dll": {
+            "related": ".xml"
+          }
+        }
+      },
       "System.Net.Http/4.3.0": {
         "type": "package",
         "dependencies": {
@@ -1457,7 +1890,9 @@
           "mscorlib"
         ],
         "compile": {
-          "ref/net46/_._": {}
+          "ref/net46/_._": {
+            "related": ".xml"
+          }
         },
         "runtime": {
           "runtimes/win/lib/net46/System.Net.Http.dll": {}
@@ -1486,6 +1921,23 @@
         },
         "runtime": {
           "lib/net46/System.Net.Sockets.dll": {}
+        }
+      },
+      "System.Numerics.Vectors/4.5.0": {
+        "type": "package",
+        "frameworkAssemblies": [
+          "System.Numerics",
+          "mscorlib"
+        ],
+        "compile": {
+          "ref/net46/System.Numerics.Vectors.dll": {
+            "related": ".xml"
+          }
+        },
+        "runtime": {
+          "lib/net46/System.Numerics.Vectors.dll": {
+            "related": ".xml"
+          }
         }
       },
       "System.ObjectModel/4.3.0": {
@@ -1552,6 +2004,22 @@
         },
         "runtime": {
           "lib/net462/System.Runtime.dll": {}
+        }
+      },
+      "System.Runtime.CompilerServices.Unsafe/4.5.3": {
+        "type": "package",
+        "frameworkAssemblies": [
+          "mscorlib"
+        ],
+        "compile": {
+          "ref/net461/System.Runtime.CompilerServices.Unsafe.dll": {
+            "related": ".xml"
+          }
+        },
+        "runtime": {
+          "lib/net461/System.Runtime.CompilerServices.Unsafe.dll": {
+            "related": ".xml"
+          }
         }
       },
       "System.Runtime.Extensions/4.3.0": {
@@ -1762,6 +2230,22 @@
           "lib/net45/_._": {}
         }
       },
+      "System.Threading.Tasks.Extensions/4.5.2": {
+        "type": "package",
+        "dependencies": {
+          "System.Runtime.CompilerServices.Unsafe": "4.5.2"
+        },
+        "compile": {
+          "lib/netstandard2.0/System.Threading.Tasks.Extensions.dll": {
+            "related": ".xml"
+          }
+        },
+        "runtime": {
+          "lib/netstandard2.0/System.Threading.Tasks.Extensions.dll": {
+            "related": ".xml"
+          }
+        }
+      },
       "System.Threading.Timer/4.3.0": {
         "type": "package",
         "compile": {
@@ -1780,7 +2264,9 @@
           "ref/net47/System.ValueTuple.dll": {}
         },
         "runtime": {
-          "lib/net47/System.ValueTuple.dll": {}
+          "lib/net47/System.ValueTuple.dll": {
+            "related": ".xml"
+          }
         }
       },
       "System.Xml.ReaderWriter/4.3.0": {
@@ -1809,25 +2295,29 @@
         }
       }
     },
-    ".NETFramework,Version=v4.7.2/win-x64": {
-      "Costura.Fody/5.7.0": {
+    ".NETFramework,Version=v4.8.1/win-x64": {
+      "Costura.Fody/5.8.0-alpha0098": {
         "type": "package",
         "dependencies": {
-          "Fody": "6.5.5",
+          "Fody": "6.6.0",
           "NETStandard.Library": "1.6.1"
         },
         "compile": {
-          "lib/netstandard1.0/_._": {}
+          "lib/netstandard1.0/_._": {
+            "related": ".pdb;.xml"
+          }
         },
         "runtime": {
-          "lib/netstandard1.0/Costura.dll": {}
+          "lib/netstandard1.0/Costura.dll": {
+            "related": ".pdb;.xml"
+          }
         },
         "build": {
           "build/Costura.Fody.props": {},
           "build/Costura.Fody.targets": {}
         }
       },
-      "Fody/6.5.5": {
+      "Fody/6.6.0": {
         "type": "package",
         "build": {
           "build/Fody.targets": {}
@@ -1836,74 +2326,206 @@
       "MahApps.Metro.IconPacks/4.11.0": {
         "type": "package",
         "compile": {
-          "lib/net47/MahApps.Metro.IconPacks.BootstrapIcons.dll": {},
-          "lib/net47/MahApps.Metro.IconPacks.BoxIcons.dll": {},
-          "lib/net47/MahApps.Metro.IconPacks.Codicons.dll": {},
-          "lib/net47/MahApps.Metro.IconPacks.Coolicons.dll": {},
-          "lib/net47/MahApps.Metro.IconPacks.Core.dll": {},
-          "lib/net47/MahApps.Metro.IconPacks.Entypo.dll": {},
-          "lib/net47/MahApps.Metro.IconPacks.EvaIcons.dll": {},
-          "lib/net47/MahApps.Metro.IconPacks.FeatherIcons.dll": {},
-          "lib/net47/MahApps.Metro.IconPacks.FileIcons.dll": {},
-          "lib/net47/MahApps.Metro.IconPacks.FontAwesome.dll": {},
-          "lib/net47/MahApps.Metro.IconPacks.Fontaudio.dll": {},
-          "lib/net47/MahApps.Metro.IconPacks.Fontisto.dll": {},
-          "lib/net47/MahApps.Metro.IconPacks.ForkAwesome.dll": {},
-          "lib/net47/MahApps.Metro.IconPacks.Ionicons.dll": {},
-          "lib/net47/MahApps.Metro.IconPacks.JamIcons.dll": {},
-          "lib/net47/MahApps.Metro.IconPacks.Material.dll": {},
-          "lib/net47/MahApps.Metro.IconPacks.MaterialDesign.dll": {},
-          "lib/net47/MahApps.Metro.IconPacks.MaterialLight.dll": {},
-          "lib/net47/MahApps.Metro.IconPacks.Microns.dll": {},
-          "lib/net47/MahApps.Metro.IconPacks.Modern.dll": {},
-          "lib/net47/MahApps.Metro.IconPacks.Octicons.dll": {},
-          "lib/net47/MahApps.Metro.IconPacks.PicolIcons.dll": {},
-          "lib/net47/MahApps.Metro.IconPacks.PixelartIcons.dll": {},
-          "lib/net47/MahApps.Metro.IconPacks.RPGAwesome.dll": {},
-          "lib/net47/MahApps.Metro.IconPacks.RadixIcons.dll": {},
-          "lib/net47/MahApps.Metro.IconPacks.RemixIcon.dll": {},
-          "lib/net47/MahApps.Metro.IconPacks.SimpleIcons.dll": {},
-          "lib/net47/MahApps.Metro.IconPacks.Typicons.dll": {},
-          "lib/net47/MahApps.Metro.IconPacks.Unicons.dll": {},
-          "lib/net47/MahApps.Metro.IconPacks.VaadinIcons.dll": {},
-          "lib/net47/MahApps.Metro.IconPacks.WeatherIcons.dll": {},
-          "lib/net47/MahApps.Metro.IconPacks.Zondicons.dll": {},
-          "lib/net47/MahApps.Metro.IconPacks.dll": {}
+          "lib/net47/MahApps.Metro.IconPacks.BootstrapIcons.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net47/MahApps.Metro.IconPacks.BoxIcons.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net47/MahApps.Metro.IconPacks.Codicons.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net47/MahApps.Metro.IconPacks.Coolicons.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net47/MahApps.Metro.IconPacks.Core.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net47/MahApps.Metro.IconPacks.Entypo.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net47/MahApps.Metro.IconPacks.EvaIcons.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net47/MahApps.Metro.IconPacks.FeatherIcons.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net47/MahApps.Metro.IconPacks.FileIcons.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net47/MahApps.Metro.IconPacks.FontAwesome.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net47/MahApps.Metro.IconPacks.Fontaudio.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net47/MahApps.Metro.IconPacks.Fontisto.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net47/MahApps.Metro.IconPacks.ForkAwesome.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net47/MahApps.Metro.IconPacks.Ionicons.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net47/MahApps.Metro.IconPacks.JamIcons.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net47/MahApps.Metro.IconPacks.Material.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net47/MahApps.Metro.IconPacks.MaterialDesign.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net47/MahApps.Metro.IconPacks.MaterialLight.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net47/MahApps.Metro.IconPacks.Microns.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net47/MahApps.Metro.IconPacks.Modern.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net47/MahApps.Metro.IconPacks.Octicons.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net47/MahApps.Metro.IconPacks.PicolIcons.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net47/MahApps.Metro.IconPacks.PixelartIcons.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net47/MahApps.Metro.IconPacks.RPGAwesome.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net47/MahApps.Metro.IconPacks.RadixIcons.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net47/MahApps.Metro.IconPacks.RemixIcon.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net47/MahApps.Metro.IconPacks.SimpleIcons.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net47/MahApps.Metro.IconPacks.Typicons.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net47/MahApps.Metro.IconPacks.Unicons.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net47/MahApps.Metro.IconPacks.VaadinIcons.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net47/MahApps.Metro.IconPacks.WeatherIcons.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net47/MahApps.Metro.IconPacks.Zondicons.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net47/MahApps.Metro.IconPacks.dll": {
+            "related": ".BootstrapIcons.pdb;.BootstrapIcons.xml;.BoxIcons.pdb;.BoxIcons.xml;.Codicons.pdb;.Codicons.xml;.Coolicons.pdb;.Coolicons.xml;.Core.pdb;.Core.xml;.Entypo.pdb;.Entypo.xml;.EvaIcons.pdb;.EvaIcons.xml;.FeatherIcons.pdb;.FeatherIcons.xml;.FileIcons.pdb;.FileIcons.xml;.Fontaudio.pdb;.Fontaudio.xml;.FontAwesome.pdb;.FontAwesome.xml;.Fontisto.pdb;.Fontisto.xml;.ForkAwesome.pdb;.ForkAwesome.xml;.Ionicons.pdb;.Ionicons.xml;.JamIcons.pdb;.JamIcons.xml;.Material.pdb;.Material.xml;.MaterialDesign.pdb;.MaterialDesign.xml;.MaterialLight.pdb;.MaterialLight.xml;.Microns.pdb;.Microns.xml;.Modern.pdb;.Modern.xml;.Octicons.pdb;.Octicons.xml;.pdb;.PicolIcons.pdb;.PicolIcons.xml;.PixelartIcons.pdb;.PixelartIcons.xml;.RadixIcons.pdb;.RadixIcons.xml;.RemixIcon.pdb;.RemixIcon.xml;.RPGAwesome.pdb;.RPGAwesome.xml;.SimpleIcons.pdb;.SimpleIcons.xml;.Typicons.pdb;.Typicons.xml;.Unicons.pdb;.Unicons.xml;.VaadinIcons.pdb;.VaadinIcons.xml;.WeatherIcons.pdb;.WeatherIcons.xml;.xml;.Zondicons.pdb;.Zondicons.xml"
+          }
         },
         "runtime": {
-          "lib/net47/MahApps.Metro.IconPacks.BootstrapIcons.dll": {},
-          "lib/net47/MahApps.Metro.IconPacks.BoxIcons.dll": {},
-          "lib/net47/MahApps.Metro.IconPacks.Codicons.dll": {},
-          "lib/net47/MahApps.Metro.IconPacks.Coolicons.dll": {},
-          "lib/net47/MahApps.Metro.IconPacks.Core.dll": {},
-          "lib/net47/MahApps.Metro.IconPacks.Entypo.dll": {},
-          "lib/net47/MahApps.Metro.IconPacks.EvaIcons.dll": {},
-          "lib/net47/MahApps.Metro.IconPacks.FeatherIcons.dll": {},
-          "lib/net47/MahApps.Metro.IconPacks.FileIcons.dll": {},
-          "lib/net47/MahApps.Metro.IconPacks.FontAwesome.dll": {},
-          "lib/net47/MahApps.Metro.IconPacks.Fontaudio.dll": {},
-          "lib/net47/MahApps.Metro.IconPacks.Fontisto.dll": {},
-          "lib/net47/MahApps.Metro.IconPacks.ForkAwesome.dll": {},
-          "lib/net47/MahApps.Metro.IconPacks.Ionicons.dll": {},
-          "lib/net47/MahApps.Metro.IconPacks.JamIcons.dll": {},
-          "lib/net47/MahApps.Metro.IconPacks.Material.dll": {},
-          "lib/net47/MahApps.Metro.IconPacks.MaterialDesign.dll": {},
-          "lib/net47/MahApps.Metro.IconPacks.MaterialLight.dll": {},
-          "lib/net47/MahApps.Metro.IconPacks.Microns.dll": {},
-          "lib/net47/MahApps.Metro.IconPacks.Modern.dll": {},
-          "lib/net47/MahApps.Metro.IconPacks.Octicons.dll": {},
-          "lib/net47/MahApps.Metro.IconPacks.PicolIcons.dll": {},
-          "lib/net47/MahApps.Metro.IconPacks.PixelartIcons.dll": {},
-          "lib/net47/MahApps.Metro.IconPacks.RPGAwesome.dll": {},
-          "lib/net47/MahApps.Metro.IconPacks.RadixIcons.dll": {},
-          "lib/net47/MahApps.Metro.IconPacks.RemixIcon.dll": {},
-          "lib/net47/MahApps.Metro.IconPacks.SimpleIcons.dll": {},
-          "lib/net47/MahApps.Metro.IconPacks.Typicons.dll": {},
-          "lib/net47/MahApps.Metro.IconPacks.Unicons.dll": {},
-          "lib/net47/MahApps.Metro.IconPacks.VaadinIcons.dll": {},
-          "lib/net47/MahApps.Metro.IconPacks.WeatherIcons.dll": {},
-          "lib/net47/MahApps.Metro.IconPacks.Zondicons.dll": {},
-          "lib/net47/MahApps.Metro.IconPacks.dll": {}
+          "lib/net47/MahApps.Metro.IconPacks.BootstrapIcons.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net47/MahApps.Metro.IconPacks.BoxIcons.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net47/MahApps.Metro.IconPacks.Codicons.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net47/MahApps.Metro.IconPacks.Coolicons.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net47/MahApps.Metro.IconPacks.Core.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net47/MahApps.Metro.IconPacks.Entypo.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net47/MahApps.Metro.IconPacks.EvaIcons.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net47/MahApps.Metro.IconPacks.FeatherIcons.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net47/MahApps.Metro.IconPacks.FileIcons.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net47/MahApps.Metro.IconPacks.FontAwesome.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net47/MahApps.Metro.IconPacks.Fontaudio.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net47/MahApps.Metro.IconPacks.Fontisto.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net47/MahApps.Metro.IconPacks.ForkAwesome.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net47/MahApps.Metro.IconPacks.Ionicons.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net47/MahApps.Metro.IconPacks.JamIcons.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net47/MahApps.Metro.IconPacks.Material.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net47/MahApps.Metro.IconPacks.MaterialDesign.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net47/MahApps.Metro.IconPacks.MaterialLight.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net47/MahApps.Metro.IconPacks.Microns.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net47/MahApps.Metro.IconPacks.Modern.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net47/MahApps.Metro.IconPacks.Octicons.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net47/MahApps.Metro.IconPacks.PicolIcons.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net47/MahApps.Metro.IconPacks.PixelartIcons.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net47/MahApps.Metro.IconPacks.RPGAwesome.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net47/MahApps.Metro.IconPacks.RadixIcons.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net47/MahApps.Metro.IconPacks.RemixIcon.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net47/MahApps.Metro.IconPacks.SimpleIcons.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net47/MahApps.Metro.IconPacks.Typicons.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net47/MahApps.Metro.IconPacks.Unicons.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net47/MahApps.Metro.IconPacks.VaadinIcons.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net47/MahApps.Metro.IconPacks.WeatherIcons.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net47/MahApps.Metro.IconPacks.Zondicons.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net47/MahApps.Metro.IconPacks.dll": {
+            "related": ".BootstrapIcons.pdb;.BootstrapIcons.xml;.BoxIcons.pdb;.BoxIcons.xml;.Codicons.pdb;.Codicons.xml;.Coolicons.pdb;.Coolicons.xml;.Core.pdb;.Core.xml;.Entypo.pdb;.Entypo.xml;.EvaIcons.pdb;.EvaIcons.xml;.FeatherIcons.pdb;.FeatherIcons.xml;.FileIcons.pdb;.FileIcons.xml;.Fontaudio.pdb;.Fontaudio.xml;.FontAwesome.pdb;.FontAwesome.xml;.Fontisto.pdb;.Fontisto.xml;.ForkAwesome.pdb;.ForkAwesome.xml;.Ionicons.pdb;.Ionicons.xml;.JamIcons.pdb;.JamIcons.xml;.Material.pdb;.Material.xml;.MaterialDesign.pdb;.MaterialDesign.xml;.MaterialLight.pdb;.MaterialLight.xml;.Microns.pdb;.Microns.xml;.Modern.pdb;.Modern.xml;.Octicons.pdb;.Octicons.xml;.pdb;.PicolIcons.pdb;.PicolIcons.xml;.PixelartIcons.pdb;.PixelartIcons.xml;.RadixIcons.pdb;.RadixIcons.xml;.RemixIcon.pdb;.RemixIcon.xml;.RPGAwesome.pdb;.RPGAwesome.xml;.SimpleIcons.pdb;.SimpleIcons.xml;.Typicons.pdb;.Typicons.xml;.Unicons.pdb;.Unicons.xml;.VaadinIcons.pdb;.VaadinIcons.xml;.WeatherIcons.pdb;.WeatherIcons.xml;.xml;.Zondicons.pdb;.Zondicons.xml"
+          }
         }
       },
       "Microsoft.NETCore.Platforms/1.1.0": {
@@ -1918,16 +2540,16 @@
       "Microsoft.NETFramework.ReferenceAssemblies/1.0.0": {
         "type": "package",
         "dependencies": {
-          "Microsoft.NETFramework.ReferenceAssemblies.net472": "1.0.0"
+          "Microsoft.NETFramework.ReferenceAssemblies.net48": "1.0.0"
         }
       },
-      "Microsoft.NETFramework.ReferenceAssemblies.net472/1.0.0": {
+      "Microsoft.NETFramework.ReferenceAssemblies.net48/1.0.0": {
         "type": "package",
         "build": {
           "build/_._": {}
         }
       },
-      "Microsoft.Toolkit.Uwp.Notifications/7.1.2": {
+      "Microsoft.Toolkit.Uwp.Notifications/7.1.3-rc": {
         "type": "package",
         "dependencies": {
           "Microsoft.NETFramework.ReferenceAssemblies": "1.0.0",
@@ -1935,10 +2557,14 @@
           "System.ValueTuple": "4.5.0"
         },
         "compile": {
-          "lib/net461/Microsoft.Toolkit.Uwp.Notifications.dll": {}
+          "lib/net461/Microsoft.Toolkit.Uwp.Notifications.dll": {
+            "related": ".pdb;.xml"
+          }
         },
         "runtime": {
-          "lib/net461/Microsoft.Toolkit.Uwp.Notifications.dll": {}
+          "lib/net461/Microsoft.Toolkit.Uwp.Notifications.dll": {
+            "related": ".pdb;.xml"
+          }
         }
       },
       "Microsoft.Win32.Primitives/4.3.0": {
@@ -2101,13 +2727,21 @@
           "System.Xml.XDocument": "4.3.0"
         }
       },
-      "SharpZipLib/1.3.3": {
+      "SharpZipLib/1.4.0": {
         "type": "package",
+        "dependencies": {
+          "System.Memory": "4.5.4",
+          "System.Threading.Tasks.Extensions": "4.5.2"
+        },
         "compile": {
-          "lib/net45/ICSharpCode.SharpZipLib.dll": {}
+          "lib/netstandard2.0/ICSharpCode.SharpZipLib.dll": {
+            "related": ".pdb;.xml"
+          }
         },
         "runtime": {
-          "lib/net45/ICSharpCode.SharpZipLib.dll": {}
+          "lib/netstandard2.0/ICSharpCode.SharpZipLib.dll": {
+            "related": ".pdb;.xml"
+          }
         }
       },
       "System.AppContext/4.3.0": {
@@ -2120,6 +2754,22 @@
         },
         "runtime": {
           "lib/net463/System.AppContext.dll": {}
+        }
+      },
+      "System.Buffers/4.5.1": {
+        "type": "package",
+        "frameworkAssemblies": [
+          "mscorlib"
+        ],
+        "compile": {
+          "ref/net45/System.Buffers.dll": {
+            "related": ".xml"
+          }
+        },
+        "runtime": {
+          "lib/net461/System.Buffers.dll": {
+            "related": ".xml"
+          }
         }
       },
       "System.Collections/4.3.0": {
@@ -2174,10 +2824,14 @@
       "System.Diagnostics.DiagnosticSource/4.3.0": {
         "type": "package",
         "compile": {
-          "lib/net46/_._": {}
+          "lib/net46/_._": {
+            "related": ".xml"
+          }
         },
         "runtime": {
-          "lib/net46/System.Diagnostics.DiagnosticSource.dll": {}
+          "lib/net46/System.Diagnostics.DiagnosticSource.dll": {
+            "related": ".xml"
+          }
         }
       },
       "System.Diagnostics.Tools/4.3.0": {
@@ -2317,6 +2971,28 @@
           "lib/net463/System.Linq.Expressions.dll": {}
         }
       },
+      "System.Memory/4.5.4": {
+        "type": "package",
+        "dependencies": {
+          "System.Buffers": "4.5.1",
+          "System.Numerics.Vectors": "4.5.0",
+          "System.Runtime.CompilerServices.Unsafe": "4.5.3"
+        },
+        "frameworkAssemblies": [
+          "System",
+          "mscorlib"
+        ],
+        "compile": {
+          "lib/net461/System.Memory.dll": {
+            "related": ".xml"
+          }
+        },
+        "runtime": {
+          "lib/net461/System.Memory.dll": {
+            "related": ".xml"
+          }
+        }
+      },
       "System.Net.Http/4.3.0": {
         "type": "package",
         "dependencies": {
@@ -2329,7 +3005,9 @@
           "mscorlib"
         ],
         "compile": {
-          "ref/net46/_._": {}
+          "ref/net46/_._": {
+            "related": ".xml"
+          }
         },
         "runtime": {
           "runtimes/win/lib/net46/System.Net.Http.dll": {}
@@ -2358,6 +3036,23 @@
         },
         "runtime": {
           "lib/net46/System.Net.Sockets.dll": {}
+        }
+      },
+      "System.Numerics.Vectors/4.5.0": {
+        "type": "package",
+        "frameworkAssemblies": [
+          "System.Numerics",
+          "mscorlib"
+        ],
+        "compile": {
+          "ref/net46/System.Numerics.Vectors.dll": {
+            "related": ".xml"
+          }
+        },
+        "runtime": {
+          "lib/net46/System.Numerics.Vectors.dll": {
+            "related": ".xml"
+          }
         }
       },
       "System.ObjectModel/4.3.0": {
@@ -2424,6 +3119,22 @@
         },
         "runtime": {
           "lib/net462/System.Runtime.dll": {}
+        }
+      },
+      "System.Runtime.CompilerServices.Unsafe/4.5.3": {
+        "type": "package",
+        "frameworkAssemblies": [
+          "mscorlib"
+        ],
+        "compile": {
+          "ref/net461/System.Runtime.CompilerServices.Unsafe.dll": {
+            "related": ".xml"
+          }
+        },
+        "runtime": {
+          "lib/net461/System.Runtime.CompilerServices.Unsafe.dll": {
+            "related": ".xml"
+          }
         }
       },
       "System.Runtime.Extensions/4.3.0": {
@@ -2634,6 +3345,22 @@
           "lib/net45/_._": {}
         }
       },
+      "System.Threading.Tasks.Extensions/4.5.2": {
+        "type": "package",
+        "dependencies": {
+          "System.Runtime.CompilerServices.Unsafe": "4.5.2"
+        },
+        "compile": {
+          "lib/netstandard2.0/System.Threading.Tasks.Extensions.dll": {
+            "related": ".xml"
+          }
+        },
+        "runtime": {
+          "lib/netstandard2.0/System.Threading.Tasks.Extensions.dll": {
+            "related": ".xml"
+          }
+        }
+      },
       "System.Threading.Timer/4.3.0": {
         "type": "package",
         "compile": {
@@ -2652,7 +3379,9 @@
           "ref/net47/System.ValueTuple.dll": {}
         },
         "runtime": {
-          "lib/net47/System.ValueTuple.dll": {}
+          "lib/net47/System.ValueTuple.dll": {
+            "related": ".xml"
+          }
         }
       },
       "System.Xml.ReaderWriter/4.3.0": {
@@ -2681,25 +3410,29 @@
         }
       }
     },
-    ".NETFramework,Version=v4.7.2/win-x86": {
-      "Costura.Fody/5.7.0": {
+    ".NETFramework,Version=v4.8.1/win-x86": {
+      "Costura.Fody/5.8.0-alpha0098": {
         "type": "package",
         "dependencies": {
-          "Fody": "6.5.5",
+          "Fody": "6.6.0",
           "NETStandard.Library": "1.6.1"
         },
         "compile": {
-          "lib/netstandard1.0/_._": {}
+          "lib/netstandard1.0/_._": {
+            "related": ".pdb;.xml"
+          }
         },
         "runtime": {
-          "lib/netstandard1.0/Costura.dll": {}
+          "lib/netstandard1.0/Costura.dll": {
+            "related": ".pdb;.xml"
+          }
         },
         "build": {
           "build/Costura.Fody.props": {},
           "build/Costura.Fody.targets": {}
         }
       },
-      "Fody/6.5.5": {
+      "Fody/6.6.0": {
         "type": "package",
         "build": {
           "build/Fody.targets": {}
@@ -2708,74 +3441,206 @@
       "MahApps.Metro.IconPacks/4.11.0": {
         "type": "package",
         "compile": {
-          "lib/net47/MahApps.Metro.IconPacks.BootstrapIcons.dll": {},
-          "lib/net47/MahApps.Metro.IconPacks.BoxIcons.dll": {},
-          "lib/net47/MahApps.Metro.IconPacks.Codicons.dll": {},
-          "lib/net47/MahApps.Metro.IconPacks.Coolicons.dll": {},
-          "lib/net47/MahApps.Metro.IconPacks.Core.dll": {},
-          "lib/net47/MahApps.Metro.IconPacks.Entypo.dll": {},
-          "lib/net47/MahApps.Metro.IconPacks.EvaIcons.dll": {},
-          "lib/net47/MahApps.Metro.IconPacks.FeatherIcons.dll": {},
-          "lib/net47/MahApps.Metro.IconPacks.FileIcons.dll": {},
-          "lib/net47/MahApps.Metro.IconPacks.FontAwesome.dll": {},
-          "lib/net47/MahApps.Metro.IconPacks.Fontaudio.dll": {},
-          "lib/net47/MahApps.Metro.IconPacks.Fontisto.dll": {},
-          "lib/net47/MahApps.Metro.IconPacks.ForkAwesome.dll": {},
-          "lib/net47/MahApps.Metro.IconPacks.Ionicons.dll": {},
-          "lib/net47/MahApps.Metro.IconPacks.JamIcons.dll": {},
-          "lib/net47/MahApps.Metro.IconPacks.Material.dll": {},
-          "lib/net47/MahApps.Metro.IconPacks.MaterialDesign.dll": {},
-          "lib/net47/MahApps.Metro.IconPacks.MaterialLight.dll": {},
-          "lib/net47/MahApps.Metro.IconPacks.Microns.dll": {},
-          "lib/net47/MahApps.Metro.IconPacks.Modern.dll": {},
-          "lib/net47/MahApps.Metro.IconPacks.Octicons.dll": {},
-          "lib/net47/MahApps.Metro.IconPacks.PicolIcons.dll": {},
-          "lib/net47/MahApps.Metro.IconPacks.PixelartIcons.dll": {},
-          "lib/net47/MahApps.Metro.IconPacks.RPGAwesome.dll": {},
-          "lib/net47/MahApps.Metro.IconPacks.RadixIcons.dll": {},
-          "lib/net47/MahApps.Metro.IconPacks.RemixIcon.dll": {},
-          "lib/net47/MahApps.Metro.IconPacks.SimpleIcons.dll": {},
-          "lib/net47/MahApps.Metro.IconPacks.Typicons.dll": {},
-          "lib/net47/MahApps.Metro.IconPacks.Unicons.dll": {},
-          "lib/net47/MahApps.Metro.IconPacks.VaadinIcons.dll": {},
-          "lib/net47/MahApps.Metro.IconPacks.WeatherIcons.dll": {},
-          "lib/net47/MahApps.Metro.IconPacks.Zondicons.dll": {},
-          "lib/net47/MahApps.Metro.IconPacks.dll": {}
+          "lib/net47/MahApps.Metro.IconPacks.BootstrapIcons.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net47/MahApps.Metro.IconPacks.BoxIcons.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net47/MahApps.Metro.IconPacks.Codicons.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net47/MahApps.Metro.IconPacks.Coolicons.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net47/MahApps.Metro.IconPacks.Core.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net47/MahApps.Metro.IconPacks.Entypo.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net47/MahApps.Metro.IconPacks.EvaIcons.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net47/MahApps.Metro.IconPacks.FeatherIcons.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net47/MahApps.Metro.IconPacks.FileIcons.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net47/MahApps.Metro.IconPacks.FontAwesome.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net47/MahApps.Metro.IconPacks.Fontaudio.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net47/MahApps.Metro.IconPacks.Fontisto.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net47/MahApps.Metro.IconPacks.ForkAwesome.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net47/MahApps.Metro.IconPacks.Ionicons.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net47/MahApps.Metro.IconPacks.JamIcons.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net47/MahApps.Metro.IconPacks.Material.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net47/MahApps.Metro.IconPacks.MaterialDesign.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net47/MahApps.Metro.IconPacks.MaterialLight.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net47/MahApps.Metro.IconPacks.Microns.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net47/MahApps.Metro.IconPacks.Modern.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net47/MahApps.Metro.IconPacks.Octicons.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net47/MahApps.Metro.IconPacks.PicolIcons.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net47/MahApps.Metro.IconPacks.PixelartIcons.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net47/MahApps.Metro.IconPacks.RPGAwesome.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net47/MahApps.Metro.IconPacks.RadixIcons.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net47/MahApps.Metro.IconPacks.RemixIcon.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net47/MahApps.Metro.IconPacks.SimpleIcons.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net47/MahApps.Metro.IconPacks.Typicons.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net47/MahApps.Metro.IconPacks.Unicons.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net47/MahApps.Metro.IconPacks.VaadinIcons.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net47/MahApps.Metro.IconPacks.WeatherIcons.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net47/MahApps.Metro.IconPacks.Zondicons.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net47/MahApps.Metro.IconPacks.dll": {
+            "related": ".BootstrapIcons.pdb;.BootstrapIcons.xml;.BoxIcons.pdb;.BoxIcons.xml;.Codicons.pdb;.Codicons.xml;.Coolicons.pdb;.Coolicons.xml;.Core.pdb;.Core.xml;.Entypo.pdb;.Entypo.xml;.EvaIcons.pdb;.EvaIcons.xml;.FeatherIcons.pdb;.FeatherIcons.xml;.FileIcons.pdb;.FileIcons.xml;.Fontaudio.pdb;.Fontaudio.xml;.FontAwesome.pdb;.FontAwesome.xml;.Fontisto.pdb;.Fontisto.xml;.ForkAwesome.pdb;.ForkAwesome.xml;.Ionicons.pdb;.Ionicons.xml;.JamIcons.pdb;.JamIcons.xml;.Material.pdb;.Material.xml;.MaterialDesign.pdb;.MaterialDesign.xml;.MaterialLight.pdb;.MaterialLight.xml;.Microns.pdb;.Microns.xml;.Modern.pdb;.Modern.xml;.Octicons.pdb;.Octicons.xml;.pdb;.PicolIcons.pdb;.PicolIcons.xml;.PixelartIcons.pdb;.PixelartIcons.xml;.RadixIcons.pdb;.RadixIcons.xml;.RemixIcon.pdb;.RemixIcon.xml;.RPGAwesome.pdb;.RPGAwesome.xml;.SimpleIcons.pdb;.SimpleIcons.xml;.Typicons.pdb;.Typicons.xml;.Unicons.pdb;.Unicons.xml;.VaadinIcons.pdb;.VaadinIcons.xml;.WeatherIcons.pdb;.WeatherIcons.xml;.xml;.Zondicons.pdb;.Zondicons.xml"
+          }
         },
         "runtime": {
-          "lib/net47/MahApps.Metro.IconPacks.BootstrapIcons.dll": {},
-          "lib/net47/MahApps.Metro.IconPacks.BoxIcons.dll": {},
-          "lib/net47/MahApps.Metro.IconPacks.Codicons.dll": {},
-          "lib/net47/MahApps.Metro.IconPacks.Coolicons.dll": {},
-          "lib/net47/MahApps.Metro.IconPacks.Core.dll": {},
-          "lib/net47/MahApps.Metro.IconPacks.Entypo.dll": {},
-          "lib/net47/MahApps.Metro.IconPacks.EvaIcons.dll": {},
-          "lib/net47/MahApps.Metro.IconPacks.FeatherIcons.dll": {},
-          "lib/net47/MahApps.Metro.IconPacks.FileIcons.dll": {},
-          "lib/net47/MahApps.Metro.IconPacks.FontAwesome.dll": {},
-          "lib/net47/MahApps.Metro.IconPacks.Fontaudio.dll": {},
-          "lib/net47/MahApps.Metro.IconPacks.Fontisto.dll": {},
-          "lib/net47/MahApps.Metro.IconPacks.ForkAwesome.dll": {},
-          "lib/net47/MahApps.Metro.IconPacks.Ionicons.dll": {},
-          "lib/net47/MahApps.Metro.IconPacks.JamIcons.dll": {},
-          "lib/net47/MahApps.Metro.IconPacks.Material.dll": {},
-          "lib/net47/MahApps.Metro.IconPacks.MaterialDesign.dll": {},
-          "lib/net47/MahApps.Metro.IconPacks.MaterialLight.dll": {},
-          "lib/net47/MahApps.Metro.IconPacks.Microns.dll": {},
-          "lib/net47/MahApps.Metro.IconPacks.Modern.dll": {},
-          "lib/net47/MahApps.Metro.IconPacks.Octicons.dll": {},
-          "lib/net47/MahApps.Metro.IconPacks.PicolIcons.dll": {},
-          "lib/net47/MahApps.Metro.IconPacks.PixelartIcons.dll": {},
-          "lib/net47/MahApps.Metro.IconPacks.RPGAwesome.dll": {},
-          "lib/net47/MahApps.Metro.IconPacks.RadixIcons.dll": {},
-          "lib/net47/MahApps.Metro.IconPacks.RemixIcon.dll": {},
-          "lib/net47/MahApps.Metro.IconPacks.SimpleIcons.dll": {},
-          "lib/net47/MahApps.Metro.IconPacks.Typicons.dll": {},
-          "lib/net47/MahApps.Metro.IconPacks.Unicons.dll": {},
-          "lib/net47/MahApps.Metro.IconPacks.VaadinIcons.dll": {},
-          "lib/net47/MahApps.Metro.IconPacks.WeatherIcons.dll": {},
-          "lib/net47/MahApps.Metro.IconPacks.Zondicons.dll": {},
-          "lib/net47/MahApps.Metro.IconPacks.dll": {}
+          "lib/net47/MahApps.Metro.IconPacks.BootstrapIcons.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net47/MahApps.Metro.IconPacks.BoxIcons.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net47/MahApps.Metro.IconPacks.Codicons.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net47/MahApps.Metro.IconPacks.Coolicons.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net47/MahApps.Metro.IconPacks.Core.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net47/MahApps.Metro.IconPacks.Entypo.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net47/MahApps.Metro.IconPacks.EvaIcons.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net47/MahApps.Metro.IconPacks.FeatherIcons.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net47/MahApps.Metro.IconPacks.FileIcons.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net47/MahApps.Metro.IconPacks.FontAwesome.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net47/MahApps.Metro.IconPacks.Fontaudio.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net47/MahApps.Metro.IconPacks.Fontisto.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net47/MahApps.Metro.IconPacks.ForkAwesome.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net47/MahApps.Metro.IconPacks.Ionicons.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net47/MahApps.Metro.IconPacks.JamIcons.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net47/MahApps.Metro.IconPacks.Material.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net47/MahApps.Metro.IconPacks.MaterialDesign.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net47/MahApps.Metro.IconPacks.MaterialLight.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net47/MahApps.Metro.IconPacks.Microns.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net47/MahApps.Metro.IconPacks.Modern.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net47/MahApps.Metro.IconPacks.Octicons.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net47/MahApps.Metro.IconPacks.PicolIcons.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net47/MahApps.Metro.IconPacks.PixelartIcons.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net47/MahApps.Metro.IconPacks.RPGAwesome.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net47/MahApps.Metro.IconPacks.RadixIcons.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net47/MahApps.Metro.IconPacks.RemixIcon.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net47/MahApps.Metro.IconPacks.SimpleIcons.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net47/MahApps.Metro.IconPacks.Typicons.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net47/MahApps.Metro.IconPacks.Unicons.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net47/MahApps.Metro.IconPacks.VaadinIcons.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net47/MahApps.Metro.IconPacks.WeatherIcons.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net47/MahApps.Metro.IconPacks.Zondicons.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net47/MahApps.Metro.IconPacks.dll": {
+            "related": ".BootstrapIcons.pdb;.BootstrapIcons.xml;.BoxIcons.pdb;.BoxIcons.xml;.Codicons.pdb;.Codicons.xml;.Coolicons.pdb;.Coolicons.xml;.Core.pdb;.Core.xml;.Entypo.pdb;.Entypo.xml;.EvaIcons.pdb;.EvaIcons.xml;.FeatherIcons.pdb;.FeatherIcons.xml;.FileIcons.pdb;.FileIcons.xml;.Fontaudio.pdb;.Fontaudio.xml;.FontAwesome.pdb;.FontAwesome.xml;.Fontisto.pdb;.Fontisto.xml;.ForkAwesome.pdb;.ForkAwesome.xml;.Ionicons.pdb;.Ionicons.xml;.JamIcons.pdb;.JamIcons.xml;.Material.pdb;.Material.xml;.MaterialDesign.pdb;.MaterialDesign.xml;.MaterialLight.pdb;.MaterialLight.xml;.Microns.pdb;.Microns.xml;.Modern.pdb;.Modern.xml;.Octicons.pdb;.Octicons.xml;.pdb;.PicolIcons.pdb;.PicolIcons.xml;.PixelartIcons.pdb;.PixelartIcons.xml;.RadixIcons.pdb;.RadixIcons.xml;.RemixIcon.pdb;.RemixIcon.xml;.RPGAwesome.pdb;.RPGAwesome.xml;.SimpleIcons.pdb;.SimpleIcons.xml;.Typicons.pdb;.Typicons.xml;.Unicons.pdb;.Unicons.xml;.VaadinIcons.pdb;.VaadinIcons.xml;.WeatherIcons.pdb;.WeatherIcons.xml;.xml;.Zondicons.pdb;.Zondicons.xml"
+          }
         }
       },
       "Microsoft.NETCore.Platforms/1.1.0": {
@@ -2790,16 +3655,16 @@
       "Microsoft.NETFramework.ReferenceAssemblies/1.0.0": {
         "type": "package",
         "dependencies": {
-          "Microsoft.NETFramework.ReferenceAssemblies.net472": "1.0.0"
+          "Microsoft.NETFramework.ReferenceAssemblies.net48": "1.0.0"
         }
       },
-      "Microsoft.NETFramework.ReferenceAssemblies.net472/1.0.0": {
+      "Microsoft.NETFramework.ReferenceAssemblies.net48/1.0.0": {
         "type": "package",
         "build": {
           "build/_._": {}
         }
       },
-      "Microsoft.Toolkit.Uwp.Notifications/7.1.2": {
+      "Microsoft.Toolkit.Uwp.Notifications/7.1.3-rc": {
         "type": "package",
         "dependencies": {
           "Microsoft.NETFramework.ReferenceAssemblies": "1.0.0",
@@ -2807,10 +3672,14 @@
           "System.ValueTuple": "4.5.0"
         },
         "compile": {
-          "lib/net461/Microsoft.Toolkit.Uwp.Notifications.dll": {}
+          "lib/net461/Microsoft.Toolkit.Uwp.Notifications.dll": {
+            "related": ".pdb;.xml"
+          }
         },
         "runtime": {
-          "lib/net461/Microsoft.Toolkit.Uwp.Notifications.dll": {}
+          "lib/net461/Microsoft.Toolkit.Uwp.Notifications.dll": {
+            "related": ".pdb;.xml"
+          }
         }
       },
       "Microsoft.Win32.Primitives/4.3.0": {
@@ -2973,13 +3842,21 @@
           "System.Xml.XDocument": "4.3.0"
         }
       },
-      "SharpZipLib/1.3.3": {
+      "SharpZipLib/1.4.0": {
         "type": "package",
+        "dependencies": {
+          "System.Memory": "4.5.4",
+          "System.Threading.Tasks.Extensions": "4.5.2"
+        },
         "compile": {
-          "lib/net45/ICSharpCode.SharpZipLib.dll": {}
+          "lib/netstandard2.0/ICSharpCode.SharpZipLib.dll": {
+            "related": ".pdb;.xml"
+          }
         },
         "runtime": {
-          "lib/net45/ICSharpCode.SharpZipLib.dll": {}
+          "lib/netstandard2.0/ICSharpCode.SharpZipLib.dll": {
+            "related": ".pdb;.xml"
+          }
         }
       },
       "System.AppContext/4.3.0": {
@@ -2992,6 +3869,22 @@
         },
         "runtime": {
           "lib/net463/System.AppContext.dll": {}
+        }
+      },
+      "System.Buffers/4.5.1": {
+        "type": "package",
+        "frameworkAssemblies": [
+          "mscorlib"
+        ],
+        "compile": {
+          "ref/net45/System.Buffers.dll": {
+            "related": ".xml"
+          }
+        },
+        "runtime": {
+          "lib/net461/System.Buffers.dll": {
+            "related": ".xml"
+          }
         }
       },
       "System.Collections/4.3.0": {
@@ -3046,10 +3939,14 @@
       "System.Diagnostics.DiagnosticSource/4.3.0": {
         "type": "package",
         "compile": {
-          "lib/net46/_._": {}
+          "lib/net46/_._": {
+            "related": ".xml"
+          }
         },
         "runtime": {
-          "lib/net46/System.Diagnostics.DiagnosticSource.dll": {}
+          "lib/net46/System.Diagnostics.DiagnosticSource.dll": {
+            "related": ".xml"
+          }
         }
       },
       "System.Diagnostics.Tools/4.3.0": {
@@ -3189,6 +4086,28 @@
           "lib/net463/System.Linq.Expressions.dll": {}
         }
       },
+      "System.Memory/4.5.4": {
+        "type": "package",
+        "dependencies": {
+          "System.Buffers": "4.5.1",
+          "System.Numerics.Vectors": "4.5.0",
+          "System.Runtime.CompilerServices.Unsafe": "4.5.3"
+        },
+        "frameworkAssemblies": [
+          "System",
+          "mscorlib"
+        ],
+        "compile": {
+          "lib/net461/System.Memory.dll": {
+            "related": ".xml"
+          }
+        },
+        "runtime": {
+          "lib/net461/System.Memory.dll": {
+            "related": ".xml"
+          }
+        }
+      },
       "System.Net.Http/4.3.0": {
         "type": "package",
         "dependencies": {
@@ -3201,7 +4120,9 @@
           "mscorlib"
         ],
         "compile": {
-          "ref/net46/_._": {}
+          "ref/net46/_._": {
+            "related": ".xml"
+          }
         },
         "runtime": {
           "runtimes/win/lib/net46/System.Net.Http.dll": {}
@@ -3230,6 +4151,23 @@
         },
         "runtime": {
           "lib/net46/System.Net.Sockets.dll": {}
+        }
+      },
+      "System.Numerics.Vectors/4.5.0": {
+        "type": "package",
+        "frameworkAssemblies": [
+          "System.Numerics",
+          "mscorlib"
+        ],
+        "compile": {
+          "ref/net46/System.Numerics.Vectors.dll": {
+            "related": ".xml"
+          }
+        },
+        "runtime": {
+          "lib/net46/System.Numerics.Vectors.dll": {
+            "related": ".xml"
+          }
         }
       },
       "System.ObjectModel/4.3.0": {
@@ -3296,6 +4234,22 @@
         },
         "runtime": {
           "lib/net462/System.Runtime.dll": {}
+        }
+      },
+      "System.Runtime.CompilerServices.Unsafe/4.5.3": {
+        "type": "package",
+        "frameworkAssemblies": [
+          "mscorlib"
+        ],
+        "compile": {
+          "ref/net461/System.Runtime.CompilerServices.Unsafe.dll": {
+            "related": ".xml"
+          }
+        },
+        "runtime": {
+          "lib/net461/System.Runtime.CompilerServices.Unsafe.dll": {
+            "related": ".xml"
+          }
         }
       },
       "System.Runtime.Extensions/4.3.0": {
@@ -3506,6 +4460,22 @@
           "lib/net45/_._": {}
         }
       },
+      "System.Threading.Tasks.Extensions/4.5.2": {
+        "type": "package",
+        "dependencies": {
+          "System.Runtime.CompilerServices.Unsafe": "4.5.2"
+        },
+        "compile": {
+          "lib/netstandard2.0/System.Threading.Tasks.Extensions.dll": {
+            "related": ".xml"
+          }
+        },
+        "runtime": {
+          "lib/netstandard2.0/System.Threading.Tasks.Extensions.dll": {
+            "related": ".xml"
+          }
+        }
+      },
       "System.Threading.Timer/4.3.0": {
         "type": "package",
         "compile": {
@@ -3524,7 +4494,9 @@
           "ref/net47/System.ValueTuple.dll": {}
         },
         "runtime": {
-          "lib/net47/System.ValueTuple.dll": {}
+          "lib/net47/System.ValueTuple.dll": {
+            "related": ".xml"
+          }
         }
       },
       "System.Xml.ReaderWriter/4.3.0": {
@@ -3555,16 +4527,16 @@
     }
   },
   "libraries": {
-    "Costura.Fody/5.7.0": {
-      "sha512": "MmL28WOOnJEBWORXj6bfSxfWaZW8gWSXEJTdrjB9AQi4COX6RXr2xdGL9HsxpWwn6f5Io0NmNuwFJe94w1YmQA==",
+    "Costura.Fody/5.8.0-alpha0098": {
+      "sha512": "/waTTBqcZioV+2Fn2fWBO/EfyGhYN4xpBB828hfzdjkq8WJE3iiwm30cFAKJWYrwhCSD3piHasDGfBMGg6Gvqw==",
       "type": "package",
-      "path": "costura.fody/5.7.0",
+      "path": "costura.fody/5.8.0-alpha0098",
       "files": [
         ".nupkg.metadata",
         ".signature.p7s",
         "build/Costura.Fody.props",
         "build/Costura.Fody.targets",
-        "costura.fody.5.7.0.nupkg.sha512",
+        "costura.fody.5.8.0-alpha0098.nupkg.sha512",
         "costura.fody.nuspec",
         "icon.png",
         "lib/netstandard1.0/Costura.dll",
@@ -3576,16 +4548,16 @@
         "netstandardweaver/Costura.Fody.xcf"
       ]
     },
-    "Fody/6.5.5": {
-      "sha512": "Krca41L/PDva1VsmDec5n52cQZxQAQp/bsHdzsNi8iLLI0lqKL94fNIkNaC8tVolUkCyWsbzvxfxJCeD2789fA==",
+    "Fody/6.6.0": {
+      "sha512": "NWWM8KiR9DGiAi47q9px9oI27xYBiM5KXxSnI4R5mz2/rG8LIcXJfw5zDLLH1xOgzqRNJgc8KTPQPoiQCidYUw==",
       "type": "package",
-      "path": "fody/6.5.5",
+      "path": "fody/6.6.0",
       "files": [
         ".nupkg.metadata",
         ".signature.p7s",
         "License.txt",
         "build/Fody.targets",
-        "fody.6.5.5.nupkg.sha512",
+        "fody.6.6.0.nupkg.sha512",
         "fody.nuspec",
         "netclassictask/Fody.dll",
         "netclassictask/FodyCommon.dll",
@@ -4467,390 +5439,390 @@
         "microsoft.netframework.referenceassemblies.nuspec"
       ]
     },
-    "Microsoft.NETFramework.ReferenceAssemblies.net472/1.0.0": {
-      "sha512": "VI0f22cH/xOlXLUVY7t6vr2Gi7cg0vzwpspNGz5isRusyspZblF7jJMw49E8mF1m071JyeVmZVkIK9c5kbiyFA==",
+    "Microsoft.NETFramework.ReferenceAssemblies.net48/1.0.0": {
+      "sha512": "k2VyV/lct0PT9dS3Il90tBpoM2V/4dJuP5iXe1ckLbBp5FZP1XUsNbRtkuSuzcuqHm1j0OVRPdV980S4bJRe0A==",
       "type": "package",
-      "path": "microsoft.netframework.referenceassemblies.net472/1.0.0",
+      "path": "microsoft.netframework.referenceassemblies.net48/1.0.0",
       "files": [
         ".nupkg.metadata",
         ".signature.p7s",
-        "build/.NETFramework/v4.7.2/Accessibility.dll",
-        "build/.NETFramework/v4.7.2/Accessibility.xml",
-        "build/.NETFramework/v4.7.2/CustomMarshalers.dll",
-        "build/.NETFramework/v4.7.2/CustomMarshalers.xml",
-        "build/.NETFramework/v4.7.2/Facades/Microsoft.Win32.Primitives.dll",
-        "build/.NETFramework/v4.7.2/Facades/System.AppContext.dll",
-        "build/.NETFramework/v4.7.2/Facades/System.Collections.Concurrent.dll",
-        "build/.NETFramework/v4.7.2/Facades/System.Collections.NonGeneric.dll",
-        "build/.NETFramework/v4.7.2/Facades/System.Collections.Specialized.dll",
-        "build/.NETFramework/v4.7.2/Facades/System.Collections.dll",
-        "build/.NETFramework/v4.7.2/Facades/System.ComponentModel.Annotations.dll",
-        "build/.NETFramework/v4.7.2/Facades/System.ComponentModel.EventBasedAsync.dll",
-        "build/.NETFramework/v4.7.2/Facades/System.ComponentModel.Primitives.dll",
-        "build/.NETFramework/v4.7.2/Facades/System.ComponentModel.TypeConverter.dll",
-        "build/.NETFramework/v4.7.2/Facades/System.ComponentModel.dll",
-        "build/.NETFramework/v4.7.2/Facades/System.Console.dll",
-        "build/.NETFramework/v4.7.2/Facades/System.Data.Common.dll",
-        "build/.NETFramework/v4.7.2/Facades/System.Diagnostics.Contracts.dll",
-        "build/.NETFramework/v4.7.2/Facades/System.Diagnostics.Debug.dll",
-        "build/.NETFramework/v4.7.2/Facades/System.Diagnostics.FileVersionInfo.dll",
-        "build/.NETFramework/v4.7.2/Facades/System.Diagnostics.Process.dll",
-        "build/.NETFramework/v4.7.2/Facades/System.Diagnostics.StackTrace.dll",
-        "build/.NETFramework/v4.7.2/Facades/System.Diagnostics.TextWriterTraceListener.dll",
-        "build/.NETFramework/v4.7.2/Facades/System.Diagnostics.Tools.dll",
-        "build/.NETFramework/v4.7.2/Facades/System.Diagnostics.TraceSource.dll",
-        "build/.NETFramework/v4.7.2/Facades/System.Drawing.Primitives.dll",
-        "build/.NETFramework/v4.7.2/Facades/System.Dynamic.Runtime.dll",
-        "build/.NETFramework/v4.7.2/Facades/System.Globalization.Calendars.dll",
-        "build/.NETFramework/v4.7.2/Facades/System.Globalization.Extensions.dll",
-        "build/.NETFramework/v4.7.2/Facades/System.Globalization.dll",
-        "build/.NETFramework/v4.7.2/Facades/System.IO.Compression.ZipFile.dll",
-        "build/.NETFramework/v4.7.2/Facades/System.IO.FileSystem.DriveInfo.dll",
-        "build/.NETFramework/v4.7.2/Facades/System.IO.FileSystem.Primitives.dll",
-        "build/.NETFramework/v4.7.2/Facades/System.IO.FileSystem.Watcher.dll",
-        "build/.NETFramework/v4.7.2/Facades/System.IO.FileSystem.dll",
-        "build/.NETFramework/v4.7.2/Facades/System.IO.IsolatedStorage.dll",
-        "build/.NETFramework/v4.7.2/Facades/System.IO.MemoryMappedFiles.dll",
-        "build/.NETFramework/v4.7.2/Facades/System.IO.Pipes.dll",
-        "build/.NETFramework/v4.7.2/Facades/System.IO.UnmanagedMemoryStream.dll",
-        "build/.NETFramework/v4.7.2/Facades/System.IO.dll",
-        "build/.NETFramework/v4.7.2/Facades/System.Linq.Expressions.dll",
-        "build/.NETFramework/v4.7.2/Facades/System.Linq.Parallel.dll",
-        "build/.NETFramework/v4.7.2/Facades/System.Linq.Queryable.dll",
-        "build/.NETFramework/v4.7.2/Facades/System.Linq.dll",
-        "build/.NETFramework/v4.7.2/Facades/System.Net.Http.Rtc.dll",
-        "build/.NETFramework/v4.7.2/Facades/System.Net.NameResolution.dll",
-        "build/.NETFramework/v4.7.2/Facades/System.Net.NetworkInformation.dll",
-        "build/.NETFramework/v4.7.2/Facades/System.Net.Ping.dll",
-        "build/.NETFramework/v4.7.2/Facades/System.Net.Primitives.dll",
-        "build/.NETFramework/v4.7.2/Facades/System.Net.Requests.dll",
-        "build/.NETFramework/v4.7.2/Facades/System.Net.Security.dll",
-        "build/.NETFramework/v4.7.2/Facades/System.Net.Sockets.dll",
-        "build/.NETFramework/v4.7.2/Facades/System.Net.WebHeaderCollection.dll",
-        "build/.NETFramework/v4.7.2/Facades/System.Net.WebSockets.Client.dll",
-        "build/.NETFramework/v4.7.2/Facades/System.Net.WebSockets.dll",
-        "build/.NETFramework/v4.7.2/Facades/System.ObjectModel.dll",
-        "build/.NETFramework/v4.7.2/Facades/System.Reflection.Emit.ILGeneration.dll",
-        "build/.NETFramework/v4.7.2/Facades/System.Reflection.Emit.Lightweight.dll",
-        "build/.NETFramework/v4.7.2/Facades/System.Reflection.Emit.dll",
-        "build/.NETFramework/v4.7.2/Facades/System.Reflection.Extensions.dll",
-        "build/.NETFramework/v4.7.2/Facades/System.Reflection.Primitives.dll",
-        "build/.NETFramework/v4.7.2/Facades/System.Reflection.dll",
-        "build/.NETFramework/v4.7.2/Facades/System.Resources.Reader.dll",
-        "build/.NETFramework/v4.7.2/Facades/System.Resources.ResourceManager.dll",
-        "build/.NETFramework/v4.7.2/Facades/System.Resources.Writer.dll",
-        "build/.NETFramework/v4.7.2/Facades/System.Runtime.CompilerServices.VisualC.dll",
-        "build/.NETFramework/v4.7.2/Facades/System.Runtime.Extensions.dll",
-        "build/.NETFramework/v4.7.2/Facades/System.Runtime.Handles.dll",
-        "build/.NETFramework/v4.7.2/Facades/System.Runtime.InteropServices.RuntimeInformation.dll",
-        "build/.NETFramework/v4.7.2/Facades/System.Runtime.InteropServices.WindowsRuntime.dll",
-        "build/.NETFramework/v4.7.2/Facades/System.Runtime.InteropServices.dll",
-        "build/.NETFramework/v4.7.2/Facades/System.Runtime.Numerics.dll",
-        "build/.NETFramework/v4.7.2/Facades/System.Runtime.Serialization.Formatters.dll",
-        "build/.NETFramework/v4.7.2/Facades/System.Runtime.Serialization.Json.dll",
-        "build/.NETFramework/v4.7.2/Facades/System.Runtime.Serialization.Primitives.dll",
-        "build/.NETFramework/v4.7.2/Facades/System.Runtime.Serialization.Xml.dll",
-        "build/.NETFramework/v4.7.2/Facades/System.Runtime.dll",
-        "build/.NETFramework/v4.7.2/Facades/System.Security.Claims.dll",
-        "build/.NETFramework/v4.7.2/Facades/System.Security.Cryptography.Algorithms.dll",
-        "build/.NETFramework/v4.7.2/Facades/System.Security.Cryptography.Csp.dll",
-        "build/.NETFramework/v4.7.2/Facades/System.Security.Cryptography.Encoding.dll",
-        "build/.NETFramework/v4.7.2/Facades/System.Security.Cryptography.Primitives.dll",
-        "build/.NETFramework/v4.7.2/Facades/System.Security.Cryptography.X509Certificates.dll",
-        "build/.NETFramework/v4.7.2/Facades/System.Security.Principal.dll",
-        "build/.NETFramework/v4.7.2/Facades/System.Security.SecureString.dll",
-        "build/.NETFramework/v4.7.2/Facades/System.ServiceModel.Duplex.dll",
-        "build/.NETFramework/v4.7.2/Facades/System.ServiceModel.Http.dll",
-        "build/.NETFramework/v4.7.2/Facades/System.ServiceModel.NetTcp.dll",
-        "build/.NETFramework/v4.7.2/Facades/System.ServiceModel.Primitives.dll",
-        "build/.NETFramework/v4.7.2/Facades/System.ServiceModel.Security.dll",
-        "build/.NETFramework/v4.7.2/Facades/System.Text.Encoding.Extensions.dll",
-        "build/.NETFramework/v4.7.2/Facades/System.Text.Encoding.dll",
-        "build/.NETFramework/v4.7.2/Facades/System.Text.RegularExpressions.dll",
-        "build/.NETFramework/v4.7.2/Facades/System.Threading.Overlapped.dll",
-        "build/.NETFramework/v4.7.2/Facades/System.Threading.Tasks.Parallel.dll",
-        "build/.NETFramework/v4.7.2/Facades/System.Threading.Tasks.dll",
-        "build/.NETFramework/v4.7.2/Facades/System.Threading.Thread.dll",
-        "build/.NETFramework/v4.7.2/Facades/System.Threading.ThreadPool.dll",
-        "build/.NETFramework/v4.7.2/Facades/System.Threading.Timer.dll",
-        "build/.NETFramework/v4.7.2/Facades/System.Threading.dll",
-        "build/.NETFramework/v4.7.2/Facades/System.ValueTuple.dll",
-        "build/.NETFramework/v4.7.2/Facades/System.Xml.ReaderWriter.dll",
-        "build/.NETFramework/v4.7.2/Facades/System.Xml.XDocument.dll",
-        "build/.NETFramework/v4.7.2/Facades/System.Xml.XPath.XDocument.dll",
-        "build/.NETFramework/v4.7.2/Facades/System.Xml.XPath.dll",
-        "build/.NETFramework/v4.7.2/Facades/System.Xml.XmlDocument.dll",
-        "build/.NETFramework/v4.7.2/Facades/System.Xml.XmlSerializer.dll",
-        "build/.NETFramework/v4.7.2/Facades/netstandard.dll",
-        "build/.NETFramework/v4.7.2/ISymWrapper.dll",
-        "build/.NETFramework/v4.7.2/ISymWrapper.xml",
-        "build/.NETFramework/v4.7.2/Microsoft.Activities.Build.dll",
-        "build/.NETFramework/v4.7.2/Microsoft.Activities.Build.xml",
-        "build/.NETFramework/v4.7.2/Microsoft.Build.Conversion.v4.0.dll",
-        "build/.NETFramework/v4.7.2/Microsoft.Build.Conversion.v4.0.xml",
-        "build/.NETFramework/v4.7.2/Microsoft.Build.Engine.dll",
-        "build/.NETFramework/v4.7.2/Microsoft.Build.Engine.xml",
-        "build/.NETFramework/v4.7.2/Microsoft.Build.Framework.dll",
-        "build/.NETFramework/v4.7.2/Microsoft.Build.Framework.xml",
-        "build/.NETFramework/v4.7.2/Microsoft.Build.Tasks.v4.0.dll",
-        "build/.NETFramework/v4.7.2/Microsoft.Build.Tasks.v4.0.xml",
-        "build/.NETFramework/v4.7.2/Microsoft.Build.Utilities.v4.0.dll",
-        "build/.NETFramework/v4.7.2/Microsoft.Build.Utilities.v4.0.xml",
-        "build/.NETFramework/v4.7.2/Microsoft.Build.dll",
-        "build/.NETFramework/v4.7.2/Microsoft.Build.xml",
-        "build/.NETFramework/v4.7.2/Microsoft.CSharp.dll",
-        "build/.NETFramework/v4.7.2/Microsoft.CSharp.xml",
-        "build/.NETFramework/v4.7.2/Microsoft.JScript.dll",
-        "build/.NETFramework/v4.7.2/Microsoft.JScript.xml",
-        "build/.NETFramework/v4.7.2/Microsoft.VisualBasic.Compatibility.Data.dll",
-        "build/.NETFramework/v4.7.2/Microsoft.VisualBasic.Compatibility.Data.xml",
-        "build/.NETFramework/v4.7.2/Microsoft.VisualBasic.Compatibility.dll",
-        "build/.NETFramework/v4.7.2/Microsoft.VisualBasic.Compatibility.xml",
-        "build/.NETFramework/v4.7.2/Microsoft.VisualBasic.dll",
-        "build/.NETFramework/v4.7.2/Microsoft.VisualBasic.xml",
-        "build/.NETFramework/v4.7.2/Microsoft.VisualC.STLCLR.dll",
-        "build/.NETFramework/v4.7.2/Microsoft.VisualC.STLCLR.xml",
-        "build/.NETFramework/v4.7.2/Microsoft.VisualC.dll",
-        "build/.NETFramework/v4.7.2/Microsoft.VisualC.xml",
-        "build/.NETFramework/v4.7.2/PermissionSets/FullTrust.xml",
-        "build/.NETFramework/v4.7.2/PermissionSets/Internet.xml",
-        "build/.NETFramework/v4.7.2/PermissionSets/LocalIntranet.xml",
-        "build/.NETFramework/v4.7.2/PresentationBuildTasks.dll",
-        "build/.NETFramework/v4.7.2/PresentationBuildTasks.xml",
-        "build/.NETFramework/v4.7.2/PresentationCore.dll",
-        "build/.NETFramework/v4.7.2/PresentationCore.xml",
-        "build/.NETFramework/v4.7.2/PresentationFramework.Aero.dll",
-        "build/.NETFramework/v4.7.2/PresentationFramework.Aero.xml",
-        "build/.NETFramework/v4.7.2/PresentationFramework.Aero2.dll",
-        "build/.NETFramework/v4.7.2/PresentationFramework.Aero2.xml",
-        "build/.NETFramework/v4.7.2/PresentationFramework.AeroLite.dll",
-        "build/.NETFramework/v4.7.2/PresentationFramework.AeroLite.xml",
-        "build/.NETFramework/v4.7.2/PresentationFramework.Classic.dll",
-        "build/.NETFramework/v4.7.2/PresentationFramework.Classic.xml",
-        "build/.NETFramework/v4.7.2/PresentationFramework.Luna.dll",
-        "build/.NETFramework/v4.7.2/PresentationFramework.Luna.xml",
-        "build/.NETFramework/v4.7.2/PresentationFramework.Royale.dll",
-        "build/.NETFramework/v4.7.2/PresentationFramework.Royale.xml",
-        "build/.NETFramework/v4.7.2/PresentationFramework.dll",
-        "build/.NETFramework/v4.7.2/PresentationFramework.xml",
-        "build/.NETFramework/v4.7.2/ReachFramework.dll",
-        "build/.NETFramework/v4.7.2/ReachFramework.xml",
-        "build/.NETFramework/v4.7.2/RedistList/FrameworkList.xml",
-        "build/.NETFramework/v4.7.2/System.Activities.Core.Presentation.dll",
-        "build/.NETFramework/v4.7.2/System.Activities.Core.Presentation.xml",
-        "build/.NETFramework/v4.7.2/System.Activities.DurableInstancing.dll",
-        "build/.NETFramework/v4.7.2/System.Activities.DurableInstancing.xml",
-        "build/.NETFramework/v4.7.2/System.Activities.Presentation.dll",
-        "build/.NETFramework/v4.7.2/System.Activities.Presentation.xml",
-        "build/.NETFramework/v4.7.2/System.Activities.dll",
-        "build/.NETFramework/v4.7.2/System.Activities.xml",
-        "build/.NETFramework/v4.7.2/System.AddIn.Contract.dll",
-        "build/.NETFramework/v4.7.2/System.AddIn.Contract.xml",
-        "build/.NETFramework/v4.7.2/System.AddIn.dll",
-        "build/.NETFramework/v4.7.2/System.AddIn.xml",
-        "build/.NETFramework/v4.7.2/System.ComponentModel.Composition.Registration.dll",
-        "build/.NETFramework/v4.7.2/System.ComponentModel.Composition.Registration.xml",
-        "build/.NETFramework/v4.7.2/System.ComponentModel.Composition.dll",
-        "build/.NETFramework/v4.7.2/System.ComponentModel.Composition.xml",
-        "build/.NETFramework/v4.7.2/System.ComponentModel.DataAnnotations.dll",
-        "build/.NETFramework/v4.7.2/System.ComponentModel.DataAnnotations.xml",
-        "build/.NETFramework/v4.7.2/System.Configuration.Install.dll",
-        "build/.NETFramework/v4.7.2/System.Configuration.Install.xml",
-        "build/.NETFramework/v4.7.2/System.Configuration.dll",
-        "build/.NETFramework/v4.7.2/System.Configuration.xml",
-        "build/.NETFramework/v4.7.2/System.Core.dll",
-        "build/.NETFramework/v4.7.2/System.Core.xml",
-        "build/.NETFramework/v4.7.2/System.Data.DataSetExtensions.dll",
-        "build/.NETFramework/v4.7.2/System.Data.DataSetExtensions.xml",
-        "build/.NETFramework/v4.7.2/System.Data.Entity.Design.dll",
-        "build/.NETFramework/v4.7.2/System.Data.Entity.Design.xml",
-        "build/.NETFramework/v4.7.2/System.Data.Entity.dll",
-        "build/.NETFramework/v4.7.2/System.Data.Entity.xml",
-        "build/.NETFramework/v4.7.2/System.Data.Linq.dll",
-        "build/.NETFramework/v4.7.2/System.Data.Linq.xml",
-        "build/.NETFramework/v4.7.2/System.Data.OracleClient.dll",
-        "build/.NETFramework/v4.7.2/System.Data.OracleClient.xml",
-        "build/.NETFramework/v4.7.2/System.Data.Services.Client.dll",
-        "build/.NETFramework/v4.7.2/System.Data.Services.Client.xml",
-        "build/.NETFramework/v4.7.2/System.Data.Services.Design.dll",
-        "build/.NETFramework/v4.7.2/System.Data.Services.Design.xml",
-        "build/.NETFramework/v4.7.2/System.Data.Services.dll",
-        "build/.NETFramework/v4.7.2/System.Data.Services.xml",
-        "build/.NETFramework/v4.7.2/System.Data.SqlXml.dll",
-        "build/.NETFramework/v4.7.2/System.Data.SqlXml.xml",
-        "build/.NETFramework/v4.7.2/System.Data.dll",
-        "build/.NETFramework/v4.7.2/System.Data.xml",
-        "build/.NETFramework/v4.7.2/System.Deployment.dll",
-        "build/.NETFramework/v4.7.2/System.Deployment.xml",
-        "build/.NETFramework/v4.7.2/System.Design.dll",
-        "build/.NETFramework/v4.7.2/System.Design.xml",
-        "build/.NETFramework/v4.7.2/System.Device.dll",
-        "build/.NETFramework/v4.7.2/System.Device.xml",
-        "build/.NETFramework/v4.7.2/System.Diagnostics.Tracing.dll",
-        "build/.NETFramework/v4.7.2/System.Diagnostics.Tracing.xml",
-        "build/.NETFramework/v4.7.2/System.DirectoryServices.AccountManagement.dll",
-        "build/.NETFramework/v4.7.2/System.DirectoryServices.AccountManagement.xml",
-        "build/.NETFramework/v4.7.2/System.DirectoryServices.Protocols.dll",
-        "build/.NETFramework/v4.7.2/System.DirectoryServices.Protocols.xml",
-        "build/.NETFramework/v4.7.2/System.DirectoryServices.dll",
-        "build/.NETFramework/v4.7.2/System.DirectoryServices.xml",
-        "build/.NETFramework/v4.7.2/System.Drawing.Design.dll",
-        "build/.NETFramework/v4.7.2/System.Drawing.Design.xml",
-        "build/.NETFramework/v4.7.2/System.Drawing.dll",
-        "build/.NETFramework/v4.7.2/System.Drawing.xml",
-        "build/.NETFramework/v4.7.2/System.Dynamic.dll",
-        "build/.NETFramework/v4.7.2/System.EnterpriseServices.Thunk.dll",
-        "build/.NETFramework/v4.7.2/System.EnterpriseServices.Wrapper.dll",
-        "build/.NETFramework/v4.7.2/System.EnterpriseServices.dll",
-        "build/.NETFramework/v4.7.2/System.EnterpriseServices.xml",
-        "build/.NETFramework/v4.7.2/System.IO.Compression.FileSystem.dll",
-        "build/.NETFramework/v4.7.2/System.IO.Compression.FileSystem.xml",
-        "build/.NETFramework/v4.7.2/System.IO.Compression.dll",
-        "build/.NETFramework/v4.7.2/System.IO.Compression.xml",
-        "build/.NETFramework/v4.7.2/System.IO.Log.dll",
-        "build/.NETFramework/v4.7.2/System.IO.Log.xml",
-        "build/.NETFramework/v4.7.2/System.IdentityModel.Selectors.dll",
-        "build/.NETFramework/v4.7.2/System.IdentityModel.Selectors.xml",
-        "build/.NETFramework/v4.7.2/System.IdentityModel.Services.dll",
-        "build/.NETFramework/v4.7.2/System.IdentityModel.Services.xml",
-        "build/.NETFramework/v4.7.2/System.IdentityModel.dll",
-        "build/.NETFramework/v4.7.2/System.IdentityModel.xml",
-        "build/.NETFramework/v4.7.2/System.Linq.xml",
-        "build/.NETFramework/v4.7.2/System.Management.Instrumentation.dll",
-        "build/.NETFramework/v4.7.2/System.Management.Instrumentation.xml",
-        "build/.NETFramework/v4.7.2/System.Management.dll",
-        "build/.NETFramework/v4.7.2/System.Management.xml",
-        "build/.NETFramework/v4.7.2/System.Messaging.dll",
-        "build/.NETFramework/v4.7.2/System.Messaging.xml",
-        "build/.NETFramework/v4.7.2/System.Net.Http.WebRequest.dll",
-        "build/.NETFramework/v4.7.2/System.Net.Http.WebRequest.xml",
-        "build/.NETFramework/v4.7.2/System.Net.Http.dll",
-        "build/.NETFramework/v4.7.2/System.Net.Http.xml",
-        "build/.NETFramework/v4.7.2/System.Net.dll",
-        "build/.NETFramework/v4.7.2/System.Net.xml",
-        "build/.NETFramework/v4.7.2/System.Numerics.dll",
-        "build/.NETFramework/v4.7.2/System.Numerics.xml",
-        "build/.NETFramework/v4.7.2/System.Printing.dll",
-        "build/.NETFramework/v4.7.2/System.Printing.xml",
-        "build/.NETFramework/v4.7.2/System.Reflection.Context.dll",
-        "build/.NETFramework/v4.7.2/System.Reflection.Context.xml",
-        "build/.NETFramework/v4.7.2/System.Runtime.Caching.dll",
-        "build/.NETFramework/v4.7.2/System.Runtime.Caching.xml",
-        "build/.NETFramework/v4.7.2/System.Runtime.DurableInstancing.dll",
-        "build/.NETFramework/v4.7.2/System.Runtime.DurableInstancing.xml",
-        "build/.NETFramework/v4.7.2/System.Runtime.Remoting.dll",
-        "build/.NETFramework/v4.7.2/System.Runtime.Remoting.xml",
-        "build/.NETFramework/v4.7.2/System.Runtime.Serialization.Formatters.Soap.dll",
-        "build/.NETFramework/v4.7.2/System.Runtime.Serialization.Formatters.Soap.xml",
-        "build/.NETFramework/v4.7.2/System.Runtime.Serialization.dll",
-        "build/.NETFramework/v4.7.2/System.Runtime.Serialization.xml",
-        "build/.NETFramework/v4.7.2/System.Security.dll",
-        "build/.NETFramework/v4.7.2/System.Security.xml",
-        "build/.NETFramework/v4.7.2/System.ServiceModel.Activation.dll",
-        "build/.NETFramework/v4.7.2/System.ServiceModel.Activation.xml",
-        "build/.NETFramework/v4.7.2/System.ServiceModel.Activities.dll",
-        "build/.NETFramework/v4.7.2/System.ServiceModel.Activities.xml",
-        "build/.NETFramework/v4.7.2/System.ServiceModel.Channels.dll",
-        "build/.NETFramework/v4.7.2/System.ServiceModel.Channels.xml",
-        "build/.NETFramework/v4.7.2/System.ServiceModel.Discovery.dll",
-        "build/.NETFramework/v4.7.2/System.ServiceModel.Discovery.xml",
-        "build/.NETFramework/v4.7.2/System.ServiceModel.Routing.dll",
-        "build/.NETFramework/v4.7.2/System.ServiceModel.Routing.xml",
-        "build/.NETFramework/v4.7.2/System.ServiceModel.Web.dll",
-        "build/.NETFramework/v4.7.2/System.ServiceModel.Web.xml",
-        "build/.NETFramework/v4.7.2/System.ServiceModel.dll",
-        "build/.NETFramework/v4.7.2/System.ServiceModel.xml",
-        "build/.NETFramework/v4.7.2/System.ServiceProcess.dll",
-        "build/.NETFramework/v4.7.2/System.ServiceProcess.xml",
-        "build/.NETFramework/v4.7.2/System.Speech.dll",
-        "build/.NETFramework/v4.7.2/System.Speech.xml",
-        "build/.NETFramework/v4.7.2/System.Threading.Tasks.Dataflow.xml",
-        "build/.NETFramework/v4.7.2/System.Transactions.dll",
-        "build/.NETFramework/v4.7.2/System.Transactions.xml",
-        "build/.NETFramework/v4.7.2/System.Web.Abstractions.dll",
-        "build/.NETFramework/v4.7.2/System.Web.ApplicationServices.dll",
-        "build/.NETFramework/v4.7.2/System.Web.ApplicationServices.xml",
-        "build/.NETFramework/v4.7.2/System.Web.DataVisualization.Design.dll",
-        "build/.NETFramework/v4.7.2/System.Web.DataVisualization.dll",
-        "build/.NETFramework/v4.7.2/System.Web.DataVisualization.xml",
-        "build/.NETFramework/v4.7.2/System.Web.DynamicData.Design.dll",
-        "build/.NETFramework/v4.7.2/System.Web.DynamicData.Design.xml",
-        "build/.NETFramework/v4.7.2/System.Web.DynamicData.dll",
-        "build/.NETFramework/v4.7.2/System.Web.DynamicData.xml",
-        "build/.NETFramework/v4.7.2/System.Web.Entity.Design.dll",
-        "build/.NETFramework/v4.7.2/System.Web.Entity.Design.xml",
-        "build/.NETFramework/v4.7.2/System.Web.Entity.dll",
-        "build/.NETFramework/v4.7.2/System.Web.Entity.xml",
-        "build/.NETFramework/v4.7.2/System.Web.Extensions.Design.dll",
-        "build/.NETFramework/v4.7.2/System.Web.Extensions.Design.xml",
-        "build/.NETFramework/v4.7.2/System.Web.Extensions.dll",
-        "build/.NETFramework/v4.7.2/System.Web.Extensions.xml",
-        "build/.NETFramework/v4.7.2/System.Web.Mobile.dll",
-        "build/.NETFramework/v4.7.2/System.Web.Mobile.xml",
-        "build/.NETFramework/v4.7.2/System.Web.RegularExpressions.dll",
-        "build/.NETFramework/v4.7.2/System.Web.RegularExpressions.xml",
-        "build/.NETFramework/v4.7.2/System.Web.Routing.dll",
-        "build/.NETFramework/v4.7.2/System.Web.Services.dll",
-        "build/.NETFramework/v4.7.2/System.Web.Services.xml",
-        "build/.NETFramework/v4.7.2/System.Web.dll",
-        "build/.NETFramework/v4.7.2/System.Web.xml",
-        "build/.NETFramework/v4.7.2/System.Windows.Controls.Ribbon.dll",
-        "build/.NETFramework/v4.7.2/System.Windows.Controls.Ribbon.xml",
-        "build/.NETFramework/v4.7.2/System.Windows.Forms.DataVisualization.Design.dll",
-        "build/.NETFramework/v4.7.2/System.Windows.Forms.DataVisualization.dll",
-        "build/.NETFramework/v4.7.2/System.Windows.Forms.DataVisualization.xml",
-        "build/.NETFramework/v4.7.2/System.Windows.Forms.dll",
-        "build/.NETFramework/v4.7.2/System.Windows.Forms.xml",
-        "build/.NETFramework/v4.7.2/System.Windows.Input.Manipulations.dll",
-        "build/.NETFramework/v4.7.2/System.Windows.Input.Manipulations.xml",
-        "build/.NETFramework/v4.7.2/System.Windows.Presentation.dll",
-        "build/.NETFramework/v4.7.2/System.Windows.Presentation.xml",
-        "build/.NETFramework/v4.7.2/System.Windows.dll",
-        "build/.NETFramework/v4.7.2/System.Workflow.Activities.dll",
-        "build/.NETFramework/v4.7.2/System.Workflow.Activities.xml",
-        "build/.NETFramework/v4.7.2/System.Workflow.ComponentModel.dll",
-        "build/.NETFramework/v4.7.2/System.Workflow.ComponentModel.xml",
-        "build/.NETFramework/v4.7.2/System.Workflow.Runtime.dll",
-        "build/.NETFramework/v4.7.2/System.Workflow.Runtime.xml",
-        "build/.NETFramework/v4.7.2/System.WorkflowServices.dll",
-        "build/.NETFramework/v4.7.2/System.WorkflowServices.xml",
-        "build/.NETFramework/v4.7.2/System.Xaml.dll",
-        "build/.NETFramework/v4.7.2/System.Xaml.xml",
-        "build/.NETFramework/v4.7.2/System.Xml.Linq.dll",
-        "build/.NETFramework/v4.7.2/System.Xml.Linq.xml",
-        "build/.NETFramework/v4.7.2/System.Xml.Serialization.dll",
-        "build/.NETFramework/v4.7.2/System.Xml.dll",
-        "build/.NETFramework/v4.7.2/System.Xml.xml",
-        "build/.NETFramework/v4.7.2/System.dll",
-        "build/.NETFramework/v4.7.2/System.xml",
-        "build/.NETFramework/v4.7.2/UIAutomationClient.dll",
-        "build/.NETFramework/v4.7.2/UIAutomationClient.xml",
-        "build/.NETFramework/v4.7.2/UIAutomationClientsideProviders.dll",
-        "build/.NETFramework/v4.7.2/UIAutomationClientsideProviders.xml",
-        "build/.NETFramework/v4.7.2/UIAutomationProvider.dll",
-        "build/.NETFramework/v4.7.2/UIAutomationProvider.xml",
-        "build/.NETFramework/v4.7.2/UIAutomationTypes.dll",
-        "build/.NETFramework/v4.7.2/UIAutomationTypes.xml",
-        "build/.NETFramework/v4.7.2/WindowsBase.dll",
-        "build/.NETFramework/v4.7.2/WindowsBase.xml",
-        "build/.NETFramework/v4.7.2/WindowsFormsIntegration.dll",
-        "build/.NETFramework/v4.7.2/WindowsFormsIntegration.xml",
-        "build/.NETFramework/v4.7.2/XamlBuildTask.dll",
-        "build/.NETFramework/v4.7.2/XamlBuildTask.xml",
-        "build/.NETFramework/v4.7.2/mscorlib.dll",
-        "build/.NETFramework/v4.7.2/mscorlib.xml",
-        "build/.NETFramework/v4.7.2/namespaces.xml",
-        "build/.NETFramework/v4.7.2/sysglobl.dll",
-        "build/.NETFramework/v4.7.2/sysglobl.xml",
-        "build/Microsoft.NETFramework.ReferenceAssemblies.net472.targets",
-        "microsoft.netframework.referenceassemblies.net472.1.0.0.nupkg.sha512",
-        "microsoft.netframework.referenceassemblies.net472.nuspec"
+        "build/.NETFramework/v4.8/Accessibility.dll",
+        "build/.NETFramework/v4.8/Accessibility.xml",
+        "build/.NETFramework/v4.8/CustomMarshalers.dll",
+        "build/.NETFramework/v4.8/CustomMarshalers.xml",
+        "build/.NETFramework/v4.8/Facades/Microsoft.Win32.Primitives.dll",
+        "build/.NETFramework/v4.8/Facades/System.AppContext.dll",
+        "build/.NETFramework/v4.8/Facades/System.Collections.Concurrent.dll",
+        "build/.NETFramework/v4.8/Facades/System.Collections.NonGeneric.dll",
+        "build/.NETFramework/v4.8/Facades/System.Collections.Specialized.dll",
+        "build/.NETFramework/v4.8/Facades/System.Collections.dll",
+        "build/.NETFramework/v4.8/Facades/System.ComponentModel.Annotations.dll",
+        "build/.NETFramework/v4.8/Facades/System.ComponentModel.EventBasedAsync.dll",
+        "build/.NETFramework/v4.8/Facades/System.ComponentModel.Primitives.dll",
+        "build/.NETFramework/v4.8/Facades/System.ComponentModel.TypeConverter.dll",
+        "build/.NETFramework/v4.8/Facades/System.ComponentModel.dll",
+        "build/.NETFramework/v4.8/Facades/System.Console.dll",
+        "build/.NETFramework/v4.8/Facades/System.Data.Common.dll",
+        "build/.NETFramework/v4.8/Facades/System.Diagnostics.Contracts.dll",
+        "build/.NETFramework/v4.8/Facades/System.Diagnostics.Debug.dll",
+        "build/.NETFramework/v4.8/Facades/System.Diagnostics.FileVersionInfo.dll",
+        "build/.NETFramework/v4.8/Facades/System.Diagnostics.Process.dll",
+        "build/.NETFramework/v4.8/Facades/System.Diagnostics.StackTrace.dll",
+        "build/.NETFramework/v4.8/Facades/System.Diagnostics.TextWriterTraceListener.dll",
+        "build/.NETFramework/v4.8/Facades/System.Diagnostics.Tools.dll",
+        "build/.NETFramework/v4.8/Facades/System.Diagnostics.TraceSource.dll",
+        "build/.NETFramework/v4.8/Facades/System.Drawing.Primitives.dll",
+        "build/.NETFramework/v4.8/Facades/System.Dynamic.Runtime.dll",
+        "build/.NETFramework/v4.8/Facades/System.Globalization.Calendars.dll",
+        "build/.NETFramework/v4.8/Facades/System.Globalization.Extensions.dll",
+        "build/.NETFramework/v4.8/Facades/System.Globalization.dll",
+        "build/.NETFramework/v4.8/Facades/System.IO.Compression.ZipFile.dll",
+        "build/.NETFramework/v4.8/Facades/System.IO.FileSystem.DriveInfo.dll",
+        "build/.NETFramework/v4.8/Facades/System.IO.FileSystem.Primitives.dll",
+        "build/.NETFramework/v4.8/Facades/System.IO.FileSystem.Watcher.dll",
+        "build/.NETFramework/v4.8/Facades/System.IO.FileSystem.dll",
+        "build/.NETFramework/v4.8/Facades/System.IO.IsolatedStorage.dll",
+        "build/.NETFramework/v4.8/Facades/System.IO.MemoryMappedFiles.dll",
+        "build/.NETFramework/v4.8/Facades/System.IO.Pipes.dll",
+        "build/.NETFramework/v4.8/Facades/System.IO.UnmanagedMemoryStream.dll",
+        "build/.NETFramework/v4.8/Facades/System.IO.dll",
+        "build/.NETFramework/v4.8/Facades/System.Linq.Expressions.dll",
+        "build/.NETFramework/v4.8/Facades/System.Linq.Parallel.dll",
+        "build/.NETFramework/v4.8/Facades/System.Linq.Queryable.dll",
+        "build/.NETFramework/v4.8/Facades/System.Linq.dll",
+        "build/.NETFramework/v4.8/Facades/System.Net.Http.Rtc.dll",
+        "build/.NETFramework/v4.8/Facades/System.Net.NameResolution.dll",
+        "build/.NETFramework/v4.8/Facades/System.Net.NetworkInformation.dll",
+        "build/.NETFramework/v4.8/Facades/System.Net.Ping.dll",
+        "build/.NETFramework/v4.8/Facades/System.Net.Primitives.dll",
+        "build/.NETFramework/v4.8/Facades/System.Net.Requests.dll",
+        "build/.NETFramework/v4.8/Facades/System.Net.Security.dll",
+        "build/.NETFramework/v4.8/Facades/System.Net.Sockets.dll",
+        "build/.NETFramework/v4.8/Facades/System.Net.WebHeaderCollection.dll",
+        "build/.NETFramework/v4.8/Facades/System.Net.WebSockets.Client.dll",
+        "build/.NETFramework/v4.8/Facades/System.Net.WebSockets.dll",
+        "build/.NETFramework/v4.8/Facades/System.ObjectModel.dll",
+        "build/.NETFramework/v4.8/Facades/System.Reflection.Emit.ILGeneration.dll",
+        "build/.NETFramework/v4.8/Facades/System.Reflection.Emit.Lightweight.dll",
+        "build/.NETFramework/v4.8/Facades/System.Reflection.Emit.dll",
+        "build/.NETFramework/v4.8/Facades/System.Reflection.Extensions.dll",
+        "build/.NETFramework/v4.8/Facades/System.Reflection.Primitives.dll",
+        "build/.NETFramework/v4.8/Facades/System.Reflection.dll",
+        "build/.NETFramework/v4.8/Facades/System.Resources.Reader.dll",
+        "build/.NETFramework/v4.8/Facades/System.Resources.ResourceManager.dll",
+        "build/.NETFramework/v4.8/Facades/System.Resources.Writer.dll",
+        "build/.NETFramework/v4.8/Facades/System.Runtime.CompilerServices.VisualC.dll",
+        "build/.NETFramework/v4.8/Facades/System.Runtime.Extensions.dll",
+        "build/.NETFramework/v4.8/Facades/System.Runtime.Handles.dll",
+        "build/.NETFramework/v4.8/Facades/System.Runtime.InteropServices.RuntimeInformation.dll",
+        "build/.NETFramework/v4.8/Facades/System.Runtime.InteropServices.WindowsRuntime.dll",
+        "build/.NETFramework/v4.8/Facades/System.Runtime.InteropServices.dll",
+        "build/.NETFramework/v4.8/Facades/System.Runtime.Numerics.dll",
+        "build/.NETFramework/v4.8/Facades/System.Runtime.Serialization.Formatters.dll",
+        "build/.NETFramework/v4.8/Facades/System.Runtime.Serialization.Json.dll",
+        "build/.NETFramework/v4.8/Facades/System.Runtime.Serialization.Primitives.dll",
+        "build/.NETFramework/v4.8/Facades/System.Runtime.Serialization.Xml.dll",
+        "build/.NETFramework/v4.8/Facades/System.Runtime.dll",
+        "build/.NETFramework/v4.8/Facades/System.Security.Claims.dll",
+        "build/.NETFramework/v4.8/Facades/System.Security.Cryptography.Algorithms.dll",
+        "build/.NETFramework/v4.8/Facades/System.Security.Cryptography.Csp.dll",
+        "build/.NETFramework/v4.8/Facades/System.Security.Cryptography.Encoding.dll",
+        "build/.NETFramework/v4.8/Facades/System.Security.Cryptography.Primitives.dll",
+        "build/.NETFramework/v4.8/Facades/System.Security.Cryptography.X509Certificates.dll",
+        "build/.NETFramework/v4.8/Facades/System.Security.Principal.dll",
+        "build/.NETFramework/v4.8/Facades/System.Security.SecureString.dll",
+        "build/.NETFramework/v4.8/Facades/System.ServiceModel.Duplex.dll",
+        "build/.NETFramework/v4.8/Facades/System.ServiceModel.Http.dll",
+        "build/.NETFramework/v4.8/Facades/System.ServiceModel.NetTcp.dll",
+        "build/.NETFramework/v4.8/Facades/System.ServiceModel.Primitives.dll",
+        "build/.NETFramework/v4.8/Facades/System.ServiceModel.Security.dll",
+        "build/.NETFramework/v4.8/Facades/System.Text.Encoding.Extensions.dll",
+        "build/.NETFramework/v4.8/Facades/System.Text.Encoding.dll",
+        "build/.NETFramework/v4.8/Facades/System.Text.RegularExpressions.dll",
+        "build/.NETFramework/v4.8/Facades/System.Threading.Overlapped.dll",
+        "build/.NETFramework/v4.8/Facades/System.Threading.Tasks.Parallel.dll",
+        "build/.NETFramework/v4.8/Facades/System.Threading.Tasks.dll",
+        "build/.NETFramework/v4.8/Facades/System.Threading.Thread.dll",
+        "build/.NETFramework/v4.8/Facades/System.Threading.ThreadPool.dll",
+        "build/.NETFramework/v4.8/Facades/System.Threading.Timer.dll",
+        "build/.NETFramework/v4.8/Facades/System.Threading.dll",
+        "build/.NETFramework/v4.8/Facades/System.ValueTuple.dll",
+        "build/.NETFramework/v4.8/Facades/System.Xml.ReaderWriter.dll",
+        "build/.NETFramework/v4.8/Facades/System.Xml.XDocument.dll",
+        "build/.NETFramework/v4.8/Facades/System.Xml.XPath.XDocument.dll",
+        "build/.NETFramework/v4.8/Facades/System.Xml.XPath.dll",
+        "build/.NETFramework/v4.8/Facades/System.Xml.XmlDocument.dll",
+        "build/.NETFramework/v4.8/Facades/System.Xml.XmlSerializer.dll",
+        "build/.NETFramework/v4.8/Facades/netstandard.dll",
+        "build/.NETFramework/v4.8/ISymWrapper.dll",
+        "build/.NETFramework/v4.8/ISymWrapper.xml",
+        "build/.NETFramework/v4.8/Microsoft.Activities.Build.dll",
+        "build/.NETFramework/v4.8/Microsoft.Activities.Build.xml",
+        "build/.NETFramework/v4.8/Microsoft.Build.Conversion.v4.0.dll",
+        "build/.NETFramework/v4.8/Microsoft.Build.Conversion.v4.0.xml",
+        "build/.NETFramework/v4.8/Microsoft.Build.Engine.dll",
+        "build/.NETFramework/v4.8/Microsoft.Build.Engine.xml",
+        "build/.NETFramework/v4.8/Microsoft.Build.Framework.dll",
+        "build/.NETFramework/v4.8/Microsoft.Build.Framework.xml",
+        "build/.NETFramework/v4.8/Microsoft.Build.Tasks.v4.0.dll",
+        "build/.NETFramework/v4.8/Microsoft.Build.Tasks.v4.0.xml",
+        "build/.NETFramework/v4.8/Microsoft.Build.Utilities.v4.0.dll",
+        "build/.NETFramework/v4.8/Microsoft.Build.Utilities.v4.0.xml",
+        "build/.NETFramework/v4.8/Microsoft.Build.dll",
+        "build/.NETFramework/v4.8/Microsoft.Build.xml",
+        "build/.NETFramework/v4.8/Microsoft.CSharp.dll",
+        "build/.NETFramework/v4.8/Microsoft.CSharp.xml",
+        "build/.NETFramework/v4.8/Microsoft.JScript.dll",
+        "build/.NETFramework/v4.8/Microsoft.JScript.xml",
+        "build/.NETFramework/v4.8/Microsoft.VisualBasic.Compatibility.Data.dll",
+        "build/.NETFramework/v4.8/Microsoft.VisualBasic.Compatibility.Data.xml",
+        "build/.NETFramework/v4.8/Microsoft.VisualBasic.Compatibility.dll",
+        "build/.NETFramework/v4.8/Microsoft.VisualBasic.Compatibility.xml",
+        "build/.NETFramework/v4.8/Microsoft.VisualBasic.dll",
+        "build/.NETFramework/v4.8/Microsoft.VisualBasic.xml",
+        "build/.NETFramework/v4.8/Microsoft.VisualC.STLCLR.dll",
+        "build/.NETFramework/v4.8/Microsoft.VisualC.STLCLR.xml",
+        "build/.NETFramework/v4.8/Microsoft.VisualC.dll",
+        "build/.NETFramework/v4.8/Microsoft.VisualC.xml",
+        "build/.NETFramework/v4.8/PermissionSets/FullTrust.xml",
+        "build/.NETFramework/v4.8/PermissionSets/Internet.xml",
+        "build/.NETFramework/v4.8/PermissionSets/LocalIntranet.xml",
+        "build/.NETFramework/v4.8/PresentationBuildTasks.dll",
+        "build/.NETFramework/v4.8/PresentationBuildTasks.xml",
+        "build/.NETFramework/v4.8/PresentationCore.dll",
+        "build/.NETFramework/v4.8/PresentationCore.xml",
+        "build/.NETFramework/v4.8/PresentationFramework.Aero.dll",
+        "build/.NETFramework/v4.8/PresentationFramework.Aero.xml",
+        "build/.NETFramework/v4.8/PresentationFramework.Aero2.dll",
+        "build/.NETFramework/v4.8/PresentationFramework.Aero2.xml",
+        "build/.NETFramework/v4.8/PresentationFramework.AeroLite.dll",
+        "build/.NETFramework/v4.8/PresentationFramework.AeroLite.xml",
+        "build/.NETFramework/v4.8/PresentationFramework.Classic.dll",
+        "build/.NETFramework/v4.8/PresentationFramework.Classic.xml",
+        "build/.NETFramework/v4.8/PresentationFramework.Luna.dll",
+        "build/.NETFramework/v4.8/PresentationFramework.Luna.xml",
+        "build/.NETFramework/v4.8/PresentationFramework.Royale.dll",
+        "build/.NETFramework/v4.8/PresentationFramework.Royale.xml",
+        "build/.NETFramework/v4.8/PresentationFramework.dll",
+        "build/.NETFramework/v4.8/PresentationFramework.xml",
+        "build/.NETFramework/v4.8/ReachFramework.dll",
+        "build/.NETFramework/v4.8/ReachFramework.xml",
+        "build/.NETFramework/v4.8/RedistList/FrameworkList.xml",
+        "build/.NETFramework/v4.8/System.Activities.Core.Presentation.dll",
+        "build/.NETFramework/v4.8/System.Activities.Core.Presentation.xml",
+        "build/.NETFramework/v4.8/System.Activities.DurableInstancing.dll",
+        "build/.NETFramework/v4.8/System.Activities.DurableInstancing.xml",
+        "build/.NETFramework/v4.8/System.Activities.Presentation.dll",
+        "build/.NETFramework/v4.8/System.Activities.Presentation.xml",
+        "build/.NETFramework/v4.8/System.Activities.dll",
+        "build/.NETFramework/v4.8/System.Activities.xml",
+        "build/.NETFramework/v4.8/System.AddIn.Contract.dll",
+        "build/.NETFramework/v4.8/System.AddIn.Contract.xml",
+        "build/.NETFramework/v4.8/System.AddIn.dll",
+        "build/.NETFramework/v4.8/System.AddIn.xml",
+        "build/.NETFramework/v4.8/System.ComponentModel.Composition.Registration.dll",
+        "build/.NETFramework/v4.8/System.ComponentModel.Composition.Registration.xml",
+        "build/.NETFramework/v4.8/System.ComponentModel.Composition.dll",
+        "build/.NETFramework/v4.8/System.ComponentModel.Composition.xml",
+        "build/.NETFramework/v4.8/System.ComponentModel.DataAnnotations.dll",
+        "build/.NETFramework/v4.8/System.ComponentModel.DataAnnotations.xml",
+        "build/.NETFramework/v4.8/System.Configuration.Install.dll",
+        "build/.NETFramework/v4.8/System.Configuration.Install.xml",
+        "build/.NETFramework/v4.8/System.Configuration.dll",
+        "build/.NETFramework/v4.8/System.Configuration.xml",
+        "build/.NETFramework/v4.8/System.Core.dll",
+        "build/.NETFramework/v4.8/System.Core.xml",
+        "build/.NETFramework/v4.8/System.Data.DataSetExtensions.dll",
+        "build/.NETFramework/v4.8/System.Data.DataSetExtensions.xml",
+        "build/.NETFramework/v4.8/System.Data.Entity.Design.dll",
+        "build/.NETFramework/v4.8/System.Data.Entity.Design.xml",
+        "build/.NETFramework/v4.8/System.Data.Entity.dll",
+        "build/.NETFramework/v4.8/System.Data.Entity.xml",
+        "build/.NETFramework/v4.8/System.Data.Linq.dll",
+        "build/.NETFramework/v4.8/System.Data.Linq.xml",
+        "build/.NETFramework/v4.8/System.Data.OracleClient.dll",
+        "build/.NETFramework/v4.8/System.Data.OracleClient.xml",
+        "build/.NETFramework/v4.8/System.Data.Services.Client.dll",
+        "build/.NETFramework/v4.8/System.Data.Services.Client.xml",
+        "build/.NETFramework/v4.8/System.Data.Services.Design.dll",
+        "build/.NETFramework/v4.8/System.Data.Services.Design.xml",
+        "build/.NETFramework/v4.8/System.Data.Services.dll",
+        "build/.NETFramework/v4.8/System.Data.Services.xml",
+        "build/.NETFramework/v4.8/System.Data.SqlXml.dll",
+        "build/.NETFramework/v4.8/System.Data.SqlXml.xml",
+        "build/.NETFramework/v4.8/System.Data.dll",
+        "build/.NETFramework/v4.8/System.Data.xml",
+        "build/.NETFramework/v4.8/System.Deployment.dll",
+        "build/.NETFramework/v4.8/System.Deployment.xml",
+        "build/.NETFramework/v4.8/System.Design.dll",
+        "build/.NETFramework/v4.8/System.Design.xml",
+        "build/.NETFramework/v4.8/System.Device.dll",
+        "build/.NETFramework/v4.8/System.Device.xml",
+        "build/.NETFramework/v4.8/System.Diagnostics.Tracing.dll",
+        "build/.NETFramework/v4.8/System.Diagnostics.Tracing.xml",
+        "build/.NETFramework/v4.8/System.DirectoryServices.AccountManagement.dll",
+        "build/.NETFramework/v4.8/System.DirectoryServices.AccountManagement.xml",
+        "build/.NETFramework/v4.8/System.DirectoryServices.Protocols.dll",
+        "build/.NETFramework/v4.8/System.DirectoryServices.Protocols.xml",
+        "build/.NETFramework/v4.8/System.DirectoryServices.dll",
+        "build/.NETFramework/v4.8/System.DirectoryServices.xml",
+        "build/.NETFramework/v4.8/System.Drawing.Design.dll",
+        "build/.NETFramework/v4.8/System.Drawing.Design.xml",
+        "build/.NETFramework/v4.8/System.Drawing.dll",
+        "build/.NETFramework/v4.8/System.Drawing.xml",
+        "build/.NETFramework/v4.8/System.Dynamic.dll",
+        "build/.NETFramework/v4.8/System.EnterpriseServices.Thunk.dll",
+        "build/.NETFramework/v4.8/System.EnterpriseServices.Wrapper.dll",
+        "build/.NETFramework/v4.8/System.EnterpriseServices.dll",
+        "build/.NETFramework/v4.8/System.EnterpriseServices.xml",
+        "build/.NETFramework/v4.8/System.IO.Compression.FileSystem.dll",
+        "build/.NETFramework/v4.8/System.IO.Compression.FileSystem.xml",
+        "build/.NETFramework/v4.8/System.IO.Compression.dll",
+        "build/.NETFramework/v4.8/System.IO.Compression.xml",
+        "build/.NETFramework/v4.8/System.IO.Log.dll",
+        "build/.NETFramework/v4.8/System.IO.Log.xml",
+        "build/.NETFramework/v4.8/System.IdentityModel.Selectors.dll",
+        "build/.NETFramework/v4.8/System.IdentityModel.Selectors.xml",
+        "build/.NETFramework/v4.8/System.IdentityModel.Services.dll",
+        "build/.NETFramework/v4.8/System.IdentityModel.Services.xml",
+        "build/.NETFramework/v4.8/System.IdentityModel.dll",
+        "build/.NETFramework/v4.8/System.IdentityModel.xml",
+        "build/.NETFramework/v4.8/System.Linq.xml",
+        "build/.NETFramework/v4.8/System.Management.Instrumentation.dll",
+        "build/.NETFramework/v4.8/System.Management.Instrumentation.xml",
+        "build/.NETFramework/v4.8/System.Management.dll",
+        "build/.NETFramework/v4.8/System.Management.xml",
+        "build/.NETFramework/v4.8/System.Messaging.dll",
+        "build/.NETFramework/v4.8/System.Messaging.xml",
+        "build/.NETFramework/v4.8/System.Net.Http.WebRequest.dll",
+        "build/.NETFramework/v4.8/System.Net.Http.WebRequest.xml",
+        "build/.NETFramework/v4.8/System.Net.Http.dll",
+        "build/.NETFramework/v4.8/System.Net.Http.xml",
+        "build/.NETFramework/v4.8/System.Net.dll",
+        "build/.NETFramework/v4.8/System.Net.xml",
+        "build/.NETFramework/v4.8/System.Numerics.dll",
+        "build/.NETFramework/v4.8/System.Numerics.xml",
+        "build/.NETFramework/v4.8/System.Printing.dll",
+        "build/.NETFramework/v4.8/System.Printing.xml",
+        "build/.NETFramework/v4.8/System.Reflection.Context.dll",
+        "build/.NETFramework/v4.8/System.Reflection.Context.xml",
+        "build/.NETFramework/v4.8/System.Runtime.Caching.dll",
+        "build/.NETFramework/v4.8/System.Runtime.Caching.xml",
+        "build/.NETFramework/v4.8/System.Runtime.DurableInstancing.dll",
+        "build/.NETFramework/v4.8/System.Runtime.DurableInstancing.xml",
+        "build/.NETFramework/v4.8/System.Runtime.Remoting.dll",
+        "build/.NETFramework/v4.8/System.Runtime.Remoting.xml",
+        "build/.NETFramework/v4.8/System.Runtime.Serialization.Formatters.Soap.dll",
+        "build/.NETFramework/v4.8/System.Runtime.Serialization.Formatters.Soap.xml",
+        "build/.NETFramework/v4.8/System.Runtime.Serialization.dll",
+        "build/.NETFramework/v4.8/System.Runtime.Serialization.xml",
+        "build/.NETFramework/v4.8/System.Security.dll",
+        "build/.NETFramework/v4.8/System.Security.xml",
+        "build/.NETFramework/v4.8/System.ServiceModel.Activation.dll",
+        "build/.NETFramework/v4.8/System.ServiceModel.Activation.xml",
+        "build/.NETFramework/v4.8/System.ServiceModel.Activities.dll",
+        "build/.NETFramework/v4.8/System.ServiceModel.Activities.xml",
+        "build/.NETFramework/v4.8/System.ServiceModel.Channels.dll",
+        "build/.NETFramework/v4.8/System.ServiceModel.Channels.xml",
+        "build/.NETFramework/v4.8/System.ServiceModel.Discovery.dll",
+        "build/.NETFramework/v4.8/System.ServiceModel.Discovery.xml",
+        "build/.NETFramework/v4.8/System.ServiceModel.Routing.dll",
+        "build/.NETFramework/v4.8/System.ServiceModel.Routing.xml",
+        "build/.NETFramework/v4.8/System.ServiceModel.Web.dll",
+        "build/.NETFramework/v4.8/System.ServiceModel.Web.xml",
+        "build/.NETFramework/v4.8/System.ServiceModel.dll",
+        "build/.NETFramework/v4.8/System.ServiceModel.xml",
+        "build/.NETFramework/v4.8/System.ServiceProcess.dll",
+        "build/.NETFramework/v4.8/System.ServiceProcess.xml",
+        "build/.NETFramework/v4.8/System.Speech.dll",
+        "build/.NETFramework/v4.8/System.Speech.xml",
+        "build/.NETFramework/v4.8/System.Threading.Tasks.Dataflow.xml",
+        "build/.NETFramework/v4.8/System.Transactions.dll",
+        "build/.NETFramework/v4.8/System.Transactions.xml",
+        "build/.NETFramework/v4.8/System.Web.Abstractions.dll",
+        "build/.NETFramework/v4.8/System.Web.ApplicationServices.dll",
+        "build/.NETFramework/v4.8/System.Web.ApplicationServices.xml",
+        "build/.NETFramework/v4.8/System.Web.DataVisualization.Design.dll",
+        "build/.NETFramework/v4.8/System.Web.DataVisualization.dll",
+        "build/.NETFramework/v4.8/System.Web.DataVisualization.xml",
+        "build/.NETFramework/v4.8/System.Web.DynamicData.Design.dll",
+        "build/.NETFramework/v4.8/System.Web.DynamicData.Design.xml",
+        "build/.NETFramework/v4.8/System.Web.DynamicData.dll",
+        "build/.NETFramework/v4.8/System.Web.DynamicData.xml",
+        "build/.NETFramework/v4.8/System.Web.Entity.Design.dll",
+        "build/.NETFramework/v4.8/System.Web.Entity.Design.xml",
+        "build/.NETFramework/v4.8/System.Web.Entity.dll",
+        "build/.NETFramework/v4.8/System.Web.Entity.xml",
+        "build/.NETFramework/v4.8/System.Web.Extensions.Design.dll",
+        "build/.NETFramework/v4.8/System.Web.Extensions.Design.xml",
+        "build/.NETFramework/v4.8/System.Web.Extensions.dll",
+        "build/.NETFramework/v4.8/System.Web.Extensions.xml",
+        "build/.NETFramework/v4.8/System.Web.Mobile.dll",
+        "build/.NETFramework/v4.8/System.Web.Mobile.xml",
+        "build/.NETFramework/v4.8/System.Web.RegularExpressions.dll",
+        "build/.NETFramework/v4.8/System.Web.RegularExpressions.xml",
+        "build/.NETFramework/v4.8/System.Web.Routing.dll",
+        "build/.NETFramework/v4.8/System.Web.Services.dll",
+        "build/.NETFramework/v4.8/System.Web.Services.xml",
+        "build/.NETFramework/v4.8/System.Web.dll",
+        "build/.NETFramework/v4.8/System.Web.xml",
+        "build/.NETFramework/v4.8/System.Windows.Controls.Ribbon.dll",
+        "build/.NETFramework/v4.8/System.Windows.Controls.Ribbon.xml",
+        "build/.NETFramework/v4.8/System.Windows.Forms.DataVisualization.Design.dll",
+        "build/.NETFramework/v4.8/System.Windows.Forms.DataVisualization.dll",
+        "build/.NETFramework/v4.8/System.Windows.Forms.DataVisualization.xml",
+        "build/.NETFramework/v4.8/System.Windows.Forms.dll",
+        "build/.NETFramework/v4.8/System.Windows.Forms.xml",
+        "build/.NETFramework/v4.8/System.Windows.Input.Manipulations.dll",
+        "build/.NETFramework/v4.8/System.Windows.Input.Manipulations.xml",
+        "build/.NETFramework/v4.8/System.Windows.Presentation.dll",
+        "build/.NETFramework/v4.8/System.Windows.Presentation.xml",
+        "build/.NETFramework/v4.8/System.Windows.dll",
+        "build/.NETFramework/v4.8/System.Workflow.Activities.dll",
+        "build/.NETFramework/v4.8/System.Workflow.Activities.xml",
+        "build/.NETFramework/v4.8/System.Workflow.ComponentModel.dll",
+        "build/.NETFramework/v4.8/System.Workflow.ComponentModel.xml",
+        "build/.NETFramework/v4.8/System.Workflow.Runtime.dll",
+        "build/.NETFramework/v4.8/System.Workflow.Runtime.xml",
+        "build/.NETFramework/v4.8/System.WorkflowServices.dll",
+        "build/.NETFramework/v4.8/System.WorkflowServices.xml",
+        "build/.NETFramework/v4.8/System.Xaml.dll",
+        "build/.NETFramework/v4.8/System.Xaml.xml",
+        "build/.NETFramework/v4.8/System.Xml.Linq.dll",
+        "build/.NETFramework/v4.8/System.Xml.Linq.xml",
+        "build/.NETFramework/v4.8/System.Xml.Serialization.dll",
+        "build/.NETFramework/v4.8/System.Xml.dll",
+        "build/.NETFramework/v4.8/System.Xml.xml",
+        "build/.NETFramework/v4.8/System.dll",
+        "build/.NETFramework/v4.8/System.xml",
+        "build/.NETFramework/v4.8/UIAutomationClient.dll",
+        "build/.NETFramework/v4.8/UIAutomationClient.xml",
+        "build/.NETFramework/v4.8/UIAutomationClientsideProviders.dll",
+        "build/.NETFramework/v4.8/UIAutomationClientsideProviders.xml",
+        "build/.NETFramework/v4.8/UIAutomationProvider.dll",
+        "build/.NETFramework/v4.8/UIAutomationProvider.xml",
+        "build/.NETFramework/v4.8/UIAutomationTypes.dll",
+        "build/.NETFramework/v4.8/UIAutomationTypes.xml",
+        "build/.NETFramework/v4.8/WindowsBase.dll",
+        "build/.NETFramework/v4.8/WindowsBase.xml",
+        "build/.NETFramework/v4.8/WindowsFormsIntegration.dll",
+        "build/.NETFramework/v4.8/WindowsFormsIntegration.xml",
+        "build/.NETFramework/v4.8/XamlBuildTask.dll",
+        "build/.NETFramework/v4.8/XamlBuildTask.xml",
+        "build/.NETFramework/v4.8/mscorlib.dll",
+        "build/.NETFramework/v4.8/mscorlib.xml",
+        "build/.NETFramework/v4.8/namespaces.xml",
+        "build/.NETFramework/v4.8/sysglobl.dll",
+        "build/.NETFramework/v4.8/sysglobl.xml",
+        "build/Microsoft.NETFramework.ReferenceAssemblies.net48.targets",
+        "microsoft.netframework.referenceassemblies.net48.1.0.0.nupkg.sha512",
+        "microsoft.netframework.referenceassemblies.net48.nuspec"
       ]
     },
-    "Microsoft.Toolkit.Uwp.Notifications/7.1.2": {
-      "sha512": "cVBRDG8g0K4sBRHFJoNQjwZduDUz+cXP33erIQjAa8fGKF4DsWIuOAQCYGFoXpdXIXjxoaUYuGSxAG6QCvOdtQ==",
+    "Microsoft.Toolkit.Uwp.Notifications/7.1.3-rc": {
+      "sha512": "LGgcmKTlLjb6n77hg25ZEhCknPyHcWUQq3I4CGsUXvlyQZbIy3rjXL4OTCf2EV5YHaTsRxwrYDlc6h0vMW4Nyg==",
       "type": "package",
-      "path": "microsoft.toolkit.uwp.notifications/7.1.2",
+      "path": "microsoft.toolkit.uwp.notifications/7.1.3-rc",
       "files": [
         ".nupkg.metadata",
         ".signature.p7s",
@@ -4884,7 +5856,7 @@
         "lib/uap10.0.16299/Microsoft.Toolkit.Uwp.Notifications.pdb",
         "lib/uap10.0.16299/Microsoft.Toolkit.Uwp.Notifications.pri",
         "lib/uap10.0.16299/Microsoft.Toolkit.Uwp.Notifications.xml",
-        "microsoft.toolkit.uwp.notifications.7.1.2.nupkg.sha512",
+        "microsoft.toolkit.uwp.notifications.7.1.3-rc.nupkg.sha512",
         "microsoft.toolkit.uwp.notifications.nuspec"
       ]
     },
@@ -5125,24 +6097,24 @@
         "netstandard.library.nuspec"
       ]
     },
-    "SharpZipLib/1.3.3": {
-      "sha512": "N8+hwhsKZm25tDJfWpBSW7EGhH/R7EMuiX+KJ4C4u+fCWVc1lJ5zg1u3S1RPPVYgTqhx/C3hxrqUpi6RwK5+Tg==",
+    "SharpZipLib/1.4.0": {
+      "sha512": "CdkbBSPIpHD8xBlu+8kDJiqc1Tf9iV89BObnqcvEbwysXSj5h1MfaeLgeeaxPZmi7CTJO8FDofBBNxBW0Vml7A==",
       "type": "package",
-      "path": "sharpziplib/1.3.3",
+      "path": "sharpziplib/1.4.0",
       "files": [
         ".nupkg.metadata",
         ".signature.p7s",
         "images/sharpziplib-nuget-256x256.png",
-        "lib/net45/ICSharpCode.SharpZipLib.dll",
-        "lib/net45/ICSharpCode.SharpZipLib.pdb",
-        "lib/net45/ICSharpCode.SharpZipLib.xml",
+        "lib/net6.0/ICSharpCode.SharpZipLib.dll",
+        "lib/net6.0/ICSharpCode.SharpZipLib.pdb",
+        "lib/net6.0/ICSharpCode.SharpZipLib.xml",
         "lib/netstandard2.0/ICSharpCode.SharpZipLib.dll",
         "lib/netstandard2.0/ICSharpCode.SharpZipLib.pdb",
         "lib/netstandard2.0/ICSharpCode.SharpZipLib.xml",
         "lib/netstandard2.1/ICSharpCode.SharpZipLib.dll",
         "lib/netstandard2.1/ICSharpCode.SharpZipLib.pdb",
         "lib/netstandard2.1/ICSharpCode.SharpZipLib.xml",
-        "sharpziplib.1.3.3.nupkg.sha512",
+        "sharpziplib.1.4.0.nupkg.sha512",
         "sharpziplib.nuspec"
       ]
     },
@@ -5199,6 +6171,37 @@
         "runtimes/aot/lib/netcore50/System.AppContext.dll",
         "system.appcontext.4.3.0.nupkg.sha512",
         "system.appcontext.nuspec"
+      ]
+    },
+    "System.Buffers/4.5.1": {
+      "sha512": "Rw7ijyl1qqRS0YQD/WycNst8hUUMgrMH4FCn1nNm27M4VxchZ1js3fVjQaANHO5f3sN4isvP4a+Met9Y4YomAg==",
+      "type": "package",
+      "path": "system.buffers/4.5.1",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "LICENSE.TXT",
+        "THIRD-PARTY-NOTICES.TXT",
+        "lib/net461/System.Buffers.dll",
+        "lib/net461/System.Buffers.xml",
+        "lib/netcoreapp2.0/_._",
+        "lib/netstandard1.1/System.Buffers.dll",
+        "lib/netstandard1.1/System.Buffers.xml",
+        "lib/netstandard2.0/System.Buffers.dll",
+        "lib/netstandard2.0/System.Buffers.xml",
+        "lib/uap10.0.16299/_._",
+        "ref/net45/System.Buffers.dll",
+        "ref/net45/System.Buffers.xml",
+        "ref/netcoreapp2.0/_._",
+        "ref/netstandard1.1/System.Buffers.dll",
+        "ref/netstandard1.1/System.Buffers.xml",
+        "ref/netstandard2.0/System.Buffers.dll",
+        "ref/netstandard2.0/System.Buffers.xml",
+        "ref/uap10.0.16299/_._",
+        "system.buffers.4.5.1.nupkg.sha512",
+        "system.buffers.nuspec",
+        "useSharedDesignerContext.txt",
+        "version.txt"
       ]
     },
     "System.Collections/4.3.0": {
@@ -6141,6 +7144,29 @@
         "system.linq.expressions.nuspec"
       ]
     },
+    "System.Memory/4.5.4": {
+      "sha512": "1MbJTHS1lZ4bS4FmsJjnuGJOu88ZzTT2rLvrhW7Ygic+pC0NWA+3hgAen0HRdsocuQXCkUTdFn9yHJJhsijDXw==",
+      "type": "package",
+      "path": "system.memory/4.5.4",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "LICENSE.TXT",
+        "THIRD-PARTY-NOTICES.TXT",
+        "lib/net461/System.Memory.dll",
+        "lib/net461/System.Memory.xml",
+        "lib/netcoreapp2.1/_._",
+        "lib/netstandard1.1/System.Memory.dll",
+        "lib/netstandard1.1/System.Memory.xml",
+        "lib/netstandard2.0/System.Memory.dll",
+        "lib/netstandard2.0/System.Memory.xml",
+        "ref/netcoreapp2.1/_._",
+        "system.memory.4.5.4.nupkg.sha512",
+        "system.memory.nuspec",
+        "useSharedDesignerContext.txt",
+        "version.txt"
+      ]
+    },
     "System.Net.Http/4.3.0": {
       "sha512": "sYg+FtILtRQuYWSIAuNOELwVuVsxVyJGWQyOnlAzhV4xvhyFnON1bAzYYC+jjRW8JREM45R0R5Dgi8MTC5sEwA==",
       "type": "package",
@@ -6338,6 +7364,53 @@
         "ref/xamarinwatchos10/_._",
         "system.net.sockets.4.3.0.nupkg.sha512",
         "system.net.sockets.nuspec"
+      ]
+    },
+    "System.Numerics.Vectors/4.5.0": {
+      "sha512": "QQTlPTl06J/iiDbJCiepZ4H//BVraReU4O4EoRw1U02H5TLUIT7xn3GnDp9AXPSlJUDyFs4uWjWafNX6WrAojQ==",
+      "type": "package",
+      "path": "system.numerics.vectors/4.5.0",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "LICENSE.TXT",
+        "THIRD-PARTY-NOTICES.TXT",
+        "lib/MonoAndroid10/_._",
+        "lib/MonoTouch10/_._",
+        "lib/net46/System.Numerics.Vectors.dll",
+        "lib/net46/System.Numerics.Vectors.xml",
+        "lib/netcoreapp2.0/_._",
+        "lib/netstandard1.0/System.Numerics.Vectors.dll",
+        "lib/netstandard1.0/System.Numerics.Vectors.xml",
+        "lib/netstandard2.0/System.Numerics.Vectors.dll",
+        "lib/netstandard2.0/System.Numerics.Vectors.xml",
+        "lib/portable-net45+win8+wp8+wpa81/System.Numerics.Vectors.dll",
+        "lib/portable-net45+win8+wp8+wpa81/System.Numerics.Vectors.xml",
+        "lib/uap10.0.16299/_._",
+        "lib/xamarinios10/_._",
+        "lib/xamarinmac20/_._",
+        "lib/xamarintvos10/_._",
+        "lib/xamarinwatchos10/_._",
+        "ref/MonoAndroid10/_._",
+        "ref/MonoTouch10/_._",
+        "ref/net45/System.Numerics.Vectors.dll",
+        "ref/net45/System.Numerics.Vectors.xml",
+        "ref/net46/System.Numerics.Vectors.dll",
+        "ref/net46/System.Numerics.Vectors.xml",
+        "ref/netcoreapp2.0/_._",
+        "ref/netstandard1.0/System.Numerics.Vectors.dll",
+        "ref/netstandard1.0/System.Numerics.Vectors.xml",
+        "ref/netstandard2.0/System.Numerics.Vectors.dll",
+        "ref/netstandard2.0/System.Numerics.Vectors.xml",
+        "ref/uap10.0.16299/_._",
+        "ref/xamarinios10/_._",
+        "ref/xamarinmac20/_._",
+        "ref/xamarintvos10/_._",
+        "ref/xamarinwatchos10/_._",
+        "system.numerics.vectors.4.5.0.nupkg.sha512",
+        "system.numerics.vectors.nuspec",
+        "useSharedDesignerContext.txt",
+        "version.txt"
       ]
     },
     "System.ObjectModel/4.3.0": {
@@ -6752,6 +7825,35 @@
         "ref/xamarinwatchos10/_._",
         "system.runtime.4.3.0.nupkg.sha512",
         "system.runtime.nuspec"
+      ]
+    },
+    "System.Runtime.CompilerServices.Unsafe/4.5.3": {
+      "sha512": "3TIsJhD1EiiT0w2CcDMN/iSSwnNnsrnbzeVHSKkaEgV85txMprmuO+Yq2AdSbeVGcg28pdNDTPK87tJhX7VFHw==",
+      "type": "package",
+      "path": "system.runtime.compilerservices.unsafe/4.5.3",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "LICENSE.TXT",
+        "THIRD-PARTY-NOTICES.TXT",
+        "lib/net461/System.Runtime.CompilerServices.Unsafe.dll",
+        "lib/net461/System.Runtime.CompilerServices.Unsafe.xml",
+        "lib/netcoreapp2.0/System.Runtime.CompilerServices.Unsafe.dll",
+        "lib/netcoreapp2.0/System.Runtime.CompilerServices.Unsafe.xml",
+        "lib/netstandard1.0/System.Runtime.CompilerServices.Unsafe.dll",
+        "lib/netstandard1.0/System.Runtime.CompilerServices.Unsafe.xml",
+        "lib/netstandard2.0/System.Runtime.CompilerServices.Unsafe.dll",
+        "lib/netstandard2.0/System.Runtime.CompilerServices.Unsafe.xml",
+        "ref/net461/System.Runtime.CompilerServices.Unsafe.dll",
+        "ref/net461/System.Runtime.CompilerServices.Unsafe.xml",
+        "ref/netstandard1.0/System.Runtime.CompilerServices.Unsafe.dll",
+        "ref/netstandard1.0/System.Runtime.CompilerServices.Unsafe.xml",
+        "ref/netstandard2.0/System.Runtime.CompilerServices.Unsafe.dll",
+        "ref/netstandard2.0/System.Runtime.CompilerServices.Unsafe.xml",
+        "system.runtime.compilerservices.unsafe.4.5.3.nupkg.sha512",
+        "system.runtime.compilerservices.unsafe.nuspec",
+        "useSharedDesignerContext.txt",
+        "version.txt"
       ]
     },
     "System.Runtime.Extensions/4.3.0": {
@@ -7724,6 +8826,41 @@
         "system.threading.tasks.nuspec"
       ]
     },
+    "System.Threading.Tasks.Extensions/4.5.2": {
+      "sha512": "BG/TNxDFv0svAzx8OiMXDlsHfGw623BZ8tCXw4YLhDFDvDhNUEV58jKYMGRnkbJNm7c3JNNJDiN7JBMzxRBR2w==",
+      "type": "package",
+      "path": "system.threading.tasks.extensions/4.5.2",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "LICENSE.TXT",
+        "THIRD-PARTY-NOTICES.TXT",
+        "lib/MonoAndroid10/_._",
+        "lib/MonoTouch10/_._",
+        "lib/netcoreapp2.1/_._",
+        "lib/netstandard1.0/System.Threading.Tasks.Extensions.dll",
+        "lib/netstandard1.0/System.Threading.Tasks.Extensions.xml",
+        "lib/netstandard2.0/System.Threading.Tasks.Extensions.dll",
+        "lib/netstandard2.0/System.Threading.Tasks.Extensions.xml",
+        "lib/portable-net45+win8+wp8+wpa81/System.Threading.Tasks.Extensions.dll",
+        "lib/portable-net45+win8+wp8+wpa81/System.Threading.Tasks.Extensions.xml",
+        "lib/xamarinios10/_._",
+        "lib/xamarinmac20/_._",
+        "lib/xamarintvos10/_._",
+        "lib/xamarinwatchos10/_._",
+        "ref/MonoAndroid10/_._",
+        "ref/MonoTouch10/_._",
+        "ref/netcoreapp2.1/_._",
+        "ref/xamarinios10/_._",
+        "ref/xamarinmac20/_._",
+        "ref/xamarintvos10/_._",
+        "ref/xamarinwatchos10/_._",
+        "system.threading.tasks.extensions.4.5.2.nupkg.sha512",
+        "system.threading.tasks.extensions.nuspec",
+        "useSharedDesignerContext.txt",
+        "version.txt"
+      ]
+    },
     "System.Threading.Timer/4.3.0": {
       "sha512": "Z6YfyYTCg7lOZjJzBjONJTFKGN9/NIYKSxhU5GRd+DTwHSZyvWp1xuI5aR+dLg+ayyC5Xv57KiY4oJ0tMO89fQ==",
       "type": "package",
@@ -7967,56 +9104,49 @@
     }
   },
   "projectFileDependencyGroups": {
-    ".NETFramework,Version=v4.7.2": [
-      "Costura.Fody >= 5.7.0",
+    ".NETFramework,Version=v4.8.1": [
+      "Costura.Fody >= 5.8.0-alpha0098",
       "MahApps.Metro.IconPacks >= 4.11.0",
-      "Microsoft.Toolkit.Uwp.Notifications >= 7.1.2",
-      "SharpZipLib >= 1.3.3"
+      "Microsoft.Toolkit.Uwp.Notifications >= 7.1.3-rc",
+      "SharpZipLib >= 1.4.0"
     ]
   },
   "packageFolders": {
-    "C:\\Users\\Tiger\\.nuget\\packages\\": {},
-    "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages": {}
+    "C:\\Users\\Tiger\\.nuget\\packages\\": {}
   },
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "G:\\xxx\\EasyExtractUnitypackage\\EasyExtractUnitypackage\\EasyExtractUnitypackageRework\\EasyExtractUnitypackageRework.csproj",
-      "projectName": "EasyExtractUnitypackageRework",
-      "projectPath": "G:\\xxx\\EasyExtractUnitypackage\\EasyExtractUnitypackage\\EasyExtractUnitypackageRework\\EasyExtractUnitypackageRework.csproj",
+      "projectUniqueName": "G:\\xxx\\TEST\\EasyExtractUnitypackage\\EasyExtractUnitypackageRework\\EasyExtractUnitypackageRework.csproj",
+      "projectName": "EasyExtractUnitypackageRework.csproj",
+      "projectPath": "G:\\xxx\\TEST\\EasyExtractUnitypackage\\EasyExtractUnitypackageRework\\EasyExtractUnitypackageRework.csproj",
       "packagesPath": "C:\\Users\\Tiger\\.nuget\\packages\\",
-      "outputPath": "G:\\xxx\\EasyExtractUnitypackage\\EasyExtractUnitypackage\\EasyExtractUnitypackageRework\\obj\\",
+      "outputPath": "G:\\xxx\\TEST\\EasyExtractUnitypackage\\EasyExtractUnitypackageRework\\obj\\",
       "projectStyle": "PackageReference",
       "skipContentFileWrite": true,
-      "fallbackFolders": [
-        "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
-      ],
       "configFilePaths": [
-        "C:\\Users\\Tiger\\AppData\\Roaming\\NuGet\\NuGet.Config",
-        "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
-        "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
+        "C:\\Users\\Tiger\\AppData\\Roaming\\NuGet\\NuGet.Config"
       ],
       "originalTargetFrameworks": [
-        "net472"
+        "net481"
       ],
       "sources": {
-        "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
         "https://api.nuget.org/v3/index.json": {}
       },
       "frameworks": {
-        "net472": {
+        "net481": {
           "projectReferences": {}
         }
       }
     },
     "frameworks": {
-      "net472": {
+      "net481": {
         "dependencies": {
           "Costura.Fody": {
             "include": "Runtime, Build, Native, ContentFiles, Analyzers, BuildTransitive",
             "suppressParent": "All",
             "target": "Package",
-            "version": "[5.7.0, )"
+            "version": "[5.8.0-alpha0098, )"
           },
           "MahApps.Metro.IconPacks": {
             "target": "Package",
@@ -8024,11 +9154,11 @@
           },
           "Microsoft.Toolkit.Uwp.Notifications": {
             "target": "Package",
-            "version": "[7.1.2, )"
+            "version": "[7.1.3-rc, )"
           },
           "SharpZipLib": {
             "target": "Package",
-            "version": "[1.3.3, )"
+            "version": "[1.4.0, )"
           }
         }
       }
