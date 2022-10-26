@@ -1,5 +1,5 @@
 ﻿# EasyExtractUnitypackage
-EasyExtractUnitypackage is a Program to get files out of a .unitypackage without importing them into unity.
+EasyExtractUnitypackage is a Software to get files out of a .unitypackage without importing them into unity.
 
 ![NVIDIA_Share_7IW0tKkgW2 (1)](https://user-images.githubusercontent.com/47220014/161437797-c8ed8c22-1d7b-47df-b323-7183c44966c9.gif)
 
