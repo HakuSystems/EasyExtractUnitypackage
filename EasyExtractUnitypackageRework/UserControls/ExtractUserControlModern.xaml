@@ -1,0 +1,121 @@
+﻿<UserControl x:Class="EasyExtractUnitypackageRework.UserControls.ExtractUserControlModern"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+             mc:Ignorable="d"
+             d:DesignHeight="650" d:DesignWidth="850" Background="#1c1d20"
+             AllowDrop="True">
+
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="445*" />
+            <ColumnDefinition Width="445*" />
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="35*" />
+            <RowDefinition Height="35*" />
+        </Grid.RowDefinitions>
+
+
+        <materialDesign:TransitioningContent>
+            <materialDesign:TransitioningContent.OpeningEffects>
+                <materialDesign:TransitionEffect Kind="FadeIn" />
+            </materialDesign:TransitioningContent.OpeningEffects>
+            <Grid HorizontalAlignment="Left" VerticalAlignment="Top" Margin="15" x:Name="ExtractionToolBox">
+                <Border Background="#1c1d20" BorderThickness="1" CornerRadius="0,0,15,15"
+
+                        DragEnter="UIElement_OnDragEnter"
+                        DragLeave="UIElement_OnDragLeave"
+                        Drop="UIElement_OnDrop">
+                    <Border.Effect>
+                        <DropShadowEffect ShadowDepth="2" Direction="0" Color="#1B1D1E" Opacity="0.25" BlurRadius="50" />
+                    </Border.Effect>
+                </Border>
+                <StackPanel Orientation="Vertical" Margin="25">
+                    <MediaElement x:Name="ExtractMedia" Visibility="Collapsed" Width="255" Height="155"
+                                  LoadedBehavior="Manual" Stretch="Fill" MediaEnded="MediaElement_OnMediaEnded" />
+                    <Image x:Name="ExtractImage" Source="{DynamicResource EasyExtractLogoBig}" Stretch="UniformToFill"
+                           Width="145" Height="145" />
+                    <TextBlock Foreground="White"
+                               Margin="35"
+                               Text="Drag and Drop .unitypackage File to extract it."
+                               x:Name="DragDropInformation"
+                               HorizontalAlignment="Center" />
+                </StackPanel>
+                <StackPanel Orientation="Horizontal" VerticalAlignment="Bottom" HorizontalAlignment="Center">
+                    <Label HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="White"
+                           x:Name="ExtractionStatus" Height="25" />
+                    <ProgressBar Style="{DynamicResource MaterialDesignCircularProgressBar}" Visibility="Collapsed"
+                                 Background="Transparent" BorderBrush="Transparent" x:Name="progressBar" />
+
+                    <Button Style="{DynamicResource EasyTextButton.style}"
+                            x:Name="SearchInsBtn"
+                            Click="Search_OnClick"
+                            Margin="10"
+                            Foreground="White"
+                            Content="Manual Search Instead" />
+                </StackPanel>
+            </Grid>
+        </materialDesign:TransitioningContent>
+
+        <Grid Grid.Row="1">
+            <TreeView Foreground="White" x:Name="AssetTreeView" />
+        </Grid>
+        <Grid Grid.Column="1" Visibility="Collapsed" x:Name="NextStepGrid">
+            <materialDesign:Card Background="{DynamicResource MaterialDesignDarkSeparatorBackground}">
+                <StackPanel>
+                    <Label Content="Please Take Action" Foreground="Green" />
+                    <TextBlock TextWrapping="WrapWithOverflow" x:Name="TutorialText" Text="Instruction Text"
+                               Margin="10" Foreground="White" />
+                    <Button
+                        x:Name="ExtractAllBtn"
+                        Click="ExtractAllBtn_OnClick"
+                        Style="{DynamicResource MaterialDesignFlatButton}"
+                        Margin="10"
+                        Foreground="White"
+                        Content="Extract Everything" />
+                    <Label Content="Files to extract" Visibility="Collapsed" x:Name="FilesToExtractTxt"
+                           HorizontalAlignment="Center" Foreground="DarkGray" />
+                    <TreeView Foreground="White" x:Name="ToExtractContentListBox" />
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                        <Button
+                            x:Name="ExtractSelectedBtn"
+                            Click="ExtractSelectedBtn_OnClick"
+                            IsEnabled="False"
+                            Style="{DynamicResource MaterialDesignFlatButton}"
+                            Margin="10"
+                            Foreground="White"
+                            Content="Extract" />
+                        <Button
+                            x:Name="OpenFolderBtn"
+                            Click="OpenFolderBtn_OnClick"
+                            Style="{DynamicResource MaterialDesignFlatButton}"
+                            IsEnabled="False"
+                            Margin="10"
+                            Foreground="White"
+                            Content="Open Folder" />
+                        <Button
+                            x:Name="ContinueBtn"
+                            Click="ContinueBtn_OnClick"
+                            Style="{DynamicResource MaterialDesignFlatButton}"
+                            IsEnabled="False"
+                            Margin="10"
+                            Foreground="White"
+                            Content="Continue" />
+                    </StackPanel>
+                </StackPanel>
+            </materialDesign:Card>
+        </Grid>
+        <Grid Row="1" x:Name="QueueGrid" Visibility="Collapsed" Column="1">
+            <Label Foreground="DarkGray" HorizontalAlignment="Center" VerticalAlignment="Top" Margin="5"
+                   Content="Queue" />
+            <Border BorderBrush="White" Background="Transparent" BorderThickness="1" CornerRadius="15">
+                <TreeView x:Name="QueueListBox" Foreground="White" Margin="30" />
+            </Border>
+            <Button x:Name="QueueStartBtn" Click="QueueStartBtn_OnClick" Content="Start Extraction" Foreground="White"
+                    BorderThickness="0,1,0,0" Background="Transparent" VerticalAlignment="Bottom" />
+        </Grid>
+    </Grid>
+</UserControl>

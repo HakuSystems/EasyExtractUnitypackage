@@ -1,26 +1,32 @@
 {
   "format": 1,
   "restore": {
-    "G:\\xxx\\TEST\\EasyExtractUnitypackage\\EasyExtractUnitypackageRework\\EasyExtractUnitypackageRework.csproj": {}
+    "G:\\xxx\\EasyExtractUnitypackage\\EasyExtractUnitypackageRework\\EasyExtractUnitypackageRework.csproj": {}
   },
   "projects": {
-    "G:\\xxx\\TEST\\EasyExtractUnitypackage\\EasyExtractUnitypackageRework\\EasyExtractUnitypackageRework.csproj": {
+    "G:\\xxx\\EasyExtractUnitypackage\\EasyExtractUnitypackageRework\\EasyExtractUnitypackageRework.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "G:\\xxx\\TEST\\EasyExtractUnitypackage\\EasyExtractUnitypackageRework\\EasyExtractUnitypackageRework.csproj",
-        "projectName": "EasyExtractUnitypackageRework.csproj",
-        "projectPath": "G:\\xxx\\TEST\\EasyExtractUnitypackage\\EasyExtractUnitypackageRework\\EasyExtractUnitypackageRework.csproj",
+        "projectUniqueName": "G:\\xxx\\EasyExtractUnitypackage\\EasyExtractUnitypackageRework\\EasyExtractUnitypackageRework.csproj",
+        "projectName": "EasyExtractUnitypackageRework",
+        "projectPath": "G:\\xxx\\EasyExtractUnitypackage\\EasyExtractUnitypackageRework\\EasyExtractUnitypackageRework.csproj",
         "packagesPath": "C:\\Users\\Tiger\\.nuget\\packages\\",
-        "outputPath": "G:\\xxx\\TEST\\EasyExtractUnitypackage\\EasyExtractUnitypackageRework\\obj\\",
+        "outputPath": "G:\\xxx\\EasyExtractUnitypackage\\EasyExtractUnitypackageRework\\obj\\",
         "projectStyle": "PackageReference",
         "skipContentFileWrite": true,
+        "fallbackFolders": [
+          "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
+        ],
         "configFilePaths": [
-          "C:\\Users\\Tiger\\AppData\\Roaming\\NuGet\\NuGet.Config"
+          "C:\\Users\\Tiger\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
         "originalTargetFrameworks": [
           "net481"
         ],
         "sources": {
+          "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
           "https://api.nuget.org/v3/index.json": {}
         },
         "frameworks": {
@@ -33,18 +39,35 @@
         "net481": {
           "dependencies": {
             "Costura.Fody": {
-              "include": "Runtime, Build, Native, ContentFiles, Analyzers, BuildTransitive",
               "suppressParent": "All",
               "target": "Package",
               "version": "[5.8.0-alpha0098, )"
+            },
+            "Fody": {
+              "include": "Runtime, Build, Native, ContentFiles, Analyzers, BuildTransitive",
+              "suppressParent": "All",
+              "target": "Package",
+              "version": "[6.6.4, )"
             },
             "MahApps.Metro.IconPacks": {
               "target": "Package",
               "version": "[4.11.0, )"
             },
+            "MaterialDesignColors": {
+              "target": "Package",
+              "version": "[2.1.0-ci350, )"
+            },
+            "MaterialDesignThemes": {
+              "target": "Package",
+              "version": "[4.7.0-ci350, )"
+            },
             "Microsoft.Toolkit.Uwp.Notifications": {
               "target": "Package",
-              "version": "[7.1.3-rc, )"
+              "version": "[7.1.3, )"
+            },
+            "Newtonsoft.Json": {
+              "target": "Package",
+              "version": "[13.0.2-beta2, )"
             },
             "SharpZipLib": {
               "target": "Package",
