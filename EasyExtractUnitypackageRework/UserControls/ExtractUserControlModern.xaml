@@ -6,7 +6,12 @@
              xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
              mc:Ignorable="d"
              d:DesignHeight="650" d:DesignWidth="850" Background="#1c1d20"
-             AllowDrop="True">
+             AllowDrop="True"
+             DragEnter="UIElement_OnDragEnter"
+             DragLeave="UIElement_OnDragLeave"
+             Drop="UIElement_OnDrop"
+             Loaded="ExtractUserControlModern_OnLoaded"
+             >
 
     <Grid>
         <Grid.ColumnDefinitions>
@@ -24,11 +29,7 @@
                 <materialDesign:TransitionEffect Kind="FadeIn" />
             </materialDesign:TransitioningContent.OpeningEffects>
             <Grid HorizontalAlignment="Left" VerticalAlignment="Top" Margin="15" x:Name="ExtractionToolBox">
-                <Border Background="#1c1d20" BorderThickness="1" CornerRadius="0,0,15,15"
-
-                        DragEnter="UIElement_OnDragEnter"
-                        DragLeave="UIElement_OnDragLeave"
-                        Drop="UIElement_OnDrop">
+                <Border Background="#1c1d20" BorderThickness="1" CornerRadius="0,0,15,15">
                     <Border.Effect>
                         <DropShadowEffect ShadowDepth="2" Direction="0" Color="#1B1D1E" Opacity="0.25" BlurRadius="50" />
                     </Border.Effect>
@@ -60,13 +61,13 @@
             </Grid>
         </materialDesign:TransitioningContent>
 
-        <Grid Grid.Row="1">
+        <Grid Grid.Row="1" ZIndex="1">
             <TreeView Foreground="White" x:Name="AssetTreeView" />
         </Grid>
-        <Grid Grid.Column="1" Visibility="Collapsed" x:Name="NextStepGrid">
+        <Grid Grid.Column="1" Grid.RowSpan="2" Visibility="Collapsed" x:Name="NextStepGrid">
             <materialDesign:Card Background="{DynamicResource MaterialDesignDarkSeparatorBackground}">
                 <StackPanel>
-                    <Label Content="Please Take Action" Foreground="Green" />
+                    <Label Content="Please Take Action" Foreground="Green"/>
                     <TextBlock TextWrapping="WrapWithOverflow" x:Name="TutorialText" Text="Instruction Text"
                                Margin="10" Foreground="White" />
                     <Button
@@ -76,9 +77,6 @@
                         Margin="10"
                         Foreground="White"
                         Content="Extract Everything" />
-                    <Label Content="Files to extract" Visibility="Collapsed" x:Name="FilesToExtractTxt"
-                           HorizontalAlignment="Center" Foreground="DarkGray" />
-                    <TreeView Foreground="White" x:Name="ToExtractContentListBox" />
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
                         <Button
                             x:Name="ExtractSelectedBtn"
@@ -105,14 +103,23 @@
                             Foreground="White"
                             Content="Continue" />
                     </StackPanel>
+                    <Label Content="Files to extract" Margin="5" Visibility="Collapsed" x:Name="FilesToExtractTxt"
+                           HorizontalAlignment="Center" Foreground="DarkGray" />
+                    <Grid>
+                        <ScrollViewer Foreground="White" CanContentScroll="True" VerticalScrollBarVisibility="Auto">
+                            <TreeView Foreground="White" x:Name="ToExtractContentListBox"/>
+                        </ScrollViewer>
+                    </Grid>
                 </StackPanel>
             </materialDesign:Card>
         </Grid>
-        <Grid Row="1" x:Name="QueueGrid" Visibility="Collapsed" Column="1">
+        <Grid Row="1" x:Name="QueueGrid" VerticalAlignment="Bottom" Visibility="Collapsed" Column="1">
             <Label Foreground="DarkGray" HorizontalAlignment="Center" VerticalAlignment="Top" Margin="5"
                    Content="Queue" />
             <Border BorderBrush="White" Background="Transparent" BorderThickness="1" CornerRadius="15">
-                <TreeView x:Name="QueueListBox" Foreground="White" Margin="30" />
+                <ScrollViewer Foreground="White" CanContentScroll="True" VerticalScrollBarVisibility="Auto">
+                    <TreeView x:Name="QueueListBox" Foreground="White" Margin="30" />
+                </ScrollViewer>
             </Border>
             <Button x:Name="QueueStartBtn" Click="QueueStartBtn_OnClick" Content="Start Extraction" Foreground="White"
                     BorderThickness="0,1,0,0" Background="Transparent" VerticalAlignment="Bottom" />

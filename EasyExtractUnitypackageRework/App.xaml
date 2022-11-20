@@ -13,6 +13,7 @@
             </ResourceDictionary.MergedDictionaries>
             <BitmapImage x:Key="EasyExtractLogoBig" UriSource="Theme/Icon - Logo/Big/EEUP_IconBig@4x.png" />
             <BitmapImage x:Key="EasyExtractLogoSmall" UriSource="Theme/Icon - Logo/Small/EEUP_IconSmall@4x.png" />
+            <BitmapImage x:Key="EverythingLogo" UriSource="Theme/Icon - Logo/EverythingLogo.png" />
         </ResourceDictionary>
     </Application.Resources>
 </Application>

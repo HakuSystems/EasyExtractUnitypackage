@@ -24,6 +24,8 @@ public partial class SettingsUserControlModern : UserControl
         RandomTxt.Text = GetRandomText.RandomText();
         if (Config.Config.HeartERPEasterEgg)
             ERPEasterEgg.Visibility = Visibility.Visible;
+        
+        WindowsDescription.Text = $"Current State: {(Config.Config.WindowsNotification ? "Enabled" : "Disabled")}";
     }
 
     private void DefaultTempPathCheckbox_OnChecked(object sender, RoutedEventArgs e)
@@ -56,6 +58,20 @@ public partial class SettingsUserControlModern : UserControl
     {
         ((ModernMainWindow)Window.GetWindow(this))!.WindowTitleEasy.Text = "EasyExtractUwUnitypacakge";
         Config.Config.UwUifyer = true;
+        Config.Config.UpdateConfig();
+    }
+
+    private void WindowsCheckBox_OnChecked(object sender, RoutedEventArgs e)
+    {
+        WindowsDescription.Text = "Current State: Enabled";
+        Config.Config.WindowsNotification = true;
+        Config.Config.UpdateConfig();
+    }
+
+    private void WindowsCheckBox_OnUnchecked(object sender, RoutedEventArgs e)
+    {
+        WindowsDescription.Text = "Current State: Disabled";
+        Config.Config.WindowsNotification = false;
         Config.Config.UpdateConfig();
     }
 }

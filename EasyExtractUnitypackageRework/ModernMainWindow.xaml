@@ -51,29 +51,19 @@
                 <materiaDesign:Card x:Name="disableTop" Background="{StaticResource MaterialDesignDarkBackground}"
                                     Grid.ColumnSpan="10">
                     <Grid>
-
                         <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" Margin="5,0,5,0">
                             <Button Foreground="White"
-                                    ToolTip="(Work in Progress)"
-                                    Style="{DynamicResource MaterialDesignIconButton}"
+                                    Click="SearchComputerBtn_OnClick"
+                                    Style="{DynamicResource MaterialDesignFlatButton}"
                                     x:Name="SearchComputerBtn">
                                 <Button.Content>
-                                    <materiaDesign:PackIcon Kind="Search" Foreground="White" />
+                                    <StackPanel Orientation="Horizontal">
+                                    <materiaDesign:PackIcon Margin="5" Kind="Search" Foreground="White" />
+                                    <TextBlock Foreground="White" Margin="5" VerticalAlignment="Center" Text="Search Computer with Search Everything"/>
+                                        
+                                    </StackPanel>
                                 </Button.Content>
                             </Button>
-                            <TextBox HorizontalContentAlignment="Left"
-                                     ToolTip="(Work in Progress)"
-                                     VerticalContentAlignment="Center"
-                                     x:Name="SearchBox"
-                                     Width="250"
-                                     Style="{DynamicResource MaterialDesignFloatingHintTextBox}"
-                                     materiaDesign:HintAssist.Hint="Search Unitypackage on Computer"
-                                     Height="45" FontSize="15"
-                                     Foreground="White"
-                                     VerticalAlignment="Top"
-                                     HorizontalAlignment="Left"
-                                     Background="Transparent"
-                                     BorderThickness="0" />
                         </StackPanel>
 
                         <TextBlock Text="EasyExtractUnitypackage" x:Name="WindowTitleEasy" FontSize="20"

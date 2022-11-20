@@ -10,22 +10,18 @@ using System.Windows.Media;
 using EasyExtractUnitypackageRework.Theme.MessageBox;
 using ICSharpCode.SharpZipLib.GZip;
 using ICSharpCode.SharpZipLib.Tar;
+using Microsoft.Toolkit.Uwp.Notifications;
 using Microsoft.Win32;
 
 namespace EasyExtractUnitypackageRework.UserControls;
 
 public partial class ExtractUserControlModern : UserControl
 {
-    //todo: BUG fix drag drop for multiple files
-    //todo: BUG listview scrollbar thing in assets to extract
-
-    //todo: NEED TO BE IMPLEMENTED SEARCHEVERYTHING IMPLEMENTATION
-
-
     public ExtractUserControlModern()
     {
         InitializeComponent();
     }
+
 
     private void Search_OnClick(object sender, RoutedEventArgs e)
     {
@@ -40,6 +36,12 @@ public partial class ExtractUserControlModern : UserControl
         foreach (var filepath in files)
             if (files.Length > 1)
             {
+                if (!filepath.EndsWith(".unitypackage"))
+                {
+                    new EasyMessageBox("The file you selected is not a unitypackage file.", MessageType.Error,
+                        MessageButtons.Ok).ShowDialog();
+                    return;
+                }
                 QueueGrid.Visibility = Visibility.Visible;
                 QueueGrid.IsEnabled = true;
                 QueueListBox.Items.Add(filepath);
@@ -58,7 +60,6 @@ public partial class ExtractUserControlModern : UserControl
                 MessageButtons.Ok).ShowDialog();
             return;
         }
-
         progressBar.Visibility = Visibility.Visible;
         progressBar.IsIndeterminate = true;
         var tempFolder = Path.Combine(Config.Config.UseDefaultTempPath
@@ -160,6 +161,12 @@ public partial class ExtractUserControlModern : UserControl
         foreach (var filepath in files)
             if (files.Length > 1)
             {
+                if (!filepath.EndsWith(".unitypackage"))
+                {
+                    new EasyMessageBox("The file you selected is not a unitypackage file.", MessageType.Error,
+                        MessageButtons.Ok).ShowDialog();
+                    return;
+                }
                 QueueGrid.Visibility = Visibility.Visible;
                 QueueGrid.IsEnabled = true;
                 QueueListBox.Items.Add(filepath);
@@ -254,11 +261,11 @@ public partial class ExtractUserControlModern : UserControl
         ExtractAllBtn.IsEnabled = true;
         ExtractionStatus.Content = "Waiting for Actions...";
         progressBar.IsIndeterminate = true;
-
+        
         TutorialText.Text =
             "Step 2: Select the files you want to extract by DOUBLE clicking on them. files will be displayed in a list below." +
             "when you are done, click on the Extract button to extract the files. after that, you can click on the Open Folder Button" +
-            " to continue. or Press the Continue button to Continue with the Queue. if there is one.";
+            $" to continue. or Press the Continue button to Continue with the Queue. if there is one.";
     }
 
     private void ExtractAllBtn_OnClick(object sender, RoutedEventArgs e)
@@ -293,6 +300,8 @@ public partial class ExtractUserControlModern : UserControl
             Config.Config.TotalFilesExtracted.ToString();
         ((ModernMainWindow)Window.GetWindow(this))!.TotalUnityExLabeltrac.Content =
             Config.Config.TotalUnitypackgesExtracted.ToString();
+        WNotification(files);
+        
     }
 
     private void ExtractSelectedBtn_OnClick(object sender, RoutedEventArgs e)
@@ -310,12 +319,12 @@ public partial class ExtractUserControlModern : UserControl
 
             File.Delete(file);
         }
-
-        //delete all empty folders and ignore the root folder
+        
         var folders = Directory.GetDirectories(targetFolder, "*", SearchOption.AllDirectories);
         foreach (var folder in folders)
             if (Directory.GetFiles(folder).Length == 0 && Directory.GetDirectories(folder).Length == 0)
                 Directory.Delete(folder);
+        
         ContinueBtn.IsEnabled = true;
         OpenFolderBtn.IsEnabled = true;
         ExtractSelectedBtn.IsEnabled = false;
@@ -369,6 +378,7 @@ public partial class ExtractUserControlModern : UserControl
     private void StartQueue()
     {
         var item = QueueListBox.Items[0];
+        QueueGrid.Visibility = Visibility.Visible;
         QueueListBox.Items.Remove(item);
         Extract(item.ToString());
         QueueGrid.IsEnabled = false;
@@ -384,5 +394,28 @@ public partial class ExtractUserControlModern : UserControl
         ContinueBtn.IsEnabled = false;
         ((ModernMainWindow)Window.GetWindow(this))!.disableCard.IsEnabled = false;
         ((ModernMainWindow)Window.GetWindow(this))!.disableTop.IsEnabled = false;
+    }
+
+    private void ExtractUserControlModern_OnLoaded(object sender, RoutedEventArgs e)
+    {
+        var tempQueue = ((ModernMainWindow)Window.GetWindow(this))!._TempQueue;
+        if(tempQueue.Count == 0) return;
+        foreach (var item in tempQueue)
+            QueueListBox.Items.Add(item);
+        StartQueue();
+    }
+
+    private void WNotification(int assetCounter) // Windows Notification and data refresh
+    {
+        if (Config.Config.WindowsNotification)
+        {
+            new ToastContentBuilder()
+                .AddArgument("action", "viewConversation")
+                .AddArgument("conversationId", 9813)
+                .AddText("EasyExtract has finished extracting...")
+                // ReSharper disable once HeapView.BoxingAllocation
+                .AddText($"Extracted {assetCounter} files!")
+                .Show();
+        }
     }
 }

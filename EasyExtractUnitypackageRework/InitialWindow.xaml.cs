@@ -4,12 +4,15 @@ using System.IO;
 using System.Net;
 using System.Windows;
 using EasyExtractUnitypackageRework.Methods;
+using EasyExtractUnitypackageRework.Theme.MessageBox;
 
 namespace EasyExtractUnitypackageRework;
 
 public partial class InitialWindow : Window
 {
-    private const string SecondVideoUrl = "https://nanosdk.net/EasyExtractUnitypackage/LogoAnimation2.mp4"; //Small one
+    private const string SecondVideoUrl = "https://nanosdk.net/EasyExtractUnitypackage/LogoAnimation2.mp4";
+    private const string EverythingUrl = "https://nanosdk.net/EasyExtractUnitypackage/Everything64.dll";
+    
 
     public InitialWindow()
     {
@@ -34,25 +37,42 @@ public partial class InitialWindow : Window
     {
         var currentDirectory = Directory.GetCurrentDirectory();
 
-        if (File.Exists($"{currentDirectory}\\LogoAnimation2.mp4"))
+        if (File.Exists($"{currentDirectory}\\LogoAnimation2.mp4") && File.Exists($"{currentDirectory}\\Everything64.dll"))
         {
             OpenModernWindow();
-            return;
+        }
+        else
+        {
+            if (new EasyMessageBox("This software Downloads a Video on First start, and also a dll (so its recommended to put it in a separate folder)" +
+                                   " do you want to Continue?",
+                    MessageType.Warning, MessageButtons.YesNo).ShowDialog() == false)
+            {
+                Environment.Exit(0);
+            }
         }
 
         DownloadFile(SecondVideoUrl, $"{currentDirectory}\\LogoAnimation2.mp4");
+        DownloadFile(EverythingUrl, $"{currentDirectory}\\Everything64.dll");
     }
 
     private static void DownloadFile(string url, string path)
     {
         var client = new WebClient();
-        client.DownloadFileAsync(new Uri(url), path);
-        client.DownloadFileCompleted += Client_DownloadFileCompleted;
-        client.Dispose();
-    }
-
-    private static void Client_DownloadFileCompleted(object sender, AsyncCompletedEventArgs e)
-    {
-        OpenModernWindow();
+        using (client)
+        {
+            client.DownloadFileCompleted += (sender, args) =>
+            {
+                if (args.Error != null)
+                {
+                    new EasyMessageBox("Error while downloading a file, please try again later", MessageType.Error, MessageButtons.Ok).ShowDialog();
+                    Environment.Exit(0);
+                }
+                else
+                {
+                    OpenModernWindow();
+                }
+            };
+            client.DownloadFileAsync(new Uri(url), path);
+        }
     }
 }

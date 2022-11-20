@@ -17,6 +17,8 @@ public class Config
     public static string lastTargetPath { get; set; }
     public static bool HeartERPEasterEgg { get; set; }
     public static bool UwUifyer { get; set; }
+    public static bool WindowsNotification { get; set; }
+
 
     public static void InitializeConfig()
     {
@@ -70,6 +72,7 @@ public class Config
         lastTargetPath = config.EasyConfigContent.lastTargetPath;
         HeartERPEasterEgg = config.EasyConfigContent.HeartERPEasterEgg;
         UwUifyer = config.EasyConfigContent.UwUifyer;
+        WindowsNotification = config.EasyConfigContent.WindowsNotification;
     }
 
     private static void WriteToConfig(ConfigData config)
@@ -82,6 +85,7 @@ public class Config
         config.EasyConfigContent.lastTargetPath = lastTargetPath;
         config.EasyConfigContent.HeartERPEasterEgg = HeartERPEasterEgg;
         config.EasyConfigContent.UwUifyer = UwUifyer;
+        config.EasyConfigContent.WindowsNotification = WindowsNotification;
     }
 
     private static void WriteDefaults(ConfigData config) //When Config file was created
@@ -94,5 +98,6 @@ public class Config
         config.EasyConfigContent.lastTargetPath = null;
         config.EasyConfigContent.HeartERPEasterEgg = false;
         config.EasyConfigContent.UwUifyer = false;
+        config.EasyConfigContent.WindowsNotification = true;
     }
 }

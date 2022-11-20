@@ -1,9 +1,11 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Media;
 using EasyExtractUnitypackageRework.Methods;
+using EasyExtractUnitypackageRework.Theme.MessageBox;
 
 namespace EasyExtractUnitypackageRework;
 
@@ -14,9 +16,12 @@ public partial class ModernMainWindow : Window
         InitializeComponent();
     }
 
+    public List<string> _TempQueue = new List<string>();
+
 
     private void ModernMainWindow_OnLoaded(object sender, RoutedEventArgs e)
     {
+        _TempQueue.Clear();
         //bool ? true : false
         UpdateInfo.Text =
             Updater.IsUpdateAvailable
@@ -25,11 +30,11 @@ public partial class ModernMainWindow : Window
         //so this will always be false
         Frame.Navigate(new Uri("UserControls/ExtractUserControlModern.xaml", UriKind.Relative));
         Config.Config.GoFrame = "UserControls/ExtractUserControlModern.xaml";
-        Config.Config.UpdateConfig();
         versionTxt.Text = $"V{Application.ResourceAssembly.GetName().Version}";
         TotalFilesExLabeltrac.Content = Config.Config.TotalFilesExtracted.ToString();
         TotalUnityExLabeltrac.Content = Config.Config.TotalUnitypackgesExtracted.ToString();
         Config.Config.HeartERPEasterEgg = false;
+        Config.Config.UpdateConfig();
     }
 
     private void SettingsBtn_OnClick(object sender, RoutedEventArgs e)
@@ -81,5 +86,12 @@ public partial class ModernMainWindow : Window
     {
         heartBtnEasterEgg.Foreground = new SolidColorBrush(Color.FromRgb(255, 0, 0));
         Config.Config.HeartERPEasterEgg = true;
+    }
+
+    private void SearchComputerBtn_OnClick(object sender, RoutedEventArgs e)
+    {
+        Frame.Navigate(new Uri("UserControls/SearchEverything.xaml", UriKind.Relative));
+        Config.Config.GoFrame = "UserControls/SearchEverything.xaml";
+        Config.Config.UpdateConfig();
     }
 }

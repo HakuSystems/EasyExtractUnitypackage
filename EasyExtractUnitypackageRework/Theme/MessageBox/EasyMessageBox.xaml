@@ -3,110 +3,102 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:EasyExtractUnitypackageRework.Theme.MessageBox"
-        xmlns:icons="http://metro.mahapps.com/winfx/xaml/iconpacks"
+        xmlns:materialdesign="http://materialdesigninxaml.net/winfx/xaml/themes"
         mc:Ignorable="d"
-        Title="EasyMessageBox" Height="230" Width="510" 
+        Title="EasyMessageBox" Height="230" Width="506"
         WindowStartupLocation="CenterScreen"
         WindowStyle="None"
-        Background="#1B1D1E"
-        BorderBrush="#FFCC3B5D"
-        AllowsTransparency="True"
-        ResizeMode="NoResize"
-        BorderThickness="0,1,0,1"
+        MinHeight="230"
+        MinWidth="510"
+        ResizeMode="CanResize"
+        Background="{DynamicResource MaterialDesignDarkBackground}"
         Topmost="True"
         ShowInTaskbar="False"
-        >
-    
-    <Window.Clip>
-        <RectangleGeometry Rect="0,0,510,230" RadiusX="25" RadiusY="25"/>
-    </Window.Clip>
+        AllowsTransparency="True">
 
     <Grid>
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="197*"/>
-            <ColumnDefinition Width="295*"/>
+            <ColumnDefinition Width="128*" />
+            <ColumnDefinition Width="127*" />
         </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
-            <RowDefinition Height="auto"/>
-            <RowDefinition Height="*"/>
+            <RowDefinition Height="auto" />
+            <RowDefinition Height="51*" />
+            <RowDefinition Height="44*"/>
+            <RowDefinition Height="88*"/>
         </Grid.RowDefinitions>
         <StackPanel Orientation="Horizontal">
-            <TextBlock x:Name="txtTitle" HorizontalAlignment="Left" Foreground="White" VerticalAlignment="Stretch" FontSize="20" Margin="10" >Message Title</TextBlock>
+            <TextBlock x:Name="txtTitle"
+                       Style="{StaticResource MaterialDesignHeadline6TextBlock}"
+                       HorizontalAlignment="Left" Foreground="White" VerticalAlignment="Stretch" FontSize="20"
+                       Margin="10">
+                Message Title
+            </TextBlock>
         </StackPanel>
-        <StackPanel  HorizontalAlignment="Right" Margin="0,5,5,0"  VerticalAlignment="Top" Grid.Column="1">
-            <Button x:Name="BtnClose" Click="BtnClose_Click" Style="{DynamicResource EasyButton.style}" Height="30" Width="30" Foreground="White" Margin="175,0,0,0">
+        <StackPanel HorizontalAlignment="Right" VerticalAlignment="Top" Grid.Row="0" Grid.Column="1" Height="42" Width="201">
+            <Button x:Name="BtnClose" HorizontalAlignment="Right" Click="BtnClose_Click" Style="{StaticResource MaterialDesignFlatButton}"
+                    Foreground="White">
                 <Button.Content>
-                    <icons:MaterialDesign Kind="Close"/>
+                    <materialdesign:PackIcon Kind="Close" Foreground="White" />
                 </Button.Content>
             </Button>
         </StackPanel>
-        <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto" CanContentScroll="True" Grid.Row="1" Grid.ColumnSpan="2">
-            <Grid Grid.Row="1" Grid.ColumnSpan="2">
-                <Grid Margin="20">
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="auto"/>
-                        <RowDefinition Height="auto"/>
-                        <RowDefinition Height="*"/>
-                    </Grid.RowDefinitions>
-
-                    <Grid Grid.Row="0">
-                        <TextBlock 
-                            FontSize="20"
-                            x:Name="txtMessage"
-                            Text="Actual Mesasage"
-                                   Foreground="White"
-                            TextAlignment="Center"
-                            />
-                    </Grid>
-                    <Grid Grid.Row="1" Margin="0,20,0,5">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="auto"/>
-                            <ColumnDefinition Width="auto"/>
-                            <ColumnDefinition Width="*"/>
-                        </Grid.ColumnDefinitions>
-
-                        <Button x:Name="BtnOk"
-                                Style="{DynamicResource EasyButton.style}"
-                                     Click="BtnOk_Click"
-                                     Foreground="White"
-                                     Grid.Column="1"
-                                     Margin="5"
-                                     Width="100"
-                                     Content="OK"
-                                     />
-                        <Button x:Name="BtnCancel"
-                                     Style="{DynamicResource EasyButton.style}"
-                                     Click="BtnCancel_Click"
-                                     Foreground="White"
-                                     Grid.Column="2"
-                                     Margin="5"
-                                     Width="100"
-                                     Content="Cancel"
-                                     />
-                        <Button x:Name="BtnYes"
-                                Style="{DynamicResource EasyButton.style}"
-                                     Click="BtnYes_Click"
-                                     Foreground="White"
-                                     Grid.Column="1"
-                                     Margin="5"
-                                     Width="100"
-                                     Content="Yes"
-                                     />
-                        <Button x:Name="BtnNo"
-                                Style="{DynamicResource EasyButton.style}"
-                                     Click="BtnNo_Click"
-                                     Foreground="White"
-                                     Grid.Column="2"
-                                     Margin="5"
-                                     Width="100"
-                                     Content="No"
-                                     />
-                    </Grid>
-
-                </Grid>
-            </Grid>
-        </ScrollViewer>
+        <Grid ColumnSpan="2" Grid.Column="0" Grid.RowSpan="2" Grid.Row="1">
+            <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+                <TextBlock
+                    Margin="5"
+                    x:Name="txtMessage"
+                    Text="Actual Mesasage"
+                    Foreground="White"
+                    TextWrapping="Wrap"
+                    VerticalAlignment="Center"
+                    Style="{StaticResource MaterialDesignBody1TextBlock}"
+                    TextAlignment="Center" />
+            </ScrollViewer>
+            
+        </Grid>
+        <Grid Grid.Row="3"
+              Grid.ColumnSpan="2"
+              VerticalAlignment="Bottom"
+              Margin="0,20,0,5">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="auto" />
+                <ColumnDefinition Width="auto" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+            <Button x:Name="BtnOk"
+                            Style="{DynamicResource MaterialDesignFlatButton}"
+                            Click="BtnOk_Click"
+                            Foreground="White"
+                            Grid.Column="1"
+                            Margin="5"
+                            Width="100"
+                            Content="OK" />
+            <Button x:Name="BtnCancel"
+                            Style="{DynamicResource MaterialDesignFlatButton}"
+                            Click="BtnCancel_Click"
+                            Foreground="White"
+                            Grid.Column="2"
+                            Margin="5"
+                            Width="100"
+                            Content="Cancel" />
+            <Button x:Name="BtnYes"
+                            Style="{DynamicResource MaterialDesignFlatButton}"
+                            Click="BtnYes_Click"
+                            Foreground="White"
+                            Grid.Column="1"
+                            Margin="5"
+                            Width="100"
+                            Content="Yes" />
+            <Button x:Name="BtnNo"
+                            Style="{DynamicResource MaterialDesignFlatButton}"
+                            Click="BtnNo_Click"
+                            Foreground="White"
+                            Grid.Column="2"
+                            Margin="5"
+                            Width="100"
+                            Content="No" />
+        </Grid>
     </Grid>
 </Window>

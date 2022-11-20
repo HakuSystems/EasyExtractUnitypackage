@@ -17,6 +17,7 @@
     <Import Project="$(NuGetPackageRoot)costura.fody\5.8.0-alpha0098\build\Costura.Fody.props" Condition="Exists('$(NuGetPackageRoot)costura.fody\5.8.0-alpha0098\build\Costura.Fody.props')" />
   </ImportGroup>
   <PropertyGroup Condition=" '$(ExcludeRestorePackageImports)' != 'true' ">
-    <PkgMaterialDesignThemes Condition=" '$(PkgMaterialDesignThemes)' == '' ">C:\Users\Tiger\.nuget\packages\materialdesignthemes\4.7.0-ci350</PkgMaterialDesignThemes>
+    <PkgMicrosoft_Xaml_Behaviors_Wpf Condition=" '$(PkgMicrosoft_Xaml_Behaviors_Wpf)' == '' ">C:\Users\Tiger\.nuget\packages\microsoft.xaml.behaviors.wpf\1.1.39</PkgMicrosoft_Xaml_Behaviors_Wpf>
+    <PkgMaterialDesignThemes Condition=" '$(PkgMaterialDesignThemes)' == '' ">C:\Users\Tiger\.nuget\packages\materialdesignthemes\4.7.0-ci369</PkgMaterialDesignThemes>
   </PropertyGroup>
 </Project>

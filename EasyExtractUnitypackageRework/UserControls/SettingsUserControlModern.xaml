@@ -70,14 +70,17 @@
                                     BorderThickness="1" Margin="5" Content="OPEN FOLDER" Foreground="White" />
                         </StackPanel>
                     </materialDesign:Card>
-
-                    <materialDesign:Card Margin="0,5,0,5" IsEnabled="False" Background="{DynamicResource MaterialDesignDarkBackground}">
+                    
+                    <materialDesign:Card Margin="0,5,0,5" Background="{DynamicResource MaterialDesignDarkBackground}">
                         <StackPanel Orientation="Vertical">
-                            <Label Margin="15" FontSize="25" Content="Search Everything Settings" Foreground="White" />
-                            <TextBlock TextWrapping="Wrap" Margin="15,0,0,10" FontSize="15"
-                                       Text="(Work in Progress) We Implemented the ability to Search you whole Computer with EverythingSDK Standard it Searched Every Drive (Work in Progress)"
-                                       Foreground="White" />
-                            <StackPanel Orientation="Horizontal" />
+                            <Label Margin="15" FontSize="25" Content="Windows Notification" Foreground="White" />
+                            <TextBlock TextWrapping="Wrap" Margin="5" FontSize="15" Text="Current State:"
+                                       x:Name="WindowsDescription"
+                                       Foreground="DarkGray" />
+                            <CheckBox x:Name="WindowsCheckBox" Checked="WindowsCheckBox_OnChecked"
+                                      Unchecked="WindowsCheckBox_OnUnchecked"
+                                    Style="{DynamicResource MaterialDesignFlatButton}" BorderBrush="White"
+                                    BorderThickness="1" Margin="5" Content="Change State" Foreground="White" />
                         </StackPanel>
                     </materialDesign:Card>
                 </StackPanel>

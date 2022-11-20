@@ -55,11 +55,11 @@
             },
             "MaterialDesignColors": {
               "target": "Package",
-              "version": "[2.1.0-ci350, )"
+              "version": "[2.1.0-ci369, )"
             },
             "MaterialDesignThemes": {
               "target": "Package",
-              "version": "[4.7.0-ci350, )"
+              "version": "[4.7.0-ci369, )"
             },
             "Microsoft.Toolkit.Uwp.Notifications": {
               "target": "Package",
@@ -67,11 +67,11 @@
             },
             "Newtonsoft.Json": {
               "target": "Package",
-              "version": "[13.0.2-beta2, )"
+              "version": "[13.0.2-beta3, )"
             },
             "SharpZipLib": {
               "target": "Package",
-              "version": "[1.4.0, )"
+              "version": "[1.4.1, )"
             }
           }
         }

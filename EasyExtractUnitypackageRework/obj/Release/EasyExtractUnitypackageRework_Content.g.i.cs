@@ -8,6 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
+[assembly: System.Windows.Resources.AssemblyAssociatedContentFileAttribute("theme/icon%20-%20logo/1_everything.ico")]
 [assembly: System.Windows.Resources.AssemblyAssociatedContentFileAttribute("theme/icon%20-%20logo/bigicon.ico")]
 [assembly: System.Windows.Resources.AssemblyAssociatedContentFileAttribute("theme/icon%20-%20logo/smallicon.ico")]
 
