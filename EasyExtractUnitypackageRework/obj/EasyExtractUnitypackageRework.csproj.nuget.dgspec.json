@@ -1,21 +1,21 @@
 {
   "format": 1,
   "restore": {
-    "G:\\xxx\\EasyExtractUnitypackage\\EasyExtractUnitypackageRework\\EasyExtractUnitypackageRework.csproj": {}
+    "D:\\Rider Projects\\EasyExtractUnitypackage\\EasyExtractUnitypackageRework\\EasyExtractUnitypackageRework.csproj": {}
   },
   "projects": {
-    "G:\\xxx\\EasyExtractUnitypackage\\EasyExtractUnitypackageRework\\EasyExtractUnitypackageRework.csproj": {
+    "D:\\Rider Projects\\EasyExtractUnitypackage\\EasyExtractUnitypackageRework\\EasyExtractUnitypackageRework.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "G:\\xxx\\EasyExtractUnitypackage\\EasyExtractUnitypackageRework\\EasyExtractUnitypackageRework.csproj",
+        "projectUniqueName": "D:\\Rider Projects\\EasyExtractUnitypackage\\EasyExtractUnitypackageRework\\EasyExtractUnitypackageRework.csproj",
         "projectName": "EasyExtractUnitypackageRework",
-        "projectPath": "G:\\xxx\\EasyExtractUnitypackage\\EasyExtractUnitypackageRework\\EasyExtractUnitypackageRework.csproj",
-        "packagesPath": "C:\\Users\\Tiger\\.nuget\\packages\\",
-        "outputPath": "G:\\xxx\\EasyExtractUnitypackage\\EasyExtractUnitypackageRework\\obj\\",
+        "projectPath": "D:\\Rider Projects\\EasyExtractUnitypackage\\EasyExtractUnitypackageRework\\EasyExtractUnitypackageRework.csproj",
+        "packagesPath": "C:\\Users\\Shadow\\.nuget\\packages\\",
+        "outputPath": "D:\\Rider Projects\\EasyExtractUnitypackage\\EasyExtractUnitypackageRework\\obj\\",
         "projectStyle": "PackageReference",
         "skipContentFileWrite": true,
         "configFilePaths": [
-          "C:\\Users\\Tiger\\AppData\\Roaming\\NuGet\\NuGet.Config"
+          "C:\\Users\\Shadow\\AppData\\Roaming\\NuGet\\NuGet.Config"
         ],
         "originalTargetFrameworks": [
           "net481"
@@ -41,7 +41,7 @@
               "include": "Runtime, Build, Native, ContentFiles, Analyzers, BuildTransitive",
               "suppressParent": "All",
               "target": "Package",
-              "version": "[6.6.4, )"
+              "version": "[6.7.0, )"
             },
             "MahApps.Metro.IconPacks": {
               "target": "Package",
@@ -49,11 +49,11 @@
             },
             "MaterialDesignColors": {
               "target": "Package",
-              "version": "[2.1.0-ci369, )"
+              "version": "[2.1.4, )"
             },
             "MaterialDesignThemes": {
               "target": "Package",
-              "version": "[4.7.0-ci369, )"
+              "version": "[4.9.0, )"
             },
             "Microsoft.Toolkit.Uwp.Notifications": {
               "target": "Package",
@@ -61,11 +61,11 @@
             },
             "Newtonsoft.Json": {
               "target": "Package",
-              "version": "[13.0.2-beta3, )"
+              "version": "[13.0.3, )"
             },
             "SharpZipLib": {
               "target": "Package",
-              "version": "[1.4.1, )"
+              "version": "[1.4.2, )"
             }
           }
         }

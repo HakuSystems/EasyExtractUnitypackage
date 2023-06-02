@@ -3,6 +3,7 @@ using System.IO;
 using System.Windows;
 using EasyExtractUnitypackageRework.Models;
 using Newtonsoft.Json;
+using Formatting = System.Xml.Formatting;
 
 namespace EasyExtractUnitypackageRework.Config;
 
@@ -46,7 +47,7 @@ public class Config
             WriteDefaults(config);
             UpdateData(config);
 
-            var json = JsonConvert.SerializeObject(config, Formatting.Indented);
+            var json = JsonConvert.SerializeObject(config, (Newtonsoft.Json.Formatting)Formatting.Indented);
             File.WriteAllText(configPath, json);
         }
         else
@@ -57,7 +58,7 @@ public class Config
 
             WriteToConfig(config);
 
-            var json2 = JsonConvert.SerializeObject(config, Formatting.Indented);
+            var json2 = JsonConvert.SerializeObject(config, (Newtonsoft.Json.Formatting)Formatting.Indented);
             File.WriteAllText(configPath, json2);
         }
     }

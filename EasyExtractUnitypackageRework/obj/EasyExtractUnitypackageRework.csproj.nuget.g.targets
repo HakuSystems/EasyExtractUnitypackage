@@ -2,8 +2,8 @@
 <Project ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ImportGroup Condition=" '$(ExcludeRestorePackageImports)' != 'true' ">
     <Import Project="$(NuGetPackageRoot)system.runtime.windowsruntime\4.6.0\buildTransitive\net461\System.Runtime.WindowsRuntime.targets" Condition="Exists('$(NuGetPackageRoot)system.runtime.windowsruntime\4.6.0\buildTransitive\net461\System.Runtime.WindowsRuntime.targets')" />
-    <Import Project="$(NuGetPackageRoot)materialdesignthemes\4.7.0-ci369\build\MaterialDesignThemes.targets" Condition="Exists('$(NuGetPackageRoot)materialdesignthemes\4.7.0-ci369\build\MaterialDesignThemes.targets')" />
-    <Import Project="$(NuGetPackageRoot)fody\6.6.4\build\Fody.targets" Condition="Exists('$(NuGetPackageRoot)fody\6.6.4\build\Fody.targets')" />
+    <Import Project="$(NuGetPackageRoot)materialdesignthemes\4.9.0\build\MaterialDesignThemes.targets" Condition="Exists('$(NuGetPackageRoot)materialdesignthemes\4.9.0\build\MaterialDesignThemes.targets')" />
+    <Import Project="$(NuGetPackageRoot)fody\6.7.0\build\Fody.targets" Condition="Exists('$(NuGetPackageRoot)fody\6.7.0\build\Fody.targets')" />
     <Import Project="$(NuGetPackageRoot)costura.fody\5.8.0-alpha0098\build\Costura.Fody.targets" Condition="Exists('$(NuGetPackageRoot)costura.fody\5.8.0-alpha0098\build\Costura.Fody.targets')" />
   </ImportGroup>
 </Project>
