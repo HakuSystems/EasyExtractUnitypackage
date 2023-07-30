@@ -22,12 +22,6 @@ public partial class ModernMainWindow : Window
     private void ModernMainWindow_OnLoaded(object sender, RoutedEventArgs e)
     {
         _TempQueue.Clear();
-        //bool ? true : false
-        UpdateInfo.Text =
-            Updater.IsUpdateAvailable
-                ? "Update available!"
-                : "Welcome Back"; //Todo: INFORMATION currently the program will always be updated
-        //so this will always be false
         Frame.Navigate(new Uri("UserControls/ExtractUserControlModern.xaml", UriKind.Relative));
         Config.Config.GoFrame = "UserControls/ExtractUserControlModern.xaml";
         versionTxt.Text = $"V{Application.ResourceAssembly.GetName().Version}";
@@ -93,5 +87,15 @@ public partial class ModernMainWindow : Window
         Frame.Navigate(new Uri("UserControls/SearchEverything.xaml", UriKind.Relative));
         Config.Config.GoFrame = "UserControls/SearchEverything.xaml";
         Config.Config.UpdateConfig();
+    }
+
+    private void UpdateInfo_OnClick(object sender, RoutedEventArgs e)
+    {
+            if (new EasyMessageBox(
+                    "EasyExtractUnitypackage is currently not able to perform updates, neither play videos/audios. keep yourself updated on the official discord server for more information.",
+                    MessageType.Info, MessageButtons.Ok).ShowDialog() == true)
+            {
+                Process.Start("https://discord.com/invite/Wn7XfhPCyD");
+            }
     }
 }

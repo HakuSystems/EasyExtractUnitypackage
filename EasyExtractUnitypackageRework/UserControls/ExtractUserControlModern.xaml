@@ -36,7 +36,7 @@
                 </Border>
                 <StackPanel Orientation="Vertical" Margin="25">
                     <MediaElement x:Name="ExtractMedia" Visibility="Collapsed" Width="255" Height="155"
-                                  LoadedBehavior="Manual" Stretch="Fill" MediaEnded="MediaElement_OnMediaEnded" />
+                                  LoadedBehavior="Manual" Stretch="Fill" />
                     <Image x:Name="ExtractImage" Source="{DynamicResource EasyExtractLogoBig}" Stretch="UniformToFill"
                            Width="145" Height="145" />
                     <TextBlock Foreground="White"

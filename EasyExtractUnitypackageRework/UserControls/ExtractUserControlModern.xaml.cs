@@ -84,7 +84,7 @@ public partial class ExtractUserControlModern : UserControl
         var myNewThread = new Thread(() => TarGzExtract(filepath, tempFolder));
         myNewThread.Start();
 
-        PlayFinishedExtractedAnimation();
+        PlayFinishedExtractedAnimation(); //doesnt play shit, temporary fix
     }
 
     private void ProcessExtractedContent(string tempFolder, string targetFolder)
@@ -180,20 +180,9 @@ public partial class ExtractUserControlModern : UserControl
         Mouse.OverrideCursor = Cursors.Arrow;
     }
 
+    
     private void PlayFinishedExtractedAnimation()
     {
-        ExtractImage.IsEnabled = false;
-        ExtractImage.Visibility = Visibility.Collapsed;
-        ExtractMedia.Source = new Uri("LogoAnimation2.mp4", UriKind.Relative);
-        ExtractMedia.Visibility = Visibility.Visible;
-        ExtractMedia.Play();
-    }
-
-    private void MediaElement_OnMediaEnded(object sender, RoutedEventArgs e)
-    {
-        ((MediaElement)sender).Close();
-        ((MediaElement)sender).Source = null;
-        ((MediaElement)sender).Visibility = Visibility.Collapsed;
         ExtractImage.Visibility = Visibility.Visible;
 
         var targetFolder = $"{Config.Config.lastTargetPath}";
@@ -204,6 +193,7 @@ public partial class ExtractUserControlModern : UserControl
         LoadAssets(targetFolder, root);
         AssetTreeView.Items.Add(root);
     }
+    
 
     private void LoadAssets(string targetFolder, TreeViewItem root)
     {
@@ -261,11 +251,9 @@ public partial class ExtractUserControlModern : UserControl
         ExtractAllBtn.IsEnabled = true;
         ExtractionStatus.Content = "Waiting for Actions...";
         progressBar.IsIndeterminate = true;
-        
+
         TutorialText.Text =
-            "Step 2: Select the files you want to extract by DOUBLE clicking on them. files will be displayed in a list below." +
-            "when you are done, click on the Extract button to extract the files. after that, you can click on the Open Folder Button" +
-            $" to continue. or Press the Continue button to Continue with the Queue. if there is one.";
+            "Currently you can extract all files only, read notice on discord for more information";
     }
 
     private void ExtractAllBtn_OnClick(object sender, RoutedEventArgs e)

@@ -69,8 +69,6 @@
       <DependentUpon>InitialWindow.xaml</DependentUpon>
     </Compile>
     <Compile Include="Methods\Everything.cs" />
-    <Compile Include="Methods\GetRandomText.cs" />
-    <Compile Include="Methods\Updater.cs" />
     <Compile Include="Models\ConfigData.cs" />
     <Compile Include="ModernMainWindow.xaml.cs">
       <DependentUpon>ModernMainWindow.xaml</DependentUpon>

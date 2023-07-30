@@ -2431,6 +2431,1189 @@
         }
       }
     },
+    ".NETFramework,Version=v4.8.1/win-arm64": {
+      "Costura.Fody/5.8.0-alpha0098": {
+        "type": "package",
+        "dependencies": {
+          "Fody": "6.6.0",
+          "NETStandard.Library": "1.6.1"
+        },
+        "compile": {
+          "lib/netstandard1.0/Costura.dll": {
+            "related": ".pdb;.xml"
+          }
+        },
+        "runtime": {
+          "lib/netstandard1.0/Costura.dll": {
+            "related": ".pdb;.xml"
+          }
+        },
+        "build": {
+          "build/Costura.Fody.props": {},
+          "build/Costura.Fody.targets": {}
+        }
+      },
+      "Fody/6.7.0": {
+        "type": "package",
+        "build": {
+          "build/Fody.targets": {}
+        }
+      },
+      "MahApps.Metro.IconPacks/4.11.0": {
+        "type": "package",
+        "compile": {
+          "lib/net47/MahApps.Metro.IconPacks.BootstrapIcons.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net47/MahApps.Metro.IconPacks.BoxIcons.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net47/MahApps.Metro.IconPacks.Codicons.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net47/MahApps.Metro.IconPacks.Coolicons.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net47/MahApps.Metro.IconPacks.Core.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net47/MahApps.Metro.IconPacks.Entypo.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net47/MahApps.Metro.IconPacks.EvaIcons.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net47/MahApps.Metro.IconPacks.FeatherIcons.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net47/MahApps.Metro.IconPacks.FileIcons.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net47/MahApps.Metro.IconPacks.FontAwesome.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net47/MahApps.Metro.IconPacks.Fontaudio.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net47/MahApps.Metro.IconPacks.Fontisto.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net47/MahApps.Metro.IconPacks.ForkAwesome.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net47/MahApps.Metro.IconPacks.Ionicons.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net47/MahApps.Metro.IconPacks.JamIcons.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net47/MahApps.Metro.IconPacks.Material.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net47/MahApps.Metro.IconPacks.MaterialDesign.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net47/MahApps.Metro.IconPacks.MaterialLight.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net47/MahApps.Metro.IconPacks.Microns.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net47/MahApps.Metro.IconPacks.Modern.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net47/MahApps.Metro.IconPacks.Octicons.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net47/MahApps.Metro.IconPacks.PicolIcons.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net47/MahApps.Metro.IconPacks.PixelartIcons.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net47/MahApps.Metro.IconPacks.RPGAwesome.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net47/MahApps.Metro.IconPacks.RadixIcons.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net47/MahApps.Metro.IconPacks.RemixIcon.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net47/MahApps.Metro.IconPacks.SimpleIcons.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net47/MahApps.Metro.IconPacks.Typicons.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net47/MahApps.Metro.IconPacks.Unicons.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net47/MahApps.Metro.IconPacks.VaadinIcons.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net47/MahApps.Metro.IconPacks.WeatherIcons.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net47/MahApps.Metro.IconPacks.Zondicons.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net47/MahApps.Metro.IconPacks.dll": {
+            "related": ".BootstrapIcons.pdb;.BootstrapIcons.xml;.BoxIcons.pdb;.BoxIcons.xml;.Codicons.pdb;.Codicons.xml;.Coolicons.pdb;.Coolicons.xml;.Core.pdb;.Core.xml;.Entypo.pdb;.Entypo.xml;.EvaIcons.pdb;.EvaIcons.xml;.FeatherIcons.pdb;.FeatherIcons.xml;.FileIcons.pdb;.FileIcons.xml;.Fontaudio.pdb;.Fontaudio.xml;.FontAwesome.pdb;.FontAwesome.xml;.Fontisto.pdb;.Fontisto.xml;.ForkAwesome.pdb;.ForkAwesome.xml;.Ionicons.pdb;.Ionicons.xml;.JamIcons.pdb;.JamIcons.xml;.Material.pdb;.Material.xml;.MaterialDesign.pdb;.MaterialDesign.xml;.MaterialLight.pdb;.MaterialLight.xml;.Microns.pdb;.Microns.xml;.Modern.pdb;.Modern.xml;.Octicons.pdb;.Octicons.xml;.pdb;.PicolIcons.pdb;.PicolIcons.xml;.PixelartIcons.pdb;.PixelartIcons.xml;.RadixIcons.pdb;.RadixIcons.xml;.RemixIcon.pdb;.RemixIcon.xml;.RPGAwesome.pdb;.RPGAwesome.xml;.SimpleIcons.pdb;.SimpleIcons.xml;.Typicons.pdb;.Typicons.xml;.Unicons.pdb;.Unicons.xml;.VaadinIcons.pdb;.VaadinIcons.xml;.WeatherIcons.pdb;.WeatherIcons.xml;.xml;.Zondicons.pdb;.Zondicons.xml"
+          }
+        },
+        "runtime": {
+          "lib/net47/MahApps.Metro.IconPacks.BootstrapIcons.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net47/MahApps.Metro.IconPacks.BoxIcons.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net47/MahApps.Metro.IconPacks.Codicons.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net47/MahApps.Metro.IconPacks.Coolicons.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net47/MahApps.Metro.IconPacks.Core.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net47/MahApps.Metro.IconPacks.Entypo.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net47/MahApps.Metro.IconPacks.EvaIcons.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net47/MahApps.Metro.IconPacks.FeatherIcons.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net47/MahApps.Metro.IconPacks.FileIcons.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net47/MahApps.Metro.IconPacks.FontAwesome.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net47/MahApps.Metro.IconPacks.Fontaudio.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net47/MahApps.Metro.IconPacks.Fontisto.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net47/MahApps.Metro.IconPacks.ForkAwesome.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net47/MahApps.Metro.IconPacks.Ionicons.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net47/MahApps.Metro.IconPacks.JamIcons.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net47/MahApps.Metro.IconPacks.Material.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net47/MahApps.Metro.IconPacks.MaterialDesign.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net47/MahApps.Metro.IconPacks.MaterialLight.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net47/MahApps.Metro.IconPacks.Microns.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net47/MahApps.Metro.IconPacks.Modern.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net47/MahApps.Metro.IconPacks.Octicons.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net47/MahApps.Metro.IconPacks.PicolIcons.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net47/MahApps.Metro.IconPacks.PixelartIcons.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net47/MahApps.Metro.IconPacks.RPGAwesome.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net47/MahApps.Metro.IconPacks.RadixIcons.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net47/MahApps.Metro.IconPacks.RemixIcon.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net47/MahApps.Metro.IconPacks.SimpleIcons.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net47/MahApps.Metro.IconPacks.Typicons.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net47/MahApps.Metro.IconPacks.Unicons.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net47/MahApps.Metro.IconPacks.VaadinIcons.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net47/MahApps.Metro.IconPacks.WeatherIcons.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net47/MahApps.Metro.IconPacks.Zondicons.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net47/MahApps.Metro.IconPacks.dll": {
+            "related": ".BootstrapIcons.pdb;.BootstrapIcons.xml;.BoxIcons.pdb;.BoxIcons.xml;.Codicons.pdb;.Codicons.xml;.Coolicons.pdb;.Coolicons.xml;.Core.pdb;.Core.xml;.Entypo.pdb;.Entypo.xml;.EvaIcons.pdb;.EvaIcons.xml;.FeatherIcons.pdb;.FeatherIcons.xml;.FileIcons.pdb;.FileIcons.xml;.Fontaudio.pdb;.Fontaudio.xml;.FontAwesome.pdb;.FontAwesome.xml;.Fontisto.pdb;.Fontisto.xml;.ForkAwesome.pdb;.ForkAwesome.xml;.Ionicons.pdb;.Ionicons.xml;.JamIcons.pdb;.JamIcons.xml;.Material.pdb;.Material.xml;.MaterialDesign.pdb;.MaterialDesign.xml;.MaterialLight.pdb;.MaterialLight.xml;.Microns.pdb;.Microns.xml;.Modern.pdb;.Modern.xml;.Octicons.pdb;.Octicons.xml;.pdb;.PicolIcons.pdb;.PicolIcons.xml;.PixelartIcons.pdb;.PixelartIcons.xml;.RadixIcons.pdb;.RadixIcons.xml;.RemixIcon.pdb;.RemixIcon.xml;.RPGAwesome.pdb;.RPGAwesome.xml;.SimpleIcons.pdb;.SimpleIcons.xml;.Typicons.pdb;.Typicons.xml;.Unicons.pdb;.Unicons.xml;.VaadinIcons.pdb;.VaadinIcons.xml;.WeatherIcons.pdb;.WeatherIcons.xml;.xml;.Zondicons.pdb;.Zondicons.xml"
+          }
+        }
+      },
+      "MaterialDesignColors/2.1.4": {
+        "type": "package",
+        "compile": {
+          "lib/net462/MaterialDesignColors.dll": {
+            "related": ".pdb"
+          }
+        },
+        "runtime": {
+          "lib/net462/MaterialDesignColors.dll": {
+            "related": ".pdb"
+          }
+        }
+      },
+      "MaterialDesignThemes/4.9.0": {
+        "type": "package",
+        "dependencies": {
+          "MaterialDesignColors": "2.1.4",
+          "Microsoft.Xaml.Behaviors.Wpf": "1.1.39"
+        },
+        "compile": {
+          "lib/net462/MaterialDesignThemes.Wpf.dll": {
+            "related": ".pdb;.xml"
+          }
+        },
+        "runtime": {
+          "lib/net462/MaterialDesignThemes.Wpf.dll": {
+            "related": ".pdb;.xml"
+          }
+        },
+        "build": {
+          "build/MaterialDesignThemes.targets": {}
+        }
+      },
+      "Microsoft.NETCore.Platforms/1.1.0": {
+        "type": "package",
+        "compile": {
+          "lib/netstandard1.0/_._": {}
+        },
+        "runtime": {
+          "lib/netstandard1.0/_._": {}
+        }
+      },
+      "Microsoft.NETFramework.ReferenceAssemblies/1.0.0": {
+        "type": "package",
+        "dependencies": {
+          "Microsoft.NETFramework.ReferenceAssemblies.net48": "1.0.0"
+        }
+      },
+      "Microsoft.NETFramework.ReferenceAssemblies.net48/1.0.0": {
+        "type": "package",
+        "build": {
+          "build/_._": {}
+        }
+      },
+      "Microsoft.Toolkit.Uwp.Notifications/7.1.3": {
+        "type": "package",
+        "dependencies": {
+          "Microsoft.NETFramework.ReferenceAssemblies": "1.0.0",
+          "Microsoft.Windows.SDK.Contracts": "10.0.19041.1",
+          "System.ValueTuple": "4.5.0"
+        },
+        "compile": {
+          "lib/net461/Microsoft.Toolkit.Uwp.Notifications.dll": {
+            "related": ".pdb;.xml"
+          }
+        },
+        "runtime": {
+          "lib/net461/Microsoft.Toolkit.Uwp.Notifications.dll": {
+            "related": ".pdb;.xml"
+          }
+        }
+      },
+      "Microsoft.Win32.Primitives/4.3.0": {
+        "type": "package",
+        "frameworkAssemblies": [
+          "System",
+          "mscorlib"
+        ],
+        "compile": {
+          "ref/net46/Microsoft.Win32.Primitives.dll": {}
+        },
+        "runtime": {
+          "lib/net46/Microsoft.Win32.Primitives.dll": {}
+        }
+      },
+      "Microsoft.Windows.SDK.Contracts/10.0.19041.1": {
+        "type": "package",
+        "dependencies": {
+          "System.Runtime.WindowsRuntime": "4.6.0",
+          "System.Runtime.WindowsRuntime.UI.Xaml": "4.6.0"
+        },
+        "compile": {
+          "ref/netstandard2.0/Windows.AI.MachineLearning.MachineLearningContract.winmd": {},
+          "ref/netstandard2.0/Windows.AI.MachineLearning.Preview.MachineLearningPreviewContract.winmd": {},
+          "ref/netstandard2.0/Windows.ApplicationModel.Activation.ActivatedEventsContract.winmd": {},
+          "ref/netstandard2.0/Windows.ApplicationModel.Activation.ActivationCameraSettingsContract.winmd": {},
+          "ref/netstandard2.0/Windows.ApplicationModel.Activation.ContactActivatedEventsContract.winmd": {},
+          "ref/netstandard2.0/Windows.ApplicationModel.Activation.WebUISearchActivatedEventsContract.winmd": {},
+          "ref/netstandard2.0/Windows.ApplicationModel.Background.BackgroundAlarmApplicationContract.winmd": {},
+          "ref/netstandard2.0/Windows.ApplicationModel.Calls.Background.CallsBackgroundContract.winmd": {},
+          "ref/netstandard2.0/Windows.ApplicationModel.Calls.CallsPhoneContract.winmd": {},
+          "ref/netstandard2.0/Windows.ApplicationModel.Calls.CallsVoipContract.winmd": {},
+          "ref/netstandard2.0/Windows.ApplicationModel.Calls.LockScreenCallContract.winmd": {},
+          "ref/netstandard2.0/Windows.ApplicationModel.CommunicationBlocking.CommunicationBlockingContract.winmd": {},
+          "ref/netstandard2.0/Windows.ApplicationModel.FullTrustAppContract.winmd": {},
+          "ref/netstandard2.0/Windows.ApplicationModel.Preview.InkWorkspace.PreviewInkWorkspaceContract.winmd": {},
+          "ref/netstandard2.0/Windows.ApplicationModel.Preview.Notes.PreviewNotesContract.winmd": {},
+          "ref/netstandard2.0/Windows.ApplicationModel.Resources.Management.ResourceIndexerContract.winmd": {},
+          "ref/netstandard2.0/Windows.ApplicationModel.Search.Core.SearchCoreContract.winmd": {},
+          "ref/netstandard2.0/Windows.ApplicationModel.Search.SearchContract.winmd": {},
+          "ref/netstandard2.0/Windows.ApplicationModel.SocialInfo.SocialInfoContract.winmd": {},
+          "ref/netstandard2.0/Windows.ApplicationModel.StartupTaskContract.winmd": {},
+          "ref/netstandard2.0/Windows.ApplicationModel.Wallet.WalletContract.winmd": {},
+          "ref/netstandard2.0/Windows.Devices.Custom.CustomDeviceContract.winmd": {},
+          "ref/netstandard2.0/Windows.Devices.DevicesLowLevelContract.winmd": {},
+          "ref/netstandard2.0/Windows.Devices.Portable.PortableDeviceContract.winmd": {},
+          "ref/netstandard2.0/Windows.Devices.Printers.Extensions.ExtensionsContract.winmd": {},
+          "ref/netstandard2.0/Windows.Devices.Printers.PrintersContract.winmd": {},
+          "ref/netstandard2.0/Windows.Devices.Scanners.ScannerDeviceContract.winmd": {},
+          "ref/netstandard2.0/Windows.Devices.SmartCards.SmartCardBackgroundTriggerContract.winmd": {},
+          "ref/netstandard2.0/Windows.Devices.SmartCards.SmartCardEmulatorContract.winmd": {},
+          "ref/netstandard2.0/Windows.Devices.Sms.LegacySmsApiContract.winmd": {},
+          "ref/netstandard2.0/Windows.Embedded.DeviceLockdown.DeviceLockdownContract.winmd": {},
+          "ref/netstandard2.0/Windows.Foundation.FoundationContract.winmd": {},
+          "ref/netstandard2.0/Windows.Foundation.UniversalApiContract.winmd": {},
+          "ref/netstandard2.0/Windows.Gaming.Input.GamingInputPreviewContract.winmd": {},
+          "ref/netstandard2.0/Windows.Gaming.Preview.GamesEnumerationContract.winmd": {},
+          "ref/netstandard2.0/Windows.Gaming.UI.GameChatOverlayContract.winmd": {},
+          "ref/netstandard2.0/Windows.Gaming.UI.GamingUIProviderContract.winmd": {},
+          "ref/netstandard2.0/Windows.Gaming.XboxLive.StorageApiContract.winmd": {},
+          "ref/netstandard2.0/Windows.Globalization.GlobalizationJapanesePhoneticAnalyzerContract.winmd": {},
+          "ref/netstandard2.0/Windows.Graphics.Printing3D.Printing3DContract.winmd": {},
+          "ref/netstandard2.0/Windows.Management.Deployment.Preview.DeploymentPreviewContract.winmd": {},
+          "ref/netstandard2.0/Windows.Management.Workplace.WorkplaceSettingsContract.winmd": {},
+          "ref/netstandard2.0/Windows.Media.AppBroadcasting.AppBroadcastingContract.winmd": {},
+          "ref/netstandard2.0/Windows.Media.AppRecording.AppRecordingContract.winmd": {},
+          "ref/netstandard2.0/Windows.Media.Capture.AppBroadcastContract.winmd": {},
+          "ref/netstandard2.0/Windows.Media.Capture.AppCaptureContract.winmd": {},
+          "ref/netstandard2.0/Windows.Media.Capture.AppCaptureMetadataContract.winmd": {},
+          "ref/netstandard2.0/Windows.Media.Capture.CameraCaptureUIContract.winmd": {},
+          "ref/netstandard2.0/Windows.Media.Capture.GameBarContract.winmd": {},
+          "ref/netstandard2.0/Windows.Media.Devices.CallControlContract.winmd": {},
+          "ref/netstandard2.0/Windows.Media.MediaControlContract.winmd": {},
+          "ref/netstandard2.0/Windows.Media.Playlists.PlaylistsContract.winmd": {},
+          "ref/netstandard2.0/Windows.Media.Protection.ProtectionRenewalContract.winmd": {},
+          "ref/netstandard2.0/Windows.Networking.Connectivity.WwanContract.winmd": {},
+          "ref/netstandard2.0/Windows.Networking.NetworkOperators.LegacyNetworkOperatorsContract.winmd": {},
+          "ref/netstandard2.0/Windows.Networking.NetworkOperators.NetworkOperatorsFdnContract.WinMD": {},
+          "ref/netstandard2.0/Windows.Networking.Sockets.ControlChannelTriggerContract.winmd": {},
+          "ref/netstandard2.0/Windows.Networking.XboxLive.XboxLiveSecureSocketsContract.winmd": {},
+          "ref/netstandard2.0/Windows.Perception.Automation.Core.PerceptionAutomationCoreContract.winmd": {},
+          "ref/netstandard2.0/Windows.Phone.PhoneContract.winmd": {},
+          "ref/netstandard2.0/Windows.Phone.StartScreen.DualSimTileContract.WinMD": {},
+          "ref/netstandard2.0/Windows.Security.EnterpriseData.EnterpriseDataContract.winmd": {},
+          "ref/netstandard2.0/Windows.Security.ExchangeActiveSyncProvisioning.EasContract.winmd": {},
+          "ref/netstandard2.0/Windows.Security.Isolation.Isolatedwindowsenvironmentcontract.winmd": {},
+          "ref/netstandard2.0/Windows.Services.Maps.GuidanceContract.winmd": {},
+          "ref/netstandard2.0/Windows.Services.Maps.LocalSearchContract.winmd": {},
+          "ref/netstandard2.0/Windows.Services.Store.StoreContract.winmd": {},
+          "ref/netstandard2.0/Windows.Services.TargetedContent.TargetedContentContract.winmd": {},
+          "ref/netstandard2.0/Windows.Storage.Provider.CloudFilesContract.winmd": {},
+          "ref/netstandard2.0/Windows.System.Profile.ProfileHardwareTokenContract.winmd": {},
+          "ref/netstandard2.0/Windows.System.Profile.ProfileRetailInfoContract.winmd": {},
+          "ref/netstandard2.0/Windows.System.Profile.ProfileSharedModeContract.winmd": {},
+          "ref/netstandard2.0/Windows.System.Profile.SystemManufacturers.SystemManufacturersContract.winmd": {},
+          "ref/netstandard2.0/Windows.System.SystemManagementContract.winmd": {},
+          "ref/netstandard2.0/Windows.System.UserProfile.UserProfileContract.winmd": {},
+          "ref/netstandard2.0/Windows.System.UserProfile.UserProfileLockScreenContract.winmd": {},
+          "ref/netstandard2.0/Windows.UI.ApplicationSettings.ApplicationsSettingsContract.winmd": {},
+          "ref/netstandard2.0/Windows.UI.Core.AnimationMetrics.AnimationMetricsContract.winmd": {},
+          "ref/netstandard2.0/Windows.UI.Core.CoreWindowDialogsContract.winmd": {},
+          "ref/netstandard2.0/Windows.UI.Shell.SecurityAppManagerContract.winmd": {},
+          "ref/netstandard2.0/Windows.UI.ViewManagement.ViewManagementViewScalingContract.winmd": {},
+          "ref/netstandard2.0/Windows.UI.WebUI.Core.WebUICommandBarContract.winmd": {},
+          "ref/netstandard2.0/Windows.UI.Xaml.Core.Direct.XamlDirectContract.winmd": {},
+          "ref/netstandard2.0/Windows.UI.Xaml.Hosting.HostingContract.winmd": {},
+          "ref/netstandard2.0/Windows.Web.Http.Diagnostics.HttpDiagnosticsContract.winmd": {},
+          "ref/netstandard2.0/Windows.WinMD": {}
+        },
+        "build": {
+          "build/_._": {}
+        }
+      },
+      "Microsoft.Xaml.Behaviors.Wpf/1.1.39": {
+        "type": "package",
+        "frameworkAssemblies": [
+          "PresentationCore",
+          "PresentationFramework",
+          "System",
+          "System.Core",
+          "System.XML",
+          "System.Xaml",
+          "WindowsBase"
+        ],
+        "compile": {
+          "lib/net45/Microsoft.Xaml.Behaviors.dll": {
+            "related": ".pdb;.xml"
+          }
+        },
+        "runtime": {
+          "lib/net45/Microsoft.Xaml.Behaviors.dll": {
+            "related": ".pdb;.xml"
+          }
+        }
+      },
+      "NETStandard.Library/1.6.1": {
+        "type": "package",
+        "dependencies": {
+          "Microsoft.NETCore.Platforms": "1.1.0",
+          "Microsoft.Win32.Primitives": "4.3.0",
+          "System.AppContext": "4.3.0",
+          "System.Collections": "4.3.0",
+          "System.Collections.Concurrent": "4.3.0",
+          "System.Console": "4.3.0",
+          "System.Diagnostics.Debug": "4.3.0",
+          "System.Diagnostics.Tools": "4.3.0",
+          "System.Diagnostics.Tracing": "4.3.0",
+          "System.Globalization": "4.3.0",
+          "System.Globalization.Calendars": "4.3.0",
+          "System.IO": "4.3.0",
+          "System.IO.Compression": "4.3.0",
+          "System.IO.Compression.ZipFile": "4.3.0",
+          "System.IO.FileSystem": "4.3.0",
+          "System.IO.FileSystem.Primitives": "4.3.0",
+          "System.Linq": "4.3.0",
+          "System.Linq.Expressions": "4.3.0",
+          "System.Net.Http": "4.3.0",
+          "System.Net.Primitives": "4.3.0",
+          "System.Net.Sockets": "4.3.0",
+          "System.ObjectModel": "4.3.0",
+          "System.Reflection": "4.3.0",
+          "System.Reflection.Extensions": "4.3.0",
+          "System.Reflection.Primitives": "4.3.0",
+          "System.Resources.ResourceManager": "4.3.0",
+          "System.Runtime": "4.3.0",
+          "System.Runtime.Extensions": "4.3.0",
+          "System.Runtime.Handles": "4.3.0",
+          "System.Runtime.InteropServices": "4.3.0",
+          "System.Runtime.InteropServices.RuntimeInformation": "4.3.0",
+          "System.Runtime.Numerics": "4.3.0",
+          "System.Security.Cryptography.Algorithms": "4.3.0",
+          "System.Security.Cryptography.Encoding": "4.3.0",
+          "System.Security.Cryptography.Primitives": "4.3.0",
+          "System.Security.Cryptography.X509Certificates": "4.3.0",
+          "System.Text.Encoding": "4.3.0",
+          "System.Text.Encoding.Extensions": "4.3.0",
+          "System.Text.RegularExpressions": "4.3.0",
+          "System.Threading": "4.3.0",
+          "System.Threading.Tasks": "4.3.0",
+          "System.Threading.Timer": "4.3.0",
+          "System.Xml.ReaderWriter": "4.3.0",
+          "System.Xml.XDocument": "4.3.0"
+        }
+      },
+      "Newtonsoft.Json/13.0.3": {
+        "type": "package",
+        "compile": {
+          "lib/net45/Newtonsoft.Json.dll": {
+            "related": ".xml"
+          }
+        },
+        "runtime": {
+          "lib/net45/Newtonsoft.Json.dll": {
+            "related": ".xml"
+          }
+        }
+      },
+      "SharpZipLib/1.4.2": {
+        "type": "package",
+        "dependencies": {
+          "System.Memory": "4.5.4",
+          "System.Threading.Tasks.Extensions": "4.5.2"
+        },
+        "compile": {
+          "lib/netstandard2.0/ICSharpCode.SharpZipLib.dll": {
+            "related": ".pdb;.xml"
+          }
+        },
+        "runtime": {
+          "lib/netstandard2.0/ICSharpCode.SharpZipLib.dll": {
+            "related": ".pdb;.xml"
+          }
+        }
+      },
+      "System.AppContext/4.3.0": {
+        "type": "package",
+        "frameworkAssemblies": [
+          "mscorlib"
+        ],
+        "compile": {
+          "ref/net463/System.AppContext.dll": {}
+        },
+        "runtime": {
+          "lib/net463/System.AppContext.dll": {}
+        }
+      },
+      "System.Buffers/4.5.1": {
+        "type": "package",
+        "frameworkAssemblies": [
+          "mscorlib"
+        ],
+        "compile": {
+          "ref/net45/System.Buffers.dll": {
+            "related": ".xml"
+          }
+        },
+        "runtime": {
+          "lib/net461/System.Buffers.dll": {
+            "related": ".xml"
+          }
+        }
+      },
+      "System.Collections/4.3.0": {
+        "type": "package",
+        "frameworkAssemblies": [
+          "System",
+          "System.Core"
+        ],
+        "compile": {
+          "ref/net45/_._": {}
+        },
+        "runtime": {
+          "lib/net45/_._": {}
+        }
+      },
+      "System.Collections.Concurrent/4.3.0": {
+        "type": "package",
+        "frameworkAssemblies": [
+          "System"
+        ],
+        "compile": {
+          "ref/net45/_._": {}
+        },
+        "runtime": {
+          "lib/net45/_._": {}
+        }
+      },
+      "System.Console/4.3.0": {
+        "type": "package",
+        "frameworkAssemblies": [
+          "mscorlib"
+        ],
+        "compile": {
+          "ref/net46/System.Console.dll": {}
+        },
+        "runtime": {
+          "lib/net46/System.Console.dll": {}
+        }
+      },
+      "System.Diagnostics.Debug/4.3.0": {
+        "type": "package",
+        "frameworkAssemblies": [
+          "System"
+        ],
+        "compile": {
+          "ref/net45/_._": {}
+        },
+        "runtime": {
+          "lib/net45/_._": {}
+        }
+      },
+      "System.Diagnostics.DiagnosticSource/4.3.0": {
+        "type": "package",
+        "compile": {
+          "lib/net46/_._": {
+            "related": ".xml"
+          }
+        },
+        "runtime": {
+          "lib/net46/System.Diagnostics.DiagnosticSource.dll": {
+            "related": ".xml"
+          }
+        }
+      },
+      "System.Diagnostics.Tools/4.3.0": {
+        "type": "package",
+        "frameworkAssemblies": [
+          "System"
+        ],
+        "compile": {
+          "ref/net45/_._": {}
+        },
+        "runtime": {
+          "lib/net45/_._": {}
+        }
+      },
+      "System.Diagnostics.Tracing/4.3.0": {
+        "type": "package",
+        "frameworkAssemblies": [
+          "mscorlib"
+        ],
+        "compile": {
+          "ref/net462/System.Diagnostics.Tracing.dll": {}
+        },
+        "runtime": {
+          "lib/net462/System.Diagnostics.Tracing.dll": {}
+        }
+      },
+      "System.Globalization/4.3.0": {
+        "type": "package",
+        "compile": {
+          "ref/net45/_._": {}
+        },
+        "runtime": {
+          "lib/net45/_._": {}
+        }
+      },
+      "System.Globalization.Calendars/4.3.0": {
+        "type": "package",
+        "frameworkAssemblies": [
+          "mscorlib"
+        ],
+        "compile": {
+          "ref/net46/System.Globalization.Calendars.dll": {}
+        },
+        "runtime": {
+          "lib/net46/System.Globalization.Calendars.dll": {}
+        }
+      },
+      "System.IO/4.3.0": {
+        "type": "package",
+        "frameworkAssemblies": [
+          "System",
+          "mscorlib"
+        ],
+        "compile": {
+          "ref/net462/System.IO.dll": {}
+        },
+        "runtime": {
+          "lib/net462/System.IO.dll": {}
+        }
+      },
+      "System.IO.Compression/4.3.0": {
+        "type": "package",
+        "frameworkAssemblies": [
+          "System",
+          "mscorlib"
+        ],
+        "compile": {
+          "ref/net46/System.IO.Compression.dll": {}
+        },
+        "runtime": {
+          "lib/net46/System.IO.Compression.dll": {}
+        }
+      },
+      "System.IO.Compression.ZipFile/4.3.0": {
+        "type": "package",
+        "frameworkAssemblies": [
+          "System.IO.Compression.FileSystem",
+          "mscorlib"
+        ],
+        "compile": {
+          "ref/net46/System.IO.Compression.ZipFile.dll": {}
+        },
+        "runtime": {
+          "lib/net46/System.IO.Compression.ZipFile.dll": {}
+        }
+      },
+      "System.IO.FileSystem/4.3.0": {
+        "type": "package",
+        "dependencies": {
+          "System.IO.FileSystem.Primitives": "4.3.0"
+        },
+        "frameworkAssemblies": [
+          "mscorlib"
+        ],
+        "compile": {
+          "ref/net46/System.IO.FileSystem.dll": {}
+        },
+        "runtime": {
+          "lib/net46/System.IO.FileSystem.dll": {}
+        }
+      },
+      "System.IO.FileSystem.Primitives/4.3.0": {
+        "type": "package",
+        "frameworkAssemblies": [
+          "mscorlib"
+        ],
+        "compile": {
+          "ref/net46/System.IO.FileSystem.Primitives.dll": {}
+        },
+        "runtime": {
+          "lib/net46/System.IO.FileSystem.Primitives.dll": {}
+        }
+      },
+      "System.Linq/4.3.0": {
+        "type": "package",
+        "frameworkAssemblies": [
+          "System.Core",
+          "mscorlib"
+        ],
+        "compile": {
+          "ref/net463/System.Linq.dll": {}
+        },
+        "runtime": {
+          "lib/net463/System.Linq.dll": {}
+        }
+      },
+      "System.Linq.Expressions/4.3.0": {
+        "type": "package",
+        "frameworkAssemblies": [
+          "System.Core",
+          "mscorlib"
+        ],
+        "compile": {
+          "ref/net463/System.Linq.Expressions.dll": {}
+        },
+        "runtime": {
+          "lib/net463/System.Linq.Expressions.dll": {}
+        }
+      },
+      "System.Memory/4.5.4": {
+        "type": "package",
+        "dependencies": {
+          "System.Buffers": "4.5.1",
+          "System.Numerics.Vectors": "4.5.0",
+          "System.Runtime.CompilerServices.Unsafe": "4.5.3"
+        },
+        "frameworkAssemblies": [
+          "System",
+          "mscorlib"
+        ],
+        "compile": {
+          "lib/net461/System.Memory.dll": {
+            "related": ".xml"
+          }
+        },
+        "runtime": {
+          "lib/net461/System.Memory.dll": {
+            "related": ".xml"
+          }
+        }
+      },
+      "System.Net.Http/4.3.0": {
+        "type": "package",
+        "dependencies": {
+          "System.Diagnostics.DiagnosticSource": "4.3.0",
+          "System.Security.Cryptography.X509Certificates": "4.3.0"
+        },
+        "frameworkAssemblies": [
+          "System",
+          "System.Core",
+          "mscorlib"
+        ],
+        "compile": {
+          "ref/net46/System.Net.Http.dll": {
+            "related": ".xml"
+          }
+        },
+        "runtime": {
+          "lib/net46/System.Net.Http.dll": {}
+        }
+      },
+      "System.Net.Primitives/4.3.0": {
+        "type": "package",
+        "frameworkAssemblies": [
+          "System"
+        ],
+        "compile": {
+          "ref/net45/_._": {}
+        },
+        "runtime": {
+          "lib/net45/_._": {}
+        }
+      },
+      "System.Net.Sockets/4.3.0": {
+        "type": "package",
+        "frameworkAssemblies": [
+          "System",
+          "mscorlib"
+        ],
+        "compile": {
+          "ref/net46/System.Net.Sockets.dll": {}
+        },
+        "runtime": {
+          "lib/net46/System.Net.Sockets.dll": {}
+        }
+      },
+      "System.Numerics.Vectors/4.5.0": {
+        "type": "package",
+        "frameworkAssemblies": [
+          "System.Numerics",
+          "mscorlib"
+        ],
+        "compile": {
+          "ref/net46/System.Numerics.Vectors.dll": {
+            "related": ".xml"
+          }
+        },
+        "runtime": {
+          "lib/net46/System.Numerics.Vectors.dll": {
+            "related": ".xml"
+          }
+        }
+      },
+      "System.ObjectModel/4.3.0": {
+        "type": "package",
+        "frameworkAssemblies": [
+          "System"
+        ],
+        "compile": {
+          "ref/net45/_._": {}
+        },
+        "runtime": {
+          "lib/net45/_._": {}
+        }
+      },
+      "System.Reflection/4.3.0": {
+        "type": "package",
+        "frameworkAssemblies": [
+          "mscorlib"
+        ],
+        "compile": {
+          "ref/net462/System.Reflection.dll": {}
+        },
+        "runtime": {
+          "lib/net462/System.Reflection.dll": {}
+        }
+      },
+      "System.Reflection.Extensions/4.3.0": {
+        "type": "package",
+        "compile": {
+          "ref/net45/_._": {}
+        },
+        "runtime": {
+          "lib/net45/_._": {}
+        }
+      },
+      "System.Reflection.Primitives/4.3.0": {
+        "type": "package",
+        "compile": {
+          "ref/net45/_._": {}
+        },
+        "runtime": {
+          "lib/net45/_._": {}
+        }
+      },
+      "System.Resources.ResourceManager/4.3.0": {
+        "type": "package",
+        "compile": {
+          "ref/net45/_._": {}
+        },
+        "runtime": {
+          "lib/net45/_._": {}
+        }
+      },
+      "System.Runtime/4.3.0": {
+        "type": "package",
+        "frameworkAssemblies": [
+          "System",
+          "System.ComponentModel.Composition",
+          "System.Core",
+          "mscorlib"
+        ],
+        "compile": {
+          "ref/net462/System.Runtime.dll": {}
+        },
+        "runtime": {
+          "lib/net462/System.Runtime.dll": {}
+        }
+      },
+      "System.Runtime.CompilerServices.Unsafe/4.5.3": {
+        "type": "package",
+        "frameworkAssemblies": [
+          "mscorlib"
+        ],
+        "compile": {
+          "ref/net461/System.Runtime.CompilerServices.Unsafe.dll": {
+            "related": ".xml"
+          }
+        },
+        "runtime": {
+          "lib/net461/System.Runtime.CompilerServices.Unsafe.dll": {
+            "related": ".xml"
+          }
+        }
+      },
+      "System.Runtime.Extensions/4.3.0": {
+        "type": "package",
+        "frameworkAssemblies": [
+          "System",
+          "mscorlib"
+        ],
+        "compile": {
+          "ref/net462/System.Runtime.Extensions.dll": {}
+        },
+        "runtime": {
+          "lib/net462/System.Runtime.Extensions.dll": {}
+        }
+      },
+      "System.Runtime.Handles/4.3.0": {
+        "type": "package",
+        "frameworkAssemblies": [
+          "System.Core"
+        ],
+        "compile": {
+          "ref/net46/_._": {}
+        },
+        "runtime": {
+          "lib/net46/_._": {}
+        }
+      },
+      "System.Runtime.InteropServices/4.3.0": {
+        "type": "package",
+        "dependencies": {
+          "System.Runtime": "4.3.0"
+        },
+        "frameworkAssemblies": [
+          "System",
+          "System.Core",
+          "mscorlib"
+        ],
+        "compile": {
+          "ref/net463/System.Runtime.InteropServices.dll": {}
+        },
+        "runtime": {
+          "lib/net463/System.Runtime.InteropServices.dll": {}
+        }
+      },
+      "System.Runtime.InteropServices.RuntimeInformation/4.3.0": {
+        "type": "package",
+        "compile": {
+          "ref/netstandard1.1/System.Runtime.InteropServices.RuntimeInformation.dll": {}
+        },
+        "runtime": {
+          "lib/net45/System.Runtime.InteropServices.RuntimeInformation.dll": {}
+        }
+      },
+      "System.Runtime.Numerics/4.3.0": {
+        "type": "package",
+        "frameworkAssemblies": [
+          "System.Numerics"
+        ],
+        "compile": {
+          "ref/net45/_._": {}
+        },
+        "runtime": {
+          "lib/net45/_._": {}
+        }
+      },
+      "System.Runtime.WindowsRuntime/4.6.0": {
+        "type": "package",
+        "compile": {
+          "ref/net45/_._": {}
+        },
+        "runtime": {
+          "lib/net45/_._": {}
+        },
+        "build": {
+          "buildTransitive/net461/System.Runtime.WindowsRuntime.targets": {}
+        }
+      },
+      "System.Runtime.WindowsRuntime.UI.Xaml/4.6.0": {
+        "type": "package",
+        "dependencies": {
+          "System.Runtime.WindowsRuntime": "4.6.0"
+        },
+        "compile": {
+          "ref/net45/_._": {}
+        },
+        "runtime": {
+          "lib/net45/_._": {}
+        },
+        "build": {
+          "build/net461/_._": {}
+        }
+      },
+      "System.Security.Cryptography.Algorithms/4.3.0": {
+        "type": "package",
+        "dependencies": {
+          "System.IO": "4.3.0",
+          "System.Runtime": "4.3.0",
+          "System.Security.Cryptography.Encoding": "4.3.0",
+          "System.Security.Cryptography.Primitives": "4.3.0"
+        },
+        "frameworkAssemblies": [
+          "System.Core",
+          "mscorlib"
+        ],
+        "compile": {
+          "ref/net463/System.Security.Cryptography.Algorithms.dll": {}
+        },
+        "runtime": {
+          "lib/net463/System.Security.Cryptography.Algorithms.dll": {}
+        }
+      },
+      "System.Security.Cryptography.Encoding/4.3.0": {
+        "type": "package",
+        "frameworkAssemblies": [
+          "System",
+          "mscorlib"
+        ],
+        "compile": {
+          "ref/net46/System.Security.Cryptography.Encoding.dll": {}
+        },
+        "runtime": {
+          "lib/net46/System.Security.Cryptography.Encoding.dll": {}
+        }
+      },
+      "System.Security.Cryptography.Primitives/4.3.0": {
+        "type": "package",
+        "frameworkAssemblies": [
+          "mscorlib"
+        ],
+        "compile": {
+          "ref/net46/System.Security.Cryptography.Primitives.dll": {}
+        },
+        "runtime": {
+          "lib/net46/System.Security.Cryptography.Primitives.dll": {}
+        }
+      },
+      "System.Security.Cryptography.X509Certificates/4.3.0": {
+        "type": "package",
+        "dependencies": {
+          "System.Security.Cryptography.Algorithms": "4.3.0",
+          "System.Security.Cryptography.Encoding": "4.3.0"
+        },
+        "frameworkAssemblies": [
+          "System",
+          "System.Core",
+          "mscorlib"
+        ],
+        "compile": {
+          "ref/net461/System.Security.Cryptography.X509Certificates.dll": {}
+        },
+        "runtime": {
+          "lib/net461/System.Security.Cryptography.X509Certificates.dll": {}
+        }
+      },
+      "System.Text.Encoding/4.3.0": {
+        "type": "package",
+        "compile": {
+          "ref/net45/_._": {}
+        },
+        "runtime": {
+          "lib/net45/_._": {}
+        }
+      },
+      "System.Text.Encoding.Extensions/4.3.0": {
+        "type": "package",
+        "compile": {
+          "ref/net45/_._": {}
+        },
+        "runtime": {
+          "lib/net45/_._": {}
+        }
+      },
+      "System.Text.RegularExpressions/4.3.0": {
+        "type": "package",
+        "frameworkAssemblies": [
+          "System",
+          "mscorlib"
+        ],
+        "compile": {
+          "ref/net463/System.Text.RegularExpressions.dll": {}
+        },
+        "runtime": {
+          "lib/net463/System.Text.RegularExpressions.dll": {}
+        }
+      },
+      "System.Threading/4.3.0": {
+        "type": "package",
+        "frameworkAssemblies": [
+          "System",
+          "System.Core"
+        ],
+        "compile": {
+          "ref/net45/_._": {}
+        },
+        "runtime": {
+          "lib/net45/_._": {}
+        }
+      },
+      "System.Threading.Tasks/4.3.0": {
+        "type": "package",
+        "frameworkAssemblies": [
+          "System.Core"
+        ],
+        "compile": {
+          "ref/net45/_._": {}
+        },
+        "runtime": {
+          "lib/net45/_._": {}
+        }
+      },
+      "System.Threading.Tasks.Extensions/4.5.2": {
+        "type": "package",
+        "dependencies": {
+          "System.Runtime.CompilerServices.Unsafe": "4.5.2"
+        },
+        "compile": {
+          "lib/netstandard2.0/System.Threading.Tasks.Extensions.dll": {
+            "related": ".xml"
+          }
+        },
+        "runtime": {
+          "lib/netstandard2.0/System.Threading.Tasks.Extensions.dll": {
+            "related": ".xml"
+          }
+        }
+      },
+      "System.Threading.Timer/4.3.0": {
+        "type": "package",
+        "compile": {
+          "ref/net451/_._": {}
+        },
+        "runtime": {
+          "lib/net451/_._": {}
+        }
+      },
+      "System.ValueTuple/4.5.0": {
+        "type": "package",
+        "frameworkAssemblies": [
+          "mscorlib"
+        ],
+        "compile": {
+          "ref/net47/System.ValueTuple.dll": {}
+        },
+        "runtime": {
+          "lib/net47/System.ValueTuple.dll": {
+            "related": ".xml"
+          }
+        }
+      },
+      "System.Xml.ReaderWriter/4.3.0": {
+        "type": "package",
+        "frameworkAssemblies": [
+          "System.Xml",
+          "mscorlib"
+        ],
+        "compile": {
+          "ref/net46/System.Xml.ReaderWriter.dll": {}
+        },
+        "runtime": {
+          "lib/net46/System.Xml.ReaderWriter.dll": {}
+        }
+      },
+      "System.Xml.XDocument/4.3.0": {
+        "type": "package",
+        "frameworkAssemblies": [
+          "System.Xml.Linq"
+        ],
+        "compile": {
+          "ref/net45/_._": {}
+        },
+        "runtime": {
+          "lib/net45/_._": {}
+        }
+      }
+    },
     ".NETFramework,Version=v4.8.1/win-x64": {
       "Costura.Fody/5.8.0-alpha0098": {
         "type": "package",
@@ -9508,25 +10691,32 @@
     ]
   },
   "packageFolders": {
-    "C:\\Users\\Shadow\\.nuget\\packages\\": {}
+    "C:\\Users\\Tiger\\.nuget\\packages\\": {},
+    "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages": {}
   },
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "D:\\Rider Projects\\EasyExtractUnitypackage\\EasyExtractUnitypackageRework\\EasyExtractUnitypackageRework.csproj",
+      "projectUniqueName": "E:\\RiderProjects\\EasyExtractUnitypackage\\EasyExtractUnitypackageRework\\EasyExtractUnitypackageRework.csproj",
       "projectName": "EasyExtractUnitypackageRework",
-      "projectPath": "D:\\Rider Projects\\EasyExtractUnitypackage\\EasyExtractUnitypackageRework\\EasyExtractUnitypackageRework.csproj",
-      "packagesPath": "C:\\Users\\Shadow\\.nuget\\packages\\",
-      "outputPath": "D:\\Rider Projects\\EasyExtractUnitypackage\\EasyExtractUnitypackageRework\\obj\\",
+      "projectPath": "E:\\RiderProjects\\EasyExtractUnitypackage\\EasyExtractUnitypackageRework\\EasyExtractUnitypackageRework.csproj",
+      "packagesPath": "C:\\Users\\Tiger\\.nuget\\packages\\",
+      "outputPath": "E:\\RiderProjects\\EasyExtractUnitypackage\\EasyExtractUnitypackageRework\\obj\\",
       "projectStyle": "PackageReference",
       "skipContentFileWrite": true,
+      "fallbackFolders": [
+        "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
+      ],
       "configFilePaths": [
-        "C:\\Users\\Shadow\\AppData\\Roaming\\NuGet\\NuGet.Config"
+        "C:\\Users\\Tiger\\AppData\\Roaming\\NuGet\\NuGet.Config",
+        "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
+        "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
       ],
       "originalTargetFrameworks": [
         "net481"
       ],
       "sources": {
+        "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
         "https://api.nuget.org/v3/index.json": {}
       },
       "frameworks": {
@@ -9578,6 +10768,9 @@
     },
     "runtimes": {
       "win": {
+        "#import": []
+      },
+      "win-arm64": {
         "#import": []
       },
       "win-x64": {

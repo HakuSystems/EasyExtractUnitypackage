@@ -133,7 +133,9 @@
                                 Background="{DynamicResource MaterialDesignDarkSeparatorBackground}" Width="150"
                                 HorizontalAlignment="Left">
                 <StackPanel Orientation="Vertical" VerticalAlignment="Bottom">
-                    <TextBlock x:Name="UpdateInfo" Text="UpdateChecks" Foreground="White" HorizontalAlignment="Center"
+                    <Button x:Name="UpdateInfo"
+                            Click="UpdateInfo_OnClick"
+                            Content="Readme" Foreground="White" HorizontalAlignment="Center"
                                Margin="5" />
 
                     <Button Margin="5" x:Name="ExtractBtn" Click="ExtractBtn_OnClick">

@@ -21,7 +21,7 @@ public partial class SettingsUserControlModern : UserControl
             ? $"Default Temp Path set to: {Path.GetTempPath()}"
             : $"Default Temp Path set to: {Directory.GetCurrentDirectory()}";
         LastExtractedPath.Text = $"Last Extracted Path: {Config.Config.lastTargetPath}";
-        RandomTxt.Text = GetRandomText.RandomText();
+        RandomTxt.Text = "Random Text is not available at the moment";
         if (Config.Config.HeartERPEasterEgg)
             ERPEasterEgg.Visibility = Visibility.Visible;
         

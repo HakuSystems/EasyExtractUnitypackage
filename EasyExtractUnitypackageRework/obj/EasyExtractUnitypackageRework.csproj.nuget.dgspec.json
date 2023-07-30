@@ -1,26 +1,32 @@
 {
   "format": 1,
   "restore": {
-    "D:\\Rider Projects\\EasyExtractUnitypackage\\EasyExtractUnitypackageRework\\EasyExtractUnitypackageRework.csproj": {}
+    "E:\\RiderProjects\\EasyExtractUnitypackage\\EasyExtractUnitypackageRework\\EasyExtractUnitypackageRework.csproj": {}
   },
   "projects": {
-    "D:\\Rider Projects\\EasyExtractUnitypackage\\EasyExtractUnitypackageRework\\EasyExtractUnitypackageRework.csproj": {
+    "E:\\RiderProjects\\EasyExtractUnitypackage\\EasyExtractUnitypackageRework\\EasyExtractUnitypackageRework.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "D:\\Rider Projects\\EasyExtractUnitypackage\\EasyExtractUnitypackageRework\\EasyExtractUnitypackageRework.csproj",
+        "projectUniqueName": "E:\\RiderProjects\\EasyExtractUnitypackage\\EasyExtractUnitypackageRework\\EasyExtractUnitypackageRework.csproj",
         "projectName": "EasyExtractUnitypackageRework",
-        "projectPath": "D:\\Rider Projects\\EasyExtractUnitypackage\\EasyExtractUnitypackageRework\\EasyExtractUnitypackageRework.csproj",
-        "packagesPath": "C:\\Users\\Shadow\\.nuget\\packages\\",
-        "outputPath": "D:\\Rider Projects\\EasyExtractUnitypackage\\EasyExtractUnitypackageRework\\obj\\",
+        "projectPath": "E:\\RiderProjects\\EasyExtractUnitypackage\\EasyExtractUnitypackageRework\\EasyExtractUnitypackageRework.csproj",
+        "packagesPath": "C:\\Users\\Tiger\\.nuget\\packages\\",
+        "outputPath": "E:\\RiderProjects\\EasyExtractUnitypackage\\EasyExtractUnitypackageRework\\obj\\",
         "projectStyle": "PackageReference",
         "skipContentFileWrite": true,
+        "fallbackFolders": [
+          "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
+        ],
         "configFilePaths": [
-          "C:\\Users\\Shadow\\AppData\\Roaming\\NuGet\\NuGet.Config"
+          "C:\\Users\\Tiger\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
         "originalTargetFrameworks": [
           "net481"
         ],
         "sources": {
+          "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
           "https://api.nuget.org/v3/index.json": {}
         },
         "frameworks": {
@@ -72,6 +78,9 @@
       },
       "runtimes": {
         "win": {
+          "#import": []
+        },
+        "win-arm64": {
           "#import": []
         },
         "win-x64": {
