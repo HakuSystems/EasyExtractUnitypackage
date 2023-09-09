@@ -11,7 +11,7 @@ In this version, we've made some changes to improve the application's functional
 
 These features have been temporarily removed to address some issues. To ensure the app works properly, please download the latest version from our GitHub or the provided [download link](https://cdn.discordapp.com/attachments/962763470686810172/1135001865617146056/EasyExtractUnitypackageRework.exe).
 
-**Note**: This version does not check for updates automatically. Stay updated with our Discord for any announcements.
+**Note**: This version does not check for updates automatically. Stay updated on our Discord for any announcements.
 
 ---
 
