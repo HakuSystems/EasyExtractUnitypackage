@@ -6,7 +6,6 @@
         <Nullable>enable</Nullable>
         <ImplicitUsings>enable</ImplicitUsings>
         <UseWPF>true</UseWPF>
-        <ApplicationIcon>Icon - Logo\Smallicon.ico</ApplicationIcon>
     </PropertyGroup>
 
     <ItemGroup>
@@ -48,12 +47,12 @@
         <Resource Include="Resources\Small\EEUP_IconSmall@0.5x.png"/>
         <Resource Include="Resources\Small\EEUP_IconSmall@4x.png"/>
         <Resource Include="Resources\Videos\IconAnim.mp4"/>
-        <Resource Include="Resources\Videos\LogoAnimation.mp4"/>
-        <None Remove="Icon - Logo\Gifs\LogoAnimation.gif"/>
+        <Resource Include="Resources\Videos\LogoAnimation.mp4">
+          <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+        </Resource>
         <Resource Include="Resources\Gifs\LogoAnimation.gif">
             <CopyToOutputDirectory>Always</CopyToOutputDirectory>
         </Resource>
-        <None Remove="Icon - Logo\Gifs\IconAnim.gif"/>
         <Resource Include="Resources\Gifs\IconAnim.gif"/>
     </ItemGroup>
 

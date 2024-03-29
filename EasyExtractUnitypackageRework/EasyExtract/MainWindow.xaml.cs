@@ -1,22 +1,32 @@
-﻿using System.Windows;
-using System.Windows.Media.Imaging;
-using Wpf.Ui.Controls;
+﻿
+
+using System.Windows;
+using System.Windows.Threading;
+using XamlAnimatedGif;
 
 namespace EasyExtract;
 
 /// <summary>
 ///     Interaction logic for MainWindow.xaml
 /// </summary>
-public partial class MainWindow : FluentWindow
+public partial class MainWindow : Window
 {
     public MainWindow()
     {
         InitializeComponent();
     }
 
-    private void MainWindow_OnLoaded(object sender, RoutedEventArgs e)
+    private void AnimationBehavior_OnLoaded(object sender, RoutedEventArgs e)
     {
-        Logo.Source =
-            new BitmapImage(new Uri("pack://application:,,,/EasyExtract;component/Resources/Gifs/LogoAnimation.gif"));
+        DispatcherTimer timer = new DispatcherTimer();
+        timer.Interval = TimeSpan.FromSeconds(5);
+        timer.Tick += (sender, args) =>
+        {
+            timer.Stop();
+            new Dashboard().Show();
+            Close();
+        };
+        timer.Start();
     }
+
 }
