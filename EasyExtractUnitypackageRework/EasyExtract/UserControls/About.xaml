@@ -3,11 +3,113 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-             xmlns:local="clr-namespace:EasyExtract.UserControls"
+             xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+             xmlns:gif="https://github.com/XamlAnimatedGif/XamlAnimatedGif"
              mc:Ignorable="d"
              Background="Transparent"
-             >
+             Loaded="About_OnLoaded"
+             d:DesignHeight="450" d:DesignWidth="2000">
     <Grid>
-        <TextBlock>ABOUT</TextBlock>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="Auto" />
+            <ColumnDefinition Width="*" />
+        </Grid.ColumnDefinitions>
+        <ui:Card
+            VerticalAlignment="Top" Padding="10" Margin="10" ui:Footer="Version 2.0.5.5">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+                <ui:Card Padding="5" BorderThickness="8,1,1,15" VerticalAlignment="Top">
+                    <Image
+                        Height="50" Width="50"
+                        Margin="10"
+                        Source="/EasyExtract;component/Resources/Big/EEUP_IconBig@4x.png"
+                        Stretch="UniformToFill" />
+                </ui:Card>
+                <StackPanel Grid.Row="0" Grid.Column="1" Orientation="Vertical">
+                    <TextBlock Text="EasyExtract" FontSize="24" FontWeight="Bold" Margin="10,0,0,0" />
+                    <TextBlock
+                        Text=" a Software to get files out of a .unitypackage without importing them into unity."
+                        FontSize="16"
+                        Opacity="0.5"
+                        Margin="15,0,0,0"
+                        TextWrapping="Wrap"
+                        FontWeight="Bold" />
+                    <ui:Card Height="20" Padding="5" Margin="10,0,0,0" />
+                </StackPanel>
+            </Grid>
+        </ui:Card>
+
+        <ui:Card Grid.Row="0" Grid.Column="1" VerticalAlignment="Top"
+                 HorizontalAlignment="Left" Padding="10" Margin="10"
+                 ui:Footer="Made by DigitalAzure">
+            <ui:PassiveScrollViewer>
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+
+                    <ui:Card Padding="5" BorderThickness="8,1,1,15" VerticalAlignment="Top">
+                        <ui:SymbolIcon
+                            Margin="10"
+                            FontSize="50"
+                            Foreground="White"
+                            Symbol="DesignIdeas24" />
+                    </ui:Card>
+                    <StackPanel Grid.Row="0" Grid.Column="1" Orientation="Vertical">
+                        <TextBlock Text="Branding" FontSize="24" FontWeight="Bold" Margin="10,0,0,0" />
+                        <TextBlock
+                            Text="Our logo visually represents the seamless extraction of assets from a Unity package&#x0a;highlighting the core functionality of our application."
+                            FontSize="16"
+                            Opacity="0.5"
+                            Margin="15,0,0,0"
+                            TextWrapping="Wrap"
+                            FontWeight="Bold" />
+                        <ui:Card Height="20" Padding="5" Margin="10,0,0,0" />
+                    </StackPanel>
+                    <Border Grid.Row="1" Grid.Column="1" BorderThickness="2.5">
+                        <Image
+                            VerticalAlignment="Center"
+                            MaxHeight="230"
+                            HorizontalAlignment="Center"
+                            Stretch="UniformToFill"
+                            gif:AnimationBehavior.SourceUri="pack://application:,,,/EasyExtract;component/Resources/Gifs/LogoAnimation.gif" />
+                        <Border.BorderBrush>
+                            <LinearGradientBrush>
+                                <GradientStop Color="#04d3be" Offset="0.0" />
+                                <GradientStop Color="#7fc5ff" Offset="1.0" />
+                            </LinearGradientBrush>
+                        </Border.BorderBrush>
+                    </Border>
+                    <StackPanel Grid.Row="1" Grid.Column="0" Orientation="Vertical">
+                        <ui:ListView
+                            IsSelected="False"
+                            IsEnabled="False"
+                            Background="Transparent"
+                            HorizontalAlignment="Stretch"
+                            HorizontalContentAlignment="Stretch"
+                            BorderBrush="Transparent" x:Name="RandomCardDesign" />
+                    </StackPanel>
+                </Grid>
+            </ui:PassiveScrollViewer>
+        </ui:Card>
     </Grid>
 </UserControl>

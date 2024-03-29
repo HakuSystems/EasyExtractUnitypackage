@@ -34,12 +34,11 @@ public partial class Dashboard : FluentWindow
     private void HeartIcon_OnMouseDown(object sender, MouseButtonEventArgs e)
     {
         HeartIcon.Symbol = SymbolRegular.HeartPulse24;
-        HeartIcon.Foreground = new SolidColorBrush(Colors.Red);
         NavView.Navigate(typeof(EasterEgg));
     }
 
     private void Dashboard_OnLoaded(object sender, RoutedEventArgs e)
     {
-        NavView.Navigate("Extraction");
+        NavView.Navigate("About");
     }
 }

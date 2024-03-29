@@ -56,7 +56,7 @@
                                        Icon="{ui:SymbolIcon Settings24}" />
                 <ui:NavigationViewItem Content="About" TargetPageTag="About"
                                        TargetPageType="{x:Type UserControls:About}"
-                                       Icon="{ui:SymbolIcon Question24}" />
+                                       Icon="{ui:SymbolIcon Heart24}" />
             </ui:NavigationView.MenuItems>
             <ui:NavigationView.Header>
                 <ui:CardControl>
