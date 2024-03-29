@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "E:\\RiderProjects\\EasyExtractUnitypackage\\EasyExtractUnitypackageRework\\EasyExtractUnitypackageRework.csproj": {}
+    "E:\\xxx\\EasyExtractUnitypackage\\EasyExtractUnitypackageRework\\EasyExtractUnitypackageRework.csproj": {}
   },
   "projects": {
-    "E:\\RiderProjects\\EasyExtractUnitypackage\\EasyExtractUnitypackageRework\\EasyExtractUnitypackageRework.csproj": {
+    "E:\\xxx\\EasyExtractUnitypackage\\EasyExtractUnitypackageRework\\EasyExtractUnitypackageRework.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "E:\\RiderProjects\\EasyExtractUnitypackage\\EasyExtractUnitypackageRework\\EasyExtractUnitypackageRework.csproj",
+        "projectUniqueName": "E:\\xxx\\EasyExtractUnitypackage\\EasyExtractUnitypackageRework\\EasyExtractUnitypackageRework.csproj",
         "projectName": "EasyExtractUnitypackageRework",
-        "projectPath": "E:\\RiderProjects\\EasyExtractUnitypackage\\EasyExtractUnitypackageRework\\EasyExtractUnitypackageRework.csproj",
+        "projectPath": "E:\\xxx\\EasyExtractUnitypackage\\EasyExtractUnitypackageRework\\EasyExtractUnitypackageRework.csproj",
         "packagesPath": "C:\\Users\\Tiger\\.nuget\\packages\\",
-        "outputPath": "E:\\RiderProjects\\EasyExtractUnitypackage\\EasyExtractUnitypackageRework\\obj\\",
+        "outputPath": "E:\\xxx\\EasyExtractUnitypackage\\EasyExtractUnitypackageRework\\obj\\",
         "projectStyle": "PackageReference",
         "skipContentFileWrite": true,
         "fallbackFolders": [
@@ -74,20 +74,6 @@
               "version": "[1.4.2, )"
             }
           }
-        }
-      },
-      "runtimes": {
-        "win": {
-          "#import": []
-        },
-        "win-arm64": {
-          "#import": []
-        },
-        "win-x64": {
-          "#import": []
-        },
-        "win-x86": {
-          "#import": []
         }
       }
     }

@@ -169,28 +169,5 @@
       <Version>1.4.2</Version>
     </PackageReference>
   </ItemGroup>
-  <ItemGroup>
-    <Resource Include="Theme\Icon - Logo\Videos\IconAnim.mp4" />
-    <Resource Include="Theme\Icon - Logo\Videos\LogoAnimation.mp4" />
-    <Resource Include="Theme\Icon - Logo\Big\EEUP_IconBig.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Resource>
-    <Resource Include="Theme\Icon - Logo\Big\EEUP_IconBig@4x.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Resource>
-    <Content Include="Theme\Icon - Logo\1_Everything.ico" />
-    <Content Include="Theme\Icon - Logo\Bigicon.ico" />
-    <Resource Include="Theme\Icon - Logo\EverythingLogo.png" />
-    <Content Include="Theme\Icon - Logo\Smallicon.ico" />
-    <Resource Include="Theme\Icon - Logo\Small\EEUP_IconSmall.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Resource>
-    <Resource Include="Theme\Icon - Logo\Small\EEUP_IconSmall@0.5x.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Resource>
-    <Resource Include="Theme\Icon - Logo\Small\EEUP_IconSmall@4x.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Resource>
-  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
