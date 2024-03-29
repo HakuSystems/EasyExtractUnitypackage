@@ -2,7 +2,6 @@
 using System.IO;
 using System.Windows;
 using EasyExtractUnitypackageRework.Models;
-using Newtonsoft.Json;
 using Formatting = System.Xml.Formatting;
 
 namespace EasyExtractUnitypackageRework.Config;

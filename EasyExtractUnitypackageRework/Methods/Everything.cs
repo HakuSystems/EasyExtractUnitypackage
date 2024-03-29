@@ -1,5 +1,4 @@
 ﻿using System;
-using System.IO;
 using System.Runtime.InteropServices;
 using System.Text;
 
@@ -7,6 +6,14 @@ namespace EasyExtractUnitypackageRework.Methods;
 
 public class Everything
 {
+    public static IntPtr Everything_GetResultFullPathName(uint nIndex)
+    {
+        //return as string
+        var sb = new StringBuilder(260);
+        Everything_GetResultFullPathName(nIndex, sb, 260);
+        return Marshal.StringToHGlobalUni(sb.ToString());
+    }
+
     #region publicants
 
     public const int EVERYTHING_REQUEST_FILE_NAME = 0x00000001;
@@ -36,18 +43,9 @@ public class Everything
 
     [DllImport("Everything64.dll")]
     public static extern void Everything_SetRequestFlags(uint dwRequestFlags);
-    
-    [DllImport("Everything64.dll", CharSet = CharSet.Unicode)]
-    private static extern void Everything_GetResultFullPathName(UInt32 nIndex, StringBuilder lpString, UInt32 nMaxCount);
 
+    [DllImport("Everything64.dll", CharSet = CharSet.Unicode)]
+    private static extern void Everything_GetResultFullPathName(uint nIndex, StringBuilder lpString, uint nMaxCount);
 
     #endregion
-
-    public static IntPtr Everything_GetResultFullPathName(uint nIndex)
-    {
-        //return as string
-        var sb = new StringBuilder(260);
-        Everything_GetResultFullPathName(nIndex, sb, 260);
-        return Marshal.StringToHGlobalUni(sb.ToString());
-    }
 }

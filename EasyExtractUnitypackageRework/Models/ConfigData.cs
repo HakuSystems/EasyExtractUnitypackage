@@ -19,8 +19,7 @@ public class ConfigData
         public string lastTargetPath { get; set; }
         public bool HeartERPEasterEgg { get; set; }
         public bool UwUifyer { get; set; }
-        
-        public bool WindowsNotification { get; set; }
 
+        public bool WindowsNotification { get; set; }
     }
 }

@@ -70,7 +70,7 @@
                                     BorderThickness="1" Margin="5" Content="OPEN FOLDER" Foreground="White" />
                         </StackPanel>
                     </materialDesign:Card>
-                    
+
                     <materialDesign:Card Margin="0,5,0,5" Background="{DynamicResource MaterialDesignDarkBackground}">
                         <StackPanel Orientation="Vertical">
                             <Label Margin="15" FontSize="25" Content="Windows Notification" Foreground="White" />
@@ -79,8 +79,8 @@
                                        Foreground="DarkGray" />
                             <CheckBox x:Name="WindowsCheckBox" Checked="WindowsCheckBox_OnChecked"
                                       Unchecked="WindowsCheckBox_OnUnchecked"
-                                    Style="{DynamicResource MaterialDesignFlatButton}" BorderBrush="White"
-                                    BorderThickness="1" Margin="5" Content="Change State" Foreground="White" />
+                                      Style="{DynamicResource MaterialDesignFlatButton}" BorderBrush="White"
+                                      BorderThickness="1" Margin="5" Content="Change State" Foreground="White" />
                         </StackPanel>
                     </materialDesign:Card>
                 </StackPanel>

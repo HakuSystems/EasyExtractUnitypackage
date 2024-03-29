@@ -4,19 +4,18 @@ using System.Diagnostics;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Media;
-using EasyExtractUnitypackageRework.Methods;
 using EasyExtractUnitypackageRework.Theme.MessageBox;
 
 namespace EasyExtractUnitypackageRework;
 
 public partial class ModernMainWindow : Window
 {
+    public List<string> _TempQueue = new();
+
     public ModernMainWindow()
     {
         InitializeComponent();
     }
-
-    public List<string> _TempQueue = new List<string>();
 
 
     private void ModernMainWindow_OnLoaded(object sender, RoutedEventArgs e)
@@ -91,11 +90,9 @@ public partial class ModernMainWindow : Window
 
     private void UpdateInfo_OnClick(object sender, RoutedEventArgs e)
     {
-            if (new EasyMessageBox(
-                    "EasyExtractUnitypackage is currently not able to perform updates, neither play videos/audios. keep yourself updated on the official discord server for more information.",
-                    MessageType.Info, MessageButtons.Ok).ShowDialog() == true)
-            {
-                Process.Start("https://discord.com/invite/Wn7XfhPCyD");
-            }
+        if (new EasyMessageBox(
+                "EasyExtractUnitypackage is currently not able to perform updates, neither play videos/audios. keep yourself updated on the official discord server for more information.",
+                MessageType.Info, MessageButtons.Ok).ShowDialog() == true)
+            Process.Start("https://discord.com/invite/Wn7XfhPCyD");
     }
 }

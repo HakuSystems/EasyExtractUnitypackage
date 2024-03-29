@@ -8,9 +8,6 @@ using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
 using EasyExtractUnitypackageRework.Theme.MessageBox;
-using ICSharpCode.SharpZipLib.GZip;
-using ICSharpCode.SharpZipLib.Tar;
-using Microsoft.Toolkit.Uwp.Notifications;
 using Microsoft.Win32;
 
 namespace EasyExtractUnitypackageRework.UserControls;
@@ -42,6 +39,7 @@ public partial class ExtractUserControlModern : UserControl
                         MessageButtons.Ok).ShowDialog();
                     return;
                 }
+
                 QueueGrid.Visibility = Visibility.Visible;
                 QueueGrid.IsEnabled = true;
                 QueueListBox.Items.Add(filepath);
@@ -60,11 +58,12 @@ public partial class ExtractUserControlModern : UserControl
                 MessageButtons.Ok).ShowDialog();
             return;
         }
+
         progressBar.Visibility = Visibility.Visible;
         progressBar.IsIndeterminate = true;
         var tempFolder = Path.Combine(Config.Config.UseDefaultTempPath
-            ? Path.GetTempPath()
-            : Directory.GetCurrentDirectory(), $"tmp_{Path.GetFileNameWithoutExtension(filepath)}");
+                ? Path.GetTempPath()
+                : Directory.GetCurrentDirectory(), $"tmp_{Path.GetFileNameWithoutExtension(filepath)}");
         ExtractionStatus.Content = "Extracting...";
         DisableImportants();
 
@@ -167,6 +166,7 @@ public partial class ExtractUserControlModern : UserControl
                         MessageButtons.Ok).ShowDialog();
                     return;
                 }
+
                 QueueGrid.Visibility = Visibility.Visible;
                 QueueGrid.IsEnabled = true;
                 QueueListBox.Items.Add(filepath);
@@ -180,7 +180,7 @@ public partial class ExtractUserControlModern : UserControl
         Mouse.OverrideCursor = Cursors.Arrow;
     }
 
-    
+
     private void PlayFinishedExtractedAnimation()
     {
         ExtractImage.Visibility = Visibility.Visible;
@@ -193,7 +193,7 @@ public partial class ExtractUserControlModern : UserControl
         LoadAssets(targetFolder, root);
         AssetTreeView.Items.Add(root);
     }
-    
+
 
     private void LoadAssets(string targetFolder, TreeViewItem root)
     {
@@ -289,7 +289,6 @@ public partial class ExtractUserControlModern : UserControl
         ((ModernMainWindow)Window.GetWindow(this))!.TotalUnityExLabeltrac.Content =
             Config.Config.TotalUnitypackgesExtracted.ToString();
         WNotification(files);
-        
     }
 
     private void ExtractSelectedBtn_OnClick(object sender, RoutedEventArgs e)
@@ -307,12 +306,12 @@ public partial class ExtractUserControlModern : UserControl
 
             File.Delete(file);
         }
-        
+
         var folders = Directory.GetDirectories(targetFolder, "*", SearchOption.AllDirectories);
         foreach (var folder in folders)
             if (Directory.GetFiles(folder).Length == 0 && Directory.GetDirectories(folder).Length == 0)
                 Directory.Delete(folder);
-        
+
         ContinueBtn.IsEnabled = true;
         OpenFolderBtn.IsEnabled = true;
         ExtractSelectedBtn.IsEnabled = false;
@@ -387,7 +386,7 @@ public partial class ExtractUserControlModern : UserControl
     private void ExtractUserControlModern_OnLoaded(object sender, RoutedEventArgs e)
     {
         var tempQueue = ((ModernMainWindow)Window.GetWindow(this))!._TempQueue;
-        if(tempQueue.Count == 0) return;
+        if (tempQueue.Count == 0) return;
         foreach (var item in tempQueue)
             QueueListBox.Items.Add(item);
         StartQueue();
@@ -396,7 +395,6 @@ public partial class ExtractUserControlModern : UserControl
     private void WNotification(int assetCounter) // Windows Notification and data refresh
     {
         if (Config.Config.WindowsNotification)
-        {
             new ToastContentBuilder()
                 .AddArgument("action", "viewConversation")
                 .AddArgument("conversationId", 9813)
@@ -404,6 +402,5 @@ public partial class ExtractUserControlModern : UserControl
                 // ReSharper disable once HeapView.BoxingAllocation
                 .AddText($"Extracted {assetCounter} files!")
                 .Show();
-        }
     }
 }

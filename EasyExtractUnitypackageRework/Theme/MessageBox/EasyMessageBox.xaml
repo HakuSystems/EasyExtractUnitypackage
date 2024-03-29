@@ -24,8 +24,8 @@
         <Grid.RowDefinitions>
             <RowDefinition Height="auto" />
             <RowDefinition Height="51*" />
-            <RowDefinition Height="44*"/>
-            <RowDefinition Height="88*"/>
+            <RowDefinition Height="44*" />
+            <RowDefinition Height="88*" />
         </Grid.RowDefinitions>
         <StackPanel Orientation="Horizontal">
             <TextBlock x:Name="txtTitle"
@@ -35,8 +35,10 @@
                 Message Title
             </TextBlock>
         </StackPanel>
-        <StackPanel HorizontalAlignment="Right" VerticalAlignment="Top" Grid.Row="0" Grid.Column="1" Height="42" Width="201">
-            <Button x:Name="BtnClose" HorizontalAlignment="Right" Click="BtnClose_Click" Style="{StaticResource MaterialDesignFlatButton}"
+        <StackPanel HorizontalAlignment="Right" VerticalAlignment="Top" Grid.Row="0" Grid.Column="1" Height="42"
+                    Width="201">
+            <Button x:Name="BtnClose" HorizontalAlignment="Right" Click="BtnClose_Click"
+                    Style="{StaticResource MaterialDesignFlatButton}"
                     Foreground="White">
                 <Button.Content>
                     <materialdesign:PackIcon Kind="Close" Foreground="White" />
@@ -55,7 +57,7 @@
                     Style="{StaticResource MaterialDesignBody1TextBlock}"
                     TextAlignment="Center" />
             </ScrollViewer>
-            
+
         </Grid>
         <Grid Grid.Row="3"
               Grid.ColumnSpan="2"
@@ -68,37 +70,37 @@
                 <ColumnDefinition Width="*" />
             </Grid.ColumnDefinitions>
             <Button x:Name="BtnOk"
-                            Style="{DynamicResource MaterialDesignFlatButton}"
-                            Click="BtnOk_Click"
-                            Foreground="White"
-                            Grid.Column="1"
-                            Margin="5"
-                            Width="100"
-                            Content="OK" />
+                    Style="{DynamicResource MaterialDesignFlatButton}"
+                    Click="BtnOk_Click"
+                    Foreground="White"
+                    Grid.Column="1"
+                    Margin="5"
+                    Width="100"
+                    Content="OK" />
             <Button x:Name="BtnCancel"
-                            Style="{DynamicResource MaterialDesignFlatButton}"
-                            Click="BtnCancel_Click"
-                            Foreground="White"
-                            Grid.Column="2"
-                            Margin="5"
-                            Width="100"
-                            Content="Cancel" />
+                    Style="{DynamicResource MaterialDesignFlatButton}"
+                    Click="BtnCancel_Click"
+                    Foreground="White"
+                    Grid.Column="2"
+                    Margin="5"
+                    Width="100"
+                    Content="Cancel" />
             <Button x:Name="BtnYes"
-                            Style="{DynamicResource MaterialDesignFlatButton}"
-                            Click="BtnYes_Click"
-                            Foreground="White"
-                            Grid.Column="1"
-                            Margin="5"
-                            Width="100"
-                            Content="Yes" />
+                    Style="{DynamicResource MaterialDesignFlatButton}"
+                    Click="BtnYes_Click"
+                    Foreground="White"
+                    Grid.Column="1"
+                    Margin="5"
+                    Width="100"
+                    Content="Yes" />
             <Button x:Name="BtnNo"
-                            Style="{DynamicResource MaterialDesignFlatButton}"
-                            Click="BtnNo_Click"
-                            Foreground="White"
-                            Grid.Column="2"
-                            Margin="5"
-                            Width="100"
-                            Content="No" />
+                    Style="{DynamicResource MaterialDesignFlatButton}"
+                    Click="BtnNo_Click"
+                    Foreground="White"
+                    Grid.Column="2"
+                    Margin="5"
+                    Width="100"
+                    Content="No" />
         </Grid>
     </Grid>
 </Window>

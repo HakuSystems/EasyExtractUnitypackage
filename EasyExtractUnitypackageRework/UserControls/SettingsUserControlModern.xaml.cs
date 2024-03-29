@@ -2,7 +2,6 @@
 using System.IO;
 using System.Windows;
 using System.Windows.Controls;
-using EasyExtractUnitypackageRework.Methods;
 
 namespace EasyExtractUnitypackageRework.UserControls;
 
@@ -24,7 +23,7 @@ public partial class SettingsUserControlModern : UserControl
         RandomTxt.Text = "Random Text is not available at the moment";
         if (Config.Config.HeartERPEasterEgg)
             ERPEasterEgg.Visibility = Visibility.Visible;
-        
+
         WindowsDescription.Text = $"Current State: {(Config.Config.WindowsNotification ? "Enabled" : "Disabled")}";
     }
 

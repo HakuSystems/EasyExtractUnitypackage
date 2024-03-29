@@ -29,7 +29,8 @@ public partial class SearchEverything : UserControl
             // ReSharper disable once ComplexConditionExpression
             if (!CheckEverythingRunning() || !CheckOperatingSystem())
             {
-                new EasyMessageBox("Your System Doesnt Support This feature or you dont have SearchEverything open.", MessageType.Info, MessageButtons.Ok)
+                new EasyMessageBox("Your System Doesnt Support This feature or you dont have SearchEverything open.",
+                        MessageType.Info, MessageButtons.Ok)
                     .ShowDialog();
                 CompletedEverything();
             }
@@ -42,7 +43,7 @@ public partial class SearchEverything : UserControl
             Everything.Everything_SetRequestFlags(Everything.EVERYTHING_REQUEST_FILE_NAME
                                                   | Everything.EVERYTHING_REQUEST_PATH
             );
-        
+
             // execute the query
             Everything.Everything_QueryW(true);
 
@@ -56,7 +57,6 @@ public partial class SearchEverything : UserControl
             Clipboard.SetText(exception.ToString());
             throw;
         }
-        
     }
 
     private bool CheckOperatingSystem()
@@ -112,14 +112,14 @@ public partial class SearchEverything : UserControl
             InformationTxt.Text = "Please enter a search term";
             return;
         }
+
         foreach (var content in _tempList)
-        {
             if (content.Value.ToLower().Contains(SearchBox.Text.ToLower()))
-            {
                 Dispatcher.BeginInvoke(() =>
                 {
                     var count = UnitypackagesList.Items.Count + 1; // +1 because we start at 0
-                    InformationTxt.Text = $"Found {count.ToString()} / [ {Everything.Everything_GetNumResults().ToString()} ] unitypackages";
+                    InformationTxt.Text =
+                        $"Found {count.ToString()} / [ {Everything.Everything_GetNumResults().ToString()} ] unitypackages";
                     UnitypackagesList.Items.Refresh();
                     var txt = new TextBlock
                     {
@@ -153,20 +153,15 @@ public partial class SearchEverything : UserControl
                         Tag = content.Key
                     });
                     btn.Click += OnBtnOnClick;
-                    
                 });
-            }
             else
-            {
                 InformationTxt.Text = "No Results Found";
-            }
-        }
     }
 
     private void LoopList()
     {
         uint i;
-        
+
         for (i = 0; i < Everything.Everything_GetNumResults(); i++)
         {
             var path = Marshal.PtrToStringUni(Everything.Everything_GetResultFullPathName(i));
@@ -174,5 +169,4 @@ public partial class SearchEverything : UserControl
             if (path != null) _tempList.Add(path, name);
         }
     }
-
 }

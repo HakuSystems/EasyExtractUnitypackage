@@ -10,8 +10,7 @@
              DragEnter="UIElement_OnDragEnter"
              DragLeave="UIElement_OnDragLeave"
              Drop="UIElement_OnDrop"
-             Loaded="ExtractUserControlModern_OnLoaded"
-             >
+             Loaded="ExtractUserControlModern_OnLoaded">
 
     <Grid>
         <Grid.ColumnDefinitions>
@@ -67,7 +66,7 @@
         <Grid Grid.Column="1" Grid.RowSpan="2" Visibility="Collapsed" x:Name="NextStepGrid">
             <materialDesign:Card Background="{DynamicResource MaterialDesignDarkSeparatorBackground}">
                 <StackPanel>
-                    <Label Content="Please Take Action" Foreground="Green"/>
+                    <Label Content="Please Take Action" Foreground="Green" />
                     <TextBlock TextWrapping="WrapWithOverflow" x:Name="TutorialText" Text="Instruction Text"
                                Margin="10" Foreground="White" />
                     <Button
@@ -107,7 +106,7 @@
                            HorizontalAlignment="Center" Foreground="DarkGray" />
                     <Grid>
                         <ScrollViewer Foreground="White" CanContentScroll="True" VerticalScrollBarVisibility="Auto">
-                            <TreeView Foreground="White" x:Name="ToExtractContentListBox"/>
+                            <TreeView Foreground="White" x:Name="ToExtractContentListBox" />
                         </ScrollViewer>
                     </Grid>
                 </StackPanel>

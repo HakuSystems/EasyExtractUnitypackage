@@ -58,9 +58,10 @@
                                     x:Name="SearchComputerBtn">
                                 <Button.Content>
                                     <StackPanel Orientation="Horizontal">
-                                    <materiaDesign:PackIcon Margin="5" Kind="Search" Foreground="White" />
-                                    <TextBlock Foreground="White" Margin="5" VerticalAlignment="Center" Text="Search Computer with Search Everything"/>
-                                        
+                                        <materiaDesign:PackIcon Margin="5" Kind="Search" Foreground="White" />
+                                        <TextBlock Foreground="White" Margin="5" VerticalAlignment="Center"
+                                                   Text="Search Computer with Search Everything" />
+
                                     </StackPanel>
                                 </Button.Content>
                             </Button>
@@ -136,7 +137,7 @@
                     <Button x:Name="UpdateInfo"
                             Click="UpdateInfo_OnClick"
                             Content="Readme" Foreground="White" HorizontalAlignment="Center"
-                               Margin="5" />
+                            Margin="5" />
 
                     <Button Margin="5" x:Name="ExtractBtn" Click="ExtractBtn_OnClick">
                         <Button.Content>
