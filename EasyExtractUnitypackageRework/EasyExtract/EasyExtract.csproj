@@ -7,6 +7,7 @@
         <ImplicitUsings>enable</ImplicitUsings>
         <UseWPF>true</UseWPF>
         <ApplicationIcon>Resources\Smallicon.ico</ApplicationIcon>
+        <AssemblyVersion>2.0.5.5</AssemblyVersion>
     </PropertyGroup>
 
     <ItemGroup>

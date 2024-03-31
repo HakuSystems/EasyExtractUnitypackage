@@ -40,7 +40,7 @@
                            HorizontalAlignment="Stretch"
                            VerticalAlignment="Stretch"
                            FontWeight="DemiBold"
-                           Transition="FadeIn"
+                           Transition="FadeInWithSlide"
                            PaneDisplayMode="LeftFluent"
                            ContentOverlay="{Binding ElementName=ContentFrame}"
                            IsBackButtonVisible="Collapsed">
