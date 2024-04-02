@@ -16,7 +16,7 @@
                  WindowBackdropType="Mica"
                  ExtendsContentIntoTitleBar="True"
                  Title="EasyExtractUnitypackage" Height="auto" Width="auto">
-    <Grid>
+    <Grid x:Name="MainGrid">
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="*" />
             <ColumnDefinition Width="*" />
@@ -28,10 +28,11 @@
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
         <ui:TitleBar Grid.Row="0"
+                     x:Name="TitleBar"
                      VerticalAlignment="Top"
                      ButtonsForeground="White"
                      VerticalContentAlignment="Top"
-                     HorizontalContentAlignment="Center" Title="EasyExtract"
+                     HorizontalContentAlignment="Center" Title="EasyExtractUnitypackage"
                      Foreground="White" Grid.ColumnSpan="3" />
 
         <ui:NavigationView Grid.Row="1" Grid.Column="0" Grid.RowSpan="2" Grid.ColumnSpan="3"

@@ -56,6 +56,7 @@
             <CopyToOutputDirectory>Always</CopyToOutputDirectory>
         </Resource>
         <Resource Include="Resources\Gifs\IconAnim.gif"/>
+        <None Remove="Resources\uwuMode.png" />
     </ItemGroup>
 
 </Project>

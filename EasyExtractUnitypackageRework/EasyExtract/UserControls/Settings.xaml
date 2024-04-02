@@ -1,12 +1,211 @@
 <UserControl x:Class="EasyExtract.UserControls.Settings"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-             xmlns:local="clr-namespace:EasyExtract.UserControls"
-             Background="Transparent"
-             >
-    <Grid>
-        <TextBlock>SETTINGS</TextBlock>
-    </Grid>
+             xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+             Background="Transparent">
+    <!--todo: make it look better-->
+    <ScrollViewer VerticalScrollBarVisibility="Auto">
+        <Grid Margin="10">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+
+            <!-- User Experience -->
+            <ui:CardExpander x:Name="UserExExpander" MouseEnter="UserExExpander_OnMouseEnter" MouseLeave="UserExExpander_OnMouseLeave" Icon="{ui:SymbolIcon DesignIdeas24}"  Header="User Experience">
+                <ui:CardControl>
+                    <ui:CardControl.Icon>
+                        <ui:SymbolIcon
+                            HorizontalAlignment="Center"
+                            VerticalAlignment="Center"
+                            Margin="0,0,5,0"
+                            Foreground="White"
+                            Symbol="EmojiSparkle24" />
+                    </ui:CardControl.Icon>
+                    <ui:CardControl.Header>
+                        <StackPanel>
+                            <ui:TextBlock
+                                Margin="0"
+                                FontTypography="BodyStrong"
+                                Foreground="{DynamicResource TextFillColorPrimaryBrush}"
+                                Text="UwU Mode"
+                                TextWrapping="WrapWithOverflow" />
+                            <ui:TextBlock
+                                Appearance="Secondary"
+                                Foreground="{DynamicResource TextFillColorSecondaryBrush}"
+                                Text="Title Changes to UwU"
+                                Opacity="0.5"
+                                TextWrapping="WrapWithOverflow" />
+                        </StackPanel>
+                    </ui:CardControl.Header>
+                    <ui:Card Margin="5">
+                        <ui:ToggleSwitch Content="On" IsChecked="True" Margin="10" Foreground="White" />
+                    </ui:Card>
+                </ui:CardControl>
+            </ui:CardExpander>
+
+            <!-- Notifications & Updates -->
+            <ui:CardExpander Grid.Row="1" x:Name="NotifUpExpander" MouseEnter="NotifUpExpander_OnMouseEnter" MouseLeave="NotifUpExpander_OnMouseLeave" Icon="{ui:SymbolIcon Shield24}" Header="Notifications And Updates">
+                <StackPanel Orientation="Vertical">
+                    <ui:CardControl>
+                        <ui:CardControl.Icon>
+                            <ui:SymbolIcon
+                                HorizontalAlignment="Center"
+                                VerticalAlignment="Center"
+                                Margin="0,0,5,0"
+                                Foreground="White"
+                                Symbol="ArrowDownload24" />
+                        </ui:CardControl.Icon>
+                        <ui:CardControl.Header>
+                            <StackPanel>
+                                <ui:TextBlock
+                                    Margin="0"
+                                    FontTypography="BodyStrong"
+                                    Foreground="{DynamicResource TextFillColorPrimaryBrush}"
+                                    Text="Update Check"
+                                    TextWrapping="WrapWithOverflow" />
+                                <ui:TextBlock
+                                    Appearance="Secondary"
+                                    Foreground="{DynamicResource TextFillColorSecondaryBrush}"
+                                    Text="Check for updates on startup"
+                                    Opacity="0.5"
+                                    TextWrapping="WrapWithOverflow" />
+                            </StackPanel>
+                        </ui:CardControl.Header>
+                        <ui:Card Margin="5">
+                            <ui:ToggleSwitch Content="On" IsChecked="True" Margin="10" Foreground="White" />
+                        </ui:Card>
+                    </ui:CardControl>
+                    
+                    <ui:CardControl>
+                        <ui:CardControl.Icon>
+                            <ui:SymbolIcon
+                                HorizontalAlignment="Center"
+                                VerticalAlignment="Center"
+                                Margin="0,0,5,0"
+                                Foreground="White"
+                                Symbol="Info24" />
+                        </ui:CardControl.Icon>
+                        <ui:CardControl.Header>
+                            <StackPanel>
+                                <ui:TextBlock
+                                    Margin="0"
+                                    FontTypography="BodyStrong"
+                                    Foreground="{DynamicResource TextFillColorPrimaryBrush}"
+                                    Text="Windows Notifications"
+                                    TextWrapping="WrapWithOverflow" />
+                                <ui:TextBlock
+                                    Appearance="Secondary"
+                                    Foreground="{DynamicResource TextFillColorSecondaryBrush}"
+                                    Text="Get Windows Notifications"
+                                    Opacity="0.5"
+                                    TextWrapping="WrapWithOverflow" />
+                            </StackPanel>
+                        </ui:CardControl.Header>
+                        <ui:Card Margin="5">
+                            <ui:ToggleSwitch Content="On" IsChecked="True" Margin="10" Foreground="White" />
+                        </ui:Card>
+                    </ui:CardControl>
+                </StackPanel>
+            </ui:CardExpander>
+
+            <!-- Integrations -->
+            <ui:CardExpander Grid.Row="2" x:Name="IntigExpander" MouseEnter="IntigExpander_OnMouseEnter" MouseLeave="IntigExpander_OnMouseLeave" Icon="{ui:SymbolIcon Apps24}"  Header="Integrations">
+                <StackPanel Orientation="Vertical">
+                    <ui:CardControl>
+                        <ui:CardControl.Icon>
+                            <ui:SymbolIcon
+                                HorizontalAlignment="Center"
+                                VerticalAlignment="Center"
+                                Margin="0,0,5,0"
+                                Foreground="White"
+                                Symbol="AppFolder24" />
+                        </ui:CardControl.Icon>
+                        <ui:CardControl.Header>
+                            <StackPanel>
+                                <ui:TextBlock
+                                    Margin="0"
+                                    FontTypography="BodyStrong"
+                                    Foreground="{DynamicResource TextFillColorPrimaryBrush}"
+                                    Text="Discord RPC"
+                                    TextWrapping="WrapWithOverflow" />
+                                <ui:TextBlock
+                                    Appearance="Secondary"
+                                    Foreground="{DynamicResource TextFillColorSecondaryBrush}"
+                                    Text="Show what you're extracting on Discord"
+                                    Opacity="0.5"
+                                    TextWrapping="WrapWithOverflow" />
+                            </StackPanel>
+                        </ui:CardControl.Header>
+                        <ui:Card Margin="5">
+                            <ui:ToggleSwitch Content="On" IsChecked="True" Margin="10" Foreground="White" />
+                        </ui:Card>
+                    </ui:CardControl>
+                </StackPanel>
+            </ui:CardExpander>
+
+            <!-- Paths -->
+            <ui:CardExpander x:Name="PathExpander" MouseEnter="PathExpander_OnMouseEnter" MouseLeave="PathExpander_OnMouseLeave" Grid.Row="3" Icon="{ui:SymbolIcon Folder24}" Header="Paths">
+                <StackPanel Orientation="Vertical">
+                    <ui:CardControl>
+                        <ui:CardControl.Icon>
+                            <ui:SymbolIcon
+                                HorizontalAlignment="Center"
+                                VerticalAlignment="Center"
+                                Margin="0,0,5,0"
+                                Foreground="White"
+                                Symbol="FolderOpen24" />
+                        </ui:CardControl.Icon>
+                        <ui:CardControl.Header>
+                            <StackPanel Margin="10">
+                                <ui:TextBlock
+                                    Margin="0"
+                                    FontTypography="BodyStrong"
+                                    Foreground="{DynamicResource TextFillColorPrimaryBrush}"
+                                    Text="Default Temp Path:"
+                                    TextWrapping="WrapWithOverflow" />
+                                <ui:TextBox
+                                    Foreground="{DynamicResource TextFillColorSecondaryBrush}"
+                                    Text="C:\\Users\\Tiger\\AppData\\Roaming\\EasyExtract\\Temp"
+                                    Opacity="0.5"
+                                    IsEnabled="False"
+                                    TextWrapping="WrapWithOverflow" />
+                            </StackPanel>
+                        </ui:CardControl.Header>
+                        <ui:Button Content="Change" Margin="10" Foreground="White"  />
+                    </ui:CardControl>
+                    <ui:CardControl>
+                        <ui:CardControl.Icon>
+                            <ui:SymbolIcon
+                                HorizontalAlignment="Center"
+                                VerticalAlignment="Center"
+                                Margin="0,0,5,0"
+                                Foreground="White"
+                                Symbol="FolderZip24" />
+                        </ui:CardControl.Icon>
+                        <ui:CardControl.Header>
+                            <StackPanel>
+                                <ui:TextBlock
+                                    Margin="0"
+                                    FontTypography="BodyStrong"
+                                    Foreground="{DynamicResource TextFillColorPrimaryBrush}"
+                                    Text="Last Extracted Path:"
+                                    TextWrapping="WrapWithOverflow" />
+                                <ui:TextBox
+                                    Foreground="{DynamicResource TextFillColorSecondaryBrush}"
+                                    Text="C:\\Users\\Tiger\\AppData\\Roaming\\EasyExtract\\Extracted"
+                                    Opacity="0.5"
+                                    IsEnabled="False"
+                                    TextWrapping="WrapWithOverflow" />
+                            </StackPanel>
+                        </ui:CardControl.Header>
+                        <ui:Button Content="Change" Margin="10" Foreground="White"  />
+                    </ui:CardControl>
+                </StackPanel>
+            </ui:CardExpander>
+
+        </Grid>
+    </ScrollViewer>
 </UserControl>
