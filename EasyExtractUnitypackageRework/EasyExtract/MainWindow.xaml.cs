@@ -1,8 +1,6 @@
-﻿
-
-using System.Windows;
+﻿using System.Windows;
 using System.Windows.Threading;
-using XamlAnimatedGif;
+using EasyExtract.Discord;
 
 namespace EasyExtract;
 
@@ -18,7 +16,9 @@ public partial class MainWindow : Window
 
     private void AnimationBehavior_OnLoaded(object sender, RoutedEventArgs e)
     {
-        DispatcherTimer timer = new DispatcherTimer();
+        DiscordRpcManager.Instance.DiscordStart();
+
+        var timer = new DispatcherTimer();
         timer.Interval = TimeSpan.FromSeconds(5);
         timer.Tick += (sender, args) =>
         {
@@ -28,5 +28,4 @@ public partial class MainWindow : Window
         };
         timer.Start();
     }
-
 }

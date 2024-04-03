@@ -11,11 +11,11 @@
                  Loaded="Dashboard_OnLoaded"
                  WindowCornerPreference="Round"
                  WindowStartupLocation="CenterScreen"
+                 Title="{Binding AppTitle}"
                  FontFamily="{DynamicResource SegoeFluentIcons}"
                  Background="Transparent"
                  WindowBackdropType="Mica"
-                 ExtendsContentIntoTitleBar="True"
-                 Title="EasyExtractUnitypackage" Height="auto" Width="auto">
+                 ExtendsContentIntoTitleBar="True" Height="auto" Width="auto">
     <Grid x:Name="MainGrid">
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="*" />
@@ -32,7 +32,8 @@
                      VerticalAlignment="Top"
                      ButtonsForeground="White"
                      VerticalContentAlignment="Top"
-                     HorizontalContentAlignment="Center" Title="EasyExtractUnitypackage"
+                     HorizontalContentAlignment="Center"
+                     Title="{Binding AppTitle}"
                      Foreground="White" Grid.ColumnSpan="3" />
 
         <ui:NavigationView Grid.Row="1" Grid.Column="0" Grid.RowSpan="2" Grid.ColumnSpan="3"
@@ -71,9 +72,7 @@
                             VerticalAlignment="Center"
                             Margin="0,0,5,0"
                             Foreground="White"
-                            Symbol="Heart24">
-                            
-                        </ui:SymbolIcon>
+                            Symbol="Heart24" />
                     </ui:CardControl.Icon>
                     <ui:CardControl.Header>
                         <StackPanel>

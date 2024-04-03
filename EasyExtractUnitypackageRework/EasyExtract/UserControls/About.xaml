@@ -86,7 +86,7 @@
         </ui:Card>
         <ui:Card Grid.Row="1" Grid.Column="1" HorizontalAlignment="Center" BorderThickness="8,1,1,15">
             <StackPanel Orientation="Horizontal">
-                <ui:Card Padding="5"  VerticalAlignment="Center">
+                <ui:Card Padding="5" VerticalAlignment="Center">
                     <Image
                         Height="50" Width="50"
                         Margin="10"

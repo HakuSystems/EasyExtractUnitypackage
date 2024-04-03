@@ -1,18 +1,17 @@
 ﻿<Window x:Class="EasyExtract.MainWindow"
-                 xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-                 xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-                 xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-                 xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-                 xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
-                 xmlns:gif="https://github.com/XamlAnimatedGif/XamlAnimatedGif"
-                 mc:Ignorable="d"
-                 AllowsTransparency="True"
-                 WindowStartupLocation="CenterScreen"
-                 ShowInTaskbar="False"
-                 Background="Transparent"
-                 WindowStyle="None"
-                 Title="EasyExtractUnitypackage" Height="450" Width="800">
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:gif="https://github.com/XamlAnimatedGif/XamlAnimatedGif"
+        mc:Ignorable="d"
+        AllowsTransparency="True"
+        WindowStartupLocation="CenterScreen"
+        ShowInTaskbar="False"
+        Background="Transparent"
+        WindowStyle="None" Height="450" Width="800">
     <StackPanel Background="Transparent">
-        <Image gif:AnimationBehavior.Loaded="AnimationBehavior_OnLoaded" gif:AnimationBehavior.SourceUri="pack://application:,,,/EasyExtract;component/Resources/Gifs/LogoAnimation.gif" />
+        <Image gif:AnimationBehavior.Loaded="AnimationBehavior_OnLoaded"
+               gif:AnimationBehavior.SourceUri="pack://application:,,,/EasyExtract;component/Resources/Gifs/LogoAnimation.gif" />
     </StackPanel>
 </Window>

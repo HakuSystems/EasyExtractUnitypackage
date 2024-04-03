@@ -16,6 +16,9 @@
             <PrivateAssets>all</PrivateAssets>
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
+        <PackageReference Include="DiscordRichPresence">
+            <Version>1.2.1.24</Version>
+        </PackageReference>
         <PackageReference Include="Fody">
             <Version>6.8.0</Version>
             <PrivateAssets>all</PrivateAssets>
@@ -50,13 +53,13 @@
         <Resource Include="Resources\Small\EEUP_IconSmall@4x.png"/>
         <Resource Include="Resources\Videos\IconAnim.mp4"/>
         <Resource Include="Resources\Videos\LogoAnimation.mp4">
-          <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+            <CopyToOutputDirectory>Always</CopyToOutputDirectory>
         </Resource>
         <Resource Include="Resources\Gifs\LogoAnimation.gif">
             <CopyToOutputDirectory>Always</CopyToOutputDirectory>
         </Resource>
         <Resource Include="Resources\Gifs\IconAnim.gif"/>
-        <None Remove="Resources\uwuMode.png" />
+        <None Remove="Resources\uwuMode.png"/>
     </ItemGroup>
 
 </Project>

@@ -1,7 +1,7 @@
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Threading;
-using Wpf.Ui.Controls;
+using EasyExtract.Config;
+using EasyExtract.Discord;
 
 namespace EasyExtract.UserControls;
 
@@ -10,5 +10,30 @@ public partial class EasterEgg : UserControl
     public EasterEgg()
     {
         InitializeComponent();
+    }
+
+    private async void EasterEgg_OnLoaded(object sender, RoutedEventArgs e)
+    {
+        var isDiscordEnabled = false;
+        try
+        {
+            isDiscordEnabled = (await ConfigHelper.LoadConfig()).DiscordRpc;
+        }
+        catch (Exception exception)
+        {
+            Console.WriteLine(exception);
+            throw;
+        }
+
+        if (isDiscordEnabled)
+            try
+            {
+                await DiscordRpcManager.Instance.UpdatePresenceAsync("Viewing Easter Egg");
+            }
+            catch (Exception exception)
+            {
+                Console.WriteLine(exception);
+                throw;
+            }
     }
 }

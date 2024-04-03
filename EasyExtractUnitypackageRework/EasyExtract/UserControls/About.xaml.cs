@@ -1,6 +1,8 @@
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Threading;
+using EasyExtract.Config;
+using EasyExtract.Discord;
 using Wpf.Ui.Controls;
 
 namespace EasyExtract.UserControls;
@@ -14,9 +16,31 @@ public partial class About : UserControl
         InitializeComponent();
     }
 
-    private void About_OnLoaded(object sender, RoutedEventArgs e)
+    private async void About_OnLoaded(object sender, RoutedEventArgs e)
     {
         VersionCard.Footer = $"Version {Application.ResourceAssembly.GetName().Version}";
+
+        var isDiscordEnabled = false;
+        try
+        {
+            isDiscordEnabled = (await ConfigHelper.LoadConfig()).DiscordRpc;
+        }
+        catch (Exception exception)
+        {
+            Console.WriteLine(exception);
+            throw;
+        }
+
+        if (isDiscordEnabled)
+            try
+            {
+                await DiscordRpcManager.Instance.UpdatePresenceAsync("Viewing About Page");
+            }
+            catch (Exception exception)
+            {
+                Console.WriteLine(exception);
+                throw;
+            }
 
         const int maxCards = 10;
         for (var i = 0; i < maxCards; i++)
@@ -31,6 +55,7 @@ public partial class About : UserControl
             _cards.Add(card);
             RandomCardDesign.Items.Add(card);
         }
+
         var repeatTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(500) };
         repeatTimer.Tick += (o, args) => ChangeRandomMargins();
         repeatTimer.Start();

@@ -9,16 +9,18 @@ public class ConfigHelper
         Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "EasyExtract",
             "Settings.json");
 
+    private static readonly SemaphoreSlim _semaphore = new(1, 1);
+
     private static async Task CreateConfig()
     {
         Directory.CreateDirectory(Path.GetDirectoryName(_configPath));
-        Directory.CreateDirectory(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "EasyExtract", "Temp"));
-        Directory.CreateDirectory(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "EasyExtract", "Extracted"));
+        Directory.CreateDirectory(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
+            "EasyExtract", "Temp"));
+        Directory.CreateDirectory(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
+            "EasyExtract", "Extracted"));
         await using var sw = new StreamWriter(_configPath, false);
         await sw.WriteAsync(JsonConvert.SerializeObject(new ConfigModel(), Formatting.Indented));
     }
-
-    private static readonly SemaphoreSlim _semaphore = new SemaphoreSlim(1, 1);
 
     public static async Task<ConfigModel?> LoadConfig()
     {

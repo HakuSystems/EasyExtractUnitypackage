@@ -21,6 +21,7 @@ public partial class Dashboard : FluentWindow
         ContentFrame = new Extraction();
     }
 
+
     private void HeartIcon_OnMouseEnter(object sender, MouseEventArgs e)
     {
         HeartIcon.Symbol = SymbolRegular.HeartBroken24;
@@ -63,19 +64,14 @@ public partial class Dashboard : FluentWindow
         {
             case true:
                 NavView.Opacity = 0.2;
-                Title = "EasyExtractUwUnitypackage";
-                TitleBar.Title = "EasyExtractUwUnitypackage";
+                TitleBar.Title = config.AppTitle;
+                Title = config.AppTitle;
                 await UwUAnimation();
                 break;
             default:
-                Title = "EasyExtractUnitypackage";
-                TitleBar.Title = "EasyExtractUnitypackage";
+                TitleBar.Title = config.AppTitle;
+                Title = config.AppTitle;
                 break;
-        }
-
-        if (config.DiscordRpc)
-        {
-            //todo: discord rpc
         }
     }
 
