@@ -29,7 +29,6 @@ public class DiscordRpcManager : IDisposable
             client = new DiscordRpcClient("1103487584124010607");
             client.Initialize(); // Initialize synchronously; no await needed here
             client.OnReady += (sender, e) => Console.WriteLine($"Received Ready from user {e.User.Username}");
-            client.OnPresenceUpdate += (sender, e) => Console.WriteLine($"Received Update! {e.Presence}");
             client.OnError += (sender, e) => Console.WriteLine($"Error! {e.Message}");
             client.OnClose += (sender, e) => Console.WriteLine($"Close! {e}");
         }
