@@ -11,12 +11,6 @@ public partial class Settings : UserControl
     private string _configLastExtractedPath = "";
 
     //todo: make change title work properly
-    
-    //todo: Fix discord rpc change when off
-    //also on card click the toggle changes back or on toggle click idk
-    //card click == checkbox off
-    // config wird geupdate ja, aber ui changed falsch.
-    //discord rpc wird nicht gelöscht aka disposed wenn die checkbox aus ist fix das
     private string _configTempPath = "";
 
     public Settings()
@@ -66,6 +60,8 @@ public partial class Settings : UserControl
             ConfigHelper.UpdateConfig(config);
         });
         DiscordRpcToggle.Content = "On";
+        DiscordRpcManager.Instance.DiscordStart();
+        await UpdateDiscordRpc();
     }
 
     private async void DiscordRPCToggle_OnUnchecked(object sender, RoutedEventArgs e)
@@ -78,6 +74,7 @@ public partial class Settings : UserControl
             ConfigHelper.UpdateConfig(config);
         });
         DiscordRpcToggle.Content = "Off";
+        DiscordRpcManager.Instance.Dispose();
     }
 
     private async void WindowsNotificationToggle_OnChecked(object sender, RoutedEventArgs e)
@@ -190,6 +187,11 @@ public partial class Settings : UserControl
             ConfigHelper.UpdateConfig(config);
         });
 
+        await UpdateDiscordRpc();
+    }
+
+    private static async Task UpdateDiscordRpc()
+    {
         var isDiscordEnabled = false;
         try
         {

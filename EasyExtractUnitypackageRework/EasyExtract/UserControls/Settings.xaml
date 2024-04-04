@@ -44,7 +44,7 @@
                         </StackPanel>
                     </ui:CardControl.Header>
                     <ui:Card Margin="5">
-                        <ui:ToggleSwitch x:Name="UwUModeToggle" Checked="UwUModeToggle_OnChecked"
+                        <ui:ToggleSwitch IsHitTestVisible="False" x:Name="UwUModeToggle" Checked="UwUModeToggle_OnChecked"
                                          Unchecked="UwUModeToggle_OnUnchecked" Content="On" IsChecked="True"
                                          Margin="10" Foreground="White" />
                     </ui:Card>
@@ -83,7 +83,7 @@
                             </StackPanel>
                         </ui:CardControl.Header>
                         <ui:Card Margin="5">
-                            <ui:ToggleSwitch x:Name="UpdateCheckToggle" Checked="UpdateCheckToggle_OnChecked"
+                            <ui:ToggleSwitch IsHitTestVisible="False" x:Name="UpdateCheckToggle" Checked="UpdateCheckToggle_OnChecked"
                                              Unchecked="UpdateCheckToggle_OnUnchecked" Content="On" IsChecked="True"
                                              Margin="10" Foreground="White" />
                         </ui:Card>
@@ -115,7 +115,7 @@
                             </StackPanel>
                         </ui:CardControl.Header>
                         <ui:Card Margin="5">
-                            <ui:ToggleSwitch x:Name="WindowsNotificationToggle"
+                            <ui:ToggleSwitch IsHitTestVisible="False" x:Name="WindowsNotificationToggle"
                                              Checked="WindowsNotificationToggle_OnChecked"
                                              Unchecked="WindowsNotificationToggle_OnUnchecked" Content="On"
                                              IsChecked="True" Margin="10" Foreground="White" />
@@ -155,7 +155,7 @@
                             </StackPanel>
                         </ui:CardControl.Header>
                         <ui:Card Margin="5">
-                            <ui:ToggleSwitch x:Name="DiscordRpcToggle" Checked="DiscordRPCToggle_OnChecked"
+                            <ui:ToggleSwitch IsHitTestVisible="False" x:Name="DiscordRpcToggle" Checked="DiscordRPCToggle_OnChecked"
                                              Unchecked="DiscordRPCToggle_OnUnchecked" Content="On" IsChecked="True"
                                              Margin="10" Foreground="White" />
                         </ui:Card>
