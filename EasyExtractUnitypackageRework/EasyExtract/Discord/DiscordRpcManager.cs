@@ -41,7 +41,7 @@ public class DiscordRpcManager : IDisposable
             client.SetPresence(new RichPresence
             {
                 Details = "A Software to get files out of a .unitypackage",
-                State = state,
+                State = $"Viewing {state} Page",
                 Timestamps = timestamps,
                 Assets = new Assets
                 {

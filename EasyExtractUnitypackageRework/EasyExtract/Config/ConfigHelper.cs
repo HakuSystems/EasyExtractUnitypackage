@@ -40,7 +40,7 @@ public class ConfigHelper
         }
     }
 
-    public static async Task UpdateConfig(ConfigModel config)
+    public static async Task UpdateConfig(ConfigModel? config)
     {
         await _semaphore.WaitAsync();
         try
@@ -57,7 +57,14 @@ public class ConfigHelper
             _semaphore.Release();
         }
     }
-
+    
+    public static async Task AddToHistory(HistoryModel history)
+    {
+        var config = await LoadConfig();
+        if (config == null) return;
+        config.History.Add(history);
+        await UpdateConfig(config);
+    }
     public static Task ResetConfig()
     {
         if (File.Exists(_configPath)) File.Delete(_configPath);

@@ -28,7 +28,7 @@ public partial class SearchEverything : UserControl
         if (isDiscordEnabled)
             try
             {
-                await DiscordRpcManager.Instance.UpdatePresenceAsync("Searching Everything");
+                await DiscordRpcManager.Instance.UpdatePresenceAsync("Search Everything");
             }
             catch (Exception exception)
             {

@@ -1,9 +1,11 @@
+using System.Reflection;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
 using EasyExtract.Config;
+using EasyExtract.Discord;
 using EasyExtract.UserControls;
 using Wpf.Ui.Controls;
 using TextBlock = Wpf.Ui.Controls.TextBlock;
@@ -12,12 +14,12 @@ namespace EasyExtract;
 
 public partial class Dashboard : FluentWindow
 {
-    private readonly UserControl ContentFrame;
-
+    private static UserControl ContentFrame;
+    private ConfigModel Config { get; set; } = new();
     public Dashboard()
     {
         InitializeComponent();
-        DataContext = this;
+        DataContext = Config;
         ContentFrame = new Extraction();
     }
 

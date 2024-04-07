@@ -28,7 +28,7 @@ public partial class Extraction : UserControl
         if (isDiscordEnabled)
             try
             {
-                await DiscordRpcManager.Instance.UpdatePresenceAsync("Extracting Files");
+                await DiscordRpcManager.Instance.UpdatePresenceAsync("Extraction");
             }
             catch (Exception exception)
             {

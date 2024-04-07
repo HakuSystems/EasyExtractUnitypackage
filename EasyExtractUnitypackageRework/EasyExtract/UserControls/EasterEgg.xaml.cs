@@ -28,7 +28,7 @@ public partial class EasterEgg : UserControl
         if (isDiscordEnabled)
             try
             {
-                await DiscordRpcManager.Instance.UpdatePresenceAsync("Viewing Easter Egg");
+                await DiscordRpcManager.Instance.UpdatePresenceAsync("Easter Egg");
             }
             catch (Exception exception)
             {

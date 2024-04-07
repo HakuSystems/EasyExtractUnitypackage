@@ -61,7 +61,6 @@ public partial class Settings : UserControl
         });
         DiscordRpcToggle.Content = "On";
         DiscordRpcManager.Instance.DiscordStart();
-        await UpdateDiscordRpc();
     }
 
     private async void DiscordRPCToggle_OnUnchecked(object sender, RoutedEventArgs e)
@@ -180,18 +179,11 @@ public partial class Settings : UserControl
                 DefaultTempPath.Text = ConfigModel.DefaultTempPath;
                 LastExtractedPath.Text = ConfigModel.LastExtractedPath;
 
-
                 _configTempPath = ConfigModel.DefaultTempPath;
                 _configLastExtractedPath = ConfigModel.LastExtractedPath;
             });
             ConfigHelper.UpdateConfig(config);
         });
-
-        await UpdateDiscordRpc();
-    }
-
-    private static async Task UpdateDiscordRpc()
-    {
         var isDiscordEnabled = false;
         try
         {
@@ -206,7 +198,7 @@ public partial class Settings : UserControl
         if (isDiscordEnabled)
             try
             {
-                await DiscordRpcManager.Instance.UpdatePresenceAsync("Viewing Settings Page");
+                await DiscordRpcManager.Instance.UpdatePresenceAsync("Settings");
             }
             catch (Exception exception)
             {

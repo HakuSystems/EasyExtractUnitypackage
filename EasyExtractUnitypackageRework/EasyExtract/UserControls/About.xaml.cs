@@ -18,29 +18,8 @@ public partial class About : UserControl
 
     private async void About_OnLoaded(object sender, RoutedEventArgs e)
     {
+        
         VersionCard.Footer = $"Version {Application.ResourceAssembly.GetName().Version}";
-
-        var isDiscordEnabled = false;
-        try
-        {
-            isDiscordEnabled = (await ConfigHelper.LoadConfig()).DiscordRpc;
-        }
-        catch (Exception exception)
-        {
-            Console.WriteLine(exception);
-            throw;
-        }
-
-        if (isDiscordEnabled)
-            try
-            {
-                await DiscordRpcManager.Instance.UpdatePresenceAsync("Viewing About Page");
-            }
-            catch (Exception exception)
-            {
-                Console.WriteLine(exception);
-                throw;
-            }
 
         const int maxCards = 10;
         for (var i = 0; i < maxCards; i++)
@@ -59,6 +38,28 @@ public partial class About : UserControl
         var repeatTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(500) };
         repeatTimer.Tick += (o, args) => ChangeRandomMargins();
         repeatTimer.Start();
+        
+        var isDiscordEnabled = false;
+        try
+        {
+            isDiscordEnabled = (await ConfigHelper.LoadConfig()).DiscordRpc;
+        }
+        catch (Exception exception)
+        {
+            Console.WriteLine(exception);
+            throw;
+        }
+
+        if (isDiscordEnabled)
+            try
+            {
+                await DiscordRpcManager.Instance.UpdatePresenceAsync("About");
+            }
+            catch (Exception exception)
+            {
+                Console.WriteLine(exception);
+                throw;
+            }
     }
 
     private Thickness RandomMargin()
