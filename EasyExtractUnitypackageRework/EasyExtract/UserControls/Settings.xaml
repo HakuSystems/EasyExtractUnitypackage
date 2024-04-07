@@ -38,7 +38,7 @@
                             <ui:TextBlock
                                 Appearance="Secondary"
                                 Foreground="{DynamicResource TextFillColorSecondaryBrush}"
-                                Text="Title Changes to UwU"
+                                Text="Title Changes to UwU on Restart"
                                 Opacity="0.5"
                                 TextWrapping="WrapWithOverflow" />
                         </StackPanel>

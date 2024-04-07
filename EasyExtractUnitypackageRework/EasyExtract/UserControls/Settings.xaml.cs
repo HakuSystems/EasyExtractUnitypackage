@@ -9,8 +9,6 @@ namespace EasyExtract.UserControls;
 public partial class Settings : UserControl
 {
     private string _configLastExtractedPath = "";
-
-    //todo: make change title work properly
     private string _configTempPath = "";
 
     public Settings()
