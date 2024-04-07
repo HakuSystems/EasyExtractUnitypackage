@@ -3,12 +3,12 @@ using System.Windows.Controls;
 using EasyExtract.Config;
 using EasyExtract.Discord;
 using Microsoft.Win32;
+using Wpf.Ui.Appearance;
 
 namespace EasyExtract.UserControls;
 
 public partial class Settings : UserControl
 {
-    private string _configLastExtractedPath = "";
     private string _configTempPath = "";
 
     public Settings()
@@ -28,22 +28,6 @@ public partial class Settings : UserControl
             var config = task.Result;
             if (config == null) return;
             ConfigModel.DefaultTempPath = folderDialog.FolderName;
-            ConfigHelper.UpdateConfig(config);
-        });
-    }
-
-    private async void LastExtractedPathBtn_OnClick(object sender, RoutedEventArgs e)
-    {
-        var folderDialog = new OpenFolderDialog();
-        var result = folderDialog.ShowDialog();
-        if (result != true) return;
-        LastExtractedPath.Text = folderDialog.FolderName;
-        _configLastExtractedPath = folderDialog.FolderName;
-        await ConfigHelper.LoadConfig().ContinueWith(task =>
-        {
-            var config = task.Result;
-            if (config == null) return;
-            ConfigModel.LastExtractedPath = folderDialog.FolderName;
             ConfigHelper.UpdateConfig(config);
         });
     }
@@ -161,8 +145,24 @@ public partial class Settings : UserControl
         UwUModeToggle.Checked += UwUModeToggle_OnChecked;
         UwUModeToggle.Unchecked += UwUModeToggle_OnUnchecked;
 
+        //0 = Light, 1 = Dark, 2 = High Contrast
+        switch (ThemeComboBox.SelectedIndex)
+        {
+            case 0:
+                ApplicationThemeManager.Apply(ApplicationTheme.Light);
+                break;
+            case 1:
+                ApplicationThemeManager.Apply(ApplicationTheme.Dark);
+                break;
+            case 2:
+                ApplicationThemeManager.Apply(ApplicationTheme.HighContrast);
+                break;
+            default:
+                ApplicationThemeManager.Apply(ApplicationTheme.Dark);
+                break;
+        }
+
         DefaultTempPath.Text = _configTempPath;
-        LastExtractedPath.Text = _configLastExtractedPath;
 
         await ConfigHelper.LoadConfig().ContinueWith(task =>
         {
@@ -175,10 +175,16 @@ public partial class Settings : UserControl
                 UpdateCheckToggle.IsChecked = config.AutoUpdate;
                 UwUModeToggle.IsChecked = config.UwUModeActive;
                 DefaultTempPath.Text = ConfigModel.DefaultTempPath;
-                LastExtractedPath.Text = ConfigModel.LastExtractedPath;
+
+                ThemeComboBox.SelectedIndex = config.ApplicationTheme switch
+                {
+                    ApplicationTheme.Light => 0,
+                    ApplicationTheme.Dark => 1,
+                    ApplicationTheme.HighContrast => 2,
+                    _ => 1
+                };
 
                 _configTempPath = ConfigModel.DefaultTempPath;
-                _configLastExtractedPath = ConfigModel.LastExtractedPath;
             });
             ConfigHelper.UpdateConfig(config);
         });
@@ -205,11 +211,6 @@ public partial class Settings : UserControl
             }
     }
 
-    private void LastExtractedPath_OnTextChanged(object sender, TextChangedEventArgs e)
-    {
-        _configLastExtractedPath = LastExtractedPath.Text;
-    }
-
     private void DefaultTempPath_OnTextChanged(object sender, TextChangedEventArgs e)
     {
         _configTempPath = DefaultTempPath.Text;
@@ -219,12 +220,6 @@ public partial class Settings : UserControl
     {
         DefaultTempPath.Text = ConfigModel.DefaultTempPath;
         _configTempPath = ConfigModel.DefaultTempPath;
-    }
-
-    private void LastExtractedPathReset_OnClick(object sender, RoutedEventArgs e)
-    {
-        LastExtractedPath.Text = ConfigModel.LastExtractedPath;
-        _configLastExtractedPath = ConfigModel.LastExtractedPath;
     }
 
     private void UwUCard_OnClick(object sender, RoutedEventArgs e)
@@ -245,5 +240,40 @@ public partial class Settings : UserControl
     private void UpdateCard_OnClick(object sender, RoutedEventArgs e)
     {
         UpdateCheckToggle.IsChecked = !UpdateCheckToggle.IsChecked;
+    }
+
+
+    private async void ThemeComboBox_OnSelectionChanged(object sender, SelectionChangedEventArgs e)
+    {
+        var currentSelection = ThemeComboBox.SelectedIndex;
+        //1 = dark, 2 = light, 3 = high contrast
+        await ConfigHelper.LoadConfig().ContinueWith(task =>
+        {
+            var config = task.Result;
+            if (config == null) return;
+            config.ApplicationTheme = currentSelection switch
+            {
+                0 => ApplicationTheme.Light,
+                1 => ApplicationTheme.Dark,
+                2 => ApplicationTheme.HighContrast,
+                _ => ApplicationTheme.Dark
+            };
+            ConfigHelper.UpdateConfig(config);
+        });
+        switch (currentSelection)
+        {
+            case 0:
+                ApplicationThemeManager.Apply(ApplicationTheme.Light);
+                break;
+            case 1:
+                ApplicationThemeManager.Apply(ApplicationTheme.Dark);
+                break;
+            case 2:
+                ApplicationThemeManager.Apply(ApplicationTheme.HighContrast);
+                break;
+            default:
+                ApplicationThemeManager.Apply(ApplicationTheme.Dark);
+                break;
+        }
     }
 }

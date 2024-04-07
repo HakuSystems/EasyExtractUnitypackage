@@ -7,7 +7,7 @@
              mc:Ignorable="d"
              Loaded="History_OnLoaded"
              Foreground="{DynamicResource TextFillColorPrimaryBrush}"
-             Background="Black"
+             Background="{DynamicResource BackgroundPrimaryBrush}"
              d:DesignHeight="800" d:DesignWidth="1500">
     <Grid>
         <Grid.RowDefinitions>
@@ -53,7 +53,6 @@
                                 HorizontalAlignment="Center"
                                 VerticalAlignment="Center"
                                 Margin="0,0,5,0"
-                                Foreground="White"
                                 Symbol="FolderZip24" />
                         </ui:CardControl.Icon>
                         <ui:CardControl.Header>

@@ -9,13 +9,14 @@
                  WindowStyle="None"
                  ResizeMode="CanResizeWithGrip"
                  Loaded="Dashboard_OnLoaded"
+                 Foreground="{DynamicResource TextFillColorPrimaryBrush}"
                  WindowCornerPreference="Round"
                  WindowStartupLocation="CenterScreen"
                  Title="{Binding AppTitle}"
                  FontFamily="{DynamicResource SegoeFluentIcons}"
-                 Background="Transparent"
+                 Background="{DynamicResource BackgroundPrimaryBrush}"
                  WindowBackdropType="Mica"
-                 ExtendsContentIntoTitleBar="True" Height="auto" Width="auto">
+                 Height="auto" Width="auto">
     <Grid x:Name="MainGrid">
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="*" />
@@ -30,17 +31,17 @@
         <ui:TitleBar Grid.Row="0"
                      x:Name="TitleBar"
                      VerticalAlignment="Top"
-                     ButtonsForeground="White"
                      VerticalContentAlignment="Top"
                      HorizontalContentAlignment="Center"
-                     Title="{Binding AppTitle}"
-                     Foreground="White" Grid.ColumnSpan="3" />
+                     Title="{Binding AppTitle}" Grid.ColumnSpan="3" />
 
         <ui:NavigationView Grid.Row="1" Grid.Column="0" Grid.RowSpan="2" Grid.ColumnSpan="3"
                            PaneTitle="EasyExtractUnitypackage"
                            x:Name="NavView"
                            HorizontalAlignment="Stretch"
                            VerticalAlignment="Stretch"
+                           Foreground="{DynamicResource TextFillColorPrimaryBrush}"
+                           Background="{DynamicResource BackgroundPrimaryBrush}"
                            FontWeight="DemiBold"
                            Transition="FadeInWithSlide"
                            PaneDisplayMode="LeftFluent"
@@ -49,14 +50,22 @@
             <ui:NavigationView.MenuItems>
                 <ui:NavigationViewItem Content="Extract" TargetPageTag="Extraction"
                                        TargetPageType="{x:Type UserControls:Extraction}"
+                                       Foreground="{DynamicResource TextFillColorPrimaryBrush}"
+                                       Background="{DynamicResource BackgroundPrimaryBrush}"
                                        Icon="{ui:SymbolIcon DocumentTextExtract24}" />
                 <ui:NavigationViewItem Content="Search" TargetPageTag="SearchEverything"
+                                       Foreground="{DynamicResource TextFillColorPrimaryBrush}"
+                                       Background="{DynamicResource BackgroundPrimaryBrush}"
                                        TargetPageType="{x:Type UserControls:SearchEverything}"
                                        Icon="{ui:SymbolIcon Search24}" />
                 <ui:NavigationViewItem Content="History" TargetPageTag="History"
+                                       Foreground="{DynamicResource TextFillColorPrimaryBrush}"
+                                       Background="{DynamicResource BackgroundPrimaryBrush}"
                                        TargetPageType="{x:Type UserControls:History}"
                                        Icon="{ui:SymbolIcon History24}" />
                 <ui:NavigationViewItem Content="About" TargetPageTag="About"
+                                       Foreground="{DynamicResource TextFillColorPrimaryBrush}"
+                                       Background="{DynamicResource BackgroundPrimaryBrush}"
                                        TargetPageType="{x:Type UserControls:About}"
                                        Icon="{ui:SymbolIcon Heart24}" />
             </ui:NavigationView.MenuItems>
@@ -65,13 +74,13 @@
                     <ui:CardControl.Icon>
                         <ui:SymbolIcon
                             x:Name="HeartIcon"
+                            Foreground="Red"
                             MouseLeave="HeartIcon_OnMouseLeave"
                             MouseEnter="HeartIcon_OnMouseEnter"
                             MouseDown="HeartIcon_OnMouseDown"
                             HorizontalAlignment="Center"
                             VerticalAlignment="Center"
                             Margin="0,0,5,0"
-                            Foreground="White"
                             Symbol="Heart24" />
                     </ui:CardControl.Icon>
                     <ui:CardControl.Header>
@@ -79,12 +88,10 @@
                             <ui:TextBlock
                                 Margin="0"
                                 FontTypography="BodyStrong"
-                                Foreground="{DynamicResource TextFillColorPrimaryBrush}"
                                 Text="Application made by"
                                 TextWrapping="WrapWithOverflow" />
                             <ui:TextBlock
                                 Appearance="Secondary"
-                                Foreground="{DynamicResource TextFillColorSecondaryBrush}"
                                 Text="HakuSystems, Jan-Fcloud."
                                 Opacity="0.5"
                                 TextWrapping="WrapWithOverflow" />
@@ -94,8 +101,12 @@
             </ui:NavigationView.Header>
             <ui:NavigationView.FooterMenuItems>
                 <ui:NavigationViewItem Content="Settings" Icon="{ui:SymbolIcon Settings24}"
+                                       Foreground="{DynamicResource TextFillColorPrimaryBrush}"
+                                       Background="{DynamicResource BackgroundPrimaryBrush}"
                                        TargetPageType="{x:Type UserControls:Settings}" />
-                <ui:NavigationViewItem Content="{Binding CurrentVersion}" IsEnabled="False" />
+                <ui:NavigationViewItem Content="{Binding CurrentVersion}" IsEnabled="False"
+                                       Foreground="{DynamicResource TextFillColorPrimaryBrush}"
+                                       Background="{DynamicResource BackgroundPrimaryBrush}" />
             </ui:NavigationView.FooterMenuItems>
         </ui:NavigationView>
     </Grid>

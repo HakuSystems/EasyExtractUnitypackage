@@ -5,6 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:gif="https://github.com/XamlAnimatedGif/XamlAnimatedGif"
         mc:Ignorable="d"
+        Foreground="{DynamicResource TextFillColorPrimaryBrush}"
         AllowsTransparency="True"
         WindowStartupLocation="CenterScreen"
         ShowInTaskbar="False"

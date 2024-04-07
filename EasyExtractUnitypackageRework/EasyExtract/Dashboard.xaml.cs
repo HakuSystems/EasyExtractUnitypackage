@@ -5,6 +5,7 @@ using System.Windows.Media;
 using System.Windows.Media.Animation;
 using EasyExtract.Config;
 using EasyExtract.UserControls;
+using Wpf.Ui.Appearance;
 using Wpf.Ui.Controls;
 using TextBlock = Wpf.Ui.Controls.TextBlock;
 
@@ -27,13 +28,11 @@ public partial class Dashboard : FluentWindow
     private void HeartIcon_OnMouseEnter(object sender, MouseEventArgs e)
     {
         HeartIcon.Symbol = SymbolRegular.HeartBroken24;
-        HeartIcon.Foreground = new SolidColorBrush(Colors.Red);
     }
 
     private void HeartIcon_OnMouseLeave(object sender, MouseEventArgs e)
     {
         HeartIcon.Symbol = SymbolRegular.Heart24;
-        HeartIcon.Foreground = new SolidColorBrush(Colors.White);
     }
 
     private void HeartIcon_OnMouseDown(object sender, MouseButtonEventArgs e)
@@ -45,6 +44,25 @@ public partial class Dashboard : FluentWindow
     private async void Dashboard_OnLoaded(object sender, RoutedEventArgs e)
     {
         var config = await ConfigHelper.LoadConfig();
+        var theme = config.ApplicationTheme;
+        switch (theme)
+        {
+            case ApplicationTheme.Dark:
+                ApplicationThemeManager.Apply(ApplicationTheme.Dark);
+                break;
+            case ApplicationTheme.Light:
+                ApplicationThemeManager.Apply(ApplicationTheme.Light);
+                break;
+            case ApplicationTheme.Unknown:
+                ApplicationThemeManager.Apply(ApplicationTheme.Dark);
+                break;
+            case ApplicationTheme.HighContrast:
+                ApplicationThemeManager.Apply(ApplicationTheme.HighContrast);
+                break;
+            default:
+                throw new ArgumentOutOfRangeException();
+        }
+
         if (config.AutoUpdate)
         {
             //todo: check for update here

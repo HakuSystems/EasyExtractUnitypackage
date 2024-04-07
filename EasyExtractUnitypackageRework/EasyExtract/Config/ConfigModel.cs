@@ -1,6 +1,7 @@
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Reflection;
+using Wpf.Ui.Appearance;
 
 namespace EasyExtract.Config;
 
@@ -8,6 +9,7 @@ public class ConfigModel
 {
     public string AppTitle { get; set; } = "EasyExtractUnitypackage";
     public string CurrentVersion { get; set; } = $"V{Assembly.GetExecutingAssembly().GetName().Version}";
+    public ApplicationTheme ApplicationTheme { get; set; } = ApplicationTheme.Dark;
     public bool UwUModeActive { get; set; } = false;
     public bool IsFirstRun { get; set; } = true;
     public bool DiscordRpc { get; set; } = true;

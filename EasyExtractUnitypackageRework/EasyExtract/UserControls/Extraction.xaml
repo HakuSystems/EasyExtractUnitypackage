@@ -4,8 +4,9 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              mc:Ignorable="d"
-             Loaded="Extraction_OnLoaded"
-             Background="Transparent">
+             Background="{DynamicResource BackgroundPrimaryBrush}"
+             Foreground="{DynamicResource TextFillColorPrimaryBrush}"
+             Loaded="Extraction_OnLoaded">
     <Grid>
         <TextBlock>EXTRACT</TextBlock>
     </Grid>

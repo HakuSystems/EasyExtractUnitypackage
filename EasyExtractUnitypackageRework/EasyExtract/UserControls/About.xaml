@@ -6,7 +6,8 @@
              xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
              xmlns:gif="https://github.com/XamlAnimatedGif/XamlAnimatedGif"
              mc:Ignorable="d"
-             Background="Transparent"
+             Background="{DynamicResource BackgroundPrimaryBrush}"
+             Foreground="{DynamicResource TextFillColorPrimaryBrush}"
              Loaded="About_OnLoaded"
              d:DesignHeight="450" d:DesignWidth="1530">
     <Grid>
@@ -68,7 +69,6 @@
                     <ui:SymbolIcon
                         Margin="10"
                         FontSize="50"
-                        Foreground="White"
                         Symbol="DeveloperBoard24" />
                 </ui:Card>
                 <StackPanel Grid.Row="0" Grid.Column="1" Orientation="Vertical">
@@ -119,7 +119,6 @@
                         <ui:SymbolIcon
                             Margin="10"
                             FontSize="50"
-                            Foreground="White"
                             Symbol="DesignIdeas24" />
                     </ui:Card>
                     <StackPanel Grid.Row="0" Grid.Column="1" Orientation="Vertical">
