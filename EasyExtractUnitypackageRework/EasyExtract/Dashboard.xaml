@@ -16,6 +16,7 @@
                  FontFamily="{DynamicResource SegoeFluentIcons}"
                  Background="{DynamicResource BackgroundPrimaryBrush}"
                  WindowBackdropType="Mica"
+                 ExtendsContentIntoTitleBar="True"
                  Height="auto" Width="auto">
     <Grid x:Name="MainGrid">
         <Grid.ColumnDefinitions>
