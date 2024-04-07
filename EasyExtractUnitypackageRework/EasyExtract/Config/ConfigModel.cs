@@ -1,7 +1,6 @@
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Reflection;
-using System.Windows;
 
 namespace EasyExtract.Config;
 
@@ -20,9 +19,9 @@ public class ConfigModel
 
     public static string LastExtractedPath { get; set; } =
         Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "EasyExtract", "Extracted");
-    
+
     public int TotalExtracted { get; set; } = 0;
     public int TotalFilesExtracted { get; set; } = 0;
-    
+
     public ObservableCollection<HistoryModel> History { get; set; }
 }

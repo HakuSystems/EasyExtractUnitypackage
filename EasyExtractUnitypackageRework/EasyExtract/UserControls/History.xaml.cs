@@ -12,10 +12,17 @@ namespace EasyExtract.UserControls;
 public partial class History : UserControl, INotifyPropertyChanged
 {
     private ObservableCollection<HistoryModel> _history = new();
+
+    private int _totalExtracted;
     // TotalFilesExtracted & TotalExtracted are not used in this file.
 
     private int _totalFilesExtracted;
-    private int _totalExtracted;
+
+    public History()
+    {
+        InitializeComponent();
+        DataContext = this;
+    }
 
 
     public int TotalFilesExtracted
@@ -50,11 +57,7 @@ public partial class History : UserControl, INotifyPropertyChanged
 
     private ConfigModel? Config { get; set; } = new();
 
-    public History()
-    {
-        InitializeComponent();
-        DataContext = this;
-    }
+    public event PropertyChangedEventHandler PropertyChanged;
 
     private async void History_OnLoaded(object sender, RoutedEventArgs e)
     {
@@ -79,6 +82,7 @@ public partial class History : UserControl, INotifyPropertyChanged
                 Console.WriteLine(exception);
                 throw;
             }
+
         TotalExtracted = Config!.TotalExtracted;
         TotalFilesExtracted = Config.TotalFilesExtracted;
         await LoadHistory();
@@ -96,8 +100,6 @@ public partial class History : UserControl, INotifyPropertyChanged
         NoHistoryLabel.Visibility = Visibility.Collapsed;
         HistoryList = Config.History;
     }
-
-    public event PropertyChangedEventHandler PropertyChanged;
 
     protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null)
     {

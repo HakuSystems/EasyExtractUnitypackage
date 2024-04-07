@@ -18,7 +18,6 @@ public partial class About : UserControl
 
     private async void About_OnLoaded(object sender, RoutedEventArgs e)
     {
-        
         VersionCard.Footer = $"Version {Application.ResourceAssembly.GetName().Version}";
 
         const int maxCards = 10;
@@ -38,7 +37,7 @@ public partial class About : UserControl
         var repeatTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(500) };
         repeatTimer.Tick += (o, args) => ChangeRandomMargins();
         repeatTimer.Start();
-        
+
         var isDiscordEnabled = false;
         try
         {

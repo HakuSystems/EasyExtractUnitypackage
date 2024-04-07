@@ -93,8 +93,9 @@
                 </ui:CardControl>
             </ui:NavigationView.Header>
             <ui:NavigationView.FooterMenuItems>
-                <ui:NavigationViewItem Content="Settings" Icon="{ui:SymbolIcon Settings24}" TargetPageType="{x:Type UserControls:Settings}"/>
-                <ui:NavigationViewItem Content="{Binding CurrentVersion}" IsEnabled="False"/>
+                <ui:NavigationViewItem Content="Settings" Icon="{ui:SymbolIcon Settings24}"
+                                       TargetPageType="{x:Type UserControls:Settings}" />
+                <ui:NavigationViewItem Content="{Binding CurrentVersion}" IsEnabled="False" />
             </ui:NavigationView.FooterMenuItems>
         </ui:NavigationView>
     </Grid>
