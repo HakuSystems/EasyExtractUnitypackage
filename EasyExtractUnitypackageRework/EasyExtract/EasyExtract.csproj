@@ -10,6 +10,19 @@
         <AssemblyVersion>2.0.5.5</AssemblyVersion>
     </PropertyGroup>
 
+    <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
+      <PlatformTarget>AnyCPU</PlatformTarget>
+      <Prefer32bit>false</Prefer32bit>
+      <Optimize>true</Optimize>
+      <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    </PropertyGroup>
+
+    <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
+      <PlatformTarget>AnyCPU</PlatformTarget>
+      <Prefer32bit>false</Prefer32bit>
+      <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    </PropertyGroup>
+
     <ItemGroup>
         <PackageReference Include="Costura.Fody">
             <Version>5.7.0</Version>
