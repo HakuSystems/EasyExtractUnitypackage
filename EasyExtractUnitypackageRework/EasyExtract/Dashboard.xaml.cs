@@ -20,7 +20,7 @@ public partial class Dashboard : FluentWindow
     {
         InitializeComponent();
         DataContext = Config;
-        ContentFrame = new Extraction();
+        ContentFrame = new UserControls.Extraction();
     }
 
     public static Dashboard Instance => instance ??= new Dashboard();

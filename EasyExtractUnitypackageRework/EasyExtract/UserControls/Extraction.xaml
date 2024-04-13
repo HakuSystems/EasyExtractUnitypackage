@@ -14,6 +14,7 @@
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
         <ui:CardExpander
             Header="Queue"
@@ -26,7 +27,6 @@
                 x:Name="QueueListView"
                 HorizontalAlignment="Stretch"
                 Margin="15"
-                SourceUpdated="QueueListView_OnSourceUpdated"
                 MaxHeight="300"
                 HorizontalContentAlignment="Stretch"
                 ItemsSource="{Binding QueueList}">
@@ -73,13 +73,33 @@
                 Height="150"
                 HorizontalAlignment="Center"
                 VerticalAlignment="Center" />
-            <ui:Button HorizontalAlignment="Stretch"
-                       Margin="15"
-                       VerticalAlignment="Top"
-                       x:Name="ExtractionBtn"
-                       Click="ExtractionBtn_OnClick"
-                       Content="Start Extraction"
-                       Icon="{ui:SymbolIcon Flash24}" />
+            <StackPanel Orientation="Horizontal">
+                <ui:Button HorizontalAlignment="Stretch" Margin="5" Icon="{ui:SymbolIcon DocumentSearch24}"
+                           x:Name="SearchFileManuallyButton"
+                           Click="SearchFileManuallyButton_OnClick"
+                           Content="Search File To Extract" />
+                <ui:Button HorizontalAlignment="Stretch"
+                           Margin="5"
+                           VerticalAlignment="Top"
+                           x:Name="ExtractionBtn"
+                           Click="ExtractionBtn_OnClick"
+                           Content="Start Extraction"
+                           Icon="{ui:SymbolIcon Flash24}" />
+            </StackPanel>
         </StackPanel>
+        <StatusBar Grid.Row="2" VerticalAlignment="Bottom" HorizontalAlignment="Stretch" x:Name="StatusBar"
+                   Visibility="Collapsed">
+            <StatusBarItem>
+                <StatusBarItem.Content>
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock x:Name="StatusBarText" VerticalAlignment="Center" Margin="5" />
+                        <ProgressBar x:Name="StatusProgressBar" Height="5" MaxWidth="150" Width="150" VerticalAlignment="Center"/>
+                        <TextBlock x:Name="StatusBarDetailsTxt" VerticalAlignment="Center" Margin="5" />
+                        <ui:Button x:Name="StatusBarManageExtractedBtn" Icon="{ui:SymbolIcon Edit24}" Margin="5" Content="Manage Extracted"/>
+                        <ui:Button x:Name="StatusBarShowIgnoredBtn" Icon="{ui:SymbolIcon Question24}" Margin="5" Content="Manage Ignored"/>
+                    </StackPanel>
+                </StatusBarItem.Content>
+            </StatusBarItem>
+        </StatusBar>
     </Grid>
 </UserControl>
