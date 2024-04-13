@@ -76,6 +76,8 @@
         </Resource>
         <Resource Include="Resources\Gifs\IconAnim.gif"/>
         <None Remove="Resources\uwuMode.png"/>
+        <None Remove="Resources\ExtractionProcess\Closed.png" />
+        <Resource Include="Resources\ExtractionProcess\Closed.png" />
     </ItemGroup>
 
 </Project>

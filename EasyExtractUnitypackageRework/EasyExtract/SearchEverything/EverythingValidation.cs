@@ -17,10 +17,12 @@ public class EverythingValidation
 
     public static bool AreSystemRequirementsMet()
     {
+        var elapsedTime = Stopwatch.StartNew();
         Console.WriteLine("Checking system requirements...");
         var result = Is64BitOperatingSystem() && IsProcessRunning(ProcessName) && DoesDllExist() &&
                      CopyDllIfNecessary();
-        Console.WriteLine("System requirements checked.");
+        elapsedTime.Stop();
+        Console.WriteLine($"System requirements checked in {elapsedTime.ElapsedMilliseconds}ms.");
         return result;
     }
 
@@ -39,13 +41,11 @@ public class EverythingValidation
 
     private static bool Is64BitOperatingSystem()
     {
-        Console.WriteLine("Checking if operating system is 64-bit...");
         return Environment.Is64BitOperatingSystem;
     }
 
     private static bool IsProcessRunning(string processName)
     {
-        Console.WriteLine($"Checking if process {processName} is running...");
         return Process.GetProcessesByName(processName).Length > 0;
     }
 
@@ -55,9 +55,10 @@ public class EverythingValidation
         if (File.Exists(dllPath)) return true;
         try
         {
-            Console.WriteLine("Downloading DLL...");
+            var elapsedTime = Stopwatch.StartNew();
             DownloadDll(dllPath);
-            Console.WriteLine("DLL downloaded.");
+            elapsedTime.Stop();
+            Console.WriteLine($"Everything64.dll downloaded in {elapsedTime.ElapsedMilliseconds}ms.");
             return true;
         }
         catch (Exception)
@@ -92,9 +93,8 @@ public class EverythingValidation
 
         try
         {
-            Console.WriteLine("Copying DLL...");
             File.Copy(dllPath, destinationPath);
-            Console.WriteLine("DLL copied.");
+            Console.WriteLine("Everything64.dll moved.");
             return true;
         }
         catch (Exception)

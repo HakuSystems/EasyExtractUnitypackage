@@ -4,13 +4,26 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+             xmlns:gif="https://github.com/XamlAnimatedGif/XamlAnimatedGif"
              mc:Ignorable="d"
-             Background="{DynamicResource BackgroundPrimaryBrush}"
+             Background="Black"
              Foreground="{DynamicResource TextFillColorPrimaryBrush}"
              Loaded="Extraction_OnLoaded">
+    <!--Background="{DynamicResource BackgroundPrimaryBrush}" copy and paste-->
     <Grid>
-        <ui:CardControl Header="OpenQueue">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+        <ui:CardExpander
+            Header="Queue"
+            VerticalAlignment="Top"
+            x:Name="QueueExpander"
+            HorizontalAlignment="Stretch"
+            HorizontalContentAlignment="Stretch"
+            Icon="{ui:SymbolIcon DocumentQueue24}">
             <ui:ListView
+                x:Name="QueueListView"
                 HorizontalAlignment="Stretch"
                 Margin="15"
                 MaxHeight="300"
@@ -27,7 +40,7 @@
                                     Symbol="FolderZip24" />
                             </ui:CardControl.Icon>
                             <ui:CardControl.Header>
-                                <StackPanel>
+                                <StackPanel HorizontalAlignment="Stretch">
                                     <ui:TextBlock
                                         FontTypography="BodyStrong"
                                         Text="{Binding UnityPackageName}"
@@ -36,6 +49,7 @@
                                         Appearance="Secondary"
                                         Text="{Binding UnityPackagePath}"
                                         Opacity="0.5"
+                                        HorizontalAlignment="Left"
                                         MaxWidth="500"
                                         TextWrapping="WrapWithOverflow" />
                                 </StackPanel>
@@ -43,6 +57,28 @@
                         </ui:CardControl>
                     </DataTemplate>
                 </ui:ListView.ItemTemplate>
-            </ui:ListView></ui:CardControl>
+            </ui:ListView>
+        </ui:CardExpander>
+        <StackPanel Grid.Row="1" Orientation="Vertical"
+                    HorizontalAlignment="Center"
+                    VerticalAlignment="Center"
+                    Margin="15">
+            <Image
+                gif:AnimationBehavior.RepeatBehavior="0:0:5"
+                SourceUpdated="ExtractingIcon_OnSourceUpdated"
+                Margin="15"
+                x:Name="ExtractingIcon"
+                Width="150"
+                Height="150"
+                HorizontalAlignment="Center"
+                VerticalAlignment="Center" />
+            <ui:Button HorizontalAlignment="Stretch"
+                       Margin="15"
+                       VerticalAlignment="Top"
+                       x:Name="ExtractionBtn"
+                       Click="ExtractionBtn_OnClick"
+                       Content="Start Extraction"
+                       Icon="{ui:SymbolIcon Flash24}" />
+        </StackPanel>
     </Grid>
 </UserControl>
