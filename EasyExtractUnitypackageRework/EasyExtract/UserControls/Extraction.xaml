@@ -26,6 +26,7 @@
                 x:Name="QueueListView"
                 HorizontalAlignment="Stretch"
                 Margin="15"
+                SourceUpdated="QueueListView_OnSourceUpdated"
                 MaxHeight="300"
                 HorizontalContentAlignment="Stretch"
                 ItemsSource="{Binding QueueList}">

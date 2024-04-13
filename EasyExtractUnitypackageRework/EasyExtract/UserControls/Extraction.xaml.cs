@@ -3,8 +3,6 @@ using System.Runtime.CompilerServices;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
-using System.Windows.Media.Imaging;
-using System.Windows.Threading;
 using EasyExtract.Config;
 using EasyExtract.Discord;
 using XamlAnimatedGif;
@@ -13,9 +11,15 @@ namespace EasyExtract.UserControls;
 
 public partial class Extraction : UserControl, INotifyPropertyChanged
 {
-    //gif time = 5 seconds
     public event PropertyChangedEventHandler PropertyChanged;
-    private bool _isExtraction = false;
+    private bool _isExtraction;
+
+    private static readonly Uri IdleAnimationUri =
+        new("pack://application:,,,/EasyExtract;component/Resources/ExtractionProcess/Closed.png");
+
+    private static readonly Uri ExtractionAnimationUri =
+        new("pack://application:,,,/EasyExtract;component/Resources/Gifs/IconAnim.gif");
+
     protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null)
     {
         PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
@@ -43,8 +47,15 @@ public partial class Extraction : UserControl, INotifyPropertyChanged
 
     private async void Extraction_OnLoaded(object sender, RoutedEventArgs e)
     {
-        #region Discord
+        await ChangeDiscordState();
 
+
+        UpdateQueueHeader();
+        ChangeExtractionAnimation();
+    }
+
+    private static async Task ChangeDiscordState()
+    {
         var isDiscordEnabled = false;
         try
         {
@@ -66,35 +77,28 @@ public partial class Extraction : UserControl, INotifyPropertyChanged
                 Console.WriteLine(exception);
                 throw;
             }
-
-        #endregion
-
-        UpdateQueueHeader();
-        ChangeExtractionAnimation();
     }
 
     private void UpdateQueueHeader()
     {
-        if (QueueListView.Items.Count == 0)
+        switch (QueueListView.Items.Count)
         {
-            QueueExpander.Header = "Queue (Nothing to extract)";
-            ExtractionBtn.Visibility = Visibility.Collapsed;
-        }
-        else
-        {
-            QueueExpander.Header = QueueListView.Items.Count == 1
-                ? $"Queue ({QueueListView.Items.Count} Unitypackage)"
-                : $"Queue ({QueueListView.Items.Count} Unitypackage(s))";
-            ExtractionBtn.Visibility = Visibility.Visible;
+            case 0:
+                QueueExpander.Header = "Queue (Nothing to extract)";
+                ExtractionBtn.Visibility = Visibility.Collapsed;
+                break;
+            default:
+                QueueExpander.Header = QueueListView.Items.Count == 1
+                    ? $"Queue ({QueueListView.Items.Count} Unitypackage)"
+                    : $"Queue ({QueueListView.Items.Count} Unitypackage(s))";
+                ExtractionBtn.Visibility = Visibility.Visible;
+                break;
         }
     }
 
     private void ChangeExtractionAnimation()
     {
-        AnimationBehavior.SetSourceUri(ExtractingIcon,
-            !_isExtraction
-                ? new Uri("pack://application:,,,/EasyExtract;component/Resources/ExtractionProcess/Closed.png") //Idle
-                : new Uri("pack://application:,,,/EasyExtract;component/Resources/Gifs/IconAnim.gif")); //Extraction
+        AnimationBehavior.SetSourceUri(ExtractingIcon, _isExtraction ? ExtractionAnimationUri : IdleAnimationUri);
     }
 
     private void ExtractingIcon_OnSourceUpdated(object? sender, DataTransferEventArgs e)
@@ -106,5 +110,10 @@ public partial class Extraction : UserControl, INotifyPropertyChanged
     {
         _isExtraction = true;
         ChangeExtractionAnimation();
+    }
+
+    private void QueueListView_OnSourceUpdated(object? sender, DataTransferEventArgs e)
+    {
+        UpdateQueueHeader();
     }
 }
