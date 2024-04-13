@@ -3,11 +3,46 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
              mc:Ignorable="d"
              Background="{DynamicResource BackgroundPrimaryBrush}"
              Foreground="{DynamicResource TextFillColorPrimaryBrush}"
              Loaded="Extraction_OnLoaded">
     <Grid>
-        <TextBlock>EXTRACT</TextBlock>
+        <ui:CardControl Header="OpenQueue">
+            <ui:ListView
+                HorizontalAlignment="Stretch"
+                Margin="15"
+                MaxHeight="300"
+                HorizontalContentAlignment="Stretch"
+                ItemsSource="{Binding QueueList}">
+                <ui:ListView.ItemTemplate>
+                    <DataTemplate>
+                        <ui:CardControl>
+                            <ui:CardControl.Icon>
+                                <ui:SymbolIcon
+                                    HorizontalAlignment="Center"
+                                    VerticalAlignment="Center"
+                                    Margin="0,0,5,0"
+                                    Symbol="FolderZip24" />
+                            </ui:CardControl.Icon>
+                            <ui:CardControl.Header>
+                                <StackPanel>
+                                    <ui:TextBlock
+                                        FontTypography="BodyStrong"
+                                        Text="{Binding UnityPackageName}"
+                                        TextWrapping="WrapWithOverflow" />
+                                    <ui:TextBlock
+                                        Appearance="Secondary"
+                                        Text="{Binding UnityPackagePath}"
+                                        Opacity="0.5"
+                                        MaxWidth="500"
+                                        TextWrapping="WrapWithOverflow" />
+                                </StackPanel>
+                            </ui:CardControl.Header>
+                        </ui:CardControl>
+                    </DataTemplate>
+                </ui:ListView.ItemTemplate>
+            </ui:ListView></ui:CardControl>
     </Grid>
 </UserControl>

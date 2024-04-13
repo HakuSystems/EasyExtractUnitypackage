@@ -14,6 +14,7 @@ namespace EasyExtract;
 public partial class Dashboard : FluentWindow
 {
     private static UserControl ContentFrame;
+    private static Dashboard instance;
 
     public Dashboard()
     {
@@ -22,6 +23,7 @@ public partial class Dashboard : FluentWindow
         ContentFrame = new Extraction();
     }
 
+    public static Dashboard Instance => instance ??= new Dashboard();
     private ConfigModel Config { get; } = new();
 
 

@@ -2,9 +2,9 @@
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
-             Foreground="{DynamicResource TextFillColorPrimaryBrush}"
              Loaded="SearchEverything_OnLoaded"
-             Background="Black">
+             Foreground="{DynamicResource TextFillColorPrimaryBrush}"
+             Background="{DynamicResource BackgroundPrimaryBrush}">
     <Grid>
         <StackPanel Orientation="Vertical" HorizontalAlignment="Center" VerticalAlignment="Center">
             <TextBlock x:Name="FallbackEverything"
@@ -51,6 +51,7 @@
                                     </ui:CardControl.Header>
                                     <ui:Button Icon="{ui:SymbolIcon Add24}"
                                                x:Name="QueueAddButton"
+                                               Click="QueueAddButton_OnClick"
                                                HorizontalAlignment="Left"
                                                Margin="5"
                                                ToolTip="Add to Queue" />
@@ -66,6 +67,8 @@
                        x:Name="SearchFileManuallyButton"
                        Click="SearchFileManuallyButton_OnClick"
                        Content="Search File Manually" />
+            <TextBlock HorizontalAlignment="Center" VerticalAlignment="Center"
+                       x:Name="AddedStatusTxt" />
         </StackPanel>
     </Grid>
 </UserControl>

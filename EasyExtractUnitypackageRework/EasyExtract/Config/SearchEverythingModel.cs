@@ -4,4 +4,5 @@ public class SearchEverythingModel
 {
     public string UnityPackageName { get; set; }
     public string UnityPackagePath { get; set; }
+    public uint Id { get; set; }
 }
