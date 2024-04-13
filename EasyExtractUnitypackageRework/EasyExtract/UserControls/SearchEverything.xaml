@@ -59,7 +59,8 @@
                             </DataTemplate>
                         </ui:ListView.ItemTemplate>
                     </ui:ListView>
-                    <TextBlock HorizontalAlignment="Center" Text="Search for a UnityPackage Name" x:Name="FoundText" Opacity="0.5" MaxWidth="500" Margin="5" />
+                    <TextBlock HorizontalAlignment="Center" Text="Search for a UnityPackage Name" x:Name="FoundText"
+                               Opacity="0.5" MaxWidth="500" Margin="5" />
                     <TextBlock HorizontalAlignment="Center" Text="Powered by SearchEverything" Margin="5" />
                 </StackPanel>
             </ui:Card>

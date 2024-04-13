@@ -47,7 +47,7 @@
                      ItemsSource="{Binding HistoryList}">
             <ui:ListView.ItemTemplate>
                 <DataTemplate>
-                    <ui:CardControl Tag="{Binding Id}">
+                    <ui:CardControl>
                         <ui:CardControl.Icon>
                             <ui:SymbolIcon
                                 HorizontalAlignment="Center"

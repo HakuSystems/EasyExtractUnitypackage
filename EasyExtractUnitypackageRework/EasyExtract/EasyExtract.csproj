@@ -11,16 +11,16 @@
     </PropertyGroup>
 
     <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
-      <PlatformTarget>AnyCPU</PlatformTarget>
-      <Prefer32bit>false</Prefer32bit>
-      <Optimize>true</Optimize>
-      <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+        <PlatformTarget>AnyCPU</PlatformTarget>
+        <Prefer32bit>false</Prefer32bit>
+        <Optimize>true</Optimize>
+        <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     </PropertyGroup>
 
     <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
-      <PlatformTarget>AnyCPU</PlatformTarget>
-      <Prefer32bit>false</Prefer32bit>
-      <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+        <PlatformTarget>AnyCPU</PlatformTarget>
+        <Prefer32bit>false</Prefer32bit>
+        <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     </PropertyGroup>
 
     <ItemGroup>
@@ -76,8 +76,8 @@
         </Resource>
         <Resource Include="Resources\Gifs\IconAnim.gif"/>
         <None Remove="Resources\uwuMode.png"/>
-        <None Remove="Resources\ExtractionProcess\Closed.png" />
-        <Resource Include="Resources\ExtractionProcess\Closed.png" />
+        <None Remove="Resources\ExtractionProcess\Closed.png"/>
+        <Resource Include="Resources\ExtractionProcess\Closed.png"/>
     </ItemGroup>
 
 </Project>

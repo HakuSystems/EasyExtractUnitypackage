@@ -53,7 +53,7 @@
                                        TargetPageType="{x:Type UserControls:Extraction}"
                                        Foreground="{DynamicResource TextFillColorPrimaryBrush}"
                                        Background="{DynamicResource BackgroundPrimaryBrush}"
-                                       Icon="{ui:SymbolIcon DocumentTextExtract24}"/>
+                                       Icon="{ui:SymbolIcon DocumentTextExtract24}" />
                 <ui:NavigationViewItem Content="Search" TargetPageTag="SearchEverything"
                                        Foreground="{DynamicResource TextFillColorPrimaryBrush}"
                                        Background="{DynamicResource BackgroundPrimaryBrush}"

@@ -1,3 +1,4 @@
+using System.Collections.ObjectModel;
 using System.IO;
 using Newtonsoft.Json;
 
@@ -62,6 +63,7 @@ public class ConfigHelper
     {
         var config = await LoadConfig();
         if (config == null) return;
+        config.History ??= new ObservableCollection<HistoryModel>();
         config.History.Add(history);
         await UpdateConfig(config);
     }

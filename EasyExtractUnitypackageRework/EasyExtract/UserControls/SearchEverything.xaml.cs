@@ -15,14 +15,13 @@ public partial class SearchEverything : UserControl, INotifyPropertyChanged
 {
     private readonly List<SearchEverythingModel> _tempList = new();
 
-    public event PropertyChangedEventHandler PropertyChanged;
-
-    protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null)
-    {
-        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
-    }
-
     private List<SearchEverythingModel>? _searchEverythingList;
+
+    public SearchEverything()
+    {
+        InitializeComponent();
+        DataContext = this;
+    }
 
     public List<SearchEverythingModel>? SearchEverythingList
     {
@@ -35,10 +34,11 @@ public partial class SearchEverything : UserControl, INotifyPropertyChanged
         }
     }
 
-    public SearchEverything()
+    public event PropertyChangedEventHandler PropertyChanged;
+
+    protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null)
     {
-        InitializeComponent();
-        DataContext = this;
+        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
     }
 
     private async void SearchEverything_OnLoaded(object sender, RoutedEventArgs e)

@@ -14,18 +14,19 @@ namespace EasyExtract.UserControls;
 
 public partial class Extraction : UserControl, INotifyPropertyChanged
 {
-    public event PropertyChangedEventHandler PropertyChanged;
-    private bool _isExtraction;
-
     private static readonly Uri IdleAnimationUri =
         new("pack://application:,,,/EasyExtract;component/Resources/ExtractionProcess/Closed.png");
 
     private static readonly Uri ExtractionAnimationUri =
         new("pack://application:,,,/EasyExtract;component/Resources/Gifs/IconAnim.gif");
 
-    protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null)
+    private bool _isExtraction;
+
+
+    public Extraction()
     {
-        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        InitializeComponent();
+        DataContext = this;
     }
 
     public static List<SearchEverythingModel>? _queueList { get; set; }
@@ -43,11 +44,12 @@ public partial class Extraction : UserControl, INotifyPropertyChanged
 
     public static List<IgnoredUnitypackageModel>? IgnoredUnitypackages { get; set; }
 
+    //todo: drag an drop
+    public event PropertyChangedEventHandler PropertyChanged;
 
-    public Extraction()
+    protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null)
     {
-        InitializeComponent();
-        DataContext = this;
+        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
     }
 
     private async void Extraction_OnLoaded(object sender, RoutedEventArgs e)
@@ -111,12 +113,12 @@ public partial class Extraction : UserControl, INotifyPropertyChanged
         ChangeExtractionAnimation();
     }
 
-    private void ExtractionBtn_OnClick(object sender, RoutedEventArgs e)
+    private async void ExtractionBtn_OnClick(object sender, RoutedEventArgs e)
     {
         _isExtraction = true;
         SetupUiForExtraction();
 
-        var (ignoredCounter, fileFinishedCounter) = ProcessUnityPackages();
+        var (ignoredCounter, fileFinishedCounter) = await ProcessUnityPackages();
 
         UpdateUiAfterExtraction(ignoredCounter, fileFinishedCounter);
     }
@@ -131,7 +133,7 @@ public partial class Extraction : UserControl, INotifyPropertyChanged
         StatusBarShowIgnoredBtn.Visibility = Visibility.Collapsed;
     }
 
-    private (int ignoredCounter, int fileFinishedCounter) ProcessUnityPackages()
+    private async Task<(int ignoredCounter, int fileFinishedCounter)> ProcessUnityPackages()
     {
         var ignoredCounter = 0;
         var fileFinishedCounter = 0;
@@ -145,7 +147,7 @@ public partial class Extraction : UserControl, INotifyPropertyChanged
             }
 
             StatusBarText.Text = $"Extracting {unitypackage.UnityPackageName}...";
-            if (ExtractionHandler.ExtractUnitypackage(unitypackage))
+            if (await ExtractionHandler.ExtractUnitypackage(unitypackage))
             {
                 fileFinishedCounter++;
                 UpdateExtractionProgress(fileFinishedCounter);
@@ -246,5 +248,15 @@ public partial class Extraction : UserControl, INotifyPropertyChanged
 
             UpdateQueueHeader();
         }
+    }
+
+    private void StatusBarManageExtractedBtn_OnClick(object sender, RoutedEventArgs e)
+    {
+        throw new NotImplementedException();
+    }
+
+    private void StatusBarShowIgnoredBtn_OnClick(object sender, RoutedEventArgs e)
+    {
+        throw new NotImplementedException();
     }
 }

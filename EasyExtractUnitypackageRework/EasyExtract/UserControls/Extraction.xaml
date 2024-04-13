@@ -6,10 +6,9 @@
              xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
              xmlns:gif="https://github.com/XamlAnimatedGif/XamlAnimatedGif"
              mc:Ignorable="d"
-             Background="Black"
+             Background="{DynamicResource BackgroundPrimaryBrush}"
              Foreground="{DynamicResource TextFillColorPrimaryBrush}"
              Loaded="Extraction_OnLoaded">
-    <!--Background="{DynamicResource BackgroundPrimaryBrush}" copy and paste-->
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
@@ -86,6 +85,8 @@
                            Content="Start Extraction"
                            Icon="{ui:SymbolIcon Flash24}" />
             </StackPanel>
+            <TextBlock Text="Drag and drop is enabled" Opacity="0.5" HorizontalAlignment="Center"
+                       VerticalAlignment="Top" Margin="5" />
         </StackPanel>
         <StatusBar Grid.Row="2" VerticalAlignment="Bottom" HorizontalAlignment="Stretch" x:Name="StatusBar"
                    Visibility="Collapsed">
@@ -93,10 +94,13 @@
                 <StatusBarItem.Content>
                     <StackPanel Orientation="Horizontal">
                         <TextBlock x:Name="StatusBarText" VerticalAlignment="Center" Margin="5" />
-                        <ProgressBar x:Name="StatusProgressBar" Height="5" MaxWidth="150" Width="150" VerticalAlignment="Center"/>
+                        <ProgressBar x:Name="StatusProgressBar" Height="5" MaxWidth="150" Width="150"
+                                     VerticalAlignment="Center" />
                         <TextBlock x:Name="StatusBarDetailsTxt" VerticalAlignment="Center" Margin="5" />
-                        <ui:Button x:Name="StatusBarManageExtractedBtn" Icon="{ui:SymbolIcon Edit24}" Margin="5" Content="Manage Extracted"/>
-                        <ui:Button x:Name="StatusBarShowIgnoredBtn" Icon="{ui:SymbolIcon Question24}" Margin="5" Content="Manage Ignored"/>
+                        <ui:Button x:Name="StatusBarManageExtractedBtn" Click="StatusBarManageExtractedBtn_OnClick"
+                                   Icon="{ui:SymbolIcon Edit24}" Margin="5" Content="Manage Extracted" />
+                        <ui:Button x:Name="StatusBarShowIgnoredBtn" Click="StatusBarShowIgnoredBtn_OnClick"
+                                   Icon="{ui:SymbolIcon Question24}" Margin="5" Content="Manage Ignored" />
                     </StackPanel>
                 </StatusBarItem.Content>
             </StatusBarItem>
