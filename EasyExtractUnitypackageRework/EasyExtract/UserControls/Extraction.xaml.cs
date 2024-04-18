@@ -44,8 +44,6 @@ public partial class Extraction : UserControl, INotifyPropertyChanged
     }
 
     public static List<IgnoredUnitypackageModel>? IgnoredUnitypackages { get; set; }
-
-    //todo: drag an drop
     public event PropertyChangedEventHandler PropertyChanged;
 
     protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null)
@@ -173,10 +171,17 @@ public partial class Extraction : UserControl, INotifyPropertyChanged
             reason = "File not found";
             return false;
         }
-
-        if (!unitypackage.UnityPackageName.EndsWith(".unitypackage"))
+        var fileInfo = new FileInfo(unitypackage.UnityPackagePath);
+        
+        if(fileInfo.Extension != ".unitypackage")
         {
-            reason = "Not a Unitypackage";
+            reason = "File is not a Unitypackage";
+            return false;
+        }
+        
+        if(fileInfo.Length == 0)
+        {
+            reason = "File is empty";
             return false;
         }
 
