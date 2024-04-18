@@ -8,6 +8,8 @@
              mc:Ignorable="d"
              Background="{DynamicResource BackgroundPrimaryBrush}"
              Foreground="{DynamicResource TextFillColorPrimaryBrush}"
+             AllowDrop="True"
+             Drop="Extraction_OnDrop"
              Loaded="Extraction_OnLoaded">
     <Grid>
         <Grid.RowDefinitions>
@@ -81,6 +83,7 @@
                            Margin="5"
                            VerticalAlignment="Top"
                            x:Name="ExtractionBtn"
+                           Appearance="Primary"
                            Click="ExtractionBtn_OnClick"
                            Content="Start Extraction"
                            Icon="{ui:SymbolIcon Flash24}" />

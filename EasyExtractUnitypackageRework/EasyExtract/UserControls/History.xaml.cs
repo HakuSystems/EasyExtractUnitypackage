@@ -120,4 +120,16 @@ public partial class History : UserControl, INotifyPropertyChanged
         await ConfigHelper.UpdateConfig(Config);
         if (HistoryList.Count == 0) NoHistoryLabel.Visibility = Visibility.Visible;
     }
+
+    private async void ClearHistoryButton_OnClick(object sender, RoutedEventArgs e)
+    {
+        HistoryList.Clear();
+        Config!.History.Clear();
+        Config.TotalExtracted = 0;
+        Config.TotalFilesExtracted = 0;
+        TotalExtracted = 0;
+        TotalFilesExtracted = 0;
+        NoHistoryLabel.Visibility = Visibility.Visible;
+        await ConfigHelper.UpdateConfig(Config);
+    }
 }

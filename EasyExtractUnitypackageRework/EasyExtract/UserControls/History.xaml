@@ -6,12 +6,13 @@
              xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
              mc:Ignorable="d"
              Loaded="History_OnLoaded"
-             Foreground="{DynamicResource TextFillColorPrimaryBrush}"
              Background="{DynamicResource BackgroundPrimaryBrush}"
+             Foreground="{DynamicResource TextFillColorPrimaryBrush}"
              d:DesignHeight="800" d:DesignWidth="1500">
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
@@ -37,8 +38,17 @@
                          IsExpanded="True"
                          Header="Total Unitypackages Extracted" />
 
-        <Label x:Name="NoHistoryLabel" Content="No History Jet" Visibility="Visible" HorizontalAlignment="Center"
-               VerticalAlignment="Center" Grid.Column="0" Grid.ColumnSpan="2" Grid.Row="1" />
+        <StackPanel
+            HorizontalAlignment="Center" VerticalAlignment="Bottom"
+            Grid.Column="0" Grid.ColumnSpan="2" Grid.Row="2">
+            <ui:Button Content="Clear History"
+                       Icon="{ui:SymbolIcon Subtract24}"
+                       x:Name="ClearHistoryButton"
+                       HorizontalAlignment="Center" VerticalAlignment="Center"
+                       Click="ClearHistoryButton_OnClick" />
+            <Label x:Name="NoHistoryLabel" Content="No History Found" Visibility="Visible" HorizontalAlignment="Center"
+                   VerticalAlignment="Center" />
+        </StackPanel>
 
         <ui:ListView Grid.Row="1" Grid.ColumnSpan="2" Grid.Column="0"
                      HorizontalAlignment="Stretch"

@@ -5,6 +5,14 @@ namespace EasyExtract.SearchEverything;
 
 public class Everything
 {
+    public static IntPtr Everything_GetResultFullPathName(uint nIndex)
+    {
+        //return as string
+        var sb = new StringBuilder(260);
+        Everything_GetResultFullPathName(nIndex, sb, 260);
+        return Marshal.StringToHGlobalUni(sb.ToString());
+    }
+
     #region publicants
 
     private const int EVERYTHING_OK = 0;
@@ -216,14 +224,6 @@ public class Everything
     public static extern bool Everything_SetRunCountFromFileName(string lpFileName, uint dwRunCount);
 
     #endregion
-
-    public static IntPtr Everything_GetResultFullPathName(uint nIndex)
-    {
-        //return as string
-        var sb = new StringBuilder(260);
-        Everything_GetResultFullPathName(nIndex, sb, 260);
-        return Marshal.StringToHGlobalUni(sb.ToString());
-    }
 
     /*public static List<SearchEverythingModel>? Search(string query)
     {

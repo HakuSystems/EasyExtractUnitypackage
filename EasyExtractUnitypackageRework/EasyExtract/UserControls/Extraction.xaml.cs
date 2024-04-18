@@ -8,6 +8,7 @@ using EasyExtract.Config;
 using EasyExtract.Discord;
 using EasyExtract.Extraction;
 using Microsoft.Win32;
+using Wpf.Ui.Controls;
 using XamlAnimatedGif;
 
 namespace EasyExtract.UserControls;
@@ -115,6 +116,7 @@ public partial class Extraction : UserControl, INotifyPropertyChanged
 
     private async void ExtractionBtn_OnClick(object sender, RoutedEventArgs e)
     {
+        ChangeExtractionAnimation();
         _isExtraction = true;
         SetupUiForExtraction();
 
@@ -131,6 +133,8 @@ public partial class Extraction : UserControl, INotifyPropertyChanged
         StatusBar.Visibility = Visibility.Visible;
         StatusBarManageExtractedBtn.Visibility = Visibility.Collapsed;
         StatusBarShowIgnoredBtn.Visibility = Visibility.Collapsed;
+        ExtractionBtn.IsEnabled = false;
+        ExtractionBtn.Appearance = ControlAppearance.Info;
     }
 
     private async Task<(int ignoredCounter, int fileFinishedCounter)> ProcessUnityPackages()
@@ -210,18 +214,24 @@ public partial class Extraction : UserControl, INotifyPropertyChanged
             StatusBarDetailsTxt.Visibility = Visibility.Collapsed;
             StatusBarManageExtractedBtn.Visibility = Visibility.Collapsed;
             StatusBarShowIgnoredBtn.Visibility = Visibility.Visible;
-            _isExtraction = false;
+            ExtractionBtn.IsEnabled = true;
+            ExtractionBtn.Appearance = ControlAppearance.Primary;
             ChangeExtractionAnimation();
+            _isExtraction = false;
             return;
         }
+
+        ExtractionBtn.IsEnabled = true;
+        ExtractionBtn.Appearance = ControlAppearance.Primary;
+
 
         StatusBarText.Text = fileFinishedCounter == 1
             ? $"Successfully extracted {fileFinishedCounter} Unitypackage, {ignoredCounter} ignored."
             : $"Successfully extracted {fileFinishedCounter} Unitypackages, {ignoredCounter} ignored.";
         StatusProgressBar.Visibility = Visibility.Collapsed;
         StatusBarDetailsTxt.Visibility = Visibility.Collapsed;
-        _isExtraction = false;
         ChangeExtractionAnimation();
+        _isExtraction = false;
     }
 
     private void SearchFileManuallyButton_OnClick(object sender, RoutedEventArgs e)
@@ -258,5 +268,24 @@ public partial class Extraction : UserControl, INotifyPropertyChanged
     private void StatusBarShowIgnoredBtn_OnClick(object sender, RoutedEventArgs e)
     {
         throw new NotImplementedException();
+    }
+
+    private void Extraction_OnDrop(object sender, DragEventArgs e)
+    {
+        if (!e.Data.GetDataPresent(DataFormats.FileDrop)) return;
+        var files = (string[])e.Data.GetData(DataFormats.FileDrop);
+        foreach (var fileName in files)
+        {
+            var duplicate = QueueListView.Items.Cast<SearchEverythingModel>()
+                .FirstOrDefault(x => x.UnityPackageName == Path.GetFileName(fileName));
+            if (duplicate != null) continue;
+            QueueListView.Items.Add(new SearchEverythingModel
+            {
+                UnityPackageName = Path.GetFileName(fileName),
+                UnityPackagePath = fileName
+            });
+        }
+
+        UpdateQueueHeader();
     }
 }

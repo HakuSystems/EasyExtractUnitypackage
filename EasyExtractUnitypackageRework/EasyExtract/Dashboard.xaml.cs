@@ -1,3 +1,4 @@
+using System.IO;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -134,5 +135,21 @@ public partial class Dashboard : FluentWindow
         storyboard.Begin();
         await Task.Delay(1000);
         NavView.Opacity = 1;
+    }
+
+    private void Dashboard_OnDrop(object sender, DragEventArgs e)
+    {
+        if (!e.Data.GetDataPresent(DataFormats.FileDrop)) return;
+        var files = (string[])e.Data.GetData(DataFormats.FileDrop);
+        foreach (var file in files)
+        {
+            var name = Path.GetFileName(file);
+            var duplicate = UserControls.Extraction._queueList?.Find(x => x.UnityPackageName == name);
+            if (duplicate != null) continue;
+            if (UserControls.Extraction._queueList == null)
+                UserControls.Extraction._queueList = new List<SearchEverythingModel>();
+            UserControls.Extraction._queueList.Add(new SearchEverythingModel
+                { UnityPackageName = name, UnityPackagePath = file, Id = 0 });
+        }
     }
 }
