@@ -110,6 +110,7 @@
                     <StackPanel Orientation="Horizontal">
                         <ui:SymbolIcon Margin="0,0,6,0" Symbol="Settings24" />
                         <TextBlock Text="Manage Extracted" />
+                        <ui:InfoBadge Severity="Success" x:Name="ManageExtractedInfoBadge"/>
                     </StackPanel>
                 </TabItem.Header>
             </TabItem>
@@ -118,6 +119,7 @@
                     <StackPanel Orientation="Horizontal">
                         <ui:SymbolIcon Margin="0,0,6,0" Symbol="Warning24" />
                         <TextBlock Text="Ignored" />
+                        <ui:InfoBadge Severity="Caution" x:Name="ManageIgnoredInfoBadge"/>
                     </StackPanel>
                 </TabItem.Header>
             </TabItem>
@@ -132,10 +134,6 @@
                         <ProgressBar x:Name="StatusProgressBar" Height="5" MaxWidth="150" Width="150"
                                      VerticalAlignment="Center" />
                         <TextBlock x:Name="StatusBarDetailsTxt" VerticalAlignment="Center" Margin="5" />
-                        <ui:Button x:Name="StatusBarManageExtractedBtn" Click="StatusBarManageExtractedBtn_OnClick"
-                                   Icon="{ui:SymbolIcon Edit24}" Margin="5" Content="Manage Extracted" />
-                        <ui:Button x:Name="StatusBarShowIgnoredBtn" Click="StatusBarShowIgnoredBtn_OnClick"
-                                   Icon="{ui:SymbolIcon Question24}" Margin="5" Content="Manage Ignored" />
                     </StackPanel>
                 </StatusBarItem.Content>
             </StatusBarItem>

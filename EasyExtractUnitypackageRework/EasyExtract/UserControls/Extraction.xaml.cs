@@ -22,6 +22,7 @@ public partial class Extraction : UserControl, INotifyPropertyChanged
         new("pack://application:,,,/EasyExtract;component/Resources/Gifs/IconAnim.gif");
 
     private bool _isExtraction;
+    private string TotalExtractedInExtractedFolder { get; set; }
 
 
     public Extraction()
@@ -55,9 +56,27 @@ public partial class Extraction : UserControl, INotifyPropertyChanged
     {
         await ChangeDiscordState();
 
-
         UpdateQueueHeader();
         ChangeExtractionAnimation();
+        UpdateManageableUnitypackageCount();
+    }
+
+    private void UpdateManageableUnitypackageCount()
+    {
+        TotalExtractedInExtractedFolder = Directory.GetDirectories(ConfigModel.LastExtractedPath).Length.ToString();
+        ManageExtractedInfoBadge.Value = TotalExtractedInExtractedFolder;
+        UpdateIgnoredUnitypackagesCount();
+    }
+
+    private void UpdateIgnoredUnitypackagesCount()
+    {
+        if (IgnoredUnitypackages == null)
+        {
+            ManageIgnoredInfoBadge.Value = "0";
+            return;
+        }
+
+        ManageIgnoredInfoBadge.Value = IgnoredUnitypackages.Count.ToString();
     }
 
     private static async Task ChangeDiscordState()
@@ -121,6 +140,7 @@ public partial class Extraction : UserControl, INotifyPropertyChanged
         var (ignoredCounter, fileFinishedCounter) = await ProcessUnityPackages();
 
         UpdateUiAfterExtraction(ignoredCounter, fileFinishedCounter);
+        UpdateManageableUnitypackageCount();
     }
 
     private void SetupUiForExtraction()
@@ -129,8 +149,6 @@ public partial class Extraction : UserControl, INotifyPropertyChanged
         StatusProgressBar.Visibility = Visibility.Visible;
         StatusBarDetailsTxt.Visibility = Visibility.Visible;
         StatusBar.Visibility = Visibility.Visible;
-        StatusBarManageExtractedBtn.Visibility = Visibility.Collapsed;
-        StatusBarShowIgnoredBtn.Visibility = Visibility.Collapsed;
         ExtractionBtn.IsEnabled = false;
         ExtractionBtn.Appearance = ControlAppearance.Info;
     }
@@ -208,17 +226,11 @@ public partial class Extraction : UserControl, INotifyPropertyChanged
 
     private void UpdateUiAfterExtraction(int ignoredCounter, int fileFinishedCounter)
     {
-        if (ignoredCounter > 0 || fileFinishedCounter > 0) StatusBarManageExtractedBtn.Visibility = Visibility.Visible;
-
-        if (ignoredCounter > 0) StatusBarShowIgnoredBtn.Visibility = Visibility.Visible;
-
         if (fileFinishedCounter == 0)
         {
             StatusBarText.Text = $"No Unitypackages Extracted, {ignoredCounter} ignored.";
             StatusProgressBar.Visibility = Visibility.Collapsed;
             StatusBarDetailsTxt.Visibility = Visibility.Collapsed;
-            StatusBarManageExtractedBtn.Visibility = Visibility.Collapsed;
-            StatusBarShowIgnoredBtn.Visibility = Visibility.Visible;
             ExtractionBtn.IsEnabled = true;
             ExtractionBtn.Appearance = ControlAppearance.Primary;
             ChangeExtractionAnimation();
@@ -263,16 +275,6 @@ public partial class Extraction : UserControl, INotifyPropertyChanged
 
             UpdateQueueHeader();
         }
-    }
-
-    private void StatusBarManageExtractedBtn_OnClick(object sender, RoutedEventArgs e)
-    {
-        throw new NotImplementedException();
-    }
-
-    private void StatusBarShowIgnoredBtn_OnClick(object sender, RoutedEventArgs e)
-    {
-        throw new NotImplementedException();
     }
 
     private void Extraction_OnDrop(object sender, DragEventArgs e)
