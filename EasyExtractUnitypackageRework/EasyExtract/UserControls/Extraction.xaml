@@ -13,7 +13,7 @@
              Loaded="Extraction_OnLoaded">
     <!-- Background="{DynamicResource BackgroundPrimaryBrush}" -->
     <Grid>
-        <TabControl>
+        <TabControl x:Name="Tabs" SelectionChanged="Tabs_OnSelectionChanged">
             <TabItem IsSelected="True">
                 <TabItem.Header>
                     <StackPanel Orientation="Horizontal">
@@ -122,6 +122,59 @@
                         <ui:InfoBadge Severity="Caution" x:Name="ManageIgnoredInfoBadge"/>
                     </StackPanel>
                 </TabItem.Header>
+                <!-- Ignored Start -->
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+                    <ui:CardExpander
+                        Header="Ignored"
+                        VerticalAlignment="Top"
+                        x:Name="IgnoredExpander"
+                        IsExpanded="True"
+                        HorizontalAlignment="Stretch"
+                        HorizontalContentAlignment="Stretch"
+                        Icon="{ui:SymbolIcon Warning24}">
+                        <ui:ListView
+                            x:Name="IgnoredListView"
+                            HorizontalAlignment="Stretch"
+                            Margin="15"
+                            MaxHeight="300"
+                            HorizontalContentAlignment="Stretch"
+                            ItemsSource="{Binding IgnoredUnitypackages}">
+                            <ui:ListView.ItemTemplate>
+                                <DataTemplate>
+                                    <ui:CardControl>
+                                        <ui:CardControl.Icon>
+                                            <ui:SymbolIcon
+                                                HorizontalAlignment="Center"
+                                                VerticalAlignment="Center"
+                                                Margin="0,0,5,0"
+                                                Symbol="FolderZip24" />
+                                        </ui:CardControl.Icon>
+                                        <ui:CardControl.Header>
+                                            <StackPanel HorizontalAlignment="Stretch">
+                                                <ui:TextBlock
+                                                    FontTypography="BodyStrong"
+                                                    Text="{Binding UnityPackageName}"
+                                                    TextWrapping="WrapWithOverflow" />
+                                                <ui:TextBlock
+                                                    Appearance="Secondary"
+                                                    Text="{Binding Reason}"
+                                                    Opacity="0.5"
+                                                    HorizontalAlignment="Left"
+                                                    MaxWidth="500"
+                                                    TextWrapping="WrapWithOverflow" />
+                                            </StackPanel>
+                                        </ui:CardControl.Header>
+                                    </ui:CardControl>
+                                </DataTemplate>
+                            </ui:ListView.ItemTemplate>
+                        </ui:ListView>
+                    </ui:CardExpander>
+                </Grid>
+                <!-- Ignored End -->
             </TabItem>
         </TabControl>
         

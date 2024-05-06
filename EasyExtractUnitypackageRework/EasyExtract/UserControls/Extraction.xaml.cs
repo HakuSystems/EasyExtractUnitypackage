@@ -44,7 +44,7 @@ public partial class Extraction : UserControl, INotifyPropertyChanged
         }
     }
 
-    public static List<IgnoredUnitypackageModel>? IgnoredUnitypackages { get; set; }
+    public static List<IgnoredUnitypackageModel>? IgnoredUnitypackages { get; set; } = new();
     public event PropertyChangedEventHandler PropertyChanged;
 
     protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null)
@@ -58,13 +58,13 @@ public partial class Extraction : UserControl, INotifyPropertyChanged
 
         UpdateQueueHeader();
         ChangeExtractionAnimation();
-        UpdateManageableUnitypackageCount();
+        UpdateInfoBadges();
     }
 
-    private void UpdateManageableUnitypackageCount()
+    private void UpdateInfoBadges()
     {
         TotalExtractedInExtractedFolder = Directory.GetDirectories(ConfigModel.LastExtractedPath).Length.ToString();
-        ManageExtractedInfoBadge.Value = TotalExtractedInExtractedFolder;
+        if (ManageExtractedInfoBadge != null) ManageExtractedInfoBadge.Value = TotalExtractedInExtractedFolder;
         UpdateIgnoredUnitypackagesCount();
     }
 
@@ -76,7 +76,7 @@ public partial class Extraction : UserControl, INotifyPropertyChanged
             return;
         }
 
-        ManageIgnoredInfoBadge.Value = IgnoredUnitypackages.Count.ToString();
+        if (ManageIgnoredInfoBadge != null) ManageIgnoredInfoBadge.Value = IgnoredUnitypackages.Count.ToString();
     }
 
     private static async Task ChangeDiscordState()
@@ -111,19 +111,22 @@ public partial class Extraction : UserControl, INotifyPropertyChanged
             case 0:
                 QueueExpander.Header = "Queue (Nothing to extract)";
                 ExtractionBtn.Visibility = Visibility.Collapsed;
+                UpdateInfoBadges();
                 break;
             default:
                 QueueExpander.Header = QueueListView.Items.Count == 1
                     ? $"Queue ({QueueListView.Items.Count} Unitypackage)"
                     : $"Queue ({QueueListView.Items.Count} Unitypackage(s))";
                 ExtractionBtn.Visibility = Visibility.Visible;
+                UpdateInfoBadges();
                 break;
         }
     }
 
     private void ChangeExtractionAnimation()
     {
-        AnimationBehavior.SetSourceUri(ExtractingIcon, _isExtraction ? ExtractionAnimationUri : IdleAnimationUri);
+        if (ExtractingIcon != null)
+            AnimationBehavior.SetSourceUri(ExtractingIcon, _isExtraction ? ExtractionAnimationUri : IdleAnimationUri);
     }
 
     private void ExtractingIcon_OnSourceUpdated(object? sender, DataTransferEventArgs e)
@@ -140,7 +143,7 @@ public partial class Extraction : UserControl, INotifyPropertyChanged
         var (ignoredCounter, fileFinishedCounter) = await ProcessUnityPackages();
 
         UpdateUiAfterExtraction(ignoredCounter, fileFinishedCounter);
-        UpdateManageableUnitypackageCount();
+        UpdateInfoBadges();
     }
 
     private void SetupUiForExtraction()
@@ -178,7 +181,9 @@ public partial class Extraction : UserControl, INotifyPropertyChanged
                 AddToIgnoredUnitypackages(unitypackage, "Failed to extract");
             }
         }
-
+        QueueListView.Items.Clear();
+        UpdateQueueHeader();
+        UpdateInfoBadges();
         return (ignoredCounter, fileFinishedCounter);
     }
 
@@ -209,11 +214,12 @@ public partial class Extraction : UserControl, INotifyPropertyChanged
 
     private void AddToIgnoredUnitypackages(SearchEverythingModel unitypackage, string reason)
     {
-        IgnoredUnitypackages?.Add(new IgnoredUnitypackageModel
+        IgnoredUnitypackages.Add(new IgnoredUnitypackageModel
         {
             UnityPackageName = unitypackage.UnityPackageName,
             Reason = reason
         });
+        UpdateInfoBadges();
     }
 
     private void UpdateExtractionProgress(int fileFinishedCounter)
@@ -294,5 +300,14 @@ public partial class Extraction : UserControl, INotifyPropertyChanged
         }
 
         UpdateQueueHeader();
+    }
+
+    private void Tabs_OnSelectionChanged(object sender, SelectionChangedEventArgs e)
+    {
+        //Update Info Badges
+        UpdateInfoBadges();
+        //reset Extraction to normal
+        ChangeExtractionAnimation();
+        _isExtraction = false;
     }
 }

@@ -93,10 +93,11 @@ public partial class History : UserControl, INotifyPropertyChanged
         Config = await ConfigHelper.LoadConfig();
         if (Config.History == null || Config.History.Count == 0)
         {
+            ClearHistoryButton.Visibility = Visibility.Collapsed;
             NoHistoryLabel.Visibility = Visibility.Visible;
             return;
         }
-
+        ClearHistoryButton.Visibility = Visibility.Visible;
         NoHistoryLabel.Visibility = Visibility.Collapsed;
         HistoryList = Config.History;
     }
