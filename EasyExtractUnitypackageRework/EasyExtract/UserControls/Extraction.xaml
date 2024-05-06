@@ -14,7 +14,7 @@
     <!-- Background="{DynamicResource BackgroundPrimaryBrush}" -->
     <Grid>
         <TabControl x:Name="Tabs" SelectionChanged="Tabs_OnSelectionChanged">
-            <TabItem IsSelected="True">
+            <TabItem>
                 <TabItem.Header>
                     <StackPanel Orientation="Horizontal">
                         <ui:SymbolIcon Margin="0,0,6,0" Symbol="DocumentTextExtract24" />
@@ -105,7 +105,7 @@
                 </Grid>
                 <!-- Extraction End -->
             </TabItem>
-            <TabItem x:Name="ManageExtractedTab">
+            <TabItem x:Name="ManageExtractedTab" IsSelected="True">
                 <TabItem.Header>
                     <StackPanel Orientation="Horizontal">
                         <ui:SymbolIcon Margin="0,0,6,0" Symbol="Settings24" />
@@ -113,6 +113,126 @@
                         <ui:InfoBadge Severity="Success" x:Name="ManageExtractedInfoBadge" />
                     </StackPanel>
                 </TabItem.Header>
+                <!-- Manage Extracted Start -->
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <!-- 
+                    This section will list
+                    every extracted unitypackage
+                    but for each unitypackage
+                    it shows how many shaders or materials and etc are in it
+                    this information will be gathered from the extracted (unzipped) unitypackage (folder)
+                    the user will have a button to either select to extract what he wants (shaders, materials, etc)
+                    or to ignore the unitypackage
+                    or to delete the unitypackage
+                    or select manual, wich will show a TreeView of the extracted unitypackage (folder)
+                    in order to check and uncheck what he wants to extract
+                    finally when everything is done,
+                    the app will delete all the ignored files / unchecked files from the extracted unitypackage (folder)
+                    but keeps the selected files
+                    the user Then can if he wants move the edited folder to another location or keep it in the same location.
+                     -->
+                    <ui:CardExpander
+                        Grid.Column="0"
+                        Grid.Row="0"
+                        Header="Extracted"
+                        VerticalAlignment="Top"
+                        x:Name="ExtractedExpander"
+                        HorizontalAlignment="Stretch"
+                        HorizontalContentAlignment="Stretch"
+                        Icon="{ui:SymbolIcon DocumentSearch24}">
+                        <ui:ListView
+                            x:Name="ExtractedListView"
+                            HorizontalAlignment="Stretch"
+                            Margin="15"
+                            MaxHeight="300"
+                            HorizontalContentAlignment="Stretch"
+                            ItemsSource="{Binding ExtractedUnitypackages}">
+                            <ui:ListView.ItemTemplate>
+                                <DataTemplate>
+                                    <ui:CardControl>
+                                        <ui:CardControl.Icon>
+                                            <ui:SymbolIcon
+                                                HorizontalAlignment="Center"
+                                                VerticalAlignment="Center"
+                                                Margin="0,0,5,0"
+                                                Symbol="FolderZip24" />
+                                        </ui:CardControl.Icon>
+                                        <ui:CardControl.Header>
+                                            <StackPanel HorizontalAlignment="Stretch">
+                                                <ui:TextBlock
+                                                    FontTypography="BodyStrong"
+                                                    Text="{Binding UnityPackageName}"
+                                                    TextWrapping="WrapWithOverflow" />
+                                                <ui:TextBlock
+                                                    Appearance="Secondary"
+                                                    Text="{Binding UnityPackagePath}"
+                                                    Opacity="0.5"
+                                                    HorizontalAlignment="Left"
+                                                    MaxWidth="500"
+                                                    TextWrapping="WrapWithOverflow" />
+                                            </StackPanel>
+                                        </ui:CardControl.Header>
+                                    </ui:CardControl>
+                                </DataTemplate>
+                            </ui:ListView.ItemTemplate>
+                        </ui:ListView>
+                    </ui:CardExpander>
+                    <ui:CardExpander
+                        Grid.Column="1"
+                        Grid.Row="0"
+                        Header="Extracted Details"
+                        VerticalAlignment="Top"
+                        x:Name="ExtractedDetailsExpander"
+                        HorizontalAlignment="Stretch"
+                        HorizontalContentAlignment="Stretch"
+                        Icon="{ui:SymbolIcon DocumentSearch24}">
+                        <ui:ListView
+                            x:Name="ExtractedDetailsListView"
+                            HorizontalAlignment="Stretch"
+                            Margin="15"
+                            MaxHeight="300"
+                            HorizontalContentAlignment="Stretch"
+                            ItemsSource="{Binding ExtractedUnitypackages}">
+                            <ui:ListView.ItemTemplate>
+                                <DataTemplate>
+                                    <ui:CardControl>
+                                        <ui:CardControl.Icon>
+                                            <ui:SymbolIcon
+                                                HorizontalAlignment="Center"
+                                                VerticalAlignment="Center"
+                                                Margin="0,0,5,0"
+                                                Symbol="FolderZip24" />
+                                        </ui:CardControl.Icon>
+                                        <ui:CardControl.Header>
+                                            <StackPanel HorizontalAlignment="Stretch">
+                                                <ui:TextBlock
+                                                    FontTypography="BodyStrong"
+                                                    Text="{Binding UnityPackageName}"
+                                                    TextWrapping="WrapWithOverflow" />
+                                                <ui:TextBlock
+                                                    Appearance="Secondary"
+                                                    Text="{Binding UnityPackagePath}"
+                                                    Opacity="0.5"
+                                                    HorizontalAlignment="Left"
+                                                    MaxWidth="500"
+                                                    TextWrapping="WrapWithOverflow" />
+                                            </StackPanel>
+                                        </ui:CardControl.Header>
+                                    </ui:CardControl>
+                                </DataTemplate>
+                            </ui:ListView.ItemTemplate>
+                        </ui:ListView>
+                    </ui:CardExpander>
+                </Grid>
+                <!-- Manage Extracted End -->
             </TabItem>
             <TabItem>
                 <TabItem.Header>
