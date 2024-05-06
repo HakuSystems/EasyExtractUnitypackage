@@ -105,21 +105,21 @@
                 </Grid>
                 <!-- Extraction End -->
             </TabItem>
-            <TabItem>
+            <TabItem x:Name="ManageExtractedTab">
                 <TabItem.Header>
                     <StackPanel Orientation="Horizontal">
                         <ui:SymbolIcon Margin="0,0,6,0" Symbol="Settings24" />
                         <TextBlock Text="Manage Extracted" />
-                        <ui:InfoBadge Severity="Success" x:Name="ManageExtractedInfoBadge"/>
+                        <ui:InfoBadge Severity="Success" x:Name="ManageExtractedInfoBadge" />
                     </StackPanel>
                 </TabItem.Header>
             </TabItem>
-            <TabItem >
+            <TabItem>
                 <TabItem.Header>
                     <StackPanel Orientation="Horizontal">
                         <ui:SymbolIcon Margin="0,0,6,0" Symbol="Warning24" />
                         <TextBlock Text="Ignored" />
-                        <ui:InfoBadge Severity="Caution" x:Name="ManageIgnoredInfoBadge"/>
+                        <ui:InfoBadge Severity="Caution" x:Name="ManageIgnoredInfoBadge" />
                     </StackPanel>
                 </TabItem.Header>
                 <!-- Ignored Start -->
@@ -177,7 +177,7 @@
                 <!-- Ignored End -->
             </TabItem>
         </TabControl>
-        
+
         <StatusBar Grid.Row="2" VerticalAlignment="Bottom" HorizontalAlignment="Stretch" x:Name="StatusBar"
                    Visibility="Collapsed">
             <StatusBarItem>

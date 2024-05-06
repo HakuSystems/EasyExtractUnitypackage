@@ -181,9 +181,11 @@ public partial class Extraction : UserControl, INotifyPropertyChanged
                 AddToIgnoredUnitypackages(unitypackage, "Failed to extract");
             }
         }
+
         QueueListView.Items.Clear();
         UpdateQueueHeader();
         UpdateInfoBadges();
+        ManageExtractedTab.IsSelected = true;
         return (ignoredCounter, fileFinishedCounter);
     }
 
@@ -194,15 +196,16 @@ public partial class Extraction : UserControl, INotifyPropertyChanged
             reason = "File not found";
             return false;
         }
+
         var fileInfo = new FileInfo(unitypackage.UnityPackagePath);
-        
-        if(fileInfo.Extension != ".unitypackage")
+
+        if (fileInfo.Extension != ".unitypackage")
         {
             reason = "File is not a Unitypackage";
             return false;
         }
-        
-        if(fileInfo.Length == 0)
+
+        if (fileInfo.Length == 0)
         {
             reason = "File is empty";
             return false;
