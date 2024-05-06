@@ -6,91 +6,123 @@
              xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
              xmlns:gif="https://github.com/XamlAnimatedGif/XamlAnimatedGif"
              mc:Ignorable="d"
-             Background="{DynamicResource BackgroundPrimaryBrush}"
+             Background="Black"
              Foreground="{DynamicResource TextFillColorPrimaryBrush}"
              AllowDrop="True"
              Drop="Extraction_OnDrop"
              Loaded="Extraction_OnLoaded">
+    <!-- Background="{DynamicResource BackgroundPrimaryBrush}" -->
     <Grid>
-        <Grid.RowDefinitions>
-            <RowDefinition Height="Auto" />
-            <RowDefinition Height="Auto" />
-            <RowDefinition Height="Auto" />
-        </Grid.RowDefinitions>
-        <ui:CardExpander
-            Header="Queue"
-            VerticalAlignment="Top"
-            x:Name="QueueExpander"
-            HorizontalAlignment="Stretch"
-            HorizontalContentAlignment="Stretch"
-            Icon="{ui:SymbolIcon DocumentQueue24}">
-            <ui:ListView
-                x:Name="QueueListView"
-                HorizontalAlignment="Stretch"
-                Margin="15"
-                MaxHeight="300"
-                HorizontalContentAlignment="Stretch"
-                ItemsSource="{Binding QueueList}">
-                <ui:ListView.ItemTemplate>
-                    <DataTemplate>
-                        <ui:CardControl>
-                            <ui:CardControl.Icon>
-                                <ui:SymbolIcon
-                                    HorizontalAlignment="Center"
-                                    VerticalAlignment="Center"
-                                    Margin="0,0,5,0"
-                                    Symbol="FolderZip24" />
-                            </ui:CardControl.Icon>
-                            <ui:CardControl.Header>
-                                <StackPanel HorizontalAlignment="Stretch">
-                                    <ui:TextBlock
-                                        FontTypography="BodyStrong"
-                                        Text="{Binding UnityPackageName}"
-                                        TextWrapping="WrapWithOverflow" />
-                                    <ui:TextBlock
-                                        Appearance="Secondary"
-                                        Text="{Binding UnityPackagePath}"
-                                        Opacity="0.5"
-                                        HorizontalAlignment="Left"
-                                        MaxWidth="500"
-                                        TextWrapping="WrapWithOverflow" />
-                                </StackPanel>
-                            </ui:CardControl.Header>
-                        </ui:CardControl>
-                    </DataTemplate>
-                </ui:ListView.ItemTemplate>
-            </ui:ListView>
-        </ui:CardExpander>
-        <StackPanel Grid.Row="1" Orientation="Vertical"
-                    HorizontalAlignment="Center"
-                    VerticalAlignment="Center"
-                    Margin="15">
-            <Image
-                gif:AnimationBehavior.RepeatBehavior="0:0:5"
-                SourceUpdated="ExtractingIcon_OnSourceUpdated"
-                Margin="15"
-                x:Name="ExtractingIcon"
-                Width="150"
-                Height="150"
-                HorizontalAlignment="Center"
-                VerticalAlignment="Center" />
-            <StackPanel Orientation="Horizontal">
-                <ui:Button HorizontalAlignment="Stretch" Margin="5" Icon="{ui:SymbolIcon DocumentSearch24}"
-                           x:Name="SearchFileManuallyButton"
-                           Click="SearchFileManuallyButton_OnClick"
-                           Content="Search File To Extract" />
-                <ui:Button HorizontalAlignment="Stretch"
-                           Margin="5"
-                           VerticalAlignment="Top"
-                           x:Name="ExtractionBtn"
-                           Appearance="Primary"
-                           Click="ExtractionBtn_OnClick"
-                           Content="Start Extraction"
-                           Icon="{ui:SymbolIcon Flash24}" />
-            </StackPanel>
-            <TextBlock Text="Drag and drop is enabled" Opacity="0.5" HorizontalAlignment="Center"
-                       VerticalAlignment="Top" Margin="5" />
-        </StackPanel>
+        <TabControl>
+            <TabItem IsSelected="True">
+                <TabItem.Header>
+                    <StackPanel Orientation="Horizontal">
+                        <ui:SymbolIcon Margin="0,0,6,0" Symbol="DocumentTextExtract24" />
+                        <TextBlock Text="Extraction" />
+                    </StackPanel>
+                </TabItem.Header>
+                <!-- Extraction Start -->
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+                    <ui:CardExpander
+                        Header="Queue"
+                        VerticalAlignment="Top"
+                        x:Name="QueueExpander"
+                        HorizontalAlignment="Stretch"
+                        HorizontalContentAlignment="Stretch"
+                        Icon="{ui:SymbolIcon DocumentQueue24}">
+                        <ui:ListView
+                            x:Name="QueueListView"
+                            HorizontalAlignment="Stretch"
+                            Margin="15"
+                            MaxHeight="300"
+                            HorizontalContentAlignment="Stretch"
+                            ItemsSource="{Binding QueueList}">
+                            <ui:ListView.ItemTemplate>
+                                <DataTemplate>
+                                    <ui:CardControl>
+                                        <ui:CardControl.Icon>
+                                            <ui:SymbolIcon
+                                                HorizontalAlignment="Center"
+                                                VerticalAlignment="Center"
+                                                Margin="0,0,5,0"
+                                                Symbol="FolderZip24" />
+                                        </ui:CardControl.Icon>
+                                        <ui:CardControl.Header>
+                                            <StackPanel HorizontalAlignment="Stretch">
+                                                <ui:TextBlock
+                                                    FontTypography="BodyStrong"
+                                                    Text="{Binding UnityPackageName}"
+                                                    TextWrapping="WrapWithOverflow" />
+                                                <ui:TextBlock
+                                                    Appearance="Secondary"
+                                                    Text="{Binding UnityPackagePath}"
+                                                    Opacity="0.5"
+                                                    HorizontalAlignment="Left"
+                                                    MaxWidth="500"
+                                                    TextWrapping="WrapWithOverflow" />
+                                            </StackPanel>
+                                        </ui:CardControl.Header>
+                                    </ui:CardControl>
+                                </DataTemplate>
+                            </ui:ListView.ItemTemplate>
+                        </ui:ListView>
+                    </ui:CardExpander>
+                    <StackPanel Grid.Row="1" Orientation="Vertical"
+                                HorizontalAlignment="Center"
+                                VerticalAlignment="Center"
+                                Margin="15">
+                        <Image
+                            gif:AnimationBehavior.RepeatBehavior="0:0:5"
+                            SourceUpdated="ExtractingIcon_OnSourceUpdated"
+                            Margin="15"
+                            x:Name="ExtractingIcon"
+                            Width="150"
+                            Height="150"
+                            HorizontalAlignment="Center"
+                            VerticalAlignment="Center" />
+                        <StackPanel Orientation="Horizontal">
+                            <ui:Button HorizontalAlignment="Stretch" Margin="5" Icon="{ui:SymbolIcon DocumentSearch24}"
+                                       x:Name="SearchFileManuallyButton"
+                                       Click="SearchFileManuallyButton_OnClick"
+                                       Content="Search File To Extract" />
+                            <ui:Button HorizontalAlignment="Stretch"
+                                       Margin="5"
+                                       VerticalAlignment="Top"
+                                       x:Name="ExtractionBtn"
+                                       Appearance="Primary"
+                                       Click="ExtractionBtn_OnClick"
+                                       Content="Start Extraction"
+                                       Icon="{ui:SymbolIcon Flash24}" />
+                        </StackPanel>
+                        <TextBlock Text="Drag and drop is enabled" Opacity="0.5" HorizontalAlignment="Center"
+                                   VerticalAlignment="Top" Margin="5" />
+                    </StackPanel>
+                </Grid>
+                <!-- Extraction End -->
+            </TabItem>
+            <TabItem>
+                <TabItem.Header>
+                    <StackPanel Orientation="Horizontal">
+                        <ui:SymbolIcon Margin="0,0,6,0" Symbol="Settings24" />
+                        <TextBlock Text="Manage Extracted" />
+                    </StackPanel>
+                </TabItem.Header>
+            </TabItem>
+            <TabItem >
+                <TabItem.Header>
+                    <StackPanel Orientation="Horizontal">
+                        <ui:SymbolIcon Margin="0,0,6,0" Symbol="Warning24" />
+                        <TextBlock Text="Ignored" />
+                    </StackPanel>
+                </TabItem.Header>
+            </TabItem>
+        </TabControl>
+        
         <StatusBar Grid.Row="2" VerticalAlignment="Bottom" HorizontalAlignment="Stretch" x:Name="StatusBar"
                    Visibility="Collapsed">
             <StatusBarItem>
