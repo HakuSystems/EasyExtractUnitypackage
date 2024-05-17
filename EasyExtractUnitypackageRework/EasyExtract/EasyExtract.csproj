@@ -33,7 +33,7 @@
             <Version>1.2.1.24</Version>
         </PackageReference>
         <PackageReference Include="Fody">
-            <Version>6.8.0</Version>
+            <Version>6.8.1</Version>
             <PrivateAssets>all</PrivateAssets>
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
@@ -47,16 +47,16 @@
             <Version>13.0.3</Version>
         </PackageReference>
         <PackageReference Include="SharpCompress">
-          <Version>0.36.0</Version>
+          <Version>0.37.2</Version>
         </PackageReference>
         <PackageReference Include="WPF-UI">
-            <Version>3.0.3</Version>
+            <Version>3.0.4</Version>
         </PackageReference>
         <PackageReference Include="WPF-UI.Tray">
-            <Version>3.0.3</Version>
+            <Version>3.0.4</Version>
         </PackageReference>
         <PackageReference Include="XamlAnimatedGif">
-            <Version>2.2.3</Version>
+            <Version>2.3.0</Version>
         </PackageReference>
     </ItemGroup>
 
