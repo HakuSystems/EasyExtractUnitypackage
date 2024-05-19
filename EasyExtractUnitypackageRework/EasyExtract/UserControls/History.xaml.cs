@@ -97,6 +97,7 @@ public partial class History : UserControl, INotifyPropertyChanged
             NoHistoryLabel.Visibility = Visibility.Visible;
             return;
         }
+
         ClearHistoryButton.Visibility = Visibility.Visible;
         NoHistoryLabel.Visibility = Visibility.Collapsed;
         HistoryList = Config.History;
