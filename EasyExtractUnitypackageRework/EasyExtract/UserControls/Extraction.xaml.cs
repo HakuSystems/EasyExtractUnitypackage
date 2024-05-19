@@ -1,9 +1,11 @@
+using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.IO;
 using System.Runtime.CompilerServices;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
+using System.Windows.Media.Imaging;
 using EasyExtract.Config;
 using EasyExtract.Discord;
 using EasyExtract.Extraction;
@@ -15,20 +17,34 @@ namespace EasyExtract.UserControls;
 
 public partial class Extraction : UserControl, INotifyPropertyChanged
 {
+    private const string EasyExtractPreview = "EASYEXTRACTPREVIEW.png";
+
     private static readonly Uri IdleAnimationUri =
         new("pack://application:,,,/EasyExtract;component/Resources/ExtractionProcess/Closed.png");
 
     private static readonly Uri ExtractionAnimationUri =
         new("pack://application:,,,/EasyExtract;component/Resources/Gifs/IconAnim.gif");
 
-    private bool _isExtraction;
-    private string TotalExtractedInExtractedFolder { get; set; }
+    private ObservableCollection<ExtractedUnitypackageModel> _extractedUnitypackages = new();
 
+    private bool _isExtraction;
 
     public Extraction()
     {
         InitializeComponent();
         DataContext = this;
+    }
+
+    private string TotalExtractedInExtractedFolder { get; set; }
+
+    public ObservableCollection<ExtractedUnitypackageModel> ExtractedUnitypackages
+    {
+        get => _extractedUnitypackages;
+        set
+        {
+            _extractedUnitypackages = value;
+            OnPropertyChanged();
+        }
     }
 
     public static List<SearchEverythingModel>? _queueList { get; set; }
@@ -47,6 +63,101 @@ public partial class Extraction : UserControl, INotifyPropertyChanged
     public static List<IgnoredUnitypackageModel>? IgnoredUnitypackages { get; set; } = new();
     public event PropertyChangedEventHandler PropertyChanged;
 
+
+    private void PopulateExtractedFilesList()
+    {
+        var directories = Directory.GetDirectories(ConfigModel.LastExtractedPath);
+        foreach (var directory in directories)
+        {
+            var totalSizeInBytes = CalculateDirectoryTotalSizeInBytes(directory);
+            var unitypackage = CreateUnityPackageModel(directory, totalSizeInBytes);
+            AddSubdirectoryItemsToUnityPackage(unitypackage, directory);
+            ExtractedUnitypackages.Add(unitypackage);
+        }
+    }
+
+    private long CalculateDirectoryTotalSizeInBytes(string directory)
+    {
+        return new DirectoryInfo(directory).GetFiles("*.*", SearchOption.AllDirectories)
+            .Sum(file => file.Length);
+    }
+
+    private ExtractedUnitypackageModel CreateUnityPackageModel(string directory, long totalSizeInBytes)
+    {
+        return new ExtractedUnitypackageModel
+        {
+            UnitypackageName = Path.GetFileName(directory),
+            UnitypackagePath = directory,
+            UnitypackageSize = ExtractionHelper.GetReadableFileSize(totalSizeInBytes),
+            UnitypackageTotalFileCount = ExtractionHelper.GetTotalFileCount(directory),
+            UnitypackageTotalFolderCount = ExtractionHelper.GetTotalFolderCount(directory),
+            UnitypackageTotalScriptCount = ExtractionHelper.GetTotalScriptCount(directory),
+            UnitypackageTotalShaderCount = ExtractionHelper.GetTotalShaderCount(directory),
+            UnitypackageTotalPrefabCount = ExtractionHelper.GetTotalPrefabCount(directory),
+            UnitypackageTotal3DObjectCount = ExtractionHelper.GetTotal3DObjectCount(directory),
+            UnitypackageTotalImageCount = ExtractionHelper.GetTotalImageCount(directory),
+            UnitypackageTotalAudioCount = ExtractionHelper.GetTotalAudioCount(directory),
+            UnitypackageTotalAnimationCount = ExtractionHelper.GetTotalAnimationCount(directory),
+            UnitypackageTotalSceneCount = ExtractionHelper.GetTotalSceneCount(directory),
+            UnitypackageTotalMaterialCount = ExtractionHelper.GetTotalMaterialCount(directory),
+            UnitypackageTotalAssetCount = ExtractionHelper.GetTotalAssetCount(directory),
+            UnitypackageTotalControllerCount = ExtractionHelper.GetTotalControllerCount(directory),
+            UnitypackageTotalFontCount = ExtractionHelper.GetTotalFontCount(directory),
+            UnitypackageTotalConfigurationCount = ExtractionHelper.GetTotalConfigurationCount(directory),
+            UnitypackageTotalDataCount = ExtractionHelper.GetTotalDataCount(directory),
+            UnitypackageExtractedDate = Directory.GetCreationTime(directory)
+        };
+    }
+
+    private void AddSubdirectoryItemsToUnityPackage(ExtractedUnitypackageModel unitypackage, string directory)
+    {
+        var directoryInfo = new DirectoryInfo(directory);
+        var files = directoryInfo.GetFiles("*.*", SearchOption.AllDirectories);
+        var rootPath = directoryInfo.FullName;
+
+        foreach (var file in files)
+        {
+            if (file.Name.EndsWith(".EASYEXTRACTPREVIEW.png")) continue;
+
+            var category = CategoryStructureBool?.IsChecked == true
+                ? ExtractionHelper.GetCategoryByExtension(file.Extension)
+                : GetFileRelativePath(file.FullName, rootPath);
+
+            unitypackage.SubdirectoryItems.Add(new ExtractedFiles
+            {
+                FileName = file.Name,
+                FilePath = file.FullName,
+                Category = category,
+                Extension = file.Extension,
+                Size = ExtractionHelper.GetReadableFileSize(file.Length),
+                ExtractedDate = file.CreationTime,
+                SymbolIconImage = ExtractionHelper.GetSymbolByExtension(file.Extension),
+                PreviewImage = GeneratePreviewImage(file)
+            });
+        }
+    }
+
+    private string GetFileRelativePath(string filePath, string rootPath)
+    {
+        return filePath.Replace(rootPath, "").TrimStart(Path.DirectorySeparatorChar);
+    }
+
+
+    private BitmapImage? GeneratePreviewImage(FileInfo fileInfo)
+    {
+        var previewImagePath = Path.Combine(fileInfo.DirectoryName, $"{fileInfo.Name}.{EasyExtractPreview}");
+        if (!File.Exists(previewImagePath)) return null;
+
+        var previewImage = new BitmapImage();
+        previewImage.BeginInit();
+        previewImage.UriSource = new Uri(previewImagePath);
+        previewImage.CacheOption = BitmapCacheOption.OnLoad;
+        previewImage.EndInit();
+        previewImage.Freeze();
+
+        return previewImage;
+    }
+
     protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null)
     {
         PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
@@ -54,11 +165,27 @@ public partial class Extraction : UserControl, INotifyPropertyChanged
 
     private async void Extraction_OnLoaded(object sender, RoutedEventArgs e)
     {
-        await ChangeDiscordState();
+        CalculateScrollerHeight();
+        await UpdateDiscordPresenceState();
 
         UpdateQueueHeader();
         ChangeExtractionAnimation();
         UpdateInfoBadges();
+        await ConfigHelper.LoadConfig().ContinueWith(task =>
+        {
+            var config = task.Result;
+            if (config == null) return;
+            Dispatcher.Invoke(() => { CategoryStructureBool.IsChecked = config.ExtractedCategoryStructure; });
+            ConfigHelper.UpdateConfig(config);
+        });
+        UpdateExtractedFiles();
+    }
+
+    private void CalculateScrollerHeight()
+    {
+        //max window height - height of the other elements
+        var height = (int)ActualHeight - 200;
+        ExtractedItemsScroller.MaxHeight = height;
     }
 
     private void UpdateInfoBadges()
@@ -79,7 +206,7 @@ public partial class Extraction : UserControl, INotifyPropertyChanged
         if (ManageIgnoredInfoBadge != null) ManageIgnoredInfoBadge.Value = IgnoredUnitypackages.Count.ToString();
     }
 
-    private static async Task ChangeDiscordState()
+    private static async Task UpdateDiscordPresenceState()
     {
         var isDiscordEnabled = false;
         try
@@ -244,6 +371,7 @@ public partial class Extraction : UserControl, INotifyPropertyChanged
             ExtractionBtn.Appearance = ControlAppearance.Primary;
             ChangeExtractionAnimation();
             _isExtraction = false;
+            UpdateExtractedFiles();
             return;
         }
 
@@ -258,6 +386,7 @@ public partial class Extraction : UserControl, INotifyPropertyChanged
         StatusBarDetailsTxt.Visibility = Visibility.Collapsed;
         ChangeExtractionAnimation();
         _isExtraction = false;
+        UpdateExtractedFiles();
     }
 
     private void SearchFileManuallyButton_OnClick(object sender, RoutedEventArgs e)
@@ -312,5 +441,46 @@ public partial class Extraction : UserControl, INotifyPropertyChanged
         //reset Extraction to normal
         ChangeExtractionAnimation();
         _isExtraction = false;
+        UpdateExtractedFiles();
+    }
+
+    private async void CategoryStructureBool_OnChecked(object sender, RoutedEventArgs e)
+    {
+        await ConfigHelper.LoadConfig().ContinueWith(task =>
+        {
+            var config = task.Result;
+            if (config == null) return;
+            config.ExtractedCategoryStructure = true;
+            ConfigHelper.UpdateConfig(config);
+        });
+        UpdateExtractedFiles();
+    }
+
+    private async void CategoryStructureBool_OnUnchecked(object sender, RoutedEventArgs e)
+    {
+        await ConfigHelper.LoadConfig().ContinueWith(task =>
+        {
+            var config = task.Result;
+            if (config == null) return;
+            config.ExtractedCategoryStructure = false;
+            ConfigHelper.UpdateConfig(config);
+        });
+
+        UpdateExtractedFiles();
+    }
+
+    private void UpdateExtractedFiles()
+    {
+        ExtractedUnitypackages.Clear();
+        CheckForDuplicateExtractedFiles();
+        PopulateExtractedFilesList();
+    }
+
+    private void CheckForDuplicateExtractedFiles()
+    {
+        foreach (var unitypackage in ExtractedUnitypackages)
+        foreach (var extractedFile in unitypackage.SubdirectoryItems.Where(extractedFile =>
+                     ExtractedUnitypackages.Any(x => x.UnitypackageName == extractedFile.FileName)).ToList())
+            unitypackage.SubdirectoryItems.Remove(extractedFile);
     }
 }
