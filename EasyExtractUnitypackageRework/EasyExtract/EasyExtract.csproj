@@ -47,7 +47,7 @@
             <Version>13.0.3</Version>
         </PackageReference>
         <PackageReference Include="SharpCompress">
-          <Version>0.37.2</Version>
+            <Version>0.37.2</Version>
         </PackageReference>
         <PackageReference Include="WPF-UI">
             <Version>3.0.4</Version>
