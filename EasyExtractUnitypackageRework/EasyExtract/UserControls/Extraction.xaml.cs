@@ -29,8 +29,8 @@ public partial class Extraction : UserControl, INotifyPropertyChanged
 
     private bool _isExtraction;
     
-    private ExtractionHelper _ExtractionHelper { get; } = new();
-    private ExtractionHandler _ExtractionHandler { get; } = new();
+    private ExtractionHelper ExtractionHelper { get; } = new();
+    private ExtractionHandler ExtractionHandler { get; } = new();
     
 
     public Extraction()
@@ -92,23 +92,23 @@ public partial class Extraction : UserControl, INotifyPropertyChanged
         {
             UnitypackageName = Path.GetFileName(directory),
             UnitypackagePath = directory,
-            UnitypackageSize = _ExtractionHelper.GetReadableFileSize(totalSizeInBytes),
-            UnitypackageTotalFileCount = _ExtractionHelper.GetTotalFileCount(directory),
-            UnitypackageTotalFolderCount = _ExtractionHelper.GetTotalFolderCount(directory),
-            UnitypackageTotalScriptCount = _ExtractionHelper.GetTotalScriptCount(directory),
-            UnitypackageTotalShaderCount = _ExtractionHelper.GetTotalShaderCount(directory),
-            UnitypackageTotalPrefabCount = _ExtractionHelper.GetTotalPrefabCount(directory),
-            UnitypackageTotal3DObjectCount = _ExtractionHelper.GetTotal3DObjectCount(directory),
-            UnitypackageTotalImageCount = _ExtractionHelper.GetTotalImageCount(directory),
-            UnitypackageTotalAudioCount = _ExtractionHelper.GetTotalAudioCount(directory),
-            UnitypackageTotalAnimationCount = _ExtractionHelper.GetTotalAnimationCount(directory),
-            UnitypackageTotalSceneCount = _ExtractionHelper.GetTotalSceneCount(directory),
-            UnitypackageTotalMaterialCount = _ExtractionHelper.GetTotalMaterialCount(directory),
-            UnitypackageTotalAssetCount = _ExtractionHelper.GetTotalAssetCount(directory),
-            UnitypackageTotalControllerCount = _ExtractionHelper.GetTotalControllerCount(directory),
-            UnitypackageTotalFontCount = _ExtractionHelper.GetTotalFontCount(directory),
-            UnitypackageTotalConfigurationCount = _ExtractionHelper.GetTotalConfigurationCount(directory),
-            UnitypackageTotalDataCount = _ExtractionHelper.GetTotalDataCount(directory),
+            UnitypackageSize = ExtractionHelper.GetReadableFileSize(totalSizeInBytes),
+            UnitypackageTotalFileCount = ExtractionHelper.GetTotalFileCount(directory),
+            UnitypackageTotalFolderCount = ExtractionHelper.GetTotalFolderCount(directory),
+            UnitypackageTotalScriptCount = ExtractionHelper.GetTotalScriptCount(directory),
+            UnitypackageTotalShaderCount = ExtractionHelper.GetTotalShaderCount(directory),
+            UnitypackageTotalPrefabCount = ExtractionHelper.GetTotalPrefabCount(directory),
+            UnitypackageTotal3DObjectCount = ExtractionHelper.GetTotal3DObjectCount(directory),
+            UnitypackageTotalImageCount = ExtractionHelper.GetTotalImageCount(directory),
+            UnitypackageTotalAudioCount = ExtractionHelper.GetTotalAudioCount(directory),
+            UnitypackageTotalAnimationCount = ExtractionHelper.GetTotalAnimationCount(directory),
+            UnitypackageTotalSceneCount = ExtractionHelper.GetTotalSceneCount(directory),
+            UnitypackageTotalMaterialCount = ExtractionHelper.GetTotalMaterialCount(directory),
+            UnitypackageTotalAssetCount = ExtractionHelper.GetTotalAssetCount(directory),
+            UnitypackageTotalControllerCount = ExtractionHelper.GetTotalControllerCount(directory),
+            UnitypackageTotalFontCount = ExtractionHelper.GetTotalFontCount(directory),
+            UnitypackageTotalConfigurationCount = ExtractionHelper.GetTotalConfigurationCount(directory),
+            UnitypackageTotalDataCount = ExtractionHelper.GetTotalDataCount(directory),
             UnitypackageExtractedDate = Directory.GetCreationTime(directory)
         };
     }
@@ -124,7 +124,7 @@ public partial class Extraction : UserControl, INotifyPropertyChanged
             if (file.Name.EndsWith(".EASYEXTRACTPREVIEW.png")) continue;
 
             var category = CategoryStructureBool?.IsChecked == true
-                ? _ExtractionHelper.GetCategoryByExtension(file.Extension)
+                ? ExtractionHelper.GetCategoryByExtension(file.Extension)
                 : GetFileRelativePath(file.FullName, rootPath);
 
             unitypackage.SubdirectoryItems.Add(new ExtractedFiles
@@ -133,9 +133,9 @@ public partial class Extraction : UserControl, INotifyPropertyChanged
                 FilePath = file.FullName,
                 Category = category,
                 Extension = file.Extension,
-                Size = _ExtractionHelper.GetReadableFileSize(file.Length),
+                Size = ExtractionHelper.GetReadableFileSize(file.Length),
                 ExtractedDate = file.CreationTime,
-                SymbolIconImage = _ExtractionHelper.GetSymbolByExtension(file.Extension),
+                SymbolIconImage = ExtractionHelper.GetSymbolByExtension(file.Extension),
                 PreviewImage = GeneratePreviewImage(file)
             });
         }
@@ -301,7 +301,7 @@ public partial class Extraction : UserControl, INotifyPropertyChanged
             }
 
             StatusBarText.Text = $"Extracting {unitypackage.UnityPackageName}...";
-            if (await _ExtractionHandler.ExtractUnitypackage(unitypackage))
+            if (await ExtractionHandler.ExtractUnitypackage(unitypackage))
             {
                 fileFinishedCounter++;
                 UpdateExtractionProgress(fileFinishedCounter);
