@@ -367,9 +367,7 @@ public partial class Extraction : UserControl, INotifyPropertyChanged
 
             if (fileInfo.Extension != ".unitypackage") return (false, "File is not a Unitypackage");
 
-            if (fileInfo.Length == 0) return (false, "File is empty");
-
-            return (true, "");
+            return fileInfo.Length == 0 ? (false, "File is empty") : (true, "");
         });
     }
 
