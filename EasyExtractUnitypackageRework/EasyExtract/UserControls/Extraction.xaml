@@ -256,7 +256,15 @@
                                          IsChecked="{Binding ExtractedCategoryStructure, Mode=TwoWay}"
                                          Checked="CategoryStructureBool_OnChecked"
                                          Unchecked="CategoryStructureBool_OnUnchecked"
-                                         Content="Use Category Structure" Margin="5" />
+                                         Content="Category Structure" Margin="5">
+                            <ui:ToggleSwitch.ToolTip>
+                                <ui:InfoBar Title="Recommended"
+                                            IsOpen="True"
+                                            IsClosable="False"
+                                            Severity="Success"
+                                            Message="Display assets according to their respective categories using the Category Structure." />
+                            </ui:ToggleSwitch.ToolTip>
+                        </ui:ToggleSwitch>
                         <ui:Button Content="Delete Selected" Icon="{ui:SymbolIcon Delete24}" Margin="5" />
                         <ui:Button Content="Ignore Selected" Icon="{ui:SymbolIcon Dismiss24}" Margin="5" />
                         <ui:Button Content="Extract Selected Assets" Icon="{ui:SymbolIcon Save24}" Margin="5" />
