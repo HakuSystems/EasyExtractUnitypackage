@@ -248,10 +248,13 @@
                         </ScrollViewer>
                     </ui:CardExpander>
 
-
                     <StackPanel Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" Orientation="Horizontal"
-                                VerticalAlignment="Top"
-                                HorizontalAlignment="Center" Margin="15">
+                                VerticalAlignment="Bottom"
+                                HorizontalAlignment="Stretch" Margin="15">
+                        <ui:TextBox MaxLines="1" MinWidth="300" PlaceholderText="Search unitypackage..."
+                                    x:Name="SearchBar"
+                                    TextChanged="SearchBar_OnTextChanged"
+                                    Icon="{ui:SymbolIcon Search24}" />
                         <ui:ToggleSwitch x:Name="CategoryStructureBool"
                                          IsChecked="{Binding ExtractedCategoryStructure, Mode=TwoWay}"
                                          Checked="CategoryStructureBool_OnChecked"
@@ -265,7 +268,10 @@
                                             Message="Display assets according to their respective categories using the Category Structure." />
                             </ui:ToggleSwitch.ToolTip>
                         </ui:ToggleSwitch>
-                        <ui:Button Content="Delete Selected" Icon="{ui:SymbolIcon Delete24}" Margin="5" />
+                        <ui:Button Content="Delete Selected" x:Name="DeleteSelectedBtn"
+                                   Appearance="Secondary"
+                                   Click="DeleteSelectedBtn_OnClick"
+                                   Icon="{ui:SymbolIcon Delete24}" Margin="5" />
                         <ui:Button Content="Ignore Selected" Icon="{ui:SymbolIcon Dismiss24}" Margin="5" />
                         <ui:Button Content="Extract Selected Assets" Icon="{ui:SymbolIcon Save24}" Margin="5" />
                     </StackPanel>

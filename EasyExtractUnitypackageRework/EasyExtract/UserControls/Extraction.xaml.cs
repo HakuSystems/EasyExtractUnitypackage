@@ -513,7 +513,7 @@ public partial class Extraction : UserControl, INotifyPropertyChanged
         UpdateExtractedFiles();
     }
 
-    private async void UpdateExtractedFiles()
+    private async Task UpdateExtractedFiles()
     {
         Dispatcher.Invoke(() =>
         {
@@ -529,5 +529,53 @@ public partial class Extraction : UserControl, INotifyPropertyChanged
         foreach (var extractedFile in unitypackage.SubdirectoryItems.Where(extractedFile =>
                      ExtractedUnitypackages.Any(x => x.UnitypackageName == extractedFile.FileName)).ToList())
             unitypackage.SubdirectoryItems.Remove(extractedFile);
+    }
+
+    private async void SearchBar_OnTextChanged(object sender, TextChangedEventArgs e)
+    {
+        await Dispatcher.InvokeAsync(async () =>
+        {
+            var filter = SearchBar.Text.ToLower();
+            if (string.IsNullOrEmpty(filter))
+                await UpdateExtractedFiles();
+            else
+                ExtractedUnitypackages = new ObservableCollection<ExtractedUnitypackageModel>(
+                    _extractedUnitypackages.Where(u => u.UnitypackageName.ToLower().Contains(filter))
+                );
+        });
+    }
+
+    //todo: implement delete selected files for Whole Unitypackage
+    //currently only works with Files only.
+    private async void DeleteSelectedBtn_OnClick(object sender, RoutedEventArgs e)
+    {
+        await Dispatcher.InvokeAsync(async () =>
+        {
+            if (ExtractedUnitypackages.SelectMany(x => x.SubdirectoryItems).All(x => !x.IsChecked)) return;
+            var selectedItems = ExtractedUnitypackages.SelectMany(x => x.SubdirectoryItems)
+                .Where(x => x.IsChecked).ToList();
+            foreach (var selectedItem in selectedItems)
+            {
+                File.Delete(selectedItem.FilePath);
+                ExtractedUnitypackages.SelectMany(x => x.SubdirectoryItems).ToList().Remove(selectedItem); 
+            }
+            Dispatcher.Invoke(() =>
+            {
+                DeleteSelectedBtn.Content = $"Deleted {selectedItems.Count} Files";
+                DeleteSelectedBtn.Appearance = ControlAppearance.Success;
+                DeleteSelectedBtn.Icon = new SymbolIcon(SymbolRegular.Checkmark24);
+            });
+            await Task.Delay(1000); //wait for a second
+            Dispatcher.Invoke(() =>
+            {
+                DeleteSelectedBtn.Content = "Delete Selected";
+                DeleteSelectedBtn.Appearance = ControlAppearance.Secondary;
+                DeleteSelectedBtn.Icon = new SymbolIcon(SymbolRegular.Delete24);
+            });
+            
+
+
+            await UpdateExtractedFiles();
+        });
     }
 }
