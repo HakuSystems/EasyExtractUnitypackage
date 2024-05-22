@@ -6,12 +6,12 @@ using SharpCompress.Common;
 
 namespace EasyExtract.Extraction;
 
-public static class ExtractionHandler
+public class ExtractionHandler
 {
     private static string LastExtractedPath { get; } = ConfigModel.LastExtractedPath;
     private static string EasyExtractTempPath { get; } = ConfigModel.DefaultTempPath;
 
-    public static async Task<bool> ExtractUnitypackage(SearchEverythingModel unitypackage)
+    public async Task<bool> ExtractUnitypackage(SearchEverythingModel unitypackage)
     {
         var tempFolder = GetTempFolderPath(unitypackage);
         var targetFolder = GetTargetFolderPath(unitypackage);
@@ -26,33 +26,33 @@ public static class ExtractionHandler
         return true;
     }
 
-    private static string GetTempFolderPath(SearchEverythingModel unitypackage)
+    public string GetTempFolderPath(SearchEverythingModel unitypackage)
     {
         var tempFolder = Path.Combine(EasyExtractTempPath, unitypackage.UnityPackageName);
         DeleteIfDirectoryExists(tempFolder);
         return tempFolder;
     }
 
-    private static string GetTargetFolderPath(SearchEverythingModel unitypackage)
+    public string GetTargetFolderPath(SearchEverythingModel unitypackage)
     {
         var targetFolder = Path.Combine(LastExtractedPath, unitypackage.UnityPackageName);
         DeleteIfDirectoryExists(targetFolder);
         return targetFolder;
     }
 
-    private static void DeleteIfDirectoryExists(string directory)
+    public void DeleteIfDirectoryExists(string directory)
     {
         if (Directory.Exists(directory))
             Directory.Delete(directory, true);
     }
 
-    private static void CreateDirectories(params string[] directories)
+    public void CreateDirectories(params string[] directories)
     {
         foreach (var dir in directories)
             Directory.CreateDirectory(dir);
     }
 
-    private static async Task ExtractAndWriteFiles(SearchEverythingModel unitypackage, string tempFolder)
+    public async Task ExtractAndWriteFiles(SearchEverythingModel unitypackage, string tempFolder)
     {
         await Task.Run(() =>
         {
@@ -75,7 +75,7 @@ public static class ExtractionHandler
         });
     }
 
-    private static void MoveFilesFromTempToTargetFolder(string tempFolder, string targetFolder)
+    public void MoveFilesFromTempToTargetFolder(string tempFolder, string targetFolder)
     {
         foreach (var d in Directory.EnumerateDirectories(tempFolder))
         {
@@ -101,7 +101,7 @@ public static class ExtractionHandler
         }
     }
 
-    private static void MoveFileIfExists(string directory, string fileName, string targetFullPath,
+    public void MoveFileIfExists(string directory, string fileName, string targetFullPath,
         string targetFullFile)
     {
         if (File.Exists(Path.Combine(directory, fileName)))

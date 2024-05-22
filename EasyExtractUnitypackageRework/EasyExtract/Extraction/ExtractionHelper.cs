@@ -22,7 +22,7 @@ public class ExtractionHelper
     /// </summary>
     /// <param name="size">The size to convert.</param>
     /// <returns>The readable file size.</returns>
-    public static string GetReadableFileSize(long size)
+    public string GetReadableFileSize(long size)
     {
         string[] sizes = { "B", "KB", "MB", "GB", "TB" };
         var order = 0;
@@ -35,43 +35,43 @@ public class ExtractionHelper
         return $"{size:0.##} {sizes[order]}";
     }
 
-    public static int GetTotalFileCount(string directory)
+    public int GetTotalFileCount(string directory)
     {
         //BASED ON GetCategoryByExtension
         return Directory.GetFiles(directory, "*.*", SearchOption.AllDirectories).Length;
     }
 
-    public static int GetTotalFolderCount(string directory)
+    public int GetTotalFolderCount(string directory)
     {
         //BASED ON GetCategoryByExtension
         return Directory.GetDirectories(directory, "*", SearchOption.AllDirectories).Length;
     }
 
-    public static int GetTotalScriptCount(string directory)
+    public int GetTotalScriptCount(string directory)
     {
         //BASED ON GetCategoryByExtension
         return Directory.GetFiles(directory, "*.cs", SearchOption.AllDirectories).Length;
     }
 
-    public static int GetTotalShaderCount(string directory)
+    public int GetTotalShaderCount(string directory)
     {
         //BASED ON GetCategoryByExtension
         return Directory.GetFiles(directory, "*.shader", SearchOption.AllDirectories).Length;
     }
 
-    public static int GetTotalPrefabCount(string directory)
+    public int GetTotalPrefabCount(string directory)
     {
         //BASED ON GetCategoryByExtension
         return Directory.GetFiles(directory, "*.prefab", SearchOption.AllDirectories).Length;
     }
 
-    public static int GetTotal3DObjectCount(string directory)
+    public int GetTotal3DObjectCount(string directory)
     {
         //BASED ON GetCategoryByExtension
         return Directory.GetFiles(directory, "*.fbx", SearchOption.AllDirectories).Length;
     }
 
-    public static int GetTotalImageCount(string directory)
+    public int GetTotalImageCount(string directory)
     {
         //BASED ON GetCategoryByExtension
         return Directory.GetFiles(directory, "*.png", SearchOption.AllDirectories).Length +
@@ -81,7 +81,7 @@ public class ExtractionHelper
                Directory.GetFiles(directory, "*.psd", SearchOption.AllDirectories).Length;
     }
 
-    public static int GetTotalAudioCount(string directory)
+    public int GetTotalAudioCount(string directory)
     {
         //BASED ON GetCategoryByExtension
         return Directory.GetFiles(directory, "*.mp3", SearchOption.AllDirectories).Length +
@@ -89,44 +89,44 @@ public class ExtractionHelper
                Directory.GetFiles(directory, "*.ogg", SearchOption.AllDirectories).Length;
     }
 
-    public static int GetTotalAnimationCount(string directory)
+    public int GetTotalAnimationCount(string directory)
     {
         //BASED ON GetCategoryByExtension
         return Directory.GetFiles(directory, "*.anim", SearchOption.AllDirectories).Length;
     }
 
-    public static int GetTotalSceneCount(string directory)
+    public int GetTotalSceneCount(string directory)
     {
         //BASED ON GetCategoryByExtension
         return Directory.GetFiles(directory, "*.unity", SearchOption.AllDirectories).Length;
     }
 
-    public static int GetTotalMaterialCount(string directory)
+    public int GetTotalMaterialCount(string directory)
     {
         //BASED ON GetCategoryByExtension
         return Directory.GetFiles(directory, "*.mat", SearchOption.AllDirectories).Length;
     }
 
-    public static int GetTotalAssetCount(string directory)
+    public int GetTotalAssetCount(string directory)
     {
         //BASED ON GetCategoryByExtension
         return Directory.GetFiles(directory, "*.asset", SearchOption.AllDirectories).Length;
     }
 
-    public static int GetTotalControllerCount(string directory)
+    public int GetTotalControllerCount(string directory)
     {
         //BASED ON GetCategoryByExtension
         return Directory.GetFiles(directory, "*.controller", SearchOption.AllDirectories).Length;
     }
 
-    public static int GetTotalFontCount(string directory)
+    public int GetTotalFontCount(string directory)
     {
         //BASED ON GetCategoryByExtension
         return Directory.GetFiles(directory, "*.ttf", SearchOption.AllDirectories).Length +
                Directory.GetFiles(directory, "*.otf", SearchOption.AllDirectories).Length;
     }
 
-    public static int GetTotalConfigurationCount(string directory)
+    public int GetTotalConfigurationCount(string directory)
     {
         //BASED ON GetCategoryByExtension
         return Directory.GetFiles(directory, "*.meta", SearchOption.AllDirectories).Length +
@@ -135,7 +135,7 @@ public class ExtractionHelper
                Directory.GetFiles(directory, "*.yaml", SearchOption.AllDirectories).Length;
     }
 
-    public static int GetTotalDataCount(string directory)
+    public int GetTotalDataCount(string directory)
     {
         //BASED ON GetCategoryByExtension
         return Directory.GetFiles(directory, "*.json", SearchOption.AllDirectories).Length +
@@ -148,7 +148,7 @@ public class ExtractionHelper
     /// </summary>
     /// <param name="extension">The file extension.</param>
     /// <returns>The symbol icon.</returns>
-    public static string GetSymbolByExtension(string extension)
+    public string GetSymbolByExtension(string extension)
     {
         return extension switch
         {
@@ -184,7 +184,7 @@ public class ExtractionHelper
     /// </summary>
     /// <param name="extension">The file extension.</param>
     /// <returns>The category of the file.</returns>
-    public static string GetCategoryByExtension(string extension)
+    public string GetCategoryByExtension(string extension)
     {
         return extension switch
         {
