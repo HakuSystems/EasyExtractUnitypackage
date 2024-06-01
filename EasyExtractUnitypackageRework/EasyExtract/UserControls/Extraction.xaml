@@ -20,7 +20,7 @@
             <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
         <TabControl x:Name="Tabs" SelectionChanged="Tabs_OnSelectionChanged">
-            <TabItem>
+            <TabItem x:Name="ExtractionTab">
                 <TabItem.Header>
                     <StackPanel Orientation="Horizontal">
                         <ui:SymbolIcon Margin="0,0,6,0" Symbol="DocumentTextExtract24" />
@@ -272,7 +272,8 @@
                                    Appearance="Secondary"
                                    Click="DeleteSelectedBtn_OnClick"
                                    Icon="{ui:SymbolIcon Delete24}" Margin="5" />
-                        <ui:Button Content="Ignore Selected" x:Name="IgnoreSelectedBtn" Click="IgnoreSelectedBtn_OnClick" Icon="{ui:SymbolIcon Dismiss24}" Margin="5" />
+                        <ui:Button Content="Ignore Selected" x:Name="IgnoreSelectedBtn"
+                                   Click="IgnoreSelectedBtn_OnClick" Icon="{ui:SymbolIcon Dismiss24}" Margin="5" />
                         <ui:Button Content="Extract Selected Assets" Icon="{ui:SymbolIcon Save24}" Margin="5" />
                     </StackPanel>
                     <!-- Unity Package Enumeration End -->

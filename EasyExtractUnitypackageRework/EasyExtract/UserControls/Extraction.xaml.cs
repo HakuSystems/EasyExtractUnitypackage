@@ -43,6 +43,12 @@ public partial class Extraction : UserControl, INotifyPropertyChanged
     /// The boolean variable _isExtraction represents whether an extraction process is currently happening or not.
     private bool _isExtraction;
 
+    public Extraction()
+    {
+        InitializeComponent();
+        DataContext = this;
+    }
+
     /// <summary>
     ///     The ExtractionHelper class provides various helper methods for extracting information from directories.
     /// </summary>
@@ -52,12 +58,6 @@ public partial class Extraction : UserControl, INotifyPropertyChanged
     ///     Represents a class that handles the extraction of Unitypackages.
     /// </summary>
     private ExtractionHandler ExtractionHandler { get; } = new();
-
-    public Extraction()
-    {
-        InitializeComponent();
-        DataContext = this;
-    }
 
     /// <summary>
     ///     Represents the total number of extracted items in the extracted folder.
@@ -268,6 +268,7 @@ public partial class Extraction : UserControl, INotifyPropertyChanged
     /// <param name="e">The event data.</param>
     private async void Extraction_OnLoaded(object sender, RoutedEventArgs e)
     {
+        if (ExtractedUnitypackages.Count == 0) ExtractionTab.IsSelected = true;
         await CalculateScrollerHeightAsync();
         await UpdateDiscordPresenceState();
 
