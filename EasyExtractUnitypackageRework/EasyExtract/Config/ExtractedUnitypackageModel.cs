@@ -10,7 +10,7 @@ public class ExtractedUnitypackageModel : INotifyPropertyChanged
     private InfoBarSeverity detailsSeverity;
     private List<ExtractedFiles> subdirectoryItems = new();
     private string unitypackageDetails;
-    private bool isChecked;
+    private bool packageIsChecked;
     private DateTime unitypackageExtractedDate;
 
 
@@ -42,12 +42,12 @@ public class ExtractedUnitypackageModel : INotifyPropertyChanged
 
     public string UnitypackageTotalFileCountMessage => unitypackageTotalFileCountMessage;
 
-    public bool IsChecked
+    public bool PackageIsChecked
     {
-        get => isChecked;
+        get => packageIsChecked;
         set
         {
-            isChecked = value;
+            packageIsChecked = value;
             OnPropertyChanged();
         }
     }

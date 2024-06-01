@@ -545,23 +545,31 @@ public partial class Extraction : UserControl, INotifyPropertyChanged
         });
     }
 
-    //todo: implement delete selected files for Whole Unitypackage
-    //currently only works with Files only.
     private async void DeleteSelectedBtn_OnClick(object sender, RoutedEventArgs e)
     {
         await Dispatcher.InvokeAsync(async () =>
         {
-            if (ExtractedUnitypackages.SelectMany(x => x.SubdirectoryItems).All(x => !x.IsChecked)) return;
+            // Delete selected Unitypackages
+            var selectedUnitypackages = ExtractedUnitypackages.Where(x => x.PackageIsChecked).ToList();
+            foreach (var unitypackage in selectedUnitypackages)
+            {
+                Directory.Delete(unitypackage.UnitypackagePath, true);
+                ExtractedUnitypackages.Remove(unitypackage);
+            }
+
+            // Delete selected items within Unitypackages
             var selectedItems = ExtractedUnitypackages.SelectMany(x => x.SubdirectoryItems)
                 .Where(x => x.IsChecked).ToList();
             foreach (var selectedItem in selectedItems)
             {
                 File.Delete(selectedItem.FilePath);
-                ExtractedUnitypackages.SelectMany(x => x.SubdirectoryItems).ToList().Remove(selectedItem); 
+                var parentUnitypackage = ExtractedUnitypackages.First(x => x.SubdirectoryItems.Contains(selectedItem));
+                parentUnitypackage.SubdirectoryItems.Remove(selectedItem);
             }
+            // Update UI
             Dispatcher.Invoke(() =>
             {
-                DeleteSelectedBtn.Content = $"Deleted {selectedItems.Count} Files";
+                DeleteSelectedBtn.Content = $"Deleted {selectedUnitypackages.Count} Unitypackages and {selectedItems.Count} Files";
                 DeleteSelectedBtn.Appearance = ControlAppearance.Success;
                 DeleteSelectedBtn.Icon = new SymbolIcon(SymbolRegular.Checkmark24);
             });
@@ -572,9 +580,46 @@ public partial class Extraction : UserControl, INotifyPropertyChanged
                 DeleteSelectedBtn.Appearance = ControlAppearance.Secondary;
                 DeleteSelectedBtn.Icon = new SymbolIcon(SymbolRegular.Delete24);
             });
-            
 
+            await UpdateExtractedFiles();
+        });
+    }
 
+    private async void IgnoreSelectedBtn_OnClick(object sender, RoutedEventArgs e)
+    {
+        await Dispatcher.InvokeAsync(async () =>
+        {
+            //PackageIsChecked
+            if (ExtractedUnitypackages.All(x => !x.PackageIsChecked)) return;
+            var selectedItems = ExtractedUnitypackages.Where(x => x.PackageIsChecked).ToList();
+            foreach (var selectedItem in selectedItems)
+            {
+                IgnoredUnitypackages.Add(new IgnoredUnitypackageModel
+                {
+                    UnityPackageName = selectedItem.UnitypackageName,
+                    Reason = "Manually Ignored"
+                });
+                ExtractedUnitypackages.Remove(selectedItem);
+                //add to ignored list
+                await AddToIgnoredUnitypackagesAsync(new SearchEverythingModel
+                {
+                    UnityPackageName = selectedItem.UnitypackageName,
+                    UnityPackagePath = selectedItem.UnitypackagePath
+                }, "Manually Ignored");
+            }
+            Dispatcher.Invoke(() =>
+            {
+                IgnoreSelectedBtn.Content = $"Ignored {selectedItems.Count} Unitypackages";
+                IgnoreSelectedBtn.Appearance = ControlAppearance.Success;
+                IgnoreSelectedBtn.Icon = new SymbolIcon(SymbolRegular.Checkmark24);
+            });
+            await Task.Delay(1000); //wait for a second
+            Dispatcher.Invoke(() =>
+            {
+                IgnoreSelectedBtn.Content = "Ignore Selected";
+                IgnoreSelectedBtn.Appearance = ControlAppearance.Secondary;
+                IgnoreSelectedBtn.Icon = new SymbolIcon(SymbolRegular.Dismiss24);
+            });
             await UpdateExtractedFiles();
         });
     }
