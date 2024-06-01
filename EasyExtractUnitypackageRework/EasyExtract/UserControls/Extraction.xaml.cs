@@ -18,6 +18,7 @@ namespace EasyExtract.UserControls;
 
 public partial class Extraction : UserControl, INotifyPropertyChanged
 {
+    // Constants and Resource URIs
     private const string EasyExtractPreview = "EASYEXTRACTPREVIEW.png";
 
     private static readonly Uri IdleAnimationUri =
@@ -25,11 +26,12 @@ public partial class Extraction : UserControl, INotifyPropertyChanged
 
     private static readonly Uri ExtractionAnimationUri =
         new("pack://application:,,,/EasyExtract;component/Resources/Gifs/IconAnim.gif");
-
+    // Data Properties for UI Binding
     private ObservableCollection<ExtractedUnitypackageModel> _extractedUnitypackages = new();
 
     private bool _isExtraction;
 
+    // Helper Classes
     private ExtractionHelper ExtractionHelper { get; } = new();
     private ExtractionHandler ExtractionHandler { get; } = new();
 
@@ -68,17 +70,21 @@ public partial class Extraction : UserControl, INotifyPropertyChanged
     private static List<IgnoredUnitypackageModel>? IgnoredUnitypackages { get; } = new();
     public event PropertyChangedEventHandler PropertyChanged;
 
-
+    // Extracted Files Management Methods
     private async Task PopulateExtractedFilesListAsync()
     {
+        // Populate the list of extracted Unity packages from the extracted folder
+        // Get the directories in the extraction path
         var directories = Directory.GetDirectories(ConfigModel.LastExtractedPath);
         foreach (var directory in directories)
         {
+            // Calculate total size and create a model for the unity package.
             var totalSizeInBytes = await Task.Run(async () => await CalculateDirectoryTotalSizeInBytesAsync(directory));
             var unitypackage =
                 await Task.Run(async () => await CreateUnityPackageModelAsync(directory, totalSizeInBytes));
+            // Add subdirectory items to the package model.
             await Task.Run(async () => await AddSubdirectoryItemsToUnityPackageAsync(unitypackage, directory));
-            // Check if a unitypackage with the same name already exists in the collection
+            // Avoid duplicate packages.
             if (ExtractedUnitypackages.All(u => u.UnitypackageName != unitypackage.UnitypackageName))
                 Dispatcher.Invoke(() => { ExtractedUnitypackages.Add(unitypackage); });
         }
@@ -185,9 +191,10 @@ public partial class Extraction : UserControl, INotifyPropertyChanged
     {
         PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
     }
-
+    // UI Events and Methods
     private async void Extraction_OnLoaded(object sender, RoutedEventArgs e)
     {
+        // Calculate scroller height, update Discord presence, queue header, extraction animation, info badges, and load config
         await CalculateScrollerHeightAsync();
         await UpdateDiscordPresenceState();
 
@@ -535,6 +542,7 @@ public partial class Extraction : UserControl, INotifyPropertyChanged
     {
         await Dispatcher.InvokeAsync(async () =>
         {
+            // Filter extracted Unitypackages
             var filter = SearchBar.Text.ToLower();
             if (string.IsNullOrEmpty(filter))
                 await UpdateExtractedFiles();
