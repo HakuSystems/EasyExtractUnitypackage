@@ -62,7 +62,7 @@
                                             <StackPanel HorizontalAlignment="Stretch">
                                                 <ui:TextBlock
                                                     FontTypography="BodyStrong"
-                                                    Text="{Binding UnityPackageName}"
+                                                    Text="{Binding IgnoredUnityPackageName}"
                                                     TextWrapping="WrapWithOverflow" />
                                                 <ui:TextBlock
                                                     Appearance="Secondary"
@@ -323,11 +323,11 @@
                                             <StackPanel HorizontalAlignment="Stretch">
                                                 <ui:TextBlock
                                                     FontTypography="BodyStrong"
-                                                    Text="{Binding UnityPackageName}"
+                                                    Text="{Binding IgnoredUnityPackageName}"
                                                     TextWrapping="WrapWithOverflow" />
                                                 <ui:TextBlock
                                                     Appearance="Secondary"
-                                                    Text="{Binding Reason}"
+                                                    Text="{Binding IgnoredReason}"
                                                     Opacity="0.5"
                                                     HorizontalAlignment="Left"
                                                     MaxWidth="500"

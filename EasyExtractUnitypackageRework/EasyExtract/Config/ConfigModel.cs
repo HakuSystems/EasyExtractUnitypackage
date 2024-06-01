@@ -26,5 +26,6 @@ public class ConfigModel
     public int TotalExtracted { get; set; } = 0;
     public int TotalFilesExtracted { get; set; } = 0;
 
-    public ObservableCollection<HistoryModel> History { get; set; }
+    public ObservableCollection<HistoryModel> History { get; set; } = new();
+    public ObservableCollection<IgnoredUnitypackageModel> IgnoredUnitypackages { get; set; } = new();
 }

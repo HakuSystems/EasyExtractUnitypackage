@@ -120,7 +120,7 @@ public partial class Extraction : UserControl, INotifyPropertyChanged
             // Add subdirectory items to the package model.
             await Task.Run(async () => await AddSubdirectoryItemsToUnityPackageAsync(unitypackage, directory));
             // Avoid duplicate packages by checking if it already exists
-            Dispatcher.Invoke(() =>
+            Dispatcher.InvokeAsync(() =>
             {
                 if (ExtractedUnitypackages.All(u => u.UnitypackageName != unitypackage.UnitypackageName))
                     ExtractedUnitypackages.Add(unitypackage);
@@ -285,11 +285,64 @@ public partial class Extraction : UserControl, INotifyPropertyChanged
             ConfigHelper.UpdateConfigAsync(config);
         });
         await UpdateExtractedFiles();
+        await UpdateIgnoredConfigListAsync();
         if (ExtractedUnitypackages.Count == 0)
             ExtractionTab.IsSelected = true;
         else
             ManageExtractedTab.IsSelected = true;
     }
+
+    private async Task UpdateIgnoredConfigListAsync()
+    {
+        var config = await ConfigHelper.LoadConfigAsync();
+        if (config == null) return;
+
+        var ignoredAppDataDirectory = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
+            "EasyExtract", "IgnoredUnitypackages");
+        Directory.CreateDirectory(ignoredAppDataDirectory);
+
+        var directoryNames = Directory.GetDirectories(ignoredAppDataDirectory).Select(Path.GetFileName).ToList();
+
+        var packagesToRemove = config.IgnoredUnitypackages
+            .Where(package => !directoryNames.Contains(package.IgnoredUnityPackageName)).ToList();
+
+        foreach (var packageToRemove in packagesToRemove) config.IgnoredUnitypackages.Remove(packageToRemove);
+        if (packagesToRemove.Any()) await ConfigHelper.UpdateConfigAsync(config);
+
+        // Update UI with existing ignored packages
+        Dispatcher.InvokeAsync(() =>
+        {
+            IgnoredUnitypackages.Clear();
+
+            foreach (var ignoredUnitypackage in config.IgnoredUnitypackages)
+                if (directoryNames.Contains(ignoredUnitypackage.IgnoredUnityPackageName))
+                    IgnoredUnitypackages.Add(ignoredUnitypackage);
+        });
+
+        // Handle directories not listed in the config
+        var packagesToAdd = new List<IgnoredUnitypackageModel>();
+        foreach (var newIgnoredPackage in from directory in directoryNames
+                 where config.IgnoredUnitypackages.All(p => p.IgnoredUnityPackageName != directory)
+                 select new IgnoredUnitypackageModel
+                 {
+                     IgnoredUnityPackageName = directory,
+                     IgnoredReason = "Manually ignored"
+                 })
+        {
+            packagesToAdd.Add(newIgnoredPackage);
+            config.IgnoredUnitypackages.Add(newIgnoredPackage);
+        }
+
+        // Update the config file if there were new packages added
+        if (packagesToAdd.Any()) await ConfigHelper.UpdateConfigAsync(config);
+
+        // Update the UI with newly added packages
+        Dispatcher.InvokeAsync(() =>
+        {
+            foreach (var newPackage in packagesToAdd) IgnoredUnitypackages.Add(newPackage);
+        });
+    }
+
 
     /// <summary>
     ///     Asynchronously calculates the height of the scroller in the Extraction user control.
@@ -509,12 +562,28 @@ public partial class Extraction : UserControl, INotifyPropertyChanged
         {
             IgnoredUnitypackages.Add(new IgnoredUnitypackageModel
             {
-                UnityPackageName = unitypackage.UnityPackageName,
-                Reason = reason
+                IgnoredUnityPackageName = unitypackage.UnityPackageName,
+                IgnoredReason = reason
             });
             await MoveIgnoredUnitypackageAsync(unitypackage);
+            await CreateIgnoredConfigFileAsync(unitypackage, reason);
             await UpdateInfoBadgesAsync();
         }).Task;
+    }
+
+    private async Task CreateIgnoredConfigFileAsync(SearchEverythingModel unitypackage, string reason)
+    {
+        await ConfigHelper.LoadConfigAsync().ContinueWith(task =>
+        {
+            var config = task.Result;
+            if (config == null) return;
+            config.IgnoredUnitypackages.Add(new IgnoredUnitypackageModel
+            {
+                IgnoredUnityPackageName = unitypackage.UnityPackageName,
+                IgnoredReason = reason
+            });
+            ConfigHelper.UpdateConfigAsync(config);
+        });
     }
 
     private async Task MoveIgnoredUnitypackageAsync(SearchEverythingModel unitypackage)
@@ -689,7 +758,7 @@ public partial class Extraction : UserControl, INotifyPropertyChanged
 
     private async Task UpdateExtractedFiles()
     {
-        Dispatcher.Invoke(() =>
+        Dispatcher.InvokeAsync(() =>
         {
             ExtractedUnitypackages.Clear();
             CheckForDuplicateExtractedFiles();
