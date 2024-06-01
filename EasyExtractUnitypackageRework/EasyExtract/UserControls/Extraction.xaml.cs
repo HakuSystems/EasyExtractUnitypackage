@@ -566,10 +566,12 @@ public partial class Extraction : UserControl, INotifyPropertyChanged
                 var parentUnitypackage = ExtractedUnitypackages.First(x => x.SubdirectoryItems.Contains(selectedItem));
                 parentUnitypackage.SubdirectoryItems.Remove(selectedItem);
             }
+
             // Update UI
             Dispatcher.Invoke(() =>
             {
-                DeleteSelectedBtn.Content = $"Deleted {selectedUnitypackages.Count} Unitypackages and {selectedItems.Count} Files";
+                DeleteSelectedBtn.Content =
+                    $"Deleted {selectedUnitypackages.Count} Unitypackages and {selectedItems.Count} Files";
                 DeleteSelectedBtn.Appearance = ControlAppearance.Success;
                 DeleteSelectedBtn.Icon = new SymbolIcon(SymbolRegular.Checkmark24);
             });
@@ -589,27 +591,28 @@ public partial class Extraction : UserControl, INotifyPropertyChanged
     {
         await Dispatcher.InvokeAsync(async () =>
         {
-            //PackageIsChecked
-            if (ExtractedUnitypackages.All(x => !x.PackageIsChecked)) return;
-            var selectedItems = ExtractedUnitypackages.Where(x => x.PackageIsChecked).ToList();
-            foreach (var selectedItem in selectedItems)
+            // Ignore selected Unitypackage
+            var selectedUnitypackages = ExtractedUnitypackages.Where(x => x.PackageIsChecked).ToList();
+            foreach (var unitypackage in selectedUnitypackages)
             {
                 IgnoredUnitypackages.Add(new IgnoredUnitypackageModel
                 {
-                    UnityPackageName = selectedItem.UnitypackageName,
+                    UnityPackageName = unitypackage.UnitypackageName,
                     Reason = "Manually Ignored"
                 });
-                ExtractedUnitypackages.Remove(selectedItem);
-                //add to ignored list
+                ExtractedUnitypackages.Remove(unitypackage);
+                // Add to ignored list
                 await AddToIgnoredUnitypackagesAsync(new SearchEverythingModel
                 {
-                    UnityPackageName = selectedItem.UnitypackageName,
-                    UnityPackagePath = selectedItem.UnitypackagePath
+                    UnityPackageName = unitypackage.UnitypackageName,
+                    UnityPackagePath = unitypackage.UnitypackagePath
                 }, "Manually Ignored");
             }
+
+            // Update UI
             Dispatcher.Invoke(() =>
             {
-                IgnoreSelectedBtn.Content = $"Ignored {selectedItems.Count} Unitypackages";
+                IgnoreSelectedBtn.Content = $"Ignored {selectedUnitypackages.Count} Unitypackages";
                 IgnoreSelectedBtn.Appearance = ControlAppearance.Success;
                 IgnoreSelectedBtn.Icon = new SymbolIcon(SymbolRegular.Checkmark24);
             });
@@ -620,6 +623,7 @@ public partial class Extraction : UserControl, INotifyPropertyChanged
                 IgnoreSelectedBtn.Appearance = ControlAppearance.Secondary;
                 IgnoreSelectedBtn.Icon = new SymbolIcon(SymbolRegular.Dismiss24);
             });
+
             await UpdateExtractedFiles();
         });
     }
