@@ -64,7 +64,7 @@ public partial class History : UserControl, INotifyPropertyChanged
         var isDiscordEnabled = false;
         try
         {
-            isDiscordEnabled = (await ConfigHelper.LoadConfig()).DiscordRpc;
+            isDiscordEnabled = (await ConfigHelper.LoadConfigAsync()).DiscordRpc;
         }
         catch (Exception exception)
         {
@@ -90,7 +90,7 @@ public partial class History : UserControl, INotifyPropertyChanged
 
     private async Task LoadHistory()
     {
-        Config = await ConfigHelper.LoadConfig();
+        Config = await ConfigHelper.LoadConfigAsync();
         if (Config.History == null || Config.History.Count == 0)
         {
             ClearHistoryButton.Visibility = Visibility.Collapsed;
@@ -119,7 +119,7 @@ public partial class History : UserControl, INotifyPropertyChanged
         if (sender is not Button button || button.DataContext is not HistoryModel history) return;
         HistoryList.Remove(history);
         Config!.History.Remove(history);
-        await ConfigHelper.UpdateConfig(Config);
+        await ConfigHelper.UpdateConfigAsync(Config);
         if (HistoryList.Count == 0) NoHistoryLabel.Visibility = Visibility.Visible;
     }
 
@@ -132,6 +132,6 @@ public partial class History : UserControl, INotifyPropertyChanged
         TotalExtracted = 0;
         TotalFilesExtracted = 0;
         NoHistoryLabel.Visibility = Visibility.Visible;
-        await ConfigHelper.UpdateConfig(Config);
+        await ConfigHelper.UpdateConfigAsync(Config);
     }
 }

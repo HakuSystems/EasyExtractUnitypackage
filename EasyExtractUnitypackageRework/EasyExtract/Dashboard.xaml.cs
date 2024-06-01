@@ -46,7 +46,7 @@ public partial class Dashboard : FluentWindow
 
     private async void Dashboard_OnLoaded(object sender, RoutedEventArgs e)
     {
-        var config = await ConfigHelper.LoadConfig();
+        var config = await ConfigHelper.LoadConfigAsync();
         var theme = config.ApplicationTheme;
         switch (theme)
         {
@@ -76,7 +76,7 @@ public partial class Dashboard : FluentWindow
             case true:
                 NavView.Navigate(typeof(About));
                 config.IsFirstRun = false;
-                await ConfigHelper.UpdateConfig(config);
+                await ConfigHelper.UpdateConfigAsync(config);
                 break;
             default:
                 NavView.Navigate(ContentFrame.GetType());

@@ -41,7 +41,7 @@ public partial class About : UserControl
         var isDiscordEnabled = false;
         try
         {
-            isDiscordEnabled = (await ConfigHelper.LoadConfig()).DiscordRpc;
+            isDiscordEnabled = (await ConfigHelper.LoadConfigAsync()).DiscordRpc;
         }
         catch (Exception exception)
         {

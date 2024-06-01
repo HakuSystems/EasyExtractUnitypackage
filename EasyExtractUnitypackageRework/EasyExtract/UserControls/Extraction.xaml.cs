@@ -274,12 +274,12 @@ public partial class Extraction : UserControl, INotifyPropertyChanged
         await UpdateQueueHeaderAsync();
         await ChangeExtractionAnimationAsync();
         await UpdateInfoBadgesAsync();
-        await ConfigHelper.LoadConfig().ContinueWith(task =>
+        await ConfigHelper.LoadConfigAsync().ContinueWith(task =>
         {
             var config = task.Result;
             if (config == null) return;
             Dispatcher.Invoke(() => { CategoryStructureBool.IsChecked = config.ExtractedCategoryStructure; });
-            ConfigHelper.UpdateConfig(config);
+            ConfigHelper.UpdateConfigAsync(config);
         });
         UpdateExtractedFiles();
     }
@@ -336,7 +336,7 @@ public partial class Extraction : UserControl, INotifyPropertyChanged
         var isDiscordEnabled = false;
         try
         {
-            isDiscordEnabled = (await ConfigHelper.LoadConfig()).DiscordRpc;
+            isDiscordEnabled = (await ConfigHelper.LoadConfigAsync()).DiscordRpc;
         }
         catch (Exception exception)
         {
@@ -640,24 +640,24 @@ public partial class Extraction : UserControl, INotifyPropertyChanged
 
     private async void CategoryStructureBool_OnChecked(object sender, RoutedEventArgs e)
     {
-        await ConfigHelper.LoadConfig().ContinueWith(task =>
+        await ConfigHelper.LoadConfigAsync().ContinueWith(task =>
         {
             var config = task.Result;
             if (config == null) return;
             config.ExtractedCategoryStructure = true;
-            ConfigHelper.UpdateConfig(config);
+            ConfigHelper.UpdateConfigAsync(config);
         });
         UpdateExtractedFiles();
     }
 
     private async void CategoryStructureBool_OnUnchecked(object sender, RoutedEventArgs e)
     {
-        await ConfigHelper.LoadConfig().ContinueWith(task =>
+        await ConfigHelper.LoadConfigAsync().ContinueWith(task =>
         {
             var config = task.Result;
             if (config == null) return;
             config.ExtractedCategoryStructure = false;
-            ConfigHelper.UpdateConfig(config);
+            ConfigHelper.UpdateConfigAsync(config);
         });
 
         UpdateExtractedFiles();

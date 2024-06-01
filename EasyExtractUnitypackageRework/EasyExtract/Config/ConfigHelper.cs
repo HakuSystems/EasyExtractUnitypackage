@@ -1,4 +1,3 @@
-using System.Collections.ObjectModel;
 using System.IO;
 using Newtonsoft.Json;
 
@@ -12,7 +11,7 @@ public class ConfigHelper
 
     private static readonly SemaphoreSlim _semaphore = new(1, 1);
 
-    private static async Task CreateConfig()
+    private static async Task CreateConfigAsync()
     {
         Directory.CreateDirectory(Path.GetDirectoryName(_configPath));
         Directory.CreateDirectory(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
@@ -23,12 +22,12 @@ public class ConfigHelper
         await sw.WriteAsync(JsonConvert.SerializeObject(new ConfigModel(), Formatting.Indented));
     }
 
-    public static async Task<ConfigModel?> LoadConfig()
+    public static async Task<ConfigModel?> LoadConfigAsync()
     {
         await _semaphore.WaitAsync();
         try
         {
-            if (!File.Exists(_configPath)) await CreateConfig();
+            if (!File.Exists(_configPath)) await CreateConfigAsync();
             using (var sr = new StreamReader(_configPath))
             {
                 var fileContents = await sr.ReadToEndAsync();
@@ -41,12 +40,12 @@ public class ConfigHelper
         }
     }
 
-    public static async Task UpdateConfig(ConfigModel? config)
+    public static async Task UpdateConfigAsync(ConfigModel? config)
     {
         await _semaphore.WaitAsync();
         try
         {
-            if (!File.Exists(_configPath)) await CreateConfig();
+            if (!File.Exists(_configPath)) await CreateConfigAsync();
             using (var sw = new StreamWriter(_configPath, false))
             {
                 var json = JsonConvert.SerializeObject(config, Formatting.Indented);
@@ -57,20 +56,5 @@ public class ConfigHelper
         {
             _semaphore.Release();
         }
-    }
-
-    public static async Task AddToHistory(HistoryModel history)
-    {
-        var config = await LoadConfig();
-        if (config == null) return;
-        config.History ??= new ObservableCollection<HistoryModel>();
-        config.History.Add(history);
-        await UpdateConfig(config);
-    }
-
-    public static Task ResetConfig()
-    {
-        if (File.Exists(_configPath)) File.Delete(_configPath);
-        return Task.CompletedTask;
     }
 }

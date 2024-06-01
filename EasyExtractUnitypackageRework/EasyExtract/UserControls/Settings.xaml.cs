@@ -23,23 +23,23 @@ public partial class Settings : UserControl
         if (result != true) return;
         DefaultTempPath.Text = folderDialog.FolderName;
         _configTempPath = folderDialog.FolderName;
-        await ConfigHelper.LoadConfig().ContinueWith(task =>
+        await ConfigHelper.LoadConfigAsync().ContinueWith(task =>
         {
             var config = task.Result;
             if (config == null) return;
             ConfigModel.DefaultTempPath = folderDialog.FolderName;
-            ConfigHelper.UpdateConfig(config);
+            ConfigHelper.UpdateConfigAsync(config);
         });
     }
 
     private async void DiscordRPCToggle_OnChecked(object sender, RoutedEventArgs e)
     {
-        await ConfigHelper.LoadConfig().ContinueWith(task =>
+        await ConfigHelper.LoadConfigAsync().ContinueWith(task =>
         {
             var config = task.Result;
             if (config == null) return;
             config.DiscordRpc = true;
-            ConfigHelper.UpdateConfig(config);
+            ConfigHelper.UpdateConfigAsync(config);
         });
         DiscordRpcToggle.Content = "On";
         DiscordRpcManager.Instance.DiscordStart();
@@ -47,12 +47,12 @@ public partial class Settings : UserControl
 
     private async void DiscordRPCToggle_OnUnchecked(object sender, RoutedEventArgs e)
     {
-        await ConfigHelper.LoadConfig().ContinueWith(task =>
+        await ConfigHelper.LoadConfigAsync().ContinueWith(task =>
         {
             var config = task.Result;
             if (config == null) return;
             config.DiscordRpc = false;
-            ConfigHelper.UpdateConfig(config);
+            ConfigHelper.UpdateConfigAsync(config);
         });
         DiscordRpcToggle.Content = "Off";
         DiscordRpcManager.Instance.Dispose();
@@ -60,74 +60,74 @@ public partial class Settings : UserControl
 
     private async void WindowsNotificationToggle_OnChecked(object sender, RoutedEventArgs e)
     {
-        await ConfigHelper.LoadConfig().ContinueWith(task =>
+        await ConfigHelper.LoadConfigAsync().ContinueWith(task =>
         {
             var config = task.Result;
             if (config == null) return;
             config.WindowsNotification = true;
-            ConfigHelper.UpdateConfig(config);
+            ConfigHelper.UpdateConfigAsync(config);
         });
         WindowsNotificationToggle.Content = "On";
     }
 
     private async void WindowsNotificationToggle_OnUnchecked(object sender, RoutedEventArgs e)
     {
-        await ConfigHelper.LoadConfig().ContinueWith(task =>
+        await ConfigHelper.LoadConfigAsync().ContinueWith(task =>
         {
             var config = task.Result;
             if (config == null) return;
             config.WindowsNotification = false;
-            ConfigHelper.UpdateConfig(config);
+            ConfigHelper.UpdateConfigAsync(config);
         });
         WindowsNotificationToggle.Content = "Off";
     }
 
     private async void UpdateCheckToggle_OnChecked(object sender, RoutedEventArgs e)
     {
-        await ConfigHelper.LoadConfig().ContinueWith(task =>
+        await ConfigHelper.LoadConfigAsync().ContinueWith(task =>
         {
             var config = task.Result;
             if (config == null) return;
             config.AutoUpdate = true;
-            ConfigHelper.UpdateConfig(config);
+            ConfigHelper.UpdateConfigAsync(config);
         });
         UpdateCheckToggle.Content = "On";
     }
 
     private async void UpdateCheckToggle_OnUnchecked(object sender, RoutedEventArgs e)
     {
-        await ConfigHelper.LoadConfig().ContinueWith(task =>
+        await ConfigHelper.LoadConfigAsync().ContinueWith(task =>
         {
             var config = task.Result;
             if (config == null) return;
             config.AutoUpdate = false;
-            ConfigHelper.UpdateConfig(config);
+            ConfigHelper.UpdateConfigAsync(config);
         });
         UpdateCheckToggle.Content = "Off";
     }
 
     private async void UwUModeToggle_OnChecked(object sender, RoutedEventArgs e)
     {
-        await ConfigHelper.LoadConfig().ContinueWith(task =>
+        await ConfigHelper.LoadConfigAsync().ContinueWith(task =>
         {
             var config = task.Result;
             if (config == null) return;
             config.UwUModeActive = true;
             config.AppTitle = "EasyExtractUwUnitypackage";
-            ConfigHelper.UpdateConfig(config);
+            ConfigHelper.UpdateConfigAsync(config);
         });
         UwUModeToggle.Content = "On";
     }
 
     private async void UwUModeToggle_OnUnchecked(object sender, RoutedEventArgs e)
     {
-        await ConfigHelper.LoadConfig().ContinueWith(task =>
+        await ConfigHelper.LoadConfigAsync().ContinueWith(task =>
         {
             var config = task.Result;
             if (config == null) return;
             config.UwUModeActive = false;
             config.AppTitle = "EasyExtractUnitypackage";
-            ConfigHelper.UpdateConfig(config);
+            ConfigHelper.UpdateConfigAsync(config);
         });
         UwUModeToggle.Content = "Off";
         var window = Window.GetWindow(this);
@@ -164,7 +164,7 @@ public partial class Settings : UserControl
 
         DefaultTempPath.Text = _configTempPath;
 
-        await ConfigHelper.LoadConfig().ContinueWith(task =>
+        await ConfigHelper.LoadConfigAsync().ContinueWith(task =>
         {
             var config = task.Result;
             if (config == null) return;
@@ -186,12 +186,12 @@ public partial class Settings : UserControl
 
                 _configTempPath = ConfigModel.DefaultTempPath;
             });
-            ConfigHelper.UpdateConfig(config);
+            ConfigHelper.UpdateConfigAsync(config);
         });
         var isDiscordEnabled = false;
         try
         {
-            isDiscordEnabled = (await ConfigHelper.LoadConfig()).DiscordRpc;
+            isDiscordEnabled = (await ConfigHelper.LoadConfigAsync()).DiscordRpc;
         }
         catch (Exception exception)
         {
@@ -247,7 +247,7 @@ public partial class Settings : UserControl
     {
         var currentSelection = ThemeComboBox.SelectedIndex;
         //1 = dark, 2 = light, 3 = high contrast
-        await ConfigHelper.LoadConfig().ContinueWith(task =>
+        await ConfigHelper.LoadConfigAsync().ContinueWith(task =>
         {
             var config = task.Result;
             if (config == null) return;
@@ -258,7 +258,7 @@ public partial class Settings : UserControl
                 2 => ApplicationTheme.HighContrast,
                 _ => ApplicationTheme.Dark
             };
-            ConfigHelper.UpdateConfig(config);
+            ConfigHelper.UpdateConfigAsync(config);
         });
         switch (currentSelection)
         {

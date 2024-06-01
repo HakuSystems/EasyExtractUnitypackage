@@ -1,5 +1,6 @@
 ﻿using System.Windows;
 using System.Windows.Threading;
+using EasyExtract.Config;
 using EasyExtract.Discord;
 
 namespace EasyExtract;
@@ -14,9 +15,11 @@ public partial class MainWindow : Window
         InitializeComponent();
     }
 
-    private void AnimationBehavior_OnLoaded(object sender, RoutedEventArgs e)
+    private async void AnimationBehavior_OnLoaded(object sender, RoutedEventArgs e)
     {
         DiscordRpcManager.Instance.DiscordStart();
+        // Load the Config
+        await ConfigHelper.LoadConfigAsync();
 
         var timer = new DispatcherTimer();
         timer.Interval = TimeSpan.FromSeconds(5);

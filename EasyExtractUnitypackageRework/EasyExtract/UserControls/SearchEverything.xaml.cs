@@ -73,7 +73,7 @@ public partial class SearchEverything : UserControl, INotifyPropertyChanged
         var isDiscordEnabled = false;
         try
         {
-            isDiscordEnabled = (await ConfigHelper.LoadConfig()).DiscordRpc;
+            isDiscordEnabled = (await ConfigHelper.LoadConfigAsync()).DiscordRpc;
         }
         catch (Exception exception)
         {
