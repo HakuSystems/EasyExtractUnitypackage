@@ -99,7 +99,7 @@ public partial class Extraction : UserControl, INotifyPropertyChanged
     /// <summary>
     ///     Gets or sets the list of ignored Unitypackages.
     /// </summary>
-    private static List<IgnoredUnitypackageModel>? IgnoredUnitypackages { get; } = new();
+    private static ObservableCollection<IgnoredUnitypackageModel> IgnoredUnitypackages { get; } = new();
 
     public event PropertyChangedEventHandler PropertyChanged;
 
@@ -119,9 +119,12 @@ public partial class Extraction : UserControl, INotifyPropertyChanged
                 await Task.Run(async () => await CreateUnityPackageModelAsync(directory, totalSizeInBytes));
             // Add subdirectory items to the package model.
             await Task.Run(async () => await AddSubdirectoryItemsToUnityPackageAsync(unitypackage, directory));
-            // Avoid duplicate packages.
-            if (ExtractedUnitypackages.All(u => u.UnitypackageName != unitypackage.UnitypackageName))
-                Dispatcher.InvokeAsync(() => { ExtractedUnitypackages.Add(unitypackage); });
+            // Avoid duplicate packages by checking if it already exists
+            Dispatcher.Invoke(() =>
+            {
+                if (ExtractedUnitypackages.All(u => u.UnitypackageName != unitypackage.UnitypackageName))
+                    ExtractedUnitypackages.Add(unitypackage);
+            });
         }
     }
 
@@ -268,7 +271,6 @@ public partial class Extraction : UserControl, INotifyPropertyChanged
     /// <param name="e">The event data.</param>
     private async void Extraction_OnLoaded(object sender, RoutedEventArgs e)
     {
-        if (ExtractedUnitypackages.Count == 0) ExtractionTab.IsSelected = true;
         await CalculateScrollerHeightAsync();
         await UpdateDiscordPresenceState();
 
@@ -282,7 +284,11 @@ public partial class Extraction : UserControl, INotifyPropertyChanged
             Dispatcher.Invoke(() => { CategoryStructureBool.IsChecked = config.ExtractedCategoryStructure; });
             ConfigHelper.UpdateConfigAsync(config);
         });
-        UpdateExtractedFiles();
+        await UpdateExtractedFiles();
+        if (ExtractedUnitypackages.Count == 0)
+            ExtractionTab.IsSelected = true;
+        else
+            ManageExtractedTab.IsSelected = true;
     }
 
     /// <summary>
@@ -499,16 +505,33 @@ public partial class Extraction : UserControl, INotifyPropertyChanged
     /// <returns>A <see cref="Task" /> representing the asynchronous operation.</returns>
     private Task AddToIgnoredUnitypackagesAsync(SearchEverythingModel unitypackage, string reason)
     {
-        return Task.Run(async () =>
+        return Dispatcher.InvokeAsync(async () =>
         {
             IgnoredUnitypackages.Add(new IgnoredUnitypackageModel
             {
                 UnityPackageName = unitypackage.UnityPackageName,
                 Reason = reason
             });
+            await MoveIgnoredUnitypackageAsync(unitypackage);
             await UpdateInfoBadgesAsync();
-        });
+        }).Task;
     }
+
+    private async Task MoveIgnoredUnitypackageAsync(SearchEverythingModel unitypackage)
+    {
+        var ignoredAppDataDirectory = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
+            "EasyExtract", "IgnoredUnitypackages");
+        if (!Directory.Exists(ignoredAppDataDirectory)) Directory.CreateDirectory(ignoredAppDataDirectory);
+
+        var ignoredUnitypackagePath = Path.Combine(ignoredAppDataDirectory, unitypackage.UnityPackageName);
+
+        // Check if the destination already exists and delete it if it does
+        if (Directory.Exists(ignoredUnitypackagePath) || File.Exists(ignoredUnitypackagePath))
+            Directory.Delete(ignoredUnitypackagePath, true);
+
+        await Task.Run(() => Directory.Move(unitypackage.UnityPackagePath, ignoredUnitypackagePath));
+    }
+
 
     /// <summary>
     ///     Updates the extraction progress in the status bar.
@@ -560,7 +583,7 @@ public partial class Extraction : UserControl, INotifyPropertyChanged
                 StatusBarDetailsTxt.Visibility = Visibility.Collapsed;
                 await ChangeExtractionAnimationAsync().ConfigureAwait(false);
                 _isExtraction = false;
-                UpdateExtractedFiles();
+                await UpdateExtractedFiles();
                 StatusBar.Visibility = Visibility.Collapsed;
             });
             return Task.CompletedTask;
@@ -635,7 +658,7 @@ public partial class Extraction : UserControl, INotifyPropertyChanged
         //reset Extraction to normal
         await ChangeExtractionAnimationAsync();
         _isExtraction = false;
-        UpdateExtractedFiles();
+        await UpdateExtractedFiles();
         StatusBar.Visibility = Visibility.Collapsed;
     }
 
@@ -648,7 +671,7 @@ public partial class Extraction : UserControl, INotifyPropertyChanged
             config.ExtractedCategoryStructure = true;
             ConfigHelper.UpdateConfigAsync(config);
         });
-        UpdateExtractedFiles();
+        await UpdateExtractedFiles();
     }
 
     private async void CategoryStructureBool_OnUnchecked(object sender, RoutedEventArgs e)
@@ -661,12 +684,12 @@ public partial class Extraction : UserControl, INotifyPropertyChanged
             ConfigHelper.UpdateConfigAsync(config);
         });
 
-        UpdateExtractedFiles();
+        await UpdateExtractedFiles();
     }
 
     private async Task UpdateExtractedFiles()
     {
-        Dispatcher.InvokeAsync(() =>
+        Dispatcher.Invoke(() =>
         {
             ExtractedUnitypackages.Clear();
             CheckForDuplicateExtractedFiles();
@@ -680,7 +703,7 @@ public partial class Extraction : UserControl, INotifyPropertyChanged
     {
         foreach (var unitypackage in ExtractedUnitypackages)
             unitypackage.SubdirectoryItems.RemoveAll(extractedFile =>
-                ExtractedUnitypackages.Any(x => x.UnitypackageName == extractedFile.FileName));
+                ExtractedUnitypackages.All(x => x.UnitypackageName == extractedFile.FileName));
     }
 
     /// <summary>
@@ -692,13 +715,16 @@ public partial class Extraction : UserControl, INotifyPropertyChanged
     {
         await Dispatcher.InvokeAsync(async () =>
         {
-            var filter = SearchBar.Text.ToLower();
-            if (string.IsNullOrEmpty(filter))
+            if (string.IsNullOrWhiteSpace(SearchBar.Text))
+            {
                 await UpdateExtractedFiles();
-            else
-                ExtractedUnitypackages = new ObservableCollection<ExtractedUnitypackageModel>(
-                    _extractedUnitypackages.Where(u => u.UnitypackageName.ToLower().Contains(filter))
-                );
+                return;
+            }
+
+            var filteredList = ExtractedUnitypackages.Where(x =>
+                x.UnitypackageName.ToLower().Contains(SearchBar.Text.ToLower())).ToList();
+            ExtractedUnitypackages.Clear();
+            foreach (var unitypackage in filteredList) ExtractedUnitypackages.Add(unitypackage);
         });
     }
 
@@ -745,6 +771,8 @@ public partial class Extraction : UserControl, INotifyPropertyChanged
                 DeleteSelectedBtn.Icon = new SymbolIcon(SymbolRegular.Delete24);
             });
 
+            await UpdateQueueHeaderAsync();
+            await UpdateInfoBadgesAsync();
             await UpdateExtractedFiles();
         });
     }
@@ -757,35 +785,27 @@ public partial class Extraction : UserControl, INotifyPropertyChanged
             var selectedUnitypackages = ExtractedUnitypackages.Where(x => x.PackageIsChecked).ToList();
             foreach (var unitypackage in selectedUnitypackages)
             {
-                IgnoredUnitypackages.Add(new IgnoredUnitypackageModel
-                {
-                    UnityPackageName = unitypackage.UnitypackageName,
-                    Reason = "Manually Ignored"
-                });
-                ExtractedUnitypackages.Remove(unitypackage);
-                // Add to ignored list
                 await AddToIgnoredUnitypackagesAsync(new SearchEverythingModel
                 {
                     UnityPackageName = unitypackage.UnitypackageName,
                     UnityPackagePath = unitypackage.UnitypackagePath
-                }, "Manually Ignored");
+                }, "Manually ignored");
+                ExtractedUnitypackages.Remove(unitypackage);
             }
 
             // Update UI
-            Dispatcher.InvokeAsync(() =>
-            {
-                IgnoreSelectedBtn.Content = $"Ignored {selectedUnitypackages.Count} Unitypackages";
-                IgnoreSelectedBtn.Appearance = ControlAppearance.Success;
-                IgnoreSelectedBtn.Icon = new SymbolIcon(SymbolRegular.Checkmark24);
-            });
-            await Task.Delay(1000); //wait for a second
-            Dispatcher.InvokeAsync(() =>
-            {
-                IgnoreSelectedBtn.Content = "Ignore Selected";
-                IgnoreSelectedBtn.Appearance = ControlAppearance.Secondary;
-                IgnoreSelectedBtn.Icon = new SymbolIcon(SymbolRegular.Dismiss24);
-            });
+            IgnoreSelectedBtn.Content = $"Ignored {selectedUnitypackages.Count} Unitypackages";
+            IgnoreSelectedBtn.Appearance = ControlAppearance.Success;
+            IgnoreSelectedBtn.Icon = new SymbolIcon(SymbolRegular.Checkmark24);
 
+            await Task.Delay(1000); //wait for a second
+
+            IgnoreSelectedBtn.Content = "Ignore Selected";
+            IgnoreSelectedBtn.Appearance = ControlAppearance.Secondary;
+            IgnoreSelectedBtn.Icon = new SymbolIcon(SymbolRegular.Delete24);
+
+            await UpdateQueueHeaderAsync();
+            await UpdateInfoBadgesAsync();
             await UpdateExtractedFiles();
         });
     }
