@@ -18,23 +18,40 @@ namespace EasyExtract.UserControls;
 
 public partial class Extraction : UserControl, INotifyPropertyChanged
 {
-    // Constants and Resource URIs
+    /// <summary>
+    ///     Represents the EasyExtractPreview constant which is used as the file extension for preview images.
+    /// </summary>
     private const string EasyExtractPreview = "EASYEXTRACTPREVIEW.png";
 
+    /// <summary>
+    ///     Represents the URI for the idle animation in the Extraction user control.
+    /// </summary>
     private static readonly Uri IdleAnimationUri =
         new("pack://application:,,,/EasyExtract;component/Resources/ExtractionProcess/Closed.png");
 
+    /// <summary>
+    ///     The URI for the extraction animation.
+    /// </summary>
     private static readonly Uri ExtractionAnimationUri =
         new("pack://application:,,,/EasyExtract;component/Resources/Gifs/IconAnim.gif");
-    // Data Properties for UI Binding
+
+    /// <summary>
+    ///     Represents a collection of extracted Unitypackages.
+    /// </summary>
     private ObservableCollection<ExtractedUnitypackageModel> _extractedUnitypackages = new();
 
+    /// The boolean variable _isExtraction represents whether an extraction process is currently happening or not.
     private bool _isExtraction;
 
-    // Helper Classes
+    /// <summary>
+    ///     The ExtractionHelper class provides various helper methods for extracting information from directories.
+    /// </summary>
     private ExtractionHelper ExtractionHelper { get; } = new();
-    private ExtractionHandler ExtractionHandler { get; } = new();
 
+    /// <summary>
+    ///     Represents a class that handles the extraction of Unitypackages.
+    /// </summary>
+    private ExtractionHandler ExtractionHandler { get; } = new();
 
     public Extraction()
     {
@@ -42,8 +59,14 @@ public partial class Extraction : UserControl, INotifyPropertyChanged
         DataContext = this;
     }
 
+    /// <summary>
+    ///     Represents the total number of extracted items in the extracted folder.
+    /// </summary>
     private string TotalExtractedInExtractedFolder { get; set; }
 
+    /// <summary>
+    ///     Represents a collection of extracted Unitypackages.
+    /// </summary>
     public ObservableCollection<ExtractedUnitypackageModel> ExtractedUnitypackages
     {
         get => _extractedUnitypackages;
@@ -54,8 +77,14 @@ public partial class Extraction : UserControl, INotifyPropertyChanged
         }
     }
 
+    /// <summary>
+    ///     Gets or sets the list of SearchEverythingModel's in the queue.
+    /// </summary>
     public static List<SearchEverythingModel>? _queueList { get; set; }
 
+    /// <summary>
+    ///     Represents a queue list of SearchEverythingModel objects.
+    /// </summary>
     public List<SearchEverythingModel>? QueueList
     {
         get => _queueList;
@@ -67,18 +96,24 @@ public partial class Extraction : UserControl, INotifyPropertyChanged
         }
     }
 
+    /// <summary>
+    ///     Gets or sets the list of ignored Unitypackages.
+    /// </summary>
     private static List<IgnoredUnitypackageModel>? IgnoredUnitypackages { get; } = new();
+
     public event PropertyChangedEventHandler PropertyChanged;
 
-    // Extracted Files Management Methods
+    /// <summary>
+    ///     Populates the list of extracted files asynchronously.
+    /// </summary>
     private async Task PopulateExtractedFilesListAsync()
     {
-        // Populate the list of extracted Unity packages from the extracted folder
+        // Populate the list of extracted Unitypackages from the extracted folder
         // Get the directories in the extraction path
         var directories = Directory.GetDirectories(ConfigModel.LastExtractedPath);
         foreach (var directory in directories)
         {
-            // Calculate total size and create a model for the unity package.
+            // Calculate total size and create a model for the Unitypackage.
             var totalSizeInBytes = await Task.Run(async () => await CalculateDirectoryTotalSizeInBytesAsync(directory));
             var unitypackage =
                 await Task.Run(async () => await CreateUnityPackageModelAsync(directory, totalSizeInBytes));
@@ -86,10 +121,15 @@ public partial class Extraction : UserControl, INotifyPropertyChanged
             await Task.Run(async () => await AddSubdirectoryItemsToUnityPackageAsync(unitypackage, directory));
             // Avoid duplicate packages.
             if (ExtractedUnitypackages.All(u => u.UnitypackageName != unitypackage.UnitypackageName))
-                Dispatcher.Invoke(() => { ExtractedUnitypackages.Add(unitypackage); });
+                Dispatcher.InvokeAsync(() => { ExtractedUnitypackages.Add(unitypackage); });
         }
     }
 
+    /// <summary>
+    ///     Calculates the total size of a directory in bytes asynchronously.
+    /// </summary>
+    /// <param name="directory">The directory path.</param>
+    /// <returns>The total size of the directory in bytes.</returns>
     private Task<long> CalculateDirectoryTotalSizeInBytesAsync(string directory)
     {
         return Task.Run(() =>
@@ -99,6 +139,12 @@ public partial class Extraction : UserControl, INotifyPropertyChanged
         });
     }
 
+    /// <summary>
+    ///     Creates a model for the Unitypackage based on the provided directory and total size in bytes.
+    /// </summary>
+    /// <param name="directory">The path of the directory for which the Unitypackage model is created.</param>
+    /// <param name="totalSizeInBytes">The total size of the directory in bytes.</param>
+    /// <returns>A task that represents the asynchronous operation. The task result contains the created Unitypackage model.</returns>
     private Task<ExtractedUnitypackageModel> CreateUnityPackageModelAsync(string directory, long totalSizeInBytes)
     {
         return Task.Run(() => new ExtractedUnitypackageModel
@@ -126,6 +172,11 @@ public partial class Extraction : UserControl, INotifyPropertyChanged
         });
     }
 
+    /// <summary>
+    ///     Adds subdirectory items to the Unitypackage model.
+    /// </summary>
+    /// <param name="unitypackage">The Unitypackage model.</param>
+    /// <param name="directory">The directory to search for subdirectory items.</param>
     private Task AddSubdirectoryItemsToUnityPackageAsync(ExtractedUnitypackageModel unitypackage, string directory)
     {
         return Task.Run(() =>
@@ -140,7 +191,6 @@ public partial class Extraction : UserControl, INotifyPropertyChanged
 
                 string category = null;
 
-                // Use Dispatcher.Invoke to safely access the UI element from a non-UI thread
                 Dispatcher.Invoke(() =>
                 {
                     category = CategoryStructureBool?.IsChecked == true
@@ -163,12 +213,26 @@ public partial class Extraction : UserControl, INotifyPropertyChanged
         });
     }
 
+    /// <summary>
+    ///     Returns the relative path of a file from the specified root path.
+    /// </summary>
+    /// <param name="filePath">The full path of the file.</param>
+    /// <param name="rootPath">The root path within which the file is located.</param>
+    /// <returns>The relative path of the file from the root path.</returns>
     private string GetFileRelativePath(string filePath, string rootPath)
     {
         return filePath.Replace(rootPath, "").TrimStart(Path.DirectorySeparatorChar);
     }
 
 
+    /// <summary>
+    ///     Generates a preview image for given FileInfo.
+    /// </summary>
+    /// <param name="fileInfo">The FileInfo object representing the file for which to generate the preview image.</param>
+    /// <returns>
+    ///     A task that represents the asynchronous operation. The task result is a BitmapImage object representing the
+    ///     generated preview image, or null if the preview image doesn't exist.
+    /// </returns>
     private Task<BitmapImage?> GeneratePreviewImage(FileInfo fileInfo)
     {
         return Task.Run(() =>
@@ -187,14 +251,23 @@ public partial class Extraction : UserControl, INotifyPropertyChanged
         });
     }
 
+    /// <summary>
+    ///     Raises the PropertyChanged event when a property value changes.
+    /// </summary>
+    /// <param name="propertyName">The name of the property that changed.</param>
     protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null)
     {
         PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
     }
-    // UI Events and Methods
+
+    /// <summary>
+    ///     Event handler for the Loaded event of the Extraction UserControl. This method is responsible for performing various
+    ///     initialization tasks when the user control is loaded.
+    /// </summary>
+    /// <param name="sender">The object that raised the event.</param>
+    /// <param name="e">The event data.</param>
     private async void Extraction_OnLoaded(object sender, RoutedEventArgs e)
     {
-        // Calculate scroller height, update Discord presence, queue header, extraction animation, info badges, and load config
         await CalculateScrollerHeightAsync();
         await UpdateDiscordPresenceState();
 
@@ -211,6 +284,9 @@ public partial class Extraction : UserControl, INotifyPropertyChanged
         UpdateExtractedFiles();
     }
 
+    /// <summary>
+    ///     Asynchronously calculates the height of the scroller in the Extraction user control.
+    /// </summary>
     private async Task CalculateScrollerHeightAsync()
     {
         await Dispatcher.BeginInvoke((Action)(() =>
@@ -221,6 +297,9 @@ public partial class Extraction : UserControl, INotifyPropertyChanged
         }));
     }
 
+    /// <summary>
+    ///     Asynchronously updates the information badges related to extraction.
+    /// </summary>
     private async Task UpdateInfoBadgesAsync()
     {
         TotalExtractedInExtractedFolder =
@@ -229,6 +308,9 @@ public partial class Extraction : UserControl, INotifyPropertyChanged
         await UpdateIgnoredUnitypackagesCountAsync();
     }
 
+    /// <summary>
+    ///     Updates the count of ignored Unitypackages.
+    /// </summary>
     private async Task UpdateIgnoredUnitypackagesCountAsync()
     {
         if (IgnoredUnitypackages == null)
@@ -243,6 +325,12 @@ public partial class Extraction : UserControl, INotifyPropertyChanged
         }));
     }
 
+    /// <summary>
+    ///     Updates the presence state of the Discord client.
+    /// </summary>
+    /// <remarks>
+    ///     This method checks if Discord RPC is enabled in the configuration and updates the presence state accordingly.
+    /// </remarks>
     private static async Task UpdateDiscordPresenceState()
     {
         var isDiscordEnabled = false;
@@ -268,6 +356,9 @@ public partial class Extraction : UserControl, INotifyPropertyChanged
             }
     }
 
+    /// <summary>
+    ///     Updates the header of the queue.
+    /// </summary>
     private Task UpdateQueueHeaderAsync()
     {
         return Dispatcher.InvokeAsync(async () =>
@@ -290,6 +381,9 @@ public partial class Extraction : UserControl, INotifyPropertyChanged
         }).Task;
     }
 
+    /// <summary>
+    ///     Changes the extraction animation by updating the source URI of the ExtractingIcon control.
+    /// </summary>
     private async Task ChangeExtractionAnimationAsync()
     {
         await Dispatcher.BeginInvoke((Action)(() =>
@@ -317,6 +411,9 @@ public partial class Extraction : UserControl, INotifyPropertyChanged
         await UpdateInfoBadgesAsync();
     }
 
+    /// <summary>
+    ///     Sets up the user interface for the extraction process asynchronously.
+    /// </summary>
     private DispatcherOperation SetupUiForExtractionAsync()
     {
         return Dispatcher.InvokeAsync(() =>
@@ -330,6 +427,13 @@ public partial class Extraction : UserControl, INotifyPropertyChanged
         });
     }
 
+    /// <summary>
+    ///     Processes the Unitypackages in the queue and extracts them.
+    /// </summary>
+    /// <returns>
+    ///     Returns a tuple containing the number of ignored Unitypackages and the number of successfully extracted
+    ///     Unitypackages.
+    /// </returns>
     private async Task<(int ignoredCounter, int fileFinishedCounter)> ProcessUnityPackages()
     {
         var ignoredCounter = 0;
@@ -364,6 +468,14 @@ public partial class Extraction : UserControl, INotifyPropertyChanged
         return (ignoredCounter, fileFinishedCounter);
     }
 
+    /// <summary>
+    ///     Determines whether a Unitypackage is valid or not.
+    /// </summary>
+    /// <param name="unitypackage">The Unitypackage to check.</param>
+    /// <returns>
+    ///     Returns a tuple with the first item indicating whether the Unitypackage is valid or not, and the second item
+    ///     containing a message explaining the reason if the package is not valid.
+    /// </returns>
     private Task<(bool, string)> IsValidUnityPackageAsync(SearchEverythingModel unitypackage)
     {
         return Task.Run(() =>
@@ -378,6 +490,12 @@ public partial class Extraction : UserControl, INotifyPropertyChanged
         });
     }
 
+    /// <summary>
+    ///     Adds the specified unitypackage to the ignored unitypackages list with the given reason.
+    /// </summary>
+    /// <param name="unitypackage">The unitypackage to be ignored.</param>
+    /// <param name="reason">The reason for ignoring the unitypackage.</param>
+    /// <returns>A <see cref="Task" /> representing the asynchronous operation.</returns>
     private Task AddToIgnoredUnitypackagesAsync(SearchEverythingModel unitypackage, string reason)
     {
         return Task.Run(async () =>
@@ -391,6 +509,10 @@ public partial class Extraction : UserControl, INotifyPropertyChanged
         });
     }
 
+    /// <summary>
+    ///     Updates the extraction progress in the status bar.
+    /// </summary>
+    /// <param name="fileFinishedCounter">The number of files that have finished extraction.</param>
     private Task UpdateExtractionProgressAsync(int fileFinishedCounter)
     {
         return Task.Run(() =>
@@ -403,6 +525,11 @@ public partial class Extraction : UserControl, INotifyPropertyChanged
         });
     }
 
+    /// <summary>
+    ///     Updates the user interface after the extraction process.
+    /// </summary>
+    /// <param name="ignoredCounter">The number of Unitypackages ignored during the extraction process.</param>
+    /// <param name="fileFinishedCounter">The number of Unitypackages successfully extracted.</param>
     private Task UpdateUiAfterExtractionAsync(int ignoredCounter, int fileFinishedCounter)
     {
         return Task.Run(() =>
@@ -439,6 +566,12 @@ public partial class Extraction : UserControl, INotifyPropertyChanged
         });
     }
 
+    /// <summary>
+    ///     Handles the click event of the SearchFileManuallyButton.
+    ///     Allows the user to manually select files to search for extraction.
+    /// </summary>
+    /// <param name="sender">The object that raised the event.</param>
+    /// <param name="e">The event arguments.</param>
     private async void SearchFileManuallyButton_OnClick(object sender, RoutedEventArgs e)
     {
         var openFileDialog = new OpenFileDialog
@@ -465,6 +598,11 @@ public partial class Extraction : UserControl, INotifyPropertyChanged
         }
     }
 
+    /// <summary>
+    ///     Event handler for the Drop event of the Extraction user control.
+    /// </summary>
+    /// <param name="sender">The object that raised the event.</param>
+    /// <param name="e">A DragEventArgs that contains the event data.</param>
     private async void Extraction_OnDrop(object sender, DragEventArgs e)
     {
         if (!e.Data.GetDataPresent(DataFormats.FileDrop)) return;
@@ -484,6 +622,11 @@ public partial class Extraction : UserControl, INotifyPropertyChanged
         await UpdateQueueHeaderAsync();
     }
 
+    /// <summary>
+    ///     Event handler for the SelectionChanged event of the Tabs control.
+    /// </summary>
+    /// <param name="sender">The object that raised the event.</param>
+    /// <param name="e">A SelectionChangedEventArgs object that contains the event data.</param>
     private async void Tabs_OnSelectionChanged(object sender, SelectionChangedEventArgs e)
     {
         //Update Info Badges
@@ -522,7 +665,7 @@ public partial class Extraction : UserControl, INotifyPropertyChanged
 
     private async Task UpdateExtractedFiles()
     {
-        Dispatcher.Invoke(() =>
+        Dispatcher.InvokeAsync(() =>
         {
             ExtractedUnitypackages.Clear();
             CheckForDuplicateExtractedFiles();
@@ -530,19 +673,24 @@ public partial class Extraction : UserControl, INotifyPropertyChanged
         await PopulateExtractedFilesListAsync();
     }
 
+    /// Checks for duplicate extracted files in the ExtractedUnitypackages collection.
+    /// Duplicates are removed from the SubdirectoryItems list of each ExtractedUnitypackageModel object.
     private void CheckForDuplicateExtractedFiles()
     {
         foreach (var unitypackage in ExtractedUnitypackages)
-        foreach (var extractedFile in unitypackage.SubdirectoryItems.Where(extractedFile =>
-                     ExtractedUnitypackages.Any(x => x.UnitypackageName == extractedFile.FileName)).ToList())
-            unitypackage.SubdirectoryItems.Remove(extractedFile);
+            unitypackage.SubdirectoryItems.RemoveAll(extractedFile =>
+                ExtractedUnitypackages.Any(x => x.UnitypackageName == extractedFile.FileName));
     }
 
+    /// <summary>
+    ///     Filters the extracted Unitypackages based on the search text.
+    /// </summary>
+    /// <param name="sender">The object that fired the event.</param>
+    /// <param name="e">The event arguments.</param>
     private async void SearchBar_OnTextChanged(object sender, TextChangedEventArgs e)
     {
         await Dispatcher.InvokeAsync(async () =>
         {
-            // Filter extracted Unitypackages
             var filter = SearchBar.Text.ToLower();
             if (string.IsNullOrEmpty(filter))
                 await UpdateExtractedFiles();
@@ -553,6 +701,11 @@ public partial class Extraction : UserControl, INotifyPropertyChanged
         });
     }
 
+    /// <summary>
+    ///     Deletes selected Unitypackages and their associated files.
+    /// </summary>
+    /// <param name="sender">The object that raised the event.</param>
+    /// <param name="e">The event arguments.</param>
     private async void DeleteSelectedBtn_OnClick(object sender, RoutedEventArgs e)
     {
         await Dispatcher.InvokeAsync(async () =>
@@ -576,7 +729,7 @@ public partial class Extraction : UserControl, INotifyPropertyChanged
             }
 
             // Update UI
-            Dispatcher.Invoke(() =>
+            Dispatcher.InvokeAsync(() =>
             {
                 DeleteSelectedBtn.Content =
                     $"Deleted {selectedUnitypackages.Count} Unitypackages and {selectedItems.Count} Files";
@@ -584,7 +737,7 @@ public partial class Extraction : UserControl, INotifyPropertyChanged
                 DeleteSelectedBtn.Icon = new SymbolIcon(SymbolRegular.Checkmark24);
             });
             await Task.Delay(1000); //wait for a second
-            Dispatcher.Invoke(() =>
+            Dispatcher.InvokeAsync(() =>
             {
                 DeleteSelectedBtn.Content = "Delete Selected";
                 DeleteSelectedBtn.Appearance = ControlAppearance.Secondary;
@@ -618,14 +771,14 @@ public partial class Extraction : UserControl, INotifyPropertyChanged
             }
 
             // Update UI
-            Dispatcher.Invoke(() =>
+            Dispatcher.InvokeAsync(() =>
             {
                 IgnoreSelectedBtn.Content = $"Ignored {selectedUnitypackages.Count} Unitypackages";
                 IgnoreSelectedBtn.Appearance = ControlAppearance.Success;
                 IgnoreSelectedBtn.Icon = new SymbolIcon(SymbolRegular.Checkmark24);
             });
             await Task.Delay(1000); //wait for a second
-            Dispatcher.Invoke(() =>
+            Dispatcher.InvokeAsync(() =>
             {
                 IgnoreSelectedBtn.Content = "Ignore Selected";
                 IgnoreSelectedBtn.Appearance = ControlAppearance.Secondary;
