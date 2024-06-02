@@ -86,6 +86,24 @@ public partial class History : UserControl, INotifyPropertyChanged
         TotalExtracted = Config!.TotalExtracted;
         TotalFilesExtracted = Config.TotalFilesExtracted;
         await LoadHistory();
+        await CalculateTotalExtracted();
+    }
+
+    private async Task CalculateTotalExtracted()
+    {
+        // calculate total extracted files in each history item
+        // and update the total extracted files count in the config
+        var totalFilesExtracted = 0;
+        var totalUnitypackagesExtracted = 0;
+
+        foreach (var history in HistoryList)
+        {
+            totalFilesExtracted += history.TotalFiles;
+            totalUnitypackagesExtracted++;
+        }
+
+        TotalFilesExtracted = totalFilesExtracted;
+        TotalExtracted = totalUnitypackagesExtracted;
     }
 
     private async Task LoadHistory()

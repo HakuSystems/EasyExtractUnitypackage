@@ -14,7 +14,6 @@ public class ConfigModel
     public bool IsFirstRun { get; set; } = true;
     public bool DiscordRpc { get; set; } = true;
     public bool AutoUpdate { get; set; } = true;
-    public bool WindowsNotification { get; set; } = true;
     public bool ExtractedCategoryStructure { get; set; } = true;
 
     public static string DefaultTempPath { get; set; } =

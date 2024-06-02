@@ -513,6 +513,7 @@ public partial class Extraction : UserControl, INotifyPropertyChanged
             if (await ExtractionHandler.ExtractUnitypackage(unitypackage))
             {
                 fileFinishedCounter++;
+                await AddUnitypackageToHistoryAsync(unitypackage);
                 await UpdateExtractionProgressAsync(fileFinishedCounter);
             }
             else
@@ -527,6 +528,25 @@ public partial class Extraction : UserControl, INotifyPropertyChanged
         await UpdateInfoBadgesAsync();
         ManageExtractedTab.IsSelected = true;
         return (ignoredCounter, fileFinishedCounter);
+    }
+
+    private async Task AddUnitypackageToHistoryAsync(SearchEverythingModel unitypackage)
+    {
+        await ConfigHelper.LoadConfigAsync().ContinueWith(task =>
+        {
+            var config = task.Result;
+            if (config == null) return;
+            config.History.Add(new HistoryModel
+            {
+                FileName = unitypackage.UnityPackageName,
+                ExtractedPath = Path.Combine(ConfigModel.LastExtractedPath, unitypackage.UnityPackageName),
+                ExtractedDate = DateTime.Now,
+                TotalFiles = Directory.GetFiles(
+                    Path.Combine(ConfigModel.LastExtractedPath, unitypackage.UnityPackageName),
+                    "*.*", SearchOption.AllDirectories).Length
+            });
+            ConfigHelper.UpdateConfigAsync(config);
+        });
     }
 
     /// <summary>
@@ -639,7 +659,7 @@ public partial class Extraction : UserControl, INotifyPropertyChanged
                     ExtractionBtn.Appearance = ControlAppearance.Primary;
                     await ChangeExtractionAnimationAsync().ConfigureAwait(false);
                     _isExtraction = false;
-                    UpdateExtractedFiles();
+                    await UpdateExtractedFiles();
                     return;
                 }
 
