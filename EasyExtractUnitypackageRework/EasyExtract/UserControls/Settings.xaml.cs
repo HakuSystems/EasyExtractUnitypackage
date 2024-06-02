@@ -58,30 +58,6 @@ public partial class Settings : UserControl
         DiscordRpcManager.Instance.Dispose();
     }
 
-    private async void WindowsNotificationToggle_OnChecked(object sender, RoutedEventArgs e)
-    {
-        await ConfigHelper.LoadConfigAsync().ContinueWith(task =>
-        {
-            var config = task.Result;
-            if (config == null) return;
-            config.WindowsNotification = true;
-            ConfigHelper.UpdateConfigAsync(config);
-        });
-        WindowsNotificationToggle.Content = "On";
-    }
-
-    private async void WindowsNotificationToggle_OnUnchecked(object sender, RoutedEventArgs e)
-    {
-        await ConfigHelper.LoadConfigAsync().ContinueWith(task =>
-        {
-            var config = task.Result;
-            if (config == null) return;
-            config.WindowsNotification = false;
-            ConfigHelper.UpdateConfigAsync(config);
-        });
-        WindowsNotificationToggle.Content = "Off";
-    }
-
     private async void UpdateCheckToggle_OnChecked(object sender, RoutedEventArgs e)
     {
         await ConfigHelper.LoadConfigAsync().ContinueWith(task =>
@@ -138,8 +114,6 @@ public partial class Settings : UserControl
     {
         DiscordRpcToggle.Checked += DiscordRPCToggle_OnChecked;
         DiscordRpcToggle.Unchecked += DiscordRPCToggle_OnUnchecked;
-        WindowsNotificationToggle.Checked += WindowsNotificationToggle_OnChecked;
-        WindowsNotificationToggle.Unchecked += WindowsNotificationToggle_OnUnchecked;
         UpdateCheckToggle.Checked += UpdateCheckToggle_OnChecked;
         UpdateCheckToggle.Unchecked += UpdateCheckToggle_OnUnchecked;
         UwUModeToggle.Checked += UwUModeToggle_OnChecked;
@@ -171,7 +145,6 @@ public partial class Settings : UserControl
             Dispatcher.Invoke(() =>
             {
                 DiscordRpcToggle.IsChecked = config.DiscordRpc;
-                WindowsNotificationToggle.IsChecked = config.WindowsNotification;
                 UpdateCheckToggle.IsChecked = config.AutoUpdate;
                 UwUModeToggle.IsChecked = config.UwUModeActive;
                 DefaultTempPath.Text = ConfigModel.DefaultTempPath;
@@ -232,10 +205,6 @@ public partial class Settings : UserControl
         DiscordRpcToggle.IsChecked = !DiscordRpcToggle.IsChecked;
     }
 
-    private void WindowsNotiCard_OnClick(object sender, RoutedEventArgs e)
-    {
-        WindowsNotificationToggle.IsChecked = !WindowsNotificationToggle.IsChecked;
-    }
 
     private void UpdateCard_OnClick(object sender, RoutedEventArgs e)
     {

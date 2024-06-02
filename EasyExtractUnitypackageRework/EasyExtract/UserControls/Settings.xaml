@@ -120,36 +120,6 @@
                                              Margin="10" />
                         </ui:Card>
                     </ui:CardControl>
-
-                    <ui:CardControl x:Name="WindowsNotiCard" Click="WindowsNotiCard_OnClick">
-                        <ui:CardControl.Icon>
-                            <ui:SymbolIcon
-                                HorizontalAlignment="Center"
-                                VerticalAlignment="Center"
-                                Margin="0,0,5,0"
-                                Symbol="Info24" />
-                        </ui:CardControl.Icon>
-                        <ui:CardControl.Header>
-                            <StackPanel>
-                                <ui:TextBlock
-                                    Margin="0"
-                                    FontTypography="BodyStrong"
-                                    Text="Windows Notifications"
-                                    TextWrapping="WrapWithOverflow" />
-                                <ui:TextBlock
-                                    Appearance="Secondary"
-                                    Text="Get Windows Notifications"
-                                    Opacity="0.5"
-                                    TextWrapping="WrapWithOverflow" />
-                            </StackPanel>
-                        </ui:CardControl.Header>
-                        <ui:Card Margin="5">
-                            <ui:ToggleSwitch IsHitTestVisible="False" x:Name="WindowsNotificationToggle"
-                                             Checked="WindowsNotificationToggle_OnChecked"
-                                             Unchecked="WindowsNotificationToggle_OnUnchecked" Content="On"
-                                             IsChecked="True" Margin="10" />
-                        </ui:Card>
-                    </ui:CardControl>
                 </StackPanel>
             </ui:CardExpander>
 
