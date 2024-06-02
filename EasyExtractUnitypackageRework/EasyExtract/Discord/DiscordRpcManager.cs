@@ -1,5 +1,7 @@
 using System.Windows;
 using DiscordRPC;
+using DiscordRPC.Exceptions;
+using EasyExtract.Config;
 
 namespace EasyExtract.Discord;
 
@@ -36,6 +38,19 @@ public class DiscordRpcManager : IDisposable
 
     public async Task UpdatePresenceAsync(string state)
     {
+        var config = await ConfigHelper.LoadConfigAsync();
+        var largeTextString =
+            $"Extracted [{config.TotalExtracted}] Unitypackages & [{config.TotalFilesExtracted}] files.";
+        if (largeTextString.Length > 127)
+            try
+            {
+                largeTextString = $"U: {config.TotalExtracted} F: {config.TotalFilesExtracted}";
+            }
+            catch (StringOutOfRangeException e)
+            {
+                largeTextString = "Too many files extracted and/or unitypackages";
+            }
+
         try
         {
             client.SetPresence(new RichPresence
@@ -46,7 +61,7 @@ public class DiscordRpcManager : IDisposable
                 Assets = new Assets
                 {
                     LargeImageKey = "logo",
-                    LargeImageText = "EasyExtract",
+                    LargeImageText = largeTextString,
                     SmallImageKey = "slogo",
                     SmallImageText = $"V{Application.ResourceAssembly.GetName().Version}"
                 }

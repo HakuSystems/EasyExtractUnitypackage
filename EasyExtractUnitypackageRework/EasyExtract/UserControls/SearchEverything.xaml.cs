@@ -159,7 +159,20 @@ public partial class SearchEverything : UserControl, INotifyPropertyChanged
 
     private void QueueAddButton_OnClick(object sender, RoutedEventArgs e)
     {
-        if (SearchEverythingList == null) return;
+        //only add the item where the user clicked on plus
+        var selected = (SearchEverythingModel)((Button)sender).DataContext;
+        var id = selected.Id;
+        var name = selected.UnityPackageName;
+        var path = selected.UnityPackagePath;
+
+        var duplicate = Extraction._queueList?.Find(x => x.UnityPackageName == name);
+        if (duplicate != null) return;
+        if (Extraction._queueList == null) Extraction._queueList = new List<SearchEverythingModel>();
+        Extraction._queueList.Add(new SearchEverythingModel
+            { UnityPackageName = name, UnityPackagePath = path, Id = id });
+        AddedStatusTxt.Text = $"Added {name} to the queue";
+        /*
+         * if (SearchEverythingList == null) return;
         var selected = SearchEverythingList.FirstOrDefault();
         if (selected == null) return;
         var id = selected.Id;
@@ -172,5 +185,6 @@ public partial class SearchEverything : UserControl, INotifyPropertyChanged
         Extraction._queueList.Add(new SearchEverythingModel
             { UnityPackageName = name, UnityPackagePath = path, Id = id });
         AddedStatusTxt.Text = $"Added {name} to the queue";
+         */
     }
 }

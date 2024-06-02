@@ -327,7 +327,7 @@ public partial class Extraction : UserControl, INotifyPropertyChanged
                  select new IgnoredUnitypackageModel
                  {
                      IgnoredUnityPackageName = directory,
-                     IgnoredReason = "Manually ignored"
+                     IgnoredReason = "Unknown Reason"
                  })
         {
             packagesToAdd.Add(newIgnoredPackage);
@@ -523,7 +523,7 @@ public partial class Extraction : UserControl, INotifyPropertyChanged
             }
         }
 
-        QueueListView.Items.Clear();
+        _extractedUnitypackages.Clear();
         await UpdateQueueHeaderAsync();
         await UpdateInfoBadgesAsync();
         ManageExtractedTab.IsSelected = true;
