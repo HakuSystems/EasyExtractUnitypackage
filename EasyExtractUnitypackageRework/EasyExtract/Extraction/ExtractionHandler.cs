@@ -13,17 +13,25 @@ public class ExtractionHandler
 
     public async Task<bool> ExtractUnitypackage(SearchEverythingModel unitypackage)
     {
-        var tempFolder = GetTempFolderPath(unitypackage);
-        var targetFolder = GetTargetFolderPath(unitypackage);
+        try
+        {
+            var tempFolder = GetTempFolderPath(unitypackage);
+            var targetFolder = GetTargetFolderPath(unitypackage);
 
-        CreateDirectories(tempFolder, targetFolder);
+            CreateDirectories(tempFolder, targetFolder);
 
-        await ExtractAndWriteFiles(unitypackage, tempFolder);
-        MoveFilesFromTempToTargetFolder(tempFolder, targetFolder);
+            await ExtractAndWriteFiles(unitypackage, tempFolder);
+            MoveFilesFromTempToTargetFolder(tempFolder, targetFolder);
 
-        Directory.Delete(tempFolder, true);
+            Directory.Delete(tempFolder, true);
 
-        return true;
+            return true;
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine($"Error while extracting unitypackage: {e.Message}");
+            return false;
+        }
     }
 
     public string GetTempFolderPath(SearchEverythingModel unitypackage)

@@ -1,5 +1,6 @@
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.IO;
 using System.Runtime.CompilerServices;
 using System.Windows;
@@ -99,7 +100,7 @@ public partial class Extraction : UserControl, INotifyPropertyChanged
     /// <summary>
     ///     Gets or sets the list of ignored Unitypackages.
     /// </summary>
-    private static ObservableCollection<IgnoredUnitypackageModel> IgnoredUnitypackages { get; } = new();
+    public ObservableCollection<IgnoredUnitypackageModel> IgnoredUnitypackages { get; set; } = new();
 
     public event PropertyChangedEventHandler PropertyChanged;
 
@@ -824,6 +825,20 @@ public partial class Extraction : UserControl, INotifyPropertyChanged
                 parentUnitypackage.SubdirectoryItems.Remove(selectedItem);
             }
 
+            if (selectedItems.Count == 0 && selectedUnitypackages.Count == 0)
+            {
+                DeleteSelectedBtn.Content = "No Unitypackage or File selected";
+                DeleteSelectedBtn.Appearance = ControlAppearance.Danger;
+                DeleteSelectedBtn.Icon = new SymbolIcon(SymbolRegular.ErrorCircle24);
+
+                await Task.Delay(3000); //wait for 3 seconds
+
+                DeleteSelectedBtn.Content = "Delete Selected";
+                DeleteSelectedBtn.Appearance = ControlAppearance.Secondary;
+                DeleteSelectedBtn.Icon = new SymbolIcon(SymbolRegular.Delete24);
+                return;
+            }
+
             // Update UI
             Dispatcher.InvokeAsync(() =>
             {
@@ -862,6 +877,20 @@ public partial class Extraction : UserControl, INotifyPropertyChanged
                 ExtractedUnitypackages.Remove(unitypackage);
             }
 
+            if (selectedUnitypackages.Count == 0)
+            {
+                IgnoreSelectedBtn.Content = "No Unitypackage selected";
+                IgnoreSelectedBtn.Appearance = ControlAppearance.Danger;
+                IgnoreSelectedBtn.Icon = new SymbolIcon(SymbolRegular.ErrorCircle24);
+
+                await Task.Delay(3000); //wait for 3 seconds
+
+                IgnoreSelectedBtn.Content = "Ignore Selected";
+                IgnoreSelectedBtn.Appearance = ControlAppearance.Secondary;
+                IgnoreSelectedBtn.Icon = new SymbolIcon(SymbolRegular.Delete24);
+                return;
+            }
+
             // Update UI
             IgnoreSelectedBtn.Content = $"Ignored {selectedUnitypackages.Count} Unitypackages";
             IgnoreSelectedBtn.Appearance = ControlAppearance.Success;
@@ -872,6 +901,159 @@ public partial class Extraction : UserControl, INotifyPropertyChanged
             IgnoreSelectedBtn.Content = "Ignore Selected";
             IgnoreSelectedBtn.Appearance = ControlAppearance.Secondary;
             IgnoreSelectedBtn.Icon = new SymbolIcon(SymbolRegular.Delete24);
+
+            await UpdateQueueHeaderAsync();
+            await UpdateInfoBadgesAsync();
+            await UpdateExtractedFiles();
+        });
+    }
+
+    private async void OpenSelectedDirectoryBtn_OnClick(object sender, RoutedEventArgs e)
+    {
+        await Dispatcher.InvokeAsync(async () =>
+        {
+            var selectedUnitypackage = ExtractedUnitypackages.FirstOrDefault(x => x.PackageIsChecked);
+            if (selectedUnitypackage == null)
+            {
+                OpenSelectedDirectoryBtn.Content = "No Unitypackage selected";
+                OpenSelectedDirectoryBtn.Appearance = ControlAppearance.Danger;
+                OpenSelectedDirectoryBtn.Icon = new SymbolIcon(SymbolRegular.ErrorCircle24);
+
+                await Task.Delay(3000); //wait for 3 seconds
+
+                OpenSelectedDirectoryBtn.Content = "Open Selected Directory";
+                OpenSelectedDirectoryBtn.Appearance = ControlAppearance.Secondary;
+                OpenSelectedDirectoryBtn.Icon = new SymbolIcon(SymbolRegular.Folder24);
+                return;
+            }
+
+            Process.Start("explorer.exe", selectedUnitypackage.UnitypackagePath);
+            if (selectedUnitypackage.SubdirectoryItems.Count > 0)
+                Process.Start("explorer.exe", selectedUnitypackage.SubdirectoryItems[0].FilePath);
+        });
+    }
+
+    private async void MoveToDifferentDirectoryBtn_OnClick(object sender, RoutedEventArgs e)
+    {
+        var standardString = "Move Selected to Different Directory";
+        // only whole unitypackages
+        var selectedUnitypackage = ExtractedUnitypackages.FirstOrDefault(x => x.PackageIsChecked);
+        if (selectedUnitypackage == null)
+        {
+            MoveToDifferentDirectoryBtn.Content = "No Unitypackage selected";
+            MoveToDifferentDirectoryBtn.Appearance = ControlAppearance.Danger;
+            MoveToDifferentDirectoryBtn.Icon = new SymbolIcon(SymbolRegular.ErrorCircle24);
+
+            await Task.Delay(3000); //wait for 3 seconds
+
+            MoveToDifferentDirectoryBtn.Content = standardString;
+            MoveToDifferentDirectoryBtn.Appearance = ControlAppearance.Secondary;
+            MoveToDifferentDirectoryBtn.Icon = new SymbolIcon(SymbolRegular.Directions24);
+
+            return;
+        }
+
+        if (ExtractedUnitypackages.Count(x => x.PackageIsChecked) > 1)
+        {
+            MoveToDifferentDirectoryBtn.Content = "Only 1 Unitypackage at a time";
+            MoveToDifferentDirectoryBtn.Appearance = ControlAppearance.Danger;
+            MoveToDifferentDirectoryBtn.Icon = new SymbolIcon(SymbolRegular.ErrorCircle24);
+
+            await Task.Delay(3000); //wait for 3 seconds
+
+            MoveToDifferentDirectoryBtn.Content = standardString;
+            MoveToDifferentDirectoryBtn.Appearance = ControlAppearance.Secondary;
+            MoveToDifferentDirectoryBtn.Icon = new SymbolIcon(SymbolRegular.Directions24);
+            return;
+        }
+
+        var folderDialog = new OpenFolderDialog
+        {
+            Multiselect = false
+        };
+
+        try
+        {
+            if (folderDialog.ShowDialog() == true)
+            {
+                var newDirectory = folderDialog.FolderName;
+                var newDirectoryPath = Path.Combine(newDirectory, selectedUnitypackage.UnitypackageName);
+                Directory.Move(selectedUnitypackage.UnitypackagePath, newDirectoryPath);
+                selectedUnitypackage.UnitypackagePath = newDirectoryPath;
+            }
+
+            // Update UI
+            MoveToDifferentDirectoryBtn.Content =
+                $"Moved {selectedUnitypackage.UnitypackageName} to different directory";
+            MoveToDifferentDirectoryBtn.Appearance = ControlAppearance.Success;
+            MoveToDifferentDirectoryBtn.Icon = new SymbolIcon(SymbolRegular.Checkmark24);
+        }
+        catch (Exception exception)
+        {
+            Console.WriteLine(exception);
+            MoveToDifferentDirectoryBtn.Content = "Failed to move Unitypackage";
+            MoveToDifferentDirectoryBtn.Appearance = ControlAppearance.Danger;
+            MoveToDifferentDirectoryBtn.Icon = new SymbolIcon(SymbolRegular.ErrorCircle24);
+
+            await Task.Delay(3000); //wait for 3 seconds
+
+            MoveToDifferentDirectoryBtn.Content = standardString;
+            MoveToDifferentDirectoryBtn.Appearance = ControlAppearance.Secondary;
+            MoveToDifferentDirectoryBtn.Icon = new SymbolIcon(SymbolRegular.Directions24);
+        }
+
+        await Task.Delay(1000); //wait for 1 second
+
+        MoveToDifferentDirectoryBtn.Content = standardString;
+        MoveToDifferentDirectoryBtn.Appearance = ControlAppearance.Secondary;
+        MoveToDifferentDirectoryBtn.Icon = new SymbolIcon(SymbolRegular.Directions24);
+
+        await UpdateQueueHeaderAsync();
+        await UpdateInfoBadgesAsync();
+        await UpdateExtractedFiles();
+    }
+
+    private async void ClearIgnoredListBtn_OnClick(object sender, RoutedEventArgs e)
+    {
+        await Dispatcher.InvokeAsync(async () =>
+        {
+            var ignoredUnitypackages = IgnoredUnitypackages.ToList();
+            foreach (var ignoredUnitypackage in ignoredUnitypackages)
+            {
+                var ignoredAppDataDirectory = Path.Combine(
+                    Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
+                    "EasyExtract", "IgnoredUnitypackages");
+                var ignoredUnitypackagePath =
+                    Path.Combine(ignoredAppDataDirectory, ignoredUnitypackage.IgnoredUnityPackageName);
+                if (Directory.Exists(ignoredUnitypackagePath))
+                    Directory.Delete(ignoredUnitypackagePath, true);
+                IgnoredUnitypackages.Remove(ignoredUnitypackage);
+            }
+
+            if (ignoredUnitypackages.Count == 0)
+            {
+                ClearIgnoredListBtn.Content = "No Ignored Unitypackage to clear";
+                ClearIgnoredListBtn.Appearance = ControlAppearance.Danger;
+                ClearIgnoredListBtn.Icon = new SymbolIcon(SymbolRegular.ErrorCircle24);
+
+                await Task.Delay(3000); //wait for 3 seconds
+
+                ClearIgnoredListBtn.Content = "Clear Ignored List";
+                ClearIgnoredListBtn.Appearance = ControlAppearance.Secondary;
+                ClearIgnoredListBtn.Icon = new SymbolIcon(SymbolRegular.Delete24);
+                return;
+            }
+
+            // Update UI
+            ClearIgnoredListBtn.Content = $"Cleared {ignoredUnitypackages.Count} Ignored Unitypackages";
+            ClearIgnoredListBtn.Appearance = ControlAppearance.Success;
+            ClearIgnoredListBtn.Icon = new SymbolIcon(SymbolRegular.Checkmark24);
+
+            await Task.Delay(1000); //wait for 1 second
+
+            ClearIgnoredListBtn.Content = "Clear Ignored List";
+            ClearIgnoredListBtn.Appearance = ControlAppearance.Secondary;
+            ClearIgnoredListBtn.Icon = new SymbolIcon(SymbolRegular.Delete24);
 
             await UpdateQueueHeaderAsync();
             await UpdateInfoBadgesAsync();

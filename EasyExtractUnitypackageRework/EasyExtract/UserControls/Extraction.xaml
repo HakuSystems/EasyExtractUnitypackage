@@ -62,7 +62,7 @@
                                             <StackPanel HorizontalAlignment="Stretch">
                                                 <ui:TextBlock
                                                     FontTypography="BodyStrong"
-                                                    Text="{Binding IgnoredUnityPackageName}"
+                                                    Text="{Binding UnityPackageName}"
                                                     TextWrapping="WrapWithOverflow" />
                                                 <ui:TextBlock
                                                     Appearance="Secondary"
@@ -132,7 +132,7 @@
 
 
                     <!-- Unity Package Enumeration Start -->
-                    <ui:CardExpander Header="Unity Packages" VerticalAlignment="Top"
+                    <ui:CardExpander Header="Unitypackages" VerticalAlignment="Top"
                                      x:Name="ExtractedPackagesExpander"
                                      Grid.Row="0" Grid.Column="0"
                                      Grid.ColumnSpan="2"
@@ -255,8 +255,14 @@
                                     x:Name="SearchBar"
                                     TextChanged="SearchBar_OnTextChanged"
                                     Icon="{ui:SymbolIcon Search24}" />
+                        <!-- the ToggleSwitch is disabled for now 
+                                         since the user should not be able to change the view yet
+                                         the IsChecked is set to always true for now
+                                          -->
                         <ui:ToggleSwitch x:Name="CategoryStructureBool"
-                                         IsChecked="{Binding ExtractedCategoryStructure, Mode=TwoWay}"
+                                         IsChecked="True"
+                                         IsEnabled="False"
+                                         Visibility="Collapsed"
                                          Checked="CategoryStructureBool_OnChecked"
                                          Unchecked="CategoryStructureBool_OnUnchecked"
                                          Content="Category Structure" Margin="5">
@@ -272,9 +278,15 @@
                                    Appearance="Secondary"
                                    Click="DeleteSelectedBtn_OnClick"
                                    Icon="{ui:SymbolIcon Delete24}" Margin="5" />
+                        <ui:Button x:Name="OpenSelectedDirectoryBtn" Click="OpenSelectedDirectoryBtn_OnClick"
+                                   Margin="5"
+                                   Content="Open Selected Directory" Icon="{ui:SymbolIcon Open24}" />
+                        <ui:Button x:Name="MoveToDifferentDirectoryBtn"
+                                   Margin="5"
+                                   Click="MoveToDifferentDirectoryBtn_OnClick"
+                                   Content="Move Selected to Different Directory" Icon="{ui:SymbolIcon Directions24}" />
                         <ui:Button Content="Ignore Selected" x:Name="IgnoreSelectedBtn"
                                    Click="IgnoreSelectedBtn_OnClick" Icon="{ui:SymbolIcon Dismiss24}" Margin="5" />
-                        <ui:Button Content="Extract Selected Assets" Icon="{ui:SymbolIcon Save24}" Margin="5" />
                     </StackPanel>
                     <!-- Unity Package Enumeration End -->
                 </Grid>
@@ -339,6 +351,12 @@
                             </ui:ListView.ItemTemplate>
                         </ui:ListView>
                     </ui:CardExpander>
+                    <StackPanel Grid.Row="1">
+                        <ui:Button HorizontalAlignment="Stretch" Margin="5" Icon="{ui:SymbolIcon Delete24}"
+                                   x:Name="ClearIgnoredListBtn"
+                                   Click="ClearIgnoredListBtn_OnClick"
+                                   Content="Clear Ignored List" />
+                    </StackPanel>
                 </Grid>
                 <!-- Ignored End -->
             </TabItem>
