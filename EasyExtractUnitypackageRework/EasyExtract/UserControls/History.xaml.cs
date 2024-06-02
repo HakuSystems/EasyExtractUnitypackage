@@ -104,6 +104,10 @@ public partial class History : UserControl, INotifyPropertyChanged
 
         TotalFilesExtracted = totalFilesExtracted;
         TotalExtracted = totalUnitypackagesExtracted;
+        Config!.TotalExtracted = totalUnitypackagesExtracted;
+        Config.TotalFilesExtracted = totalFilesExtracted;
+
+        await ConfigHelper.UpdateConfigAsync(Config);
     }
 
     private async Task LoadHistory()
