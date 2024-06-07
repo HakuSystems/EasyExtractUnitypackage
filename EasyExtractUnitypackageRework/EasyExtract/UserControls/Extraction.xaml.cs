@@ -291,6 +291,14 @@ public partial class Extraction : UserControl, INotifyPropertyChanged
             ExtractionTab.IsSelected = true;
         else
             ManageExtractedTab.IsSelected = true;
+        UpdateSelectAllToggleContent();
+    }
+
+    private void UpdateSelectAllToggleContent()
+    {
+        SelectAllUnitypackageToggle.Content = ExtractedUnitypackages.Count > 0
+            ? $"Select All {ExtractedUnitypackages.Count}"
+            : "Select All Unitypackages";
     }
 
     private async Task UpdateIgnoredConfigListAsync()
@@ -314,7 +322,6 @@ public partial class Extraction : UserControl, INotifyPropertyChanged
         Dispatcher.InvokeAsync(() =>
         {
             IgnoredUnitypackages.Clear();
-
             foreach (var ignoredUnitypackage in config.IgnoredUnitypackages)
                 if (directoryNames.Contains(ignoredUnitypackage.IgnoredUnityPackageName))
                     IgnoredUnitypackages.Add(ignoredUnitypackage);
@@ -342,6 +349,7 @@ public partial class Extraction : UserControl, INotifyPropertyChanged
         {
             foreach (var newPackage in packagesToAdd) IgnoredUnitypackages.Add(newPackage);
         });
+        UpdateSelectAllToggleContent();
     }
 
 
@@ -367,6 +375,7 @@ public partial class Extraction : UserControl, INotifyPropertyChanged
             (await Task.Run(() => Directory.GetDirectories(ConfigModel.LastExtractedPath))).Length.ToString();
         if (ManageExtractedInfoBadge != null) ManageExtractedInfoBadge.Value = TotalExtractedInExtractedFolder;
         await UpdateIgnoredUnitypackagesCountAsync();
+        UpdateSelectAllToggleContent();
     }
 
     /// <summary>
@@ -427,12 +436,12 @@ public partial class Extraction : UserControl, INotifyPropertyChanged
             switch (QueueListView.Items.Count)
             {
                 case 0:
-                    QueueExpander.Header = "Queue (Nothing to extract)";
+                    QueueHeaderText.Text = "Queue (Nothing to extract)";
                     ExtractionBtn.Visibility = Visibility.Collapsed;
                     await UpdateInfoBadgesAsync();
                     break;
                 default:
-                    QueueExpander.Header = QueueListView.Items.Count == 1
+                    QueueHeaderText.Text = QueueListView.Items.Count == 1
                         ? $"Queue ({QueueListView.Items.Count} Unitypackage)"
                         : $"Queue ({QueueListView.Items.Count} Unitypackage(s))";
                     ExtractionBtn.Visibility = Visibility.Visible;
@@ -657,6 +666,7 @@ public partial class Extraction : UserControl, INotifyPropertyChanged
                     StatusBarDetailsTxt.Visibility = Visibility.Collapsed;
                     ExtractionBtn.IsEnabled = true;
                     ExtractionBtn.Appearance = ControlAppearance.Primary;
+                    UpdateSelectAllToggleContent();
                     await ChangeExtractionAnimationAsync().ConfigureAwait(false);
                     _isExtraction = false;
                     await UpdateExtractedFiles();
@@ -671,6 +681,7 @@ public partial class Extraction : UserControl, INotifyPropertyChanged
                     : $"Successfully extracted {fileFinishedCounter} Unitypackages, {ignoredCounter} ignored.";
                 StatusProgressBar.Visibility = Visibility.Collapsed;
                 StatusBarDetailsTxt.Visibility = Visibility.Collapsed;
+                UpdateSelectAllToggleContent();
                 await ChangeExtractionAnimationAsync().ConfigureAwait(false);
                 _isExtraction = false;
                 await UpdateExtractedFiles();
@@ -878,6 +889,7 @@ public partial class Extraction : UserControl, INotifyPropertyChanged
             await UpdateQueueHeaderAsync();
             await UpdateInfoBadgesAsync();
             await UpdateExtractedFiles();
+            UpdateSelectAllToggleContent();
         });
     }
 
@@ -925,6 +937,7 @@ public partial class Extraction : UserControl, INotifyPropertyChanged
             await UpdateQueueHeaderAsync();
             await UpdateInfoBadgesAsync();
             await UpdateExtractedFiles();
+            UpdateSelectAllToggleContent();
         });
     }
 
@@ -1031,6 +1044,7 @@ public partial class Extraction : UserControl, INotifyPropertyChanged
         await UpdateQueueHeaderAsync();
         await UpdateInfoBadgesAsync();
         await UpdateExtractedFiles();
+        UpdateSelectAllToggleContent();
     }
 
     private async void ClearIgnoredListBtn_OnClick(object sender, RoutedEventArgs e)
@@ -1078,6 +1092,17 @@ public partial class Extraction : UserControl, INotifyPropertyChanged
             await UpdateQueueHeaderAsync();
             await UpdateInfoBadgesAsync();
             await UpdateExtractedFiles();
+            UpdateSelectAllToggleContent();
         });
+    }
+
+    private void SelectAllUnitypackageToggle_OnChecked(object sender, RoutedEventArgs e)
+    {
+        foreach (var unitypackage in ExtractedUnitypackages) unitypackage.PackageIsChecked = true;
+    }
+
+    private void SelectAllUnitypackageToggle_OnUnchecked(object sender, RoutedEventArgs e)
+    {
+        foreach (var unitypackage in ExtractedUnitypackages) unitypackage.PackageIsChecked = false;
     }
 }

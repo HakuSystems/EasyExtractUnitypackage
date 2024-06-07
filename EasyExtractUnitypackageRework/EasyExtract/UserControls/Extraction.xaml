@@ -6,7 +6,7 @@
              xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
              xmlns:gif="https://github.com/XamlAnimatedGif/XamlAnimatedGif"
              mc:Ignorable="d"
-             Background="{DynamicResource BackgroundPrimaryBrush}"
+             Background="Black"
              Foreground="{DynamicResource TextFillColorPrimaryBrush}"
              FontFamily="{DynamicResource SegoeFluentIcons}"
              AllowDrop="True"
@@ -23,7 +23,9 @@
             <TabItem x:Name="ExtractionTab">
                 <TabItem.Header>
                     <StackPanel Orientation="Horizontal">
-                        <ui:SymbolIcon Margin="0,0,6,0" Symbol="DocumentTextExtract24" />
+                        <ui:SymbolIcon Margin="0,0,6,0"
+                                       Foreground="{DynamicResource AccentTextFillColorSecondaryBrush}"
+                                       Symbol="DocumentTextExtract24" />
                         <TextBlock Text="Extraction" />
                     </StackPanel>
                 </TabItem.Header>
@@ -35,12 +37,21 @@
                         <RowDefinition Height="Auto" />
                     </Grid.RowDefinitions>
                     <ui:CardExpander
-                        Header="Queue"
                         VerticalAlignment="Top"
                         x:Name="QueueExpander"
+                        Foreground="{DynamicResource AccentTextFillColorSecondaryBrush}"
                         HorizontalAlignment="Stretch"
                         HorizontalContentAlignment="Stretch"
                         Icon="{ui:SymbolIcon DocumentQueue24}">
+                        <ui:CardExpander.Header>
+                            <StackPanel Orientation="Horizontal">
+                                <StackPanel>
+                                    <TextBlock Text="Queue" x:Name="QueueHeaderText" Margin="5" FontWeight="Bold"
+                                               FontSize="24" />
+                                </StackPanel>
+                            </StackPanel>
+                        </ui:CardExpander.Header>
+
                         <ui:ListView
                             x:Name="QueueListView"
                             HorizontalAlignment="Stretch"
@@ -114,7 +125,9 @@
             <TabItem x:Name="ManageExtractedTab" IsSelected="True">
                 <TabItem.Header>
                     <StackPanel Orientation="Horizontal">
-                        <ui:SymbolIcon Margin="0,0,6,0" Symbol="Settings24" />
+                        <ui:SymbolIcon Margin="0,0,6,0"
+                                       Foreground="{DynamicResource AccentTextFillColorSecondaryBrush}"
+                                       Symbol="Settings24" />
                         <TextBlock Text="Manage Extracted" />
                         <ui:InfoBadge Severity="Success" x:Name="ManageExtractedInfoBadge" />
                     </StackPanel>
@@ -132,14 +145,31 @@
 
 
                     <!-- Unity Package Enumeration Start -->
-                    <ui:CardExpander Header="Unitypackages" VerticalAlignment="Top"
+                    <ui:CardExpander VerticalAlignment="Top"
                                      x:Name="ExtractedPackagesExpander"
                                      Grid.Row="0" Grid.Column="0"
                                      Grid.ColumnSpan="2"
                                      IsExpanded="True"
+                                     Foreground="{DynamicResource AccentTextFillColorSecondaryBrush}"
+                                     Icon="{ui:SymbolIcon FolderZip24}"
                                      VerticalContentAlignment="Center"
-                                     HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch"
-                                     Icon="{ui:SymbolIcon Folder24}">
+                                     HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch">
+                        <ui:CardExpander.Header>
+                            <StackPanel Orientation="Horizontal">
+                                <StackPanel>
+                                    <TextBlock Text="All Extracted Unitypackages" Margin="5" FontWeight="Bold"
+                                               FontSize="24" />
+                                    <ui:Card Padding="3">
+                                        <ui:ToggleSwitch x:Name="SelectAllUnitypackageToggle"
+                                                         Checked="SelectAllUnitypackageToggle_OnChecked"
+                                                         Unchecked="SelectAllUnitypackageToggle_OnUnchecked"
+                                                         HorizontalAlignment="Center"
+                                                         Margin="5"
+                                                         Content="Select Everything [Count]" />
+                                    </ui:Card>
+                                </StackPanel>
+                            </StackPanel>
+                        </ui:CardExpander.Header>
                         <ScrollViewer VerticalScrollBarVisibility="Auto" x:Name="ExtractedItemsScroller">
                             <TreeView x:Name="UnityPackageTreeView"
                                       ItemsSource="{Binding ExtractedUnitypackages}">
@@ -295,7 +325,9 @@
             <TabItem>
                 <TabItem.Header>
                     <StackPanel Orientation="Horizontal">
-                        <ui:SymbolIcon Margin="0,0,6,0" Symbol="Warning24" />
+                        <ui:SymbolIcon Margin="0,0,6,0"
+                                       Foreground="{DynamicResource AccentTextFillColorSecondaryBrush}"
+                                       Symbol="Warning24" />
                         <TextBlock Text="Ignored" />
                         <ui:InfoBadge Severity="Caution" x:Name="ManageIgnoredInfoBadge" />
                     </StackPanel>
@@ -307,13 +339,23 @@
                         <RowDefinition Height="Auto" />
                     </Grid.RowDefinitions>
                     <ui:CardExpander
-                        Header="Ignored"
+                        Foreground="{DynamicResource AccentTextFillColorSecondaryBrush}"
                         VerticalAlignment="Top"
                         x:Name="IgnoredExpander"
                         IsExpanded="True"
                         HorizontalAlignment="Stretch"
                         HorizontalContentAlignment="Stretch"
                         Icon="{ui:SymbolIcon Warning24}">
+
+                        <ui:CardExpander.Header>
+                            <StackPanel Orientation="Horizontal">
+                                <StackPanel>
+                                    <TextBlock Text="Ignored" Margin="5" FontWeight="Bold"
+                                               FontSize="24" />
+                                </StackPanel>
+                            </StackPanel>
+                        </ui:CardExpander.Header>
+
                         <ui:ListView
                             x:Name="IgnoredListView"
                             HorizontalAlignment="Stretch"
