@@ -11,6 +11,8 @@ using System.Windows.Threading;
 using EasyExtract.Config;
 using EasyExtract.Discord;
 using EasyExtract.Extraction;
+using LiveCharts;
+using LiveCharts.Wpf;
 using Microsoft.Win32;
 using Wpf.Ui.Controls;
 using XamlAnimatedGif;
@@ -103,6 +105,47 @@ public partial class Extraction : UserControl, INotifyPropertyChanged
     public ObservableCollection<IgnoredUnitypackageModel> IgnoredUnitypackages { get; set; } = new();
 
     public event PropertyChangedEventHandler PropertyChanged;
+
+    private void UpdateChart()
+    {
+        var collection = new SeriesCollection();
+        var extractedUnitypackages = ExtractedUnitypackages.ToList();
+
+        var categories = new string[]
+        {
+            "Scripts", "Shaders", "Prefabs", "3D Objects", "Images", "Audios", "Animations", "Scenes", "Materials",
+            "Assets", "Controllers", "Fonts", "Configurations", "Data"
+        };
+
+        var counts = new int[]
+        {
+            extractedUnitypackages.Sum(x => x.UnitypackageTotalScriptCount),
+            extractedUnitypackages.Sum(x => x.UnitypackageTotalShaderCount),
+            extractedUnitypackages.Sum(x => x.UnitypackageTotalPrefabCount),
+            extractedUnitypackages.Sum(x => x.UnitypackageTotal3DObjectCount),
+            extractedUnitypackages.Sum(x => x.UnitypackageTotalImageCount),
+            extractedUnitypackages.Sum(x => x.UnitypackageTotalAudioCount),
+            extractedUnitypackages.Sum(x => x.UnitypackageTotalAnimationCount),
+            extractedUnitypackages.Sum(x => x.UnitypackageTotalSceneCount),
+            extractedUnitypackages.Sum(x => x.UnitypackageTotalMaterialCount),
+            extractedUnitypackages.Sum(x => x.UnitypackageTotalAssetCount),
+            extractedUnitypackages.Sum(x => x.UnitypackageTotalControllerCount),
+            extractedUnitypackages.Sum(x => x.UnitypackageTotalFontCount),
+            extractedUnitypackages.Sum(x => x.UnitypackageTotalConfigurationCount),
+            extractedUnitypackages.Sum(x => x.UnitypackageTotalDataCount)
+        };
+
+        for (var i = 0; i < categories.Length; i++)
+        {
+            collection.Add(new ColumnSeries()
+            {
+                Title = categories[i],
+                Values = new ChartValues<double> { counts[i] }
+            });
+        }
+
+        UnityPackageChart.Series = collection;
+    }
 
     /// <summary>
     ///     Populates the list of extracted files asynchronously.
@@ -292,6 +335,7 @@ public partial class Extraction : UserControl, INotifyPropertyChanged
         else
             ManageExtractedTab.IsSelected = true;
         UpdateSelectAllToggleContent();
+        UpdateChart();
     }
 
     private void UpdateSelectAllToggleContent()
@@ -299,6 +343,7 @@ public partial class Extraction : UserControl, INotifyPropertyChanged
         SelectAllUnitypackageToggle.Content = ExtractedUnitypackages.Count > 0
             ? $"Select All {ExtractedUnitypackages.Count}"
             : "Select All Unitypackages";
+        UpdateChart();
     }
 
     private async Task UpdateIgnoredConfigListAsync()
