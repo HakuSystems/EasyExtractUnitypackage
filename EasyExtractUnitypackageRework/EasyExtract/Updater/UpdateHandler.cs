@@ -1,7 +1,9 @@
 using System.Diagnostics;
 using System.IO;
+using System.IO.Compression;
 using System.Net.Http;
 using System.Net.Http.Headers;
+using System.Windows;
 using EasyExtract.Config;
 using Newtonsoft.Json;
 
@@ -48,26 +50,55 @@ public class UpdateHandler
     {
         try
         {
-            if (UpdateUri == null) return false; // No update available
+            if (UpdateUri == null)
+            {
+                await Console.Error.WriteLineAsync("No update URI available.");
+                return false; // No update available
+            }
 
             var tempPath = ConfigModel.DefaultTempPath;
             var tempFile = Path.Combine(tempPath, NewAppName);
 
-            using var response = await _client.GetAsync(UpdateUri);
-            response.EnsureSuccessStatusCode();
+            // Download the update file
+            using (var response = await _client.GetAsync(UpdateUri))
+            {
+                response.EnsureSuccessStatusCode();
+                await using var fileStream = new FileStream(tempFile, FileMode.Create);
+                await response.Content.CopyToAsync(fileStream);
+            }
 
-            await using var fileStream = new FileStream(tempFile, FileMode.Create);
-            await response.Content.CopyToAsync(fileStream);
+            // Extract if it's a ZIP, otherwise assume it's the executable
+            string exePath;
+            if (Path.GetExtension(tempFile).Equals(".zip", StringComparison.OrdinalIgnoreCase))
+            {
+                var extractPath = Path.Combine(tempPath, Path.GetFileNameWithoutExtension(tempFile));
+                ZipFile.ExtractToDirectory(tempFile, extractPath);
+                exePath = Directory.GetFiles(extractPath, "*.exe", SearchOption.AllDirectories).FirstOrDefault();
 
+                if (exePath == null) throw new FileNotFoundException("Exe not found within the ZIP archive.");
+            }
+            else
+            {
+                exePath = tempFile;
+            }
 
-            Process.Start(new ProcessStartInfo(tempFile) { UseShellExecute = false });
+            var newProcess = Process.Start(new ProcessStartInfo(exePath) { UseShellExecute = true });
+            if (newProcess != null)
+            {
+                await Task.Delay(2000); // Delay to allow the new process to start
 
-            Environment.Exit(0);
-            return true;
+                // Close the current application
+                Application.Current?.Dispatcher.Invoke(Application.Current.Shutdown);
+
+                return true;
+            }
+
+            throw new Exception("Failed to start the new process.");
         }
         catch (Exception ex)
         {
             await Console.Error.WriteLineAsync($"Update failed: {ex.Message}");
+            // Consider showing a user-friendly error message here
             return false;
         }
     }
