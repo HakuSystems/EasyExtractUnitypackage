@@ -6,6 +6,7 @@ using System.Runtime.CompilerServices;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
+using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Threading;
 using EasyExtract.Config;
@@ -117,6 +118,28 @@ public partial class Extraction : UserControl, INotifyPropertyChanged
             "Assets", "Controllers", "Fonts", "Configurations", "Data"
         };
 
+        var colors = new[]
+        {
+            Brushes.Red,
+            Brushes.DarkBlue,
+            Brushes.Gold,
+            Brushes.LimeGreen,
+            Brushes.MediumOrchid,
+            Brushes.OrangeRed,
+            Brushes.DarkTurquoise,
+            Brushes.LightPink,
+            Brushes.DarkSlateBlue,
+            Brushes.Brown,
+            Brushes.ForestGreen,
+            Brushes.DeepPink,
+            Brushes.YellowGreen,
+            Brushes.SteelBlue,
+            Brushes.Sienna,
+            Brushes.Tan,
+            Brushes.Plum,
+            Brushes.LightSalmon
+        };
+
         var counts = new int[]
         {
             extractedUnitypackages.Sum(x => x.UnitypackageTotalScriptCount),
@@ -140,9 +163,14 @@ public partial class Extraction : UserControl, INotifyPropertyChanged
             collection.Add(new ColumnSeries()
             {
                 Title = categories[i],
-                Values = new ChartValues<double> { counts[i] }
+                Values = new ChartValues<double> { counts[i] },
+                Fill = colors[i],
+                DataLabels = true,
+                FontSize = 12,
+                FontWeight = FontWeights.Bold
             });
         }
+
 
         UnityPackageChart.Series = collection;
     }
@@ -1149,5 +1177,10 @@ public partial class Extraction : UserControl, INotifyPropertyChanged
     private void SelectAllUnitypackageToggle_OnUnchecked(object sender, RoutedEventArgs e)
     {
         foreach (var unitypackage in ExtractedUnitypackages) unitypackage.PackageIsChecked = false;
+    }
+
+    private void AnalyticsExpander_OnExpanded(object sender, RoutedEventArgs e)
+    {
+        UpdateChart();
     }
 }

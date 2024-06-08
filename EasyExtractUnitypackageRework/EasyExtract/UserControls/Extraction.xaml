@@ -153,7 +153,7 @@
                                      IsExpanded="True"
                                      Foreground="{DynamicResource AccentTextFillColorSecondaryBrush}"
                                      Icon="{ui:SymbolIcon FolderZip24}"
-                                     VerticalContentAlignment="Center"
+                                     VerticalContentAlignment="Stretch"
                                      HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch">
                         <ui:CardExpander.Header>
                             <StackPanel Orientation="Horizontal">
@@ -169,10 +169,10 @@
                                                              Margin="5"
                                                              Content="Select Everything [Count]" />
 
-                                            <StackPanel Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2"
-                                                        Orientation="Horizontal"
-                                                        VerticalAlignment="Bottom"
-                                                        HorizontalAlignment="Stretch" Margin="15">
+                                            <StackPanel
+                                                Orientation="Horizontal"
+                                                VerticalAlignment="Bottom"
+                                                HorizontalAlignment="Stretch" Margin="15">
                                                 <ui:TextBox MaxLines="1" MinWidth="300"
                                                             PlaceholderText="Search unitypackage..."
                                                             x:Name="SearchBar"
@@ -219,18 +219,26 @@
                                         </StackPanel>
 
                                     </ui:Card>
-                                    <charts:CartesianChart charts:Background="{DynamicResource BackgroundPrimaryBrush}"
-                                                           Height="200"
-                                                           HorizontalContentAlignment="Stretch"
-                                                           LegendLocation="Bottom"
-                                                           x:Name="UnityPackageChart">
-                                        <charts:CartesianChart.AxisX>
-                                            <charts:Axis IsEnabled="False" ShowLabels="False"></charts:Axis>
-                                        </charts:CartesianChart.AxisX>
-                                        <charts:CartesianChart.AxisY>
-                                            <charts:Axis IsMerged="True" FontSize="14"></charts:Axis>
-                                        </charts:CartesianChart.AxisY>
-                                    </charts:CartesianChart>
+                                    <ui:Card>
+                                        <ui:CardExpander Header="View Analytics" x:Name="AnalyticsExpander"
+                                                         Expanded="AnalyticsExpander_OnExpanded"
+                                                         Icon="{ui:SymbolIcon DataArea24}">
+                                            <charts:CartesianChart
+                                                Background="{DynamicResource BackgroundPrimaryBrush}"
+                                                Height="200"
+                                                Foreground="{DynamicResource TextFillColorPrimaryBrush}"
+                                                HorizontalContentAlignment="Stretch"
+                                                LegendLocation="Right"
+                                                x:Name="UnityPackageChart">
+                                                <charts:CartesianChart.AxisX>
+                                                    <charts:Axis IsEnabled="False" ShowLabels="False" />
+                                                </charts:CartesianChart.AxisX>
+                                                <charts:CartesianChart.AxisY>
+                                                    <charts:Axis IsMerged="True" FontSize="14" />
+                                                </charts:CartesianChart.AxisY>
+                                            </charts:CartesianChart>
+                                        </ui:CardExpander>
+                                    </ui:Card>
                                 </StackPanel>
 
                             </StackPanel>
