@@ -17,7 +17,7 @@ public partial class Dashboard : FluentWindow
 {
     private static UserControl ContentFrame;
     private static Dashboard instance;
-    private readonly UpdateHandler UpdateHandler = new();
+    private readonly UpdateHandler _updateHandler = new();
 
     public Dashboard()
     {
@@ -70,23 +70,23 @@ public partial class Dashboard : FluentWindow
 
         if (config.AutoUpdate)
         {
-            var uptoDate = await UpdateHandler.IsUptoDate();
-
-            if (!uptoDate) await UpdateHandler.Update();
+            var updateAvailable = !await _updateHandler.IsUpToDate();
 
             await Dispatcher.InvokeAsync(() =>
             {
-                CheckForUpdatesTxt.Text = uptoDate ? "New Update Available" : "Check for Updates";
+                CheckForUpdatesTxt.Text = updateAvailable ? "New Update Available" : "Check for Updates";
                 CheckForUpdatesTxt.Foreground =
-                    new SolidColorBrush(uptoDate ? Color.FromRgb(255, 0, 0) : Color.FromRgb(0, 255, 0));
-                CheckForUpdatesDesc.Text = uptoDate
+                    new SolidColorBrush(updateAvailable ? Color.FromRgb(255, 0, 0) : Color.FromRgb(0, 255, 0));
+                CheckForUpdatesDesc.Text = updateAvailable
                     ? "Click here to update EasyExtractUnitypackage!"
                     : "You're running the latest version of EasyExtractUnitypackage!";
             });
+
+            if (updateAvailable) await _updateHandler.Update();
         }
         else
         {
-            var updateAvailable = await UpdateHandler.IsUptoDate();
+            var updateAvailable = !await _updateHandler.IsUpToDate();
 
             await Dispatcher.InvokeAsync(() =>
             {
@@ -184,7 +184,7 @@ public partial class Dashboard : FluentWindow
 
     private async void CheckForUpdatesNavBtn_OnClick(object sender, RoutedEventArgs e)
     {
-        var updateAvailable = await UpdateHandler.IsUptoDate();
+        var updateAvailable = !await _updateHandler.IsUpToDate();
 
         await Dispatcher.InvokeAsync(() =>
         {
@@ -195,5 +195,7 @@ public partial class Dashboard : FluentWindow
                 ? "Click here to update EasyExtractUnitypackage!"
                 : "You're running the latest version of EasyExtractUnitypackage!";
         });
+
+        if (updateAvailable) await _updateHandler.Update();
     }
 }

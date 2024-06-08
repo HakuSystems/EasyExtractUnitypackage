@@ -1,125 +1,93 @@
 using System.Diagnostics;
 using System.IO;
 using System.Net.Http;
-using System.Net.Http.Headers;
-using System.Windows;
+using System.Reflection;
 using EasyExtract.Config;
-using Newtonsoft.Json;
+using Octokit;
+using FileMode = System.IO.FileMode;
 
 namespace EasyExtract.Updater;
 
 public class UpdateHandler
 {
-    private readonly HttpClient _client = new();
-    private readonly string RepoName = "EasyExtractUnitypackage";
-    private readonly string RepoOwner = "HakuSystems";
-
-    public UpdateHandler()
-    {
-        _client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-        _client.DefaultRequestHeaders.UserAgent.Add(new ProductInfoHeaderValue("EasyExtract", CurrentVersion));
-    }
+    private const string RepoName = "EasyExtractUnitypackage";
+    private const string RepoOwner = "HakuSystems";
 
     private ConfigModel Config { get; } = new();
-    private static string? LatestVersion { get; set; }
-    private string NewAppName => $"EasyExtractUnitypackageV{LatestVersion}";
-    private Uri? UpdateUri { get; set; }
-    private string CurrentVersion => Config.CurrentVersion;
+    private string CurrentVersion => Assembly.GetExecutingAssembly().GetName().Version?.ToString() ?? "0.0.0";
 
-    public async Task<bool> IsUptoDate()
+
+    public async Task<bool> IsUpToDate()
     {
-        var response = await _client.GetAsync($"https://api.github.com/repos/{RepoOwner}/{RepoName}/releases/latest");
-
-        if (response.IsSuccessStatusCode)
+        var latestRelease = await GetLatestReleaseAsync();
+        if (latestRelease != null)
         {
-            var content = await response.Content.ReadAsStringAsync();
-            var release = JsonConvert.DeserializeObject<Release>(content);
-
-            LatestVersion = release?.TagName;
-            UpdateUri = !string.IsNullOrEmpty(release?.HtmlUrl) ? new Uri(release.HtmlUrl) : null;
-
-            return CurrentVersion == LatestVersion; // Equality check
+            var latestVersion = latestRelease.TagName.TrimStart('v', 'V'); // Removing both 'v' and 'V'
+            return Version.TryParse(latestVersion, out var latest) &&
+                   Version.TryParse(CurrentVersion, out var current) &&
+                   latest <= current;
         }
 
-        await Console.Error.WriteLineAsync($"Error checking for updates: {response.StatusCode}");
-        return true;
+        return false;
     }
 
     public async Task<bool> Update()
     {
-        try
+        var latestRelease = await GetLatestReleaseAsync();
+        if (latestRelease != null)
         {
-            if (UpdateUri == null)
+            var asset = latestRelease.Assets.FirstOrDefault(a => a.Name.EndsWith(".exe"));
+            if (asset != null)
             {
-                await Console.Error.WriteLineAsync("No update URI available.");
-                return false; // No update available
+                var exePath = await DownloadAssetAsync(asset.BrowserDownloadUrl);
+                Process.Start(exePath);
+                Environment.Exit(0);
             }
-
-            var response =
-                await _client.GetAsync($"https://api.github.com/repos/{RepoOwner}/{RepoName}/releases/latest");
-            response.EnsureSuccessStatusCode();
-            var content = await response.Content.ReadAsStringAsync();
-            var release = JsonConvert.DeserializeObject<Release>(content);
-
-            // Fetch assets for the release
-            var assetsResponse = await _client.GetAsync(release.AssetsUrl); // Uses the new AssetsUrl property
-            assetsResponse.EnsureSuccessStatusCode();
-            var assetsContent = await assetsResponse.Content.ReadAsStringAsync();
-            var assets = JsonConvert.DeserializeObject<Asset[]>(assetsContent);
-
-            // Filter for .exe asset
-            var exeAsset = assets.FirstOrDefault(a => a.Name.EndsWith(".exe"));
-            if (exeAsset == null)
+            else
             {
-                await Console.Error.WriteLineAsync("No .exe asset found in the release.");
                 return false;
             }
+        }
+        else
+        {
+            return false;
+        }
 
-            var tempPath = ConfigModel.DefaultTempPath;
-            var tempFile = Path.Combine(tempPath, exeAsset.Name);
+        return true;
+    }
 
-            // Download the executable file
-            using (var downloadResponse = await _client.GetAsync(exeAsset.DownloadUrl))
-            {
-                downloadResponse.EnsureSuccessStatusCode();
-                await using var fileStream = new FileStream(tempFile, FileMode.Create);
-                await downloadResponse.Content.CopyToAsync(fileStream);
-            }
+    private async Task<string> DownloadAssetAsync(string url)
+    {
+        var client = new HttpClient();
+        var response = await client.GetAsync(url);
+        var fileName = Path.GetFileName(url);
 
-            // Start the new executable (tempFile) and close the current application
-            var newProcess = Process.Start(new ProcessStartInfo(tempFile) { UseShellExecute = true });
-            if (newProcess != null)
-            {
-                await Task.Delay(2000); // Delay to allow the new process to start
+        var currentDirectory = AppDomain.CurrentDomain.BaseDirectory;
+        var filePath = Path.Combine(currentDirectory, fileName);
 
-                // Close the current application
-                Application.Current?.Dispatcher.Invoke(Application.Current.Shutdown);
+        if (File.Exists(filePath))
+            File.Delete(filePath);
+        using (var fs = new FileStream(filePath, FileMode.Create, FileAccess.Write, FileShare.None))
+        {
+            await response.Content.CopyToAsync(fs);
+        }
 
-                return true;
-            }
+        return filePath;
+    }
 
-            throw new Exception("Failed to start the new process.");
+
+    private async Task<Release> GetLatestReleaseAsync()
+    {
+        try
+        {
+            var client = new GitHubClient(new ProductHeaderValue("GitHubUpdater"));
+            var releases = await client.Repository.Release.GetAll(RepoOwner, RepoName);
+            return releases.FirstOrDefault();
         }
         catch (Exception ex)
         {
-            await Console.Error.WriteLineAsync($"Update failed: {ex.Message}");
-            return false;
+            await Console.Error.WriteAsync(ex.Message);
+            return null;
         }
     }
-}
-
-public class Asset
-{
-    [JsonProperty("name")] public string Name { get; set; }
-
-    [JsonProperty("browser_download_url")] public string DownloadUrl { get; set; }
-}
-
-public class Release
-{
-    [JsonProperty("tag_name")] public string TagName { get; set; }
-
-    [JsonProperty("html_url")] public string HtmlUrl { get; set; }
-
-    [JsonProperty("assets_url")] public string AssetsUrl { get; set; }
 }

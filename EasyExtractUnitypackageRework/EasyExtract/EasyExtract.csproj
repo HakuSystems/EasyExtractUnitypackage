@@ -49,6 +49,9 @@
         <PackageReference Include="Newtonsoft.Json">
             <Version>13.0.3</Version>
         </PackageReference>
+        <PackageReference Include="Octokit">
+            <Version>11.0.1</Version>
+        </PackageReference>
         <PackageReference Include="SharpCompress">
             <Version>0.37.2</Version>
         </PackageReference>
