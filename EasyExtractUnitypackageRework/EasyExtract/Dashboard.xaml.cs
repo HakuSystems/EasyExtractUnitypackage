@@ -5,6 +5,7 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
 using EasyExtract.Config;
+using EasyExtract.Updater;
 using EasyExtract.UserControls;
 using Wpf.Ui.Appearance;
 using Wpf.Ui.Controls;
@@ -16,6 +17,7 @@ public partial class Dashboard : FluentWindow
 {
     private static UserControl ContentFrame;
     private static Dashboard instance;
+    private readonly UpdateHandler UpdateHandler = new();
 
     public Dashboard()
     {
@@ -68,7 +70,33 @@ public partial class Dashboard : FluentWindow
 
         if (config.AutoUpdate)
         {
-            //todo: check for update here
+            var updateAvailable = await UpdateHandler.IsUptoDate();
+
+            if (updateAvailable) await UpdateHandler.Update();
+
+            await Dispatcher.InvokeAsync(() =>
+            {
+                CheckForUpdatesTxt.Text = updateAvailable ? "New Update Available" : "Check for Updates";
+                CheckForUpdatesTxt.Foreground =
+                    new SolidColorBrush(updateAvailable ? Color.FromRgb(255, 0, 0) : Color.FromRgb(0, 255, 0));
+                CheckForUpdatesDesc.Text = updateAvailable
+                    ? "Click here to update EasyExtractUnitypackage!"
+                    : "You're running the latest version of EasyExtractUnitypackage!";
+            });
+        }
+        else
+        {
+            var updateAvailable = await UpdateHandler.IsUptoDate();
+
+            await Dispatcher.InvokeAsync(() =>
+            {
+                CheckForUpdatesTxt.Text = updateAvailable ? "New Update Available" : "Check for Updates";
+                CheckForUpdatesTxt.Foreground =
+                    new SolidColorBrush(updateAvailable ? Color.FromRgb(255, 0, 0) : Color.FromRgb(0, 255, 0));
+                CheckForUpdatesDesc.Text = updateAvailable
+                    ? "Click here to update EasyExtractUnitypackage!"
+                    : "You're running the latest version of EasyExtractUnitypackage!";
+            });
         }
 
         switch (config.IsFirstRun)
@@ -151,5 +179,21 @@ public partial class Dashboard : FluentWindow
             UserControls.Extraction._queueList.Add(new SearchEverythingModel
                 { UnityPackageName = name, UnityPackagePath = file, Id = 0 });
         }
+    }
+
+
+    private async void CheckForUpdatesNavBtn_OnClick(object sender, RoutedEventArgs e)
+    {
+        var updateAvailable = await UpdateHandler.IsUptoDate();
+
+        await Dispatcher.InvokeAsync(() =>
+        {
+            CheckForUpdatesTxt.Text = updateAvailable ? "New Update Available" : "Check for Updates";
+            CheckForUpdatesTxt.Foreground =
+                new SolidColorBrush(updateAvailable ? Color.FromRgb(255, 0, 0) : Color.FromRgb(0, 255, 0));
+            CheckForUpdatesDesc.Text = updateAvailable
+                ? "Click here to update EasyExtractUnitypackage!"
+                : "You're running the latest version of EasyExtractUnitypackage!";
+        });
     }
 }

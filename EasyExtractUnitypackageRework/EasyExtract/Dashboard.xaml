@@ -87,6 +87,32 @@
                                        Background="{DynamicResource BackgroundPrimaryBrush}"
                                        TargetPageType="{x:Type UserControls:About}"
                                        Icon="{ui:SymbolIcon Heart24}" />
+                <ui:NavigationViewItem TargetPageTag="Updater"
+                                       HorizontalAlignment="Stretch"
+                                       VerticalAlignment="Stretch"
+                                       x:Name="CheckForUpdatesNavBtn"
+                                       Click="CheckForUpdatesNavBtn_OnClick"
+                                       HorizontalContentAlignment="Stretch"
+                                       VerticalContentAlignment="Stretch"
+                                       Foreground="{DynamicResource TextFillColorPrimaryBrush}"
+                                       Background="{DynamicResource BackgroundPrimaryBrush}"
+                                       Icon="{ui:SymbolIcon ArrowSyncCircle24}">
+                    <ui:NavigationViewItem.Content>
+                        <StackPanel>
+                            <ui:TextBlock
+                                Text="Check for updates"
+                                x:Name="CheckForUpdatesTxt"
+                                FontTypography="BodyStrong"
+                                TextWrapping="WrapWithOverflow" />
+                            <ui:TextBlock
+                                Appearance="Secondary"
+                                x:Name="CheckForUpdatesDesc"
+                                Text="You are up to date."
+                                Opacity="0.5"
+                                TextWrapping="WrapWithOverflow" />
+                        </StackPanel>
+                    </ui:NavigationViewItem.Content>
+                </ui:NavigationViewItem>
             </ui:NavigationView.MenuItems>
             <ui:NavigationView.Header>
                 <ui:CardControl>
