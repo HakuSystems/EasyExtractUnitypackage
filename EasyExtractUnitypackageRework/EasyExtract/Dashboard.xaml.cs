@@ -70,16 +70,16 @@ public partial class Dashboard : FluentWindow
 
         if (config.AutoUpdate)
         {
-            var updateAvailable = await UpdateHandler.IsUptoDate();
+            var uptoDate = await UpdateHandler.IsUptoDate();
 
-            if (!updateAvailable) await UpdateHandler.Update();
+            if (!uptoDate) await UpdateHandler.Update();
 
             await Dispatcher.InvokeAsync(() =>
             {
-                CheckForUpdatesTxt.Text = updateAvailable ? "New Update Available" : "Check for Updates";
+                CheckForUpdatesTxt.Text = uptoDate ? "New Update Available" : "Check for Updates";
                 CheckForUpdatesTxt.Foreground =
-                    new SolidColorBrush(updateAvailable ? Color.FromRgb(255, 0, 0) : Color.FromRgb(0, 255, 0));
-                CheckForUpdatesDesc.Text = updateAvailable
+                    new SolidColorBrush(uptoDate ? Color.FromRgb(255, 0, 0) : Color.FromRgb(0, 255, 0));
+                CheckForUpdatesDesc.Text = uptoDate
                     ? "Click here to update EasyExtractUnitypackage!"
                     : "You're running the latest version of EasyExtractUnitypackage!";
             });
