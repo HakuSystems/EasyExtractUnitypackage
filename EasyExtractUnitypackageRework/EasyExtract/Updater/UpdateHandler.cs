@@ -1,6 +1,5 @@
 using System.Diagnostics;
 using System.IO;
-using System.IO.Compression;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Windows;
@@ -56,33 +55,39 @@ public class UpdateHandler
                 return false; // No update available
             }
 
+            var response =
+                await _client.GetAsync($"https://api.github.com/repos/{RepoOwner}/{RepoName}/releases/latest");
+            response.EnsureSuccessStatusCode();
+            var content = await response.Content.ReadAsStringAsync();
+            var release = JsonConvert.DeserializeObject<Release>(content);
+
+            // Fetch assets for the release
+            var assetsResponse = await _client.GetAsync(release.AssetsUrl); // Uses the new AssetsUrl property
+            assetsResponse.EnsureSuccessStatusCode();
+            var assetsContent = await assetsResponse.Content.ReadAsStringAsync();
+            var assets = JsonConvert.DeserializeObject<Asset[]>(assetsContent);
+
+            // Filter for .exe asset
+            var exeAsset = assets.FirstOrDefault(a => a.Name.EndsWith(".exe"));
+            if (exeAsset == null)
+            {
+                await Console.Error.WriteLineAsync("No .exe asset found in the release.");
+                return false;
+            }
+
             var tempPath = ConfigModel.DefaultTempPath;
-            var tempFile = Path.Combine(tempPath, NewAppName);
+            var tempFile = Path.Combine(tempPath, exeAsset.Name);
 
-            // Download the update file
-            using (var response = await _client.GetAsync(UpdateUri))
+            // Download the executable file
+            using (var downloadResponse = await _client.GetAsync(exeAsset.DownloadUrl))
             {
-                response.EnsureSuccessStatusCode();
+                downloadResponse.EnsureSuccessStatusCode();
                 await using var fileStream = new FileStream(tempFile, FileMode.Create);
-                await response.Content.CopyToAsync(fileStream);
+                await downloadResponse.Content.CopyToAsync(fileStream);
             }
 
-            // Extract if it's a ZIP, otherwise assume it's the executable
-            string exePath;
-            if (Path.GetExtension(tempFile).Equals(".zip", StringComparison.OrdinalIgnoreCase))
-            {
-                var extractPath = Path.Combine(tempPath, Path.GetFileNameWithoutExtension(tempFile));
-                ZipFile.ExtractToDirectory(tempFile, extractPath);
-                exePath = Directory.GetFiles(extractPath, "*.exe", SearchOption.AllDirectories).FirstOrDefault();
-
-                if (exePath == null) throw new FileNotFoundException("Exe not found within the ZIP archive.");
-            }
-            else
-            {
-                exePath = tempFile;
-            }
-
-            var newProcess = Process.Start(new ProcessStartInfo(exePath) { UseShellExecute = true });
+            // Start the new executable (tempFile) and close the current application
+            var newProcess = Process.Start(new ProcessStartInfo(tempFile) { UseShellExecute = true });
             if (newProcess != null)
             {
                 await Task.Delay(2000); // Delay to allow the new process to start
@@ -98,10 +103,16 @@ public class UpdateHandler
         catch (Exception ex)
         {
             await Console.Error.WriteLineAsync($"Update failed: {ex.Message}");
-            // Consider showing a user-friendly error message here
             return false;
         }
     }
+}
+
+public class Asset
+{
+    [JsonProperty("name")] public string Name { get; set; }
+
+    [JsonProperty("browser_download_url")] public string DownloadUrl { get; set; }
 }
 
 public class Release
@@ -109,4 +120,6 @@ public class Release
     [JsonProperty("tag_name")] public string TagName { get; set; }
 
     [JsonProperty("html_url")] public string HtmlUrl { get; set; }
+
+    [JsonProperty("assets_url")] public string AssetsUrl { get; set; }
 }
