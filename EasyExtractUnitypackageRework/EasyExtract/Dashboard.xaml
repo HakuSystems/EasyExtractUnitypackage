@@ -26,8 +26,7 @@
             <ColumnDefinition Width="*" />
         </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
-            <RowDefinition Height="30" />
-            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
         <ui:TitleBar Grid.Row="0"
@@ -37,7 +36,7 @@
                      HorizontalContentAlignment="Center"
                      Title="{Binding AppTitle}" Grid.ColumnSpan="3" />
 
-        <ui:NavigationView Grid.Row="1" Grid.Column="0" Grid.RowSpan="2" Grid.ColumnSpan="3"
+        <ui:NavigationView Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="3"
                            PaneTitle="EasyExtractUnitypackage"
                            x:Name="NavView"
                            HorizontalAlignment="Stretch"
@@ -48,7 +47,7 @@
                            Background="{DynamicResource BackgroundPrimaryBrush}"
                            FontWeight="DemiBold"
                            Transition="FadeInWithSlide"
-                           PaneDisplayMode="LeftFluent"
+                           PaneDisplayMode="Left"
                            ContentOverlay="{Binding ElementName=ContentFrame}"
                            IsBackButtonVisible="Collapsed">
             <ui:NavigationView.MenuItems>
