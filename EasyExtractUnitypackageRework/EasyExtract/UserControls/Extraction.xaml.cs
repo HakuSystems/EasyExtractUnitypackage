@@ -1041,7 +1041,7 @@ public partial class Extraction : UserControl, INotifyPropertyChanged
 
     private async void MoveToDifferentDirectoryBtn_OnClick(object sender, RoutedEventArgs e)
     {
-        var standardString = "Move Selected to Different Directory";
+        var standardString = "Move Selected";
         // only whole unitypackages
         var selectedUnitypackage = ExtractedUnitypackages.FirstOrDefault(x => x.PackageIsChecked);
         if (selectedUnitypackage == null)
