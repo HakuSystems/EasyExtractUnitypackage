@@ -72,7 +72,7 @@ public partial class Dashboard : FluentWindow
         {
             var updateAvailable = await UpdateHandler.IsUptoDate();
 
-            if (updateAvailable) await UpdateHandler.Update();
+            if (!updateAvailable) await UpdateHandler.Update();
 
             await Dispatcher.InvokeAsync(() =>
             {
