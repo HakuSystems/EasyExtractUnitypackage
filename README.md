@@ -38,7 +38,7 @@
 For any queries, suggestions, or feedback, please reach out to us:
 - Discord: [EasyExtractUnitypackage Discord](https://discord.gg/Wn7XfhPCyD)
 
-## Images (V2.0.5.5)
+## Images
 ![Image 1](https://f.biyori.moe/6B49aD.png)
 ![Image 2](https://f.biyori.moe/nics7T.png)
 ![Image 3](https://f.biyori.moe/EYwtqG.png)
