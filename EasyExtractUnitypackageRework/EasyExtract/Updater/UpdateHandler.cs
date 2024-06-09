@@ -4,6 +4,8 @@ using System.Net.Http;
 using System.Reflection;
 using EasyExtract.Config;
 using Octokit;
+using SharpCompress.Archives;
+using SharpCompress.Common;
 using FileMode = System.IO.FileMode;
 
 namespace EasyExtract.Updater;
@@ -12,10 +14,8 @@ public class UpdateHandler
 {
     private const string RepoName = "EasyExtractUnitypackage";
     private const string RepoOwner = "HakuSystems";
-
     private ConfigModel Config { get; } = new();
     private string CurrentVersion => Assembly.GetExecutingAssembly().GetName().Version?.ToString() ?? "0.0.0";
-
 
     public async Task<bool> IsUpToDate()
     {
@@ -36,12 +36,20 @@ public class UpdateHandler
         var latestRelease = await GetLatestReleaseAsync();
         if (latestRelease != null)
         {
-            var asset = latestRelease.Assets.FirstOrDefault(a => a.Name.EndsWith(".exe"));
+            var asset = latestRelease.Assets.FirstOrDefault(a => a.Name.EndsWith(".rar"));
             if (asset != null)
             {
-                var exePath = await DownloadAssetAsync(asset.BrowserDownloadUrl);
-                Process.Start(exePath);
-                Environment.Exit(0);
+                var rarPath = await DownloadAssetAsync(asset.BrowserDownloadUrl);
+                var exePath = ExtractRar(rarPath);
+                if (exePath != null)
+                {
+                    Process.Start(exePath);
+                    Environment.Exit(0);
+                }
+                else
+                {
+                    return false;
+                }
             }
             else
             {
@@ -65,8 +73,8 @@ public class UpdateHandler
         var currentDirectory = AppDomain.CurrentDomain.BaseDirectory;
         var filePath = Path.Combine(currentDirectory, fileName);
 
-        if (File.Exists(filePath))
-            File.Delete(filePath);
+        DeleteOldFiles(currentDirectory);
+
         using (var fs = new FileStream(filePath, FileMode.Create, FileAccess.Write, FileShare.None))
         {
             await response.Content.CopyToAsync(fs);
@@ -75,6 +83,29 @@ public class UpdateHandler
         return filePath;
     }
 
+    private void DeleteOldFiles(string directory)
+    {
+        var rarFiles = Directory.GetFiles(directory, "*.rar");
+        var extractedFiles = Directory.GetFiles(directory, "*.*").Where(f => !f.EndsWith(".rar")).ToArray();
+
+        foreach (var file in rarFiles) File.Delete(file);
+
+        foreach (var file in extractedFiles) File.Delete(file);
+    }
+
+    private string ExtractRar(string rarPath)
+    {
+        var currentDirectory = AppDomain.CurrentDomain.BaseDirectory;
+        using (var archive = ArchiveFactory.Open(rarPath))
+        {
+            foreach (var entry in archive.Entries.Where(entry => !entry.IsDirectory))
+                entry.WriteToDirectory(currentDirectory,
+                    new ExtractionOptions { ExtractFullPath = true, Overwrite = true });
+        }
+
+        var exeFile = Directory.GetFiles(currentDirectory, "*.exe").FirstOrDefault();
+        return exeFile;
+    }
 
     private async Task<Release> GetLatestReleaseAsync()
     {
