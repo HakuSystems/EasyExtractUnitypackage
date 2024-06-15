@@ -47,11 +47,16 @@ public partial class Extraction : UserControl, INotifyPropertyChanged
     /// The boolean variable _isExtraction represents whether an extraction process is currently happening or not.
     private bool _isExtraction;
 
+    private readonly BetterLogger _logger = new();
+    private readonly ConfigHelper ConfigHelper = new();
+
     public Extraction()
     {
         InitializeComponent();
         DataContext = this;
     }
+
+    private ConfigModel Config { get; } = new();
 
     /// <summary>
     ///     The ExtractionHelper class provides various helper methods for extracting information from directories.
@@ -107,7 +112,7 @@ public partial class Extraction : UserControl, INotifyPropertyChanged
 
     public event PropertyChangedEventHandler PropertyChanged;
 
-    private void UpdateChart()
+    private async void UpdateChart()
     {
         var collection = new SeriesCollection();
         var extractedUnitypackages = ExtractedUnitypackages.ToList();
@@ -182,7 +187,7 @@ public partial class Extraction : UserControl, INotifyPropertyChanged
     {
         // Populate the list of extracted Unitypackages from the extracted folder
         // Get the directories in the extraction path
-        var directories = Directory.GetDirectories(ConfigModel.LastExtractedPath);
+        var directories = Directory.GetDirectories(Config.LastExtractedPath);
         foreach (var directory in directories)
         {
             // Calculate total size and create a model for the Unitypackage.
@@ -198,6 +203,8 @@ public partial class Extraction : UserControl, INotifyPropertyChanged
                     ExtractedUnitypackages.Add(unitypackage);
             });
         }
+
+        await _logger.LogAsync("Populated Extracted Files List", "Extraction.xaml.cs", Importance.Info);
     }
 
     /// <summary>
@@ -222,27 +229,27 @@ public partial class Extraction : UserControl, INotifyPropertyChanged
     /// <returns>A task that represents the asynchronous operation. The task result contains the created Unitypackage model.</returns>
     private Task<ExtractedUnitypackageModel> CreateUnityPackageModelAsync(string directory, long totalSizeInBytes)
     {
-        return Task.Run(() => new ExtractedUnitypackageModel
+        return Task.Run(async () => new ExtractedUnitypackageModel
         {
             UnitypackageName = Path.GetFileName(directory),
             UnitypackagePath = directory,
-            UnitypackageSize = ExtractionHelper.GetReadableFileSize(totalSizeInBytes),
-            UnitypackageTotalFileCount = ExtractionHelper.GetTotalFileCount(directory),
-            UnitypackageTotalFolderCount = ExtractionHelper.GetTotalFolderCount(directory),
-            UnitypackageTotalScriptCount = ExtractionHelper.GetTotalScriptCount(directory),
-            UnitypackageTotalShaderCount = ExtractionHelper.GetTotalShaderCount(directory),
-            UnitypackageTotalPrefabCount = ExtractionHelper.GetTotalPrefabCount(directory),
-            UnitypackageTotal3DObjectCount = ExtractionHelper.GetTotal3DObjectCount(directory),
-            UnitypackageTotalImageCount = ExtractionHelper.GetTotalImageCount(directory),
-            UnitypackageTotalAudioCount = ExtractionHelper.GetTotalAudioCount(directory),
-            UnitypackageTotalAnimationCount = ExtractionHelper.GetTotalAnimationCount(directory),
-            UnitypackageTotalSceneCount = ExtractionHelper.GetTotalSceneCount(directory),
-            UnitypackageTotalMaterialCount = ExtractionHelper.GetTotalMaterialCount(directory),
-            UnitypackageTotalAssetCount = ExtractionHelper.GetTotalAssetCount(directory),
-            UnitypackageTotalControllerCount = ExtractionHelper.GetTotalControllerCount(directory),
-            UnitypackageTotalFontCount = ExtractionHelper.GetTotalFontCount(directory),
-            UnitypackageTotalConfigurationCount = ExtractionHelper.GetTotalConfigurationCount(directory),
-            UnitypackageTotalDataCount = ExtractionHelper.GetTotalDataCount(directory),
+            UnitypackageSize = await ExtractionHelper.GetReadableFileSize(totalSizeInBytes),
+            UnitypackageTotalFileCount = await ExtractionHelper.GetTotalFileCount(directory),
+            UnitypackageTotalFolderCount = await ExtractionHelper.GetTotalFolderCount(directory),
+            UnitypackageTotalScriptCount = await ExtractionHelper.GetTotalScriptCount(directory),
+            UnitypackageTotalShaderCount = await ExtractionHelper.GetTotalShaderCount(directory),
+            UnitypackageTotalPrefabCount = await ExtractionHelper.GetTotalPrefabCount(directory),
+            UnitypackageTotal3DObjectCount = await ExtractionHelper.GetTotal3DObjectCount(directory),
+            UnitypackageTotalImageCount = await ExtractionHelper.GetTotalImageCount(directory),
+            UnitypackageTotalAudioCount = await ExtractionHelper.GetTotalAudioCount(directory),
+            UnitypackageTotalAnimationCount = await ExtractionHelper.GetTotalAnimationCount(directory),
+            UnitypackageTotalSceneCount = await ExtractionHelper.GetTotalSceneCount(directory),
+            UnitypackageTotalMaterialCount = await ExtractionHelper.GetTotalMaterialCount(directory),
+            UnitypackageTotalAssetCount = await ExtractionHelper.GetTotalAssetCount(directory),
+            UnitypackageTotalControllerCount = await ExtractionHelper.GetTotalControllerCount(directory),
+            UnitypackageTotalFontCount = await ExtractionHelper.GetTotalFontCount(directory),
+            UnitypackageTotalConfigurationCount = await ExtractionHelper.GetTotalConfigurationCount(directory),
+            UnitypackageTotalDataCount = await ExtractionHelper.GetTotalDataCount(directory),
             UnitypackageExtractedDate = Directory.GetCreationTime(directory)
         });
     }
@@ -254,7 +261,7 @@ public partial class Extraction : UserControl, INotifyPropertyChanged
     /// <param name="directory">The directory to search for subdirectory items.</param>
     private Task AddSubdirectoryItemsToUnityPackageAsync(ExtractedUnitypackageModel unitypackage, string directory)
     {
-        return Task.Run(() =>
+        return Task.Run(async () =>
         {
             var directoryInfo = new DirectoryInfo(directory);
             var files = directoryInfo.GetFiles("*.*", SearchOption.AllDirectories);
@@ -266,10 +273,10 @@ public partial class Extraction : UserControl, INotifyPropertyChanged
 
                 string category = null;
 
-                Dispatcher.Invoke(() =>
+                Dispatcher.Invoke(async () =>
                 {
                     category = CategoryStructureBool?.IsChecked == true
-                        ? ExtractionHelper.GetCategoryByExtension(file.Extension)
+                        ? await ExtractionHelper.GetCategoryByExtension(file.Extension)
                         : GetFileRelativePath(file.FullName, rootPath);
                 });
 
@@ -279,9 +286,9 @@ public partial class Extraction : UserControl, INotifyPropertyChanged
                     FilePath = file.FullName,
                     Category = category,
                     Extension = file.Extension,
-                    Size = ExtractionHelper.GetReadableFileSize(file.Length),
+                    Size = await ExtractionHelper.GetReadableFileSize(file.Length),
                     ExtractedDate = file.CreationTime,
-                    SymbolIconImage = ExtractionHelper.GetSymbolByExtension(file.Extension),
+                    SymbolIconImage = await ExtractionHelper.GetSymbolByExtension(file.Extension),
                     PreviewImage = GeneratePreviewImage(file).Result
                 });
             }
@@ -349,7 +356,7 @@ public partial class Extraction : UserControl, INotifyPropertyChanged
         await UpdateQueueHeaderAsync();
         await ChangeExtractionAnimationAsync();
         await UpdateInfoBadgesAsync();
-        await ConfigHelper.LoadConfigAsync().ContinueWith(task =>
+        await ConfigHelper.ReadConfigAsync().ContinueWith(task =>
         {
             var config = task.Result;
             if (config == null) return;
@@ -376,7 +383,7 @@ public partial class Extraction : UserControl, INotifyPropertyChanged
 
     private async Task UpdateIgnoredConfigListAsync()
     {
-        var config = await ConfigHelper.LoadConfigAsync();
+        var config = await ConfigHelper.ReadConfigAsync();
         if (config == null) return;
 
         var ignoredAppDataDirectory = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
@@ -445,7 +452,7 @@ public partial class Extraction : UserControl, INotifyPropertyChanged
     private async Task UpdateInfoBadgesAsync()
     {
         TotalExtractedInExtractedFolder =
-            (await Task.Run(() => Directory.GetDirectories(ConfigModel.LastExtractedPath))).Length.ToString();
+            (await Task.Run(() => Directory.GetDirectories(Config.LastExtractedPath))).Length.ToString();
         if (ManageExtractedInfoBadge != null) ManageExtractedInfoBadge.Value = TotalExtractedInExtractedFolder;
         await UpdateIgnoredUnitypackagesCountAsync();
         UpdateSelectAllToggleContent();
@@ -474,12 +481,12 @@ public partial class Extraction : UserControl, INotifyPropertyChanged
     /// <remarks>
     ///     This method checks if Discord RPC is enabled in the configuration and updates the presence state accordingly.
     /// </remarks>
-    private static async Task UpdateDiscordPresenceState()
+    private async Task UpdateDiscordPresenceState()
     {
         var isDiscordEnabled = false;
         try
         {
-            isDiscordEnabled = (await ConfigHelper.LoadConfigAsync()).DiscordRpc;
+            isDiscordEnabled = (await ConfigHelper.ReadConfigAsync())!.DiscordRpc;
         }
         catch (Exception exception)
         {
@@ -549,6 +556,9 @@ public partial class Extraction : UserControl, INotifyPropertyChanged
         await SetupUiForExtractionAsync();
 
         var (ignoredCounter, fileFinishedCounter) = await ProcessUnityPackages();
+        await _logger.LogAsync(
+            $"Extraction Process Completed: {fileFinishedCounter} packages extracted, {ignoredCounter} packages ignored",
+            "Extraction.xaml.cs", Importance.Info);
 
         await UpdateUiAfterExtractionAsync(ignoredCounter, fileFinishedCounter);
         await UpdateInfoBadgesAsync();
@@ -614,17 +624,17 @@ public partial class Extraction : UserControl, INotifyPropertyChanged
 
     private async Task AddUnitypackageToHistoryAsync(SearchEverythingModel unitypackage)
     {
-        await ConfigHelper.LoadConfigAsync().ContinueWith(task =>
+        await ConfigHelper.ReadConfigAsync().ContinueWith(task =>
         {
             var config = task.Result;
             if (config == null) return;
             config.History.Add(new HistoryModel
             {
                 FileName = unitypackage.UnityPackageName,
-                ExtractedPath = Path.Combine(ConfigModel.LastExtractedPath, unitypackage.UnityPackageName),
+                ExtractedPath = Path.Combine(Config.LastExtractedPath, unitypackage.UnityPackageName),
                 ExtractedDate = DateTime.Now,
                 TotalFiles = Directory.GetFiles(
-                    Path.Combine(ConfigModel.LastExtractedPath, unitypackage.UnityPackageName),
+                    Path.Combine(Config.LastExtractedPath, unitypackage.UnityPackageName),
                     "*.*", SearchOption.AllDirectories).Length
             });
             ConfigHelper.UpdateConfigAsync(config);
@@ -676,7 +686,7 @@ public partial class Extraction : UserControl, INotifyPropertyChanged
 
     private async Task CreateIgnoredConfigFileAsync(SearchEverythingModel unitypackage, string reason)
     {
-        await ConfigHelper.LoadConfigAsync().ContinueWith(task =>
+        await ConfigHelper.ReadConfigAsync().ContinueWith(task =>
         {
             var config = task.Result;
             if (config == null) return;
@@ -794,6 +804,8 @@ public partial class Extraction : UserControl, INotifyPropertyChanged
 
             await UpdateQueueHeaderAsync();
         }
+
+        await _logger.LogAsync("Manually Searched and Added Files", "Extraction.xaml.cs", Importance.Info);
     }
 
     /// <summary>
@@ -818,6 +830,7 @@ public partial class Extraction : UserControl, INotifyPropertyChanged
         }
 
         await UpdateQueueHeaderAsync();
+        await _logger.LogAsync("Dropped Files Added to Queue", "Extraction.xaml.cs", Importance.Info);
     }
 
     /// <summary>
@@ -838,7 +851,7 @@ public partial class Extraction : UserControl, INotifyPropertyChanged
 
     private async void CategoryStructureBool_OnChecked(object sender, RoutedEventArgs e)
     {
-        await ConfigHelper.LoadConfigAsync().ContinueWith(task =>
+        await ConfigHelper.ReadConfigAsync().ContinueWith(task =>
         {
             var config = task.Result;
             if (config == null) return;
@@ -850,7 +863,7 @@ public partial class Extraction : UserControl, INotifyPropertyChanged
 
     private async void CategoryStructureBool_OnUnchecked(object sender, RoutedEventArgs e)
     {
-        await ConfigHelper.LoadConfigAsync().ContinueWith(task =>
+        await ConfigHelper.ReadConfigAsync().ContinueWith(task =>
         {
             var config = task.Result;
             if (config == null) return;
@@ -964,6 +977,7 @@ public partial class Extraction : UserControl, INotifyPropertyChanged
             await UpdateExtractedFiles();
             UpdateSelectAllToggleContent();
         });
+        await _logger.LogAsync("Deleted Selected Unitypackages and Files", "Extraction.xaml.cs", Importance.Info);
     }
 
     private async void IgnoreSelectedBtn_OnClick(object sender, RoutedEventArgs e)

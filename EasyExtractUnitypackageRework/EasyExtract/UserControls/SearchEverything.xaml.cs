@@ -14,8 +14,11 @@ namespace EasyExtract.UserControls;
 public partial class SearchEverything : UserControl, INotifyPropertyChanged
 {
     private readonly List<SearchEverythingModel> _tempList = new();
+    private readonly BetterLogger _logger = new();
 
     private List<SearchEverythingModel>? _searchEverythingList;
+    private readonly ConfigHelper ConfigHelper = new();
+    private readonly EverythingValidation EverythingValidation = new();
 
     public SearchEverything()
     {
@@ -43,11 +46,13 @@ public partial class SearchEverything : UserControl, INotifyPropertyChanged
 
     private async void SearchEverything_OnLoaded(object sender, RoutedEventArgs e)
     {
-        if (!EverythingValidation.AreSystemRequirementsMet())
+        if (!await EverythingValidation.AreSystemRequirementsMet())
         {
             SearchEverythingCard.Visibility = Visibility.Collapsed;
             FallbackEverything.Visibility = Visibility.Visible;
-            FallbackEverything.Text = EverythingValidation.AreSystemRequirementsMetString();
+            FallbackEverything.Text = await EverythingValidation.AreSystemRequirementsMetString();
+            await _logger.LogAsync("System requirements not met for Everything", "SearchEverything.xaml.cs",
+                Importance.Warning); // Log system requirements not met
         }
         else
         {
@@ -65,19 +70,19 @@ public partial class SearchEverything : UserControl, INotifyPropertyChanged
 
             SearchEverythingCard.Visibility = Visibility.Visible;
             FallbackEverything.Visibility = Visibility.Collapsed;
+            await _logger.LogAsync("Everything search started", "SearchEverything.xaml.cs",
+                Importance.Info); // Log search start
         }
-
-
-        #region Discord
 
         var isDiscordEnabled = false;
         try
         {
-            isDiscordEnabled = (await ConfigHelper.LoadConfigAsync()).DiscordRpc;
+            isDiscordEnabled = (await ConfigHelper.ReadConfigAsync()).DiscordRpc;
         }
         catch (Exception exception)
         {
-            Console.WriteLine(exception);
+            await _logger.LogAsync($"Error reading config: {exception.Message}", "SearchEverything.xaml.cs",
+                Importance.Error); // Log error
             throw;
         }
 
@@ -88,14 +93,13 @@ public partial class SearchEverything : UserControl, INotifyPropertyChanged
             }
             catch (Exception exception)
             {
-                Console.WriteLine(exception);
+                await _logger.LogAsync($"Error updating Discord presence: {exception.Message}",
+                    "SearchEverything.xaml.cs", Importance.Error); // Log error
                 throw;
             }
-
-        #endregion
     }
 
-    private void LoopList()
+    private async void LoopList()
     {
         uint i;
 
@@ -108,14 +112,19 @@ public partial class SearchEverything : UserControl, INotifyPropertyChanged
             if (path != null)
                 _tempList.Add(new SearchEverythingModel { UnityPackageName = name, UnityPackagePath = path, Id = i });
         }
+
+        await _logger.LogAsync($"LoopList processed {i} results", "SearchEverything.xaml.cs",
+            Importance.Info); // Log loop processing
     }
 
-    private void SearchEverythingTextBox_OnTextChanged(object sender, TextChangedEventArgs e)
+    private async void SearchEverythingTextBox_OnTextChanged(object sender, TextChangedEventArgs e)
     {
         if (string.IsNullOrEmpty(SearchEverythingTextBox.Text))
         {
             SearchEverythingList = null;
             FoundText.Text = "Search for a UnityPackage Name";
+            await _logger.LogAsync("Search box cleared", "SearchEverything.xaml.cs",
+                Importance.Info); // Log search clear
             return;
         }
 
@@ -124,9 +133,11 @@ public partial class SearchEverything : UserControl, INotifyPropertyChanged
                     StringComparison.InvariantCultureIgnoreCase))
             .ToList();
         FoundText.Text = $"Found {SearchEverythingList.Count} results";
+        await _logger.LogAsync($"Search updated, found {SearchEverythingList.Count} results",
+            "SearchEverything.xaml.cs", Importance.Info); // Log search update
     }
 
-    private void SearchFileManuallyButton_OnClick(object sender, RoutedEventArgs e)
+    private async void SearchFileManuallyButton_OnClick(object sender, RoutedEventArgs e)
     {
         var openFileDialog = new OpenFileDialog
         {
@@ -154,12 +165,14 @@ public partial class SearchEverything : UserControl, INotifyPropertyChanged
                     _ => AddedStatusTxt.Text
                 };
             }
+
+            await _logger.LogAsync($"Manually added {counter} files to the queue", "SearchEverything.xaml.cs",
+                Importance.Info); // Log manual addition
         }
     }
 
-    private void QueueAddButton_OnClick(object sender, RoutedEventArgs e)
+    private async void QueueAddButton_OnClick(object sender, RoutedEventArgs e)
     {
-        //only add the item where the user clicked on plus
         var selected = (SearchEverythingModel)((Button)sender).DataContext;
         var id = selected.Id;
         var name = selected.UnityPackageName;
@@ -171,20 +184,8 @@ public partial class SearchEverything : UserControl, INotifyPropertyChanged
         Extraction._queueList.Add(new SearchEverythingModel
             { UnityPackageName = name, UnityPackagePath = path, Id = id });
         AddedStatusTxt.Text = $"Added {name} to the queue";
-        /*
-         * if (SearchEverythingList == null) return;
-        var selected = SearchEverythingList.FirstOrDefault();
-        if (selected == null) return;
-        var id = selected.Id;
-        var name = selected.UnityPackageName;
-        var path = selected.UnityPackagePath;
 
-        var duplicate = Extraction._queueList?.Find(x => x.UnityPackageName == name);
-        if (duplicate != null) return;
-        if (Extraction._queueList == null) Extraction._queueList = new List<SearchEverythingModel>();
-        Extraction._queueList.Add(new SearchEverythingModel
-            { UnityPackageName = name, UnityPackagePath = path, Id = id });
-        AddedStatusTxt.Text = $"Added {name} to the queue";
-         */
+        await _logger.LogAsync($"Added {name} to the queue", "SearchEverything.xaml.cs",
+            Importance.Info); // Log queue addition
     }
 }

@@ -1,6 +1,7 @@
 ﻿using System.IO;
 using System.Windows;
 using System.Windows.Threading;
+using EasyExtract.Config;
 using EasyExtract.Discord;
 
 namespace EasyExtract;
@@ -10,6 +11,9 @@ namespace EasyExtract;
 /// </summary>
 public partial class MainWindow : Window
 {
+    private readonly BetterLogger _logger = new();
+    private readonly ConfigHelper ConfigHelper = new();
+
     public MainWindow()
     {
         InitializeComponent();
@@ -17,8 +21,10 @@ public partial class MainWindow : Window
 
     private async void AnimationBehavior_OnLoaded(object sender, RoutedEventArgs e)
     {
+        await _logger.LogAsync("Application started", "MainWindow.xaml.cs", Importance.Info);
         DiscordRpcManager.Instance.DiscordStart();
-        GenerateAllNessesaryFiles();
+        await GenerateAllNessesaryFiles();
+        await ConfigHelper.ReadConfigAsync();
 
         var timer = new DispatcherTimer();
         timer.Interval = TimeSpan.FromSeconds(5);
@@ -31,27 +37,32 @@ public partial class MainWindow : Window
         timer.Start();
     }
 
-    private void GenerateAllNessesaryFiles()
+    private async Task GenerateAllNessesaryFiles()
     {
         //Appdata folder
         var appdata = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
         var appdataFolder = Path.Combine(appdata, "EasyExtract");
         if (!Directory.Exists(appdataFolder)) Directory.CreateDirectory(appdataFolder);
+        await _logger.LogAsync("Appdata folder created", "MainWindow.xaml.cs", Importance.Info);
 
         //EasyExtract\Extracted
         var extractedFolder = Path.Combine(appdataFolder, "Extracted");
         if (!Directory.Exists(extractedFolder)) Directory.CreateDirectory(extractedFolder);
+        await _logger.LogAsync("Extracted folder created", "MainWindow.xaml.cs", Importance.Info);
 
         //EasyExtract\Temp
         var tempFolder = Path.Combine(appdataFolder, "Temp");
         if (!Directory.Exists(tempFolder)) Directory.CreateDirectory(tempFolder);
+        await _logger.LogAsync("Temp folder created", "MainWindow.xaml.cs", Importance.Info);
 
         //EasyExtract\ThirdParty
         var thirdPartyFolder = Path.Combine(appdataFolder, "ThirdParty");
         if (!Directory.Exists(thirdPartyFolder)) Directory.CreateDirectory(thirdPartyFolder);
+        await _logger.LogAsync("ThirdParty folder created", "MainWindow.xaml.cs", Importance.Info);
 
         //EasyExtract\IgnoredUnitypackages
         var ignoredUnitypackagesFolder = Path.Combine(appdataFolder, "IgnoredUnitypackages");
         if (!Directory.Exists(ignoredUnitypackagesFolder)) Directory.CreateDirectory(ignoredUnitypackagesFolder);
+        await _logger.LogAsync("IgnoredUnitypackages folder created", "MainWindow.xaml.cs", Importance.Info);
     }
 }

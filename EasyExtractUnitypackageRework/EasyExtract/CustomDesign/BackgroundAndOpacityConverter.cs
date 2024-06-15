@@ -23,6 +23,8 @@ public class BackgroundAndOpacityConverter : IMultiValueConverter
 
     public object[] ConvertBack(object value, Type[] targetTypes, object parameter, CultureInfo culture)
     {
-        throw new NotImplementedException();
+        if (value is ImageBrush imageBrush) return new object[] { imageBrush, imageBrush.Opacity };
+
+        return new[] { Binding.DoNothing, Binding.DoNothing };
     }
 }

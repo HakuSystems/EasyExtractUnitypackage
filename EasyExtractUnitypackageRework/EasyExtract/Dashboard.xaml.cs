@@ -5,7 +5,6 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
 using EasyExtract.Config;
-using EasyExtract.CustomDesign;
 using EasyExtract.Updater;
 using EasyExtract.UserControls;
 using Wpf.Ui.Appearance;
@@ -19,6 +18,8 @@ public partial class Dashboard : FluentWindow
     private static UserControl ContentFrame;
     private static Dashboard instance;
     private readonly UpdateHandler _updateHandler = new();
+    private readonly BetterLogger _logger = new();
+    private readonly ConfigHelper ConfigHelper = new();
 
     public Dashboard()
     {
@@ -28,8 +29,8 @@ public partial class Dashboard : FluentWindow
     }
 
     private ConfigModel Config { get; } = new();
-
     public static Dashboard Instance => instance ??= new Dashboard();
+
 
     private void HeartIcon_OnMouseEnter(object sender, MouseEventArgs e)
     {
@@ -49,15 +50,16 @@ public partial class Dashboard : FluentWindow
 
     private async void Dashboard_OnLoaded(object sender, RoutedEventArgs e)
     {
-        var config = await ConfigHelper.LoadConfigAsync();
-        var backgroundHandler = new BackgroundHandler();
-
-        if (!string.IsNullOrEmpty(backgroundHandler.GetBackground()?.ToString()))
-            BackgroundManager.Instance.UpdateBackground(backgroundHandler.GetBackground()?.ToString());
-        else
-            BackgroundManager.Instance.ResetBackground(backgroundHandler.GetDefaultBackground()?.ToString());
-
-        BackgroundManager.Instance.BackgroundOpacity = backgroundHandler.GetBackgroundOpacity();
+        var config = await ConfigHelper.ReadConfigAsync();
+        // var backgroundConfig = await ConfigHelper.ReadConfigAsync();
+        // var BackgroundHandler = new BackgroundHandler(backgroundConfig.Backgrounds);
+        //
+        // if (!string.IsNullOrEmpty(BackgroundHandler.GetBackground()?.ToString()))
+        //     BackgroundManager.Instance.UpdateBackground(BackgroundHandler.GetBackground()?.ToString());
+        // else
+        //     BackgroundManager.Instance.ResetBackground(BackgroundHandler.GetDefaultBackground()?.ToString());
+        //
+        // BackgroundManager.Instance.BackgroundOpacity = await BackgroundHandler.GetBackgroundOpacity();
 
 
         var theme = config.ApplicationTheme;
@@ -65,18 +67,21 @@ public partial class Dashboard : FluentWindow
         {
             case ApplicationTheme.Dark:
                 ApplicationThemeManager.Apply(ApplicationTheme.Dark);
+                await _logger.LogAsync("Applied Dark Theme", "Dashboard.xaml.cs", Importance.Info);
                 break;
             case ApplicationTheme.Light:
                 ApplicationThemeManager.Apply(ApplicationTheme.Light);
-                break;
-            case ApplicationTheme.Unknown:
-                ApplicationThemeManager.Apply(ApplicationTheme.Dark);
+                await _logger.LogAsync("Applied Light Theme", "Dashboard.xaml.cs", Importance.Info);
                 break;
             case ApplicationTheme.HighContrast:
                 ApplicationThemeManager.Apply(ApplicationTheme.HighContrast);
+                await _logger.LogAsync("Applied High Contrast Theme", "Dashboard.xaml.cs", Importance.Info);
                 break;
             default:
-                throw new ArgumentOutOfRangeException();
+                ApplicationThemeManager.Apply(ApplicationTheme.Dark);
+                await _logger.LogAsync("Applied Dark Theme", "Dashboard.xaml.cs", Importance.Info)
+                    .ConfigureAwait(false);
+                break;
         }
 
         if (config.AutoUpdate)
@@ -113,25 +118,27 @@ public partial class Dashboard : FluentWindow
         if (config.IsFirstRun)
         {
             NavView.Navigate(typeof(About));
-            config.IsFirstRun = false;
-            await ConfigHelper.UpdateConfigAsync(config);
+            await _logger.LogAsync("First run detected, navigating to About", "Dashboard.xaml.cs", Importance.Info);
+            Config.IsFirstRun = false;
+            await ConfigHelper.UpdateConfigAsync(Config);
         }
         else
         {
+            await _logger.LogAsync("Navigating to Extraction", "Dashboard.xaml.cs", Importance.Info);
             NavView.Navigate(typeof(UserControls.Extraction));
         }
 
         if (config.UwUModeActive)
         {
             NavView.Opacity = 0.2;
-            TitleBar.Title = config.AppTitle;
-            Title = config.AppTitle;
+            TitleBar.Title = Config.AppTitle;
+            Title = Config.AppTitle;
             await UwUAnimation();
         }
         else
         {
-            TitleBar.Title = config.AppTitle;
-            Title = config.AppTitle;
+            TitleBar.Title = Config.AppTitle;
+            Title = Config.AppTitle;
         }
     }
 
@@ -174,20 +181,22 @@ public partial class Dashboard : FluentWindow
         NavView.Opacity = 1;
     }
 
-    private void Dashboard_OnDrop(object sender, DragEventArgs e)
+    private async void Dashboard_OnDrop(object sender, DragEventArgs e)
     {
         if (!e.Data.GetDataPresent(DataFormats.FileDrop)) return;
         var files = (string[])e.Data.GetData(DataFormats.FileDrop);
         foreach (var file in files)
         {
+            await _logger.LogAsync($"Dropped file: {file}", "Dashboard.xaml.cs", Importance.Info);
             var name = Path.GetFileName(file);
             var duplicate = UserControls.Extraction._queueList?.Find(x => x.UnityPackageName == name);
             if (duplicate != null) continue;
-            if (UserControls.Extraction._queueList == null)
-                UserControls.Extraction._queueList = new List<SearchEverythingModel>();
+            UserControls.Extraction._queueList ??= new List<SearchEverythingModel>();
             UserControls.Extraction._queueList.Add(new SearchEverythingModel
                 { UnityPackageName = name, UnityPackagePath = file, Id = 0 });
         }
+
+        await _logger.LogAsync("Added dropped files to queue", "Dashboard.xaml.cs", Importance.Info);
     }
 
 

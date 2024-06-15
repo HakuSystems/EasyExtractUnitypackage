@@ -9,52 +9,66 @@ public class ConfigHelper
         Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "EasyExtract",
             "Settings.json");
 
-    private static readonly SemaphoreSlim _semaphore = new(1, 1);
+    private static readonly SemaphoreSlim Semaphore = new(1, 1);
+    private ConfigModel? _config;
+    private readonly BetterLogger _logger = new();
 
-    private static async Task CreateConfigAsync()
+    private async Task CreateConfigAsync()
     {
         Directory.CreateDirectory(Path.GetDirectoryName(_configPath));
-        Directory.CreateDirectory(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
-            "EasyExtract", "Temp"));
-        Directory.CreateDirectory(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
-            "EasyExtract", "Extracted"));
+        _config = new ConfigModel();
+        await _logger.LogAsync("Created new config file", "ConfigHelper", Importance.Info);
+        await SaveConfigAsync(_config);
+    }
+
+    public async Task<ConfigModel?> ReadConfigAsync()
+    {
+        await Semaphore.WaitAsync();
+        try
+        {
+            if (_config != null) return _config;
+            if (!File.Exists(_configPath)) await CreateConfigAsync();
+            using var sr = new StreamReader(_configPath);
+            var fileContents = await sr.ReadToEndAsync();
+            _config = JsonConvert.DeserializeObject<ConfigModel>(fileContents) ?? new ConfigModel();
+            await _logger.LogAsync("Read config file", "ConfigHelper", Importance.Info);
+            return _config;
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            return null;
+        }
+        finally
+        {
+            Semaphore.Release();
+        }
+    }
+
+    public async Task UpdateConfigAsync(ConfigModel? config)
+    {
+        await Semaphore.WaitAsync();
+        try
+        {
+            _config = config;
+            await _logger.LogAsync("Updated config file", "ConfigHelper", Importance.Info);
+            await SaveConfigAsync(_config);
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+        }
+        finally
+        {
+            Semaphore.Release();
+        }
+    }
+
+    private async Task SaveConfigAsync(ConfigModel? config)
+    {
         await using var sw = new StreamWriter(_configPath, false);
-        await sw.WriteAsync(JsonConvert.SerializeObject(new ConfigModel(), Formatting.Indented));
-    }
-
-    public static async Task<ConfigModel?> LoadConfigAsync()
-    {
-        await _semaphore.WaitAsync();
-        try
-        {
-            if (!File.Exists(_configPath)) await CreateConfigAsync();
-            using (var sr = new StreamReader(_configPath))
-            {
-                var fileContents = await sr.ReadToEndAsync();
-                return JsonConvert.DeserializeObject<ConfigModel>(fileContents);
-            }
-        }
-        finally
-        {
-            _semaphore.Release();
-        }
-    }
-
-    public static async Task UpdateConfigAsync(ConfigModel? config)
-    {
-        await _semaphore.WaitAsync();
-        try
-        {
-            if (!File.Exists(_configPath)) await CreateConfigAsync();
-            using (var sw = new StreamWriter(_configPath, false))
-            {
-                var json = JsonConvert.SerializeObject(config, Formatting.Indented);
-                await sw.WriteAsync(json);
-            }
-        }
-        finally
-        {
-            _semaphore.Release();
-        }
+        var json = JsonConvert.SerializeObject(config, Formatting.Indented);
+        await sw.WriteAsync(json);
+        await _logger.LogAsync("Saved config file", "ConfigHelper", Importance.Info);
     }
 }

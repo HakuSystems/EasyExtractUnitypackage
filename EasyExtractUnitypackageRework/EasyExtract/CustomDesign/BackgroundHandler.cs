@@ -5,6 +5,13 @@ namespace EasyExtract.CustomDesign;
 public class BackgroundHandler
 {
     private readonly BackgroundModel _backgroundConfig;
+    private readonly BetterLogger _logger = new();
+    private readonly ConfigHelper ConfigHelper = new();
+
+    public BackgroundHandler(BackgroundModel backgroundConfig)
+    {
+        _backgroundConfig = backgroundConfig;
+    }
 
     public string? BackgroundPath
     {
@@ -12,33 +19,46 @@ public class BackgroundHandler
         set
         {
             _backgroundConfig.BackgroundPath = value;
-            ConfigHelper.UpdateConfigAsync(new ConfigModel { Backgrounds = _backgroundConfig });
+            ConfigHelper.UpdateConfigAsync(new ConfigModel { Backgrounds = _backgroundConfig }).Wait();
         }
     }
 
-    public void SetBackground(string? background)
+    public async void SetBackground(string? background)
     {
         BackgroundPath = background;
+        await _logger.LogAsync($"Set background to: {background}", "BackgroundHandler.cs",
+            Importance.Info); // Log set background
     }
 
-    public void SetBackgroundOpacity(double value)
+    public async void SetBackgroundOpacity(double value) // not used
     {
         _backgroundConfig.BackgroundOpacity = value;
-        ConfigHelper.UpdateConfigAsync(new ConfigModel { Backgrounds = _backgroundConfig });
+        await ConfigHelper.UpdateConfigAsync(new ConfigModel { Backgrounds = _backgroundConfig });
+        await _logger.LogAsync($"Background opacity set to: {value}", "BackgroundHandler.cs",
+            Importance.Info); // Log background opacity set
     }
 
-    public object? GetBackground()
+    public async Task<object?> GetBackground()
     {
-        return ConfigHelper.LoadConfigAsync().Result.Backgrounds?.BackgroundPath;
+        var backgroundPath = ConfigHelper.ReadConfigAsync().Result.Backgrounds?.BackgroundPath;
+        await _logger.LogAsync($"Retrieved background path: {backgroundPath}", "BackgroundHandler.cs",
+            Importance.Info); // Log get background
+        return backgroundPath;
     }
 
-    public object? GetDefaultBackground()
+    public async Task<object?> GetDefaultBackground()
     {
-        return ConfigHelper.LoadConfigAsync().Result.Backgrounds?.DefaultBackgroundResource;
+        var defaultBackground = ConfigHelper.ReadConfigAsync().Result.Backgrounds?.DefaultBackgroundResource;
+        await _logger.LogAsync($"Retrieved default background: {defaultBackground}", "BackgroundHandler.cs",
+            Importance.Info); // Log get default background
+        return defaultBackground;
     }
 
-    public double GetBackgroundOpacity()
+    public async Task<double> GetBackgroundOpacity()
     {
-        return ConfigHelper.LoadConfigAsync().Result.Backgrounds?.BackgroundOpacity ?? 0.5;
+        var opacity = ConfigHelper.ReadConfigAsync().Result.Backgrounds?.BackgroundOpacity ?? 0.5;
+        await _logger.LogAsync($"Retrieved background opacity: {opacity}", "BackgroundHandler.cs",
+            Importance.Info); // Log get background opacity
+        return opacity;
     }
 }

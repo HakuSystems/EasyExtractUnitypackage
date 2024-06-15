@@ -16,13 +16,14 @@ public class ExtractionHelper
     private const string GameController24 = "XboxController24";
     private const string Text24 = "SlideText24";
     private const string Settings24 = "Settings24";
+    private readonly BetterLogger _logger = new();
 
     /// <summary>
     ///     Gets the readable file size representation of the given size.
     /// </summary>
     /// <param name="size">The size to convert.</param>
     /// <returns>The readable file size.</returns>
-    public string GetReadableFileSize(long size)
+    public async Task<string> GetReadableFileSize(long size)
     {
         string[] sizes = { "B", "KB", "MB", "GB", "TB" };
         var order = 0;
@@ -32,115 +33,149 @@ public class ExtractionHelper
             size = size / 1024;
         }
 
+        await _logger.LogAsync($"Converted file size: {size:0.##} {sizes[order]}", "ExtractionHelper.cs",
+            Importance.Info); // Log file size conversion
         return $"{size:0.##} {sizes[order]}";
     }
 
-    public int GetTotalFileCount(string directory)
+    public async Task<int> GetTotalFileCount(string directory)
     {
-        //BASED ON GetCategoryByExtension
-        return Directory.GetFiles(directory, "*.*", SearchOption.AllDirectories).Length;
+        var count = Directory.GetFiles(directory, "*.*", SearchOption.AllDirectories).Length;
+        await _logger.LogAsync($"Total file count in directory '{directory}': {count}", "ExtractionHelper.cs",
+            Importance.Info); // Log total file count
+        return count;
     }
 
-    public int GetTotalFolderCount(string directory)
+    public async Task<int> GetTotalFolderCount(string directory)
     {
-        //BASED ON GetCategoryByExtension
-        return Directory.GetDirectories(directory, "*", SearchOption.AllDirectories).Length;
+        var count = Directory.GetDirectories(directory, "*", SearchOption.AllDirectories).Length;
+        await _logger.LogAsync($"Total folder count in directory '{directory}': {count}", "ExtractionHelper.cs",
+            Importance.Info); // Log total folder count
+        return count;
     }
 
-    public int GetTotalScriptCount(string directory)
+    public async Task<int> GetTotalScriptCount(string directory)
     {
-        //BASED ON GetCategoryByExtension
-        return Directory.GetFiles(directory, "*.cs", SearchOption.AllDirectories).Length;
+        var count = Directory.GetFiles(directory, "*.cs", SearchOption.AllDirectories).Length;
+        await _logger.LogAsync($"Total script count in directory '{directory}': {count}", "ExtractionHelper.cs",
+            Importance.Info); // Log total script count
+        return count;
     }
 
-    public int GetTotalShaderCount(string directory)
+    public async Task<int> GetTotalShaderCount(string directory)
     {
-        //BASED ON GetCategoryByExtension
-        return Directory.GetFiles(directory, "*.shader", SearchOption.AllDirectories).Length;
+        var count = Directory.GetFiles(directory, "*.shader", SearchOption.AllDirectories).Length;
+        await _logger.LogAsync($"Total shader count in directory '{directory}': {count}", "ExtractionHelper.cs",
+            Importance.Info); // Log total shader count
+        return count;
     }
 
-    public int GetTotalPrefabCount(string directory)
+    public async Task<int> GetTotalPrefabCount(string directory)
     {
-        //BASED ON GetCategoryByExtension
-        return Directory.GetFiles(directory, "*.prefab", SearchOption.AllDirectories).Length;
+        var count = Directory.GetFiles(directory, "*.prefab", SearchOption.AllDirectories).Length;
+        await _logger.LogAsync($"Total prefab count in directory '{directory}': {count}", "ExtractionHelper.cs",
+            Importance.Info); // Log total prefab count
+        return count;
     }
 
-    public int GetTotal3DObjectCount(string directory)
+    public async Task<int> GetTotal3DObjectCount(string directory)
     {
-        //BASED ON GetCategoryByExtension
-        return Directory.GetFiles(directory, "*.fbx", SearchOption.AllDirectories).Length;
+        var count = Directory.GetFiles(directory, "*.fbx", SearchOption.AllDirectories).Length;
+        await _logger.LogAsync($"Total 3D object count in directory '{directory}': {count}", "ExtractionHelper.cs",
+            Importance.Info); // Log total 3D object count
+        return count;
     }
 
-    public int GetTotalImageCount(string directory)
+    public async Task<int> GetTotalImageCount(string directory)
     {
-        //BASED ON GetCategoryByExtension
-        return Directory.GetFiles(directory, "*.png", SearchOption.AllDirectories).Length +
-               Directory.GetFiles(directory, "*.jpg", SearchOption.AllDirectories).Length +
-               Directory.GetFiles(directory, "*.jpeg", SearchOption.AllDirectories).Length +
-               Directory.GetFiles(directory, "*.tga", SearchOption.AllDirectories).Length +
-               Directory.GetFiles(directory, "*.psd", SearchOption.AllDirectories).Length;
+        var count = Directory.GetFiles(directory, "*.png", SearchOption.AllDirectories).Length +
+                    Directory.GetFiles(directory, "*.jpg", SearchOption.AllDirectories).Length +
+                    Directory.GetFiles(directory, "*.jpeg", SearchOption.AllDirectories).Length +
+                    Directory.GetFiles(directory, "*.tga", SearchOption.AllDirectories).Length +
+                    Directory.GetFiles(directory, "*.psd", SearchOption.AllDirectories).Length;
+        await _logger.LogAsync($"Total image count in directory '{directory}': {count}", "ExtractionHelper.cs",
+            Importance.Info); // Log total image count
+        return count;
     }
 
-    public int GetTotalAudioCount(string directory)
+    public async Task<int> GetTotalAudioCount(string directory)
     {
-        //BASED ON GetCategoryByExtension
-        return Directory.GetFiles(directory, "*.mp3", SearchOption.AllDirectories).Length +
-               Directory.GetFiles(directory, "*.wav", SearchOption.AllDirectories).Length +
-               Directory.GetFiles(directory, "*.ogg", SearchOption.AllDirectories).Length;
+        var count = Directory.GetFiles(directory, "*.mp3", SearchOption.AllDirectories).Length +
+                    Directory.GetFiles(directory, "*.wav", SearchOption.AllDirectories).Length +
+                    Directory.GetFiles(directory, "*.ogg", SearchOption.AllDirectories).Length;
+        await _logger.LogAsync($"Total audio count in directory '{directory}': {count}", "ExtractionHelper.cs",
+            Importance.Info); // Log total audio count
+        return count;
     }
 
-    public int GetTotalAnimationCount(string directory)
+    public async Task<int> GetTotalAnimationCount(string directory)
     {
-        //BASED ON GetCategoryByExtension
-        return Directory.GetFiles(directory, "*.anim", SearchOption.AllDirectories).Length;
+        var count = Directory.GetFiles(directory, "*.anim", SearchOption.AllDirectories).Length;
+        await _logger.LogAsync($"Total animation count in directory '{directory}': {count}", "ExtractionHelper.cs",
+            Importance.Info); // Log total animation count
+        return count;
     }
 
-    public int GetTotalSceneCount(string directory)
+    public async Task<int> GetTotalSceneCount(string directory)
     {
-        //BASED ON GetCategoryByExtension
-        return Directory.GetFiles(directory, "*.unity", SearchOption.AllDirectories).Length;
+        var count = Directory.GetFiles(directory, "*.unity", SearchOption.AllDirectories).Length;
+        await _logger.LogAsync($"Total scene count in directory '{directory}': {count}", "ExtractionHelper.cs",
+            Importance.Info); // Log total scene count
+        return count;
     }
 
-    public int GetTotalMaterialCount(string directory)
+    public async Task<int> GetTotalMaterialCount(string directory)
     {
-        //BASED ON GetCategoryByExtension
-        return Directory.GetFiles(directory, "*.mat", SearchOption.AllDirectories).Length;
+        var count = Directory.GetFiles(directory, "*.mat", SearchOption.AllDirectories).Length;
+        await _logger.LogAsync($"Total material count in directory '{directory}': {count}", "ExtractionHelper.cs",
+            Importance.Info); // Log total material count
+        return count;
     }
 
-    public int GetTotalAssetCount(string directory)
+    public async Task<int> GetTotalAssetCount(string directory)
     {
-        //BASED ON GetCategoryByExtension
-        return Directory.GetFiles(directory, "*.asset", SearchOption.AllDirectories).Length;
+        var count = Directory.GetFiles(directory, "*.asset", SearchOption.AllDirectories).Length;
+        await _logger.LogAsync($"Total asset count in directory '{directory}': {count}", "ExtractionHelper.cs",
+            Importance.Info); // Log total asset count
+        return count;
     }
 
-    public int GetTotalControllerCount(string directory)
+    public async Task<int> GetTotalControllerCount(string directory)
     {
-        //BASED ON GetCategoryByExtension
-        return Directory.GetFiles(directory, "*.controller", SearchOption.AllDirectories).Length;
+        var count = Directory.GetFiles(directory, "*.controller", SearchOption.AllDirectories).Length;
+        await _logger.LogAsync($"Total controller count in directory '{directory}': {count}", "ExtractionHelper.cs",
+            Importance.Info); // Log total controller count
+        return count;
     }
 
-    public int GetTotalFontCount(string directory)
+    public async Task<int> GetTotalFontCount(string directory)
     {
-        //BASED ON GetCategoryByExtension
-        return Directory.GetFiles(directory, "*.ttf", SearchOption.AllDirectories).Length +
-               Directory.GetFiles(directory, "*.otf", SearchOption.AllDirectories).Length;
+        var count = Directory.GetFiles(directory, "*.ttf", SearchOption.AllDirectories).Length +
+                    Directory.GetFiles(directory, "*.otf", SearchOption.AllDirectories).Length;
+        await _logger.LogAsync($"Total font count in directory '{directory}': {count}", "ExtractionHelper.cs",
+            Importance.Info); // Log total font count
+        return count;
     }
 
-    public int GetTotalConfigurationCount(string directory)
+    public async Task<int> GetTotalConfigurationCount(string directory)
     {
-        //BASED ON GetCategoryByExtension
-        return Directory.GetFiles(directory, "*.meta", SearchOption.AllDirectories).Length +
-               Directory.GetFiles(directory, "*.json", SearchOption.AllDirectories).Length +
-               Directory.GetFiles(directory, "*.xml", SearchOption.AllDirectories).Length +
-               Directory.GetFiles(directory, "*.yaml", SearchOption.AllDirectories).Length;
+        var count = Directory.GetFiles(directory, "*.meta", SearchOption.AllDirectories).Length +
+                    Directory.GetFiles(directory, "*.json", SearchOption.AllDirectories).Length +
+                    Directory.GetFiles(directory, "*.xml", SearchOption.AllDirectories).Length +
+                    Directory.GetFiles(directory, "*.yaml", SearchOption.AllDirectories).Length;
+        await _logger.LogAsync($"Total configuration count in directory '{directory}': {count}", "ExtractionHelper.cs",
+            Importance.Info); // Log total configuration count
+        return count;
     }
 
-    public int GetTotalDataCount(string directory)
+    public async Task<int> GetTotalDataCount(string directory)
     {
-        //BASED ON GetCategoryByExtension
-        return Directory.GetFiles(directory, "*.json", SearchOption.AllDirectories).Length +
-               Directory.GetFiles(directory, "*.xml", SearchOption.AllDirectories).Length +
-               Directory.GetFiles(directory, "*.yaml", SearchOption.AllDirectories).Length;
+        var count = Directory.GetFiles(directory, "*.json", SearchOption.AllDirectories).Length +
+                    Directory.GetFiles(directory, "*.xml", SearchOption.AllDirectories).Length +
+                    Directory.GetFiles(directory, "*.yaml", SearchOption.AllDirectories).Length;
+        await _logger.LogAsync($"Total data count in directory '{directory}': {count}", "ExtractionHelper.cs",
+            Importance.Info); // Log total data count
+        return count;
     }
 
     /// <summary>
@@ -148,9 +183,9 @@ public class ExtractionHelper
     /// </summary>
     /// <param name="extension">The file extension.</param>
     /// <returns>The symbol icon.</returns>
-    public string GetSymbolByExtension(string extension)
+    public async Task<string> GetSymbolByExtension(string extension)
     {
-        return extension switch
+        var symbol = extension switch
         {
             ".cs" => Code24,
             ".shader" => Code24,
@@ -177,6 +212,10 @@ public class ExtractionHelper
             ".yaml" => Settings24,
             _ => Document24
         };
+
+        await _logger.LogAsync($"Symbol for extension '{extension}': {symbol}", "ExtractionHelper.cs",
+            Importance.Info); // Log symbol by extension
+        return symbol;
     }
 
     /// <summary>
@@ -184,9 +223,9 @@ public class ExtractionHelper
     /// </summary>
     /// <param name="extension">The file extension.</param>
     /// <returns>The category of the file.</returns>
-    public string GetCategoryByExtension(string extension)
+    public async Task<string> GetCategoryByExtension(string extension)
     {
-        return extension switch
+        var category = extension switch
         {
             ".cs" => "Script",
             ".shader" => "Shader",
@@ -213,6 +252,10 @@ public class ExtractionHelper
             ".yaml" => "Data",
             _ => "Document"
         };
+
+        await _logger.LogAsync($"Category for extension '{extension}': {category}", "ExtractionHelper.cs",
+            Importance.Info); // Log category by extension
+        return category;
     }
 
     /// <summary>

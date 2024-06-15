@@ -14,6 +14,7 @@ public class UpdateHandler
 {
     private const string RepoName = "EasyExtractUnitypackage";
     private const string RepoOwner = "HakuSystems";
+    private readonly BetterLogger _logger = new(); // Added logger initialization
     private ConfigModel Config { get; } = new();
     private string CurrentVersion => Assembly.GetExecutingAssembly().GetName().Version?.ToString() ?? "0.0.0";
 
@@ -23,11 +24,15 @@ public class UpdateHandler
         if (latestRelease != null)
         {
             var latestVersion = latestRelease.TagName.TrimStart('v', 'V'); // Removing both 'v' and 'V'
+            await _logger.LogAsync($"Latest version found: {latestVersion}", "UpdateHandler.cs",
+                Importance.Info); // Log latest version
             return Version.TryParse(latestVersion, out var latest) &&
                    Version.TryParse(CurrentVersion, out var current) &&
                    latest <= current;
         }
 
+        await _logger.LogAsync("Failed to fetch the latest release", "UpdateHandler.cs",
+            Importance.Warning); // Log fetch failure
         return false;
     }
 
@@ -41,23 +46,22 @@ public class UpdateHandler
             {
                 var rarPath = await DownloadAssetAsync(asset.BrowserDownloadUrl);
                 var exePath = ExtractRar(rarPath);
-                if (exePath != null)
-                {
-                    Process.Start(exePath);
-                    Environment.Exit(0);
-                }
-                else
-                {
-                    return false;
-                }
+                await _logger.LogAsync("Update package downloaded and extracted", "UpdateHandler.cs",
+                    Importance.Info); // Log extraction
+                Process.Start(new ProcessStartInfo { FileName = await exePath, UseShellExecute = true });
+                Environment.Exit(0);
             }
             else
             {
+                await _logger.LogAsync("No suitable asset found in the latest release", "UpdateHandler.cs",
+                    Importance.Warning); // Log no asset found
                 return false;
             }
         }
         else
         {
+            await _logger.LogAsync("Failed to fetch the latest release", "UpdateHandler.cs",
+                Importance.Warning); // Log fetch failure
             return false;
         }
 
@@ -75,25 +79,27 @@ public class UpdateHandler
 
         DeleteOldFiles(currentDirectory);
 
-        using (var fs = new FileStream(filePath, FileMode.Create, FileAccess.Write, FileShare.None))
+        await using (var fs = new FileStream(filePath, FileMode.Create, FileAccess.Write, FileShare.None))
         {
             await response.Content.CopyToAsync(fs);
         }
 
+        await _logger.LogAsync($"Downloaded asset to: {filePath}", "UpdateHandler.cs", Importance.Info); // Log download
         return filePath;
     }
 
-    private void DeleteOldFiles(string directory)
+    private async void DeleteOldFiles(string directory)
     {
         var rarFiles = Directory.GetFiles(directory, "*.rar");
         var extractedFiles = Directory.GetFiles(directory, "*.*").Where(f => !f.EndsWith(".rar")).ToArray();
 
         foreach (var file in rarFiles) File.Delete(file);
-
         foreach (var file in extractedFiles) File.Delete(file);
+
+        await _logger.LogAsync("Old files deleted", "UpdateHandler.cs", Importance.Info); // Log file deletion
     }
 
-    private string ExtractRar(string rarPath)
+    private async Task<string?> ExtractRar(string rarPath)
     {
         var currentDirectory = AppDomain.CurrentDomain.BaseDirectory;
         using (var archive = ArchiveFactory.Open(rarPath))
@@ -104,20 +110,26 @@ public class UpdateHandler
         }
 
         var exeFile = Directory.GetFiles(currentDirectory, "*.exe").FirstOrDefault();
+        await _logger.LogAsync($"RAR extracted, executable found: {exeFile}", "UpdateHandler.cs",
+            Importance.Info); // Log extraction
         return exeFile;
     }
 
-    private async Task<Release> GetLatestReleaseAsync()
+    private async Task<Release?> GetLatestReleaseAsync()
     {
         try
         {
             var client = new GitHubClient(new ProductHeaderValue("GitHubUpdater"));
             var releases = await client.Repository.Release.GetAll(RepoOwner, RepoName);
-            return releases.FirstOrDefault();
+            var latestRelease = releases.FirstOrDefault();
+            await _logger.LogAsync($"Fetched latest release: {latestRelease?.TagName}", "UpdateHandler.cs",
+                Importance.Info); // Log release fetch
+            return latestRelease;
         }
         catch (Exception ex)
         {
-            await Console.Error.WriteAsync(ex.Message);
+            await _logger.LogAsync($"Error fetching latest release: {ex.Message}", "UpdateHandler.cs",
+                Importance.Error); // Log error
             return null;
         }
     }

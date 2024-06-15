@@ -1,8 +1,9 @@
 using System.Diagnostics;
 using System.IO;
-using System.Net;
+using System.Net.Http;
 using System.Reflection;
 using System.Text;
+using EasyExtract.Config;
 
 namespace EasyExtract.SearchEverything;
 
@@ -14,92 +15,121 @@ public class EverythingValidation
         "https://github.com/HakuSystems/EasyExtractUnitypackage/raw/main/Everything64.dll";
 
     private const string ProcessName = "Everything";
+    private readonly BetterLogger _logger = new();
 
-    public static bool AreSystemRequirementsMet()
+    public async Task<bool> AreSystemRequirementsMet()
     {
         var elapsedTime = Stopwatch.StartNew();
-        Console.WriteLine("Checking system requirements...");
-        var result = Is64BitOperatingSystem() && IsProcessRunning(ProcessName) && DoesDllExist() &&
-                     CopyDllIfNecessary();
+        await _logger.LogAsync("Checking system requirements...", "EverythingValidation.cs",
+            Importance.Info); // Log start check
+        var result = await Is64BitOperatingSystem() && await IsProcessRunning(ProcessName) && await DoesDllExist() &&
+                     await CopyDllIfNecessary();
         elapsedTime.Stop();
-        Console.WriteLine($"System requirements checked in {elapsedTime.ElapsedMilliseconds}ms.");
+        await _logger.LogAsync($"System requirements checked in {elapsedTime.ElapsedMilliseconds}ms.",
+            "EverythingValidation.cs", Importance.Info); // Log end check
         return result;
     }
 
-    public static string AreSystemRequirementsMetString()
+    public async Task<string> AreSystemRequirementsMetString()
     {
         var missing = new StringBuilder();
-        if (!Is64BitOperatingSystem())
+        if (!await Is64BitOperatingSystem())
             missing.AppendLine("System requirement not met: Requires a 64-bit operating system.");
-        if (!IsProcessRunning(ProcessName))
+        if (!await IsProcessRunning(ProcessName))
             missing.AppendLine(
                 "System requirement not met: 'SearchEverything' process isn't running. Please start it.");
-        if (!DoesDllExist()) missing.AppendLine("System requirement not met: 'Everything DLL' is missing.");
-        if (!CopyDllIfNecessary()) missing.AppendLine("System requirement not met: Unable to copy the required DLL.");
+        if (!await DoesDllExist()) missing.AppendLine("System requirement not met: 'Everything DLL' is missing.");
+        if (!await CopyDllIfNecessary())
+            missing.AppendLine("System requirement not met: Unable to copy the required DLL.");
+        await _logger.LogAsync("Checked system requirements string.", "EverythingValidation.cs",
+            Importance.Info); // Log check string
         return missing.ToString();
     }
 
-    private static bool Is64BitOperatingSystem()
+    private async Task<bool> Is64BitOperatingSystem()
     {
-        return Environment.Is64BitOperatingSystem;
+        var result = Environment.Is64BitOperatingSystem;
+        await _logger.LogAsync($"Is64BitOperatingSystem: {result}", "EverythingValidation.cs",
+            Importance.Info); // Log OS check
+        return result;
     }
 
-    private static bool IsProcessRunning(string processName)
+    private async Task<bool> IsProcessRunning(string processName)
     {
-        return Process.GetProcessesByName(processName).Length > 0;
+        var result = Process.GetProcessesByName(processName).Length > 0;
+        await _logger.LogAsync($"IsProcessRunning('{processName}'): {result}", "EverythingValidation.cs",
+            Importance.Info); // Log process check
+        return result;
     }
 
-    private static bool DoesDllExist()
+    private async Task<bool> DoesDllExist()
     {
         var dllPath = GetDllPath();
-        if (File.Exists(dllPath)) return true;
+        if (File.Exists(await dllPath))
+        {
+            await _logger.LogAsync($"DLL exists at path: {dllPath}", "EverythingValidation.cs",
+                Importance.Info); // Log DLL existence
+            return true;
+        }
+
         try
         {
             var elapsedTime = Stopwatch.StartNew();
-            DownloadDll(dllPath);
+            DownloadDllAsync(await dllPath);
             elapsedTime.Stop();
-            Console.WriteLine($"Everything64.dll downloaded in {elapsedTime.ElapsedMilliseconds}ms.");
+            await _logger.LogAsync($"Everything64.dll downloaded in {elapsedTime.ElapsedMilliseconds}ms.",
+                "EverythingValidation.cs", Importance.Info); // Log DLL download
             return true;
         }
-        catch (Exception)
+        catch (Exception ex)
         {
-            // Handle exception
+            await _logger.LogAsync($"Failed to download Everything64.dll: {ex.Message}", "EverythingValidation.cs",
+                Importance.Error); // Log DLL download failure
             return false;
         }
     }
 
-    private static void DownloadDll(string dllPath)
+    private async void DownloadDllAsync(string dllPath)
     {
-        using (var client = new WebClient())
-        {
-            client.DownloadFile(new Uri(DownloadUrl), dllPath);
-        }
+        using var client = new HttpClient();
+        var response = await client.GetAsync(DownloadUrl);
+        await using var fs = new FileStream(dllPath, FileMode.Create, FileAccess.Write, FileShare.None);
+        await response.Content.CopyToAsync(fs);
     }
 
-    private static string GetDllPath()
+    private async Task<string> GetDllPath()
     {
         var path = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "EasyExtract",
             "ThirdParty", DllName);
         Directory.CreateDirectory(Path.GetDirectoryName(path));
+        await _logger.LogAsync($"DLL path determined: {path}", "EverythingValidation.cs",
+            Importance.Info); // Log DLL path
         return path;
     }
 
-    private static bool CopyDllIfNecessary()
+    private async Task<bool> CopyDllIfNecessary()
     {
         var dllPath = GetDllPath();
         var currentPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
         var destinationPath = Path.Combine(currentPath, DllName);
-        if (File.Exists(destinationPath)) return true;
+        if (File.Exists(destinationPath))
+        {
+            await _logger.LogAsync($"DLL already exists at destination: {destinationPath}", "EverythingValidation.cs",
+                Importance.Info); // Log DLL already exists
+            return true;
+        }
 
         try
         {
-            File.Copy(dllPath, destinationPath);
-            Console.WriteLine("Everything64.dll moved.");
+            File.Copy(await dllPath, destinationPath);
+            await _logger.LogAsync("Everything64.dll moved to destination.", "EverythingValidation.cs",
+                Importance.Info); // Log DLL move
             return true;
         }
-        catch (Exception)
+        catch (Exception ex)
         {
-            // Handle exception
+            await _logger.LogAsync($"Failed to copy Everything64.dll: {ex.Message}", "EverythingValidation.cs",
+                Importance.Error); // Log DLL copy failure
             return false;
         }
     }

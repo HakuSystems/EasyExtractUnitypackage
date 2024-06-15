@@ -6,7 +6,6 @@
              Background="Transparent"
              FontFamily="{DynamicResource SegoeFluentIcons}"
              Foreground="{DynamicResource TextFillColorPrimaryBrush}">
-    <!-- {DynamicResource BackgroundPrimaryBrush} -->
     <ScrollViewer VerticalScrollBarVisibility="Auto">
         <Grid Margin="10">
             <Grid.RowDefinitions>

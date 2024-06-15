@@ -12,11 +12,13 @@ namespace EasyExtract.UserControls;
 public partial class History : UserControl, INotifyPropertyChanged
 {
     private ObservableCollection<HistoryModel> _history = new();
+    private readonly BetterLogger _logger = new();
 
     private int _totalExtracted;
     // TotalFilesExtracted & TotalExtracted are not used in this file.
 
     private int _totalFilesExtracted;
+    private readonly ConfigHelper ConfigHelper = new();
 
     public History()
     {
@@ -64,11 +66,12 @@ public partial class History : UserControl, INotifyPropertyChanged
         var isDiscordEnabled = false;
         try
         {
-            isDiscordEnabled = (await ConfigHelper.LoadConfigAsync()).DiscordRpc;
+            isDiscordEnabled = (await ConfigHelper.ReadConfigAsync()).DiscordRpc;
         }
         catch (Exception exception)
         {
-            Console.WriteLine(exception);
+            await _logger.LogAsync($"Error reading config: {exception.Message}", "History.xaml.cs",
+                Importance.Error); // Log error
             throw;
         }
 
@@ -79,7 +82,8 @@ public partial class History : UserControl, INotifyPropertyChanged
             }
             catch (Exception exception)
             {
-                Console.WriteLine(exception);
+                await _logger.LogAsync($"Error updating Discord presence: {exception.Message}", "History.xaml.cs",
+                    Importance.Error); // Log error
                 throw;
             }
 
@@ -87,6 +91,8 @@ public partial class History : UserControl, INotifyPropertyChanged
         TotalFilesExtracted = Config.TotalFilesExtracted;
         await LoadHistory();
         await CalculateTotalExtracted();
+        await _logger.LogAsync("History loaded and totals calculated", "History.xaml.cs",
+            Importance.Info); // Log completion
     }
 
     private async Task CalculateTotalExtracted()
@@ -108,21 +114,25 @@ public partial class History : UserControl, INotifyPropertyChanged
         Config.TotalFilesExtracted = totalFilesExtracted;
 
         await ConfigHelper.UpdateConfigAsync(Config);
+        await _logger.LogAsync("Calculated total extracted files and updated config", "History.xaml.cs",
+            Importance.Info); // Log calculation
     }
 
     private async Task LoadHistory()
     {
-        Config = await ConfigHelper.LoadConfigAsync();
+        Config = await ConfigHelper.ReadConfigAsync();
         if (Config.History == null || Config.History.Count == 0)
         {
             ClearHistoryButton.Visibility = Visibility.Collapsed;
             NoHistoryLabel.Visibility = Visibility.Visible;
+            await _logger.LogAsync("No history found", "History.xaml.cs", Importance.Info); // Log no history
             return;
         }
 
         ClearHistoryButton.Visibility = Visibility.Visible;
         NoHistoryLabel.Visibility = Visibility.Collapsed;
         HistoryList = Config.History;
+        await _logger.LogAsync("Loaded history", "History.xaml.cs", Importance.Info); // Log history load
     }
 
     protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null)
@@ -142,6 +152,8 @@ public partial class History : UserControl, INotifyPropertyChanged
         HistoryList.Remove(history);
         Config!.History.Remove(history);
         await ConfigHelper.UpdateConfigAsync(Config);
+        await _logger.LogAsync($"Deleted history item: {history.ExtractedPath}", "History.xaml.cs",
+            Importance.Info); // Log deletion
         if (HistoryList.Count == 0) NoHistoryLabel.Visibility = Visibility.Visible;
     }
 
@@ -155,5 +167,6 @@ public partial class History : UserControl, INotifyPropertyChanged
         TotalFilesExtracted = 0;
         NoHistoryLabel.Visibility = Visibility.Visible;
         await ConfigHelper.UpdateConfigAsync(Config);
+        await _logger.LogAsync("Cleared all history", "History.xaml.cs", Importance.Info); // Log clearing history
     }
 }

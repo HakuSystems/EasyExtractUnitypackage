@@ -7,16 +7,16 @@ namespace EasyExtract.Config;
 
 public class ExtractedUnitypackageModel : INotifyPropertyChanged
 {
-    private InfoBarSeverity detailsSeverity;
-    private List<ExtractedFiles> subdirectoryItems = new();
-    private string unitypackageDetails;
+    private InfoBarSeverity detailsSeverity = InfoBarSeverity.Informational;
     private bool packageIsChecked;
-    private DateTime unitypackageExtractedDate;
+    private List<ExtractedFiles> subdirectoryItems = new();
+    private string unitypackageDetails = "No Details Available";
+    private DateTime unitypackageExtractedDate = DateTime.Now;
 
 
-    private string unitypackageName;
-    private string unitypackagePath;
-    private string unitypackageSize;
+    private string unitypackageName = "No Name Available";
+    private string unitypackagePath = "No Path Available";
+    private string unitypackageSize = "No Size Available";
     private int unitypackageTotal3DObjectCount;
     private int unitypackageTotalAnimationCount;
     private int unitypackageTotalAssetCount;
@@ -51,6 +51,7 @@ public class ExtractedUnitypackageModel : INotifyPropertyChanged
             OnPropertyChanged();
         }
     }
+
     public string UnitypackageDetails
     {
         get => unitypackageDetails;
@@ -295,15 +296,15 @@ public class ExtractedUnitypackageModel : INotifyPropertyChanged
 
 public class ExtractedFiles : INotifyPropertyChanged
 {
-    private string _category;
-    private string _extension;
-    private DateTime _extractedDate;
-    private string _fileName;
-    private string _filePath;
+    private string _category = "No Category Available";
+    private string _extension = "No Extension Available";
+    private DateTime _extractedDate = DateTime.Now;
+    private string _fileName = "No Name Available";
+    private string _filePath = "No Path Available";
     private bool _isChecked;
     private ImageSource? _previewImage;
-    private string _size;
-    private string _symbolIcon;
+    private string _size = "No Size Available";
+    private string _symbolIcon = "No Symbol Icon Available";
 
 
     public ImageSource? PreviewImage

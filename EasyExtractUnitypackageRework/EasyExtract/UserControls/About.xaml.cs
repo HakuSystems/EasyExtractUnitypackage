@@ -9,7 +9,9 @@ namespace EasyExtract.UserControls;
 
 public partial class About : UserControl
 {
-    private readonly List<Card> _cards = [];
+    private readonly List<Card> _cards = new();
+    private readonly BetterLogger _logger = new();
+    private readonly ConfigHelper ConfigHelper = new();
 
     public About()
     {
@@ -19,6 +21,7 @@ public partial class About : UserControl
     private async void About_OnLoaded(object sender, RoutedEventArgs e)
     {
         VersionCard.Footer = $"Version {Application.ResourceAssembly.GetName().Version}";
+        _logger.LogAsync("Set version in About UserControl", "About.xaml.cs", Importance.Info); // Log version set
 
         const int maxCards = 10;
         for (var i = 0; i < maxCards; i++)
@@ -34,6 +37,8 @@ public partial class About : UserControl
             RandomCardDesign.Items.Add(card);
         }
 
+        _logger.LogAsync("Added cards to RandomCardDesign", "About.xaml.cs", Importance.Info); // Log card addition
+
         var repeatTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(500) };
         repeatTimer.Tick += (o, args) => ChangeRandomMargins();
         repeatTimer.Start();
@@ -41,11 +46,13 @@ public partial class About : UserControl
         var isDiscordEnabled = false;
         try
         {
-            isDiscordEnabled = (await ConfigHelper.LoadConfigAsync()).DiscordRpc;
+            isDiscordEnabled = (await ConfigHelper.ReadConfigAsync()).DiscordRpc;
         }
         catch (Exception exception)
         {
             Console.WriteLine(exception);
+            await _logger.LogAsync($"Error reading config: {exception.Message}", "About.xaml.cs",
+                Importance.Error); // Log error
             throw;
         }
 
@@ -57,8 +64,12 @@ public partial class About : UserControl
             catch (Exception exception)
             {
                 Console.WriteLine(exception);
+                await _logger.LogAsync($"Error updating Discord presence: {exception.Message}", "About.xaml.cs",
+                    Importance.Error); // Log error
                 throw;
             }
+
+        await _logger.LogAsync("About UserControl loaded", "About.xaml.cs", Importance.Info); // Log successful load
     }
 
     private Thickness RandomMargin()

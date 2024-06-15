@@ -51,7 +51,6 @@
                            HorizontalContentAlignment="Stretch"
                            VerticalContentAlignment="Stretch"
                            Foreground="{DynamicResource TextFillColorPrimaryBrush}"
-                           Background="{DynamicResource BackgroundPrimaryBrush}"
                            FontWeight="DemiBold"
                            Transition="FadeInWithSlide"
                            PaneDisplayMode="Left"
@@ -65,7 +64,6 @@
                                        HorizontalContentAlignment="Stretch"
                                        VerticalContentAlignment="Stretch"
                                        Foreground="{DynamicResource TextFillColorPrimaryBrush}"
-                                       Background="{DynamicResource BackgroundPrimaryBrush}"
                                        Icon="{ui:SymbolIcon DocumentTextExtract24}" />
                 <ui:NavigationViewItem Content="Search" TargetPageTag="SearchEverything"
                                        HorizontalAlignment="Stretch"
@@ -73,7 +71,6 @@
                                        HorizontalContentAlignment="Stretch"
                                        VerticalContentAlignment="Stretch"
                                        Foreground="{DynamicResource TextFillColorPrimaryBrush}"
-                                       Background="{DynamicResource BackgroundPrimaryBrush}"
                                        TargetPageType="{x:Type UserControls:SearchEverything}"
                                        Icon="{ui:SymbolIcon Search24}" />
                 <ui:NavigationViewItem Content="History" TargetPageTag="History"
@@ -82,7 +79,6 @@
                                        HorizontalContentAlignment="Stretch"
                                        VerticalContentAlignment="Stretch"
                                        Foreground="{DynamicResource TextFillColorPrimaryBrush}"
-                                       Background="{DynamicResource BackgroundPrimaryBrush}"
                                        TargetPageType="{x:Type UserControls:History}"
                                        Icon="{ui:SymbolIcon History24}" />
                 <ui:NavigationViewItem Content="About" TargetPageTag="About"
@@ -91,7 +87,6 @@
                                        HorizontalContentAlignment="Stretch"
                                        VerticalContentAlignment="Stretch"
                                        Foreground="{DynamicResource TextFillColorPrimaryBrush}"
-                                       Background="{DynamicResource BackgroundPrimaryBrush}"
                                        TargetPageType="{x:Type UserControls:About}"
                                        Icon="{ui:SymbolIcon Heart24}" />
                 <ui:NavigationViewItem TargetPageTag="Updater"
@@ -102,7 +97,6 @@
                                        HorizontalContentAlignment="Stretch"
                                        VerticalContentAlignment="Stretch"
                                        Foreground="{DynamicResource TextFillColorPrimaryBrush}"
-                                       Background="{DynamicResource BackgroundPrimaryBrush}"
                                        Icon="{ui:SymbolIcon ArrowSyncCircle24}">
                     <ui:NavigationViewItem.Content>
                         <StackPanel>
@@ -154,11 +148,9 @@
             <ui:NavigationView.FooterMenuItems>
                 <ui:NavigationViewItem Content="Settings" Icon="{ui:SymbolIcon Settings24}"
                                        Foreground="{DynamicResource TextFillColorPrimaryBrush}"
-                                       Background="{DynamicResource BackgroundPrimaryBrush}"
                                        TargetPageType="{x:Type UserControls:Settings}" />
                 <ui:NavigationViewItem Content="{Binding CurrentVersion}" IsEnabled="False"
-                                       Foreground="{DynamicResource TextFillColorPrimaryBrush}"
-                                       Background="{DynamicResource BackgroundPrimaryBrush}" />
+                                       Foreground="{DynamicResource TextFillColorPrimaryBrush}" />
             </ui:NavigationView.FooterMenuItems>
         </ui:NavigationView>
     </Grid>

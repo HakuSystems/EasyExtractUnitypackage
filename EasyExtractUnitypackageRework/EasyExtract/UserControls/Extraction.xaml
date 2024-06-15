@@ -13,7 +13,6 @@
              AllowDrop="True"
              Drop="Extraction_OnDrop"
              Loaded="Extraction_OnLoaded">
-    <!-- Background="{DynamicResource BackgroundPrimaryBrush}" -->
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="*" />
@@ -212,7 +211,6 @@
                                                                  Expanded="AnalyticsExpander_OnExpanded"
                                                                  Icon="{ui:SymbolIcon DataArea24}">
                                                     <charts:CartesianChart
-                                                        Background="{DynamicResource BackgroundPrimaryBrush}"
                                                         Height="200"
                                                         Foreground="{DynamicResource TextFillColorPrimaryBrush}"
                                                         HorizontalContentAlignment="Stretch"

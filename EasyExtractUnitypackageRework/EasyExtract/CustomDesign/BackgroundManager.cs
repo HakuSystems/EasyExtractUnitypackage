@@ -10,8 +10,10 @@ public class BackgroundManager : INotifyPropertyChanged
 {
     private static BackgroundManager _instance;
     private double _backgroundOpacity;
-
     private ImageBrush _currentBackground;
+    private readonly BetterLogger _logger = new();
+    private readonly ConfigHelper ConfigHelper = new();
+
 
     private BackgroundManager()
     {
@@ -46,20 +48,23 @@ public class BackgroundManager : INotifyPropertyChanged
     public event PropertyChangedEventHandler PropertyChanged;
     public event EventHandler BackgroundChanged;
 
-    public void UpdateBackground(string imagePath)
+    public async void UpdateBackground(string imagePath)
     {
         CurrentBackground = new ImageBrush(new BitmapImage(new Uri(imagePath)))
         {
             Opacity = BackgroundOpacity,
             Stretch = Stretch.UniformToFill
         };
+        await _logger.LogAsync($"Background updated with image: {imagePath}", "BackgroundManager.cs",
+            Importance.Info); // Log background update
     }
 
-    public void ResetBackground(string defaultBackgroundResource)
+    public async void ResetBackground(string defaultBackgroundResource)
     {
         try
         {
-            var defaultBrush = Application.Current.FindResource(defaultBackgroundResource) as Brush;
+            var defaultBrush =
+                Application.Current.FindResource(defaultBackgroundResource ?? "BackgroundPrimaryBrush") as Brush;
             if (defaultBrush is ImageBrush imageBrush)
                 CurrentBackground = new ImageBrush(imageBrush.ImageSource)
                 {
@@ -68,19 +73,27 @@ public class BackgroundManager : INotifyPropertyChanged
                 };
             else
                 CurrentBackground = new ImageBrush { Opacity = BackgroundOpacity, Stretch = Stretch.UniformToFill };
+            await _logger.LogAsync("Background reset to default", "BackgroundManager.cs",
+                Importance.Info); // Log background reset
         }
-        catch (ResourceReferenceKeyNotFoundException)
+        catch (ResourceReferenceKeyNotFoundException ex)
         {
             CurrentBackground = new ImageBrush { Opacity = BackgroundOpacity, Stretch = Stretch.UniformToFill };
+            await _logger.LogAsync($"Default background resource not found: {ex.Message}", "BackgroundManager.cs",
+                Importance.Warning); // Log resource not found
         }
     }
 
-    public void UpdateOpacity(double opacity)
+    public async void UpdateOpacity(double opacity)
     {
         BackgroundOpacity = opacity;
         if (_currentBackground != null) _currentBackground.Opacity = opacity;
-        Task.Run(() => ConfigHelper.UpdateConfigAsync(new ConfigModel
-            { Backgrounds = new BackgroundModel { BackgroundOpacity = opacity } }));
+        await ConfigHelper.UpdateConfigAsync(new ConfigModel
+        {
+            Backgrounds = new BackgroundModel { BackgroundOpacity = opacity }
+        });
+        await _logger.LogAsync($"Background opacity updated to {opacity}", "BackgroundManager.cs",
+            Importance.Info); // Log opacity update
     }
 
     protected void OnPropertyChanged(string propertyName)

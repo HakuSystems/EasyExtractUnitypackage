@@ -9,7 +9,9 @@ public class DiscordRpcManager : IDisposable
 {
     private static DiscordRpcManager instance;
     private readonly Timestamps timestamps;
+    private readonly BetterLogger _logger = new();
     private DiscordRpcClient client;
+    private readonly ConfigHelper ConfigHelper = new();
 
     private DiscordRpcManager()
     {
@@ -19,12 +21,13 @@ public class DiscordRpcManager : IDisposable
 
     public static DiscordRpcManager Instance => instance ??= new DiscordRpcManager();
 
-    public void Dispose()
+    public async void Dispose()
     {
         if (!client.IsDisposed) client.Dispose();
+        await _logger.LogAsync("Disposed DiscordRpcClient", "DiscordRpcManager.cs", Importance.Info); // Log disposal
     }
 
-    public void DiscordStart()
+    public async void DiscordStart()
     {
         if (client == null || client.IsDisposed)
         {
@@ -33,12 +36,13 @@ public class DiscordRpcManager : IDisposable
             client.OnReady += (sender, e) => Console.WriteLine($"Received Ready from user {e.User.Username}");
             client.OnError += (sender, e) => Console.WriteLine($"Error! {e.Message}");
             client.OnClose += (sender, e) => Console.WriteLine($"Close! {e}");
+            await _logger.LogAsync("Discord RPC started", "DiscordRpcManager.cs", Importance.Info); // Log start
         }
     }
 
     public async Task UpdatePresenceAsync(string state)
     {
-        var config = await ConfigHelper.LoadConfigAsync();
+        var config = await ConfigHelper.ReadConfigAsync();
         var largeTextString =
             $"Extracted [{config.TotalExtracted}] Unitypackages & [{config.TotalFilesExtracted}] files.";
         if (largeTextString.Length > 127)
@@ -49,6 +53,8 @@ public class DiscordRpcManager : IDisposable
             catch (StringOutOfRangeException e)
             {
                 largeTextString = "Too many files extracted and/or unitypackages";
+                await _logger.LogAsync($"StringOutOfRangeException: {e.Message}", "DiscordRpcManager.cs",
+                    Importance.Warning); // Log exception
             }
 
         try
@@ -66,9 +72,13 @@ public class DiscordRpcManager : IDisposable
                     SmallImageText = $"V{Application.ResourceAssembly.GetName().Version}"
                 }
             });
+            await _logger.LogAsync($"Updated Discord presence to state: {state}", "DiscordRpcManager.cs",
+                Importance.Info); // Log presence update
         }
         catch (Exception ex)
         {
+            await _logger.LogAsync($"Failed to update Discord presence: {ex.Message}", "DiscordRpcManager.cs",
+                Importance.Error); // Log presence update failure
             Console.WriteLine($"Failed to Update Discord Presence: {ex.Message}");
         }
     }
