@@ -3,9 +3,10 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
              Loaded="Settings_OnLoaded"
+             Background="Transparent"
              FontFamily="{DynamicResource SegoeFluentIcons}"
-             Foreground="{DynamicResource TextFillColorPrimaryBrush}"
-             Background="{DynamicResource BackgroundPrimaryBrush}">
+             Foreground="{DynamicResource TextFillColorPrimaryBrush}">
+    <!-- {DynamicResource BackgroundPrimaryBrush} -->
     <ScrollViewer VerticalScrollBarVisibility="Auto">
         <Grid Margin="10">
             <Grid.RowDefinitions>
@@ -46,7 +47,7 @@
                         <ui:Card Margin="5">
                             <ui:ToggleSwitch IsHitTestVisible="False" x:Name="UwUModeToggle"
                                              Checked="UwUModeToggle_OnChecked"
-                                             Unchecked="UwUModeToggle_OnUnchecked" Content="On" IsChecked="True"
+                                             Unchecked="UwUModeToggle_OnUnchecked" Content="On" IsChecked="False"
                                              Margin="10" />
                         </ui:Card>
                     </ui:CardControl>
@@ -81,6 +82,58 @@
                                 <ComboBoxItem Content="High Contrast" />
                             </ComboBox>
                         </ui:Card>
+                    </ui:CardControl>
+                    <ui:CardControl x:Name="BackgroundWallpaperCard">
+                        <ui:CardControl.Icon>
+                            <ui:SymbolIcon
+                                HorizontalAlignment="Center"
+                                VerticalAlignment="Center"
+                                Margin="0,0,5,0"
+                                Symbol="ColorBackground24" />
+                        </ui:CardControl.Icon>
+                        <ui:CardControl.Header>
+                            <StackPanel>
+                                <ui:TextBlock
+                                    Margin="0"
+                                    FontTypography="BodyStrong"
+                                    Text="Custom Background"
+                                    TextWrapping="WrapWithOverflow" />
+                                <ui:TextBlock
+                                    Appearance="Secondary"
+                                    Text="Change the background of the app to an image"
+                                    Opacity="0.5"
+                                    TextWrapping="WrapWithOverflow" />
+                            </StackPanel>
+                        </ui:CardControl.Header>
+                        <StackPanel Orientation="Horizontal">
+                            <ui:Card Padding="10">
+                                <StackPanel Orientation="Horizontal">
+                                    <ui:Button
+                                        x:Name="BackgroundWallpaperChange"
+                                        Click="BackgroundWallpaperChange_OnClick"
+                                        Content="Change"
+                                        HorizontalAlignment="Center"
+                                        Margin="10,10,0,10" />
+                                    <ui:Button x:Name="BackgroundWallpaperReset"
+                                               Click="BackgroundWallpaperReset_OnClick"
+                                               Content="Reset"
+                                               Margin="0,10,10,10"
+                                               HorizontalAlignment="Center" />
+                                    <ui:TextBlock
+                                        Margin="10"
+                                        Text="Opacity"
+                                        VerticalAlignment="Center"
+                                        HorizontalAlignment="Center"
+                                        TextWrapping="WrapWithOverflow" />
+                                    <Slider x:Name="WallpaperOpacitySlider"
+                                            VerticalAlignment="Center"
+                                            ToolTip="Opacity of the wallpaper"
+                                            Loaded="WallpaperOpacitySlider_OnLoaded"
+                                            ValueChanged="WallpaperOpacitySlider_OnValueChanged"
+                                            Minimum="0" Maximum="1" Value="0.5" Margin="10" />
+                                </StackPanel>
+                            </ui:Card>
+                        </StackPanel>
                     </ui:CardControl>
                 </StackPanel>
             </ui:CardExpander>

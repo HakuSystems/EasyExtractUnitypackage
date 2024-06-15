@@ -5,6 +5,7 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
 using EasyExtract.Config;
+using EasyExtract.CustomDesign;
 using EasyExtract.Updater;
 using EasyExtract.UserControls;
 using Wpf.Ui.Appearance;
@@ -26,9 +27,9 @@ public partial class Dashboard : FluentWindow
         ContentFrame = new UserControls.Extraction();
     }
 
-    public static Dashboard Instance => instance ??= new Dashboard();
     private ConfigModel Config { get; } = new();
 
+    public static Dashboard Instance => instance ??= new Dashboard();
 
     private void HeartIcon_OnMouseEnter(object sender, MouseEventArgs e)
     {
@@ -49,6 +50,16 @@ public partial class Dashboard : FluentWindow
     private async void Dashboard_OnLoaded(object sender, RoutedEventArgs e)
     {
         var config = await ConfigHelper.LoadConfigAsync();
+        var backgroundHandler = new BackgroundHandler();
+
+        if (!string.IsNullOrEmpty(backgroundHandler.GetBackground()?.ToString()))
+            BackgroundManager.Instance.UpdateBackground(backgroundHandler.GetBackground()?.ToString());
+        else
+            BackgroundManager.Instance.ResetBackground(backgroundHandler.GetDefaultBackground()?.ToString());
+
+        BackgroundManager.Instance.BackgroundOpacity = backgroundHandler.GetBackgroundOpacity();
+
+
         var theme = config.ApplicationTheme;
         switch (theme)
         {
@@ -99,30 +110,28 @@ public partial class Dashboard : FluentWindow
             });
         }
 
-        switch (config.IsFirstRun)
+        if (config.IsFirstRun)
         {
-            case true:
-                NavView.Navigate(typeof(About));
-                config.IsFirstRun = false;
-                await ConfigHelper.UpdateConfigAsync(config);
-                break;
-            default:
-                NavView.Navigate(ContentFrame.GetType());
-                break;
+            NavView.Navigate(typeof(About));
+            config.IsFirstRun = false;
+            await ConfigHelper.UpdateConfigAsync(config);
+        }
+        else
+        {
+            NavView.Navigate(typeof(UserControls.Extraction));
         }
 
-        switch (config.UwUModeActive)
+        if (config.UwUModeActive)
         {
-            case true:
-                NavView.Opacity = 0.2;
-                TitleBar.Title = config.AppTitle;
-                Title = config.AppTitle;
-                await UwUAnimation();
-                break;
-            default:
-                TitleBar.Title = config.AppTitle;
-                Title = config.AppTitle;
-                break;
+            NavView.Opacity = 0.2;
+            TitleBar.Title = config.AppTitle;
+            Title = config.AppTitle;
+            await UwUAnimation();
+        }
+        else
+        {
+            TitleBar.Title = config.AppTitle;
+            Title = config.AppTitle;
         }
     }
 

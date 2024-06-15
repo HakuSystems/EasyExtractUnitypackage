@@ -5,6 +5,7 @@
                  xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
                  xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
                  xmlns:UserControls="clr-namespace:EasyExtract.UserControls"
+                 xmlns:local="clr-namespace:EasyExtract.CustomDesign"
                  mc:Ignorable="d"
                  WindowStyle="None"
                  ResizeMode="CanResizeWithGrip"
@@ -15,10 +16,16 @@
                  WindowStartupLocation="CenterScreen"
                  Title="{Binding AppTitle}"
                  FontFamily="{DynamicResource SegoeFluentIcons}"
-                 Background="{DynamicResource BackgroundPrimaryBrush}"
                  WindowBackdropType="Mica"
                  ExtendsContentIntoTitleBar="True"
                  Height="auto" Width="auto">
+    <ui:FluentWindow.Background>
+        <MultiBinding Converter="{StaticResource BackgroundAndOpacityConverter}" UpdateSourceTrigger="PropertyChanged">
+            <Binding Path="CurrentBackground" Source="{x:Static local:BackgroundManager.Instance}" />
+            <Binding Path="BackgroundOpacity" Source="{x:Static local:BackgroundManager.Instance}" />
+        </MultiBinding>
+    </ui:FluentWindow.Background>
+
     <Grid x:Name="MainGrid">
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="*" />

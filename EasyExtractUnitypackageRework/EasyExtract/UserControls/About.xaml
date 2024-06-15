@@ -7,7 +7,7 @@
              xmlns:gif="https://github.com/XamlAnimatedGif/XamlAnimatedGif"
              mc:Ignorable="d"
              FontFamily="{DynamicResource SegoeFluentIcons}"
-             Background="{DynamicResource BackgroundPrimaryBrush}"
+             Background="Transparent"
              Foreground="{DynamicResource TextFillColorPrimaryBrush}"
              Loaded="About_OnLoaded"
              d:DesignHeight="450" d:DesignWidth="1530">

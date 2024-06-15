@@ -7,9 +7,9 @@
              xmlns:charts="clr-namespace:LiveCharts.Wpf;assembly=LiveCharts.Wpf"
              xmlns:gif="https://github.com/XamlAnimatedGif/XamlAnimatedGif"
              mc:Ignorable="d"
-             Background="{DynamicResource BackgroundPrimaryBrush}"
              Foreground="{DynamicResource TextFillColorPrimaryBrush}"
              FontFamily="{DynamicResource SegoeFluentIcons}"
+             Background="Transparent"
              AllowDrop="True"
              Drop="Extraction_OnDrop"
              Loaded="Extraction_OnLoaded">

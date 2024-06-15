@@ -1,6 +1,8 @@
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Media;
 using EasyExtract.Config;
+using EasyExtract.CustomDesign;
 using EasyExtract.Discord;
 using Microsoft.Win32;
 using Wpf.Ui.Appearance;
@@ -13,6 +15,8 @@ public partial class Settings : UserControl
 
     public Settings()
     {
+        //todo: DIE CONFIG BLIEBT IRGENDWIE NICHT GLEICH WENN MAN WAS IN DEN SETTINGS ÄNDERT ALSO DER BACKGROUND WIRD NICHT GELADEN WENN DIE APP STARTET
+        // todo: DAS IST EIN GROßES PROBLEM FIX DAS MAL WENN DU WIEDER HOME BIST ODER SO!!
         InitializeComponent();
     }
 
@@ -112,6 +116,15 @@ public partial class Settings : UserControl
 
     private async void Settings_OnLoaded(object sender, RoutedEventArgs e)
     {
+        var backgroundHandler = new BackgroundHandler();
+
+        if (!string.IsNullOrEmpty(backgroundHandler.GetBackground()?.ToString()))
+            BackgroundManager.Instance.UpdateBackground(backgroundHandler.GetBackground()?.ToString());
+        else
+            BackgroundManager.Instance.ResetBackground(backgroundHandler.GetDefaultBackground()?.ToString());
+
+        BackgroundManager.Instance.BackgroundOpacity = backgroundHandler.GetBackgroundOpacity();
+
         DiscordRpcToggle.Checked += DiscordRPCToggle_OnChecked;
         DiscordRpcToggle.Unchecked += DiscordRPCToggle_OnUnchecked;
         UpdateCheckToggle.Checked += UpdateCheckToggle_OnChecked;
@@ -244,5 +257,42 @@ public partial class Settings : UserControl
                 ApplicationThemeManager.Apply(ApplicationTheme.Dark);
                 break;
         }
+    }
+
+    private void BackgroundWallpaperChange_OnClick(object sender, RoutedEventArgs e)
+    {
+        var fileDialog = new OpenFileDialog
+        {
+            Filter = "Image Files|*.jpg;*.jpeg;*.png;",
+            Title = "Select a background image"
+        };
+        var result = fileDialog.ShowDialog();
+        if (result != true) return;
+        var backgroundHandler = new BackgroundHandler();
+        backgroundHandler.SetBackground(fileDialog.FileName);
+        BackgroundManager.Instance.UpdateBackground(fileDialog.FileName);
+    }
+
+    private void BackgroundWallpaperReset_OnClick(object sender, RoutedEventArgs e)
+    {
+        var backgroundHandler = new BackgroundHandler();
+        backgroundHandler.SetBackground(null);
+        var defaultBackground = backgroundHandler.GetDefaultBackground()?.ToString();
+        if (!string.IsNullOrEmpty(defaultBackground))
+            BackgroundManager.Instance.ResetBackground(defaultBackground);
+        else
+            BackgroundManager.Instance.CurrentBackground = new ImageBrush
+                { Opacity = BackgroundManager.Instance.BackgroundOpacity };
+    }
+
+    private void WallpaperOpacitySlider_OnLoaded(object sender, RoutedEventArgs e)
+    {
+        var backgroundHandler = new BackgroundHandler();
+        WallpaperOpacitySlider.Value = backgroundHandler.GetBackgroundOpacity();
+    }
+
+    private void WallpaperOpacitySlider_OnValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+    {
+        BackgroundManager.Instance.UpdateOpacity(WallpaperOpacitySlider.Value);
     }
 }

@@ -4,8 +4,8 @@
              xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
              Loaded="SearchEverything_OnLoaded"
              FontFamily="{DynamicResource SegoeFluentIcons}"
-             Foreground="{DynamicResource TextFillColorPrimaryBrush}"
-             Background="{DynamicResource BackgroundPrimaryBrush}">
+             Background="Transparent"
+             Foreground="{DynamicResource TextFillColorPrimaryBrush}">
     <Grid>
         <StackPanel Orientation="Vertical" HorizontalAlignment="Center" VerticalAlignment="Center">
             <TextBlock x:Name="FallbackEverything"
