@@ -9,10 +9,10 @@ namespace EasyExtract.CustomDesign;
 public class BackgroundManager : INotifyPropertyChanged
 {
     private static BackgroundManager _instance;
-    private double _backgroundOpacity;
-    private ImageBrush _currentBackground;
     private readonly BetterLogger _logger = new();
     private readonly ConfigHelper ConfigHelper = new();
+    private double _backgroundOpacity;
+    private ImageBrush _currentBackground;
 
 
     private BackgroundManager()
@@ -50,6 +50,12 @@ public class BackgroundManager : INotifyPropertyChanged
 
     public async void UpdateBackground(string imagePath)
     {
+        if (string.IsNullOrEmpty(imagePath))
+        {
+            ResetBackground();
+            return;
+        }
+
         CurrentBackground = new ImageBrush(new BitmapImage(new Uri(imagePath)))
         {
             Opacity = BackgroundOpacity,
@@ -59,20 +65,19 @@ public class BackgroundManager : INotifyPropertyChanged
             Importance.Info); // Log background update
     }
 
-    public async void ResetBackground(string defaultBackgroundResource)
+    public async void ResetBackground()
     {
         try
         {
-            var defaultBrush =
-                Application.Current.FindResource(defaultBackgroundResource ?? "BackgroundPrimaryBrush") as Brush;
-            if (defaultBrush is ImageBrush imageBrush)
-                CurrentBackground = new ImageBrush(imageBrush.ImageSource)
-                {
-                    Opacity = BackgroundOpacity,
-                    Stretch = Stretch.UniformToFill
-                };
-            else
-                CurrentBackground = new ImageBrush { Opacity = BackgroundOpacity, Stretch = Stretch.UniformToFill };
+            var uri = new Uri("https://raw.githubusercontent.com/HakuSystems/GraphicsStuff/main/Shiny%20Overlay.png");
+            CurrentBackground = new ImageBrush(new BitmapImage(new Uri(uri.ToString())))
+            {
+                Opacity = BackgroundOpacity,
+                Stretch = Stretch.UniformToFill
+            };
+            ConfigHelper.Config.Backgrounds.BackgroundPath = uri.ToString();
+            UpdateBackground(uri.ToString());
+            await ConfigHelper.UpdateConfigAsync();
             await _logger.LogAsync("Background reset to default", "BackgroundManager.cs",
                 Importance.Info); // Log background reset
         }
@@ -88,10 +93,8 @@ public class BackgroundManager : INotifyPropertyChanged
     {
         BackgroundOpacity = opacity;
         if (_currentBackground != null) _currentBackground.Opacity = opacity;
-        await ConfigHelper.UpdateConfigAsync(new ConfigModel
-        {
-            Backgrounds = new BackgroundModel { BackgroundOpacity = opacity }
-        });
+        ConfigHelper.Config.Backgrounds.BackgroundOpacity = opacity;
+        await ConfigHelper.UpdateConfigAsync();
         await _logger.LogAsync($"Background opacity updated to {opacity}", "BackgroundManager.cs",
             Importance.Info); // Log opacity update
     }

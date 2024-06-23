@@ -5,6 +5,7 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
 using EasyExtract.Config;
+using EasyExtract.CustomDesign;
 using EasyExtract.Updater;
 using EasyExtract.UserControls;
 using Wpf.Ui.Appearance;
@@ -17,18 +18,18 @@ public partial class Dashboard : FluentWindow
 {
     private static UserControl ContentFrame;
     private static Dashboard instance;
-    private readonly UpdateHandler _updateHandler = new();
+    private readonly BackgroundManager _backgroundManager = BackgroundManager.Instance;
     private readonly BetterLogger _logger = new();
+    private readonly UpdateHandler _updateHandler = new();
     private readonly ConfigHelper ConfigHelper = new();
 
     public Dashboard()
     {
         InitializeComponent();
-        DataContext = Config;
+        DataContext = this;
         ContentFrame = new UserControls.Extraction();
     }
 
-    private ConfigModel Config { get; } = new();
     public static Dashboard Instance => instance ??= new Dashboard();
 
 
@@ -50,19 +51,12 @@ public partial class Dashboard : FluentWindow
 
     private async void Dashboard_OnLoaded(object sender, RoutedEventArgs e)
     {
-        var config = await ConfigHelper.ReadConfigAsync();
-        // var backgroundConfig = await ConfigHelper.ReadConfigAsync();
-        // var BackgroundHandler = new BackgroundHandler(backgroundConfig.Backgrounds);
-        //
-        // if (!string.IsNullOrEmpty(BackgroundHandler.GetBackground()?.ToString()))
-        //     BackgroundManager.Instance.UpdateBackground(BackgroundHandler.GetBackground()?.ToString());
-        // else
-        //     BackgroundManager.Instance.ResetBackground(BackgroundHandler.GetDefaultBackground()?.ToString());
-        //
-        // BackgroundManager.Instance.BackgroundOpacity = await BackgroundHandler.GetBackgroundOpacity();
+        await ConfigHelper.ReadConfigAsync();
+        VersionTxt.Content = $"{ConfigHelper.Config.Update.CurrentVersion}";
+        _backgroundManager.UpdateBackground(ConfigHelper.Config.Backgrounds.BackgroundPath);
+        _backgroundManager.UpdateOpacity(ConfigHelper.Config.Backgrounds.BackgroundOpacity);
 
-
-        var theme = config.ApplicationTheme;
+        var theme = ConfigHelper.Config.ApplicationTheme;
         switch (theme)
         {
             case ApplicationTheme.Dark:
@@ -84,7 +78,7 @@ public partial class Dashboard : FluentWindow
                 break;
         }
 
-        if (config.AutoUpdate)
+        if (ConfigHelper.Config.Update.AutoUpdate)
         {
             var updateAvailable = !await _updateHandler.IsUpToDate();
 
@@ -115,12 +109,12 @@ public partial class Dashboard : FluentWindow
             });
         }
 
-        if (config.IsFirstRun)
+        if (ConfigHelper.Config.Runs is { IsFirstRun: true })
         {
             NavView.Navigate(typeof(About));
             await _logger.LogAsync("First run detected, navigating to About", "Dashboard.xaml.cs", Importance.Info);
-            Config.IsFirstRun = false;
-            await ConfigHelper.UpdateConfigAsync(Config);
+            ConfigHelper.Config.Runs.IsFirstRun = false;
+            await ConfigHelper.UpdateConfigAsync();
         }
         else
         {
@@ -128,17 +122,17 @@ public partial class Dashboard : FluentWindow
             NavView.Navigate(typeof(UserControls.Extraction));
         }
 
-        if (config.UwUModeActive)
+        if (ConfigHelper.Config.UwUModeActive)
         {
             NavView.Opacity = 0.2;
-            TitleBar.Title = Config.AppTitle;
-            Title = Config.AppTitle;
+            TitleBar.Title = "EasyExtractUwUnitypackage";
+            Title = "EasyExtractUwUnitypackage";
             await UwUAnimation();
         }
         else
         {
-            TitleBar.Title = Config.AppTitle;
-            Title = Config.AppTitle;
+            TitleBar.Title = ConfigHelper.Config.AppTitle;
+            Title = ConfigHelper.Config.AppTitle;
         }
     }
 

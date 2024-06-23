@@ -12,7 +12,6 @@ namespace EasyExtract;
 public partial class MainWindow : Window
 {
     private readonly BetterLogger _logger = new();
-    private readonly ConfigHelper ConfigHelper = new();
 
     public MainWindow()
     {
@@ -24,7 +23,6 @@ public partial class MainWindow : Window
         await _logger.LogAsync("Application started", "MainWindow.xaml.cs", Importance.Info);
         DiscordRpcManager.Instance.DiscordStart();
         await GenerateAllNessesaryFiles();
-        await ConfigHelper.ReadConfigAsync();
 
         var timer = new DispatcherTimer();
         timer.Interval = TimeSpan.FromSeconds(5);

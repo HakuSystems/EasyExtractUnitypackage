@@ -20,7 +20,7 @@ public partial class EasterEgg : UserControl
         var isDiscordEnabled = false;
         try
         {
-            isDiscordEnabled = (await ConfigHelper.ReadConfigAsync())!.DiscordRpc;
+            isDiscordEnabled = ConfigHelper.Config.DiscordRpc;
         }
         catch (Exception exception)
         {

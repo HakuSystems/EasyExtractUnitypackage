@@ -39,6 +39,9 @@ public partial class Extraction : UserControl, INotifyPropertyChanged
     private static readonly Uri ExtractionAnimationUri =
         new("pack://application:,,,/EasyExtract;component/Resources/Gifs/IconAnim.gif");
 
+    private readonly BetterLogger _logger = new();
+    private readonly ConfigHelper ConfigHelper = new();
+
     /// <summary>
     ///     Represents a collection of extracted Unitypackages.
     /// </summary>
@@ -47,16 +50,12 @@ public partial class Extraction : UserControl, INotifyPropertyChanged
     /// The boolean variable _isExtraction represents whether an extraction process is currently happening or not.
     private bool _isExtraction;
 
-    private readonly BetterLogger _logger = new();
-    private readonly ConfigHelper ConfigHelper = new();
-
     public Extraction()
     {
         InitializeComponent();
         DataContext = this;
     }
 
-    private ConfigModel Config { get; } = new();
 
     /// <summary>
     ///     The ExtractionHelper class provides various helper methods for extracting information from directories.
@@ -187,7 +186,7 @@ public partial class Extraction : UserControl, INotifyPropertyChanged
     {
         // Populate the list of extracted Unitypackages from the extracted folder
         // Get the directories in the extraction path
-        var directories = Directory.GetDirectories(Config.LastExtractedPath);
+        var directories = Directory.GetDirectories(ConfigHelper.Config.LastExtractedPath);
         foreach (var directory in directories)
         {
             // Calculate total size and create a model for the Unitypackage.
@@ -358,10 +357,12 @@ public partial class Extraction : UserControl, INotifyPropertyChanged
         await UpdateInfoBadgesAsync();
         await ConfigHelper.ReadConfigAsync().ContinueWith(task =>
         {
-            var config = task.Result;
-            if (config == null) return;
-            Dispatcher.Invoke(() => { CategoryStructureBool.IsChecked = config.ExtractedCategoryStructure; });
-            ConfigHelper.UpdateConfigAsync(config);
+            if (ConfigHelper.Config == null) return;
+            Dispatcher.Invoke(() =>
+            {
+                CategoryStructureBool.IsChecked = ConfigHelper.Config.ExtractedCategoryStructure;
+            });
+            ConfigHelper.UpdateConfigAsync();
         });
         await UpdateExtractedFiles();
         await UpdateIgnoredConfigListAsync();
@@ -383,8 +384,7 @@ public partial class Extraction : UserControl, INotifyPropertyChanged
 
     private async Task UpdateIgnoredConfigListAsync()
     {
-        var config = await ConfigHelper.ReadConfigAsync();
-        if (config == null) return;
+        if (ConfigHelper.Config == null) return;
 
         var ignoredAppDataDirectory = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
             "EasyExtract", "IgnoredUnitypackages");
@@ -392,17 +392,18 @@ public partial class Extraction : UserControl, INotifyPropertyChanged
 
         var directoryNames = Directory.GetDirectories(ignoredAppDataDirectory).Select(Path.GetFileName).ToList();
 
-        var packagesToRemove = config.IgnoredUnitypackages
+        var packagesToRemove = ConfigHelper.Config.IgnoredUnitypackages
             .Where(package => !directoryNames.Contains(package.IgnoredUnityPackageName)).ToList();
 
-        foreach (var packageToRemove in packagesToRemove) config.IgnoredUnitypackages.Remove(packageToRemove);
-        if (packagesToRemove.Any()) await ConfigHelper.UpdateConfigAsync(config);
+        foreach (var packageToRemove in packagesToRemove)
+            ConfigHelper.Config.IgnoredUnitypackages.Remove(packageToRemove);
+        if (packagesToRemove.Any()) await ConfigHelper.UpdateConfigAsync();
 
         // Update UI with existing ignored packages
         Dispatcher.InvokeAsync(() =>
         {
             IgnoredUnitypackages.Clear();
-            foreach (var ignoredUnitypackage in config.IgnoredUnitypackages)
+            foreach (var ignoredUnitypackage in ConfigHelper.Config.IgnoredUnitypackages)
                 if (directoryNames.Contains(ignoredUnitypackage.IgnoredUnityPackageName))
                     IgnoredUnitypackages.Add(ignoredUnitypackage);
         });
@@ -410,7 +411,7 @@ public partial class Extraction : UserControl, INotifyPropertyChanged
         // Handle directories not listed in the config
         var packagesToAdd = new List<IgnoredUnitypackageModel>();
         foreach (var newIgnoredPackage in from directory in directoryNames
-                 where config.IgnoredUnitypackages.All(p => p.IgnoredUnityPackageName != directory)
+                 where ConfigHelper.Config.IgnoredUnitypackages.All(p => p.IgnoredUnityPackageName != directory)
                  select new IgnoredUnitypackageModel
                  {
                      IgnoredUnityPackageName = directory,
@@ -418,11 +419,11 @@ public partial class Extraction : UserControl, INotifyPropertyChanged
                  })
         {
             packagesToAdd.Add(newIgnoredPackage);
-            config.IgnoredUnitypackages.Add(newIgnoredPackage);
+            ConfigHelper.Config.IgnoredUnitypackages.Add(newIgnoredPackage);
         }
 
         // Update the config file if there were new packages added
-        if (packagesToAdd.Any()) await ConfigHelper.UpdateConfigAsync(config);
+        if (packagesToAdd.Any()) await ConfigHelper.UpdateConfigAsync();
 
         // Update the UI with newly added packages
         Dispatcher.InvokeAsync(() =>
@@ -452,7 +453,7 @@ public partial class Extraction : UserControl, INotifyPropertyChanged
     private async Task UpdateInfoBadgesAsync()
     {
         TotalExtractedInExtractedFolder =
-            (await Task.Run(() => Directory.GetDirectories(Config.LastExtractedPath))).Length.ToString();
+            (await Task.Run(() => Directory.GetDirectories(ConfigHelper.Config.LastExtractedPath))).Length.ToString();
         if (ManageExtractedInfoBadge != null) ManageExtractedInfoBadge.Value = TotalExtractedInExtractedFolder;
         await UpdateIgnoredUnitypackagesCountAsync();
         UpdateSelectAllToggleContent();
@@ -486,7 +487,7 @@ public partial class Extraction : UserControl, INotifyPropertyChanged
         var isDiscordEnabled = false;
         try
         {
-            isDiscordEnabled = (await ConfigHelper.ReadConfigAsync())!.DiscordRpc;
+            isDiscordEnabled = ConfigHelper.Config.DiscordRpc;
         }
         catch (Exception exception)
         {
@@ -626,18 +627,17 @@ public partial class Extraction : UserControl, INotifyPropertyChanged
     {
         await ConfigHelper.ReadConfigAsync().ContinueWith(task =>
         {
-            var config = task.Result;
-            if (config == null) return;
-            config.History.Add(new HistoryModel
+            if (ConfigHelper.Config == null) return;
+            ConfigHelper.Config.History.Add(new HistoryModel
             {
                 FileName = unitypackage.UnityPackageName,
-                ExtractedPath = Path.Combine(Config.LastExtractedPath, unitypackage.UnityPackageName),
+                ExtractedPath = Path.Combine(ConfigHelper.Config.LastExtractedPath, unitypackage.UnityPackageName),
                 ExtractedDate = DateTime.Now,
                 TotalFiles = Directory.GetFiles(
-                    Path.Combine(Config.LastExtractedPath, unitypackage.UnityPackageName),
+                    Path.Combine(ConfigHelper.Config.LastExtractedPath, unitypackage.UnityPackageName),
                     "*.*", SearchOption.AllDirectories).Length
             });
-            ConfigHelper.UpdateConfigAsync(config);
+            ConfigHelper.UpdateConfigAsync();
         });
     }
 
@@ -688,14 +688,13 @@ public partial class Extraction : UserControl, INotifyPropertyChanged
     {
         await ConfigHelper.ReadConfigAsync().ContinueWith(task =>
         {
-            var config = task.Result;
-            if (config == null) return;
-            config.IgnoredUnitypackages.Add(new IgnoredUnitypackageModel
+            if (ConfigHelper.Config == null) return;
+            ConfigHelper.Config.IgnoredUnitypackages.Add(new IgnoredUnitypackageModel
             {
                 IgnoredUnityPackageName = unitypackage.UnityPackageName,
                 IgnoredReason = reason
             });
-            ConfigHelper.UpdateConfigAsync(config);
+            ConfigHelper.UpdateConfigAsync();
         });
     }
 
@@ -853,10 +852,9 @@ public partial class Extraction : UserControl, INotifyPropertyChanged
     {
         await ConfigHelper.ReadConfigAsync().ContinueWith(task =>
         {
-            var config = task.Result;
-            if (config == null) return;
-            config.ExtractedCategoryStructure = true;
-            ConfigHelper.UpdateConfigAsync(config);
+            if (ConfigHelper.Config == null) return;
+            ConfigHelper.Config.ExtractedCategoryStructure = true;
+            ConfigHelper.UpdateConfigAsync();
         });
         await UpdateExtractedFiles();
     }
@@ -865,10 +863,9 @@ public partial class Extraction : UserControl, INotifyPropertyChanged
     {
         await ConfigHelper.ReadConfigAsync().ContinueWith(task =>
         {
-            var config = task.Result;
-            if (config == null) return;
-            config.ExtractedCategoryStructure = false;
-            ConfigHelper.UpdateConfigAsync(config);
+            if (ConfigHelper.Config == null) return;
+            ConfigHelper.Config.ExtractedCategoryStructure = false;
+            ConfigHelper.UpdateConfigAsync();
         });
 
         await UpdateExtractedFiles();

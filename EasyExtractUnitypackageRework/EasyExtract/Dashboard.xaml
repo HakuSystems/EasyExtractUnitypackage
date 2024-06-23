@@ -148,9 +148,11 @@
             <ui:NavigationView.FooterMenuItems>
                 <ui:NavigationViewItem Content="Settings" Icon="{ui:SymbolIcon Settings24}"
                                        Foreground="{DynamicResource TextFillColorPrimaryBrush}"
-                                       TargetPageType="{x:Type UserControls:Settings}" />
-                <ui:NavigationViewItem Content="{Binding CurrentVersion}" IsEnabled="False"
-                                       Foreground="{DynamicResource TextFillColorPrimaryBrush}" />
+                                       TargetPageType="{x:Type UserControls:BetterSettings}" />
+                <ui:NavigationViewItem
+                    x:Name="VersionTxt"
+                    IsEnabled="False"
+                    Foreground="{DynamicResource TextFillColorPrimaryBrush}" />
             </ui:NavigationView.FooterMenuItems>
         </ui:NavigationView>
     </Grid>

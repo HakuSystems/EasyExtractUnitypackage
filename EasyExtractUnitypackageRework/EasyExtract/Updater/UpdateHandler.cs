@@ -1,7 +1,6 @@
 using System.Diagnostics;
 using System.IO;
 using System.Net.Http;
-using System.Reflection;
 using EasyExtract.Config;
 using Octokit;
 using SharpCompress.Archives;
@@ -12,11 +11,8 @@ namespace EasyExtract.Updater;
 
 public class UpdateHandler
 {
-    private const string RepoName = "EasyExtractUnitypackage";
-    private const string RepoOwner = "HakuSystems";
+    private readonly ConfigHelper _configHelper = new();
     private readonly BetterLogger _logger = new(); // Added logger initialization
-    private ConfigModel Config { get; } = new();
-    private string CurrentVersion => Assembly.GetExecutingAssembly().GetName().Version?.ToString() ?? "0.0.0";
 
     public async Task<bool> IsUpToDate()
     {
@@ -24,10 +20,13 @@ public class UpdateHandler
         if (latestRelease != null)
         {
             var latestVersion = latestRelease.TagName.TrimStart('v', 'V'); // Removing both 'v' and 'V'
+            var currentVersion =
+                _configHelper.Config.Update.CurrentVersion.TrimStart('v', 'V'); // Removing both 'v' and 'V'
+
             await _logger.LogAsync($"Latest version found: {latestVersion}", "UpdateHandler.cs",
                 Importance.Info); // Log latest version
             return Version.TryParse(latestVersion, out var latest) &&
-                   Version.TryParse(CurrentVersion, out var current) &&
+                   Version.TryParse(currentVersion, out var current) &&
                    latest <= current;
         }
 
@@ -120,7 +119,8 @@ public class UpdateHandler
         try
         {
             var client = new GitHubClient(new ProductHeaderValue("GitHubUpdater"));
-            var releases = await client.Repository.Release.GetAll(RepoOwner, RepoName);
+            var releases = await client.Repository.Release.GetAll(_configHelper.Config.Update.RepoOwner,
+                _configHelper.Config.Update.RepoName);
             var latestRelease = releases.FirstOrDefault();
             await _logger.LogAsync($"Fetched latest release: {latestRelease?.TagName}", "UpdateHandler.cs",
                 Importance.Info); // Log release fetch

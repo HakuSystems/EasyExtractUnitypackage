@@ -233,7 +233,7 @@
 
                             </StackPanel>
                         </ui:CardExpander.Header>
-                        <ScrollViewer VerticalScrollBarVisibility="Auto" x:Name="ExtractedItemsScroller">
+                        <ui:DynamicScrollViewer VerticalScrollBarVisibility="Auto" x:Name="ExtractedItemsScroller">
                             <TreeView x:Name="UnityPackageTreeView"
                                       ItemsSource="{Binding ExtractedUnitypackages}">
                                 <TreeView.ItemTemplate>
@@ -338,7 +338,7 @@
                                     </HierarchicalDataTemplate>
                                 </TreeView.ItemTemplate>
                             </TreeView>
-                        </ScrollViewer>
+                        </ui:DynamicScrollViewer>
                     </ui:CardExpander>
 
 

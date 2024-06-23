@@ -9,7 +9,7 @@ namespace EasyExtract.Extraction;
 public class ExtractionHandler
 {
     private readonly BetterLogger _logger = new();
-    private ConfigModel Config { get; } = new();
+    private readonly ConfigHelper ConfigHelper = new();
 
     public async Task<bool> ExtractUnitypackage(SearchEverythingModel unitypackage)
     {
@@ -39,7 +39,7 @@ public class ExtractionHandler
 
     private async Task<string> GetTempFolderPath(SearchEverythingModel unitypackage)
     {
-        var tempFolder = Path.Combine(Config.DefaultTempPath, unitypackage.UnityPackageName);
+        var tempFolder = Path.Combine(ConfigHelper.Config.DefaultTempPath, unitypackage.UnityPackageName);
         DeleteIfDirectoryExists(tempFolder);
         await _logger.LogAsync($"Temporary folder path set to: {tempFolder}", "ExtractionHandler.cs",
             Importance.Info); // Log temp folder path
@@ -48,7 +48,7 @@ public class ExtractionHandler
 
     private async Task<string> GetTargetFolderPath(SearchEverythingModel unitypackage)
     {
-        var targetFolder = Path.Combine(Config.LastExtractedPath, unitypackage.UnityPackageName);
+        var targetFolder = Path.Combine(ConfigHelper.Config.LastExtractedPath, unitypackage.UnityPackageName);
         DeleteIfDirectoryExists(targetFolder);
         await _logger.LogAsync($"Target folder path set to: {targetFolder}", "ExtractionHandler.cs",
             Importance.Info); // Log target folder path

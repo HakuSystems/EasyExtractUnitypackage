@@ -13,12 +13,12 @@ namespace EasyExtract.UserControls;
 
 public partial class SearchEverything : UserControl, INotifyPropertyChanged
 {
-    private readonly List<SearchEverythingModel> _tempList = new();
     private readonly BetterLogger _logger = new();
-
-    private List<SearchEverythingModel>? _searchEverythingList;
+    private readonly List<SearchEverythingModel> _tempList = new();
     private readonly ConfigHelper ConfigHelper = new();
     private readonly EverythingValidation EverythingValidation = new();
+
+    private List<SearchEverythingModel>? _searchEverythingList;
 
     public SearchEverything()
     {
@@ -77,7 +77,7 @@ public partial class SearchEverything : UserControl, INotifyPropertyChanged
         var isDiscordEnabled = false;
         try
         {
-            isDiscordEnabled = (await ConfigHelper.ReadConfigAsync()).DiscordRpc;
+            isDiscordEnabled = ConfigHelper.Config.DiscordRpc;
         }
         catch (Exception exception)
         {

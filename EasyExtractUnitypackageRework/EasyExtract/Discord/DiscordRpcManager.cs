@@ -8,10 +8,10 @@ namespace EasyExtract.Discord;
 public class DiscordRpcManager : IDisposable
 {
     private static DiscordRpcManager instance;
-    private readonly Timestamps timestamps;
     private readonly BetterLogger _logger = new();
-    private DiscordRpcClient client;
     private readonly ConfigHelper ConfigHelper = new();
+    private readonly Timestamps timestamps;
+    private DiscordRpcClient client;
 
     private DiscordRpcManager()
     {
@@ -42,13 +42,13 @@ public class DiscordRpcManager : IDisposable
 
     public async Task UpdatePresenceAsync(string state)
     {
-        var config = await ConfigHelper.ReadConfigAsync();
         var largeTextString =
-            $"Extracted [{config.TotalExtracted}] Unitypackages & [{config.TotalFilesExtracted}] files.";
+            $"Extracted [{ConfigHelper.Config.TotalExtracted}] Unitypackages & [{ConfigHelper.Config.TotalFilesExtracted}] files.";
         if (largeTextString.Length > 127)
             try
             {
-                largeTextString = $"U: {config.TotalExtracted} F: {config.TotalFilesExtracted}";
+                largeTextString =
+                    $"U: {ConfigHelper.Config.TotalExtracted} F: {ConfigHelper.Config.TotalFilesExtracted}";
             }
             catch (StringOutOfRangeException e)
             {
