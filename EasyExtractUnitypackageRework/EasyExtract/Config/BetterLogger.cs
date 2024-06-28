@@ -19,18 +19,21 @@ public class BetterLogger
         // Clear the log file if it exists
         lock (_lock)
         {
-            File.WriteAllText(_logFile, string.Empty);
+            File.WriteAllTextAsync(_logFile, string.Empty);
         }
     }
 
-    public async Task LogAsync(string message, string source, Importance importance)
+    public Task LogAsync(string message, string source, Importance importance)
     {
         var logEntry = $"[{DateTime.Now}] [{importance}] {source}: {message}\n";
 
         lock (_lock)
         {
-            File.AppendAllText(_logFile, logEntry);
+            Console.WriteLine(logEntry);
+            File.AppendAllTextAsync(_logFile, logEntry);
         }
+
+        return Task.CompletedTask;
     }
 }
 

@@ -7,9 +7,9 @@ namespace EasyExtract.Discord;
 
 public class DiscordRpcManager : IDisposable
 {
-    private static DiscordRpcManager instance;
+    private static DiscordRpcManager? _instance;
+    private readonly ConfigHelper _configHelper = new();
     private readonly BetterLogger _logger = new();
-    private readonly ConfigHelper ConfigHelper = new();
     private readonly Timestamps timestamps;
     private DiscordRpcClient client;
 
@@ -19,7 +19,7 @@ public class DiscordRpcManager : IDisposable
         DiscordStart();
     }
 
-    public static DiscordRpcManager Instance => instance ??= new DiscordRpcManager();
+    public static DiscordRpcManager Instance => _instance ??= new DiscordRpcManager();
 
     public async void Dispose()
     {
@@ -42,13 +42,11 @@ public class DiscordRpcManager : IDisposable
 
     public async Task UpdatePresenceAsync(string state)
     {
-        var largeTextString =
-            $"Extracted [{ConfigHelper.Config.TotalExtracted}] Unitypackages & [{ConfigHelper.Config.TotalFilesExtracted}] files.";
+        var largeTextString = $"U: {_configHelper.Config.TotalExtracted} F: {_configHelper.Config.TotalFilesExtracted}";
         if (largeTextString.Length > 127)
             try
             {
-                largeTextString =
-                    $"U: {ConfigHelper.Config.TotalExtracted} F: {ConfigHelper.Config.TotalFilesExtracted}";
+                largeTextString = largeTextString.Substring(0, 127);
             }
             catch (StringOutOfRangeException e)
             {

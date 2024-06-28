@@ -52,7 +52,7 @@ public partial class Dashboard : FluentWindow
     private async void Dashboard_OnLoaded(object sender, RoutedEventArgs e)
     {
         await ConfigHelper.ReadConfigAsync();
-        VersionTxt.Content = $"{ConfigHelper.Config.Update.CurrentVersion}";
+        VersionTxt.Content = "V" + Application.ResourceAssembly.GetName().Version;
         _backgroundManager.UpdateBackground(ConfigHelper.Config.Backgrounds.BackgroundPath);
         _backgroundManager.UpdateOpacity(ConfigHelper.Config.Backgrounds.BackgroundOpacity);
 

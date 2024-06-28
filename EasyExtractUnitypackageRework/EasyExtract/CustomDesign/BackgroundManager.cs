@@ -69,7 +69,8 @@ public class BackgroundManager : INotifyPropertyChanged
     {
         try
         {
-            var uri = new Uri("https://raw.githubusercontent.com/HakuSystems/GraphicsStuff/main/Shiny%20Overlay.png");
+            var uri = new Uri(
+                "https://raw.githubusercontent.com/HakuSystems/GraphicsStuff/main/EasyExtractUnitypackage_Background%208K.png");
             CurrentBackground = new ImageBrush(new BitmapImage(new Uri(uri.ToString())))
             {
                 Opacity = BackgroundOpacity,
