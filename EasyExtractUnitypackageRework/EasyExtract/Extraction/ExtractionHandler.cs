@@ -11,6 +11,17 @@ public class ExtractionHandler
     private readonly BetterLogger _logger = new();
     private readonly ConfigHelper ConfigHelper = new();
 
+    public async Task ExtractUnitypackageFromContextMenu(string path)
+    {
+        var unitypackage = new SearchEverythingModel
+        {
+            UnityPackageName = Path.GetFileNameWithoutExtension(path),
+            UnityPackagePath = path
+        };
+
+        await ExtractUnitypackage(unitypackage);
+    }
+
     public async Task<bool> ExtractUnitypackage(SearchEverythingModel unitypackage)
     {
         try

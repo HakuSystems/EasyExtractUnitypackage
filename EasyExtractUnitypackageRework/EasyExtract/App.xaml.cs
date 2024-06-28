@@ -12,13 +12,6 @@ public partial class App : Application
 {
     private readonly BetterLogger _logger = new();
 
-    protected override void OnStartup(StartupEventArgs e)
-    {
-        base.OnStartup(e);
-        DispatcherUnhandledException += Application_DispatcherUnhandledException;
-        Exit += App_OnExit;
-    }
-
     private async void Application_DispatcherUnhandledException(object sender, DispatcherUnhandledExceptionEventArgs e)
     {
         await _logger.LogAsync(e.Exception.Message, "App.xaml.cs", Importance.Error);
@@ -31,5 +24,15 @@ public partial class App : Application
         DiscordRpcManager.Instance.Dispose();
         await _logger.LogAsync("Application exited", "App.xaml.cs", Importance.Info);
         base.OnExit(e);
+    }
+
+    private void App_OnStartup(object sender, StartupEventArgs e)
+    {
+        DispatcherUnhandledException += Application_DispatcherUnhandledException;
+        Exit += App_OnExit;
+
+        // Run the program logic directly
+        var program = new Program();
+        program.Run(e.Args);
     }
 }
