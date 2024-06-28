@@ -1,4 +1,4 @@
-# EasyExtractUnitypackage V2.0.5.5
+# EasyExtractUnitypackage
 
 **EasyExtractUnitypackage** is a powerful tool designed to seamlessly extract files from a `.unitypackage` without the hassle of importing them into Unity.
 
