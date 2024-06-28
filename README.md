@@ -25,6 +25,7 @@
 3. Click on 'Extract' and let the tool do its magic!
 
 ## Features
+- **Context menu**: by right-clicking on an .unitypackage file, you can easily Extract it!
 - **Fast Extraction**: Utilizes the `.gz` file structure for quick access and extraction.
 - **Customizable Settings**: Tailor the application to your preferences.
 - **Notifications**: Stay informed with notifications upon completion of the extraction process.
