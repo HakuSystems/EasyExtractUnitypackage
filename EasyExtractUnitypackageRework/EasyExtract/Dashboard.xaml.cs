@@ -78,36 +78,21 @@ public partial class Dashboard : FluentWindow
                 break;
         }
 
-        if (ConfigHelper.Config.Update.AutoUpdate)
+        var isUpToDate = await _updateHandler.IsUpToDate();
+        var updateAvailable = !isUpToDate;
+
+        await Dispatcher.InvokeAsync(() =>
         {
-            var updateAvailable = !await _updateHandler.IsUpToDate();
+            CheckForUpdatesTxt.Text = updateAvailable ? "New Update Available" : "Check for Updates";
+            CheckForUpdatesTxt.Foreground =
+                new SolidColorBrush(updateAvailable ? Color.FromRgb(255, 0, 0) : Color.FromRgb(0, 255, 0));
+            CheckForUpdatesDesc.Text = updateAvailable
+                ? "Click here to update EasyExtractUnitypackage!"
+                : "You're running the latest version of EasyExtractUnitypackage!";
+        });
 
-            await Dispatcher.InvokeAsync(() =>
-            {
-                CheckForUpdatesTxt.Text = updateAvailable ? "New Update Available" : "Check for Updates";
-                CheckForUpdatesTxt.Foreground =
-                    new SolidColorBrush(updateAvailable ? Color.FromRgb(255, 0, 0) : Color.FromRgb(0, 255, 0));
-                CheckForUpdatesDesc.Text = updateAvailable
-                    ? "Click here to update EasyExtractUnitypackage!"
-                    : "You're running the latest version of EasyExtractUnitypackage!";
-            });
+        if (ConfigHelper.Config.Update.AutoUpdate && updateAvailable) await _updateHandler.Update();
 
-            if (updateAvailable) await _updateHandler.Update();
-        }
-        else
-        {
-            var updateAvailable = !await _updateHandler.IsUpToDate();
-
-            await Dispatcher.InvokeAsync(() =>
-            {
-                CheckForUpdatesTxt.Text = updateAvailable ? "New Update Available" : "Check for Updates";
-                CheckForUpdatesTxt.Foreground =
-                    new SolidColorBrush(updateAvailable ? Color.FromRgb(255, 0, 0) : Color.FromRgb(0, 255, 0));
-                CheckForUpdatesDesc.Text = updateAvailable
-                    ? "Click here to update EasyExtractUnitypackage!"
-                    : "You're running the latest version of EasyExtractUnitypackage!";
-            });
-        }
 
         if (ConfigHelper.Config.Runs is { IsFirstRun: true })
         {
@@ -196,7 +181,8 @@ public partial class Dashboard : FluentWindow
 
     private async void CheckForUpdatesNavBtn_OnClick(object sender, RoutedEventArgs e)
     {
-        var updateAvailable = !await _updateHandler.IsUpToDate();
+        var isUpToDate = await _updateHandler.IsUpToDate();
+        var updateAvailable = !isUpToDate;
 
         await Dispatcher.InvokeAsync(() =>
         {

@@ -7,7 +7,7 @@
         <ImplicitUsings>enable</ImplicitUsings>
         <UseWPF>true</UseWPF>
         <ApplicationIcon>Resources\Smallicon.ico</ApplicationIcon>
-        <AssemblyVersion>2.0.5.7</AssemblyVersion>
+        <AssemblyVersion>2.0.5.4</AssemblyVersion>
     </PropertyGroup>
 
     <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
