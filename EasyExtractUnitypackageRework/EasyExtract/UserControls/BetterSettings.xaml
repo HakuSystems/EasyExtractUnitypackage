@@ -6,7 +6,8 @@
              xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
              mc:Ignorable="d"
              Loaded="BetterSettings_OnLoaded"
-             Background="Transparent"
+             ui:Design.Background="{DynamicResource ApplicationBackgroundBrush}"
+
              FontFamily="{DynamicResource SegoeFluentIcons}"
              Foreground="{DynamicResource TextFillColorPrimaryBrush}">
     <ui:PassiveScrollViewer>

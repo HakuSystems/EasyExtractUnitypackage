@@ -5,7 +5,7 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
              mc:Ignorable="d"
-             Background="Transparent"
+             ui:Design.Background="{DynamicResource ApplicationBackgroundBrush}"
              Loaded="History_OnLoaded"
              Foreground="{DynamicResource TextFillColorPrimaryBrush}"
              d:DesignHeight="800" d:DesignWidth="1500">

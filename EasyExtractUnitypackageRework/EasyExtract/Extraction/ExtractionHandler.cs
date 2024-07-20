@@ -39,7 +39,7 @@ public class ExtractionHandler
             await ExtractAndWriteFiles(unitypackage, tempFolder);
             await MoveFilesFromTempToTargetFolder(tempFolder, targetFolder);
 
-            // Directory.Delete(tempFolder, true);
+            Directory.Delete(tempFolder, true);
 
             await _logger.LogAsync($"Successfully extracted {unitypackage.UnityPackageName}", "ExtractionHandler.cs",
                 Importance.Info);

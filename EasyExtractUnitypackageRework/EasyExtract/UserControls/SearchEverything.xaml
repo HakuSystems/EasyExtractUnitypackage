@@ -4,7 +4,8 @@
              xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
              Loaded="SearchEverything_OnLoaded"
              FontFamily="{DynamicResource SegoeFluentIcons}"
-             Background="Transparent"
+             ui:Design.Background="{DynamicResource ApplicationBackgroundBrush}"
+
              Foreground="{DynamicResource TextFillColorPrimaryBrush}">
     <Grid>
         <StackPanel Orientation="Vertical" HorizontalAlignment="Center" VerticalAlignment="Center">

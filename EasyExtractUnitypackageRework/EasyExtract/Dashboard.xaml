@@ -10,6 +10,7 @@
                  WindowStyle="None"
                  ResizeMode="CanResizeWithGrip"
                  Drop="Dashboard_OnDrop"
+                 ui:Design.Background="{DynamicResource ApplicationBackgroundBrush}"
                  Loaded="Dashboard_OnLoaded"
                  Foreground="{DynamicResource TextFillColorPrimaryBrush}"
                  WindowCornerPreference="Round"

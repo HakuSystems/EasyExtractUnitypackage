@@ -17,7 +17,7 @@ public class BackgroundManager : INotifyPropertyChanged
 
     private BackgroundManager()
     {
-        _currentBackground = new ImageBrush { Stretch = Stretch.UniformToFill };
+        _currentBackground = new ImageBrush { Stretch = Stretch.Fill };
         _backgroundOpacity = 1.0;
     }
 
@@ -59,7 +59,7 @@ public class BackgroundManager : INotifyPropertyChanged
         CurrentBackground = new ImageBrush(new BitmapImage(new Uri(imagePath)))
         {
             Opacity = BackgroundOpacity,
-            Stretch = Stretch.UniformToFill
+            Stretch = Stretch.Fill
         };
         await _logger.LogAsync($"Background updated with image: {imagePath}", "BackgroundManager.cs",
             Importance.Info); // Log background update
@@ -74,7 +74,7 @@ public class BackgroundManager : INotifyPropertyChanged
             CurrentBackground = new ImageBrush(new BitmapImage(new Uri(uri.ToString())))
             {
                 Opacity = BackgroundOpacity,
-                Stretch = Stretch.UniformToFill
+                Stretch = Stretch.Fill
             };
             ConfigHelper.Config.Backgrounds.BackgroundPath = uri.ToString();
             UpdateBackground(uri.ToString());
@@ -84,7 +84,7 @@ public class BackgroundManager : INotifyPropertyChanged
         }
         catch (ResourceReferenceKeyNotFoundException ex)
         {
-            CurrentBackground = new ImageBrush { Opacity = BackgroundOpacity, Stretch = Stretch.UniformToFill };
+            CurrentBackground = new ImageBrush { Opacity = BackgroundOpacity, Stretch = Stretch.Fill };
             await _logger.LogAsync($"Default background resource not found: {ex.Message}", "BackgroundManager.cs",
                 Importance.Warning); // Log resource not found
         }
