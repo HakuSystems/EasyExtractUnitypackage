@@ -38,7 +38,7 @@ public class ExtractionHandler
             await ExtractAndWriteFiles(unitypackage, tempFolder);
             await MoveFilesFromTempToTargetFolder(tempFolder, targetFolder);
 
-            Directory.Delete(tempFolder, true);
+            // Directory.Delete(tempFolder, true);
 
             await _logger.LogAsync($"Successfully extracted {unitypackage.UnityPackageName}", "ExtractionHandler.cs",
                 Importance.Info);
@@ -107,14 +107,15 @@ public class ExtractionHandler
 
             foreach (var entry in archive.Entries.Where(e => !e.IsDirectory))
             {
-                var extractionOptions = new ExtractionOptions
-                {
-                    ExtractFullPath = true,
-                    Overwrite = true
-                };
-                entry.WriteToDirectory(tempFolder, extractionOptions);
+                var filePath = Path.Combine(tempFolder, entry.Key);
+
+                // Creates all directories and subdirectories as specified by filePath.
+                Directory.CreateDirectory(Path.GetDirectoryName(filePath));
+
+                entry.WriteToFile(filePath, new ExtractionOptions { Overwrite = true });
             }
         });
+
         await _logger.LogAsync($"Extracted and wrote files for {unitypackage.UnityPackageName} to temporary folder",
             "ExtractionHandler.cs", Importance.Info);
     }
