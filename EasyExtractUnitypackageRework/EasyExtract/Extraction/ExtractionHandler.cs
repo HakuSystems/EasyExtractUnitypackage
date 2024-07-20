@@ -1,3 +1,4 @@
+using System.Globalization;
 using System.IO;
 using System.IO.Compression;
 using EasyExtract.Config;
@@ -131,6 +132,16 @@ public class ExtractionHandler
                 if (File.Exists(Path.Combine(d, "pathname")))
                 {
                     var hashPathName = File.ReadAllText(Path.Combine(d, "pathname"));
+                    if (hashPathName.Any(c =>
+                            char.GetUnicodeCategory(c) == UnicodeCategory.Format ||
+                            char.GetUnicodeCategory(c) == UnicodeCategory.Control))
+                        hashPathName = new string(hashPathName.Where(c =>
+                            char.GetUnicodeCategory(c) != UnicodeCategory.Format &&
+                            char.GetUnicodeCategory(c) != UnicodeCategory.Control).ToArray());
+
+                    // remove additional 00 at the end of the file extension.
+                    if (hashPathName.EndsWith("00")) hashPathName = hashPathName.Substring(0, hashPathName.Length - 2);
+
                     targetFullPath = Path.GetDirectoryName(Path.Combine(targetFolder, hashPathName));
                     targetFullFile = Path.Combine(targetFolder, hashPathName);
                 }
