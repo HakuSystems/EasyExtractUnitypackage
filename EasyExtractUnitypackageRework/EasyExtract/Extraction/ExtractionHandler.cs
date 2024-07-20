@@ -8,8 +8,8 @@ namespace EasyExtract.Extraction;
 
 public class ExtractionHandler
 {
+    private readonly ConfigHelper _configHelper = new();
     private readonly BetterLogger _logger = new();
-    private readonly ConfigHelper ConfigHelper = new();
 
     public async Task ExtractUnitypackageFromContextMenu(string path)
     {
@@ -26,63 +26,71 @@ public class ExtractionHandler
     {
         try
         {
-            var tempFolder = GetTempFolderPath(unitypackage);
-            var targetFolder = GetTargetFolderPath(unitypackage);
+            var tempFolder = await GetTempFolderPath(unitypackage);
+            var targetFolder = await GetTargetFolderPath(unitypackage);
 
-            CreateDirectories(await tempFolder, await targetFolder);
+            // Debug logs for paths
+            await _logger.LogAsync($"Temporary folder path: {tempFolder}", "ExtractionHandler.cs", Importance.Info);
+            await _logger.LogAsync($"Target folder path: {targetFolder}", "ExtractionHandler.cs", Importance.Info);
 
-            await ExtractAndWriteFiles(unitypackage, await tempFolder);
-            MoveFilesFromTempToTargetFolder(await tempFolder, await targetFolder);
+            await CreateDirectories(tempFolder, targetFolder);
 
-            Directory.Delete(await tempFolder, true);
+            await ExtractAndWriteFiles(unitypackage, tempFolder);
+            await MoveFilesFromTempToTargetFolder(tempFolder, targetFolder);
+
+            Directory.Delete(tempFolder, true);
 
             await _logger.LogAsync($"Successfully extracted {unitypackage.UnityPackageName}", "ExtractionHandler.cs",
-                Importance.Info); // Log successful extraction
+                Importance.Info);
             return true;
         }
         catch (Exception e)
         {
             await _logger.LogAsync($"Error while extracting unitypackage: {e.Message}", "ExtractionHandler.cs",
-                Importance.Error); // Log extraction error
+                Importance.Error);
             return false;
         }
     }
 
     private async Task<string> GetTempFolderPath(SearchEverythingModel unitypackage)
     {
-        var tempFolder = Path.Combine(ConfigHelper.Config.DefaultTempPath, unitypackage.UnityPackageName);
-        DeleteIfDirectoryExists(tempFolder);
-        await _logger.LogAsync($"Temporary folder path set to: {tempFolder}", "ExtractionHandler.cs",
-            Importance.Info); // Log temp folder path
+        var tempFolder = Path.Combine(_configHelper.Config.DefaultTempPath, unitypackage.UnityPackageName);
+        await DeleteIfDirectoryExists(tempFolder);
+        await _logger.LogAsync($"Temporary folder path set to: {tempFolder}", "ExtractionHandler.cs", Importance.Info);
         return tempFolder;
     }
 
     private async Task<string> GetTargetFolderPath(SearchEverythingModel unitypackage)
     {
-        var targetFolder = Path.Combine(ConfigHelper.Config.LastExtractedPath, unitypackage.UnityPackageName);
-        DeleteIfDirectoryExists(targetFolder);
-        await _logger.LogAsync($"Target folder path set to: {targetFolder}", "ExtractionHandler.cs",
-            Importance.Info); // Log target folder path
+        var targetFolder = Path.Combine(_configHelper.Config.LastExtractedPath, unitypackage.UnityPackageName);
+        await DeleteIfDirectoryExists(targetFolder);
+        await _logger.LogAsync($"Target folder path set to: {targetFolder}", "ExtractionHandler.cs", Importance.Info);
         return targetFolder;
     }
 
-    private async void DeleteIfDirectoryExists(string directory)
+    private async Task DeleteIfDirectoryExists(string directory)
     {
         if (Directory.Exists(directory))
         {
             Directory.Delete(directory, true);
             await _logger.LogAsync($"Deleted existing directory: {directory}", "ExtractionHandler.cs",
-                Importance.Warning); // Log directory deletion
+                Importance.Warning);
         }
     }
 
-    private async void CreateDirectories(params string[] directories)
+    private async Task CreateDirectories(params string[] directories)
     {
         foreach (var dir in directories)
         {
+            // Path validation
+            if (dir.IndexOfAny(Path.GetInvalidPathChars()) >= 0)
+            {
+                await _logger.LogAsync($"Invalid directory path: {dir}", "ExtractionHandler.cs", Importance.Error);
+                throw new InvalidOperationException($"Invalid directory path: {dir}");
+            }
+
             Directory.CreateDirectory(dir);
-            await _logger.LogAsync($"Created directory: {dir}", "ExtractionHandler.cs",
-                Importance.Info); // Log directory creation
+            await _logger.LogAsync($"Created directory: {dir}", "ExtractionHandler.cs", Importance.Info);
         }
     }
 
@@ -90,8 +98,8 @@ public class ExtractionHandler
     {
         await Task.Run(() =>
         {
-            using Stream inStream = File.OpenRead(unitypackage.UnityPackagePath);
-            using Stream gzipStream = new GZipStream(inStream, CompressionMode.Decompress);
+            using var inStream = File.OpenRead(unitypackage.UnityPackagePath);
+            using var gzipStream = new GZipStream(inStream, CompressionMode.Decompress);
             using var memoryStream = new MemoryStream();
             gzipStream.CopyTo(memoryStream);
             memoryStream.Position = 0;
@@ -108,10 +116,10 @@ public class ExtractionHandler
             }
         });
         await _logger.LogAsync($"Extracted and wrote files for {unitypackage.UnityPackageName} to temporary folder",
-            "ExtractionHandler.cs", Importance.Info); // Log extraction
+            "ExtractionHandler.cs", Importance.Info);
     }
 
-    private async void MoveFilesFromTempToTargetFolder(string tempFolder, string targetFolder)
+    private async Task MoveFilesFromTempToTargetFolder(string tempFolder, string targetFolder)
     {
         foreach (var d in Directory.EnumerateDirectories(tempFolder))
         {
@@ -126,29 +134,29 @@ public class ExtractionHandler
                     targetFullFile = Path.Combine(targetFolder, hashPathName);
                 }
 
-                MoveFileIfExists(d, "asset", targetFullPath, targetFullFile);
-                MoveFileIfExists(d, "asset.meta", targetFullPath, targetFullFile + ".meta");
-                MoveFileIfExists(d, "preview.png", targetFullPath, targetFullFile + ".EASYEXTRACTPREVIEW.png");
+                await MoveFileIfExists(d, "asset", targetFullPath, targetFullFile);
+                await MoveFileIfExists(d, "asset.meta", targetFullPath, targetFullFile + ".meta");
+                await MoveFileIfExists(d, "preview.png", targetFullPath, targetFullFile + ".EASYEXTRACTPREVIEW.png");
             }
             catch (Exception ex)
             {
                 await _logger.LogAsync($"Error while moving file from {d} to {targetFullFile}: {ex.Message}",
-                    "ExtractionHandler.cs", Importance.Error); // Log move file error
+                    "ExtractionHandler.cs", Importance.Error);
             }
         }
 
         await _logger.LogAsync($"Moved files from temporary folder to target folder: {targetFolder}",
-            "ExtractionHandler.cs", Importance.Info); // Log move files
+            "ExtractionHandler.cs", Importance.Info);
     }
 
-    private async void MoveFileIfExists(string directory, string fileName, string targetFullPath, string targetFullFile)
+    private async Task MoveFileIfExists(string directory, string fileName, string targetFullPath, string targetFullFile)
     {
         if (File.Exists(Path.Combine(directory, fileName)))
         {
             Directory.CreateDirectory(targetFullPath);
             File.Move(Path.Combine(directory, fileName), targetFullFile);
             await _logger.LogAsync($"Moved file {fileName} to {targetFullFile}", "ExtractionHandler.cs",
-                Importance.Info); // Log move file
+                Importance.Info);
         }
     }
 }
