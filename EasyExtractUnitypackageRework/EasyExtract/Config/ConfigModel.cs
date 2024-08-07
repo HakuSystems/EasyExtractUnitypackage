@@ -10,6 +10,7 @@ public class ConfigModel
     public string AppTitle { get; set; } = "EasyExtractUnitypackage";
     public ApplicationTheme ApplicationTheme { get; set; } = ApplicationTheme.Dark;
     public bool UwUModeActive { get; set; } = false;
+    public bool IntroLogoAnimation { get; set; } = false;
     public RunsModel Runs { get; set; } = new();
     public bool DiscordRpc { get; set; } = true;
     public UpdateModel Update { get; set; } = new();

@@ -11,6 +11,7 @@ namespace EasyExtract;
 /// </summary>
 public partial class MainWindow : Window
 {
+    private readonly ConfigHelper _configHelper = new();
     private readonly BetterLogger _logger = new();
 
     public MainWindow()
@@ -24,15 +25,23 @@ public partial class MainWindow : Window
         DiscordRpcManager.Instance.DiscordStart();
         await GenerateAllNessesaryFiles();
 
-        var timer = new DispatcherTimer();
-        timer.Interval = TimeSpan.FromSeconds(5);
-        timer.Tick += (sender, args) =>
+        if (!_configHelper.Config.IntroLogoAnimation)
         {
-            timer.Stop();
+            var timer = new DispatcherTimer();
+            timer.Interval = TimeSpan.FromSeconds(5);
+            timer.Tick += (sender, args) =>
+            {
+                timer.Stop();
+                new Dashboard().Show();
+                Close();
+            };
+            timer.Start();
+        }
+        else
+        {
             new Dashboard().Show();
             Close();
-        };
-        timer.Start();
+        }
     }
 
     private async Task GenerateAllNessesaryFiles()

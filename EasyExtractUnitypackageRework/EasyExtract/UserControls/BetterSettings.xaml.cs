@@ -32,6 +32,7 @@ public partial class BetterSettings : UserControl
     {
         try
         {
+            SkipIntroLogoAnimationToggleSwitch.IsChecked = _configHelper.Config.IntroLogoAnimation;
             UwUToggleSwitch.IsChecked = _configHelper.Config.UwUModeActive;
 
             var themes = Enum.GetValues(typeof(ApplicationTheme))
@@ -173,5 +174,17 @@ public partial class BetterSettings : UserControl
         DefaultTempPathTextBox.Text = _configHelper.Config.DefaultTempPath;
         await _configHelper.UpdateConfigAsync();
         await _logger.LogAsync("Default temp path reset", "Settings.xaml.cs", Importance.Info);
+    }
+
+    private async void SkipIntroLogoAnimationToggleSwitch_OnChecked(object sender, RoutedEventArgs e)
+    {
+        _configHelper.Config.IntroLogoAnimation = SkipIntroLogoAnimationToggleSwitch.IsChecked ?? false;
+        await _configHelper.UpdateConfigAsync();
+    }
+
+    private async void SkipIntroLogoAnimationToggleSwitch_OnUnchecked(object sender, RoutedEventArgs e)
+    {
+        _configHelper.Config.IntroLogoAnimation = SkipIntroLogoAnimationToggleSwitch.IsChecked ?? false;
+        await _configHelper.UpdateConfigAsync();
     }
 }
