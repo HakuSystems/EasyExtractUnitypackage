@@ -189,6 +189,9 @@ public partial class Extraction : UserControl, INotifyPropertyChanged
         var directories = Directory.GetDirectories(ConfigHelper.Config.LastExtractedPath);
         foreach (var directory in directories)
         {
+            StatusBar.Visibility = Visibility.Visible;
+            StatusProgressBar.Visibility = Visibility.Collapsed;
+            StatusBarText.Text = $"Loading {Path.GetFileName(directory)} Information...";
             // Calculate total size and create a model for the Unitypackage.
             var totalSizeInBytes = await Task.Run(async () => await CalculateDirectoryTotalSizeInBytesAsync(directory));
             var unitypackage =
@@ -201,6 +204,8 @@ public partial class Extraction : UserControl, INotifyPropertyChanged
                 if (ExtractedUnitypackages.All(u => u.UnitypackageName != unitypackage.UnitypackageName))
                     ExtractedUnitypackages.Add(unitypackage);
             });
+            StatusBar.Visibility = Visibility.Collapsed;
+            StatusProgressBar.Visibility = Visibility.Visible;
         }
 
         await _logger.LogAsync("Populated Extracted Files List", "Extraction.xaml.cs", Importance.Info);
