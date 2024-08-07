@@ -4,36 +4,45 @@ namespace EasyExtract.Config;
 
 public class BetterLogger
 {
-    private static readonly object _lock = new();
-    private readonly string _logFile;
+    private readonly string _errorLogFile;
+    private readonly string _infoLogFile;
+    private readonly string _warningLogFile;
 
     public BetterLogger()
     {
         var applicationPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
-            "EasyExtract");
-        var logPath = Path.Combine(applicationPath, "Logs");
-        if (!Directory.Exists(logPath))
-            Directory.CreateDirectory(logPath);
-        _logFile = Path.Combine(logPath, "Log.txt");
+            "EasyExtract", "Logs");
 
-        // Clear the log file if it exists
-        lock (_lock)
-        {
-            File.WriteAllTextAsync(_logFile, string.Empty);
-        }
+        Directory.CreateDirectory(applicationPath);
+
+        _infoLogFile = Path.Combine(applicationPath, "InfoLog.txt");
+        _warningLogFile = Path.Combine(applicationPath, "WarningLog.txt");
+        _errorLogFile = Path.Combine(applicationPath, "ErrorLog.txt");
+
+        // Clear the log files if they exist
+        File.WriteAllText(_infoLogFile, string.Empty);
+        File.WriteAllText(_warningLogFile, string.Empty);
+        File.WriteAllText(_errorLogFile, string.Empty);
     }
 
     public Task LogAsync(string message, string source, Importance importance)
     {
         var logEntry = $"[{DateTime.Now}] [{importance}] {source}: {message}\n";
+        Console.WriteLine(logEntry);
 
-        lock (_lock)
+        var logFile = importance switch
         {
-            Console.WriteLine(logEntry);
-            File.AppendAllTextAsync(_logFile, logEntry);
-        }
+            Importance.Warning => _warningLogFile,
+            Importance.Error => _errorLogFile,
+            _ => _infoLogFile
+        };
 
-        return Task.CompletedTask;
+        return AsyncWrite(logFile, logEntry);
+    }
+
+    private async Task AsyncWrite(string logFile, string content)
+    {
+        await File.AppendAllTextAsync(logFile, content);
     }
 }
 
