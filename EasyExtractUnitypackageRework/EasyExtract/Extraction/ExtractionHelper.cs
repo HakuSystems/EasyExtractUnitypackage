@@ -257,31 +257,4 @@ public class ExtractionHelper
             Importance.Info); // Log category by extension
         return category;
     }
-
-    /// <summary>
-    ///     Changes the details string of an extracted Unitypackage.
-    /// </summary>
-    /// <param name="unitypackage">The extracted Unitypackage model.</param>
-    public static void ChangeUnitypackageDetailsString(ExtractedUnitypackageModel unitypackage)
-    {
-        unitypackage.UnitypackageDetails = $"Total Files: {unitypackage.UnitypackageTotalFileCount:N2} | " +
-                                           $"Total Folders: {unitypackage.UnitypackageTotalFolderCount:N2} | " +
-                                           $"Total Scripts: {unitypackage.UnitypackageTotalScriptCount:N2} | " +
-                                           $"Total Shaders: {unitypackage.UnitypackageTotalShaderCount:N2} | " +
-                                           $"Total Prefabs: {unitypackage.UnitypackageTotalPrefabCount:N2} | " +
-                                           $"Total 3D Objects: {unitypackage.UnitypackageTotal3DObjectCount:N2} | " +
-                                           $"Total Images: {unitypackage.UnitypackageTotalImageCount:N2} | " +
-                                           $"Total Audios: {unitypackage.UnitypackageTotalAudioCount:N2} | " +
-                                           $"Total Animations: {unitypackage.UnitypackageTotalAnimationCount:N2} | " +
-                                           $"Total Scenes: {unitypackage.UnitypackageTotalSceneCount:N2} | " +
-                                           $"Total Materials: {unitypackage.UnitypackageTotalMaterialCount:N2} | " +
-                                           $"Total Assets: {unitypackage.UnitypackageTotalAssetCount:N2} | " +
-                                           $"Total Controllers: {unitypackage.UnitypackageTotalControllerCount:N2} | " +
-                                           $"Total Fonts: {unitypackage.UnitypackageTotalFontCount:N2} | " +
-                                           $"Total Configurations: {unitypackage.UnitypackageTotalConfigurationCount:N2} | " +
-                                           $"Total Data: {unitypackage.UnitypackageTotalDataCount:N2}";
-
-        // Each number in the string is formatted to match the following format: 0.00
-        // For example: 1000 -> 1,000.00 and 1000000 -> 1,000,000.00
-    }
 }

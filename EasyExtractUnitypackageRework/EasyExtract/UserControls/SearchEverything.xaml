@@ -5,73 +5,75 @@
              Loaded="SearchEverything_OnLoaded"
              FontFamily="{DynamicResource SegoeFluentIcons}"
              ui:Design.Background="{DynamicResource ApplicationBackgroundBrush}"
-
              Foreground="{DynamicResource TextFillColorPrimaryBrush}">
     <Grid>
-        <StackPanel Orientation="Vertical" HorizontalAlignment="Center" VerticalAlignment="Center">
-            <TextBlock x:Name="FallbackEverything"
-                       HorizontalAlignment="Center"
-                       VerticalAlignment="Center"
-                       Text="Search Everything isnt supported on your computer." />
-            <ui:Card x:Name="SearchEverythingCard">
-                <StackPanel Orientation="Vertical">
-                    <ui:TextBox Icon="{ui:SymbolIcon Search24}"
-                                VerticalAlignment="Center"
-                                x:Name="SearchEverythingTextBox"
-                                TextChanged="SearchEverythingTextBox_OnTextChanged"
-                                HorizontalAlignment="Stretch" MinWidth="250" PlaceholderText=".unitypackage" />
+        <ui:PassiveScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto">
+            <StackPanel Orientation="Vertical" HorizontalAlignment="Center" VerticalAlignment="Center">
+                <TextBlock x:Name="FallbackEverything"
+                           HorizontalAlignment="Center"
+                           VerticalAlignment="Center"
+                           Text="Search Everything isnt supported on your computer." />
+                <ui:Card x:Name="SearchEverythingCard">
+                    <StackPanel Orientation="Vertical">
+                        <ui:TextBox Icon="{ui:SymbolIcon Search24}"
+                                    VerticalAlignment="Center"
+                                    x:Name="SearchEverythingTextBox"
+                                    TextChanged="SearchEverythingTextBox_OnTextChanged"
+                                    HorizontalAlignment="Stretch" MinWidth="250" PlaceholderText=".unitypackage" />
 
-                    <ui:ListView
-                        HorizontalAlignment="Stretch"
-                        Margin="15"
-                        MaxHeight="300"
-                        HorizontalContentAlignment="Stretch"
-                        ItemsSource="{Binding SearchEverythingList}">
-                        <ui:ListView.ItemTemplate>
-                            <DataTemplate>
-                                <ui:CardControl>
-                                    <ui:CardControl.Icon>
-                                        <ui:SymbolIcon
-                                            HorizontalAlignment="Center"
-                                            VerticalAlignment="Center"
-                                            Margin="0,0,5,0"
-                                            Symbol="FolderZip24" />
-                                    </ui:CardControl.Icon>
-                                    <ui:CardControl.Header>
-                                        <StackPanel>
-                                            <ui:TextBlock
-                                                FontTypography="BodyStrong"
-                                                Text="{Binding UnityPackageName}"
-                                                TextWrapping="WrapWithOverflow" />
-                                            <ui:TextBlock
-                                                Appearance="Secondary"
-                                                Text="{Binding UnityPackagePath}"
-                                                Opacity="0.5"
-                                                MaxWidth="500"
-                                                TextWrapping="WrapWithOverflow" />
-                                        </StackPanel>
-                                    </ui:CardControl.Header>
-                                    <ui:Button Icon="{ui:SymbolIcon Add24}"
-                                               x:Name="QueueAddButton"
-                                               Click="QueueAddButton_OnClick"
-                                               HorizontalAlignment="Left"
-                                               Margin="5"
-                                               ToolTip="Add to Queue" />
-                                </ui:CardControl>
-                            </DataTemplate>
-                        </ui:ListView.ItemTemplate>
-                    </ui:ListView>
-                    <TextBlock HorizontalAlignment="Center" Text="Search for a UnityPackage Name" x:Name="FoundText"
-                               Opacity="0.5" MaxWidth="500" Margin="5" />
-                    <TextBlock HorizontalAlignment="Center" Text="Powered by SearchEverything" Margin="5" />
-                </StackPanel>
-            </ui:Card>
-            <ui:Button HorizontalAlignment="Stretch" Margin="5" Icon="{ui:SymbolIcon DocumentSearch24}"
-                       x:Name="SearchFileManuallyButton"
-                       Click="SearchFileManuallyButton_OnClick"
-                       Content="Search File Manually" />
-            <TextBlock HorizontalAlignment="Center" VerticalAlignment="Center"
-                       x:Name="AddedStatusTxt" />
-        </StackPanel>
+                        <ui:ListView
+                            HorizontalAlignment="Stretch"
+                            Margin="15"
+                            MaxHeight="300"
+                            HorizontalContentAlignment="Stretch"
+                            ItemsSource="{Binding SearchEverythingList}">
+                            <ui:ListView.ItemTemplate>
+                                <DataTemplate>
+                                    <ui:CardControl>
+                                        <ui:CardControl.Icon>
+                                            <ui:SymbolIcon
+                                                HorizontalAlignment="Center"
+                                                VerticalAlignment="Center"
+                                                Margin="0,0,5,0"
+                                                Symbol="FolderZip24" />
+                                        </ui:CardControl.Icon>
+                                        <ui:CardControl.Header>
+                                            <StackPanel>
+                                                <ui:TextBlock
+                                                    FontTypography="BodyStrong"
+                                                    Text="{Binding UnityPackageName}"
+                                                    TextWrapping="WrapWithOverflow" />
+                                                <ui:TextBlock
+                                                    Appearance="Secondary"
+                                                    Text="{Binding UnityPackagePath}"
+                                                    Opacity="0.5"
+                                                    MaxWidth="500"
+                                                    TextWrapping="WrapWithOverflow" />
+                                            </StackPanel>
+                                        </ui:CardControl.Header>
+                                        <ui:Button Icon="{ui:SymbolIcon Add24}"
+                                                   x:Name="QueueAddButton"
+                                                   Click="QueueAddButton_OnClick"
+                                                   HorizontalAlignment="Left"
+                                                   Margin="5"
+                                                   ToolTip="Add to Queue" />
+                                    </ui:CardControl>
+                                </DataTemplate>
+                            </ui:ListView.ItemTemplate>
+                        </ui:ListView>
+                        <TextBlock HorizontalAlignment="Center" Text="Search for a UnityPackage Name"
+                                   x:Name="FoundText"
+                                   Opacity="0.5" MaxWidth="500" Margin="5" />
+                        <TextBlock HorizontalAlignment="Center" Text="Powered by SearchEverything" Margin="5" />
+                    </StackPanel>
+                </ui:Card>
+                <ui:Button HorizontalAlignment="Stretch" Margin="5" Icon="{ui:SymbolIcon DocumentSearch24}"
+                           x:Name="SearchFileManuallyButton"
+                           Click="SearchFileManuallyButton_OnClick"
+                           Content="Search File Manually" />
+                <TextBlock HorizontalAlignment="Center" VerticalAlignment="Center"
+                           x:Name="AddedStatusTxt" />
+            </StackPanel>
+        </ui:PassiveScrollViewer>
     </Grid>
 </UserControl>

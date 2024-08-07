@@ -10,7 +10,7 @@
 
              FontFamily="{DynamicResource SegoeFluentIcons}"
              Foreground="{DynamicResource TextFillColorPrimaryBrush}">
-    <ui:PassiveScrollViewer>
+    <ui:PassiveScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto">
         <Grid>
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto" />

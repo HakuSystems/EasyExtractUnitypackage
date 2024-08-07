@@ -8,7 +8,8 @@
                  xmlns:local="clr-namespace:EasyExtract.CustomDesign"
                  mc:Ignorable="d"
                  WindowStyle="None"
-                 ResizeMode="CanResizeWithGrip"
+                 ResizeMode="CanResize"
+                 AllowDrop="True"
                  Drop="Dashboard_OnDrop"
                  ui:Design.Background="{DynamicResource ApplicationBackgroundBrush}"
                  Loaded="Dashboard_OnLoaded"
@@ -17,9 +18,8 @@
                  WindowStartupLocation="CenterScreen"
                  Title="{Binding AppTitle}"
                  FontFamily="{DynamicResource SegoeFluentIcons}"
-                 WindowBackdropType="Mica"
-                 ExtendsContentIntoTitleBar="True"
-                 Height="auto" Width="auto">
+                 MinHeight="900" MinWidth="1900"
+                 SizeToContent="WidthAndHeight">
     <ui:FluentWindow.Background>
         <MultiBinding Converter="{StaticResource BackgroundAndOpacityConverter}" UpdateSourceTrigger="PropertyChanged">
             <Binding Path="CurrentBackground" Source="{x:Static local:BackgroundManager.Instance}" />
