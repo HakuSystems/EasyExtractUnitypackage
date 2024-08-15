@@ -116,7 +116,7 @@ public partial class Extraction : UserControl, INotifyPropertyChanged
         var collection = new SeriesCollection();
         var extractedUnitypackages = ExtractedUnitypackages.ToList();
 
-        var categories = new string[]
+        var categories = new[]
         {
             "Scripts", "Shaders", "Prefabs", "3D Objects", "Images", "Audios", "Animations", "Scenes", "Materials",
             "Assets", "Controllers", "Fonts", "Configurations", "Data"
@@ -144,7 +144,7 @@ public partial class Extraction : UserControl, INotifyPropertyChanged
             Brushes.LightSalmon
         };
 
-        var counts = new int[]
+        var counts = new[]
         {
             extractedUnitypackages.Sum(x => x.UnitypackageTotalScriptCount),
             extractedUnitypackages.Sum(x => x.UnitypackageTotalShaderCount),
@@ -163,8 +163,7 @@ public partial class Extraction : UserControl, INotifyPropertyChanged
         };
 
         for (var i = 0; i < categories.Length; i++)
-        {
-            collection.Add(new ColumnSeries()
+            collection.Add(new ColumnSeries
             {
                 Title = categories[i],
                 Values = new ChartValues<double> { counts[i] },
@@ -173,7 +172,6 @@ public partial class Extraction : UserControl, INotifyPropertyChanged
                 FontSize = 12,
                 FontWeight = FontWeights.Bold
             });
-        }
 
 
         UnityPackageChart.Series = collection;

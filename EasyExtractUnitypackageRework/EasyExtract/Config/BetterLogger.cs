@@ -36,10 +36,3 @@ public class BetterLogger
         return Task.CompletedTask;
     }
 }
-
-public enum Importance
-{
-    Info,
-    Warning,
-    Error
-}
