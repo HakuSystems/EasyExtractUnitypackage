@@ -28,7 +28,7 @@ public class ConfigHelper
         {
             var json = await File.ReadAllTextAsync(ConfigPath).ConfigureAwait(false);
             Config = JsonConvert.DeserializeObject<ConfigModel>(json);
-            await _logger.LogAsync("Read config file", "ConfigHelper", Importance.Info);
+            await _logger.LogAsync("Read config file", "ConfigHelper", Importance.Debug);
         }
         catch (Exception e)
         {
@@ -45,7 +45,7 @@ public class ConfigHelper
             var json = JsonConvert.SerializeObject(Config, Formatting.Indented);
             await using var sw = new StreamWriter(ConfigPath, false);
             await sw.WriteAsync(json);
-            await _logger.LogAsync($"Updated config file: {json}", "ConfigHelper", Importance.Info);
+            await _logger.LogAsync($"Updated config file: {json}", "ConfigHelper", Importance.Debug);
         }
         catch (Exception e)
         {

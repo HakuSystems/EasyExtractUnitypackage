@@ -4,5 +4,6 @@ public enum Importance
 {
     Info,
     Warning,
-    Error
+    Error,
+    Debug
 }
