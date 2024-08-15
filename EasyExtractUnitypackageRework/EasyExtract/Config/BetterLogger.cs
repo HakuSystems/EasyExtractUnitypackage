@@ -10,19 +10,23 @@ public class BetterLogger
 
     public BetterLogger()
     {
+        InitializeLogger();
+    }
+
+    private void InitializeLogger()
+    {
         DeleteLogsFolder();
         var applicationPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
             "EasyExtract");
         var logPath = Path.Combine(applicationPath, "Logs");
 
-        if (!Directory.Exists(logPath))
-            Directory.CreateDirectory(logPath);
+        Directory.CreateDirectory(logPath);
 
         Log.Logger = new LoggerConfiguration()
             .MinimumLevel.Debug()
             .WriteTo.Console()
             .WriteTo.File(Path.Combine(logPath, "Log.txt"), LogEventLevel.Information,
-                rollingInterval: RollingInterval.Infinite, shared: true)
+                rollingInterval: RollingInterval.Day, shared: true)
             .CreateLogger();
     }
 
@@ -34,14 +38,10 @@ public class BetterLogger
         if (Directory.Exists(logsPath))
             try
             {
-                foreach (var file in Directory.GetFiles(logsPath))
+                var files = Directory.GetFiles(logsPath);
+                foreach (var file in files)
                     try
                     {
-                        using (var fileStream = new FileStream(file, FileMode.Open, FileAccess.ReadWrite))
-                        {
-                            fileStream.Close();
-                        }
-
                         File.Delete(file);
                     }
                     catch (IOException ex)
