@@ -51,6 +51,7 @@ public partial class Dashboard : FluentWindow
 
     private async void Dashboard_OnLoaded(object sender, RoutedEventArgs e)
     {
+        SystemThemeWatcher.Watch(this);
         await ConfigHelper.ReadConfigAsync();
         VersionTxt.Content = "V" + Application.ResourceAssembly.GetName().Version;
         _backgroundManager.UpdateBackground(ConfigHelper.Config.Backgrounds.BackgroundPath);
