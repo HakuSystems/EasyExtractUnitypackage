@@ -163,12 +163,32 @@ public class ExtractionHandler
 
     private async Task MoveFileIfExists(string directory, string fileName, string targetFullPath, string targetFullFile)
     {
-        if (File.Exists(Path.Combine(directory, fileName)))
+        var sourceFilePath = Path.Combine(directory, fileName);
+        if (!File.Exists(sourceFilePath)) return;
+
+        try
         {
             Directory.CreateDirectory(targetFullPath);
-            File.Move(Path.Combine(directory, fileName), targetFullFile);
+            File.Move(sourceFilePath, targetFullFile, true);
             await _logger.LogAsync($"Moved file {fileName} to {targetFullFile}", "ExtractionHandler.cs",
                 Importance.Info);
+        }
+        catch (IOException ioEx)
+        {
+            await _logger.LogAsync($"I/O error while moving file {sourceFilePath} to {targetFullFile}: {ioEx.Message}",
+                "ExtractionHandler.cs", Importance.Error);
+        }
+        catch (UnauthorizedAccessException uaEx)
+        {
+            await _logger.LogAsync(
+                $"Access denied while moving file {sourceFilePath} to {targetFullFile}: {uaEx.Message}",
+                "ExtractionHandler.cs", Importance.Error);
+        }
+        catch (Exception ex)
+        {
+            await _logger.LogAsync(
+                $"Unexpected error while moving file {sourceFilePath} to {targetFullFile}: {ex.Message}",
+                "ExtractionHandler.cs", Importance.Error);
         }
     }
 }
