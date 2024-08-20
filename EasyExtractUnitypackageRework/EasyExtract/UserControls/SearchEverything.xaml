@@ -30,7 +30,7 @@
                             Margin="10"
                             MaxHeight="300"
                             HorizontalContentAlignment="Stretch"
-                            ItemsSource="{Binding FilteredSearchEverythingList}">
+                            ItemsSource="{Binding SearchEverythingList}">
                             <ui:ListView.ItemTemplate>
                                 <DataTemplate>
                                     <ui:CardControl>
@@ -55,7 +55,7 @@
                                                     TextWrapping="WrapWithOverflow"
                                                     Margin="0,5,0,0" />
                                                 <ui:Card>
-                                                    <StackPanel>
+                                                    <StackPanel Orientation="Vertical">
                                                         <ui:TextBlock
                                                             Appearance="Secondary"
                                                             Text="{Binding ModifiedTime}"
