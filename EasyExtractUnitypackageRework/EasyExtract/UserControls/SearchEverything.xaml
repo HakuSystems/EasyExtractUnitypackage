@@ -6,27 +6,31 @@
              FontFamily="{DynamicResource SegoeFluentIcons}"
              ui:Design.Background="{DynamicResource ApplicationBackgroundBrush}"
              Foreground="{DynamicResource TextFillColorPrimaryBrush}">
-    <Grid>
-        <ui:PassiveScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto">
-            <StackPanel Orientation="Vertical" HorizontalAlignment="Center" VerticalAlignment="Center">
+    <Grid HorizontalAlignment="Center" VerticalAlignment="Center">
+        <ui:PassiveScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto" Padding="20">
+            <StackPanel Orientation="Vertical" HorizontalAlignment="Stretch" VerticalAlignment="Center">
                 <TextBlock x:Name="FallbackEverything"
                            HorizontalAlignment="Center"
                            VerticalAlignment="Center"
-                           Text="Search Everything isnt supported on your computer." />
+                           Text="Search Everything isn't supported on your computer."
+                           Margin="10" />
                 <ui:Card x:Name="SearchEverythingCard">
                     <StackPanel Orientation="Vertical">
                         <ui:TextBox Icon="{ui:SymbolIcon Search24}"
                                     VerticalAlignment="Center"
                                     x:Name="SearchEverythingTextBox"
                                     TextChanged="SearchEverythingTextBox_OnTextChanged"
-                                    HorizontalAlignment="Stretch" MinWidth="250" PlaceholderText=".unitypackage" />
+                                    HorizontalAlignment="Stretch"
+                                    MinWidth="250"
+                                    PlaceholderText="Search for a UnityPackage..."
+                                    Margin="10" />
 
                         <ui:ListView
                             HorizontalAlignment="Stretch"
-                            Margin="15"
+                            Margin="10"
                             MaxHeight="300"
                             HorizontalContentAlignment="Stretch"
-                            ItemsSource="{Binding SearchEverythingList}">
+                            ItemsSource="{Binding FilteredSearchEverythingList}">
                             <ui:ListView.ItemTemplate>
                                 <DataTemplate>
                                     <ui:CardControl>
@@ -48,7 +52,26 @@
                                                     Text="{Binding UnityPackagePath}"
                                                     Opacity="0.5"
                                                     MaxWidth="500"
-                                                    TextWrapping="WrapWithOverflow" />
+                                                    TextWrapping="WrapWithOverflow"
+                                                    Margin="0,5,0,0" />
+                                                <ui:Card>
+                                                    <StackPanel>
+                                                        <ui:TextBlock
+                                                            Appearance="Secondary"
+                                                            Text="{Binding ModifiedTime}"
+                                                            Opacity="0.5"
+                                                            MaxWidth="500"
+                                                            TextWrapping="WrapWithOverflow"
+                                                            Margin="0,5,0,0" />
+                                                        <ui:TextBlock
+                                                            Appearance="Secondary"
+                                                            Text="{Binding CreatedTime}"
+                                                            Opacity="0.5"
+                                                            MaxWidth="500"
+                                                            TextWrapping="WrapWithOverflow"
+                                                            Margin="0,5,0,0" />
+                                                    </StackPanel>
+                                                </ui:Card>
                                             </StackPanel>
                                         </ui:CardControl.Header>
                                         <ui:Button Icon="{ui:SymbolIcon Add24}"
@@ -56,23 +79,32 @@
                                                    Click="QueueAddButton_OnClick"
                                                    HorizontalAlignment="Left"
                                                    Margin="5"
-                                                   ToolTip="Add to Queue" />
+                                                   ToolTip="Add to Queue"
+                                                   Content="Add" />
                                     </ui:CardControl>
                                 </DataTemplate>
                             </ui:ListView.ItemTemplate>
                         </ui:ListView>
-                        <TextBlock HorizontalAlignment="Center" Text="Search for a UnityPackage Name"
+                        <TextBlock HorizontalAlignment="Center" Text="Search for a UnityPackage Name..."
                                    x:Name="FoundText"
-                                   Opacity="0.5" MaxWidth="500" Margin="5" />
-                        <TextBlock HorizontalAlignment="Center" Text="Powered by SearchEverything" Margin="5" />
+                                   Opacity="0.5"
+                                   MaxWidth="500"
+                                   Margin="5" />
+                        <TextBlock HorizontalAlignment="Center" Text="Powered by SearchEverything"
+                                   Margin="5"
+                                   Opacity="0.7" />
                     </StackPanel>
                 </ui:Card>
-                <ui:Button HorizontalAlignment="Stretch" Margin="5" Icon="{ui:SymbolIcon DocumentSearch24}"
+                <ui:Button HorizontalAlignment="Stretch"
+                           Margin="5"
+                           Icon="{ui:SymbolIcon DocumentSearch24}"
                            x:Name="SearchFileManuallyButton"
                            Click="SearchFileManuallyButton_OnClick"
                            Content="Search File Manually" />
-                <TextBlock HorizontalAlignment="Center" VerticalAlignment="Center"
-                           x:Name="AddedStatusTxt" />
+                <TextBlock HorizontalAlignment="Center"
+                           VerticalAlignment="Center"
+                           x:Name="AddedStatusTxt"
+                           Margin="10" />
             </StackPanel>
         </ui:PassiveScrollViewer>
     </Grid>

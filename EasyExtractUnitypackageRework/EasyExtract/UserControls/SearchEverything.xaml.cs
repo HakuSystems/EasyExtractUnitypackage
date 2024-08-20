@@ -110,11 +110,36 @@ public partial class SearchEverything : UserControl, INotifyPropertyChanged
             var duplicate = _tempList.Find(x => x.UnityPackageName == name);
             if (duplicate != null) continue;
             if (path != null)
-                _tempList.Add(new SearchEverythingModel { UnityPackageName = name, UnityPackagePath = path, Id = i });
+                _tempList.Add(new SearchEverythingModel
+                {
+                    UnityPackageName = name, UnityPackagePath = path, Id = i,
+                    ModifiedTime = "Last Modified Date: " + GetFileDateTime(i, false),
+                    CreatedTime = "Creation Date: " + GetFileDateTime(i, true)
+                });
         }
 
         await _logger.LogAsync($"LoopList processed {i} results", "SearchEverything.xaml.cs",
             Importance.Info); // Log loop processing
+    }
+
+    /// <summary>
+    ///     Retrieves the created or modified time of a file given its index in the search results.
+    /// </summary>
+    /// <param name="fileIndex">The index of the file in the search results.</param>
+    /// <param name="isCreationTime">
+    ///     Specifies whether to retrieve the creation time (true) or the last modified time (false)
+    ///     of the file.
+    /// </param>
+    /// <returns>
+    ///     The created or modified time of the file in the format "dd-MM-yyyy HH:mm:ss".
+    /// </returns>
+    private string GetFileDateTime(uint fileIndex, bool isCreationTime)
+    {
+        var path = Marshal.PtrToStringUni(Everything.Everything_GetResultFullPathName(fileIndex));
+        var file = new FileInfo(path);
+        return isCreationTime
+            ? file.CreationTime.ToString("dd-MM-yyyy")
+            : file.LastWriteTime.ToString("dd-MM-yyyy");
     }
 
     private async void SearchEverythingTextBox_OnTextChanged(object sender, TextChangedEventArgs e)
@@ -156,7 +181,10 @@ public partial class SearchEverything : UserControl, INotifyPropertyChanged
                 if (duplicate != null) continue;
                 if (Extraction._queueList == null) Extraction._queueList = new List<SearchEverythingModel>();
                 Extraction._queueList.Add(new SearchEverythingModel
-                    { UnityPackageName = name, UnityPackagePath = file, Id = 0 });
+                {
+                    UnityPackageName = name, UnityPackagePath = file, Id = 0, ModifiedTime = string.Empty,
+                    CreatedTime = string.Empty
+                });
 
                 AddedStatusTxt.Text = counter switch
                 {
@@ -182,7 +210,10 @@ public partial class SearchEverything : UserControl, INotifyPropertyChanged
         if (duplicate != null) return;
         if (Extraction._queueList == null) Extraction._queueList = new List<SearchEverythingModel>();
         Extraction._queueList.Add(new SearchEverythingModel
-            { UnityPackageName = name, UnityPackagePath = path, Id = id });
+        {
+            UnityPackageName = name, UnityPackagePath = path, Id = id, ModifiedTime = string.Empty,
+            CreatedTime = string.Empty
+        });
         AddedStatusTxt.Text = $"Added {name} to the queue";
 
         await _logger.LogAsync($"Added {name} to the queue", "SearchEverything.xaml.cs",
