@@ -219,4 +219,18 @@ public partial class SearchEverything : UserControl, INotifyPropertyChanged
         await _logger.LogAsync($"Added {name} to the queue", "SearchEverything.xaml.cs",
             Importance.Info); // Log queue addition
     }
+
+    private void CreationDateFilterSwitch_OnUnchecked(object sender, RoutedEventArgs e)
+    {
+        CreationDateFilterCard.IsEnabled = false;
+        CreationDateFilterCardFallback.Visibility = Visibility.Visible;
+        CreationDateFilterCard.Visibility = Visibility.Collapsed;
+    }
+
+    private void CreationDateFilterSwitch_OnChecked(object sender, RoutedEventArgs e)
+    {
+        CreationDateFilterCard.IsEnabled = true;
+        CreationDateFilterCardFallback.Visibility = Visibility.Collapsed;
+        CreationDateFilterCard.Visibility = Visibility.Visible;
+    }
 }
