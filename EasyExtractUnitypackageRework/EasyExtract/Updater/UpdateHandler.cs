@@ -72,7 +72,7 @@ public class UpdateHandler
             var asset = latestRelease.Assets.FirstOrDefault(a => a.Name.EndsWith(".rar"));
             if (asset != null)
             {
-                var rarPath = await DownloadAssetAsync(asset.BrowserDownloadUrl);
+                var rarPath = await DownloadAssetAsync(asset.BrowserDownloadUrl, latestRelease.TagName);
                 var exePath = await ExtractRarAsync(rarPath);
 
                 if (!string.IsNullOrEmpty(exePath))
@@ -125,13 +125,14 @@ public class UpdateHandler
     ///     Asynchronously downloads an asset from a specified URL.
     /// </summary>
     /// <param name="url">The URL of the asset to download.</param>
+    /// <param name="versionTag">The version tag to append to the file name.</param>
     /// <returns>The path to the downloaded file.</returns>
-    private async Task<string> DownloadAssetAsync(string url)
+    private async Task<string> DownloadAssetAsync(string url, string versionTag)
     {
         using var client = new HttpClient();
         var response = await client.GetAsync(url);
         response.EnsureSuccessStatusCode();
-        var fileName = Path.GetFileName(url);
+        var fileName = $"{Path.GetFileNameWithoutExtension(url)}_{versionTag}{Path.GetExtension(url)}";
 
         // Download to a temporary directory
         var tempDirectory = Path.Combine(Path.GetTempPath(), "EasyExtractUpdate");
