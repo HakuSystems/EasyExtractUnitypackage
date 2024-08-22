@@ -8,7 +8,7 @@ namespace EasyExtract.Discord;
 public class DiscordRpcManager : IDisposable
 {
     private static DiscordRpcManager? _instance;
-    private readonly ConfigHelper _configHelper = new();
+    private static readonly ConfigHelper _configHelper = new();
     private readonly BetterLogger _logger = new();
     private readonly Timestamps timestamps;
     private DiscordRpcClient client;
@@ -42,7 +42,10 @@ public class DiscordRpcManager : IDisposable
 
     public async Task UpdatePresenceAsync(string state)
     {
-        var largeTextString = $"U: {_configHelper.Config.TotalExtracted} F: {_configHelper.Config.TotalFilesExtracted}";
+        var unityPackageCount = _configHelper.Config.TotalExtracted;
+        var fileCount = _configHelper.Config.TotalFilesExtracted;
+        var largeTextString = $"U: {unityPackageCount} | F: {fileCount}";
+
         if (largeTextString.Length > 127)
             try
             {
