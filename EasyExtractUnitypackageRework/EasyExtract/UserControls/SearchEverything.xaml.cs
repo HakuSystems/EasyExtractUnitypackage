@@ -153,11 +153,28 @@ public partial class SearchEverything : UserControl, INotifyPropertyChanged
             return;
         }
 
-        SearchEverythingList = _tempList.Where(x =>
-                x.UnityPackageName.StartsWith(SearchEverythingTextBox.Text,
-                    StringComparison.InvariantCultureIgnoreCase))
-            .ToList();
-        FoundText.Text = $"Found {SearchEverythingList.Count} results";
+        if (CreationDateFilterSwitch.IsChecked == true)
+        {
+            var creationDateStart = CalendarStartCreationDatePicker.Date;
+            var endCreationDate = CalendarEndCreationDatePicker.Date;
+            SearchEverythingList = _tempList.Where(x =>
+                    x.UnityPackageName.StartsWith(SearchEverythingTextBox.Text,
+                        StringComparison.InvariantCultureIgnoreCase) &&
+                    DateTime.Parse(x.CreatedTime.Replace("Creation Date: ", "")) >= creationDateStart &&
+                    DateTime.Parse(x.CreatedTime.Replace("Creation Date: ", "")) <= endCreationDate)
+                .ToList();
+            FoundText.Text = $"Found {SearchEverythingList.Count} results";
+        }
+        else
+        {
+            SearchEverythingList = _tempList.Where(x =>
+                    x.UnityPackageName.StartsWith(SearchEverythingTextBox.Text,
+                        StringComparison.InvariantCultureIgnoreCase))
+                .ToList();
+            FoundText.Text = $"Found {SearchEverythingList.Count} results";
+        }
+
+
         await _logger.LogAsync($"Search updated, found {SearchEverythingList.Count} results",
             "SearchEverything.xaml.cs", Importance.Info); // Log search update
     }
@@ -225,6 +242,24 @@ public partial class SearchEverything : UserControl, INotifyPropertyChanged
         CreationDateFilterCard.IsEnabled = false;
         CreationDateFilterCardFallback.Visibility = Visibility.Visible;
         CreationDateFilterCard.Visibility = Visibility.Collapsed;
+        if (!string.IsNullOrEmpty(SearchEverythingTextBox.Text))
+        {
+            SearchEverythingList = _tempList.Where(x =>
+                    x.UnityPackageName.StartsWith(SearchEverythingTextBox.Text,
+                        StringComparison.InvariantCultureIgnoreCase))
+                .ToList();
+            FoundText.Text = $"Found {SearchEverythingList.Count} results";
+        }
+        else
+        {
+            SearchEverythingList = _tempList.Where(x =>
+                {
+                    return x.UnityPackageName.StartsWith(SearchEverythingTextBox.Text,
+                        StringComparison.InvariantCultureIgnoreCase);
+                })
+                .ToList();
+            FoundText.Text = $"Found {SearchEverythingList.Count} results";
+        }
     }
 
     private void CreationDateFilterSwitch_OnChecked(object sender, RoutedEventArgs e)
@@ -232,5 +267,38 @@ public partial class SearchEverything : UserControl, INotifyPropertyChanged
         CreationDateFilterCard.IsEnabled = true;
         CreationDateFilterCardFallback.Visibility = Visibility.Collapsed;
         CreationDateFilterCard.Visibility = Visibility.Visible;
+        if (!string.IsNullOrEmpty(SearchEverythingTextBox.Text))
+        {
+            SearchEverythingList = _tempList.Where(x =>
+                    x.UnityPackageName.StartsWith(SearchEverythingTextBox.Text,
+                        StringComparison.InvariantCultureIgnoreCase))
+                .ToList();
+            FoundText.Text = $"Found {SearchEverythingList.Count} results";
+        }
+        else
+        {
+            var creationDateStart = CalendarStartCreationDatePicker.Date;
+            var endCreationDate = CalendarEndCreationDatePicker.Date;
+            SearchEverythingList = _tempList.Where(x =>
+                    x.UnityPackageName.StartsWith(SearchEverythingTextBox.Text,
+                        StringComparison.InvariantCultureIgnoreCase) &&
+                    DateTime.Parse(x.CreatedTime.Replace("Creation Date: ", "")) >= creationDateStart &&
+                    DateTime.Parse(x.CreatedTime.Replace("Creation Date: ", "")) <= endCreationDate)
+                .ToList();
+            FoundText.Text = $"Found {SearchEverythingList.Count} results";
+        }
+    }
+
+    private void UpdateSearchResultCreationDateFilterBtn_OnClick(object sender, RoutedEventArgs e)
+    {
+        var textinput = SearchEverythingTextBox.Text;
+        var creationDateStart = CalendarStartCreationDatePicker.Date;
+        var endCreationDate = CalendarEndCreationDatePicker.Date;
+        SearchEverythingList = _tempList.Where(x =>
+                x.UnityPackageName.StartsWith(textinput, StringComparison.InvariantCultureIgnoreCase) &&
+                DateTime.Parse(x.CreatedTime.Replace("Creation Date: ", "")) >= creationDateStart &&
+                DateTime.Parse(x.CreatedTime.Replace("Creation Date: ", "")) <= endCreationDate)
+            .ToList();
+        FoundText.Text = $"Found {SearchEverythingList.Count} results";
     }
 }

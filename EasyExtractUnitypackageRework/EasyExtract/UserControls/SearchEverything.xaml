@@ -14,10 +14,11 @@
                            HorizontalAlignment="Center"
                            VerticalAlignment="Center"
                            Text="Search Everything isn't supported on your computer."
-                           Margin="10" />
+                           Margin="10"
+                           FontStyle="Italic" />
                 <ui:Card x:Name="SearchEverythingCard">
                     <StackPanel Orientation="Vertical">
-                        <ui:Card>
+                        <ui:Card Footer="Filter" Margin="10">
                             <ui:ToggleSwitch x:Name="CreationDateFilterSwitch"
                                              Checked="CreationDateFilterSwitch_OnChecked"
                                              Unchecked="CreationDateFilterSwitch_OnUnchecked">
@@ -26,37 +27,57 @@
                                         <StackPanel Orientation="Horizontal">
                                             <ui:TextBlock Text="Enable to see Filter" HorizontalAlignment="Stretch"
                                                           Margin="8,0,0,0"
-                                                          VerticalAlignment="Center" />
+                                                          VerticalAlignment="Center"
+                                                          FontSize="12" />
                                         </StackPanel>
                                     </ui:Card>
                                     <ui:Card x:Name="CreationDateFilterCard" Visibility="Collapsed">
-                                        <StackPanel Orientation="Horizontal">
-                                            <ui:TextBlock Text="Search from" Margin="8,0,0,0"
-                                                          VerticalAlignment="Center" />
-                                            <ui:CalendarDatePicker
-                                                x:Name="CalendarStartCreationDatePicker"
-                                                Content="Pick a date"
-                                                Date="{x:Static sys:DateTime.Today}"
-                                                IsTodayHighlighted="True" />
-                                            <ui:TextBlock
-                                                Margin="8,0,0,0"
-                                                VerticalAlignment="Center"
-                                                Text="{Binding ElementName=CalendarStartCreationDatePicker, Path=Date}" />
-                                            <ui:TextBlock Text="to" Margin="8,0,0,0"
-                                                          VerticalAlignment="Center" />
-                                            <ui:CalendarDatePicker
-                                                x:Name="CalendarEndCreationDatePicker"
-                                                Content="Pick a date"
-                                                Date="{x:Static sys:DateTime.Today}"
-                                                IsTodayHighlighted="True" />
-                                            <ui:TextBlock
-                                                Margin="8,0,0,0"
-                                                VerticalAlignment="Center"
-                                                Text="{Binding ElementName=CalendarEndCreationDatePicker, Path=Date}" />
-                                        </StackPanel>
+                                        <Grid>
+                                            <Grid.RowDefinitions>
+                                                <RowDefinition Height="Auto" />
+                                                <RowDefinition Height="Auto" />
+                                            </Grid.RowDefinitions>
+                                            <StackPanel Orientation="Horizontal" Margin="5">
+                                                <ui:TextBlock Text="Search from"
+                                                              Margin="8,0,5,0"
+                                                              FontTypography="Title"
+                                                              VerticalAlignment="Center"
+                                                              FontSize="14" />
+                                                <ui:CalendarDatePicker
+                                                    x:Name="CalendarStartCreationDatePicker"
+                                                    Content="Pick a date"
+                                                    Date="{x:Static sys:DateTime.Today}"
+                                                    IsTodayHighlighted="True" />
+                                                <ui:TextBlock
+                                                    Margin="8,0,0,0"
+                                                    VerticalAlignment="Center"
+                                                    Text="{Binding ElementName=CalendarStartCreationDatePicker, Path=Date, StringFormat=dd-MM-yyyy}" />
+                                                <ui:TextBlock Text="to" Margin="8,0,5,0"
+                                                              FontTypography="Title"
+                                                              VerticalAlignment="Center"
+                                                              FontSize="14" />
+                                                <ui:CalendarDatePicker
+                                                    x:Name="CalendarEndCreationDatePicker"
+                                                    Content="Pick a date"
+                                                    Date="{x:Static sys:DateTime.Today}"
+                                                    IsTodayHighlighted="True" />
+                                                <ui:TextBlock
+                                                    Margin="8,0,0,0"
+                                                    VerticalAlignment="Center"
+                                                    Text="{Binding ElementName=CalendarEndCreationDatePicker, Path=Date, StringFormat=dd-MM-yyyy}" />
+                                            </StackPanel>
+                                            <StackPanel Grid.Row="1" Margin="5">
+                                                <ui:Button
+                                                    Margin="5"
+                                                    Content="Update Search Result"
+                                                    HorizontalAlignment="Stretch"
+                                                    x:Name="UpdateSearchResultCreationDateFilterBtn"
+                                                    Click="UpdateSearchResultCreationDateFilterBtn_OnClick"
+                                                    Icon="{ui:SymbolIcon SearchInfo24}" />
+                                            </StackPanel>
+                                        </Grid>
                                     </ui:Card>
                                 </StackPanel>
-
                             </ui:ToggleSwitch>
                         </ui:Card>
                         <ui:TextBox Icon="{ui:SymbolIcon Search24}"
@@ -66,7 +87,9 @@
                                     HorizontalAlignment="Stretch"
                                     MinWidth="250"
                                     PlaceholderText="Search for a UnityPackage..."
-                                    Margin="10" />
+                                    Margin="10"
+                                    FontSize="14"
+                                    VerticalContentAlignment="Center" />
 
                         <ui:ListView
                             HorizontalAlignment="Stretch"
@@ -89,14 +112,16 @@
                                                 <ui:TextBlock
                                                     FontTypography="BodyStrong"
                                                     Text="{Binding UnityPackageName}"
-                                                    TextWrapping="WrapWithOverflow" />
+                                                    TextWrapping="WrapWithOverflow"
+                                                    FontSize="14" />
                                                 <ui:TextBlock
                                                     Appearance="Secondary"
                                                     Text="{Binding UnityPackagePath}"
                                                     Opacity="0.5"
                                                     MaxWidth="500"
                                                     TextWrapping="WrapWithOverflow"
-                                                    Margin="0,5,0,0" />
+                                                    Margin="0,5,0,0"
+                                                    FontSize="12" />
                                                 <ui:Card>
                                                     <StackPanel Orientation="Vertical">
                                                         <ui:TextBlock
@@ -105,14 +130,16 @@
                                                             Opacity="0.5"
                                                             MaxWidth="500"
                                                             TextWrapping="WrapWithOverflow"
-                                                            Margin="0,5,0,0" />
+                                                            Margin="0,5,0,0"
+                                                            FontSize="12" />
                                                         <ui:TextBlock
                                                             Appearance="Secondary"
                                                             Text="{Binding CreatedTime}"
                                                             Opacity="0.5"
                                                             MaxWidth="500"
                                                             TextWrapping="WrapWithOverflow"
-                                                            Margin="0,5,0,0" />
+                                                            Margin="0,5,0,0"
+                                                            FontSize="12" />
                                                     </StackPanel>
                                                 </ui:Card>
                                             </StackPanel>
@@ -123,7 +150,8 @@
                                                    HorizontalAlignment="Left"
                                                    Margin="5"
                                                    ToolTip="Add to Queue"
-                                                   Content="Add" />
+                                                   Content="Add"
+                                                   FontSize="14" />
                                     </ui:CardControl>
                                 </DataTemplate>
                             </ui:ListView.ItemTemplate>
@@ -132,10 +160,12 @@
                                    x:Name="FoundText"
                                    Opacity="0.5"
                                    MaxWidth="500"
-                                   Margin="5" />
+                                   Margin="5"
+                                   FontSize="14" />
                         <TextBlock HorizontalAlignment="Center" Text="Powered by SearchEverything"
                                    Margin="5"
-                                   Opacity="0.7" />
+                                   Opacity="0.7"
+                                   FontSize="14" />
                     </StackPanel>
                 </ui:Card>
                 <ui:Button HorizontalAlignment="Stretch"
@@ -143,11 +173,13 @@
                            Icon="{ui:SymbolIcon DocumentSearch24}"
                            x:Name="SearchFileManuallyButton"
                            Click="SearchFileManuallyButton_OnClick"
-                           Content="Search File Manually" />
+                           Content="Search File Manually"
+                           FontSize="14" />
                 <TextBlock HorizontalAlignment="Center"
                            VerticalAlignment="Center"
                            x:Name="AddedStatusTxt"
-                           Margin="10" />
+                           Margin="10"
+                           FontSize="14" />
             </StackPanel>
         </ui:PassiveScrollViewer>
     </Grid>
