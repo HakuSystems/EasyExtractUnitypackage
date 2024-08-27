@@ -297,6 +297,12 @@
                                                         FontWeight="UltraLight"
                                                         Text="{Binding UnitypackageTotalFileCountMessage}"
                                                         TextWrapping="Wrap" />
+                                                    <TextBlock
+                                                        Margin="5"
+                                                        Opacity="0.5"
+                                                        FontWeight="SemiBold"
+                                                        Text="{Binding MalicousDiscordWebhookCountMessage}"
+                                                        TextWrapping="Wrap" />
                                                 </StackPanel>
                                             </StackPanel>
 

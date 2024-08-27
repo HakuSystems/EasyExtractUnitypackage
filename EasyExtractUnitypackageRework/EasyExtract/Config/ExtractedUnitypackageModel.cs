@@ -7,6 +7,7 @@ namespace EasyExtract.Config;
 public class ExtractedUnitypackageModel : INotifyPropertyChanged
 {
     private InfoBarSeverity detailsSeverity = InfoBarSeverity.Informational;
+    private int malicousDiscordWebhookCount;
     private bool packageIsChecked;
     private List<ExtractedFiles> subdirectoryItems = new();
     private string unitypackageDetails = "No Details Available";
@@ -33,12 +34,19 @@ public class ExtractedUnitypackageModel : INotifyPropertyChanged
     private int unitypackageTotalSceneCount;
 
     private int unitypackageTotalScriptCount;
+
     private int unitypackageTotalShaderCount;
+
+    private string malicousDiscordWebhookCountMessage =>
+        MalicousDiscordWebhookCount > 0
+            ? $"Possible Malicious Discord Webhook(s): {MalicousDiscordWebhookCount}"
+            : "No Malicious Discord Webhooks Found";
+
 
     private string unitypackageTotalFileCountMessage =>
         $"Total Files: {UnitypackageTotalFileCount:N2} / Package Size: {UnitypackageSize}";
 
-
+    public string MalicousDiscordWebhookCountMessage => malicousDiscordWebhookCountMessage;
     public string UnitypackageTotalFileCountMessage => unitypackageTotalFileCountMessage;
 
     public bool PackageIsChecked
@@ -67,6 +75,16 @@ public class ExtractedUnitypackageModel : INotifyPropertyChanged
         set
         {
             detailsSeverity = value;
+            OnPropertyChanged();
+        }
+    }
+
+    public int MalicousDiscordWebhookCount
+    {
+        get => malicousDiscordWebhookCount;
+        set
+        {
+            malicousDiscordWebhookCount = value;
             OnPropertyChanged();
         }
     }
