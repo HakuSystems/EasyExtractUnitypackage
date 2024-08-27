@@ -6,7 +6,6 @@ using System.Runtime.CompilerServices;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
-using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Threading;
 using EasyExtract.Config;
@@ -17,6 +16,7 @@ using LiveCharts.Wpf;
 using Microsoft.Win32;
 using Wpf.Ui.Controls;
 using XamlAnimatedGif;
+using Brushes = System.Windows.Media.Brushes;
 
 namespace EasyExtract.UserControls;
 
@@ -318,21 +318,50 @@ public partial class Extraction : UserControl, INotifyPropertyChanged
     ///     A task that represents the asynchronous operation. The task result is a BitmapImage object representing the
     ///     generated preview image, or null if the preview image doesn't exist.
     /// </returns>
-    private Task<BitmapImage?> GeneratePreviewImage(FileInfo fileInfo)
+    private async Task<BitmapImage?> GeneratePreviewImage(FileInfo fileInfo)
     {
-        return Task.Run(() =>
+        return await Task.Run(() =>
         {
             var previewImagePath = Path.Combine(fileInfo.DirectoryName, $"{fileInfo.Name}.{EasyExtractPreview}");
-            if (!File.Exists(previewImagePath)) return null;
+            if (File.Exists(previewImagePath))
+            {
+                try
+                {
+                    using (var fileStream =
+                           new FileStream(previewImagePath, FileMode.Open, FileAccess.Read, FileShare.Read))
+                    {
+                        var previewImage = new BitmapImage();
+                        previewImage.BeginInit();
+                        previewImage.StreamSource = fileStream;
+                        previewImage.CacheOption = BitmapCacheOption.OnLoad;
+                        previewImage.EndInit();
+                        previewImage.Freeze();
 
-            var previewImage = new BitmapImage();
-            previewImage.BeginInit();
-            previewImage.UriSource = new Uri(previewImagePath);
-            previewImage.CacheOption = BitmapCacheOption.OnLoad;
-            previewImage.EndInit();
-            previewImage.Freeze();
+                        return previewImage;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    // Log exception here
+                    Console.WriteLine($"Error loading image: {ex.Message}");
+                }
 
-            return previewImage;
+                if (fileInfo.Extension.Equals(".cs", StringComparison.OrdinalIgnoreCase))
+                {
+                    // Convert code to image
+                    var code = File.ReadAllText(fileInfo.FullName);
+                    var codeImage = CodeToImageConverter.ConvertCodeToImage(code);
+                    if (codeImage != null)
+                    {
+                        CodeToImageConverter.SaveImageToFile(codeImage, previewImagePath);
+                        return codeImage;
+                    }
+                }
+
+                return null;
+            }
+
+            return null;
         });
     }
 
