@@ -8,11 +8,6 @@ namespace EasyExtract.Config;
 
 public class CodeToImageConverter
 {
-    /// <summary>
-    ///     Converts the provided source code to an image.
-    /// </summary>
-    /// <param name="code">The source code to be converted into an image.</param>
-    /// <returns>A BitmapImage representing the source code.</returns>
     public static BitmapImage? ConvertCodeToImage(string code)
     {
         // Create a bitmap with specific dimensions
@@ -25,13 +20,13 @@ public class CodeToImageConverter
         graphics.Clear(Color.White);
 
         // Create a font
-        var font = new Font("Consolas", 12, FontStyle.Regular, GraphicsUnit.Pixel);
+        using var font = new Font("Consolas", 12, FontStyle.Regular, GraphicsUnit.Pixel);
 
         // Set the text rendering hints
         graphics.TextRenderingHint = TextRenderingHint.ClearTypeGridFit;
 
         // Create a brush
-        var brush = new SolidBrush(Color.Black);
+        using var brush = new SolidBrush(Color.Black);
 
         // Draw the code as text on the bitmap
         graphics.DrawString(code, font, brush, new PointF(10, 10));
