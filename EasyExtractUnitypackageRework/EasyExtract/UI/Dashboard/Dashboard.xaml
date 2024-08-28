@@ -6,6 +6,7 @@
                  xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
                  xmlns:UserControls="clr-namespace:EasyExtract.UserControls"
                  xmlns:local="clr-namespace:EasyExtract.CustomDesign"
+                 xmlns:feedback="clr-namespace:EasyExtract.UI.Feedback"
                  mc:Ignorable="d"
                  WindowStyle="None"
                  ResizeMode="CanResize"
@@ -90,6 +91,14 @@
                                        Foreground="{DynamicResource TextFillColorPrimaryBrush}"
                                        TargetPageType="{x:Type UserControls:About}"
                                        Icon="{ui:SymbolIcon Heart24}" />
+                <ui:NavigationViewItem Content="Feedback" TargetPageTag="Feedback"
+                                       HorizontalAlignment="Stretch"
+                                       VerticalAlignment="Stretch"
+                                       HorizontalContentAlignment="Stretch"
+                                       VerticalContentAlignment="Stretch"
+                                       Foreground="{DynamicResource TextFillColorPrimaryBrush}"
+                                       TargetPageType="{x:Type feedback:Feedback}"
+                                       Icon="{ui:SymbolIcon PersonFeedback24}" />
                 <ui:NavigationViewItem TargetPageTag="Updater"
                                        HorizontalAlignment="Stretch"
                                        VerticalAlignment="Stretch"
@@ -117,7 +126,7 @@
                 </ui:NavigationViewItem>
             </ui:NavigationView.MenuItems>
             <ui:NavigationView.Header>
-                <ui:CardControl>
+                <ui:CardControl x:Name="EasterEggHeader">
                     <ui:CardControl.Icon>
                         <ui:SymbolIcon
                             x:Name="HeartIcon"
@@ -142,6 +151,13 @@
                                 Text="HakuSystems, Jan-Fcloud."
                                 Opacity="0.5"
                                 TextWrapping="WrapWithOverflow" />
+                            <ui:Button
+                                Appearance="Secondary"
+                                Margin="5"
+                                Icon="{ui:SymbolIcon SlideHide24}"
+                                x:Name="DontShowAgainBtn"
+                                Click="DontShowAgainBtn_OnClick"
+                                Content="Dont show this again" />
                         </StackPanel>
                     </ui:CardControl.Header>
                 </ui:CardControl>
