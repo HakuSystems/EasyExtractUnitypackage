@@ -346,19 +346,19 @@ public partial class Extraction : UserControl, INotifyPropertyChanged
                     Console.WriteLine($"Error loading image: {ex.Message}");
                 }
 
-                if (fileInfo.Extension.Equals(".cs", StringComparison.OrdinalIgnoreCase))
-                {
-                    // Convert code to image
-                    var code = File.ReadAllText(fileInfo.FullName);
-                    var codeImage = CodeToImageConverter.ConvertCodeToImage(code);
-                    if (codeImage != null)
-                    {
-                        CodeToImageConverter.SaveImageToFile(codeImage, previewImagePath);
-                        return codeImage;
-                    }
-                }
-
                 return null;
+            }
+
+            if (fileInfo.Extension.Equals(".cs", StringComparison.OrdinalIgnoreCase))
+            {
+                // Convert code to image
+                var code = File.ReadAllText(fileInfo.FullName);
+                var codeImage = CodeToImageConverter.ConvertCodeToImage(code);
+                if (codeImage != null)
+                {
+                    CodeToImageConverter.SaveImageToFile(codeImage, previewImagePath);
+                    return codeImage;
+                }
             }
 
             return null;

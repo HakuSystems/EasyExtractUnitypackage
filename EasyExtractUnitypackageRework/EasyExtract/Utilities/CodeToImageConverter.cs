@@ -8,34 +8,26 @@ namespace EasyExtract.Config;
 
 public class CodeToImageConverter
 {
+    /// <summary>
+    ///     Converts the given code to an image.
+    /// </summary>
+    /// <param name="code">The code to convert to an image.</param>
+    /// <returns>
+    ///     A BitmapImage object representing the converted code as an image, or null if the code cannot be converted.
+    /// </returns>
     public static BitmapImage? ConvertCodeToImage(string code)
     {
-        // Create a bitmap with specific dimensions
-        using var bitmap = new Bitmap(800, 600);
-
-        // Create graphics object from bitmap
+        using var bitmap = new Bitmap(800, 600); // width, height
         using var graphics = Graphics.FromImage(bitmap);
-
-        // Set the background color
-        graphics.Clear(Color.White);
-
-        // Create a font
-        using var font = new Font("Consolas", 12, FontStyle.Regular, GraphicsUnit.Pixel);
-
-        // Set the text rendering hints
+        graphics.Clear(Color.Transparent); // background color
+        using var font = new Font("SegoeFluentIcons", 30, FontStyle.Bold, GraphicsUnit.Pixel);
         graphics.TextRenderingHint = TextRenderingHint.ClearTypeGridFit;
-
-        // Create a brush
-        using var brush = new SolidBrush(Color.Black);
-
-        // Draw the code as text on the bitmap
+        using var brush = new SolidBrush(Color.White); // foreground color
         graphics.DrawString(code, font, brush, new PointF(10, 10));
 
-        // Save the bitmap to a temporary memory stream
         using var stream = new MemoryStream();
         bitmap.Save(stream, ImageFormat.Png);
 
-        // Convert stream to BitmapImage
         stream.Position = 0;
         var bitmapImage = new BitmapImage();
         bitmapImage.BeginInit();
