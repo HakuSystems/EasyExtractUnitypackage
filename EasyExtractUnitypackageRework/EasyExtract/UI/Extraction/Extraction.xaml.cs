@@ -349,7 +349,10 @@ public partial class Extraction : UserControl, INotifyPropertyChanged
                 return null;
             }
 
-            if (fileInfo.Extension.Equals(".cs", StringComparison.OrdinalIgnoreCase))
+            if (fileInfo.Extension.Equals(".cs", StringComparison.OrdinalIgnoreCase) ||
+                fileInfo.Extension.Equals(".txt", StringComparison.OrdinalIgnoreCase) ||
+                fileInfo.Extension.Equals(".json", StringComparison.OrdinalIgnoreCase) ||
+                fileInfo.Extension.Equals(".shader", StringComparison.OrdinalIgnoreCase))
             {
                 // Convert code to image
                 var code = File.ReadAllText(fileInfo.FullName);
