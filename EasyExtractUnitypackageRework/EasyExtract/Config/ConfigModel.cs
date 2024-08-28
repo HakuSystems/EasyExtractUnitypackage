@@ -9,6 +9,7 @@ public class ConfigModel
 {
     public string AppTitle { get; set; } = "EasyExtractUnitypackage";
     public ApplicationTheme ApplicationTheme { get; set; } = ApplicationTheme.Dark;
+    public bool EasterEggHeader { get; set; } = true;
     public bool UwUModeActive { get; set; } = false;
     public bool IntroLogoAnimation { get; set; } = false;
     public RunsModel Runs { get; set; } = new();
