@@ -43,9 +43,9 @@
                               Margin="0,15,0,5" />
                 <ui:TextBox Height="100"
                             x:Name="FeedbackTextBox"
-                            Foreground="Black"
                             TextWrapping="Wrap"
                             AcceptsReturn="True"
+                            MaxLength="1000"
                             BorderBrush="#7fc5ff"
                             BorderThickness="1"
                             VerticalScrollBarVisibility="Auto" />
