@@ -247,7 +247,7 @@ public class ExtractionHelper
         return category;
     }
 
-    public async Task<int> GetTotalMalisiousCodeCount(string directory)
+    public async Task<int> GetMalicousDiscordWebhookCount(string directory)
     {
         var count = 0;
         var codeFiles = Directory.GetFiles(directory, "*.cs", SearchOption.AllDirectories).ToList();
@@ -270,6 +270,63 @@ public class ExtractionHelper
 
         await _logger.LogAsync($"Total malicious code count in directory '{directory}': {count}", "ExtractionHelper.cs",
             Importance.Info); // Log total malicious code count
+
+        return count;
+    }
+
+    public async Task<int> GetTotalLinkDetectionCount(string directory)
+    {
+        var count = 0;
+        var codeFiles = Directory.GetFiles(directory, "*.cs", SearchOption.AllDirectories).ToList();
+        var maliciousCodeDetector = new MaliciousCodeDetector();
+
+        foreach (var codeFile in codeFiles)
+        {
+            var isMalicious = false;
+            var lines = await File.ReadAllLinesAsync(codeFile);
+
+            foreach (var line in lines)
+                if (await maliciousCodeDetector.StartLinkDetectionAsync(line))
+                {
+                    isMalicious = true;
+                    break;
+                }
+
+            if (isMalicious) count++;
+        }
+
+        await _logger.LogAsync($"Total link detection count in directory '{directory}': {count}", "ExtractionHelper.cs",
+            Importance.Info); // Log total link detection count
+
+        return count;
+    }
+
+    //todo: detectionb might still be weird or wrong
+    public async Task<int> GetTotalBase64DetectionCount(string directory)
+    {
+        var count = 0;
+        var codeFiles = Directory.GetFiles(directory, "*.cs", SearchOption.AllDirectories).ToList();
+        var maliciousCodeDetector = new MaliciousCodeDetector();
+
+        foreach (var codeFile in codeFiles)
+        {
+            var isMalicious = false;
+            var lines = await File.ReadAllLinesAsync(codeFile);
+
+            foreach (var line in lines)
+                if (!await maliciousCodeDetector.StartDiscordWebhookScanAsync(line) &&
+                    await maliciousCodeDetector.StartBase64DetectionAsync(line))
+                {
+                    isMalicious = true;
+                    break;
+                }
+
+            if (isMalicious) count++;
+        }
+
+        await _logger.LogAsync($"Total base64 detection count in directory '{directory}': {count}",
+            "ExtractionHelper.cs",
+            Importance.Info); // Log total base64 detection count
 
         return count;
     }

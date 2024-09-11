@@ -239,7 +239,15 @@ public partial class Extraction : UserControl, INotifyPropertyChanged
             UnitypackageTotalFileCount = await ExtractionHelper.GetTotalFileCount(directory),
             UnitypackageTotalFolderCount = await ExtractionHelper.GetTotalFolderCount(directory),
             UnitypackageTotalScriptCount = await ExtractionHelper.GetTotalScriptCount(directory),
-            MalicousDiscordWebhookCount = await ExtractionHelper.GetTotalMalisiousCodeCount(directory),
+
+            #region MALICIOUS CODE DETECTION
+
+            MalicousDiscordWebhookCount = await ExtractionHelper.GetMalicousDiscordWebhookCount(directory),
+            LinkDetectionCount = await ExtractionHelper.GetTotalLinkDetectionCount(directory),
+            Base64DetectionCount = await ExtractionHelper.GetTotalBase64DetectionCount(directory),
+
+            #endregion
+
             UnitypackageTotalShaderCount = await ExtractionHelper.GetTotalShaderCount(directory),
             UnitypackageTotalPrefabCount = await ExtractionHelper.GetTotalPrefabCount(directory),
             UnitypackageTotal3DObjectCount = await ExtractionHelper.GetTotal3DObjectCount(directory),

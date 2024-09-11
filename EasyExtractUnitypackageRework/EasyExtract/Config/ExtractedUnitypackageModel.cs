@@ -1,12 +1,16 @@
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
+using System.Windows.Media;
 using Wpf.Ui.Controls;
 
 namespace EasyExtract.Config;
 
 public class ExtractedUnitypackageModel : INotifyPropertyChanged
 {
+    private int base64DetectionCount;
     private InfoBarSeverity detailsSeverity = InfoBarSeverity.Informational;
+
+    private int linkDetectionCount;
     private int malicousDiscordWebhookCount;
     private bool packageIsChecked;
     private List<ExtractedFiles> subdirectoryItems = new();
@@ -37,6 +41,17 @@ public class ExtractedUnitypackageModel : INotifyPropertyChanged
 
     private int unitypackageTotalShaderCount;
 
+
+    private string base64DetectionCountMessage =>
+        base64DetectionCount > 0
+            ? $"Possible Base64 Encoded String(s) Detected: {Base64DetectionCount}"
+            : "No Base64 Encoded Strings Detected";
+
+    private string linkDetectionCountMessage =>
+        LinkDetectionCount > 0
+            ? $"Possible Link(s) Detected: {LinkDetectionCount}"
+            : "No Links Detected";
+
     private string malicousDiscordWebhookCountMessage =>
         MalicousDiscordWebhookCount > 0
             ? $"Possible Malicious Discord Webhook(s): {MalicousDiscordWebhookCount}"
@@ -46,8 +61,24 @@ public class ExtractedUnitypackageModel : INotifyPropertyChanged
     private string unitypackageTotalFileCountMessage =>
         $"Total Files: {UnitypackageTotalFileCount:N2} / Package Size: {UnitypackageSize}";
 
+    public string LinkDetectionCountMessage => linkDetectionCountMessage;
     public string MalicousDiscordWebhookCountMessage => malicousDiscordWebhookCountMessage;
+
     public string UnitypackageTotalFileCountMessage => unitypackageTotalFileCountMessage;
+
+    public string Base64DetectionCountMessage => base64DetectionCountMessage;
+
+    public SolidColorBrush GetCurrentLinkDetectionColor => LinkDetectionCount > 0
+        ? new SolidColorBrush(Colors.Red)
+        : new SolidColorBrush(Colors.Green);
+
+    public SolidColorBrush GetCurrentMalicousDiscordWebhookColor => MalicousDiscordWebhookCount > 0
+        ? new SolidColorBrush(Colors.Red)
+        : new SolidColorBrush(Colors.Green);
+
+    public SolidColorBrush GetCurrentBase64DetectionColor => Base64DetectionCount > 0
+        ? new SolidColorBrush(Colors.Red)
+        : new SolidColorBrush(Colors.Green);
 
     public bool PackageIsChecked
     {
@@ -85,6 +116,26 @@ public class ExtractedUnitypackageModel : INotifyPropertyChanged
         set
         {
             malicousDiscordWebhookCount = value;
+            OnPropertyChanged();
+        }
+    }
+
+    public int Base64DetectionCount
+    {
+        get => base64DetectionCount;
+        set
+        {
+            base64DetectionCount = value;
+            OnPropertyChanged();
+        }
+    }
+
+    public int LinkDetectionCount
+    {
+        get => linkDetectionCount;
+        set
+        {
+            linkDetectionCount = value;
             OnPropertyChanged();
         }
     }

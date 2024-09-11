@@ -7,6 +7,7 @@
     xmlns:gif="https://github.com/XamlAnimatedGif/XamlAnimatedGif"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+    xmlns:boxIcons="http://metro.mahapps.com/winfx/xaml/iconpacks"
     AllowDrop="True"
     Drop="Extraction_OnDrop"
     ui:Design.Background="{DynamicResource ApplicationBackgroundBrush}"
@@ -297,12 +298,26 @@
                                                         FontWeight="UltraLight"
                                                         Text="{Binding UnitypackageTotalFileCountMessage}"
                                                         TextWrapping="Wrap" />
-                                                    <TextBlock
-                                                        Margin="5"
-                                                        Opacity="0.5"
-                                                        FontWeight="SemiBold"
-                                                        Text="{Binding MalicousDiscordWebhookCountMessage}"
-                                                        TextWrapping="Wrap" />
+                                                    <StackPanel Orientation="Horizontal">
+                                                        <!--  Link detected Symbol -->
+                                                        <ui:Card ToolTip="{Binding LinkDetectionCountMessage}">
+                                                            <boxIcons:PackIconBoxIcons Kind="RegularLink"
+                                                                Foreground="{Binding GetCurrentLinkDetectionColor}"
+                                                                x:Name="LinkDetectionIcon" />
+                                                        </ui:Card>
+                                                        <!--  Discord Webhook detected Symbol -->
+                                                        <ui:Card ToolTip="{Binding MalicousDiscordWebhookCountMessage}">
+                                                            <boxIcons:PackIconBoxIcons Kind="LogosDiscordAlt"
+                                                                Foreground="{Binding GetCurrentMalicousDiscordWebhookColor}"
+                                                                x:Name="DiscordWebhookIcon" />
+                                                        </ui:Card>
+                                                        <!--  Base64 code detected Symbol -->
+                                                        <ui:Card ToolTip="{Binding Base64DetectionCountMessage}">
+                                                            <boxIcons:PackIconBoxIcons Kind="RegularChip"
+                                                                Foreground="{Binding GetCurrentBase64DetectionColor}"
+                                                                x:Name="ObfuscatedCodeIcon" />
+                                                        </ui:Card>
+                                                    </StackPanel>
                                                 </StackPanel>
                                             </StackPanel>
 
