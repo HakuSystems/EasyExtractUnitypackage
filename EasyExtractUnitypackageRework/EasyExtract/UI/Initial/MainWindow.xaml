@@ -7,6 +7,7 @@
         mc:Ignorable="d"
         Foreground="{DynamicResource TextFillColorPrimaryBrush}"
         AllowsTransparency="True"
+        AllowDrop="True"
         FontFamily="{DynamicResource SegoeFluentIcons}"
         WindowStartupLocation="CenterScreen"
         ShowInTaskbar="False"
