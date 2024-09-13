@@ -55,7 +55,7 @@
                            Foreground="{DynamicResource TextFillColorPrimaryBrush}"
                            FontWeight="DemiBold"
                            Transition="FadeInWithSlide"
-                           PaneDisplayMode="{Binding _currentconfig.NavigationPosition, Mode=TwoWay}"
+                           PaneDisplayMode="Left"
                            ContentOverlay="{Binding ElementName=ContentFrame}"
                            IsBackButtonVisible="Collapsed">
             <ui:NavigationView.MenuItems>
