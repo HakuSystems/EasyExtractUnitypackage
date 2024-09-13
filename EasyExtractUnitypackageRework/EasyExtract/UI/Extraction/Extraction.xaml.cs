@@ -244,7 +244,6 @@ public partial class Extraction : UserControl, INotifyPropertyChanged
 
             MalicousDiscordWebhookCount = await ExtractionHelper.GetMalicousDiscordWebhookCount(directory),
             LinkDetectionCount = await ExtractionHelper.GetTotalLinkDetectionCount(directory),
-            Base64DetectionCount = await ExtractionHelper.GetTotalBase64DetectionCount(directory),
 
             #endregion
 

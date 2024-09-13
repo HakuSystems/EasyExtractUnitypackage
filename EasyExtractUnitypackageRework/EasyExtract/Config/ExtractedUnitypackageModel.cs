@@ -12,6 +12,7 @@ public class ExtractedUnitypackageModel : INotifyPropertyChanged
 
     private int linkDetectionCount;
     private int malicousDiscordWebhookCount;
+
     private bool packageIsChecked;
     private List<ExtractedFiles> subdirectoryItems = new();
     private string unitypackageDetails = "No Details Available";
@@ -38,14 +39,7 @@ public class ExtractedUnitypackageModel : INotifyPropertyChanged
     private int unitypackageTotalSceneCount;
 
     private int unitypackageTotalScriptCount;
-
     private int unitypackageTotalShaderCount;
-
-
-    private string base64DetectionCountMessage =>
-        base64DetectionCount > 0
-            ? $"Possible Base64 Encoded String(s) Detected: {Base64DetectionCount}"
-            : "No Base64 Encoded Strings Detected";
 
     private string linkDetectionCountMessage =>
         LinkDetectionCount > 0
@@ -66,7 +60,6 @@ public class ExtractedUnitypackageModel : INotifyPropertyChanged
 
     public string UnitypackageTotalFileCountMessage => unitypackageTotalFileCountMessage;
 
-    public string Base64DetectionCountMessage => base64DetectionCountMessage;
 
     public SolidColorBrush GetCurrentLinkDetectionColor => LinkDetectionCount > 0
         ? new SolidColorBrush(Colors.Red)
@@ -76,9 +69,6 @@ public class ExtractedUnitypackageModel : INotifyPropertyChanged
         ? new SolidColorBrush(Colors.Red)
         : new SolidColorBrush(Colors.Green);
 
-    public SolidColorBrush GetCurrentBase64DetectionColor => Base64DetectionCount > 0
-        ? new SolidColorBrush(Colors.Red)
-        : new SolidColorBrush(Colors.Green);
 
     public bool PackageIsChecked
     {
@@ -116,16 +106,6 @@ public class ExtractedUnitypackageModel : INotifyPropertyChanged
         set
         {
             malicousDiscordWebhookCount = value;
-            OnPropertyChanged();
-        }
-    }
-
-    public int Base64DetectionCount
-    {
-        get => base64DetectionCount;
-        set
-        {
-            base64DetectionCount = value;
             OnPropertyChanged();
         }
     }

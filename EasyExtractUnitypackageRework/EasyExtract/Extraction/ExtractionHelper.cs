@@ -301,36 +301,6 @@ public class ExtractionHelper
         return count;
     }
 
-    //todo: detectionb might still be weird or wrong
-    public async Task<int> GetTotalBase64DetectionCount(string directory)
-    {
-        var count = 0;
-        var codeFiles = Directory.GetFiles(directory, "*.cs", SearchOption.AllDirectories).ToList();
-        var maliciousCodeDetector = new MaliciousCodeDetector();
-
-        foreach (var codeFile in codeFiles)
-        {
-            var isMalicious = false;
-            var lines = await File.ReadAllLinesAsync(codeFile);
-
-            foreach (var line in lines)
-                if (!await maliciousCodeDetector.StartDiscordWebhookScanAsync(line) &&
-                    await maliciousCodeDetector.StartBase64DetectionAsync(line))
-                {
-                    isMalicious = true;
-                    break;
-                }
-
-            if (isMalicious) count++;
-        }
-
-        await _logger.LogAsync($"Total base64 detection count in directory '{directory}': {count}",
-            "ExtractionHelper.cs",
-            Importance.Info); // Log total base64 detection count
-
-        return count;
-    }
-
     #region Icons
 
     private const string Code24 = "Code24";

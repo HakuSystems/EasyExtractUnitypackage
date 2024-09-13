@@ -311,12 +311,6 @@
                                                                 Foreground="{Binding GetCurrentMalicousDiscordWebhookColor}"
                                                                 x:Name="DiscordWebhookIcon" />
                                                         </ui:Card>
-                                                        <!--  Base64 code detected Symbol -->
-                                                        <ui:Card ToolTip="{Binding Base64DetectionCountMessage}">
-                                                            <boxIcons:PackIconBoxIcons Kind="RegularChip"
-                                                                Foreground="{Binding GetCurrentBase64DetectionColor}"
-                                                                x:Name="ObfuscatedCodeIcon" />
-                                                        </ui:Card>
                                                     </StackPanel>
                                                 </StackPanel>
                                             </StackPanel>
