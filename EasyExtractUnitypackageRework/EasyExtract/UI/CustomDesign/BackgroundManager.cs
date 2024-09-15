@@ -6,6 +6,7 @@ using EasyExtract.Config;
 
 namespace EasyExtract.CustomDesign;
 
+//Todo: Background isnt changing try to find a fix
 public class BackgroundManager : INotifyPropertyChanged
 {
     private static BackgroundManager _instance;
