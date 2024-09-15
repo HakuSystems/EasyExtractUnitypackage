@@ -94,6 +94,8 @@ public partial class Dashboard : FluentWindow
 
         if (ConfigHelper.Config.Update.AutoUpdate && updateAvailable) await _updateHandler.Update();
 
+        //EasterEggHeader
+        EasterEggHeader.Visibility = ConfigHelper.Config.EasterEggHeader ? Visibility.Visible : Visibility.Collapsed;
 
         if (ConfigHelper.Config.Runs is { IsFirstRun: true })
         {
@@ -196,5 +198,13 @@ public partial class Dashboard : FluentWindow
         });
 
         if (updateAvailable) await _updateHandler.Update();
+    }
+
+    private async void DontShowAgainBtn_OnClick(object sender, RoutedEventArgs e)
+    {
+        //EasterEggHeader
+        ConfigHelper.Config.EasterEggHeader = false;
+        await ConfigHelper.UpdateConfigAsync();
+        EasterEggHeader.Visibility = Visibility.Collapsed;
     }
 }

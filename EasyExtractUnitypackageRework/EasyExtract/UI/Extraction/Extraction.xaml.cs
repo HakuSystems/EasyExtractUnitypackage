@@ -6,7 +6,6 @@ using System.Runtime.CompilerServices;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
-using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Threading;
 using EasyExtract.Config;
@@ -17,6 +16,7 @@ using LiveCharts.Wpf;
 using Microsoft.Win32;
 using Wpf.Ui.Controls;
 using XamlAnimatedGif;
+using Brushes = System.Windows.Media.Brushes;
 
 namespace EasyExtract.UserControls;
 
@@ -239,6 +239,14 @@ public partial class Extraction : UserControl, INotifyPropertyChanged
             UnitypackageTotalFileCount = await ExtractionHelper.GetTotalFileCount(directory),
             UnitypackageTotalFolderCount = await ExtractionHelper.GetTotalFolderCount(directory),
             UnitypackageTotalScriptCount = await ExtractionHelper.GetTotalScriptCount(directory),
+
+            #region MALICIOUS CODE DETECTION
+
+            MalicousDiscordWebhookCount = await ExtractionHelper.GetMalicousDiscordWebhookCount(directory),
+            LinkDetectionCount = await ExtractionHelper.GetTotalLinkDetectionCount(directory),
+
+            #endregion
+
             UnitypackageTotalShaderCount = await ExtractionHelper.GetTotalShaderCount(directory),
             UnitypackageTotalPrefabCount = await ExtractionHelper.GetTotalPrefabCount(directory),
             UnitypackageTotal3DObjectCount = await ExtractionHelper.GetTotal3DObjectCount(directory),
@@ -317,21 +325,53 @@ public partial class Extraction : UserControl, INotifyPropertyChanged
     ///     A task that represents the asynchronous operation. The task result is a BitmapImage object representing the
     ///     generated preview image, or null if the preview image doesn't exist.
     /// </returns>
-    private Task<BitmapImage?> GeneratePreviewImage(FileInfo fileInfo)
+    private async Task<BitmapImage?> GeneratePreviewImage(FileInfo fileInfo)
     {
-        return Task.Run(() =>
+        return await Task.Run(() =>
         {
             var previewImagePath = Path.Combine(fileInfo.DirectoryName, $"{fileInfo.Name}.{EasyExtractPreview}");
-            if (!File.Exists(previewImagePath)) return null;
+            if (File.Exists(previewImagePath))
+            {
+                try
+                {
+                    using (var fileStream =
+                           new FileStream(previewImagePath, FileMode.Open, FileAccess.Read, FileShare.Read))
+                    {
+                        var previewImage = new BitmapImage();
+                        previewImage.BeginInit();
+                        previewImage.StreamSource = fileStream;
+                        previewImage.CacheOption = BitmapCacheOption.OnLoad;
+                        previewImage.EndInit();
+                        previewImage.Freeze();
 
-            var previewImage = new BitmapImage();
-            previewImage.BeginInit();
-            previewImage.UriSource = new Uri(previewImagePath);
-            previewImage.CacheOption = BitmapCacheOption.OnLoad;
-            previewImage.EndInit();
-            previewImage.Freeze();
+                        return previewImage;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    // Log exception here
+                    Console.WriteLine($"Error loading image: {ex.Message}");
+                }
 
-            return previewImage;
+                return null;
+            }
+
+            if (fileInfo.Extension.Equals(".cs", StringComparison.OrdinalIgnoreCase) ||
+                fileInfo.Extension.Equals(".txt", StringComparison.OrdinalIgnoreCase) ||
+                fileInfo.Extension.Equals(".json", StringComparison.OrdinalIgnoreCase) ||
+                fileInfo.Extension.Equals(".shader", StringComparison.OrdinalIgnoreCase))
+            {
+                // Convert code to image
+                var code = File.ReadAllText(fileInfo.FullName);
+                var codeImage = CodeToImageConverter.ConvertCodeToImage(code);
+                if (codeImage != null)
+                {
+                    CodeToImageConverter.SaveImageToFile(codeImage, previewImagePath);
+                    return codeImage;
+                }
+            }
+
+            return null;
         });
     }
 
@@ -511,8 +551,12 @@ public partial class Extraction : UserControl, INotifyPropertyChanged
     }
 
     /// <summary>
-    ///     Updates the header of the queue.
+    ///     Updates the header of the queue asynchronously based on the current count of items in the queue.
     /// </summary>
+    /// <returns>
+    ///     A task that represents the asynchronous operation of updating the queue header and visibility of the extraction
+    ///     button.
+    /// </returns>
     private Task UpdateQueueHeaderAsync()
     {
         return Dispatcher.InvokeAsync(async () =>
@@ -521,14 +565,14 @@ public partial class Extraction : UserControl, INotifyPropertyChanged
             {
                 case 0:
                     QueueHeaderText.Text = "Queue (Nothing to extract)";
-                    ExtractionBtn.Visibility = Visibility.Collapsed;
+                    ExtractionBtn.Visibility = Visibility.Collapsed; // Hides the extraction button
                     await UpdateInfoBadgesAsync();
                     break;
                 default:
                     QueueHeaderText.Text = QueueListView.Items.Count == 1
                         ? $"Queue ({QueueListView.Items.Count} Unitypackage)"
                         : $"Queue ({QueueListView.Items.Count} Unitypackage(s))";
-                    ExtractionBtn.Visibility = Visibility.Visible;
+                    ExtractionBtn.Visibility = Visibility.Visible; // Shows the extraction button
                     await UpdateInfoBadgesAsync();
                     break;
             }
@@ -566,6 +610,8 @@ public partial class Extraction : UserControl, INotifyPropertyChanged
 
         await UpdateUiAfterExtractionAsync(ignoredCounter, fileFinishedCounter);
         await UpdateInfoBadgesAsync();
+        QueueListView.Items.Clear();
+        await UpdateQueueHeaderAsync();
     }
 
     /// <summary>
@@ -963,6 +1009,7 @@ public partial class Extraction : UserControl, INotifyPropertyChanged
                     $"Deleted {selectedUnitypackages.Count} Unitypackages and {selectedItems.Count} Files";
                 DeleteSelectedBtn.Appearance = ControlAppearance.Success;
                 DeleteSelectedBtn.Icon = new SymbolIcon(SymbolRegular.Checkmark24);
+                SelectAllUnitypackageToggle.IsChecked = false;
             });
             await Task.Delay(1000); //wait for a second
             Dispatcher.InvokeAsync(() =>
@@ -1033,6 +1080,9 @@ public partial class Extraction : UserControl, INotifyPropertyChanged
         await Dispatcher.InvokeAsync(async () =>
         {
             var selectedUnitypackage = ExtractedUnitypackages.FirstOrDefault(x => x.PackageIsChecked);
+
+            #region UI Update
+
             if (selectedUnitypackage == null)
             {
                 OpenSelectedDirectoryBtn.Content = "No Unitypackage selected";
@@ -1047,9 +1097,19 @@ public partial class Extraction : UserControl, INotifyPropertyChanged
                 return;
             }
 
-            Process.Start("explorer.exe", selectedUnitypackage.UnitypackagePath);
-            if (selectedUnitypackage.SubdirectoryItems.Count > 0)
-                Process.Start("explorer.exe", selectedUnitypackage.SubdirectoryItems[0].FilePath);
+            #endregion
+
+            if (selectedUnitypackage != null)
+            {
+                var directoryToOpen = Path.GetFullPath(Path.GetDirectoryName(selectedUnitypackage.UnitypackagePath));
+                if (directoryToOpen != null)
+                    Process.Start(new ProcessStartInfo
+                    {
+                        FileName = directoryToOpen,
+                        UseShellExecute = true,
+                        Verb = "open"
+                    });
+            }
         });
     }
 

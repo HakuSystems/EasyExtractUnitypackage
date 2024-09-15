@@ -1,12 +1,18 @@
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
+using System.Windows.Media;
 using Wpf.Ui.Controls;
 
 namespace EasyExtract.Config;
 
 public class ExtractedUnitypackageModel : INotifyPropertyChanged
 {
+    private int base64DetectionCount;
     private InfoBarSeverity detailsSeverity = InfoBarSeverity.Informational;
+
+    private int linkDetectionCount;
+    private int malicousDiscordWebhookCount;
+
     private bool packageIsChecked;
     private List<ExtractedFiles> subdirectoryItems = new();
     private string unitypackageDetails = "No Details Available";
@@ -35,11 +41,34 @@ public class ExtractedUnitypackageModel : INotifyPropertyChanged
     private int unitypackageTotalScriptCount;
     private int unitypackageTotalShaderCount;
 
+    private string linkDetectionCountMessage =>
+        LinkDetectionCount > 0
+            ? $"Possible Link(s) Detected: {LinkDetectionCount}"
+            : "No Links Detected";
+
+    private string malicousDiscordWebhookCountMessage =>
+        MalicousDiscordWebhookCount > 0
+            ? $"Possible Malicious Discord Webhook(s): {MalicousDiscordWebhookCount}"
+            : "No Malicious Discord Webhooks Found";
+
+
     private string unitypackageTotalFileCountMessage =>
         $"Total Files: {UnitypackageTotalFileCount:N2} / Package Size: {UnitypackageSize}";
 
+    public string LinkDetectionCountMessage => linkDetectionCountMessage;
+    public string MalicousDiscordWebhookCountMessage => malicousDiscordWebhookCountMessage;
 
     public string UnitypackageTotalFileCountMessage => unitypackageTotalFileCountMessage;
+
+
+    public SolidColorBrush GetCurrentLinkDetectionColor => LinkDetectionCount > 0
+        ? new SolidColorBrush(Colors.Red)
+        : new SolidColorBrush(Colors.Green);
+
+    public SolidColorBrush GetCurrentMalicousDiscordWebhookColor => MalicousDiscordWebhookCount > 0
+        ? new SolidColorBrush(Colors.Red)
+        : new SolidColorBrush(Colors.Green);
+
 
     public bool PackageIsChecked
     {
@@ -67,6 +96,26 @@ public class ExtractedUnitypackageModel : INotifyPropertyChanged
         set
         {
             detailsSeverity = value;
+            OnPropertyChanged();
+        }
+    }
+
+    public int MalicousDiscordWebhookCount
+    {
+        get => malicousDiscordWebhookCount;
+        set
+        {
+            malicousDiscordWebhookCount = value;
+            OnPropertyChanged();
+        }
+    }
+
+    public int LinkDetectionCount
+    {
+        get => linkDetectionCount;
+        set
+        {
+            linkDetectionCount = value;
             OnPropertyChanged();
         }
     }

@@ -11,6 +11,7 @@ namespace EasyExtract;
 
 public class Program
 {
+    private readonly ConfigHelper _configHelper = new();
     private readonly BetterLogger _logger = new();
 
     public async void Run(string[] args)
@@ -20,7 +21,8 @@ public class Program
             await _logger.LogAsync($"Run method invoked with arguments: {string.Join(", ", args)}", "Program.cs",
                 Importance.Info);
 
-            if (!Debugger.IsAttached) // Only check for admin rights if not debugging
+            if (!Debugger.IsAttached && _configHelper.Config.ContextMenuToggle)
+                // Only check for admin rights if not debugging and ContextMenuToggle is active
                 if (!IsRunningAsAdmin() && !args.Contains("--elevated"))
                 {
                     KillAllProcesses(Assembly.GetExecutingAssembly().GetName().Name);
@@ -44,7 +46,8 @@ public class Program
             }
 
             DeleteContextMenu();
-            RegisterContextMenu();
+            if (_configHelper.Config.ContextMenuToggle) RegisterContextMenu();
+
             var app = new App();
             app.InitializeComponent();
             app.Run();
@@ -59,9 +62,10 @@ public class Program
         }
     }
 
-    private async void DeleteContextMenu()
+    public async void DeleteContextMenu()
     {
         const string contextMenuPath = @"*\shell\ExtractWithEasyExtract";
+        if (Registry.ClassesRoot.OpenSubKey(contextMenuPath) == null) return;
 
         try
         {

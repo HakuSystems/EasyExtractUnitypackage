@@ -5,17 +5,6 @@ namespace EasyExtract.Extraction;
 
 public class ExtractionHelper
 {
-    private const string Code24 = "Code24";
-    private const string Box24 = "Box24";
-    private const string Cube24 = "Cube24";
-    private const string Image24 = "Image24";
-    private const string MusicNote24 = "MusicNote216";
-    private const string Video24 = "Video24";
-    private const string Document24 = "Document24";
-    private const string Paint24 = "PaintBrush24";
-    private const string GameController24 = "XboxController24";
-    private const string Text24 = "SlideText24";
-    private const string Settings24 = "Settings24";
     private readonly BetterLogger _logger = new();
 
     /// <summary>
@@ -257,4 +246,74 @@ public class ExtractionHelper
             Importance.Info); // Log category by extension
         return category;
     }
+
+    public async Task<int> GetMalicousDiscordWebhookCount(string directory)
+    {
+        var count = 0;
+        var codeFiles = Directory.GetFiles(directory, "*.cs", SearchOption.AllDirectories).ToList();
+        var maliciousCodeDetector = new MaliciousCodeDetector();
+
+        foreach (var codeFile in codeFiles)
+        {
+            var isMalicious = false;
+            var lines = await File.ReadAllLinesAsync(codeFile);
+
+            foreach (var line in lines)
+                if (await maliciousCodeDetector.StartDiscordWebhookScanAsync(line))
+                {
+                    isMalicious = true;
+                    break;
+                }
+
+            if (isMalicious) count++;
+        }
+
+        await _logger.LogAsync($"Total malicious code count in directory '{directory}': {count}", "ExtractionHelper.cs",
+            Importance.Info); // Log total malicious code count
+
+        return count;
+    }
+
+    public async Task<int> GetTotalLinkDetectionCount(string directory)
+    {
+        var count = 0;
+        var codeFiles = Directory.GetFiles(directory, "*.cs", SearchOption.AllDirectories).ToList();
+        var maliciousCodeDetector = new MaliciousCodeDetector();
+
+        foreach (var codeFile in codeFiles)
+        {
+            var isMalicious = false;
+            var lines = await File.ReadAllLinesAsync(codeFile);
+
+            foreach (var line in lines)
+                if (await maliciousCodeDetector.StartLinkDetectionAsync(line))
+                {
+                    isMalicious = true;
+                    break;
+                }
+
+            if (isMalicious) count++;
+        }
+
+        await _logger.LogAsync($"Total link detection count in directory '{directory}': {count}", "ExtractionHelper.cs",
+            Importance.Info); // Log total link detection count
+
+        return count;
+    }
+
+    #region Icons
+
+    private const string Code24 = "Code24";
+    private const string Box24 = "Box24";
+    private const string Cube24 = "Cube24";
+    private const string Image24 = "Image24";
+    private const string MusicNote24 = "MusicNote216";
+    private const string Video24 = "Video24";
+    private const string Document24 = "Document24";
+    private const string Paint24 = "PaintBrush24";
+    private const string GameController24 = "XboxController24";
+    private const string Text24 = "SlideText24";
+    private const string Settings24 = "Settings24";
+
+    #endregion
 }

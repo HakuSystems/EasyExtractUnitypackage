@@ -2,15 +2,15 @@
     x:Class="EasyExtract.UserControls.Extraction"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:boxIcons="http://metro.mahapps.com/winfx/xaml/iconpacks"
     xmlns:charts="clr-namespace:LiveCharts.Wpf;assembly=LiveCharts.Wpf"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:gif="https://github.com/XamlAnimatedGif/XamlAnimatedGif"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+    ui:Design.Background="{DynamicResource ApplicationBackgroundBrush}"
     AllowDrop="True"
     Drop="Extraction_OnDrop"
-    ui:Design.Background="{DynamicResource ApplicationBackgroundBrush}"
-
     FontFamily="{DynamicResource SegoeFluentIcons}"
     Foreground="{DynamicResource TextFillColorPrimaryBrush}"
     Loaded="Extraction_OnLoaded"
@@ -230,7 +230,7 @@
                                                             x:Name="OpenSelectedDirectoryBtn"
                                                             Margin="5"
                                                             Click="OpenSelectedDirectoryBtn_OnClick"
-                                                            Content="Open Selected Directory"
+                                                            Content="Open Extracted Directory"
                                                             Icon="{ui:SymbolIcon Open24}" />
                                                         <ui:Button
                                                             x:Name="MoveToDifferentDirectoryBtn"
@@ -297,6 +297,22 @@
                                                         FontWeight="UltraLight"
                                                         Text="{Binding UnitypackageTotalFileCountMessage}"
                                                         TextWrapping="Wrap" />
+                                                    <StackPanel Orientation="Horizontal">
+                                                        <!--  Link detected Symbol  -->
+                                                        <ui:Card ToolTip="{Binding LinkDetectionCountMessage}">
+                                                            <boxIcons:PackIconBoxIcons
+                                                                x:Name="LinkDetectionIcon"
+                                                                Foreground="{Binding GetCurrentLinkDetectionColor}"
+                                                                Kind="RegularLink" />
+                                                        </ui:Card>
+                                                        <!--  Discord Webhook detected Symbol  -->
+                                                        <ui:Card ToolTip="{Binding MalicousDiscordWebhookCountMessage}">
+                                                            <boxIcons:PackIconBoxIcons
+                                                                x:Name="DiscordWebhookIcon"
+                                                                Foreground="{Binding GetCurrentMalicousDiscordWebhookColor}"
+                                                                Kind="LogosDiscordAlt" />
+                                                        </ui:Card>
+                                                    </StackPanel>
                                                 </StackPanel>
                                             </StackPanel>
 

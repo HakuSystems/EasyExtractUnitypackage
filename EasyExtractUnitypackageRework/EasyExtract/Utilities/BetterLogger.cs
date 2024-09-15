@@ -49,7 +49,18 @@ public class BetterLogger
                         Console.WriteLine($"Failed to delete file {file}: {ex.Message}");
                     }
 
-                Directory.Delete(logsPath, true);
+                try
+                {
+                    Directory.Delete(logsPath, true);
+                }
+                catch (IOException ex)
+                {
+                    Console.WriteLine($"Failed to delete logs folder: {ex.Message}");
+                }
+            }
+            catch (DirectoryNotFoundException)
+            {
+                // Ignore if the directory is not found
             }
             catch (IOException ex)
             {

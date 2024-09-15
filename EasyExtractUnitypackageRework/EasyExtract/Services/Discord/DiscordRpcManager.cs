@@ -11,7 +11,7 @@ public class DiscordRpcManager : IDisposable
     private static readonly ConfigHelper _configHelper = new();
     private readonly BetterLogger _logger = new();
     private readonly Timestamps timestamps;
-    private DiscordRpcClient client;
+    public DiscordRpcClient client;
 
     private DiscordRpcManager()
     {
