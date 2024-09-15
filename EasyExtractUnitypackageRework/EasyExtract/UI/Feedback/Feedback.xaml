@@ -64,7 +64,6 @@
                     Content="Submit Feedback"
                     x:Name="SubmitFeedbackButton"
                     Click="SubmitFeedbackButton_OnClick"
-                    Background="#04d3be"
                     Foreground="White"
                     Padding="10,5"
                     Margin="10" />
