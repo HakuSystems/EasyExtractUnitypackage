@@ -231,7 +231,7 @@
                                                             x:Name="OpenSelectedDirectoryBtn"
                                                             Margin="5"
                                                             Click="OpenSelectedDirectoryBtn_OnClick"
-                                                            Content="Open Selected Directory"
+                                                            Content="Open Extracted Directory"
                                                             Icon="{ui:SymbolIcon Open24}" />
                                                         <ui:Button
                                                             x:Name="MoveToDifferentDirectoryBtn"
