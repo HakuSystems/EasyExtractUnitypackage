@@ -22,7 +22,7 @@ public class Program
                 Importance.Info);
 
             if (!Debugger.IsAttached && _configHelper.Config.ContextMenuToggle)
-                // Only check for admin rights if not debugging
+                // Only check for admin rights if not debugging and ContextMenuToggle is active
                 if (!IsRunningAsAdmin() && !args.Contains("--elevated"))
                 {
                     KillAllProcesses(Assembly.GetExecutingAssembly().GetName().Name);
@@ -62,7 +62,7 @@ public class Program
         }
     }
 
-    private async void DeleteContextMenu()
+    public async void DeleteContextMenu()
     {
         const string contextMenuPath = @"*\shell\ExtractWithEasyExtract";
         if (Registry.ClassesRoot.OpenSubKey(contextMenuPath) == null) return;

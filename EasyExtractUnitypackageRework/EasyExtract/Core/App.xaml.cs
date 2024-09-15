@@ -10,6 +10,7 @@ namespace EasyExtract;
 /// </summary>
 public partial class App : Application
 {
+    private readonly ConfigHelper _configHelper = new();
     private readonly BetterLogger _logger = new();
 
     private async void Application_DispatcherUnhandledException(object sender, DispatcherUnhandledExceptionEventArgs e)
@@ -31,8 +32,17 @@ public partial class App : Application
         DispatcherUnhandledException += Application_DispatcherUnhandledException;
         Exit += App_OnExit;
 
-        // Run the program logic directly
-        var program = new Program();
-        program.Run(e.Args);
+        if (_configHelper.Config.ContextMenuToggle)
+        {
+            // Run the program logic directly
+            var program = new Program();
+            program.Run(e.Args);
+        }
+        else
+        {
+            var program = new Program();
+            program.DeleteContextMenu();
+            InitializeComponent();
+        }
     }
 }
