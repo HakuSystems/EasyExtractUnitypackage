@@ -11,6 +11,7 @@ public class ConfigModel
     public ApplicationTheme ApplicationTheme { get; set; } = ApplicationTheme.Dark;
     public bool EasterEggHeader { get; set; } = true;
     public bool UwUModeActive { get; set; } = false;
+    public bool ContextMenuToggle { get; set; } = true;
     public bool IntroLogoAnimation { get; set; } = false;
     public RunsModel Runs { get; set; } = new();
     public bool DiscordRpc { get; set; } = true;

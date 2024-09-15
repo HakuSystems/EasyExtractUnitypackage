@@ -32,6 +32,7 @@ public partial class BetterSettings : UserControl
     {
         try
         {
+            ContextMenuSwitch.IsChecked = _configHelper.Config.ContextMenuToggle;
             SkipIntroLogoAnimationToggleSwitch.IsChecked = _configHelper.Config.IntroLogoAnimation;
             UwUToggleSwitch.IsChecked = _configHelper.Config.UwUModeActive;
 
@@ -186,5 +187,17 @@ public partial class BetterSettings : UserControl
     {
         _configHelper.Config.IntroLogoAnimation = SkipIntroLogoAnimationToggleSwitch.IsChecked ?? false;
         await _configHelper.UpdateConfigAsync();
+    }
+
+    private async void ContextMenuSwitch_OnChecked(object sender, RoutedEventArgs e)
+    {
+        _configHelper.Config.ContextMenuToggle = ContextMenuSwitch.IsChecked ?? false;
+        await _configHelper.UpdateConfigAsync();
+    }
+
+    private void ContextMenuSwitch_OnUnchecked(object sender, RoutedEventArgs e)
+    {
+        _configHelper.Config.ContextMenuToggle = ContextMenuSwitch.IsChecked ?? false;
+        _configHelper.UpdateConfigAsync();
     }
 }

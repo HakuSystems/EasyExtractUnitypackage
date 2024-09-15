@@ -5,6 +5,7 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+    xmlns:mahicons="http://metro.mahapps.com/winfx/xaml/iconpacks"
     ui:Design.Background="{DynamicResource ApplicationBackgroundBrush}"
     FontFamily="{DynamicResource SegoeFluentIcons}"
     Foreground="{DynamicResource TextFillColorPrimaryBrush}"
@@ -39,7 +40,41 @@
                                 Margin="5"
                                 HorizontalAlignment="Left"
                                 VerticalAlignment="Center">
+                                <mahicons:Modern Kind="Connect" />
+                            </ui:Card>
+                            <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                <ui:TextBlock
+                                    FontTypography="BodyStrong"
+                                    Text="Context Menu Activation"
+                                    TextWrapping="WrapWithOverflow" />
+                                <ui:TextBlock
+                                    Appearance="Secondary"
+                                    Opacity="0.5"
+                                    Text="When enabled, the application will register a Menu item in the registry to open the application while right-clicking on a .unitypackage file"
+                                    TextWrapping="Wrap" />
+                            </StackPanel>
+                            <ui:ToggleSwitch
+                                x:Name="ContextMenuSwitch"
+                                Grid.Column="2"
+                                Margin="5"
+                                Checked="ContextMenuSwitch_OnChecked"
+                                IsChecked="{Binding _currentConfig.ContextMenuToggle, Mode=TwoWay}"
+                                Unchecked="ContextMenuSwitch_OnUnchecked" />
+                        </Grid>
+                    </ui:Card>
+                    <ui:Card>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <ui:Card
+                                Margin="5"
+                                HorizontalAlignment="Left"
+                                VerticalAlignment="Center">
                                 <ui:SymbolIcon
+                                    Foreground="{DynamicResource TextFillColorPrimaryBrush}"
                                     HorizontalAlignment="Center"
                                     VerticalAlignment="Center"
                                     Symbol="EmojiSparkle24" />
@@ -79,6 +114,7 @@
                                 <ui:SymbolIcon
                                     HorizontalAlignment="Center"
                                     VerticalAlignment="Center"
+                                    Foreground="{DynamicResource TextFillColorPrimaryBrush}"
                                     Symbol="DarkTheme24" />
                             </ui:Card>
                             <StackPanel Grid.Column="1" VerticalAlignment="Center">
@@ -118,6 +154,7 @@
                                 VerticalAlignment="Stretch">
                                 <ui:SymbolIcon
                                     HorizontalAlignment="Center"
+                                    Foreground="{DynamicResource TextFillColorPrimaryBrush}"
                                     VerticalAlignment="Center"
                                     Symbol="ColorBackground24" />
                             </ui:Card>
@@ -187,6 +224,7 @@
                                 VerticalAlignment="Center">
                                 <ui:SymbolIcon
                                     HorizontalAlignment="Center"
+                                    Foreground="{DynamicResource TextFillColorPrimaryBrush}"
                                     VerticalAlignment="Center"
                                     Symbol="ArrowDownload24" />
                             </ui:Card>
@@ -224,6 +262,7 @@
                                 VerticalAlignment="Center">
                                 <ui:SymbolIcon
                                     HorizontalAlignment="Center"
+                                    Foreground="{DynamicResource TextFillColorPrimaryBrush}"
                                     VerticalAlignment="Center"
                                     Symbol="SkipForwardTab24" />
                             </ui:Card>
@@ -263,6 +302,7 @@
                                 <ui:SymbolIcon
                                     HorizontalAlignment="Center"
                                     VerticalAlignment="Center"
+                                    Foreground="{DynamicResource TextFillColorPrimaryBrush}"
                                     Symbol="Apps24" />
                             </ui:Card>
                             <StackPanel Grid.Column="1" VerticalAlignment="Center">
@@ -304,6 +344,7 @@
                                 VerticalAlignment="Stretch">
                                 <ui:SymbolIcon
                                     HorizontalAlignment="Center"
+                                    Foreground="{DynamicResource TextFillColorPrimaryBrush}"
                                     VerticalAlignment="Center"
                                     Symbol="Folder24" />
                             </ui:Card>
