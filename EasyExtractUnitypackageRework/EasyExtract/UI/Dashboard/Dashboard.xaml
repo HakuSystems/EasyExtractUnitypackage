@@ -1,26 +1,30 @@
-<ui:FluentWindow x:Class="EasyExtract.Dashboard"
-                 xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-                 xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-                 xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-                 xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-                 xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
-                 xmlns:UserControls="clr-namespace:EasyExtract.UserControls"
-                 xmlns:local="clr-namespace:EasyExtract.CustomDesign"
-                 xmlns:feedback="clr-namespace:EasyExtract.UI.Feedback"
-                 mc:Ignorable="d"
-                 WindowStyle="None"
-                 ResizeMode="CanResize"
-                 AllowDrop="True"
-                 Drop="Dashboard_OnDrop"
-                 ui:Design.Background="{DynamicResource ApplicationBackgroundBrush}"
-                 Loaded="Dashboard_OnLoaded"
-                 Foreground="{DynamicResource TextFillColorPrimaryBrush}"
-                 WindowCornerPreference="Round"
-                 WindowStartupLocation="CenterScreen"
-                 Title="{Binding AppTitle}"
-                 FontFamily="{DynamicResource SegoeFluentIcons}"
-                 MinHeight="900" MinWidth="1900"
-                 SizeToContent="WidthAndHeight">
+<ui:FluentWindow
+    x:Class="EasyExtract.Dashboard"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:UserControls="clr-namespace:EasyExtract.UserControls"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:feedback="clr-namespace:EasyExtract.UI.Feedback"
+    xmlns:local="clr-namespace:EasyExtract.CustomDesign"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+    Title="{Binding AppTitle}"
+    MinWidth="1900"
+    MinHeight="900"
+    ui:Design.Background="{DynamicResource ApplicationBackgroundBrush}"
+    AllowDrop="True"
+    Drop="Dashboard_OnDrop"
+    ExtendsContentIntoTitleBar="True"
+    FontFamily="{DynamicResource SegoeFluentIcons}"
+    Foreground="{DynamicResource TextFillColorPrimaryBrush}"
+    Loaded="Dashboard_OnLoaded"
+    ResizeMode="CanResize"
+    SizeToContent="WidthAndHeight"
+    WindowBackdropType="Acrylic"
+    WindowCornerPreference="Round"
+    WindowStartupLocation="CenterScreen"
+    WindowStyle="None"
+    mc:Ignorable="d">
     <ui:FluentWindow.Background>
         <MultiBinding Converter="{StaticResource BackgroundAndOpacityConverter}" UpdateSourceTrigger="PropertyChanged">
             <Binding Path="CurrentBackground" Source="{x:Static local:BackgroundManager.Instance}" />
@@ -38,88 +42,104 @@
             <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
-        <ui:TitleBar Grid.Row="0"
-                     x:Name="TitleBar"
-                     VerticalAlignment="Top"
-                     VerticalContentAlignment="Top"
-                     HorizontalContentAlignment="Center"
-                     Title="{Binding AppTitle}" Grid.ColumnSpan="3" />
+        <ui:TitleBar
+            x:Name="TitleBar"
+            Title="{Binding AppTitle}"
+            Grid.Row="0"
+            Grid.ColumnSpan="3"
+            VerticalAlignment="Top"
+            HorizontalContentAlignment="Center"
+            VerticalContentAlignment="Top" />
 
-        <ui:NavigationView Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="3"
-                           PaneTitle="EasyExtractUnitypackage"
-                           x:Name="NavView"
-                           HorizontalAlignment="Stretch"
-                           VerticalAlignment="Stretch"
-                           HorizontalContentAlignment="Stretch"
-                           VerticalContentAlignment="Stretch"
-                           Foreground="{DynamicResource TextFillColorPrimaryBrush}"
-                           FontWeight="DemiBold"
-                           Transition="FadeInWithSlide"
-                           PaneDisplayMode="Left"
-                           ContentOverlay="{Binding ElementName=ContentFrame}"
-                           IsBackButtonVisible="Collapsed">
+        <ui:NavigationView
+            x:Name="NavView"
+            Grid.Row="1"
+            Grid.Column="0"
+            Grid.ColumnSpan="3"
+            HorizontalAlignment="Stretch"
+            VerticalAlignment="Stretch"
+            HorizontalContentAlignment="Stretch"
+            VerticalContentAlignment="Stretch"
+            ContentOverlay="{Binding ElementName=ContentFrame}"
+            FontWeight="DemiBold"
+            Foreground="{DynamicResource TextFillColorPrimaryBrush}"
+            IsBackButtonVisible="Collapsed"
+            PaneDisplayMode="Left"
+            PaneTitle="EasyExtractUnitypackage"
+            Transition="FadeInWithSlide">
             <ui:NavigationView.MenuItems>
-                <ui:NavigationViewItem Content="Extract" TargetPageTag="Extraction"
-                                       TargetPageType="{x:Type UserControls:Extraction}"
-                                       HorizontalAlignment="Stretch"
-                                       VerticalAlignment="Stretch"
-                                       HorizontalContentAlignment="Stretch"
-                                       VerticalContentAlignment="Stretch"
-                                       Foreground="{DynamicResource TextFillColorPrimaryBrush}"
-                                       Icon="{ui:SymbolIcon DocumentTextExtract24}" />
-                <ui:NavigationViewItem Content="Search" TargetPageTag="SearchEverything"
-                                       HorizontalAlignment="Stretch"
-                                       VerticalAlignment="Stretch"
-                                       HorizontalContentAlignment="Stretch"
-                                       VerticalContentAlignment="Stretch"
-                                       Foreground="{DynamicResource TextFillColorPrimaryBrush}"
-                                       TargetPageType="{x:Type UserControls:SearchEverything}"
-                                       Icon="{ui:SymbolIcon Search24}" />
-                <ui:NavigationViewItem Content="History" TargetPageTag="History"
-                                       HorizontalAlignment="Stretch"
-                                       VerticalAlignment="Stretch"
-                                       HorizontalContentAlignment="Stretch"
-                                       VerticalContentAlignment="Stretch"
-                                       Foreground="{DynamicResource TextFillColorPrimaryBrush}"
-                                       TargetPageType="{x:Type UserControls:History}"
-                                       Icon="{ui:SymbolIcon History24}" />
-                <ui:NavigationViewItem Content="About" TargetPageTag="About"
-                                       HorizontalAlignment="Stretch"
-                                       VerticalAlignment="Stretch"
-                                       HorizontalContentAlignment="Stretch"
-                                       VerticalContentAlignment="Stretch"
-                                       Foreground="{DynamicResource TextFillColorPrimaryBrush}"
-                                       TargetPageType="{x:Type UserControls:About}"
-                                       Icon="{ui:SymbolIcon Heart24}" />
-                <ui:NavigationViewItem Content="Feedback" TargetPageTag="Feedback"
-                                       HorizontalAlignment="Stretch"
-                                       VerticalAlignment="Stretch"
-                                       HorizontalContentAlignment="Stretch"
-                                       VerticalContentAlignment="Stretch"
-                                       Foreground="{DynamicResource TextFillColorPrimaryBrush}"
-                                       TargetPageType="{x:Type feedback:Feedback}"
-                                       Icon="{ui:SymbolIcon PersonFeedback24}" />
-                <ui:NavigationViewItem TargetPageTag="Updater"
-                                       HorizontalAlignment="Stretch"
-                                       VerticalAlignment="Stretch"
-                                       x:Name="CheckForUpdatesNavBtn"
-                                       Click="CheckForUpdatesNavBtn_OnClick"
-                                       HorizontalContentAlignment="Stretch"
-                                       VerticalContentAlignment="Stretch"
-                                       Foreground="{DynamicResource TextFillColorPrimaryBrush}"
-                                       Icon="{ui:SymbolIcon ArrowSyncCircle24}">
+                <ui:NavigationViewItem
+                    HorizontalAlignment="Stretch"
+                    VerticalAlignment="Stretch"
+                    HorizontalContentAlignment="Stretch"
+                    VerticalContentAlignment="Stretch"
+                    Content="Extract"
+                    Foreground="{DynamicResource TextFillColorPrimaryBrush}"
+                    Icon="{ui:SymbolIcon DocumentTextExtract24}"
+                    TargetPageTag="Extraction"
+                    TargetPageType="{x:Type UserControls:Extraction}" />
+                <ui:NavigationViewItem
+                    HorizontalAlignment="Stretch"
+                    VerticalAlignment="Stretch"
+                    HorizontalContentAlignment="Stretch"
+                    VerticalContentAlignment="Stretch"
+                    Content="Search"
+                    Foreground="{DynamicResource TextFillColorPrimaryBrush}"
+                    Icon="{ui:SymbolIcon Search24}"
+                    TargetPageTag="SearchEverything"
+                    TargetPageType="{x:Type UserControls:SearchEverything}" />
+                <ui:NavigationViewItem
+                    HorizontalAlignment="Stretch"
+                    VerticalAlignment="Stretch"
+                    HorizontalContentAlignment="Stretch"
+                    VerticalContentAlignment="Stretch"
+                    Content="History"
+                    Foreground="{DynamicResource TextFillColorPrimaryBrush}"
+                    Icon="{ui:SymbolIcon History24}"
+                    TargetPageTag="History"
+                    TargetPageType="{x:Type UserControls:History}" />
+                <ui:NavigationViewItem
+                    HorizontalAlignment="Stretch"
+                    VerticalAlignment="Stretch"
+                    HorizontalContentAlignment="Stretch"
+                    VerticalContentAlignment="Stretch"
+                    Content="About"
+                    Foreground="{DynamicResource TextFillColorPrimaryBrush}"
+                    Icon="{ui:SymbolIcon Heart24}"
+                    TargetPageTag="About"
+                    TargetPageType="{x:Type UserControls:About}" />
+                <ui:NavigationViewItem
+                    HorizontalAlignment="Stretch"
+                    VerticalAlignment="Stretch"
+                    HorizontalContentAlignment="Stretch"
+                    VerticalContentAlignment="Stretch"
+                    Content="Feedback"
+                    Foreground="{DynamicResource TextFillColorPrimaryBrush}"
+                    Icon="{ui:SymbolIcon PersonFeedback24}"
+                    TargetPageTag="Feedback"
+                    TargetPageType="{x:Type feedback:Feedback}" />
+                <ui:NavigationViewItem
+                    x:Name="CheckForUpdatesNavBtn"
+                    HorizontalAlignment="Stretch"
+                    VerticalAlignment="Stretch"
+                    HorizontalContentAlignment="Stretch"
+                    VerticalContentAlignment="Stretch"
+                    Click="CheckForUpdatesNavBtn_OnClick"
+                    Foreground="{DynamicResource TextFillColorPrimaryBrush}"
+                    Icon="{ui:SymbolIcon ArrowSyncCircle24}"
+                    TargetPageTag="Updater">
                     <ui:NavigationViewItem.Content>
                         <StackPanel>
                             <ui:TextBlock
-                                Text="Check for updates"
                                 x:Name="CheckForUpdatesTxt"
                                 FontTypography="BodyStrong"
+                                Text="Check for updates"
                                 TextWrapping="WrapWithOverflow" />
                             <ui:TextBlock
-                                Appearance="Secondary"
                                 x:Name="CheckForUpdatesDesc"
-                                Text="You are up to date."
+                                Appearance="Secondary"
                                 Opacity="0.5"
+                                Text="You are up to date."
                                 TextWrapping="WrapWithOverflow" />
                         </StackPanel>
                     </ui:NavigationViewItem.Content>
@@ -130,13 +150,13 @@
                     <ui:CardControl.Icon>
                         <ui:SymbolIcon
                             x:Name="HeartIcon"
-                            Foreground="Red"
-                            MouseLeave="HeartIcon_OnMouseLeave"
-                            MouseEnter="HeartIcon_OnMouseEnter"
-                            MouseDown="HeartIcon_OnMouseDown"
+                            Margin="0,0,5,0"
                             HorizontalAlignment="Center"
                             VerticalAlignment="Center"
-                            Margin="0,0,5,0"
+                            Foreground="Red"
+                            MouseDown="HeartIcon_OnMouseDown"
+                            MouseEnter="HeartIcon_OnMouseEnter"
+                            MouseLeave="HeartIcon_OnMouseLeave"
                             Symbol="Heart24" />
                     </ui:CardControl.Icon>
                     <ui:CardControl.Header>
@@ -148,28 +168,30 @@
                                 TextWrapping="WrapWithOverflow" />
                             <ui:TextBlock
                                 Appearance="Secondary"
-                                Text="HakuSystems, Jan-Fcloud."
                                 Opacity="0.5"
+                                Text="HakuSystems, Jan-Fcloud."
                                 TextWrapping="WrapWithOverflow" />
                             <ui:Button
-                                Appearance="Secondary"
-                                Margin="5"
-                                Icon="{ui:SymbolIcon SlideHide24}"
                                 x:Name="DontShowAgainBtn"
+                                Margin="5"
+                                Appearance="Secondary"
                                 Click="DontShowAgainBtn_OnClick"
-                                Content="Dont show this again" />
+                                Content="Dont show this again"
+                                Icon="{ui:SymbolIcon SlideHide24}" />
                         </StackPanel>
                     </ui:CardControl.Header>
                 </ui:CardControl>
             </ui:NavigationView.Header>
             <ui:NavigationView.FooterMenuItems>
-                <ui:NavigationViewItem Content="Settings" Icon="{ui:SymbolIcon Settings24}"
-                                       Foreground="{DynamicResource TextFillColorPrimaryBrush}"
-                                       TargetPageType="{x:Type UserControls:BetterSettings}" />
+                <ui:NavigationViewItem
+                    Content="Settings"
+                    Foreground="{DynamicResource TextFillColorPrimaryBrush}"
+                    Icon="{ui:SymbolIcon Settings24}"
+                    TargetPageType="{x:Type UserControls:BetterSettings}" />
                 <ui:NavigationViewItem
                     x:Name="VersionTxt"
-                    IsEnabled="False"
-                    Foreground="{DynamicResource TextFillColorPrimaryBrush}" />
+                    Foreground="{DynamicResource TextFillColorPrimaryBrush}"
+                    IsEnabled="False" />
             </ui:NavigationView.FooterMenuItems>
         </ui:NavigationView>
     </Grid>

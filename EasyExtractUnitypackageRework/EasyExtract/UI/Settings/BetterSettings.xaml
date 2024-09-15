@@ -3,9 +3,9 @@
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mahicons="http://metro.mahapps.com/winfx/xaml/iconpacks"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
-    xmlns:mahicons="http://metro.mahapps.com/winfx/xaml/iconpacks"
     ui:Design.Background="{DynamicResource ApplicationBackgroundBrush}"
     FontFamily="{DynamicResource SegoeFluentIcons}"
     Foreground="{DynamicResource TextFillColorPrimaryBrush}"
@@ -74,9 +74,9 @@
                                 HorizontalAlignment="Left"
                                 VerticalAlignment="Center">
                                 <ui:SymbolIcon
-                                    Foreground="{DynamicResource TextFillColorPrimaryBrush}"
                                     HorizontalAlignment="Center"
                                     VerticalAlignment="Center"
+                                    Foreground="{DynamicResource TextFillColorPrimaryBrush}"
                                     Symbol="EmojiSparkle24" />
                             </ui:Card>
                             <StackPanel Grid.Column="1" VerticalAlignment="Center">
@@ -154,8 +154,8 @@
                                 VerticalAlignment="Stretch">
                                 <ui:SymbolIcon
                                     HorizontalAlignment="Center"
-                                    Foreground="{DynamicResource TextFillColorPrimaryBrush}"
                                     VerticalAlignment="Center"
+                                    Foreground="{DynamicResource TextFillColorPrimaryBrush}"
                                     Symbol="ColorBackground24" />
                             </ui:Card>
                             <StackPanel
@@ -224,8 +224,8 @@
                                 VerticalAlignment="Center">
                                 <ui:SymbolIcon
                                     HorizontalAlignment="Center"
-                                    Foreground="{DynamicResource TextFillColorPrimaryBrush}"
                                     VerticalAlignment="Center"
+                                    Foreground="{DynamicResource TextFillColorPrimaryBrush}"
                                     Symbol="ArrowDownload24" />
                             </ui:Card>
                             <StackPanel Grid.Column="1" VerticalAlignment="Center">
@@ -262,8 +262,8 @@
                                 VerticalAlignment="Center">
                                 <ui:SymbolIcon
                                     HorizontalAlignment="Center"
-                                    Foreground="{DynamicResource TextFillColorPrimaryBrush}"
                                     VerticalAlignment="Center"
+                                    Foreground="{DynamicResource TextFillColorPrimaryBrush}"
                                     Symbol="SkipForwardTab24" />
                             </ui:Card>
                             <StackPanel Grid.Column="1" VerticalAlignment="Center">
@@ -344,8 +344,8 @@
                                 VerticalAlignment="Stretch">
                                 <ui:SymbolIcon
                                     HorizontalAlignment="Center"
-                                    Foreground="{DynamicResource TextFillColorPrimaryBrush}"
                                     VerticalAlignment="Center"
+                                    Foreground="{DynamicResource TextFillColorPrimaryBrush}"
                                     Symbol="Folder24" />
                             </ui:Card>
                             <StackPanel
