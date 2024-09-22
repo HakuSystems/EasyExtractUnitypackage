@@ -1,0 +1,106 @@
+﻿<Window x:Class="EasyExtractUnitypackageRework.Theme.MessageBox.EasyMessageBox"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:materialdesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+        mc:Ignorable="d"
+        Title="EasyMessageBox" Height="230" Width="506"
+        WindowStartupLocation="CenterScreen"
+        WindowStyle="None"
+        MinHeight="230"
+        MinWidth="510"
+        ResizeMode="CanResize"
+        Background="{DynamicResource MaterialDesignDarkBackground}"
+        Topmost="True"
+        ShowInTaskbar="False"
+        AllowsTransparency="True">
+
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="128*" />
+            <ColumnDefinition Width="127*" />
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="auto" />
+            <RowDefinition Height="51*" />
+            <RowDefinition Height="44*" />
+            <RowDefinition Height="88*" />
+        </Grid.RowDefinitions>
+        <StackPanel Orientation="Horizontal">
+            <TextBlock x:Name="txtTitle"
+                       Style="{StaticResource MaterialDesignHeadline6TextBlock}"
+                       HorizontalAlignment="Left" Foreground="White" VerticalAlignment="Stretch" FontSize="20"
+                       Margin="10">
+                Message Title
+            </TextBlock>
+        </StackPanel>
+        <StackPanel HorizontalAlignment="Right" VerticalAlignment="Top" Grid.Row="0" Grid.Column="1" Height="42"
+                    Width="201">
+            <Button x:Name="BtnClose" HorizontalAlignment="Right" Click="BtnClose_Click"
+                    Style="{StaticResource MaterialDesignFlatButton}"
+                    Foreground="White">
+                <Button.Content>
+                    <materialdesign:PackIcon Kind="Close" Foreground="White" />
+                </Button.Content>
+            </Button>
+        </StackPanel>
+        <Grid ColumnSpan="2" Grid.Column="0" Grid.RowSpan="2" Grid.Row="1">
+            <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+                <TextBlock
+                    Margin="5"
+                    x:Name="txtMessage"
+                    Text="Actual Mesasage"
+                    Foreground="White"
+                    TextWrapping="Wrap"
+                    VerticalAlignment="Center"
+                    Style="{StaticResource MaterialDesignBody1TextBlock}"
+                    TextAlignment="Center" />
+            </ScrollViewer>
+
+        </Grid>
+        <Grid Grid.Row="3"
+              Grid.ColumnSpan="2"
+              VerticalAlignment="Bottom"
+              Margin="0,20,0,5">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="auto" />
+                <ColumnDefinition Width="auto" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+            <Button x:Name="BtnOk"
+                    Style="{DynamicResource MaterialDesignFlatButton}"
+                    Click="BtnOk_Click"
+                    Foreground="White"
+                    Grid.Column="1"
+                    Margin="5"
+                    Width="100"
+                    Content="OK" />
+            <Button x:Name="BtnCancel"
+                    Style="{DynamicResource MaterialDesignFlatButton}"
+                    Click="BtnCancel_Click"
+                    Foreground="White"
+                    Grid.Column="2"
+                    Margin="5"
+                    Width="100"
+                    Content="Cancel" />
+            <Button x:Name="BtnYes"
+                    Style="{DynamicResource MaterialDesignFlatButton}"
+                    Click="BtnYes_Click"
+                    Foreground="White"
+                    Grid.Column="1"
+                    Margin="5"
+                    Width="100"
+                    Content="Yes" />
+            <Button x:Name="BtnNo"
+                    Style="{DynamicResource MaterialDesignFlatButton}"
+                    Click="BtnNo_Click"
+                    Foreground="White"
+                    Grid.Column="2"
+                    Margin="5"
+                    Width="100"
+                    Content="No" />
+        </Grid>
+    </Grid>
+</Window>
