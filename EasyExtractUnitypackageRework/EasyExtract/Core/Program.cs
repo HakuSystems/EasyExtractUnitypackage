@@ -5,6 +5,7 @@ using System.Security.Principal;
 using System.Windows;
 using EasyExtract.Config;
 using EasyExtract.Extraction;
+using EasyExtract.Services.CustomMessageBox;
 using Microsoft.Win32;
 
 namespace EasyExtract;
@@ -162,8 +163,11 @@ public class Program
         }
         catch (Exception e)
         {
-            MessageBox.Show($"An error occurred while trying to run as administrator: {e.Message}", "Error",
-                MessageBoxButton.OK, MessageBoxImage.Error);
+            var customMessageBox =
+                new CustomMessageBox(
+                    "An error occurred while trying to run as administrator. Please check the logs for more information.",
+                    "Error", MessageBoxButton.OK);
+            customMessageBox.ShowDialog();
             throw;
         }
     }
