@@ -15,19 +15,6 @@ public class UpdateHandler
     private readonly ConfigHelper _configHelper = new();
     private readonly BetterLogger _logger = new();
 
-    /// <summary>
-    ///     Checks if the application is up to date by comparing the current version with the latest version available.
-    /// </summary>
-    /// <returns>
-    ///     <c>true</c> if the application is up to date; otherwise, <c>false</c>.
-    /// </returns>
-    /// <remarks>
-    ///     This method uses the <see cref="GetLatestReleaseAsync" /> method to fetch the latest release version.
-    ///     It then compares the latest version with the current version of the application.
-    ///     If the latest version is parsed successfully and is less than or equal to the current version, the application is
-    ///     considered up to date.
-    ///     Otherwise, the method returns <c>false</c>.
-    /// </remarks>
     public async Task<bool> IsUpToDate()
     {
         var latestRelease = await GetLatestReleaseAsync();
@@ -57,13 +44,6 @@ public class UpdateHandler
         return false;
     }
 
-    /// <summary>
-    ///     Handles the update process of the application.
-    /// </summary>
-    /// <returns>
-    ///     A task representing the asynchronous operation. The task result will be true if the update was successful,
-    ///     false otherwise.
-    /// </returns>
     public async Task<bool> Update()
     {
         var latestRelease = await GetLatestReleaseAsync();
@@ -82,12 +62,17 @@ public class UpdateHandler
 
                     try
                     {
-                        // Run the new executable from a temporary location
+                        // Run the new executable from the original location
+                        var appname = Path.GetFileNameWithoutExtension(Assembly.GetExecutingAssembly().Location);
+                        var originalDirectory = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+                        var destinationPath = Path.Combine(originalDirectory, $"{appname}_{latestRelease.TagName}.exe");
+                        File.Copy(exePath, destinationPath, true);
+
                         Process.Start(new ProcessStartInfo
                         {
-                            FileName = exePath,
+                            FileName = destinationPath,
                             UseShellExecute = true,
-                            WorkingDirectory = Path.GetDirectoryName(exePath)
+                            WorkingDirectory = originalDirectory
                         });
                         Environment.Exit(0);
                     }
@@ -121,12 +106,6 @@ public class UpdateHandler
         return true;
     }
 
-    /// <summary>
-    ///     Asynchronously downloads an asset from a specified URL.
-    /// </summary>
-    /// <param name="url">The URL of the asset to download.</param>
-    /// <param name="versionTag">The version tag to append to the file name.</param>
-    /// <returns>The path to the downloaded file.</returns>
     private async Task<string> DownloadAssetAsync(string url, string versionTag)
     {
         using var client = new HttpClient();
@@ -150,11 +129,6 @@ public class UpdateHandler
         return filePath;
     }
 
-    /// <summary>
-    ///     Deletes old files from the specified directory.
-    /// </summary>
-    /// <param name="directory">The directory from which to delete old files.</param>
-    /// <returns>A task representing the asynchronous operation.</returns>
     private async Task DeleteOldFilesAsync(string directory)
     {
         var rarFiles = Directory.GetFiles(directory, "*.rar");
@@ -166,14 +140,6 @@ public class UpdateHandler
         await _logger.LogAsync("Old files deleted", "UpdateHandler.cs", Importance.Info);
     }
 
-    /// <summary>
-    ///     Extracts files from a RAR archive asynchronously.
-    /// </summary>
-    /// <param name="rarPath">The path to the RAR archive.</param>
-    /// <returns>
-    ///     The path to the extracted executable file if successful, or null if no executable file is found or an error occurs
-    ///     during extraction.
-    /// </returns>
     private async Task<string?> ExtractRarAsync(string rarPath)
     {
         var tempDirectory = Path.Combine(Path.GetTempPath(), "EasyExtractUpdate");
@@ -219,20 +185,6 @@ public class UpdateHandler
         }
     }
 
-
-    /// <summary>
-    ///     Asynchronously retrieves the latest release from a GitHub repository.
-    /// </summary>
-    /// <returns>
-    ///     A task that represents the asynchronous operation. The task result is the latest <see cref="Release" /> object from
-    ///     the repository.
-    /// </returns>
-    /// <remarks>
-    ///     This method fetches the latest release from a GitHub repository specified in the configuration. It uses the GitHub
-    ///     API to
-    ///     retrieve the releases and returns the latest release. If an error occurs during the retrieval process,
-    ///     <see langword="null" /> is returned.
-    /// </remarks>
     private async Task<Release?> GetLatestReleaseAsync()
     {
         try
@@ -253,13 +205,6 @@ public class UpdateHandler
         }
     }
 
-    /// <summary>
-    ///     Returns the current version of the executing assembly.
-    /// </summary>
-    /// <returns>
-    ///     The current version of the executing assembly as a string. Returns "0.0.0" if the version cannot be
-    ///     determined.
-    /// </returns>
     private string GetCurrentAssemblyVersion()
     {
         var version = Assembly.GetExecutingAssembly().GetName().Version;

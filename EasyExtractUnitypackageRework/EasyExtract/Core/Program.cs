@@ -5,6 +5,7 @@ using System.Security.Principal;
 using System.Windows;
 using EasyExtract.Config;
 using EasyExtract.Extraction;
+using EasyExtract.Services.CustomMessageBox;
 using Microsoft.Win32;
 
 namespace EasyExtract;
@@ -21,14 +22,15 @@ public class Program
             await _logger.LogAsync($"Run method invoked with arguments: {string.Join(", ", args)}", "Program.cs",
                 Importance.Info);
 
-            if (!Debugger.IsAttached && _configHelper.Config.ContextMenuToggle)
-                // Only check for admin rights if not debugging and ContextMenuToggle is active
-                if (!IsRunningAsAdmin() && !args.Contains("--elevated"))
-                {
-                    KillAllProcesses(Assembly.GetExecutingAssembly().GetName().Name);
-                    RunAsAdmin(args);
-                    return; // Ensure the current instance exits after starting the elevated instance
-                }
+            var requireAdmin = !Debugger.IsAttached && _configHelper.Config.ContextMenuToggle && !IsRunningAsAdmin() &&
+                               !args.Contains("--elevated");
+
+            if (requireAdmin)
+            {
+                KillAllProcesses(Assembly.GetExecutingAssembly().GetName().Name);
+                RunAsAdmin(args);
+                return;
+            }
 
             if (args.Length > 1 && args.Contains("--extract"))
             {
@@ -41,7 +43,7 @@ public class Program
                     await _logger.LogAsync($"Extract argument detected. Path: {path}", "Program.cs", Importance.Info);
                     var extractionHandler = new ExtractionHandler();
                     await extractionHandler.ExtractUnitypackageFromContextMenu(path);
-                    return; // Exit after performing extraction
+                    return;
                 }
             }
 
@@ -161,8 +163,11 @@ public class Program
         }
         catch (Exception e)
         {
-            MessageBox.Show($"An error occurred while trying to run as administrator: {e.Message}", "Error",
-                MessageBoxButton.OK, MessageBoxImage.Error);
+            var customMessageBox =
+                new CustomMessageBox(
+                    "An error occurred while trying to run as administrator. Please check the logs for more information.",
+                    "Error", MessageBoxButton.OK);
+            customMessageBox.ShowDialog();
             throw;
         }
     }

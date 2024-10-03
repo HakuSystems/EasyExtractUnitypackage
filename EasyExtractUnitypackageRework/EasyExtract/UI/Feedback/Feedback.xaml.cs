@@ -4,6 +4,7 @@ using System.Text;
 using System.Windows;
 using System.Windows.Controls;
 using EasyExtract.Discord;
+using EasyExtract.Services.CustomMessageBox;
 using Newtonsoft.Json;
 
 namespace EasyExtract.UI.Feedback;
@@ -41,14 +42,17 @@ public partial class Feedback : UserControl
     {
         if (string.IsNullOrWhiteSpace(FeedbackTextBox.Text))
         {
-            MessageBox.Show("Please enter your feedback.", "Warning", MessageBoxButton.OK, MessageBoxImage.Warning);
+            var customMessageBox = new CustomMessageBox("Please enter your feedback.", "Warning",
+                MessageBoxButton.OK);
+            customMessageBox.ShowDialog();
             return;
         }
 
         if (FeedbackSelection.SelectedIndex.Equals(-1))
         {
-            MessageBox.Show("Please select your satisfaction level.", "Warning", MessageBoxButton.OK,
-                MessageBoxImage.Warning);
+            var customMessageBox = new CustomMessageBox("Please select your satisfaction level.", "Warning",
+                MessageBoxButton.OK);
+            customMessageBox.ShowDialog();
             return;
         }
 
@@ -75,8 +79,9 @@ public partial class Feedback : UserControl
             var response = await client.PostAsync(url, content);
             if (response.IsSuccessStatusCode)
             {
-                MessageBox.Show("Feedback submitted successfully!", "Success", MessageBoxButton.OK,
-                    MessageBoxImage.Information);
+                var customMessageBox = new CustomMessageBox("Feedback submitted successfully!", "Success",
+                    MessageBoxButton.OK);
+                customMessageBox.ShowDialog();
             }
             else
             {
@@ -84,19 +89,23 @@ public partial class Feedback : UserControl
                 dynamic errorResponse = JsonConvert.DeserializeObject(responseContent);
                 string errorMessage = errorResponse.message;
                 string errorStatus = errorResponse.status;
-                MessageBox.Show(errorMessage, errorStatus, MessageBoxButton.OK, MessageBoxImage.Error);
+                var customMessageBox = new CustomMessageBox(errorMessage, errorStatus, MessageBoxButton.OK);
+                customMessageBox.ShowDialog();
             }
         }
         catch (HttpRequestException)
         {
-            MessageBox.Show("Network error. Please check your internet connection and try again.", "Error",
-                MessageBoxButton.OK,
-                MessageBoxImage.Error);
+            var customMessageBox =
+                new CustomMessageBox("Network error. Please check your internet connection and try again.", "Error",
+                    MessageBoxButton.OK);
+            customMessageBox.ShowDialog();
         }
         catch (Exception ex)
         {
-            MessageBox.Show($"An unexpected error occurred: {ex.Message}", "Error", MessageBoxButton.OK,
-                MessageBoxImage.Error);
+            var customMessageBox =
+                new CustomMessageBox("An unexpected error occurred. Please check the logs for more information.",
+                    "Error", MessageBoxButton.OK);
+            customMessageBox.ShowDialog();
         }
     }
 }
