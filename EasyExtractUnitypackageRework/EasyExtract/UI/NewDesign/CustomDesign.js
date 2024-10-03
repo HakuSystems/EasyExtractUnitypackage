@@ -1,15 +1,15 @@
 var DarkMode = {
-    "Text": "#121212",
-    "Background": "#1E1E1E",
-    "Primary": "#333333",
-    "Secondary": "#FFFFFF",
-    "Accent": "#FFFFFF",
+    "Text": "#e9e4e7",
+    "Background": "#070406",
+    "Primary": "#cea8c0",
+    "Secondary": "#793861",
+    "Accent": "#ba4991",
 };
 
 var LightMode = {
-    "Text": "#121212",
-    "Background": "#1E1E1E",
-    "Primary": "#333333",
-    "Secondary": "#FFFFFF",
-    "Accent": "#FFFFFF",
+    "Text": "#1c171a",
+    "Background": "#fbf9fa",
+    "Primary": "#58324a",
+    "Secondary": "#c785af",
+    "Accent": "#b5458c",
 };
