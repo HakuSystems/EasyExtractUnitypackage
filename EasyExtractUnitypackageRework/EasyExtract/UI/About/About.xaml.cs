@@ -39,7 +39,10 @@ public partial class About : UserControl
 
         _logger.LogAsync("Added cards to RandomCardDesign", "About.xaml.cs", Importance.Info); // Log card addition
 
-        var repeatTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(500) };
+        var repeatTimer = new DispatcherTimer
+        {
+            Interval = TimeSpan.FromMilliseconds(500)
+        };
         repeatTimer.Tick += (o, args) => ChangeRandomMargins();
         repeatTimer.Start();
 

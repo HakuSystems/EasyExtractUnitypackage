@@ -118,8 +118,20 @@ public partial class Extraction : UserControl, INotifyPropertyChanged
 
         var categories = new[]
         {
-            "Scripts", "Shaders", "Prefabs", "3D Objects", "Images", "Audios", "Animations", "Scenes", "Materials",
-            "Assets", "Controllers", "Fonts", "Configurations", "Data"
+            "Scripts",
+            "Shaders",
+            "Prefabs",
+            "3D Objects",
+            "Images",
+            "Audios",
+            "Animations",
+            "Scenes",
+            "Materials",
+            "Assets",
+            "Controllers",
+            "Fonts",
+            "Configurations",
+            "Data"
         };
 
         var colors = new[]
@@ -166,7 +178,10 @@ public partial class Extraction : UserControl, INotifyPropertyChanged
             collection.Add(new ColumnSeries
             {
                 Title = categories[i],
-                Values = new ChartValues<double> { counts[i] },
+                Values = new ChartValues<double>
+                {
+                    counts[i]
+                },
                 Fill = colors[i],
                 DataLabels = true,
                 FontSize = 12,

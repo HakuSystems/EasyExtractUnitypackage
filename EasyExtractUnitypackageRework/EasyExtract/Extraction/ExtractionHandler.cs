@@ -113,7 +113,10 @@ public class ExtractionHandler
                 // Creates all directories and subdirectories as specified by filePath.
                 Directory.CreateDirectory(Path.GetDirectoryName(filePath));
 
-                entry.WriteToFile(filePath, new ExtractionOptions { Overwrite = true });
+                entry.WriteToFile(filePath, new ExtractionOptions
+                {
+                    Overwrite = true
+                });
             }
         });
 

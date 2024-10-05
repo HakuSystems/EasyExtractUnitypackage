@@ -19,7 +19,10 @@ public class DiscordRpcManager : IDisposable
         DiscordStart();
     }
 
-    public static DiscordRpcManager Instance => _instance ??= new DiscordRpcManager();
+    public static DiscordRpcManager Instance
+    {
+        get => _instance ??= new DiscordRpcManager();
+    }
 
     public async void Dispose()
     {

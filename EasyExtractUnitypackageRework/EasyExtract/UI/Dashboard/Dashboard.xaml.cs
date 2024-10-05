@@ -30,7 +30,10 @@ public partial class Dashboard : FluentWindow
         ContentFrame = new UserControls.Extraction();
     }
 
-    public static Dashboard Instance => instance ??= new Dashboard();
+    public static Dashboard Instance
+    {
+        get => instance ??= new Dashboard();
+    }
 
 
     private void HeartIcon_OnMouseEnter(object sender, MouseEventArgs e)
@@ -146,7 +149,10 @@ public partial class Dashboard : FluentWindow
         var fadeInOutAnimation = new DoubleAnimation(0, 1, new Duration(TimeSpan.FromSeconds(1)))
         {
             AutoReverse = true,
-            EasingFunction = new SineEase { EasingMode = EasingMode.EaseInOut }
+            EasingFunction = new SineEase
+            {
+                EasingMode = EasingMode.EaseInOut
+            }
         };
 
         var storyboard = new Storyboard();
@@ -175,7 +181,11 @@ public partial class Dashboard : FluentWindow
             if (duplicate != null) continue;
             UserControls.Extraction._queueList ??= new List<SearchEverythingModel>();
             UserControls.Extraction._queueList.Add(new SearchEverythingModel
-                { UnityPackageName = name, UnityPackagePath = file, Id = 0 });
+            {
+                UnityPackageName = name,
+                UnityPackagePath = file,
+                Id = 0
+            });
         }
 
         await _logger.LogAsync("Added dropped files to queue", "Dashboard.xaml.cs", Importance.Info);

@@ -14,7 +14,10 @@ public class ExtractionHelper
     /// <returns>The readable file size.</returns>
     public async Task<string> GetReadableFileSize(long size)
     {
-        string[] sizes = { "B", "KB", "MB", "GB", "TB" };
+        string[] sizes =
+        {
+            "B", "KB", "MB", "GB", "TB"
+        };
         var order = 0;
         while (size >= 1024 && order < sizes.Length - 1)
         {

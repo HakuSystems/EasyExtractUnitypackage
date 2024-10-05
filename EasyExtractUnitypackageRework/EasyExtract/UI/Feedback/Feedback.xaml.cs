@@ -16,9 +16,12 @@ public partial class Feedback : UserControl
         InitializeComponent();
     }
 
-    private string SenderName => DiscordRpcManager.Instance.client.CurrentUser != null
-        ? DiscordRpcManager.Instance.client.CurrentUser.Username
-        : "Anonymous";
+    private string SenderName
+    {
+        get => DiscordRpcManager.Instance.client.CurrentUser != null
+            ? DiscordRpcManager.Instance.client.CurrentUser.Username
+            : "Anonymous";
+    }
 
     private void Feedback_OnLoaded(object sender, RoutedEventArgs e)
     {
@@ -71,7 +74,10 @@ public partial class Feedback : UserControl
             appVersion = Assembly.GetExecutingAssembly().GetName().Version.ToString()
         };
         var url = "https://hooker.zkwolf.com/easy_extractor/feedback";
-        var jsonData = JsonConvert.SerializeObject(new { data = feedbackData });
+        var jsonData = JsonConvert.SerializeObject(new
+        {
+            data = feedbackData
+        });
         try
         {
             using HttpClient client = new();
