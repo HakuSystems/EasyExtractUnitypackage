@@ -17,11 +17,17 @@ public class BackgroundManager : INotifyPropertyChanged
 
     private BackgroundManager()
     {
-        _currentBackground = new ImageBrush { Stretch = Stretch.Fill };
+        _currentBackground = new ImageBrush
+        {
+            Stretch = Stretch.Fill
+        };
         _backgroundOpacity = 1.0;
     }
 
-    public static BackgroundManager Instance => _instance ??= new BackgroundManager();
+    public static BackgroundManager Instance
+    {
+        get => _instance ??= new BackgroundManager();
+    }
 
     public ImageBrush CurrentBackground
     {
@@ -84,7 +90,11 @@ public class BackgroundManager : INotifyPropertyChanged
         }
         catch (ResourceReferenceKeyNotFoundException ex)
         {
-            CurrentBackground = new ImageBrush { Opacity = BackgroundOpacity, Stretch = Stretch.Fill };
+            CurrentBackground = new ImageBrush
+            {
+                Opacity = BackgroundOpacity,
+                Stretch = Stretch.Fill
+            };
             await _logger.LogAsync($"Default background resource not found: {ex.Message}", "BackgroundManager.cs",
                 Importance.Warning); // Log resource not found
         }

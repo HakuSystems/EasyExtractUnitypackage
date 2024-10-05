@@ -112,7 +112,9 @@ public partial class SearchEverything : UserControl, INotifyPropertyChanged
             if (path != null)
                 _tempList.Add(new SearchEverythingModel
                 {
-                    UnityPackageName = name, UnityPackagePath = path, Id = i,
+                    UnityPackageName = name,
+                    UnityPackagePath = path,
+                    Id = i,
                     ModifiedTime = "Last Modified Date: " + GetFileDateTime(i, false),
                     CreatedTime = "Creation Date: " + GetFileDateTime(i, true)
                 });
@@ -199,7 +201,10 @@ public partial class SearchEverything : UserControl, INotifyPropertyChanged
                 if (Extraction._queueList == null) Extraction._queueList = new List<SearchEverythingModel>();
                 Extraction._queueList.Add(new SearchEverythingModel
                 {
-                    UnityPackageName = name, UnityPackagePath = file, Id = 0, ModifiedTime = string.Empty,
+                    UnityPackageName = name,
+                    UnityPackagePath = file,
+                    Id = 0,
+                    ModifiedTime = string.Empty,
                     CreatedTime = string.Empty
                 });
 
@@ -228,7 +233,10 @@ public partial class SearchEverything : UserControl, INotifyPropertyChanged
         if (Extraction._queueList == null) Extraction._queueList = new List<SearchEverythingModel>();
         Extraction._queueList.Add(new SearchEverythingModel
         {
-            UnityPackageName = name, UnityPackagePath = path, Id = id, ModifiedTime = string.Empty,
+            UnityPackageName = name,
+            UnityPackagePath = path,
+            Id = id,
+            ModifiedTime = string.Empty,
             CreatedTime = string.Empty
         });
         AddedStatusTxt.Text = $"Added {name} to the queue";

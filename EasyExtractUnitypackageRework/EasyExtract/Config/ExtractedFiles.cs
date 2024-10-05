@@ -107,17 +107,27 @@ public class ExtractedFiles : INotifyPropertyChanged
         }
     }
 
-    private string unityFileMessasge =>
-        $"Category: {Category} / File Size: {Size}";
+    private string unityFileMessasge
+    {
+        get => $"Category: {Category} / File Size: {Size}";
+    }
 
 
-    public string UnityFileMessasge => unityFileMessasge;
+    public string UnityFileMessasge
+    {
+        get => unityFileMessasge;
+    }
 
-    private string unityFileMessasgeTooltip =>
-        $"Category: {Category}\nFile Size: {Size}";
+    private string unityFileMessasgeTooltip
+    {
+        get => $"Category: {Category}\nFile Size: {Size}";
+    }
 
 
-    public string UnityFileMessasgeTooltip => unityFileMessasgeTooltip;
+    public string UnityFileMessasgeTooltip
+    {
+        get => unityFileMessasgeTooltip;
+    }
 
     public event PropertyChangedEventHandler PropertyChanged;
 

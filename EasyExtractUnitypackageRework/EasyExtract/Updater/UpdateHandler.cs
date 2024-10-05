@@ -159,7 +159,11 @@ public class UpdateHandler
                 {
                     await _logger.LogAsync($"Extracting entry: {entry.Key}", "UpdateHandler.cs", Importance.Info);
                     entry.WriteToDirectory(tempDirectory,
-                        new ExtractionOptions { ExtractFullPath = true, Overwrite = true });
+                        new ExtractionOptions
+                        {
+                            ExtractFullPath = true,
+                            Overwrite = true
+                        });
                 }
             }
 
