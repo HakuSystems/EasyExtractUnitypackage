@@ -1,9 +1,7 @@
 using System.Globalization;
-using System.IO;
 using System.IO.Compression;
 using EasyExtract.Config;
-using SharpCompress.Archives;
-using SharpCompress.Common;
+using EasyExtract.Utilities;
 
 namespace EasyExtract.Extraction;
 

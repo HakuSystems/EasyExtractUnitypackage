@@ -1,9 +1,9 @@
-﻿using System.Windows;
-using System.Windows.Threading;
-using EasyExtract.Config;
-using EasyExtract.Discord;
+﻿using EasyExtract.Config;
+using EasyExtract.Services.Discord;
+using EasyExtract.Utilities;
+using Application = System.Windows.Application;
 
-namespace EasyExtract;
+namespace EasyExtract.Core;
 
 /// <summary>
 ///     Interaction logic for App.xaml

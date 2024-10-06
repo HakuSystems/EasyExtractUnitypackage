@@ -1,10 +1,6 @@
-using System.Net.Http;
-using System.Reflection;
 using System.Text;
-using System.Windows;
-using System.Windows.Controls;
-using EasyExtract.Discord;
 using EasyExtract.Services;
+using EasyExtract.Services.Discord;
 using Newtonsoft.Json;
 
 namespace EasyExtract.UI.Feedback;

@@ -1,12 +1,10 @@
-using System.Diagnostics;
-using System.Reflection;
 using System.Security;
 using System.Security.Principal;
 using EasyExtract.Config;
 using EasyExtract.Extraction;
-using Microsoft.Win32;
+using EasyExtract.Utilities;
 
-namespace EasyExtract;
+namespace EasyExtract.Core;
 
 public class Program
 {

@@ -1,4 +1,4 @@
-namespace EasyExtract.CustomDesign;
+namespace EasyExtract.UI.CustomDesign;
 
 public class BackgroundModel
 {

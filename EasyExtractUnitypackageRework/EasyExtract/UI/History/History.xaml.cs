@@ -1,13 +1,9 @@
 using System.Collections.ObjectModel;
-using System.ComponentModel;
-using System.Diagnostics;
-using System.Runtime.CompilerServices;
-using System.Windows;
-using System.Windows.Controls;
 using EasyExtract.Config;
-using EasyExtract.Discord;
+using EasyExtract.Services.Discord;
+using EasyExtract.Utilities;
 
-namespace EasyExtract.UserControls;
+namespace EasyExtract.UI.History;
 
 public partial class History : UserControl, INotifyPropertyChanged
 {

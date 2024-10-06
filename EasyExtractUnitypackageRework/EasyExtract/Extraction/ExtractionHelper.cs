@@ -1,5 +1,5 @@
-using System.IO;
 using EasyExtract.Config;
+using EasyExtract.Utilities;
 
 namespace EasyExtract.Extraction;
 

@@ -1,8 +1,7 @@
-using System.IO;
+using EasyExtract.Config;
 using Serilog;
-using Serilog.Events;
 
-namespace EasyExtract.Config;
+namespace EasyExtract.Utilities;
 
 public class BetterLogger
 {

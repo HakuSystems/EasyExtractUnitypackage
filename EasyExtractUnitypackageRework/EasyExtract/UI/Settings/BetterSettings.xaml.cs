@@ -1,13 +1,9 @@
-using System.IO;
-using System.Windows;
-using System.Windows.Controls;
 using EasyExtract.Config;
-using EasyExtract.CustomDesign;
-using EasyExtract.Discord;
-using Microsoft.Win32;
-using Wpf.Ui.Appearance;
+using EasyExtract.Services.Discord;
+using EasyExtract.UI.CustomDesign;
+using EasyExtract.Utilities;
 
-namespace EasyExtract.UserControls;
+namespace EasyExtract.UI.Settings;
 
 public partial class BetterSettings : UserControl
 {

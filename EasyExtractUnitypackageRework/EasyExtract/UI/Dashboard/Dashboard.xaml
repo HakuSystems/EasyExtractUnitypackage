@@ -16,19 +16,23 @@
     WindowStyle="None"
     mc:Ignorable="d"
     ui:Design.Background="{DynamicResource ApplicationBackgroundBrush}"
-    x:Class="EasyExtract.Dashboard"
+    x:Class="EasyExtract.UI.Dashboard.Dashboard"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-    xmlns:UserControls="clr-namespace:EasyExtract.UserControls"
+    xmlns:UserControls="clr-namespace:EasyExtract.UI.About"
+    xmlns:customDesign="clr-namespace:EasyExtract.UI.CustomDesign"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:extraction="clr-namespace:EasyExtract.UI.Extraction"
     xmlns:feedback="clr-namespace:EasyExtract.UI.Feedback"
-    xmlns:local="clr-namespace:EasyExtract.CustomDesign"
+    xmlns:history="clr-namespace:EasyExtract.UI.History"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:searchEverything="clr-namespace:EasyExtract.UI.Services.SearchEverything"
+    xmlns:settings="clr-namespace:EasyExtract.UI.Settings"
     xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
     <ui:FluentWindow.Background>
         <MultiBinding Converter="{StaticResource BackgroundAndOpacityConverter}" UpdateSourceTrigger="PropertyChanged">
-            <Binding Path="CurrentBackground" Source="{x:Static local:BackgroundManager.Instance}" />
-            <Binding Path="BackgroundOpacity" Source="{x:Static local:BackgroundManager.Instance}" />
+            <Binding Path="CurrentBackground" Source="{x:Static customDesign:BackgroundManager.Instance}" />
+            <Binding Path="BackgroundOpacity" Source="{x:Static customDesign:BackgroundManager.Instance}" />
         </MultiBinding>
     </ui:FluentWindow.Background>
 
@@ -76,7 +80,7 @@
                     HorizontalContentAlignment="Stretch"
                     Icon="{ui:SymbolIcon DocumentTextExtract24}"
                     TargetPageTag="Extraction"
-                    TargetPageType="{x:Type UserControls:Extraction}"
+                    TargetPageType="{x:Type extraction:Extraction}"
                     VerticalAlignment="Stretch"
                     VerticalContentAlignment="Stretch" />
                 <ui:NavigationViewItem
@@ -86,7 +90,7 @@
                     HorizontalContentAlignment="Stretch"
                     Icon="{ui:SymbolIcon Search24}"
                     TargetPageTag="SearchEverything"
-                    TargetPageType="{x:Type UserControls:SearchEverything}"
+                    TargetPageType="{x:Type searchEverything:SearchEverything}"
                     VerticalAlignment="Stretch"
                     VerticalContentAlignment="Stretch" />
                 <ui:NavigationViewItem
@@ -96,7 +100,7 @@
                     HorizontalContentAlignment="Stretch"
                     Icon="{ui:SymbolIcon History24}"
                     TargetPageTag="History"
-                    TargetPageType="{x:Type UserControls:History}"
+                    TargetPageType="{x:Type history:History}"
                     VerticalAlignment="Stretch"
                     VerticalContentAlignment="Stretch" />
                 <ui:NavigationViewItem
@@ -188,7 +192,7 @@
                     Content="Settings"
                     Foreground="{DynamicResource TextFillColorPrimaryBrush}"
                     Icon="{ui:SymbolIcon Settings24}"
-                    TargetPageType="{x:Type UserControls:BetterSettings}" />
+                    TargetPageType="{x:Type settings:BetterSettings}" />
                 <ui:NavigationViewItem
                     Foreground="{DynamicResource TextFillColorPrimaryBrush}"
                     IsEnabled="False"

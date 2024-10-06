@@ -1,24 +1,16 @@
 using System.Collections.ObjectModel;
-using System.ComponentModel;
-using System.Diagnostics;
-using System.IO;
-using System.Runtime.CompilerServices;
-using System.Windows;
-using System.Windows.Controls;
 using System.Windows.Data;
-using System.Windows.Media.Imaging;
-using System.Windows.Threading;
 using EasyExtract.Config;
-using EasyExtract.Discord;
 using EasyExtract.Extraction;
+using EasyExtract.Services.Discord;
+using EasyExtract.Utilities;
 using LiveCharts;
 using LiveCharts.Wpf;
-using Microsoft.Win32;
 using Wpf.Ui.Controls;
 using XamlAnimatedGif;
 using Brushes = System.Windows.Media.Brushes;
 
-namespace EasyExtract.UserControls;
+namespace EasyExtract.UI.Extraction;
 
 public partial class Extraction : UserControl, INotifyPropertyChanged
 {

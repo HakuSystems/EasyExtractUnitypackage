@@ -1,11 +1,10 @@
-using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Threading;
 using EasyExtract.Config;
-using EasyExtract.Discord;
+using EasyExtract.Services.Discord;
+using EasyExtract.Utilities;
 using Wpf.Ui.Controls;
+using Application = System.Windows.Application;
 
-namespace EasyExtract.UserControls;
+namespace EasyExtract.UI.About;
 
 public partial class About : UserControl
 {

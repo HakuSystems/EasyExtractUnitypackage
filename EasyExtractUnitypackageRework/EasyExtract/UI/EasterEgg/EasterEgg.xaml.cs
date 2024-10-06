@@ -1,9 +1,8 @@
-using System.Windows;
-using System.Windows.Controls;
 using EasyExtract.Config;
-using EasyExtract.Discord;
+using EasyExtract.Services.Discord;
+using EasyExtract.Utilities;
 
-namespace EasyExtract.UserControls;
+namespace EasyExtract.UI.EasterEgg;
 
 public partial class EasterEgg : UserControl
 {
