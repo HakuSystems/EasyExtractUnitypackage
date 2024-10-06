@@ -1,7 +1,5 @@
 using System.Collections.ObjectModel;
-using System.IO;
-using EasyExtract.CustomDesign;
-using Wpf.Ui.Appearance;
+using EasyExtract.UI.CustomDesign;
 
 namespace EasyExtract.Config;
 

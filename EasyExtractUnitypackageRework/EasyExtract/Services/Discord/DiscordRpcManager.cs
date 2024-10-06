@@ -1,9 +1,10 @@
-using System.Windows;
 using DiscordRPC;
 using DiscordRPC.Exceptions;
 using EasyExtract.Config;
+using EasyExtract.Utilities;
+using Application = System.Windows.Application;
 
-namespace EasyExtract.Discord;
+namespace EasyExtract.Services.Discord;
 
 public class DiscordRpcManager : IDisposable
 {

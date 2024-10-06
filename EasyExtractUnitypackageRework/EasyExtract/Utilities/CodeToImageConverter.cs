@@ -1,10 +1,6 @@
-using System.Drawing;
-using System.Drawing.Imaging;
-using System.Drawing.Text;
-using System.IO;
-using System.Windows.Media.Imaging;
+using FontStyle = System.Drawing.FontStyle;
 
-namespace EasyExtract.Config;
+namespace EasyExtract.Utilities;
 
 public class CodeToImageConverter
 {

@@ -1,11 +1,8 @@
-using System.Diagnostics;
-using System.IO;
-using System.Net.Http;
-using System.Reflection;
 using System.Text;
 using EasyExtract.Config;
+using EasyExtract.Utilities;
 
-namespace EasyExtract.SearchEverything;
+namespace EasyExtract.Services.SearchEverything;
 
 public class EverythingValidation
 {

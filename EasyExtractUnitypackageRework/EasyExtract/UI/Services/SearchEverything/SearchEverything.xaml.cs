@@ -1,15 +1,9 @@
-using System.ComponentModel;
-using System.IO;
-using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
-using System.Windows;
-using System.Windows.Controls;
 using EasyExtract.Config;
-using EasyExtract.Discord;
-using EasyExtract.SearchEverything;
-using Microsoft.Win32;
+using EasyExtract.Services.Discord;
+using EasyExtract.Services.SearchEverything;
+using EasyExtract.Utilities;
 
-namespace EasyExtract.UserControls;
+namespace EasyExtract.UI.Services.SearchEverything;
 
 public partial class SearchEverything : UserControl, INotifyPropertyChanged
 {
@@ -196,10 +190,10 @@ public partial class SearchEverything : UserControl, INotifyPropertyChanged
             {
                 counter++;
                 var name = Path.GetFileName(file);
-                var duplicate = Extraction._queueList?.Find(x => x.UnityPackageName == name);
+                var duplicate = Extraction.Extraction._queueList?.Find(x => x.UnityPackageName == name);
                 if (duplicate != null) continue;
-                if (Extraction._queueList == null) Extraction._queueList = new List<SearchEverythingModel>();
-                Extraction._queueList.Add(new SearchEverythingModel
+                if (Extraction.Extraction._queueList == null) Extraction.Extraction._queueList = new List<SearchEverythingModel>();
+                Extraction.Extraction._queueList.Add(new SearchEverythingModel
                 {
                     UnityPackageName = name,
                     UnityPackagePath = file,
@@ -228,10 +222,10 @@ public partial class SearchEverything : UserControl, INotifyPropertyChanged
         var name = selected.UnityPackageName;
         var path = selected.UnityPackagePath;
 
-        var duplicate = Extraction._queueList?.Find(x => x.UnityPackageName == name);
+        var duplicate = Extraction.Extraction._queueList?.Find(x => x.UnityPackageName == name);
         if (duplicate != null) return;
-        if (Extraction._queueList == null) Extraction._queueList = new List<SearchEverythingModel>();
-        Extraction._queueList.Add(new SearchEverythingModel
+        if (Extraction.Extraction._queueList == null) Extraction.Extraction._queueList = new List<SearchEverythingModel>();
+        Extraction.Extraction._queueList.Add(new SearchEverythingModel
         {
             UnityPackageName = name,
             UnityPackagePath = path,

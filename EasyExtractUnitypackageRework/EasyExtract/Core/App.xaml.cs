@@ -1,10 +1,9 @@
-﻿using System.Windows;
-using System.Windows.Threading;
-using EasyExtract.Config;
-using EasyExtract.Discord;
-using EasyExtract.Services.CustomMessageBox;
+﻿using EasyExtract.Config;
+using EasyExtract.Services.Discord;
+using EasyExtract.Utilities;
+using Application = System.Windows.Application;
 
-namespace EasyExtract;
+namespace EasyExtract.Core;
 
 /// <summary>
 ///     Interaction logic for App.xaml
@@ -17,10 +16,7 @@ public partial class App : Application
     private async void Application_DispatcherUnhandledException(object sender, DispatcherUnhandledExceptionEventArgs e)
     {
         await _logger.LogAsync(e.Exception.Message, "App.xaml.cs", Importance.Error);
-        var customMessageBox =
-            new CustomMessageBox("An unexpected error occurred. Please check the logs for more information.", "Error",
-                MessageBoxButton.OK);
-        customMessageBox.ShowDialog();
+        // we cant show a Dialog here because the current doesnt have any active Window yet
         e.Handled = true;
     }
 

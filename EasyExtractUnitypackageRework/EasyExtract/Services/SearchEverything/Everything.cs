@@ -1,7 +1,6 @@
-using System.Runtime.InteropServices;
 using System.Text;
 
-namespace EasyExtract.SearchEverything;
+namespace EasyExtract.Services.SearchEverything;
 
 public class Everything
 {

@@ -1,10 +1,8 @@
-using System.ComponentModel;
-using System.Windows;
 using System.Windows.Media;
-using System.Windows.Media.Imaging;
 using EasyExtract.Config;
+using EasyExtract.Utilities;
 
-namespace EasyExtract.CustomDesign;
+namespace EasyExtract.UI.CustomDesign;
 
 public class BackgroundManager : INotifyPropertyChanged
 {

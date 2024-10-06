@@ -1,18 +1,16 @@
-using System.IO;
-using System.Windows;
-using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
 using EasyExtract.Config;
-using EasyExtract.CustomDesign;
+using EasyExtract.UI.CustomDesign;
 using EasyExtract.Updater;
-using EasyExtract.UserControls;
-using Wpf.Ui.Appearance;
+using EasyExtract.Utilities;
 using Wpf.Ui.Controls;
+using Application = System.Windows.Application;
+using Color = System.Windows.Media.Color;
 using TextBlock = Wpf.Ui.Controls.TextBlock;
 
-namespace EasyExtract;
+namespace EasyExtract.UI.Dashboard;
 
 public partial class Dashboard : FluentWindow
 {
@@ -27,7 +25,7 @@ public partial class Dashboard : FluentWindow
     {
         InitializeComponent();
         DataContext = this;
-        ContentFrame = new UserControls.Extraction();
+        ContentFrame = new UI.Extraction.Extraction();
     }
 
     public static Dashboard Instance
@@ -49,7 +47,7 @@ public partial class Dashboard : FluentWindow
     private void HeartIcon_OnMouseDown(object sender, MouseButtonEventArgs e)
     {
         HeartIcon.Symbol = SymbolRegular.HeartPulse24;
-        NavView.Navigate(typeof(EasterEgg));
+        NavView.Navigate(typeof(EasterEgg.EasterEgg));
     }
 
     private async void Dashboard_OnLoaded(object sender, RoutedEventArgs e)
@@ -102,7 +100,7 @@ public partial class Dashboard : FluentWindow
 
         if (ConfigHelper.Config.Runs is { IsFirstRun: true })
         {
-            NavView.Navigate(typeof(About));
+            NavView.Navigate(typeof(About.About));
             await _logger.LogAsync("First run detected, navigating to About", "Dashboard.xaml.cs", Importance.Info);
             ConfigHelper.Config.Runs.IsFirstRun = false;
             await ConfigHelper.UpdateConfigAsync();
@@ -110,7 +108,7 @@ public partial class Dashboard : FluentWindow
         else
         {
             await _logger.LogAsync("Navigating to Extraction", "Dashboard.xaml.cs", Importance.Info);
-            NavView.Navigate(typeof(UserControls.Extraction));
+            NavView.Navigate(typeof(UI.Extraction.Extraction));
         }
 
         if (ConfigHelper.Config.UwUModeActive)
@@ -177,10 +175,10 @@ public partial class Dashboard : FluentWindow
         {
             await _logger.LogAsync($"Dropped file: {file}", "Dashboard.xaml.cs", Importance.Info);
             var name = Path.GetFileName(file);
-            var duplicate = UserControls.Extraction._queueList?.Find(x => x.UnityPackageName == name);
+            var duplicate = UI.Extraction.Extraction._queueList?.Find(x => x.UnityPackageName == name);
             if (duplicate != null) continue;
-            UserControls.Extraction._queueList ??= new List<SearchEverythingModel>();
-            UserControls.Extraction._queueList.Add(new SearchEverythingModel
+            UI.Extraction.Extraction._queueList ??= new List<SearchEverythingModel>();
+            UI.Extraction.Extraction._queueList.Add(new SearchEverythingModel
             {
                 UnityPackageName = name,
                 UnityPackagePath = file,

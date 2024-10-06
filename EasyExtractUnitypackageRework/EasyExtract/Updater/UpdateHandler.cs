@@ -1,12 +1,5 @@
-using System.Diagnostics;
-using System.IO;
-using System.Net.Http;
-using System.Reflection;
 using EasyExtract.Config;
-using Octokit;
-using SharpCompress.Archives;
-using SharpCompress.Common;
-using FileMode = System.IO.FileMode;
+using EasyExtract.Utilities;
 
 namespace EasyExtract.Updater;
 

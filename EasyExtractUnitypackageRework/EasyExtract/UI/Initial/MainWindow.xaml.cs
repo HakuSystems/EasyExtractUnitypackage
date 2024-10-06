@@ -1,10 +1,8 @@
-﻿using System.IO;
-using System.Windows;
-using System.Windows.Threading;
-using EasyExtract.Config;
-using EasyExtract.Discord;
+﻿using EasyExtract.Config;
+using EasyExtract.Services.Discord;
+using EasyExtract.Utilities;
 
-namespace EasyExtract;
+namespace EasyExtract.UI.Initial;
 
 /// <summary>
 ///     Interaction logic for MainWindow.xaml
@@ -32,14 +30,14 @@ public partial class MainWindow : Window
             timer.Tick += (sender, args) =>
             {
                 timer.Stop();
-                new Dashboard().Show();
+                new Dashboard.Dashboard().Show();
                 Close();
             };
             timer.Start();
         }
         else
         {
-            new Dashboard().Show();
+            new Dashboard.Dashboard().Show();
             Close();
         }
     }
