@@ -4,7 +4,7 @@ using System.Text;
 using System.Windows;
 using System.Windows.Controls;
 using EasyExtract.Discord;
-using EasyExtract.Services.CustomMessageBox;
+using EasyExtract.Services;
 using Newtonsoft.Json;
 
 namespace EasyExtract.UI.Feedback;
@@ -41,21 +41,18 @@ public partial class Feedback : UserControl
             : "Sending Request as Anonymous";
     }
 
-    private void SubmitFeedbackButton_OnClick(object sender, RoutedEventArgs e)
+    private async void SubmitFeedbackButton_OnClick(object sender, RoutedEventArgs e)
     {
         if (string.IsNullOrWhiteSpace(FeedbackTextBox.Text))
         {
-            var customMessageBox = new CustomMessageBox("Please enter your feedback.", "Warning",
-                MessageBoxButton.OK);
-            customMessageBox.ShowDialog();
+            await DialogHelper.ShowErrorDialogAsync(Window.GetWindow(this), "Warning", "Please enter your feedback.", "OK");
             return;
         }
 
         if (FeedbackSelection.SelectedIndex.Equals(-1))
         {
-            var customMessageBox = new CustomMessageBox("Please select your satisfaction level.", "Warning",
-                MessageBoxButton.OK);
-            customMessageBox.ShowDialog();
+            await DialogHelper.ShowErrorDialogAsync(Window.GetWindow(this), "Warning", "Please select your satisfaction level.",
+                "OK");
             return;
         }
 
@@ -85,9 +82,7 @@ public partial class Feedback : UserControl
             var response = await client.PostAsync(url, content);
             if (response.IsSuccessStatusCode)
             {
-                var customMessageBox = new CustomMessageBox("Feedback submitted successfully!", "Success",
-                    MessageBoxButton.OK);
-                customMessageBox.ShowDialog();
+                await DialogHelper.ShowErrorDialogAsync(Window.GetWindow(this), "Success", "Feedback submitted successfully.", "OK");
             }
             else
             {
@@ -95,23 +90,18 @@ public partial class Feedback : UserControl
                 dynamic errorResponse = JsonConvert.DeserializeObject(responseContent);
                 string errorMessage = errorResponse.message;
                 string errorStatus = errorResponse.status;
-                var customMessageBox = new CustomMessageBox(errorMessage, errorStatus, MessageBoxButton.OK);
-                customMessageBox.ShowDialog();
+                await DialogHelper.ShowErrorDialogAsync(Window.GetWindow(this), errorStatus.ToUpper(), errorMessage, "OK");
             }
         }
         catch (HttpRequestException)
         {
-            var customMessageBox =
-                new CustomMessageBox("Network error. Please check your internet connection and try again.", "Error",
-                    MessageBoxButton.OK);
-            customMessageBox.ShowDialog();
+            await DialogHelper.ShowErrorDialogAsync(Window.GetWindow(this), "Error",
+                "Network error. Please check your internet connection and try again.", "OK");
         }
         catch (Exception ex)
         {
-            var customMessageBox =
-                new CustomMessageBox("An unexpected error occurred. Please check the logs for more information.",
-                    "Error", MessageBoxButton.OK);
-            customMessageBox.ShowDialog();
+            await DialogHelper.ShowErrorDialogAsync(Window.GetWindow(this), "Error",
+                "An unexpected error occurred. Please check the logs for more information.", "OK");
         }
     }
 }

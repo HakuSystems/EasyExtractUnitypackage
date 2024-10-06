@@ -61,6 +61,7 @@
             HorizontalAlignment="Stretch"
             HorizontalContentAlignment="Stretch"
             IsBackButtonVisible="Collapsed"
+            IsPaneToggleVisible="False"
             PaneDisplayMode="Left"
             PaneTitle="EasyExtractUnitypackage"
             Transition="FadeInWithSlide"

@@ -2,10 +2,8 @@ using System.Diagnostics;
 using System.Reflection;
 using System.Security;
 using System.Security.Principal;
-using System.Windows;
 using EasyExtract.Config;
 using EasyExtract.Extraction;
-using EasyExtract.Services.CustomMessageBox;
 using Microsoft.Win32;
 
 namespace EasyExtract;
@@ -146,7 +144,7 @@ public class Program
         return new WindowsPrincipal(WindowsIdentity.GetCurrent()).IsInRole(WindowsBuiltInRole.Administrator);
     }
 
-    private void RunAsAdmin(string[] args)
+    private async void RunAsAdmin(string[] args)
     {
         var processInfo = new ProcessStartInfo
         {
@@ -163,11 +161,8 @@ public class Program
         }
         catch (Exception e)
         {
-            var customMessageBox =
-                new CustomMessageBox(
-                    "An error occurred while trying to run as administrator. Please check the logs for more information.",
-                    "Error", MessageBoxButton.OK);
-            customMessageBox.ShowDialog();
+            await _logger.LogAsync($"An error occurred while running as admin: {e.Message}", "Program.cs", Importance.Error);
+            // we cant show a Dialog here because the current doesnt have any active Window yet
             throw;
         }
     }
