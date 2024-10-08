@@ -9,15 +9,15 @@ namespace EasyExtract.Services.Discord;
 public class DiscordRpcManager : IDisposable
 {
     private static DiscordRpcManager? _instance;
-    private static readonly ConfigHelper _configHelper = new();
-    private readonly BetterLogger _logger = new();
+    private static readonly ConfigHelper ConfigHelper = new();
     private readonly Timestamps timestamps;
-    public DiscordRpcClient client;
+    internal DiscordRpcClient? Client;
+    private bool disposedValue;
 
     private DiscordRpcManager()
     {
         timestamps = new Timestamps(DateTime.UtcNow);
-        DiscordStart();
+        _ = DiscordStart();
     }
 
     public static DiscordRpcManager Instance
@@ -25,29 +25,48 @@ public class DiscordRpcManager : IDisposable
         get => _instance ??= new DiscordRpcManager();
     }
 
-    public async void Dispose()
+    public void Dispose()
     {
-        if (!client.IsDisposed) client.Dispose();
-        await _logger.LogAsync("Disposed DiscordRpcClient", "DiscordRpcManager.cs", Importance.Info); // Log disposal
+        Dispose(true);
+        GC.SuppressFinalize(this);
     }
 
-    public async void DiscordStart()
+    protected virtual void Dispose(bool disposing)
     {
-        if (client == null || client.IsDisposed)
+        if (!disposedValue)
         {
-            client = new DiscordRpcClient("1103487584124010607");
-            client.Initialize(); // Initialize synchronously; no await needed here
-            client.OnReady += (sender, e) => Console.WriteLine($"Received Ready from user {e.User.Username}");
-            client.OnError += (sender, e) => Console.WriteLine($"Error! {e.Message}");
-            client.OnClose += (sender, e) => Console.WriteLine($"Close! {e}");
-            await _logger.LogAsync("Discord RPC started", "DiscordRpcManager.cs", Importance.Info); // Log start
+            if (disposing)
+            {
+                // Dispose managed state (managed objects)
+                if (Client is { IsDisposed: false }) Client.Dispose();
+                BetterLogger.LogAsync("Disposed DiscordRpcClient", $"{nameof(DiscordRpcManager)}.cs", Importance.Info)
+                    .Wait(); // Log disposal
+            }
+
+            // Set large fields to null.
+            Client = null!;
+
+            disposedValue = true;
+        }
+    }
+
+    public async Task DiscordStart()
+    {
+        if (Client == null || Client.IsDisposed)
+        {
+            Client = new DiscordRpcClient("1103487584124010607");
+            Client.Initialize(); // Initialize synchronously; no await needed here
+            Client.OnReady += (_, e) => Console.WriteLine($"Received Ready from user {e.User.Username}");
+            Client.OnError += (_, e) => Console.WriteLine($"Error! {e.Message}");
+            Client.OnClose += (_, e) => Console.WriteLine($"Close! {e}");
+            await BetterLogger.LogAsync("Discord RPC started", $"{nameof(DiscordRpcManager)}.cs", Importance.Info); // Log start
         }
     }
 
     public async Task UpdatePresenceAsync(string state)
     {
-        var unityPackageCount = _configHelper.Config.TotalExtracted;
-        var fileCount = _configHelper.Config.TotalFilesExtracted;
+        var unityPackageCount = ConfigHelper.Config.TotalExtracted;
+        var fileCount = ConfigHelper.Config.TotalFilesExtracted;
         var largeTextString = $"U: {unityPackageCount} | F: {fileCount}";
 
         if (largeTextString.Length > 127)
@@ -57,14 +76,14 @@ public class DiscordRpcManager : IDisposable
             }
             catch (StringOutOfRangeException e)
             {
-                largeTextString = "Too many files extracted and/or unitypackages";
-                await _logger.LogAsync($"StringOutOfRangeException: {e.Message}", "DiscordRpcManager.cs",
+                largeTextString = "Too many files extracted and/or unity packages";
+                await BetterLogger.LogAsync($"StringOutOfRangeException: {e.Message}", $"{nameof(DiscordRpcManager)}.cs",
                     Importance.Warning); // Log exception
             }
 
         try
         {
-            client.SetPresence(new RichPresence
+            Client?.SetPresence(new RichPresence
             {
                 Details = "A Software to get files out of a .unitypackage",
                 State = $"Viewing {state} Page",
@@ -77,12 +96,12 @@ public class DiscordRpcManager : IDisposable
                     SmallImageText = $"V{Application.ResourceAssembly.GetName().Version}"
                 }
             });
-            await _logger.LogAsync($"Updated Discord presence to state: {state}", "DiscordRpcManager.cs",
+            await BetterLogger.LogAsync($"Updated Discord presence to state: {state}", "DiscordRpcManager.cs",
                 Importance.Info); // Log presence update
         }
         catch (Exception ex)
         {
-            await _logger.LogAsync($"Failed to update Discord presence: {ex.Message}", "DiscordRpcManager.cs",
+            await BetterLogger.LogAsync($"Failed to update Discord presence: {ex.Message}", "DiscordRpcManager.cs",
                 Importance.Error); // Log presence update failure
             Console.WriteLine($"Failed to Update Discord Presence: {ex.Message}");
         }

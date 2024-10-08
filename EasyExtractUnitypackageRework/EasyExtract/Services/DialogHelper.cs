@@ -3,7 +3,7 @@ using Wpf.Ui.Controls;
 
 namespace EasyExtract.Services;
 
-public class DialogHelper
+public static class DialogHelper
 {
     private static ContentPresenter? _dialogHost;
     private static IContentDialogService? _contentDialogService;
