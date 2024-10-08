@@ -2,7 +2,7 @@ using FontStyle = System.Drawing.FontStyle;
 
 namespace EasyExtract.Utilities;
 
-public class CodeToImageConverter
+public static class CodeToImageConverter
 {
     /// <summary>
     ///     Converts the given code to an image.

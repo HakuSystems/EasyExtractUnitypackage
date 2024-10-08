@@ -4,10 +4,9 @@ using EasyExtract.Utilities;
 
 namespace EasyExtract.UI.EasterEgg;
 
-public partial class EasterEgg : UserControl
+public partial class EasterEgg
 {
-    private readonly BetterLogger _logger = new();
-    private readonly ConfigHelper ConfigHelper = new();
+    private readonly ConfigHelper _configHelper = new();
 
     public EasterEgg()
     {
@@ -16,15 +15,15 @@ public partial class EasterEgg : UserControl
 
     private async void EasterEgg_OnLoaded(object sender, RoutedEventArgs e)
     {
-        var isDiscordEnabled = false;
+        bool isDiscordEnabled;
         try
         {
-            isDiscordEnabled = ConfigHelper.Config.DiscordRpc;
+            isDiscordEnabled = _configHelper.Config.DiscordRpc;
         }
         catch (Exception exception)
         {
             Console.WriteLine(exception);
-            await _logger.LogAsync($"Error reading config: {exception.Message}", "EasterEgg.xaml.cs",
+            await BetterLogger.LogAsync($"Error reading config: {exception.Message}", "EasterEgg.xaml.cs",
                 Importance.Error); // Log error
             throw;
         }
@@ -37,12 +36,12 @@ public partial class EasterEgg : UserControl
             catch (Exception exception)
             {
                 Console.WriteLine(exception);
-                await _logger.LogAsync($"Error updating Discord presence: {exception.Message}", "EasterEgg.xaml.cs",
+                await BetterLogger.LogAsync($"Error updating Discord presence: {exception.Message}", "EasterEgg.xaml.cs",
                     Importance.Error); // Log error
                 throw;
             }
 
-        await _logger.LogAsync("EasterEgg UserControl loaded", "EasterEgg.xaml.cs",
+        await BetterLogger.LogAsync("EasterEgg UserControl loaded", "EasterEgg.xaml.cs",
             Importance.Info); // Log successful load
     }
 }

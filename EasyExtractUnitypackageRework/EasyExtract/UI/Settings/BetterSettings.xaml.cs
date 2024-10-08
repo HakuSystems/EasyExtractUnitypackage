@@ -5,11 +5,10 @@ using EasyExtract.Utilities;
 
 namespace EasyExtract.UI.Settings;
 
-public partial class BetterSettings : UserControl
+public partial class BetterSettings
 {
     private readonly BackgroundManager _backgroundManager = BackgroundManager.Instance;
     private readonly ConfigHelper _configHelper = new();
-    private readonly BetterLogger _logger = new();
 
     public BetterSettings()
     {
@@ -40,21 +39,21 @@ public partial class BetterSettings : UserControl
             ThemeComboBox.ItemsSource = themes;
 
             foreach (var theme in themes)
-                await _logger.LogAsync($"Available Theme: {theme}", "BetterSettings.xaml.cs", Importance.Info);
+                await BetterLogger.LogAsync($"Available Theme: {theme}", $"{nameof(BetterSettings)}.xaml.cs", Importance.Info);
 
             if (themes.Contains(_configHelper.Config.ApplicationTheme))
             {
                 ThemeComboBox.SelectedItem = _configHelper.Config.ApplicationTheme;
-                await _logger.LogAsync($"Set ThemeComboBox.SelectedItem to: {_configHelper.Config.ApplicationTheme}",
-                    "BetterSettings.xaml.cs", Importance.Info);
+                await BetterLogger.LogAsync($"Set ThemeComboBox.SelectedItem to: {_configHelper.Config.ApplicationTheme}",
+                    $"{nameof(BetterSettings)}.xaml.cs", Importance.Info);
             }
             else
             {
-                await _logger.LogAsync(
+                await BetterLogger.LogAsync(
                     $"ThemeComboBox.ItemsSource does not contain {_configHelper.Config.ApplicationTheme}",
-                    "BetterSettings.xaml.cs", Importance.Warning);
+                    $"{nameof(BetterSettings)}.xaml.cs", Importance.Warning);
                 ThemeComboBox.SelectedItem = ApplicationTheme.Dark; // Default to Dark
-                await _logger.LogAsync("Set ThemeComboBox.SelectedItem to default: Dark", "BetterSettings.xaml.cs",
+                await BetterLogger.LogAsync("Set ThemeComboBox.SelectedItem to default: Dark", $"{nameof(BetterSettings)}.xaml.cs",
                     Importance.Info);
             }
 
@@ -62,16 +61,21 @@ public partial class BetterSettings : UserControl
             DiscordRpcToggleSwitch.IsChecked = _configHelper.Config.DiscordRpc;
             DefaultTempPathTextBox.Text = _configHelper.Config.DefaultTempPath;
             BackgroundOpacitySlider.Value = _configHelper.Config.Backgrounds.BackgroundOpacity;
-            await _logger.LogAsync("UI updated to match config", "BetterSettings.xaml.cs", Importance.Info);
+            await BetterLogger.LogAsync("UI updated to match config", $"{nameof(BetterSettings)}.xaml.cs", Importance.Info);
         }
         catch (Exception ex)
         {
-            await _logger.LogAsync($"Exception in ChangeUiToMatchConfigAsync: {ex.Message}", "BetterSettings.xaml.cs",
+            await BetterLogger.LogAsync($"Exception in ChangeUiToMatchConfigAsync: {ex.Message}", $"{nameof(BetterSettings)}.xaml.cs",
                 Importance.Error);
         }
     }
 
     private async void UwUToggleSwitch_OnChecked(object sender, RoutedEventArgs e)
+    {
+        await UwUToggleSwitchCheckUnCheck();
+    }
+
+    private async Task UwUToggleSwitchCheckUnCheck()
     {
         _configHelper.Config.UwUModeActive = UwUToggleSwitch.IsChecked ?? false;
         await _configHelper.UpdateConfigAsync();
@@ -79,8 +83,7 @@ public partial class BetterSettings : UserControl
 
     private async void UwUToggleSwitch_OnUnchecked(object sender, RoutedEventArgs e)
     {
-        _configHelper.Config.UwUModeActive = UwUToggleSwitch.IsChecked ?? false;
-        await _configHelper.UpdateConfigAsync();
+        await UwUToggleSwitchCheckUnCheck();
     }
 
     private async void BackgroundOpacitySlider_OnValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
@@ -89,12 +92,18 @@ public partial class BetterSettings : UserControl
         _configHelper.Config.Backgrounds.BackgroundOpacity = (float)BackgroundOpacitySlider.Value;
         _configHelper.Config.Backgrounds.BackgroundPath =
             currentBackground.ImageSource
-                .ToString(); // Save current background path since it's not saved in the config when changing opacity.
+                .ToString(); // Save the current background path
+        // since it's not saved in the config when changing opacity.
         _backgroundManager.UpdateOpacity(_configHelper.Config.Backgrounds.BackgroundOpacity);
         await _configHelper.UpdateConfigAsync();
     }
 
     private async void CheckForUpdatesOnStartUpToggleSwitch_OnChecked(object sender, RoutedEventArgs e)
+    {
+        await CheckForUpdatesUpdateToggle();
+    }
+
+    private async Task CheckForUpdatesUpdateToggle()
     {
         _configHelper.Config.Update.AutoUpdate = CheckForUpdatesOnStartUpToggleSwitch.IsChecked ?? false;
         await _configHelper.UpdateConfigAsync();
@@ -102,8 +111,7 @@ public partial class BetterSettings : UserControl
 
     private async void CheckForUpdatesOnStartUpToggleSwitch_OnUnchecked(object sender, RoutedEventArgs e)
     {
-        _configHelper.Config.Update.AutoUpdate = CheckForUpdatesOnStartUpToggleSwitch.IsChecked ?? false;
-        await _configHelper.UpdateConfigAsync();
+        await CheckForUpdatesUpdateToggle();
     }
 
     private async void DiscordRpcToggleSwitch_OnChecked(object sender, RoutedEventArgs e)
@@ -160,7 +168,7 @@ public partial class BetterSettings : UserControl
 
         _configHelper.Config.DefaultTempPath = folderDialog.FolderName;
         await _configHelper.UpdateConfigAsync();
-        await _logger.LogAsync($"Default temp path set to: {folderDialog.FolderName}", "Settings.xaml.cs",
+        await BetterLogger.LogAsync($"Default temp path set to: {folderDialog.FolderName}", "Settings.xaml.cs",
             Importance.Info);
     }
 
@@ -170,10 +178,15 @@ public partial class BetterSettings : UserControl
             Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "EasyExtract", "Temp");
         DefaultTempPathTextBox.Text = _configHelper.Config.DefaultTempPath;
         await _configHelper.UpdateConfigAsync();
-        await _logger.LogAsync("Default temp path reset", "Settings.xaml.cs", Importance.Info);
+        await BetterLogger.LogAsync("Default temp path reset", "Settings.xaml.cs", Importance.Info);
     }
 
     private async void SkipIntroLogoAnimationToggleSwitch_OnChecked(object sender, RoutedEventArgs e)
+    {
+        await SkipIntroLogoAnimationToggleSwitchCheckUnCheck();
+    }
+
+    private async Task SkipIntroLogoAnimationToggleSwitchCheckUnCheck()
     {
         _configHelper.Config.IntroLogoAnimation = SkipIntroLogoAnimationToggleSwitch.IsChecked ?? false;
         await _configHelper.UpdateConfigAsync();
@@ -181,19 +194,22 @@ public partial class BetterSettings : UserControl
 
     private async void SkipIntroLogoAnimationToggleSwitch_OnUnchecked(object sender, RoutedEventArgs e)
     {
-        _configHelper.Config.IntroLogoAnimation = SkipIntroLogoAnimationToggleSwitch.IsChecked ?? false;
-        await _configHelper.UpdateConfigAsync();
+        await SkipIntroLogoAnimationToggleSwitchCheckUnCheck();
     }
 
     private async void ContextMenuSwitch_OnChecked(object sender, RoutedEventArgs e)
     {
-        _configHelper.Config.ContextMenuToggle = ContextMenuSwitch.IsChecked ?? false;
-        await _configHelper.UpdateConfigAsync();
+        await UpdateContextMenuToggleSettingAsync();
     }
 
-    private void ContextMenuSwitch_OnUnchecked(object sender, RoutedEventArgs e)
+    private async void ContextMenuSwitch_OnUnchecked(object sender, RoutedEventArgs e)
+    {
+        await UpdateContextMenuToggleSettingAsync();
+    }
+
+    private async Task UpdateContextMenuToggleSettingAsync()
     {
         _configHelper.Config.ContextMenuToggle = ContextMenuSwitch.IsChecked ?? false;
-        _configHelper.UpdateConfigAsync();
+        await _configHelper.UpdateConfigAsync();
     }
 }

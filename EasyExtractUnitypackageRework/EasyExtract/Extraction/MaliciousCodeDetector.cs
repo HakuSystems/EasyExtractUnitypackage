@@ -2,7 +2,7 @@ using System.Text.RegularExpressions;
 
 namespace EasyExtract.Extraction;
 
-public class MaliciousCodeDetector
+public static class MaliciousCodeDetector
 {
     private static readonly Regex DiscordWebhookRegex =
         new(@"https:\/\/discord(?:app)?\.com\/api\/webhooks\/\d{18}\/[A-Za-z0-9-_]{68}",
@@ -20,7 +20,7 @@ public class MaliciousCodeDetector
     ///     A task that represents the asynchronous operation. The task result contains a boolean value indicating whether
     ///     any Discord webhook URLs were found in the code file content.
     /// </returns>
-    public Task<bool> StartDiscordWebhookScanAsync(string lineOfCode)
+    public static Task<bool> StartDiscordWebhookScanAsync(string lineOfCode)
     {
         return Task.FromResult(DiscordWebhookRegex.IsMatch(lineOfCode));
     }
@@ -33,7 +33,7 @@ public class MaliciousCodeDetector
     ///     A task that represents the asynchronous operation. The task result contains a boolean value indicating whether
     ///     any links were found in the code file content.
     /// </returns>
-    public Task<bool> StartLinkDetectionAsync(string lineOfCode)
+    public static Task<bool> StartLinkDetectionAsync(string lineOfCode)
     {
         return Task.FromResult(LinkDetectionRegex.IsMatch(lineOfCode));
     }

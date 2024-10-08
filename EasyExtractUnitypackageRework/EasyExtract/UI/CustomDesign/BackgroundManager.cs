@@ -1,3 +1,4 @@
+using System.Text;
 using System.Windows.Media;
 using EasyExtract.Config;
 using EasyExtract.Utilities;
@@ -6,9 +7,8 @@ namespace EasyExtract.UI.CustomDesign;
 
 public class BackgroundManager : INotifyPropertyChanged
 {
-    private static BackgroundManager _instance;
-    private readonly BetterLogger _logger = new();
-    private readonly ConfigHelper ConfigHelper = new();
+    private static BackgroundManager? _instance;
+    private readonly ConfigHelper _configHelper = new();
     private double _backgroundOpacity;
     private ImageBrush _currentBackground;
 
@@ -44,19 +44,19 @@ public class BackgroundManager : INotifyPropertyChanged
         set
         {
             _backgroundOpacity = value;
-            if (_currentBackground != null) _currentBackground.Opacity = value;
+            _currentBackground.Opacity = value;
             OnPropertyChanged(nameof(BackgroundOpacity));
         }
     }
 
-    public event PropertyChangedEventHandler PropertyChanged;
-    public event EventHandler BackgroundChanged;
+    public event PropertyChangedEventHandler? PropertyChanged;
+    public event EventHandler? BackgroundChanged;
 
-    public async void UpdateBackground(string imagePath)
+    public async Task UpdateBackground(string imagePath)
     {
         if (string.IsNullOrEmpty(imagePath))
         {
-            ResetBackground();
+            await ResetBackground();
             return;
         }
 
@@ -65,25 +65,26 @@ public class BackgroundManager : INotifyPropertyChanged
             Opacity = BackgroundOpacity,
             Stretch = Stretch.Fill
         };
-        await _logger.LogAsync($"Background updated with image: {imagePath}", "BackgroundManager.cs",
+        await BetterLogger.LogAsync($"Background updated with image: {imagePath}", $"{nameof(BackgroundManager)}.cs",
             Importance.Info); // Log background update
     }
 
-    public async void ResetBackground()
+    public async Task ResetBackground()
     {
         try
         {
-            var uri = new Uri(
-                "https://raw.githubusercontent.com/HakuSystems/GraphicsStuff/main/EasyExtractUnitypackage_Background%208K.png");
+            var uri = new Uri(new StringBuilder().Append(
+                    "\u0068\u0074\u0074\u0070\u0073\u003a\u002f\u002f\u0072\u0061\u0077\u002e\u0067\u0069\u0074\u0068\u0075\u0062\u0075\u0073\u0065\u0072\u0063\u006f\u006e\u0074\u0065\u006e\u0074\u002e\u0063\u006f\u006d\u002f\u0048\u0061\u006b\u0075\u0053\u0079\u0073\u0074\u0065\u006d\u0073\u002f\u0047\u0072\u0061\u0070\u0068\u0069\u0063\u0073\u0053\u0074\u0075\u0066\u0066\u002f\u006d\u0061\u0069\u006e\u002f\u0045\u0061\u0073\u0079\u0045\u0078\u0074\u0072\u0061\u0063\u0074\u0055\u006e\u0069\u0074\u0079\u0070\u0061\u0063\u006b\u0061\u0067\u0065\u005f\u0042\u0061\u0063\u006b\u0067\u0072\u006f\u0075\u006e\u0064\u0025\u0032\u0030\u0038\u004b\u002e\u0070\u006e\u0067")
+                .ToString());
             CurrentBackground = new ImageBrush(new BitmapImage(new Uri(uri.ToString())))
             {
                 Opacity = BackgroundOpacity,
                 Stretch = Stretch.Fill
             };
-            ConfigHelper.Config.Backgrounds.BackgroundPath = uri.ToString();
-            UpdateBackground(uri.ToString());
-            await ConfigHelper.UpdateConfigAsync();
-            await _logger.LogAsync("Background reset to default", "BackgroundManager.cs",
+            _configHelper.Config.Backgrounds.BackgroundPath = uri.ToString();
+            await UpdateBackground(uri.ToString());
+            await _configHelper.UpdateConfigAsync();
+            await BetterLogger.LogAsync("Background reset to default", "BackgroundManager.cs",
                 Importance.Info); // Log background reset
         }
         catch (ResourceReferenceKeyNotFoundException ex)
@@ -93,27 +94,25 @@ public class BackgroundManager : INotifyPropertyChanged
                 Opacity = BackgroundOpacity,
                 Stretch = Stretch.Fill
             };
-            await _logger.LogAsync($"Default background resource not found: {ex.Message}", "BackgroundManager.cs",
+            await BetterLogger.LogAsync($"Default background resource not found: {ex.Message}", "BackgroundManager.cs",
                 Importance.Warning); // Log resource not found
         }
     }
 
-    public async void UpdateOpacity(double opacity)
+    public async Task UpdateOpacity(double opacity)
     {
         BackgroundOpacity = opacity;
-        if (_currentBackground != null) _currentBackground.Opacity = opacity;
-        ConfigHelper.Config.Backgrounds.BackgroundOpacity = opacity;
-        await ConfigHelper.UpdateConfigAsync();
-        await _logger.LogAsync($"Background opacity updated to {opacity}", "BackgroundManager.cs",
-            Importance.Info); // Log opacity update
+        _currentBackground.Opacity = opacity;
+        _configHelper.Config.Backgrounds.BackgroundOpacity = opacity;
+        await _configHelper.UpdateConfigAsync();
     }
 
-    protected void OnPropertyChanged(string propertyName)
+    private void OnPropertyChanged(string propertyName)
     {
         PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
     }
 
-    protected void OnBackgroundChanged(EventArgs e)
+    private void OnBackgroundChanged(EventArgs e)
     {
         BackgroundChanged?.Invoke(this, e);
     }

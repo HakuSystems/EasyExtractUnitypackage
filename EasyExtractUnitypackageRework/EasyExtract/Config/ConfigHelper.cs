@@ -10,7 +10,6 @@ public class ConfigHelper
             "Settings.json");
 
     private static readonly SemaphoreSlim Semaphore = new(1, 1);
-    private readonly BetterLogger _logger = new();
 
     public ConfigHelper()
     {
@@ -20,7 +19,7 @@ public class ConfigHelper
             Task.Run(async () => await UpdateConfigAsync());
     }
 
-    public ConfigModel Config { get; private set; } = new();
+    public ConfigModel? Config { get; private set; } = new();
 
     public async Task ReadConfigAsync()
     {
@@ -28,11 +27,10 @@ public class ConfigHelper
         {
             var json = await File.ReadAllTextAsync(ConfigPath).ConfigureAwait(false);
             Config = JsonConvert.DeserializeObject<ConfigModel>(json);
-            await _logger.LogAsync("Read config file", "ConfigHelper", Importance.Debug);
         }
         catch (Exception e)
         {
-            await _logger.LogAsync($"Exception in ReadConfigAsync: {e.Message}", "ConfigHelper", Importance.Error);
+            await BetterLogger.LogAsync($"Exception in ReadConfigAsync: {e.Message}", "ConfigHelper", Importance.Error);
         }
     }
 
@@ -45,11 +43,11 @@ public class ConfigHelper
             var json = JsonConvert.SerializeObject(Config, Formatting.Indented);
             await using var sw = new StreamWriter(ConfigPath, false);
             await sw.WriteAsync(json);
-            await _logger.LogAsync($"Updated config file: {json}", "ConfigHelper", Importance.Debug);
+            await BetterLogger.LogAsync($"Updated config file: {json}", "ConfigHelper", Importance.Debug);
         }
         catch (Exception e)
         {
-            await _logger.LogAsync($"Exception in UpdateConfigAsync: {e.Message}", "ConfigHelper", Importance.Error);
+            await BetterLogger.LogAsync($"Exception in UpdateConfigAsync: {e.Message}", "ConfigHelper", Importance.Error);
         }
         finally
         {

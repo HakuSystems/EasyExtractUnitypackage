@@ -5,35 +5,35 @@ using Newtonsoft.Json;
 
 namespace EasyExtract.UI.Feedback;
 
-public partial class Feedback : UserControl
+public partial class Feedback
 {
     public Feedback()
     {
         InitializeComponent();
     }
 
-    private string SenderName
+    private static string SenderName
     {
-        get => DiscordRpcManager.Instance.client.CurrentUser != null
-            ? DiscordRpcManager.Instance.client.CurrentUser.Username
+        get => DiscordRpcManager.Instance.Client.CurrentUser != null
+            ? DiscordRpcManager.Instance.Client.CurrentUser.Username
             : "Anonymous";
     }
 
-    private void Feedback_OnLoaded(object sender, RoutedEventArgs e)
+    private async void Feedback_OnLoaded(object sender, RoutedEventArgs e)
     {
         GetDiscordUsername();
-        UpdateDiscordPresence();
+        await UpdateDiscordPresence();
     }
 
-    private async void UpdateDiscordPresence()
+    private static async Task UpdateDiscordPresence()
     {
         await DiscordRpcManager.Instance.UpdatePresenceAsync("Feedback");
     }
 
     private void GetDiscordUsername()
     {
-        DiscordNameRequest.Text = DiscordRpcManager.Instance.client.CurrentUser != null
-            ? $"Sending Request as {DiscordRpcManager.Instance.client.CurrentUser.Username}"
+        DiscordNameRequest.Text = DiscordRpcManager.Instance.Client.CurrentUser != null
+            ? $"Sending Request as {DiscordRpcManager.Instance.Client.CurrentUser.Username}"
             : "Sending Request as Anonymous";
     }
 
@@ -52,52 +52,64 @@ public partial class Feedback : UserControl
             return;
         }
 
-        SendFeedback();
+        await SendFeedback();
         FeedbackTextBox.Text = string.Empty;
         FeedbackSelection.SelectedIndex = -1; // Reset the selection
     }
 
-    private async void SendFeedback()
+    private async Task SendFeedback()
     {
-        var feedbackData = new
+        var version = Assembly.GetExecutingAssembly().GetName().Version;
+        if (version != null)
         {
-            user = SenderName,
-            satisfaction = FeedbackSelection.Text,
-            feedback = FeedbackTextBox.Text,
-            appVersion = Assembly.GetExecutingAssembly().GetName().Version.ToString()
-        };
-        var url = "https://hooker.zkwolf.com/easy_extractor/feedback";
-        var jsonData = JsonConvert.SerializeObject(new
-        {
-            data = feedbackData
-        });
-        try
-        {
-            using HttpClient client = new();
-            var content = new StringContent(jsonData, Encoding.UTF8, "application/json");
-            var response = await client.PostAsync(url, content);
-            if (response.IsSuccessStatusCode)
+            var feedbackData = new
             {
-                await DialogHelper.ShowErrorDialogAsync(Window.GetWindow(this), "Success", "Feedback submitted successfully.", "OK");
-            }
-            else
+                user = SenderName,
+                satisfaction = FeedbackSelection.Text,
+                feedback = FeedbackTextBox.Text,
+                appVersion = version.ToString()
+            };
+            var url = new StringBuilder()
+                .Append(
+                    "\u0068\u0074\u0074\u0070\u0073\u003a\u002f\u002f\u0068\u006f\u006f\u006b\u0065\u0072\u002e\u007a\u006b\u0077\u006f\u006c\u0066\u002e\u0063\u006f\u006d\u002f\u0065\u0061\u0073\u0079\u005f\u0065\u0078\u0074\u0072\u0061\u0063\u0074\u006f\u0072\u002f\u0066\u0065\u0065\u0064\u0062\u0061\u0063\u006b")
+                .ToString();
+            var jsonData = JsonConvert.SerializeObject(new
             {
-                var responseContent = await response.Content.ReadAsStringAsync();
-                dynamic errorResponse = JsonConvert.DeserializeObject(responseContent);
-                string errorMessage = errorResponse.message;
-                string errorStatus = errorResponse.status;
-                await DialogHelper.ShowErrorDialogAsync(Window.GetWindow(this), errorStatus.ToUpper(), errorMessage, "OK");
+                data = feedbackData
+            });
+            try
+            {
+                using HttpClient client = new();
+                var content = new StringContent(jsonData, Encoding.UTF8, "application/json");
+                var response = await client.PostAsync(url, content);
+                if (response.IsSuccessStatusCode)
+                {
+                    await DialogHelper.ShowErrorDialogAsync(Window.GetWindow(this), "Success", "Feedback submitted successfully.",
+                        "OK");
+                }
+                else
+                {
+                    var responseContent = await response.Content.ReadAsStringAsync();
+                    dynamic errorResponse = (JsonConvert.DeserializeObject(responseContent) ?? null) ??
+                                            throw new InvalidOperationException();
+                    if (errorResponse != null)
+                    {
+                        string errorMessage = errorResponse.message;
+                        string errorStatus = errorResponse.status;
+                        await DialogHelper.ShowErrorDialogAsync(Window.GetWindow(this), errorStatus.ToUpper(), errorMessage, "OK");
+                    }
+                }
             }
-        }
-        catch (HttpRequestException)
-        {
-            await DialogHelper.ShowErrorDialogAsync(Window.GetWindow(this), "Error",
-                "Network error. Please check your internet connection and try again.", "OK");
-        }
-        catch (Exception ex)
-        {
-            await DialogHelper.ShowErrorDialogAsync(Window.GetWindow(this), "Error",
-                "An unexpected error occurred. Please check the logs for more information.", "OK");
+            catch (HttpRequestException)
+            {
+                await DialogHelper.ShowErrorDialogAsync(Window.GetWindow(this), "Error",
+                    "Network error. Please check your internet connection and try again.", "OK");
+            }
+            catch (Exception)
+            {
+                await DialogHelper.ShowErrorDialogAsync(Window.GetWindow(this), "Error",
+                    "An unexpected error occurred. Please check the logs for more information.", "OK");
+            }
         }
     }
 }

@@ -12,25 +12,22 @@ using TextBlock = Wpf.Ui.Controls.TextBlock;
 
 namespace EasyExtract.UI.Dashboard;
 
-public partial class Dashboard : FluentWindow
+public partial class Dashboard
 {
-    private static UserControl ContentFrame;
-    private static Dashboard instance;
+    private static Dashboard? _instance;
     private readonly BackgroundManager _backgroundManager = BackgroundManager.Instance;
-    private readonly BetterLogger _logger = new();
+    private readonly ConfigHelper _configHelper = new();
     private readonly UpdateHandler _updateHandler = new();
-    private readonly ConfigHelper ConfigHelper = new();
 
     public Dashboard()
     {
         InitializeComponent();
         DataContext = this;
-        ContentFrame = new UI.Extraction.Extraction();
     }
 
     public static Dashboard Instance
     {
-        get => instance ??= new Dashboard();
+        get => _instance ??= new Dashboard();
     }
 
 
@@ -53,29 +50,29 @@ public partial class Dashboard : FluentWindow
     private async void Dashboard_OnLoaded(object sender, RoutedEventArgs e)
     {
         SystemThemeWatcher.Watch(this);
-        await ConfigHelper.ReadConfigAsync();
+        await _configHelper.ReadConfigAsync();
         VersionTxt.Content = "V" + Application.ResourceAssembly.GetName().Version;
-        _backgroundManager.UpdateBackground(ConfigHelper.Config.Backgrounds.BackgroundPath);
-        _backgroundManager.UpdateOpacity(ConfigHelper.Config.Backgrounds.BackgroundOpacity);
+        _backgroundManager.UpdateBackground(_configHelper.Config.Backgrounds.BackgroundPath);
+        _backgroundManager.UpdateOpacity(_configHelper.Config.Backgrounds.BackgroundOpacity);
 
-        var theme = ConfigHelper.Config.ApplicationTheme;
+        var theme = _configHelper.Config.ApplicationTheme;
         switch (theme)
         {
             case ApplicationTheme.Dark:
                 ApplicationThemeManager.Apply(ApplicationTheme.Dark);
-                await _logger.LogAsync("Applied Dark Theme", "Dashboard.xaml.cs", Importance.Info);
+                await BetterLogger.LogAsync("Applied Dark Theme", $"{nameof(Dashboard)}.xaml.cs", Importance.Info);
                 break;
             case ApplicationTheme.Light:
                 ApplicationThemeManager.Apply(ApplicationTheme.Light);
-                await _logger.LogAsync("Applied Light Theme", "Dashboard.xaml.cs", Importance.Info);
+                await BetterLogger.LogAsync("Applied Light Theme", $"{nameof(Dashboard)}.xaml.cs", Importance.Info);
                 break;
             case ApplicationTheme.HighContrast:
                 ApplicationThemeManager.Apply(ApplicationTheme.HighContrast);
-                await _logger.LogAsync("Applied High Contrast Theme", "Dashboard.xaml.cs", Importance.Info);
+                await BetterLogger.LogAsync("Applied High Contrast Theme", $"{nameof(Dashboard)}.xaml.cs", Importance.Info);
                 break;
             default:
                 ApplicationThemeManager.Apply(ApplicationTheme.Dark);
-                await _logger.LogAsync("Applied Dark Theme", "Dashboard.xaml.cs", Importance.Info)
+                await BetterLogger.LogAsync("Applied Dark Theme", $"{nameof(Dashboard)}.xaml.cs", Importance.Info)
                     .ConfigureAwait(false);
                 break;
         }
@@ -93,25 +90,25 @@ public partial class Dashboard : FluentWindow
                 : "You're running the latest version of EasyExtractUnitypackage!";
         });
 
-        if (ConfigHelper.Config.Update.AutoUpdate && updateAvailable) await _updateHandler.Update();
+        if (_configHelper.Config.Update.AutoUpdate && updateAvailable) await _updateHandler.Update();
 
         //EasterEggHeader
-        EasterEggHeader.Visibility = ConfigHelper.Config.EasterEggHeader ? Visibility.Visible : Visibility.Collapsed;
+        EasterEggHeader.Visibility = _configHelper.Config.EasterEggHeader ? Visibility.Visible : Visibility.Collapsed;
 
-        if (ConfigHelper.Config.Runs is { IsFirstRun: true })
+        if (_configHelper.Config.Runs is { IsFirstRun: true })
         {
             NavView.Navigate(typeof(About.About));
-            await _logger.LogAsync("First run detected, navigating to About", "Dashboard.xaml.cs", Importance.Info);
-            ConfigHelper.Config.Runs.IsFirstRun = false;
-            await ConfigHelper.UpdateConfigAsync();
+            await BetterLogger.LogAsync("First run detected, navigating to About", $"{nameof(Dashboard)}.xaml.cs", Importance.Info);
+            _configHelper.Config.Runs.IsFirstRun = false;
+            await _configHelper.UpdateConfigAsync();
         }
         else
         {
-            await _logger.LogAsync("Navigating to Extraction", "Dashboard.xaml.cs", Importance.Info);
-            NavView.Navigate(typeof(UI.Extraction.Extraction));
+            await BetterLogger.LogAsync("Navigating to Extraction", $"{nameof(Dashboard)}.xaml.cs", Importance.Info);
+            NavView.Navigate(typeof(Extraction.Extraction));
         }
 
-        if (ConfigHelper.Config.UwUModeActive)
+        if (_configHelper.Config.UwUModeActive)
         {
             NavView.Opacity = 0.2;
             TitleBar.Title = "EasyExtractUwUnitypackage";
@@ -120,8 +117,8 @@ public partial class Dashboard : FluentWindow
         }
         else
         {
-            TitleBar.Title = ConfigHelper.Config.AppTitle;
-            Title = ConfigHelper.Config.AppTitle;
+            TitleBar.Title = _configHelper.Config.AppTitle;
+            Title = _configHelper.Config.AppTitle;
         }
     }
 
@@ -156,12 +153,12 @@ public partial class Dashboard : FluentWindow
         var storyboard = new Storyboard();
         storyboard.Children.Add(fadeInOutAnimation);
         Storyboard.SetTarget(fadeInOutAnimation, textBlock);
-        Storyboard.SetTargetProperty(fadeInOutAnimation, new PropertyPath("Opacity"));
+        Storyboard.SetTargetProperty(fadeInOutAnimation, new PropertyPath(OpacityProperty));
 
         textBlock.BeginAnimation(OpacityProperty, fadeInOutAnimation);
 
 
-        storyboard.Completed += (sender, args) => { MainGrid.Children.Remove(textBlock); };
+        storyboard.Completed += (_, _) => { MainGrid.Children.Remove(textBlock); };
         storyboard.Begin();
         await Task.Delay(1000);
         NavView.Opacity = 1;
@@ -170,23 +167,23 @@ public partial class Dashboard : FluentWindow
     private async void Dashboard_OnDrop(object sender, DragEventArgs e)
     {
         if (!e.Data.GetDataPresent(DataFormats.FileDrop)) return;
-        var files = (string[])e.Data.GetData(DataFormats.FileDrop);
-        foreach (var file in files)
-        {
-            await _logger.LogAsync($"Dropped file: {file}", "Dashboard.xaml.cs", Importance.Info);
-            var name = Path.GetFileName(file);
-            var duplicate = UI.Extraction.Extraction._queueList?.Find(x => x.UnityPackageName == name);
-            if (duplicate != null) continue;
-            UI.Extraction.Extraction._queueList ??= new List<SearchEverythingModel>();
-            UI.Extraction.Extraction._queueList.Add(new SearchEverythingModel
+        if (e.Data.GetData(DataFormats.FileDrop) is string[] files)
+            foreach (var file in files)
             {
-                UnityPackageName = name,
-                UnityPackagePath = file,
-                Id = 0
-            });
-        }
+                await BetterLogger.LogAsync($"Dropped file: {file}", "Dashboard.xaml.cs", Importance.Info);
+                var name = Path.GetFileName(file);
+                var duplicate = Extraction.Extraction.QueueListItems?.Find(x => x.UnityPackageName == name);
+                if (duplicate != null) continue;
+                Extraction.Extraction.QueueListItems ??= new List<SearchEverythingModel>();
+                Extraction.Extraction.QueueListItems.Add(new SearchEverythingModel
+                {
+                    UnityPackageName = name,
+                    UnityPackagePath = file,
+                    Id = 0
+                });
+            }
 
-        await _logger.LogAsync("Added dropped files to queue", "Dashboard.xaml.cs", Importance.Info);
+        await BetterLogger.LogAsync("Added dropped files to queue", "Dashboard.xaml.cs", Importance.Info);
     }
 
 
@@ -211,8 +208,8 @@ public partial class Dashboard : FluentWindow
     private async void DontShowAgainBtn_OnClick(object sender, RoutedEventArgs e)
     {
         //EasterEggHeader
-        ConfigHelper.Config.EasterEggHeader = false;
-        await ConfigHelper.UpdateConfigAsync();
+        _configHelper.Config.EasterEggHeader = false;
+        await _configHelper.UpdateConfigAsync();
         EasterEggHeader.Visibility = Visibility.Collapsed;
     }
 }
