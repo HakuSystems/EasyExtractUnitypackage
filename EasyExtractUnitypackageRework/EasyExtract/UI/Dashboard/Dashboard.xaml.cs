@@ -172,10 +172,10 @@ public partial class Dashboard
             {
                 await BetterLogger.LogAsync($"Dropped file: {file}", "Dashboard.xaml.cs", Importance.Info);
                 var name = Path.GetFileName(file);
-                var duplicate = Extraction.Extraction.QueueListItems?.Find(x => x.UnityPackageName == name);
+                var duplicate = Extraction.Extraction.QueueList?.Find(x => x.UnityPackageName == name);
                 if (duplicate != null) continue;
-                Extraction.Extraction.QueueListItems ??= new List<SearchEverythingModel>();
-                Extraction.Extraction.QueueListItems.Add(new SearchEverythingModel
+                Extraction.Extraction.QueueList ??= new List<SearchEverythingModel>();
+                Extraction.Extraction.QueueList.Add(new SearchEverythingModel
                 {
                     UnityPackageName = name,
                     UnityPackagePath = file,

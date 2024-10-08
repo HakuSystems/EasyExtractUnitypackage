@@ -208,7 +208,7 @@ public record ExtractionHelper
         return category;
     }
 
-    public static async Task<int> GetMaliciousDiscordWebhookCount(string directory)
+    public static async Task<int> GetMalicousDiscordWebhookCount(string directory)
     {
         var count = 0;
         var codeFiles = Directory.GetFiles(directory, "*.cs", SearchOption.AllDirectories).ToList();

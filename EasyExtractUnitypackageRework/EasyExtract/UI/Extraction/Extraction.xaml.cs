@@ -2,6 +2,7 @@ using System.Collections.ObjectModel;
 using System.Windows.Data;
 using EasyExtract.Config;
 using EasyExtract.Extraction;
+using EasyExtract.Models;
 using EasyExtract.Services.Discord;
 using EasyExtract.Utilities;
 using LiveCharts;
@@ -31,7 +32,6 @@ public partial class Extraction : UserControl, INotifyPropertyChanged
     private static readonly Uri ExtractionAnimationUri =
         new("pack://application:,,,/EasyExtract;component/Resources/Gifs/IconAnim.gif");
 
-    private readonly BetterLogger _logger = new();
     private readonly ConfigHelper ConfigHelper = new();
 
     /// <summary>
@@ -80,26 +80,25 @@ public partial class Extraction : UserControl, INotifyPropertyChanged
     /// <summary>
     ///     Gets or sets the list of SearchEverythingModel's in the queue.
     /// </summary>
-    public static List<SearchEverythingModel>? _queueList { get; set; }
+    public static List<SearchEverythingModel>? SearchResultQueue { get; set; }
 
     /// <summary>
     ///     Represents a queue list of SearchEverythingModel objects.
     /// </summary>
-    public List<SearchEverythingModel>? QueueList
+    public static List<SearchEverythingModel>? QueueList
     {
-        get => _queueList;
+        get => SearchResultQueue;
         set
         {
-            if (_queueList == value) return;
-            _queueList = value;
-            OnPropertyChanged();
+            if (SearchResultQueue == value) return;
+            SearchResultQueue = value;
         }
     }
 
     /// <summary>
     ///     Gets or sets the list of ignored Unitypackages.
     /// </summary>
-    public ObservableCollection<IgnoredUnitypackageModel> IgnoredUnitypackages { get; set; } = new();
+    public ObservableCollection<IgnoredPackageInventory> IgnoredUnitypackages { get; set; } = new();
 
     public event PropertyChangedEventHandler PropertyChanged;
 
@@ -213,7 +212,7 @@ public partial class Extraction : UserControl, INotifyPropertyChanged
             StatusProgressBar.Visibility = Visibility.Visible;
         }
 
-        await _logger.LogAsync("Populated Extracted Files List", "Extraction.xaml.cs", Importance.Info);
+        await BetterLogger.LogAsync("Populated Extracted Files List", "Extraction.xaml.cs", Importance.Info);
     }
 
     /// <summary>
@@ -442,34 +441,34 @@ public partial class Extraction : UserControl, INotifyPropertyChanged
 
         var directoryNames = Directory.GetDirectories(ignoredAppDataDirectory).Select(Path.GetFileName).ToList();
 
-        var packagesToRemove = ConfigHelper.Config.IgnoredUnitypackages
+        var packagesToRemove = ConfigHelper.Config.IgnoredUnityPackages
             .Where(package => !directoryNames.Contains(package.IgnoredUnityPackageName)).ToList();
 
         foreach (var packageToRemove in packagesToRemove)
-            ConfigHelper.Config.IgnoredUnitypackages.Remove(packageToRemove);
+            ConfigHelper.Config.IgnoredUnityPackages.Remove(packageToRemove);
         if (packagesToRemove.Any()) await ConfigHelper.UpdateConfigAsync();
 
         // Update UI with existing ignored packages
         Dispatcher.InvokeAsync(() =>
         {
             IgnoredUnitypackages.Clear();
-            foreach (var ignoredUnitypackage in ConfigHelper.Config.IgnoredUnitypackages)
+            foreach (var ignoredUnitypackage in ConfigHelper.Config.IgnoredUnityPackages)
                 if (directoryNames.Contains(ignoredUnitypackage.IgnoredUnityPackageName))
                     IgnoredUnitypackages.Add(ignoredUnitypackage);
         });
 
         // Handle directories not listed in the config
-        var packagesToAdd = new List<IgnoredUnitypackageModel>();
+        var packagesToAdd = new List<IgnoredPackageInventory>();
         foreach (var newIgnoredPackage in from directory in directoryNames
-                 where ConfigHelper.Config.IgnoredUnitypackages.All(p => p.IgnoredUnityPackageName != directory)
-                 select new IgnoredUnitypackageModel
+                 where ConfigHelper.Config.IgnoredUnityPackages.All(p => p.IgnoredUnityPackageName != directory)
+                 select new IgnoredPackageInventory
                  {
                      IgnoredUnityPackageName = directory,
                      IgnoredReason = "Unknown Reason"
                  })
         {
             packagesToAdd.Add(newIgnoredPackage);
-            ConfigHelper.Config.IgnoredUnitypackages.Add(newIgnoredPackage);
+            ConfigHelper.Config.IgnoredUnityPackages.Add(newIgnoredPackage);
         }
 
         // Update the config file if there were new packages added
@@ -611,7 +610,7 @@ public partial class Extraction : UserControl, INotifyPropertyChanged
         await SetupUiForExtractionAsync();
 
         var (ignoredCounter, fileFinishedCounter) = await ProcessUnityPackages();
-        await _logger.LogAsync(
+        await BetterLogger.LogAsync(
             $"Extraction Process Completed: {fileFinishedCounter} packages extracted, {ignoredCounter} packages ignored",
             "Extraction.xaml.cs", Importance.Info);
 
@@ -729,7 +728,7 @@ public partial class Extraction : UserControl, INotifyPropertyChanged
     {
         return Dispatcher.InvokeAsync(async () =>
         {
-            IgnoredUnitypackages.Add(new IgnoredUnitypackageModel
+            IgnoredUnitypackages.Add(new IgnoredPackageInventory
             {
                 IgnoredUnityPackageName = unitypackage.UnityPackageName,
                 IgnoredReason = reason
@@ -745,7 +744,7 @@ public partial class Extraction : UserControl, INotifyPropertyChanged
         await ConfigHelper.ReadConfigAsync().ContinueWith(task =>
         {
             if (ConfigHelper.Config == null) return;
-            ConfigHelper.Config.IgnoredUnitypackages.Add(new IgnoredUnitypackageModel
+            ConfigHelper.Config.IgnoredUnityPackages.Add(new IgnoredPackageInventory
             {
                 IgnoredUnityPackageName = unitypackage.UnityPackageName,
                 IgnoredReason = reason
@@ -860,7 +859,7 @@ public partial class Extraction : UserControl, INotifyPropertyChanged
             await UpdateQueueHeaderAsync();
         }
 
-        await _logger.LogAsync("Manually Searched and Added Files", "Extraction.xaml.cs", Importance.Info);
+        await BetterLogger.LogAsync("Manually Searched and Added Files", "Extraction.xaml.cs", Importance.Info);
     }
 
     /// <summary>
@@ -885,7 +884,7 @@ public partial class Extraction : UserControl, INotifyPropertyChanged
         }
 
         await UpdateQueueHeaderAsync();
-        await _logger.LogAsync("Dropped Files Added to Queue", "Extraction.xaml.cs", Importance.Info);
+        await BetterLogger.LogAsync("Dropped Files Added to Queue", "Extraction.xaml.cs", Importance.Info);
     }
 
     /// <summary>
@@ -1031,7 +1030,7 @@ public partial class Extraction : UserControl, INotifyPropertyChanged
             await UpdateExtractedFiles();
             UpdateSelectAllToggleContent();
         });
-        await _logger.LogAsync("Deleted Selected Unitypackages and Files", "Extraction.xaml.cs", Importance.Info);
+        await BetterLogger.LogAsync("Deleted Selected Unitypackages and Files", "Extraction.xaml.cs", Importance.Info);
     }
 
     private async void IgnoreSelectedBtn_OnClick(object sender, RoutedEventArgs e)

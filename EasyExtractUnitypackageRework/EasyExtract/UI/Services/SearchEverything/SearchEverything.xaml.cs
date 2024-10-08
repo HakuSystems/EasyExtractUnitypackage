@@ -7,8 +7,8 @@ namespace EasyExtract.UI.Services.SearchEverything;
 
 public partial class SearchEverything : UserControl, INotifyPropertyChanged
 {
-    private readonly BetterLogger BetterLogger = new();
     private readonly List<SearchEverythingModel> _tempList = new();
+    private readonly BetterLogger BetterLogger = new();
     private readonly ConfigHelper ConfigHelper = new();
     private readonly EverythingValidation EverythingValidation = new();
 
@@ -190,10 +190,11 @@ public partial class SearchEverything : UserControl, INotifyPropertyChanged
             {
                 counter++;
                 var name = Path.GetFileName(file);
-                var duplicate = Extraction.Extraction._queueList?.Find(x => x.UnityPackageName == name);
+                var duplicate = Extraction.Extraction.SearchResultQueue?.Find(x => x.UnityPackageName == name);
                 if (duplicate != null) continue;
-                if (Extraction.Extraction._queueList == null) Extraction.Extraction._queueList = new List<SearchEverythingModel>();
-                Extraction.Extraction._queueList.Add(new SearchEverythingModel
+                if (Extraction.Extraction.SearchResultQueue == null)
+                    Extraction.Extraction.SearchResultQueue = new List<SearchEverythingModel>();
+                Extraction.Extraction.SearchResultQueue.Add(new SearchEverythingModel
                 {
                     UnityPackageName = name,
                     UnityPackagePath = file,
@@ -222,10 +223,11 @@ public partial class SearchEverything : UserControl, INotifyPropertyChanged
         var name = selected.UnityPackageName;
         var path = selected.UnityPackagePath;
 
-        var duplicate = Extraction.Extraction._queueList?.Find(x => x.UnityPackageName == name);
+        var duplicate = Extraction.Extraction.SearchResultQueue?.Find(x => x.UnityPackageName == name);
         if (duplicate != null) return;
-        if (Extraction.Extraction._queueList == null) Extraction.Extraction._queueList = new List<SearchEverythingModel>();
-        Extraction.Extraction._queueList.Add(new SearchEverythingModel
+        if (Extraction.Extraction.SearchResultQueue == null)
+            Extraction.Extraction.SearchResultQueue = new List<SearchEverythingModel>();
+        Extraction.Extraction.SearchResultQueue.Add(new SearchEverythingModel
         {
             UnityPackageName = name,
             UnityPackagePath = path,

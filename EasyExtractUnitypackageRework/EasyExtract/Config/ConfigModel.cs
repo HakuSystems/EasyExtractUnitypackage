@@ -1,4 +1,5 @@
 using System.Collections.ObjectModel;
+using EasyExtract.Models;
 using EasyExtract.UI.CustomDesign;
 
 namespace EasyExtract.Config;
@@ -26,6 +27,6 @@ public class ConfigModel
     public int TotalFilesExtracted { get; set; }
 
     public ObservableCollection<HistoryModel> History { get; set; } = new();
-    public ObservableCollection<IgnoredPackageConfig> IgnoredUnityPackagesInventory { get; set; } = new();
+    public ObservableCollection<IgnoredPackageInventory> IgnoredUnityPackages { get; set; } = new();
     public BackgroundModel Backgrounds { get; set; } = new();
 }
