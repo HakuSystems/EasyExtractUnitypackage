@@ -2,16 +2,16 @@ using System.Windows.Media;
 
 namespace EasyExtract.Config;
 
-public class ExtractedFiles : INotifyPropertyChanged
+public sealed class ExtractedFiles : INotifyPropertyChanged
 {
-    private string _category = "No Category Available";
+    private readonly string? _category = "No Category Available";
+    private readonly string _fileName = "No Name Available";
+    private readonly string _filePath = "No Path Available";
+    private readonly string _size = "No Size Available";
     private string _extension = "No Extension Available";
     private DateTime _extractedDate = DateTime.Now;
-    private string _fileName = "No Name Available";
-    private string _filePath = "No Path Available";
     private bool _isChecked;
     private ImageSource? _previewImage;
-    private string _size = "No Size Available";
     private string _symbolIcon = "No Symbol Icon Available";
 
 
@@ -48,7 +48,7 @@ public class ExtractedFiles : INotifyPropertyChanged
     public string FileName
     {
         get => _fileName;
-        set
+        init
         {
             _fileName = value;
             OnPropertyChanged();
@@ -58,17 +58,17 @@ public class ExtractedFiles : INotifyPropertyChanged
     public string FilePath
     {
         get => _filePath;
-        set
+        init
         {
             _filePath = value;
             OnPropertyChanged();
         }
     }
 
-    public string Category
+    public string? Category
     {
         get => _category;
-        set
+        init
         {
             _category = value;
             OnPropertyChanged();
@@ -88,7 +88,7 @@ public class ExtractedFiles : INotifyPropertyChanged
     public string Size
     {
         get => _size;
-        set
+        init
         {
             _size = value;
             OnPropertyChanged();
@@ -127,9 +127,9 @@ public class ExtractedFiles : INotifyPropertyChanged
         get => unityFileMessasgeTooltip;
     }
 
-    public event PropertyChangedEventHandler PropertyChanged;
+    public event PropertyChangedEventHandler? PropertyChanged;
 
-    protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null)
+    private void OnPropertyChanged([CallerMemberName] string? propertyName = null)
     {
         PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
     }
