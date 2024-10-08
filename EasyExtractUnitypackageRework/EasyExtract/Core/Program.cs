@@ -1,7 +1,8 @@
 using System.Security;
 using System.Security.Principal;
 using EasyExtract.Config;
-using EasyExtract.Extraction;
+using EasyExtract.Models;
+using EasyExtract.Services;
 using EasyExtract.Utilities;
 
 namespace EasyExtract.Core;

@@ -2,7 +2,7 @@ using System.Globalization;
 using System.Windows.Data;
 using System.Windows.Media;
 
-namespace EasyExtract.UI.CustomDesign;
+namespace EasyExtract.Utilities;
 
 public class BackgroundAndOpacityConverter : IMultiValueConverter
 {

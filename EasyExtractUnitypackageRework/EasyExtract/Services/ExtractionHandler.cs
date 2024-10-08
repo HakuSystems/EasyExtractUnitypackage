@@ -1,9 +1,10 @@
 using System.Globalization;
 using System.IO.Compression;
 using EasyExtract.Config;
+using EasyExtract.Models;
 using EasyExtract.Utilities;
 
-namespace EasyExtract.Extraction;
+namespace EasyExtract.Services;
 
 public class ExtractionHandler
 {

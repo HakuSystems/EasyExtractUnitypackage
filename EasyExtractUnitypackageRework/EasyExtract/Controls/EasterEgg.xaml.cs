@@ -1,8 +1,9 @@
 using EasyExtract.Config;
-using EasyExtract.Services.Discord;
+using EasyExtract.Models;
+using EasyExtract.Services;
 using EasyExtract.Utilities;
 
-namespace EasyExtract.UI.EasterEgg;
+namespace EasyExtract.Controls;
 
 public partial class EasterEgg
 {

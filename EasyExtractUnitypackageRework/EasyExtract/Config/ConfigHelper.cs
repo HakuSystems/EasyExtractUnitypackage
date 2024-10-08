@@ -1,3 +1,4 @@
+using EasyExtract.Models;
 using EasyExtract.Utilities;
 using Newtonsoft.Json;
 

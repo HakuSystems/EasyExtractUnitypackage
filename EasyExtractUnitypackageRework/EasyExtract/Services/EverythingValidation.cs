@@ -1,8 +1,8 @@
 using System.Text;
-using EasyExtract.Config;
+using EasyExtract.Models;
 using EasyExtract.Utilities;
 
-namespace EasyExtract.Services.SearchEverything;
+namespace EasyExtract.Services;
 
 public record EverythingValidation
 {

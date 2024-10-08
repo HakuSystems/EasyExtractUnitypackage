@@ -1,4 +1,4 @@
-namespace EasyExtract.Config;
+namespace EasyExtract.Models;
 
 public class SearchEverythingModel
 {

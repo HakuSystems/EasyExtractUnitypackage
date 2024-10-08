@@ -1,8 +1,6 @@
 using System.Collections.ObjectModel;
-using EasyExtract.Models;
-using EasyExtract.UI.CustomDesign;
 
-namespace EasyExtract.Config;
+namespace EasyExtract.Models;
 
 public class ConfigModel
 {

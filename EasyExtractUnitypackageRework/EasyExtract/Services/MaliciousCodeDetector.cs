@@ -1,6 +1,6 @@
 using System.Text.RegularExpressions;
 
-namespace EasyExtract.Extraction;
+namespace EasyExtract.Services;
 
 public static class MaliciousCodeDetector
 {

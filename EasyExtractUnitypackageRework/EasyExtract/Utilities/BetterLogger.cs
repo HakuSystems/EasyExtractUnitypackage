@@ -1,4 +1,4 @@
-using EasyExtract.Config;
+using EasyExtract.Models;
 using Serilog;
 
 namespace EasyExtract.Utilities;

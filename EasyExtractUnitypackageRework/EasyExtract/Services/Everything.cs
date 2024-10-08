@@ -1,6 +1,6 @@
 using System.Text;
 
-namespace EasyExtract.Services.SearchEverything;
+namespace EasyExtract.Services;
 
 public class Everything
 {

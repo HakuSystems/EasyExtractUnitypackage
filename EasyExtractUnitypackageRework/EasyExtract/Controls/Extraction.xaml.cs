@@ -1,9 +1,8 @@
 using System.Collections.ObjectModel;
 using System.Windows.Data;
 using EasyExtract.Config;
-using EasyExtract.Extraction;
 using EasyExtract.Models;
-using EasyExtract.Services.Discord;
+using EasyExtract.Services;
 using EasyExtract.Utilities;
 using LiveCharts;
 using LiveCharts.Wpf;
@@ -11,7 +10,7 @@ using Wpf.Ui.Controls;
 using XamlAnimatedGif;
 using Brushes = System.Windows.Media.Brushes;
 
-namespace EasyExtract.UI.Extraction;
+namespace EasyExtract.Controls;
 
 public partial class Extraction : UserControl, INotifyPropertyChanged
 {

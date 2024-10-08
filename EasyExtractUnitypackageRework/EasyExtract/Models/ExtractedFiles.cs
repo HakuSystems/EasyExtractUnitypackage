@@ -1,6 +1,6 @@
 using System.Windows.Media;
 
-namespace EasyExtract.Config;
+namespace EasyExtract.Models;
 
 public sealed class ExtractedFiles : INotifyPropertyChanged
 {

@@ -2,15 +2,16 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
 using EasyExtract.Config;
-using EasyExtract.UI.CustomDesign;
-using EasyExtract.Updater;
+using EasyExtract.Controls;
+using EasyExtract.Models;
+using EasyExtract.Services;
 using EasyExtract.Utilities;
 using Wpf.Ui.Controls;
 using Application = System.Windows.Application;
 using Color = System.Windows.Media.Color;
 using TextBlock = Wpf.Ui.Controls.TextBlock;
 
-namespace EasyExtract.UI.Dashboard;
+namespace EasyExtract.Views;
 
 public partial class Dashboard
 {
@@ -44,7 +45,7 @@ public partial class Dashboard
     private void HeartIcon_OnMouseDown(object sender, MouseButtonEventArgs e)
     {
         HeartIcon.Symbol = SymbolRegular.HeartPulse24;
-        NavView.Navigate(typeof(EasterEgg.EasterEgg));
+        NavView.Navigate(typeof(EasterEgg));
     }
 
     private async void Dashboard_OnLoaded(object sender, RoutedEventArgs e)
@@ -97,7 +98,7 @@ public partial class Dashboard
 
         if (_configHelper.Config.Runs is { IsFirstRun: true })
         {
-            NavView.Navigate(typeof(About.About));
+            NavView.Navigate(typeof(About));
             await BetterLogger.LogAsync("First run detected, navigating to About", $"{nameof(Dashboard)}.xaml.cs", Importance.Info);
             _configHelper.Config.Runs.IsFirstRun = false;
             await _configHelper.UpdateConfigAsync();
@@ -105,7 +106,7 @@ public partial class Dashboard
         else
         {
             await BetterLogger.LogAsync("Navigating to Extraction", $"{nameof(Dashboard)}.xaml.cs", Importance.Info);
-            NavView.Navigate(typeof(Extraction.Extraction));
+            NavView.Navigate(typeof(Extraction));
         }
 
         if (_configHelper.Config.UwUModeActive)
@@ -172,10 +173,10 @@ public partial class Dashboard
             {
                 await BetterLogger.LogAsync($"Dropped file: {file}", "Dashboard.xaml.cs", Importance.Info);
                 var name = Path.GetFileName(file);
-                var duplicate = Extraction.Extraction.QueueList?.Find(x => x.UnityPackageName == name);
+                var duplicate = Extraction.QueueList?.Find(x => x.UnityPackageName == name);
                 if (duplicate != null) continue;
-                Extraction.Extraction.QueueList ??= new List<SearchEverythingModel>();
-                Extraction.Extraction.QueueList.Add(new SearchEverythingModel
+                Extraction.QueueList ??= new List<SearchEverythingModel>();
+                Extraction.QueueList.Add(new SearchEverythingModel
                 {
                     UnityPackageName = name,
                     UnityPackagePath = file,

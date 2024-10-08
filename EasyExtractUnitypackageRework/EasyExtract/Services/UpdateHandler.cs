@@ -1,7 +1,8 @@
 using EasyExtract.Config;
+using EasyExtract.Models;
 using EasyExtract.Utilities;
 
-namespace EasyExtract.Updater;
+namespace EasyExtract.Services;
 
 public class UpdateHandler
 {

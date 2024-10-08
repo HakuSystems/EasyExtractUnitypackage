@@ -1,4 +1,4 @@
-namespace EasyExtract.Extraction;
+namespace EasyExtract.Services;
 
 public record ExtractionHelper
 {

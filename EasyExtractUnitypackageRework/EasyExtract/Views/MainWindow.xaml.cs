@@ -1,8 +1,9 @@
 ﻿using EasyExtract.Config;
-using EasyExtract.Services.Discord;
+using EasyExtract.Models;
+using EasyExtract.Services;
 using EasyExtract.Utilities;
 
-namespace EasyExtract.UI.Initial;
+namespace EasyExtract.Views;
 
 /// <summary>
 ///     Interaction logic for MainWindow.xaml
@@ -31,14 +32,14 @@ public partial class MainWindow
             timer.Tick += (_, _) =>
             {
                 timer.Stop();
-                new Dashboard.Dashboard().Show();
+                new Dashboard().Show();
                 Close();
             };
             timer.Start();
         }
         else
         {
-            new Dashboard.Dashboard().Show();
+            new Dashboard().Show();
             Close();
         }
     }

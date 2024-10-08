@@ -1,10 +1,11 @@
 using EasyExtract.Config;
-using EasyExtract.Services.Discord;
+using EasyExtract.Models;
+using EasyExtract.Services;
 using EasyExtract.Utilities;
 using Wpf.Ui.Controls;
 using Application = System.Windows.Application;
 
-namespace EasyExtract.UI.About;
+namespace EasyExtract.Controls;
 
 public partial class About
 {

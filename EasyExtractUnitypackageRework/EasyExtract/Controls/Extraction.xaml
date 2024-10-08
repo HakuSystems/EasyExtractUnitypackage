@@ -6,7 +6,7 @@
     Loaded="Extraction_OnLoaded"
     mc:Ignorable="d"
     ui:Design.Background="{DynamicResource ApplicationBackgroundBrush}"
-    x:Class="EasyExtract.UI.Extraction.Extraction"
+    x:Class="EasyExtract.Controls.Extraction"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:boxIcons="http://metro.mahapps.com/winfx/xaml/iconpacks"
     xmlns:charts="clr-namespace:LiveCharts.Wpf;assembly=LiveCharts.Wpf"

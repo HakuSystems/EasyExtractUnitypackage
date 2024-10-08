@@ -1,7 +1,7 @@
 using System.Windows.Media;
 using Wpf.Ui.Controls;
 
-namespace EasyExtract.Config;
+namespace EasyExtract.Models;
 
 public class ExtractedUnitypackageModel : INotifyPropertyChanged
 {

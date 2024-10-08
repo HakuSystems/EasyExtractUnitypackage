@@ -1,9 +1,8 @@
 using System.Text;
 using EasyExtract.Services;
-using EasyExtract.Services.Discord;
 using Newtonsoft.Json;
 
-namespace EasyExtract.UI.Feedback;
+namespace EasyExtract.Controls;
 
 public partial class Feedback
 {

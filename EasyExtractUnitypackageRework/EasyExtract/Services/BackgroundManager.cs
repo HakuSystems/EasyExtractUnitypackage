@@ -1,9 +1,10 @@
 using System.Text;
 using System.Windows.Media;
 using EasyExtract.Config;
+using EasyExtract.Models;
 using EasyExtract.Utilities;
 
-namespace EasyExtract.UI.CustomDesign;
+namespace EasyExtract.Services;
 
 public class BackgroundManager : INotifyPropertyChanged
 {

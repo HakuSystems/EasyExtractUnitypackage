@@ -1,9 +1,10 @@
 using System.Collections.ObjectModel;
 using EasyExtract.Config;
-using EasyExtract.Services.Discord;
+using EasyExtract.Models;
+using EasyExtract.Services;
 using EasyExtract.Utilities;
 
-namespace EasyExtract.UI.History;
+namespace EasyExtract.Controls;
 
 public partial class History : UserControl, INotifyPropertyChanged
 {

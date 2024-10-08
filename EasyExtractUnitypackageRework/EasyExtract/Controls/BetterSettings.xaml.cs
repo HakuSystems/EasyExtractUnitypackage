@@ -1,9 +1,9 @@
 using EasyExtract.Config;
-using EasyExtract.Services.Discord;
-using EasyExtract.UI.CustomDesign;
+using EasyExtract.Models;
+using EasyExtract.Services;
 using EasyExtract.Utilities;
 
-namespace EasyExtract.UI.Settings;
+namespace EasyExtract.Controls;
 
 public partial class BetterSettings
 {
