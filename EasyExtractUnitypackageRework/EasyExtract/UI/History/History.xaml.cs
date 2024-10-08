@@ -7,7 +7,7 @@ namespace EasyExtract.UI.History;
 
 public partial class History : UserControl, INotifyPropertyChanged
 {
-    private readonly BetterLogger _logger = new();
+    private readonly BetterLogger BetterLogger = new();
     private readonly ConfigHelper ConfigHelper = new();
     private ObservableCollection<HistoryModel> _history = new();
 
@@ -65,7 +65,7 @@ public partial class History : UserControl, INotifyPropertyChanged
         }
         catch (Exception exception)
         {
-            await _logger.LogAsync($"Error reading config: {exception.Message}", "History.xaml.cs",
+            await BetterLogger.LogAsync($"Error reading config: {exception.Message}", "History.xaml.cs",
                 Importance.Error); // Log error
             throw;
         }
@@ -77,7 +77,7 @@ public partial class History : UserControl, INotifyPropertyChanged
             }
             catch (Exception exception)
             {
-                await _logger.LogAsync($"Error updating Discord presence: {exception.Message}", "History.xaml.cs",
+                await BetterLogger.LogAsync($"Error updating Discord presence: {exception.Message}", "History.xaml.cs",
                     Importance.Error); // Log error
                 throw;
             }
@@ -86,7 +86,7 @@ public partial class History : UserControl, INotifyPropertyChanged
         TotalFilesExtracted = ConfigHelper.Config.TotalFilesExtracted;
         await LoadHistory();
         await CalculateTotalExtracted();
-        await _logger.LogAsync("History loaded and totals calculated", "History.xaml.cs",
+        await BetterLogger.LogAsync("History loaded and totals calculated", "History.xaml.cs",
             Importance.Info); // Log completion
     }
 
@@ -109,7 +109,7 @@ public partial class History : UserControl, INotifyPropertyChanged
         ConfigHelper.Config.TotalFilesExtracted = totalFilesExtracted;
 
         await ConfigHelper.UpdateConfigAsync();
-        await _logger.LogAsync("Calculated total extracted files and updated config", "History.xaml.cs",
+        await BetterLogger.LogAsync("Calculated total extracted files and updated config", "History.xaml.cs",
             Importance.Info); // Log calculation
     }
 
@@ -119,14 +119,14 @@ public partial class History : UserControl, INotifyPropertyChanged
         {
             ClearHistoryButton.Visibility = Visibility.Collapsed;
             NoHistoryLabel.Visibility = Visibility.Visible;
-            await _logger.LogAsync("No history found", "History.xaml.cs", Importance.Info); // Log no history
+            await BetterLogger.LogAsync("No history found", "History.xaml.cs", Importance.Info); // Log no history
             return;
         }
 
         ClearHistoryButton.Visibility = Visibility.Visible;
         NoHistoryLabel.Visibility = Visibility.Collapsed;
         HistoryList = ConfigHelper.Config.History;
-        await _logger.LogAsync("Loaded history", "History.xaml.cs", Importance.Info); // Log history load
+        await BetterLogger.LogAsync("Loaded history", "History.xaml.cs", Importance.Info); // Log history load
     }
 
     protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null)
@@ -146,7 +146,7 @@ public partial class History : UserControl, INotifyPropertyChanged
         HistoryList.Remove(history);
         ConfigHelper.Config!.History.Remove(history);
         await ConfigHelper.UpdateConfigAsync();
-        await _logger.LogAsync($"Deleted history item: {history.ExtractedPath}", "History.xaml.cs",
+        await BetterLogger.LogAsync($"Deleted history item: {history.ExtractedPath}", "History.xaml.cs",
             Importance.Info); // Log deletion
         if (HistoryList.Count == 0) NoHistoryLabel.Visibility = Visibility.Visible;
     }
@@ -161,6 +161,6 @@ public partial class History : UserControl, INotifyPropertyChanged
         TotalFilesExtracted = 0;
         NoHistoryLabel.Visibility = Visibility.Visible;
         await ConfigHelper.UpdateConfigAsync();
-        await _logger.LogAsync("Cleared all history", "History.xaml.cs", Importance.Info); // Log clearing history
+        await BetterLogger.LogAsync("Cleared all history", "History.xaml.cs", Importance.Info); // Log clearing history
     }
 }
