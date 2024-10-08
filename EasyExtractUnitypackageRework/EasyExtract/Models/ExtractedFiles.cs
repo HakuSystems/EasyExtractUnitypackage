@@ -2,7 +2,7 @@ using System.Windows.Media;
 
 namespace EasyExtract.Models;
 
-public sealed class ExtractedFiles : INotifyPropertyChanged
+public class ExtractedFiles : INotifyPropertyChanged
 {
     private readonly string? _category = "No Category Available";
     private readonly string _fileName = "No Name Available";

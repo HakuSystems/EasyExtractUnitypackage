@@ -67,7 +67,7 @@
                             <ui:ListView
                                 HorizontalAlignment="Stretch"
                                 HorizontalContentAlignment="Stretch"
-                                ItemsSource="{Binding QueueList}"
+                                ItemsSource="{Binding Path=SearchEverything}"
                                 Margin="15"
                                 MaxHeight="300"
                                 x:Name="QueueListView">
@@ -321,7 +321,7 @@
 
                                             <!--  Category level  -->
                                             <HierarchicalDataTemplate.ItemTemplate>
-                                                <HierarchicalDataTemplate ItemsSource="{Binding Value}">
+                                                <HierarchicalDataTemplate ItemsSource="{Binding Path=Value}">
                                                     <TextBlock
                                                         FontWeight="Bold"
                                                         Margin="20,0,0,0"

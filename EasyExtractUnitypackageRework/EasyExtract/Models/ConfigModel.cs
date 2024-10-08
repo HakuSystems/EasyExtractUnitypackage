@@ -27,5 +27,7 @@ public class ConfigModel
 
     public ObservableCollection<HistoryModel> History { get; set; } = new();
     public ObservableCollection<IgnoredPackageInventory> IgnoredUnityPackages { get; set; } = new();
+    public ObservableCollection<SearchEverythingModel> SearchEverything { get; set; } = new();
+    public ObservableCollection<ExtractedUnitypackageModel> ExtractedUnitypackages { get; set; } = new();
     public BackgroundModel Backgrounds { get; set; } = new();
 }

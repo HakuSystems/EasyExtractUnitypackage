@@ -74,7 +74,7 @@
             Grid.Row="1"
             HorizontalAlignment="Stretch"
             HorizontalContentAlignment="Stretch"
-            ItemsSource="{Binding HistoryList}"
+            ItemsSource="{Binding Path=History}"
             Margin="15">
             <ui:ListView.ItemTemplate>
                 <DataTemplate>
