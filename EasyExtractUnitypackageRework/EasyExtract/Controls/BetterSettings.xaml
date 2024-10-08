@@ -19,386 +19,376 @@
                 <RowDefinition Height="Auto" />
                 <RowDefinition Height="Auto" />
             </Grid.RowDefinitions>
-            <ui:Card Grid.Row="1">
-                <ui:Card.Effect>
-                    <DropShadowEffect
-                        BlurRadius="10"
-                        Color="Black"
-                        Direction="270"
-                        Opacity="0.5"
-                        ShadowDepth="0" />
-                </ui:Card.Effect>
-                <StackPanel Orientation="Vertical">
-                    <ui:Card>
-                        <Grid>
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="Auto" />
-                                <ColumnDefinition Width="*" />
-                                <ColumnDefinition Width="Auto" />
-                            </Grid.ColumnDefinitions>
-                            <ui:Card
-                                HorizontalAlignment="Left"
-                                Margin="5"
-                                VerticalAlignment="Center">
-                                <mahicons:Modern Kind="Connect" />
-                            </ui:Card>
-                            <StackPanel Grid.Column="1" VerticalAlignment="Center">
-                                <ui:TextBlock
-                                    FontTypography="BodyStrong"
-                                    Text="Context Menu Activation"
-                                    TextWrapping="WrapWithOverflow" />
-                                <ui:TextBlock
-                                    Appearance="Secondary"
-                                    Opacity="0.5"
-                                    Text="When enabled, the application will register a Menu item in the registry to open the application while right-clicking on a .unitypackage file"
-                                    TextWrapping="Wrap" />
-                            </StackPanel>
-                            <ui:ToggleSwitch
-                                Checked="ContextMenuSwitch_OnChecked"
-                                Grid.Column="2"
-                                IsChecked="{Binding _currentConfig.ContextMenuToggle, Mode=TwoWay}"
-                                Margin="5"
-                                Unchecked="ContextMenuSwitch_OnUnchecked"
-                                x:Name="ContextMenuSwitch" />
-                        </Grid>
-                    </ui:Card>
-                    <ui:Card>
-                        <Grid>
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="Auto" />
-                                <ColumnDefinition Width="*" />
-                                <ColumnDefinition Width="Auto" />
-                            </Grid.ColumnDefinitions>
-                            <ui:Card
-                                HorizontalAlignment="Left"
-                                Margin="5"
-                                VerticalAlignment="Center">
-                                <ui:SymbolIcon
-                                    Foreground="{DynamicResource TextFillColorPrimaryBrush}"
-                                    HorizontalAlignment="Center"
-                                    Symbol="EmojiSparkle24"
-                                    VerticalAlignment="Center" />
-                            </ui:Card>
-                            <StackPanel Grid.Column="1" VerticalAlignment="Center">
-                                <ui:TextBlock
-                                    FontTypography="BodyStrong"
-                                    Text="UwU Mode Activation"
-                                    TextWrapping="WrapWithOverflow" />
-                                <ui:TextBlock
-                                    Appearance="Secondary"
-                                    Opacity="0.5"
-                                    Text="When enabled, the title of the app changes to UwU on the next application start"
-                                    TextWrapping="WrapWithOverflow" />
-                            </StackPanel>
-                            <ui:ToggleSwitch
-                                Checked="UwUToggleSwitch_OnChecked"
-                                Grid.Column="2"
-                                IsChecked="{Binding _currentConfig.UwUModeActive, Mode=TwoWay}"
-                                Margin="5"
-                                Unchecked="UwUToggleSwitch_OnUnchecked"
-                                x:Name="UwUToggleSwitch" />
-                        </Grid>
-                    </ui:Card>
+            <StackPanel Grid.Row="1" Orientation="Vertical">
+                <ui:Card>
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <ui:Card
+                            HorizontalAlignment="Left"
+                            Margin="5"
+                            VerticalAlignment="Center">
+                            <mahicons:Modern Kind="Connect" />
+                        </ui:Card>
+                        <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                            <ui:TextBlock
+                                FontTypography="BodyStrong"
+                                Text="Context Menu Activation"
+                                TextWrapping="WrapWithOverflow" />
+                            <ui:TextBlock
+                                Appearance="Secondary"
+                                Opacity="0.5"
+                                Text="When enabled, the application will register a Menu item in the registry to open the application while right-clicking on a .unitypackage file"
+                                TextWrapping="Wrap" />
+                        </StackPanel>
+                        <ui:ToggleSwitch
+                            Checked="ContextMenuSwitch_OnChecked"
+                            Grid.Column="2"
+                            IsChecked="{Binding _currentConfig.ContextMenuToggle, Mode=TwoWay}"
+                            Margin="5"
+                            Unchecked="ContextMenuSwitch_OnUnchecked"
+                            x:Name="ContextMenuSwitch" />
+                    </Grid>
+                </ui:Card>
+                <ui:Card>
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <ui:Card
+                            HorizontalAlignment="Left"
+                            Margin="5"
+                            VerticalAlignment="Center">
+                            <ui:SymbolIcon
+                                Foreground="{DynamicResource TextFillColorPrimaryBrush}"
+                                HorizontalAlignment="Center"
+                                Symbol="EmojiSparkle24"
+                                VerticalAlignment="Center" />
+                        </ui:Card>
+                        <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                            <ui:TextBlock
+                                FontTypography="BodyStrong"
+                                Text="UwU Mode Activation"
+                                TextWrapping="WrapWithOverflow" />
+                            <ui:TextBlock
+                                Appearance="Secondary"
+                                Opacity="0.5"
+                                Text="When enabled, the title of the app changes to UwU on the next application start"
+                                TextWrapping="WrapWithOverflow" />
+                        </StackPanel>
+                        <ui:ToggleSwitch
+                            Checked="UwUToggleSwitch_OnChecked"
+                            Grid.Column="2"
+                            IsChecked="{Binding _currentConfig.UwUModeActive, Mode=TwoWay}"
+                            Margin="5"
+                            Unchecked="UwUToggleSwitch_OnUnchecked"
+                            x:Name="UwUToggleSwitch" />
+                    </Grid>
+                </ui:Card>
 
-                    <ui:Card>
-                        <Grid>
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="Auto" />
-                                <ColumnDefinition Width="*" />
-                                <ColumnDefinition Width="Auto" />
-                            </Grid.ColumnDefinitions>
-                            <ui:Card
-                                HorizontalAlignment="Left"
-                                Margin="5"
-                                VerticalAlignment="Center">
-                                <ui:SymbolIcon
-                                    Foreground="{DynamicResource TextFillColorPrimaryBrush}"
-                                    HorizontalAlignment="Center"
-                                    Symbol="DarkTheme24"
-                                    VerticalAlignment="Center" />
-                            </ui:Card>
-                            <StackPanel Grid.Column="1" VerticalAlignment="Center">
-                                <ui:TextBlock
-                                    FontTypography="BodyStrong"
-                                    Text="Application Theme"
-                                    TextWrapping="WrapWithOverflow" />
-                                <ui:TextBlock
-                                    Appearance="Secondary"
-                                    Opacity="0.5"
-                                    Text="Select the visual theme for the application"
-                                    TextWrapping="WrapWithOverflow" />
-                            </StackPanel>
-                            <ComboBox
-                                Grid.Column="2"
-                                ItemsSource="{Binding _currentConfig.Themes}"
-                                SelectedItem="{Binding _currentConfig.ApplicationTheme, Mode=TwoWay}"
-                                SelectionChanged="ThemeComboBox_OnSelectionChanged"
-                                x:Name="ThemeComboBox" />
-                        </Grid>
-                    </ui:Card>
+                <ui:Card>
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <ui:Card
+                            HorizontalAlignment="Left"
+                            Margin="5"
+                            VerticalAlignment="Center">
+                            <ui:SymbolIcon
+                                Foreground="{DynamicResource TextFillColorPrimaryBrush}"
+                                HorizontalAlignment="Center"
+                                Symbol="DarkTheme24"
+                                VerticalAlignment="Center" />
+                        </ui:Card>
+                        <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                            <ui:TextBlock
+                                FontTypography="BodyStrong"
+                                Text="Application Theme"
+                                TextWrapping="WrapWithOverflow" />
+                            <ui:TextBlock
+                                Appearance="Secondary"
+                                Opacity="0.5"
+                                Text="Select the visual theme for the application"
+                                TextWrapping="WrapWithOverflow" />
+                        </StackPanel>
+                        <ComboBox
+                            Grid.Column="2"
+                            ItemsSource="{Binding _currentConfig.Themes}"
+                            SelectedItem="{Binding _currentConfig.ApplicationTheme, Mode=TwoWay}"
+                            SelectionChanged="ThemeComboBox_OnSelectionChanged"
+                            x:Name="ThemeComboBox" />
+                    </Grid>
+                </ui:Card>
 
-                    <ui:Card>
-                        <Grid>
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="Auto" />
-                                <ColumnDefinition Width="*" />
-                            </Grid.ColumnDefinitions>
-                            <Grid.RowDefinitions>
-                                <RowDefinition Height="Auto" />
-                                <RowDefinition Height="Auto" />
-                            </Grid.RowDefinitions>
-                            <ui:Card
-                                Grid.RowSpan="2"
-                                HorizontalAlignment="Left"
-                                Margin="5,0,5,0"
-                                VerticalAlignment="Stretch">
-                                <ui:SymbolIcon
-                                    Foreground="{DynamicResource TextFillColorPrimaryBrush}"
-                                    HorizontalAlignment="Center"
-                                    Symbol="ColorBackground24"
-                                    VerticalAlignment="Center" />
-                            </ui:Card>
-                            <StackPanel
-                                Grid.Column="1"
-                                Grid.Row="0"
-                                VerticalAlignment="Top">
-                                <ui:TextBlock
-                                    FontTypography="BodyStrong"
-                                    Text="Custom Application Background"
-                                    TextWrapping="WrapWithOverflow" />
-                                <ui:TextBlock
-                                    Appearance="Secondary"
-                                    Opacity="0.5"
-                                    Text="Set a custom image as the application's background"
-                                    TextWrapping="WrapWithOverflow" />
-                            </StackPanel>
-                            <ui:Card
-                                Grid.Column="1"
-                                Grid.ColumnSpan="2"
-                                Grid.Row="1">
-                                <Grid>
-                                    <Grid.RowDefinitions>
-                                        <RowDefinition Height="Auto" />
-                                        <RowDefinition Height="Auto" />
-                                    </Grid.RowDefinitions>
-                                    <StackPanel Orientation="Horizontal">
-                                        <TextBlock
-                                            HorizontalAlignment="Stretch"
-                                            Text="Background Opacity"
-                                            VerticalAlignment="Center" />
-                                        <Slider
-                                            Margin="10"
-                                            Maximum="1"
-                                            Minimum="0"
-                                            ToolTip="Set the opacity of the background wallpaper"
-                                            Value="{Binding _currentConfig.Backgrounds.BackgroundOpacity, Mode=TwoWay}"
-                                            ValueChanged="BackgroundOpacitySlider_OnValueChanged"
-                                            VerticalAlignment="Stretch"
-                                            x:Name="BackgroundOpacitySlider" />
-                                        <ui:Button
-                                            Click="BackgroundChangeButton_OnClick"
-                                            Content="Change Background"
-                                            Icon="{ui:SymbolIcon Edit24}"
-                                            x:Name="BackgroundChangeButton" />
-                                        <ui:Button
-                                            Click="BackgroundResetButton_OnClick"
-                                            Content="Reset Background"
-                                            Icon="{ui:SymbolIcon ArrowReset24}"
-                                            x:Name="BackgroundResetButton" />
-                                    </StackPanel>
-                                </Grid>
-                            </ui:Card>
-                        </Grid>
-                    </ui:Card>
+                <ui:Card>
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                        </Grid.RowDefinitions>
+                        <ui:Card
+                            Grid.RowSpan="2"
+                            HorizontalAlignment="Left"
+                            Margin="5,0,5,0"
+                            VerticalAlignment="Stretch">
+                            <ui:SymbolIcon
+                                Foreground="{DynamicResource TextFillColorPrimaryBrush}"
+                                HorizontalAlignment="Center"
+                                Symbol="ColorBackground24"
+                                VerticalAlignment="Center" />
+                        </ui:Card>
+                        <StackPanel
+                            Grid.Column="1"
+                            Grid.Row="0"
+                            VerticalAlignment="Top">
+                            <ui:TextBlock
+                                FontTypography="BodyStrong"
+                                Text="Custom Application Background"
+                                TextWrapping="WrapWithOverflow" />
+                            <ui:TextBlock
+                                Appearance="Secondary"
+                                Opacity="0.5"
+                                Text="Set a custom image as the application's background"
+                                TextWrapping="WrapWithOverflow" />
+                        </StackPanel>
+                        <ui:Card
+                            Grid.Column="1"
+                            Grid.ColumnSpan="2"
+                            Grid.Row="1">
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                </Grid.RowDefinitions>
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock
+                                        HorizontalAlignment="Stretch"
+                                        Text="Background Opacity"
+                                        VerticalAlignment="Center" />
+                                    <Slider
+                                        Margin="10"
+                                        Maximum="1"
+                                        Minimum="0"
+                                        ToolTip="Set the opacity of the background wallpaper"
+                                        Value="{Binding _currentConfig.Backgrounds.BackgroundOpacity, Mode=TwoWay}"
+                                        ValueChanged="BackgroundOpacitySlider_OnValueChanged"
+                                        VerticalAlignment="Stretch"
+                                        x:Name="BackgroundOpacitySlider" />
+                                    <ui:Button
+                                        Click="BackgroundChangeButton_OnClick"
+                                        Content="Change Background"
+                                        Icon="{ui:SymbolIcon Edit24}"
+                                        x:Name="BackgroundChangeButton" />
+                                    <ui:Button
+                                        Click="BackgroundResetButton_OnClick"
+                                        Content="Reset Background"
+                                        Icon="{ui:SymbolIcon ArrowReset24}"
+                                        x:Name="BackgroundResetButton" />
+                                </StackPanel>
+                            </Grid>
+                        </ui:Card>
+                    </Grid>
+                </ui:Card>
 
-                    <ui:Card>
-                        <Grid>
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="Auto" />
-                                <ColumnDefinition Width="*" />
-                                <ColumnDefinition Width="Auto" />
-                            </Grid.ColumnDefinitions>
-                            <ui:Card
-                                HorizontalAlignment="Left"
-                                Margin="5"
-                                VerticalAlignment="Center">
-                                <ui:SymbolIcon
-                                    Foreground="{DynamicResource TextFillColorPrimaryBrush}"
-                                    HorizontalAlignment="Center"
-                                    Symbol="ArrowDownload24"
-                                    VerticalAlignment="Center" />
-                            </ui:Card>
-                            <StackPanel Grid.Column="1" VerticalAlignment="Center">
-                                <ui:TextBlock
-                                    FontTypography="BodyStrong"
-                                    Text="Update"
-                                    TextWrapping="WrapWithOverflow" />
-                                <ui:TextBlock
-                                    Appearance="Secondary"
-                                    Opacity="0.5"
-                                    Text="Check for updates on startup"
-                                    TextWrapping="WrapWithOverflow" />
-                            </StackPanel>
-                            <ui:ToggleSwitch
-                                Checked="CheckForUpdatesOnStartUpToggleSwitch_OnChecked"
-                                Grid.Column="2"
-                                IsChecked="{Binding _currentConfig.AutoUpdate, Mode=TwoWay}"
-                                Margin="5"
-                                Unchecked="CheckForUpdatesOnStartUpToggleSwitch_OnUnchecked"
-                                x:Name="CheckForUpdatesOnStartUpToggleSwitch" />
-                        </Grid>
-                    </ui:Card>
+                <ui:Card>
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <ui:Card
+                            HorizontalAlignment="Left"
+                            Margin="5"
+                            VerticalAlignment="Center">
+                            <ui:SymbolIcon
+                                Foreground="{DynamicResource TextFillColorPrimaryBrush}"
+                                HorizontalAlignment="Center"
+                                Symbol="ArrowDownload24"
+                                VerticalAlignment="Center" />
+                        </ui:Card>
+                        <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                            <ui:TextBlock
+                                FontTypography="BodyStrong"
+                                Text="Update"
+                                TextWrapping="WrapWithOverflow" />
+                            <ui:TextBlock
+                                Appearance="Secondary"
+                                Opacity="0.5"
+                                Text="Check for updates on startup"
+                                TextWrapping="WrapWithOverflow" />
+                        </StackPanel>
+                        <ui:ToggleSwitch
+                            Checked="CheckForUpdatesOnStartUpToggleSwitch_OnChecked"
+                            Grid.Column="2"
+                            IsChecked="{Binding _currentConfig.AutoUpdate, Mode=TwoWay}"
+                            Margin="5"
+                            Unchecked="CheckForUpdatesOnStartUpToggleSwitch_OnUnchecked"
+                            x:Name="CheckForUpdatesOnStartUpToggleSwitch" />
+                    </Grid>
+                </ui:Card>
 
-                    <ui:Card>
-                        <Grid>
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="Auto" />
-                                <ColumnDefinition Width="*" />
-                                <ColumnDefinition Width="Auto" />
-                            </Grid.ColumnDefinitions>
-                            <ui:Card
-                                HorizontalAlignment="Left"
-                                Margin="5"
-                                VerticalAlignment="Center">
-                                <ui:SymbolIcon
-                                    Foreground="{DynamicResource TextFillColorPrimaryBrush}"
-                                    HorizontalAlignment="Center"
-                                    Symbol="SkipForwardTab24"
-                                    VerticalAlignment="Center" />
-                            </ui:Card>
-                            <StackPanel Grid.Column="1" VerticalAlignment="Center">
-                                <ui:TextBlock
-                                    FontTypography="BodyStrong"
-                                    Text="No Intro, Please!"
-                                    TextWrapping="WrapWithOverflow" />
-                                <ui:TextBlock
-                                    Appearance="Secondary"
-                                    Opacity="0.5"
-                                    Text="Choose not to display the animated logo at start"
-                                    TextWrapping="WrapWithOverflow" />
-                            </StackPanel>
-                            <ui:ToggleSwitch
-                                Checked="SkipIntroLogoAnimationToggleSwitch_OnChecked"
-                                Grid.Column="2"
-                                IsChecked="{Binding _currentConfig.IntroLogoAnimation, Mode=TwoWay}"
-                                Margin="5"
-                                Unchecked="SkipIntroLogoAnimationToggleSwitch_OnUnchecked"
-                                x:Name="SkipIntroLogoAnimationToggleSwitch" />
-                        </Grid>
-                    </ui:Card>
+                <ui:Card>
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <ui:Card
+                            HorizontalAlignment="Left"
+                            Margin="5"
+                            VerticalAlignment="Center">
+                            <ui:SymbolIcon
+                                Foreground="{DynamicResource TextFillColorPrimaryBrush}"
+                                HorizontalAlignment="Center"
+                                Symbol="SkipForwardTab24"
+                                VerticalAlignment="Center" />
+                        </ui:Card>
+                        <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                            <ui:TextBlock
+                                FontTypography="BodyStrong"
+                                Text="No Intro, Please!"
+                                TextWrapping="WrapWithOverflow" />
+                            <ui:TextBlock
+                                Appearance="Secondary"
+                                Opacity="0.5"
+                                Text="Choose not to display the animated logo at start"
+                                TextWrapping="WrapWithOverflow" />
+                        </StackPanel>
+                        <ui:ToggleSwitch
+                            Checked="SkipIntroLogoAnimationToggleSwitch_OnChecked"
+                            Grid.Column="2"
+                            IsChecked="{Binding _currentConfig.IntroLogoAnimation, Mode=TwoWay}"
+                            Margin="5"
+                            Unchecked="SkipIntroLogoAnimationToggleSwitch_OnUnchecked"
+                            x:Name="SkipIntroLogoAnimationToggleSwitch" />
+                    </Grid>
+                </ui:Card>
 
 
-                    <ui:Card>
-                        <Grid>
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="Auto" />
-                                <ColumnDefinition Width="*" />
-                                <ColumnDefinition Width="Auto" />
-                            </Grid.ColumnDefinitions>
-                            <ui:Card
-                                HorizontalAlignment="Left"
-                                Margin="5"
-                                VerticalAlignment="Center">
-                                <ui:SymbolIcon
-                                    Foreground="{DynamicResource TextFillColorPrimaryBrush}"
-                                    HorizontalAlignment="Center"
-                                    Symbol="Apps24"
-                                    VerticalAlignment="Center" />
-                            </ui:Card>
-                            <StackPanel Grid.Column="1" VerticalAlignment="Center">
-                                <ui:TextBlock
-                                    FontTypography="BodyStrong"
-                                    Text="Discord RPC"
-                                    TextWrapping="WrapWithOverflow" />
-                                <ui:TextBlock
-                                    Appearance="Secondary"
-                                    Opacity="0.5"
-                                    Text="Show what you're doing on Discord"
-                                    TextWrapping="WrapWithOverflow" />
-                            </StackPanel>
-                            <ui:ToggleSwitch
-                                Checked="DiscordRpcToggleSwitch_OnChecked"
-                                Grid.Column="2"
-                                IsChecked="{Binding _currentConfig.DiscordRpc, Mode=TwoWay}"
-                                Margin="5"
-                                Unchecked="DiscordRpcToggleSwitch_OnUnchecked"
-                                x:Name="DiscordRpcToggleSwitch" />
-                        </Grid>
-                    </ui:Card>
+                <ui:Card>
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <ui:Card
+                            HorizontalAlignment="Left"
+                            Margin="5"
+                            VerticalAlignment="Center">
+                            <ui:SymbolIcon
+                                Foreground="{DynamicResource TextFillColorPrimaryBrush}"
+                                HorizontalAlignment="Center"
+                                Symbol="Apps24"
+                                VerticalAlignment="Center" />
+                        </ui:Card>
+                        <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                            <ui:TextBlock
+                                FontTypography="BodyStrong"
+                                Text="Discord RPC"
+                                TextWrapping="WrapWithOverflow" />
+                            <ui:TextBlock
+                                Appearance="Secondary"
+                                Opacity="0.5"
+                                Text="Show what you're doing on Discord"
+                                TextWrapping="WrapWithOverflow" />
+                        </StackPanel>
+                        <ui:ToggleSwitch
+                            Checked="DiscordRpcToggleSwitch_OnChecked"
+                            Grid.Column="2"
+                            IsChecked="{Binding _currentConfig.DiscordRpc, Mode=TwoWay}"
+                            Margin="5"
+                            Unchecked="DiscordRpcToggleSwitch_OnUnchecked"
+                            x:Name="DiscordRpcToggleSwitch" />
+                    </Grid>
+                </ui:Card>
 
-                    <ui:Card>
-                        <Grid>
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="Auto" />
-                                <ColumnDefinition Width="*" />
-                                <ColumnDefinition />
-                            </Grid.ColumnDefinitions>
-                            <Grid.RowDefinitions>
-                                <RowDefinition Height="Auto" />
-                                <RowDefinition Height="Auto" />
-                            </Grid.RowDefinitions>
-                            <ui:Card
-                                Grid.RowSpan="2"
-                                HorizontalAlignment="Left"
-                                Margin="5,0,5,0"
-                                VerticalAlignment="Stretch">
-                                <ui:SymbolIcon
-                                    Foreground="{DynamicResource TextFillColorPrimaryBrush}"
-                                    HorizontalAlignment="Center"
-                                    Symbol="Folder24"
-                                    VerticalAlignment="Center" />
-                            </ui:Card>
-                            <StackPanel
-                                Grid.Column="1"
-                                Grid.Row="0"
-                                VerticalAlignment="Top">
-                                <ui:TextBlock
-                                    FontTypography="BodyStrong"
-                                    Text="Default Temp Path"
-                                    TextWrapping="WrapWithOverflow" />
-                                <ui:TextBlock
-                                    Appearance="Secondary"
-                                    Opacity="0.5"
-                                    Text="Change the default TEMP path for extracted files"
-                                    TextWrapping="WrapWithOverflow" />
-                            </StackPanel>
-                            <ui:Card
-                                Grid.Column="1"
-                                Grid.ColumnSpan="2"
-                                Grid.Row="1">
-                                <Grid>
-                                    <Grid.RowDefinitions>
-                                        <RowDefinition Height="Auto" />
-                                        <RowDefinition Height="Auto" />
-                                    </Grid.RowDefinitions>
-                                    <StackPanel Orientation="Horizontal">
-                                        <ui:TextBox
-                                            HorizontalAlignment="Stretch"
-                                            IsTextSelectionEnabled="True"
-                                            Margin="0,0,10,0"
-                                            PlaceholderText="Default Temp Path"
-                                            Text="{Binding _currentConfig.DefaultTempPath, Mode=TwoWay}"
-                                            ToolTip="{Binding _currentConfig.DefaultTempPath, Mode=OneWay}"
-                                            VerticalAlignment="Center"
-                                            x:Name="DefaultTempPathTextBox" />
-                                        <ui:Button
-                                            Click="DefaultTempPathChangeButton_OnClick"
-                                            Content="Change"
-                                            Icon="{ui:SymbolIcon Edit24}"
-                                            x:Name="DefaultTempPathChangeButton" />
-                                        <ui:Button
-                                            Click="DefaultTempPathResetButton_OnClick"
-                                            Content="Reset"
-                                            Icon="{ui:SymbolIcon ArrowReset24}"
-                                            x:Name="DefaultTempPathResetButton" />
-                                    </StackPanel>
-                                </Grid>
-                            </ui:Card>
-                        </Grid>
-                    </ui:Card>
+                <ui:Card>
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition />
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                        </Grid.RowDefinitions>
+                        <ui:Card
+                            Grid.RowSpan="2"
+                            HorizontalAlignment="Left"
+                            Margin="5,0,5,0"
+                            VerticalAlignment="Stretch">
+                            <ui:SymbolIcon
+                                Foreground="{DynamicResource TextFillColorPrimaryBrush}"
+                                HorizontalAlignment="Center"
+                                Symbol="Folder24"
+                                VerticalAlignment="Center" />
+                        </ui:Card>
+                        <StackPanel
+                            Grid.Column="1"
+                            Grid.Row="0"
+                            VerticalAlignment="Top">
+                            <ui:TextBlock
+                                FontTypography="BodyStrong"
+                                Text="Default Temp Path"
+                                TextWrapping="WrapWithOverflow" />
+                            <ui:TextBlock
+                                Appearance="Secondary"
+                                Opacity="0.5"
+                                Text="Change the default TEMP path for extracted files"
+                                TextWrapping="WrapWithOverflow" />
+                        </StackPanel>
+                        <ui:Card
+                            Grid.Column="1"
+                            Grid.ColumnSpan="2"
+                            Grid.Row="1">
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                </Grid.RowDefinitions>
+                                <StackPanel Orientation="Horizontal">
+                                    <ui:TextBox
+                                        HorizontalAlignment="Stretch"
+                                        IsTextSelectionEnabled="True"
+                                        Margin="0,0,10,0"
+                                        PlaceholderText="Default Temp Path"
+                                        Text="{Binding _currentConfig.DefaultTempPath, Mode=TwoWay}"
+                                        ToolTip="{Binding _currentConfig.DefaultTempPath, Mode=OneWay}"
+                                        VerticalAlignment="Center"
+                                        x:Name="DefaultTempPathTextBox" />
+                                    <ui:Button
+                                        Click="DefaultTempPathChangeButton_OnClick"
+                                        Content="Change"
+                                        Icon="{ui:SymbolIcon Edit24}"
+                                        x:Name="DefaultTempPathChangeButton" />
+                                    <ui:Button
+                                        Click="DefaultTempPathResetButton_OnClick"
+                                        Content="Reset"
+                                        Icon="{ui:SymbolIcon ArrowReset24}"
+                                        x:Name="DefaultTempPathResetButton" />
+                                </StackPanel>
+                            </Grid>
+                        </ui:Card>
+                    </Grid>
+                </ui:Card>
 
-                </StackPanel>
-            </ui:Card>
+            </StackPanel>
         </Grid>
     </ui:PassiveScrollViewer>
 </UserControl>

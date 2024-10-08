@@ -42,7 +42,6 @@ public partial class SearchEverything : UserControl, INotifyPropertyChanged
     {
         if (!await EverythingValidation.AreSystemRequirementsMet())
         {
-            SearchEverythingCard.Visibility = Visibility.Collapsed;
             FallbackEverything.Visibility = Visibility.Visible;
             FallbackEverything.Text = await EverythingValidation.AreSystemRequirementsMetString();
             await BetterLogger.LogAsync("System requirements not met for Everything", "SearchEverything.xaml.cs",
@@ -62,7 +61,6 @@ public partial class SearchEverything : UserControl, INotifyPropertyChanged
             myThread.SetApartmentState(ApartmentState.STA);
             myThread.Start();
 
-            SearchEverythingCard.Visibility = Visibility.Visible;
             FallbackEverything.Visibility = Visibility.Collapsed;
             await BetterLogger.LogAsync("Everything search started", "SearchEverything.xaml.cs",
                 Importance.Info); // Log search start
@@ -146,6 +144,12 @@ public partial class SearchEverything : UserControl, INotifyPropertyChanged
             FoundText.Text = "Search for a UnityPackage Name";
             await BetterLogger.LogAsync("Search box cleared", "SearchEverything.xaml.cs",
                 Importance.Info); // Log search clear
+            SearchEverythingList = _tempList.Where(x =>
+                {
+                    return x.UnityPackageName.StartsWith(SearchEverythingTextBox.Text,
+                        StringComparison.InvariantCultureIgnoreCase);
+                })
+                .ToList();
             return;
         }
 

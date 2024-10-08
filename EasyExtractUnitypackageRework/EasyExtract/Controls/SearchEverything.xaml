@@ -8,194 +8,185 @@
     xmlns:sys="clr-namespace:System;assembly=System.Runtime"
     xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
-    <Grid HorizontalAlignment="Center" VerticalAlignment="Center">
-        <ui:PassiveScrollViewer
-            HorizontalScrollBarVisibility="Auto"
-            Padding="20"
-            VerticalScrollBarVisibility="Auto">
+    <Grid HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+        <ui:PassiveScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto">
             <StackPanel
                 HorizontalAlignment="Stretch"
                 Orientation="Vertical"
-                VerticalAlignment="Center">
-                <TextBlock
-                    FontStyle="Italic"
-                    HorizontalAlignment="Center"
-                    Margin="10"
-                    Text="Search Everything isn't supported on your computer."
-                    VerticalAlignment="Center"
-                    x:Name="FallbackEverything" />
-                <ui:Card x:Name="SearchEverythingCard">
-                    <StackPanel Orientation="Vertical">
-                        <ui:Card Footer="Filter" Margin="10">
-                            <ui:ToggleSwitch
-                                Checked="CreationDateFilterSwitch_OnChecked"
-                                Unchecked="CreationDateFilterSwitch_OnUnchecked"
-                                x:Name="CreationDateFilterSwitch">
-                                <StackPanel HorizontalAlignment="Stretch">
-                                    <ui:Card x:Name="CreationDateFilterCardFallback">
-                                        <StackPanel Orientation="Horizontal">
-                                            <ui:TextBlock
-                                                FontSize="12"
-                                                HorizontalAlignment="Stretch"
-                                                Margin="8,0,0,0"
-                                                Text="Enable to see Filter"
-                                                VerticalAlignment="Center" />
-                                        </StackPanel>
-                                    </ui:Card>
-                                    <ui:Card Visibility="Collapsed" x:Name="CreationDateFilterCard">
-                                        <Grid>
-                                            <Grid.RowDefinitions>
-                                                <RowDefinition Height="Auto" />
-                                                <RowDefinition Height="Auto" />
-                                            </Grid.RowDefinitions>
-                                            <StackPanel Margin="5" Orientation="Horizontal">
-                                                <ui:TextBlock
-                                                    FontSize="14"
-                                                    FontTypography="Title"
-                                                    Margin="8,0,5,0"
-                                                    Text="Search from"
-                                                    VerticalAlignment="Center" />
-                                                <ui:CalendarDatePicker
-                                                    Content="Pick a date"
-                                                    Date="{x:Static sys:DateTime.Today}"
-                                                    IsTodayHighlighted="True"
-                                                    x:Name="CalendarStartCreationDatePicker" />
-                                                <ui:TextBlock
-                                                    Margin="8,0,0,0"
-                                                    Text="{Binding ElementName=CalendarStartCreationDatePicker, Path=Date, StringFormat=dd-MM-yyyy}"
-                                                    VerticalAlignment="Center" />
-                                                <ui:TextBlock
-                                                    FontSize="14"
-                                                    FontTypography="Title"
-                                                    Margin="8,0,5,0"
-                                                    Text="to"
-                                                    VerticalAlignment="Center" />
-                                                <ui:CalendarDatePicker
-                                                    Content="Pick a date"
-                                                    Date="{x:Static sys:DateTime.Today}"
-                                                    IsTodayHighlighted="True"
-                                                    x:Name="CalendarEndCreationDatePicker" />
-                                                <ui:TextBlock
-                                                    Margin="8,0,0,0"
-                                                    Text="{Binding ElementName=CalendarEndCreationDatePicker, Path=Date, StringFormat=dd-MM-yyyy}"
-                                                    VerticalAlignment="Center" />
-                                            </StackPanel>
-                                            <StackPanel Grid.Row="1" Margin="5">
-                                                <ui:Button
-                                                    Click="UpdateSearchResultCreationDateFilterBtn_OnClick"
-                                                    Content="Update Search Result"
-                                                    HorizontalAlignment="Stretch"
-                                                    Icon="{ui:SymbolIcon SearchInfo24}"
-                                                    Margin="5"
-                                                    x:Name="UpdateSearchResultCreationDateFilterBtn" />
-                                            </StackPanel>
-                                        </Grid>
-                                    </ui:Card>
-                                </StackPanel>
-                            </ui:ToggleSwitch>
-                        </ui:Card>
-                        <ui:TextBox
-                            FontSize="14"
-                            HorizontalAlignment="Stretch"
-                            Icon="{ui:SymbolIcon Search24}"
-                            Margin="10"
-                            MinWidth="250"
-                            PlaceholderText="Search for a UnityPackage..."
-                            TextChanged="SearchEverythingTextBox_OnTextChanged"
-                            VerticalAlignment="Center"
-                            VerticalContentAlignment="Center"
-                            x:Name="SearchEverythingTextBox" />
-
-                        <ui:ListView
-                            HorizontalAlignment="Stretch"
-                            HorizontalContentAlignment="Stretch"
-                            ItemsSource="{Binding SearchEverythingList}"
-                            Margin="10"
-                            MaxHeight="300">
-                            <ui:ListView.ItemTemplate>
-                                <DataTemplate>
-                                    <ui:CardControl>
-                                        <ui:CardControl.Icon>
-                                            <ui:SymbolIcon
-                                                HorizontalAlignment="Center"
-                                                Margin="0,0,5,0"
-                                                Symbol="FolderZip24"
-                                                VerticalAlignment="Center" />
-                                        </ui:CardControl.Icon>
-                                        <ui:CardControl.Header>
-                                            <StackPanel>
-                                                <ui:TextBlock
-                                                    FontSize="14"
-                                                    FontTypography="BodyStrong"
-                                                    Text="{Binding UnityPackageName}"
-                                                    TextWrapping="WrapWithOverflow" />
-                                                <ui:TextBlock
-                                                    Appearance="Secondary"
-                                                    FontSize="12"
-                                                    Margin="0,5,0,0"
-                                                    MaxWidth="500"
-                                                    Opacity="0.5"
-                                                    Text="{Binding UnityPackagePath}"
-                                                    TextWrapping="WrapWithOverflow" />
-                                                <ui:Card>
-                                                    <StackPanel Orientation="Vertical">
-                                                        <ui:TextBlock
-                                                            Appearance="Secondary"
-                                                            FontSize="12"
-                                                            Margin="0,5,0,0"
-                                                            MaxWidth="500"
-                                                            Opacity="0.5"
-                                                            Text="{Binding ModifiedTime}"
-                                                            TextWrapping="WrapWithOverflow" />
-                                                        <ui:TextBlock
-                                                            Appearance="Secondary"
-                                                            FontSize="12"
-                                                            Margin="0,5,0,0"
-                                                            MaxWidth="500"
-                                                            Opacity="0.5"
-                                                            Text="{Binding CreatedTime}"
-                                                            TextWrapping="WrapWithOverflow" />
-                                                    </StackPanel>
-                                                </ui:Card>
-                                            </StackPanel>
-                                        </ui:CardControl.Header>
-                                        <ui:Button
-                                            Click="QueueAddButton_OnClick"
-                                            Content="Add"
-                                            FontSize="14"
-                                            HorizontalAlignment="Left"
-                                            Icon="{ui:SymbolIcon Add24}"
-                                            Margin="5"
-                                            ToolTip="Add to Queue"
-                                            x:Name="QueueAddButton" />
-                                    </ui:CardControl>
-                                </DataTemplate>
-                            </ui:ListView.ItemTemplate>
-                        </ui:ListView>
-                        <TextBlock
-                            FontSize="14"
-                            HorizontalAlignment="Center"
-                            Margin="5"
-                            MaxWidth="500"
-                            Opacity="0.5"
-                            Text="Search for a UnityPackage Name..."
-                            x:Name="FoundText" />
-                        <TextBlock
-                            FontSize="14"
-                            HorizontalAlignment="Center"
-                            Margin="5"
-                            Opacity="0.7"
-                            Text="Powered by SearchEverything" />
-                    </StackPanel>
-                </ui:Card>
-                <ui:Button
-                    Click="SearchFileManuallyButton_OnClick"
-                    Content="Search File Manually"
+                VerticalAlignment="Top">
+                <ui:TextBox
                     FontSize="14"
                     HorizontalAlignment="Stretch"
-                    Icon="{ui:SymbolIcon DocumentSearch24}"
-                    Margin="5"
-                    x:Name="SearchFileManuallyButton" />
+                    Icon="{ui:SymbolIcon Search24}"
+                    Margin="0,0,0,5"
+                    MinWidth="250"
+                    PlaceholderText="Search for a UnityPackage..."
+                    TextChanged="SearchEverythingTextBox_OnTextChanged"
+                    VerticalAlignment="Center"
+                    VerticalContentAlignment="Center"
+                    x:Name="SearchEverythingTextBox" />
+                <StackPanel Orientation="Vertical">
+                    <ui:Card>
+                        <ui:ToggleSwitch
+                            Checked="CreationDateFilterSwitch_OnChecked"
+                            Unchecked="CreationDateFilterSwitch_OnUnchecked"
+                            x:Name="CreationDateFilterSwitch">
+                            <StackPanel HorizontalAlignment="Stretch">
+                                <ui:TextBlock
+                                    FontSize="12"
+                                    FontTypography="Caption"
+                                    HorizontalAlignment="Stretch"
+                                    Margin="8,0,0,0"
+                                    Text="Enable to see Filter"
+                                    VerticalAlignment="Center"
+                                    x:Name="CreationDateFilterCardFallback" />
+                                <Grid Visibility="Collapsed" x:Name="CreationDateFilterCard">
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto" />
+                                        <RowDefinition Height="Auto" />
+                                    </Grid.RowDefinitions>
+                                    <StackPanel Margin="5" Orientation="Horizontal">
+                                        <ui:TextBlock
+                                            FontSize="14"
+                                            FontTypography="Title"
+                                            Margin="8,0,5,0"
+                                            Text="Search from"
+                                            VerticalAlignment="Center" />
+                                        <ui:CalendarDatePicker
+                                            Content="Pick a date"
+                                            Date="{x:Static sys:DateTime.Today}"
+                                            IsTodayHighlighted="True"
+                                            x:Name="CalendarStartCreationDatePicker" />
+                                        <ui:TextBlock
+                                            Margin="8,0,0,0"
+                                            Text="{Binding ElementName=CalendarStartCreationDatePicker, Path=Date, StringFormat=dd-MM-yyyy}"
+                                            VerticalAlignment="Center" />
+                                        <ui:TextBlock
+                                            FontSize="14"
+                                            FontTypography="Title"
+                                            Margin="8,0,5,0"
+                                            Text="to"
+                                            VerticalAlignment="Center" />
+                                        <ui:CalendarDatePicker
+                                            Content="Pick a date"
+                                            Date="{x:Static sys:DateTime.Today}"
+                                            IsTodayHighlighted="True"
+                                            x:Name="CalendarEndCreationDatePicker" />
+                                        <ui:TextBlock
+                                            Margin="8,0,0,0"
+                                            Text="{Binding ElementName=CalendarEndCreationDatePicker, Path=Date, StringFormat=dd-MM-yyyy}"
+                                            VerticalAlignment="Center" />
+                                    </StackPanel>
+                                    <StackPanel Grid.Row="1" Margin="5">
+                                        <ui:Button
+                                            Click="UpdateSearchResultCreationDateFilterBtn_OnClick"
+                                            Content="Update Search Result"
+                                            HorizontalAlignment="Stretch"
+                                            Icon="{ui:SymbolIcon SearchInfo24}"
+                                            Margin="5"
+                                            x:Name="UpdateSearchResultCreationDateFilterBtn" />
+                                    </StackPanel>
+                                </Grid>
+                            </StackPanel>
+                        </ui:ToggleSwitch>
+                    </ui:Card>
+                    <ui:Button
+                        Appearance="Secondary"
+                        Click="SearchFileManuallyButton_OnClick"
+                        Content="Search File Manually"
+                        FontSize="14"
+                        HorizontalAlignment="Stretch"
+                        Icon="{ui:SymbolIcon DocumentSearch24}"
+                        Margin="0,5,0,5"
+                        x:Name="SearchFileManuallyButton" />
+
+
+                    <ui:ListView
+                        HorizontalAlignment="Stretch"
+                        HorizontalContentAlignment="Stretch"
+                        ItemsSource="{Binding SearchEverythingList}">
+                        <ui:ListView.ItemTemplate>
+                            <DataTemplate>
+                                <ui:CardControl>
+                                    <ui:CardControl.Icon>
+                                        <ui:SymbolIcon
+                                            HorizontalAlignment="Center"
+                                            Margin="0,0,5,0"
+                                            Symbol="FolderZip24"
+                                            VerticalAlignment="Center" />
+                                    </ui:CardControl.Icon>
+                                    <ui:CardControl.Header>
+                                        <StackPanel>
+                                            <ui:TextBlock
+                                                FontSize="14"
+                                                FontTypography="BodyStrong"
+                                                Text="{Binding UnityPackageName}"
+                                                TextWrapping="WrapWithOverflow" />
+                                            <ui:TextBlock
+                                                Appearance="Secondary"
+                                                FontSize="12"
+                                                Margin="0,5,0,0"
+                                                MaxWidth="500"
+                                                Opacity="0.5"
+                                                Text="{Binding UnityPackagePath}"
+                                                TextWrapping="WrapWithOverflow" />
+                                            <ui:Card>
+                                                <StackPanel Orientation="Vertical">
+                                                    <ui:TextBlock
+                                                        Appearance="Secondary"
+                                                        FontSize="12"
+                                                        Margin="0,5,0,0"
+                                                        MaxWidth="500"
+                                                        Opacity="0.5"
+                                                        Text="{Binding ModifiedTime}"
+                                                        TextWrapping="WrapWithOverflow" />
+                                                    <ui:TextBlock
+                                                        Appearance="Secondary"
+                                                        FontSize="12"
+                                                        Margin="0,5,0,0"
+                                                        MaxWidth="500"
+                                                        Opacity="0.5"
+                                                        Text="{Binding CreatedTime}"
+                                                        TextWrapping="WrapWithOverflow" />
+                                                </StackPanel>
+                                            </ui:Card>
+                                        </StackPanel>
+                                    </ui:CardControl.Header>
+                                    <ui:Button
+                                        Click="QueueAddButton_OnClick"
+                                        Content="Add"
+                                        FontSize="14"
+                                        HorizontalAlignment="Left"
+                                        Icon="{ui:SymbolIcon Add24}"
+                                        Margin="5"
+                                        ToolTip="Add to Queue"
+                                        x:Name="QueueAddButton" />
+                                </ui:CardControl>
+                            </DataTemplate>
+                        </ui:ListView.ItemTemplate>
+                    </ui:ListView>
+                    <TextBlock
+                        FontStyle="Italic"
+                        HorizontalAlignment="Center"
+                        Margin="10"
+                        Text="Search Everything isn't supported on your computer."
+                        VerticalAlignment="Center"
+                        x:Name="FallbackEverything" />
+                    <TextBlock
+                        FontSize="14"
+                        HorizontalAlignment="Center"
+                        Margin="5"
+                        MaxWidth="500"
+                        Opacity="0.5"
+                        Text="Search for a UnityPackage Name..."
+                        x:Name="FoundText" />
+                    <TextBlock
+                        FontSize="14"
+                        HorizontalAlignment="Center"
+                        Margin="5"
+                        Opacity="0.7"
+                        Text="Powered by SearchEverything" />
+                </StackPanel>
                 <TextBlock
                     FontSize="14"
                     HorizontalAlignment="Center"
