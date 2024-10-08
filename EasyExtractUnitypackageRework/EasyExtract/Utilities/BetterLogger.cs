@@ -12,9 +12,8 @@ public class BetterLogger
         InitializeLogger();
     }
 
-    private void InitializeLogger()
+    private static void InitializeLogger()
     {
-        DeleteLogsFolder();
         var applicationPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
             "EasyExtract");
         var logPath = Path.Combine(applicationPath, "Logs");
@@ -27,48 +26,65 @@ public class BetterLogger
             .WriteTo.File(Path.Combine(logPath, "Log.txt"), LogEventLevel.Information,
                 rollingInterval: RollingInterval.Day, shared: true)
             .CreateLogger();
+        DeleteLogsFolderIfRequired();
     }
 
-    private void DeleteLogsFolder()
+    private static void DeleteLogsFolderIfRequired()
     {
-        var logsPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "EasyExtract",
-            "Logs");
+        var applicationPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
+            "EasyExtract");
+        var logPath = Path.Combine(applicationPath, "Logs");
 
-        if (Directory.Exists(logsPath))
-            try
-            {
-                var files = Directory.GetFiles(logsPath);
-                foreach (var file in files)
-                    try
-                    {
-                        File.Delete(file);
-                    }
-                    catch (IOException ex)
-                    {
-                        Console.WriteLine($"Failed to delete file {file}: {ex.Message}");
-                    }
+        if (!Directory.Exists(logPath))
+            Directory.CreateDirectory(logPath);
+        if (Directory.Exists(logPath))
+            return;
 
-                try
-                {
-                    Directory.Delete(logsPath, true);
-                }
-                catch (IOException ex)
-                {
-                    Console.WriteLine($"Failed to delete logs folder: {ex.Message}");
-                }
-            }
-            catch (DirectoryNotFoundException)
-            {
-                // Ignore if the directory is not found
-            }
-            catch (IOException ex)
-            {
-                Console.WriteLine($"Failed to delete logs folder: {ex.Message}");
-            }
+        var logFiles = Directory.GetFiles(logPath);
+        if (GetLogFileCreationDate(logFiles) < DateTime.Now.AddDays(-7))
+            DeleteLogsFolder();
     }
 
-    public Task LogAsync(string message, string source, Importance importance)
+    private static void DeleteLogsFolder()
     {
+        var applicationPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
+            "EasyExtract");
+        var logPath = Path.Combine(applicationPath, "Logs");
+
+        if (!Directory.Exists(logPath))
+            Directory.CreateDirectory(logPath);
+
+        var logFiles = Directory.GetFiles(logPath);
+        foreach (var logFile in logFiles)
+            if (FileNotBeingUsed(logFile))
+                File.Delete(logFile);
+    }
+
+    private static bool FileNotBeingUsed(string logFile)
+    {
+        try
+        {
+            using var stream = new FileStream(logFile, FileMode.Open, FileAccess.Read, FileShare.None);
+            return true;
+        }
+        catch (IOException)
+        {
+            return false;
+        }
+    }
+
+    private static DateTime GetLogFileCreationDate(string[] logFiles)
+    {
+        if (logFiles.Length == 0)
+            return DateTime.Now;
+        var creationDates = logFiles.Select(logFile => File.GetCreationTime(logFile)).ToList();
+        return creationDates.Min();
+    }
+
+
+    public static Task LogAsync(string message, string source, Importance importance)
+    {
+        InitializeLogger();
         var logEntry = $"[{importance}] {source}: {message}";
 
         lock (_lock)
