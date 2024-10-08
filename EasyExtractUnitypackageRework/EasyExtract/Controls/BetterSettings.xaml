@@ -2,15 +2,22 @@
     FontFamily="{DynamicResource SegoeFluentIcons}"
     Foreground="{DynamicResource TextFillColorPrimaryBrush}"
     Loaded="BetterSettings_OnLoaded"
+    d:DataContext="{d:DesignInstance configModel:ConfigModel,
+                                     IsDesignTimeCreatable=True}"
     mc:Ignorable="d"
     ui:Design.Background="{DynamicResource ApplicationBackgroundBrush}"
     x:Class="EasyExtract.Controls.BetterSettings"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:configModel="clr-namespace:EasyExtract.Models"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mahicons="http://metro.mahapps.com/winfx/xaml/iconpacks"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+    xmlns:utilities="clr-namespace:EasyExtract.Utilities"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <UserControl.Resources>
+        <utilities:BorderThicknessConverter x:Key="BorderThicknessConverter" />
+    </UserControl.Resources>
     <ui:PassiveScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto">
         <Grid>
             <Grid.RowDefinitions>
@@ -20,7 +27,8 @@
                 <RowDefinition Height="Auto" />
             </Grid.RowDefinitions>
             <StackPanel Grid.Row="1" Orientation="Vertical">
-                <ui:Card>
+                <ui:Card BorderBrush="White"
+                         BorderThickness="{Binding Converter={StaticResource BorderThicknessConverter}, Path=BorderThicknessActive}">
                     <Grid>
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="Auto" />
@@ -47,13 +55,48 @@
                         <ui:ToggleSwitch
                             Checked="ContextMenuSwitch_OnChecked"
                             Grid.Column="2"
-                            IsChecked="{Binding _currentConfig.ContextMenuToggle, Mode=TwoWay}"
+                            IsChecked="{Binding ContextMenuToggle, Mode=TwoWay}"
                             Margin="5"
                             Unchecked="ContextMenuSwitch_OnUnchecked"
                             x:Name="ContextMenuSwitch" />
                     </Grid>
                 </ui:Card>
-                <ui:Card>
+                <ui:Card BorderBrush="White"
+                         BorderThickness="{Binding Converter={StaticResource BorderThicknessConverter}, Path=BorderThicknessActive}">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <ui:Card
+                            HorizontalAlignment="Left"
+                            Margin="5"
+                            VerticalAlignment="Center">
+                            <mahicons:Modern Kind="BorderAll" />
+                        </ui:Card>
+                        <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                            <ui:TextBlock
+                                FontTypography="BodyStrong"
+                                Text="Enable Borders"
+                                TextWrapping="WrapWithOverflow" />
+                            <ui:TextBlock
+                                Appearance="Secondary"
+                                Opacity="0.5"
+                                Text="When enabled, Borders will appear (Only for the settings page)"
+                                TextWrapping="Wrap" />
+                        </StackPanel>
+                        <ui:ToggleSwitch
+                            Checked="BorderMenuSwitch_OnChecked"
+                            Grid.Column="2"
+                            IsChecked="{Binding BorderThicknessActive, Mode=TwoWay}"
+                            Margin="5"
+                            Unchecked="BorderMenuSwitch_OnUnchecked"
+                            x:Name="BorderMenuSwitch" />
+                    </Grid>
+                </ui:Card>
+                <ui:Card BorderBrush="White"
+                         BorderThickness="{Binding Converter={StaticResource BorderThicknessConverter}, Path=BorderThicknessActive}">
                     <Grid>
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="Auto" />
@@ -84,14 +127,15 @@
                         <ui:ToggleSwitch
                             Checked="UwUToggleSwitch_OnChecked"
                             Grid.Column="2"
-                            IsChecked="{Binding _currentConfig.UwUModeActive, Mode=TwoWay}"
+                            IsChecked="{Binding UwUModeActive, Mode=TwoWay}"
                             Margin="5"
                             Unchecked="UwUToggleSwitch_OnUnchecked"
                             x:Name="UwUToggleSwitch" />
                     </Grid>
                 </ui:Card>
 
-                <ui:Card>
+                <ui:Card BorderBrush="White"
+                         BorderThickness="{Binding Converter={StaticResource BorderThicknessConverter}, Path=BorderThicknessActive}">
                     <Grid>
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="Auto" />
@@ -121,14 +165,15 @@
                         </StackPanel>
                         <ComboBox
                             Grid.Column="2"
-                            ItemsSource="{Binding _currentConfig.Themes}"
-                            SelectedItem="{Binding _currentConfig.ApplicationTheme, Mode=TwoWay}"
+                            ItemsSource="{Binding Themes}"
+                            SelectedItem="{Binding ApplicationTheme, Mode=TwoWay}"
                             SelectionChanged="ThemeComboBox_OnSelectionChanged"
                             x:Name="ThemeComboBox" />
                     </Grid>
                 </ui:Card>
 
-                <ui:Card>
+                <ui:Card BorderBrush="White"
+                         BorderThickness="{Binding Converter={StaticResource BorderThicknessConverter}, Path=BorderThicknessActive}">
                     <Grid>
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="Auto" />
@@ -182,7 +227,7 @@
                                         Maximum="1"
                                         Minimum="0"
                                         ToolTip="Set the opacity of the background wallpaper"
-                                        Value="{Binding _currentConfig.Backgrounds.BackgroundOpacity, Mode=TwoWay}"
+                                        Value="{Binding Backgrounds.BackgroundOpacity, Mode=TwoWay}"
                                         ValueChanged="BackgroundOpacitySlider_OnValueChanged"
                                         VerticalAlignment="Stretch"
                                         x:Name="BackgroundOpacitySlider" />
@@ -202,7 +247,8 @@
                     </Grid>
                 </ui:Card>
 
-                <ui:Card>
+                <ui:Card BorderBrush="White"
+                         BorderThickness="{Binding Converter={StaticResource BorderThicknessConverter}, Path=BorderThicknessActive}">
                     <Grid>
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="Auto" />
@@ -233,14 +279,15 @@
                         <ui:ToggleSwitch
                             Checked="CheckForUpdatesOnStartUpToggleSwitch_OnChecked"
                             Grid.Column="2"
-                            IsChecked="{Binding _currentConfig.AutoUpdate, Mode=TwoWay}"
+                            IsChecked="{Binding AutoUpdate, Mode=TwoWay}"
                             Margin="5"
                             Unchecked="CheckForUpdatesOnStartUpToggleSwitch_OnUnchecked"
                             x:Name="CheckForUpdatesOnStartUpToggleSwitch" />
                     </Grid>
                 </ui:Card>
 
-                <ui:Card>
+                <ui:Card BorderBrush="White"
+                         BorderThickness="{Binding Converter={StaticResource BorderThicknessConverter}, Path=BorderThicknessActive}">
                     <Grid>
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="Auto" />
@@ -271,7 +318,7 @@
                         <ui:ToggleSwitch
                             Checked="SkipIntroLogoAnimationToggleSwitch_OnChecked"
                             Grid.Column="2"
-                            IsChecked="{Binding _currentConfig.IntroLogoAnimation, Mode=TwoWay}"
+                            IsChecked="{Binding IntroLogoAnimation, Mode=TwoWay}"
                             Margin="5"
                             Unchecked="SkipIntroLogoAnimationToggleSwitch_OnUnchecked"
                             x:Name="SkipIntroLogoAnimationToggleSwitch" />
@@ -279,7 +326,8 @@
                 </ui:Card>
 
 
-                <ui:Card>
+                <ui:Card BorderBrush="White"
+                         BorderThickness="{Binding Converter={StaticResource BorderThicknessConverter}, Path=BorderThicknessActive}">
                     <Grid>
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="Auto" />
@@ -310,14 +358,15 @@
                         <ui:ToggleSwitch
                             Checked="DiscordRpcToggleSwitch_OnChecked"
                             Grid.Column="2"
-                            IsChecked="{Binding _currentConfig.DiscordRpc, Mode=TwoWay}"
+                            IsChecked="{Binding DiscordRpc, Mode=TwoWay}"
                             Margin="5"
                             Unchecked="DiscordRpcToggleSwitch_OnUnchecked"
                             x:Name="DiscordRpcToggleSwitch" />
                     </Grid>
                 </ui:Card>
 
-                <ui:Card>
+                <ui:Card BorderBrush="White"
+                         BorderThickness="{Binding Converter={StaticResource BorderThicknessConverter}, Path=BorderThicknessActive}">
                     <Grid>
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="Auto" />
@@ -368,8 +417,8 @@
                                         IsTextSelectionEnabled="True"
                                         Margin="0,0,10,0"
                                         PlaceholderText="Default Temp Path"
-                                        Text="{Binding _currentConfig.DefaultTempPath, Mode=TwoWay}"
-                                        ToolTip="{Binding _currentConfig.DefaultTempPath, Mode=OneWay}"
+                                        Text="{Binding DefaultTempPath, Mode=TwoWay}"
+                                        ToolTip="{Binding DefaultTempPath, Mode=OneWay}"
                                         VerticalAlignment="Center"
                                         x:Name="DefaultTempPathTextBox" />
                                     <ui:Button

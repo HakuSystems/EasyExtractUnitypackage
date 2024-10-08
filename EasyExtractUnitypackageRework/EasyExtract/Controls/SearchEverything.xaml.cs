@@ -8,7 +8,6 @@ namespace EasyExtract.Controls;
 public partial class SearchEverything : UserControl, INotifyPropertyChanged
 {
     private readonly List<SearchEverythingModel> _tempList = new();
-    private readonly BetterLogger BetterLogger = new();
     private readonly ConfigHelper ConfigHelper = new();
     private readonly EverythingValidation EverythingValidation = new();
 

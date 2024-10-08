@@ -4,17 +4,21 @@
     FontFamily="{DynamicResource SegoeFluentIcons}"
     Foreground="{DynamicResource TextFillColorPrimaryBrush}"
     Loaded="Extraction_OnLoaded"
+    d:DataContext="{d:DesignInstance configModel:ConfigModel,
+                                     IsDesignTimeCreatable=True}"
     mc:Ignorable="d"
     ui:Design.Background="{DynamicResource ApplicationBackgroundBrush}"
     x:Class="EasyExtract.Controls.Extraction"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:boxIcons="http://metro.mahapps.com/winfx/xaml/iconpacks"
     xmlns:charts="clr-namespace:LiveCharts.Wpf;assembly=LiveCharts.Wpf"
+    xmlns:configModel="clr-namespace:EasyExtract.Models"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:gif="https://github.com/XamlAnimatedGif/XamlAnimatedGif"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
     <ui:PassiveScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto">
         <Grid>
             <Grid.RowDefinitions>
@@ -460,7 +464,7 @@
                             <ui:ListView
                                 HorizontalAlignment="Stretch"
                                 HorizontalContentAlignment="Stretch"
-                                ItemsSource="{Binding IgnoredUnitypackages}"
+                                ItemsSource="{Binding IgnoredUnityPackages}"
                                 Margin="15"
                                 MaxHeight="300"
                                 x:Name="IgnoredListView">

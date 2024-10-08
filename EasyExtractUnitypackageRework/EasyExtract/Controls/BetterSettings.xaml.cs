@@ -13,7 +13,7 @@ public partial class BetterSettings
     public BetterSettings()
     {
         InitializeComponent();
-        DataContext = this;
+        DataContext = _configHelper.Config;
     }
 
     private async void BetterSettings_OnLoaded(object sender, RoutedEventArgs e)
@@ -27,6 +27,7 @@ public partial class BetterSettings
     {
         try
         {
+            BorderMenuSwitch.IsChecked = _configHelper.Config.BorderThicknessActive;
             ContextMenuSwitch.IsChecked = _configHelper.Config.ContextMenuToggle;
             SkipIntroLogoAnimationToggleSwitch.IsChecked = _configHelper.Config.IntroLogoAnimation;
             UwUToggleSwitch.IsChecked = _configHelper.Config.UwUModeActive;
@@ -211,5 +212,21 @@ public partial class BetterSettings
     {
         _configHelper.Config.ContextMenuToggle = ContextMenuSwitch.IsChecked ?? false;
         await _configHelper.UpdateConfigAsync();
+    }
+
+    private async void BorderMenuSwitch_OnChecked(object sender, RoutedEventArgs e)
+    {
+        await UpdateBorderThicknessConfigAsync();
+    }
+
+    private async Task UpdateBorderThicknessConfigAsync()
+    {
+        _configHelper.Config.BorderThicknessActive = BorderMenuSwitch.IsChecked ?? false;
+        await _configHelper.UpdateConfigAsync();
+    }
+
+    private async void BorderMenuSwitch_OnUnchecked(object sender, RoutedEventArgs e)
+    {
+        await UpdateBorderThicknessConfigAsync();
     }
 }

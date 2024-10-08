@@ -14,6 +14,7 @@ public class ConfigModel
     public bool DiscordRpc { get; set; } = true;
     public UpdateModel Update { get; set; } = new();
     public bool ExtractedCategoryStructure { get; set; } = true;
+    public bool BorderThicknessActive { get; set; }
 
     public string DefaultTempPath { get; set; } =
         Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "EasyExtract", "Temp");

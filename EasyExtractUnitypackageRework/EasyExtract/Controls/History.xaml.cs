@@ -8,7 +8,6 @@ namespace EasyExtract.Controls;
 
 public partial class History : UserControl, INotifyPropertyChanged
 {
-    private readonly BetterLogger BetterLogger = new();
     private readonly ConfigHelper ConfigHelper = new();
     private ObservableCollection<HistoryModel> _history = new();
 
@@ -20,7 +19,7 @@ public partial class History : UserControl, INotifyPropertyChanged
     public History()
     {
         InitializeComponent();
-        DataContext = this;
+        DataContext = ConfigHelper.Config;
     }
 
 

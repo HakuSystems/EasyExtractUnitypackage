@@ -89,6 +89,7 @@ public partial class Dashboard
             CheckForUpdatesDesc.Text = updateAvailable
                 ? "Click here to update EasyExtractUnitypackage!"
                 : "You're running the latest version of EasyExtractUnitypackage!";
+            CheckForUpdatesNavBtn.IsEnabled = updateAvailable;
         });
 
         if (_configHelper.Config.Update.AutoUpdate && updateAvailable) await _updateHandler.Update();
@@ -201,6 +202,7 @@ public partial class Dashboard
             CheckForUpdatesDesc.Text = updateAvailable
                 ? "Click here to update EasyExtractUnitypackage!"
                 : "You're running the latest version of EasyExtractUnitypackage!";
+            CheckForUpdatesNavBtn.IsEnabled = updateAvailable;
         });
 
         if (updateAvailable) await _updateHandler.Update();
