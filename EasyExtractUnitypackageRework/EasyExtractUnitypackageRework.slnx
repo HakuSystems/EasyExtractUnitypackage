@@ -1,0 +1,5 @@
+﻿<Solution>
+    <Project Path="EasyExtract\EasyExtract.csproj" Type="Classic C#">
+        <Configuration Solution="Debug|Any CPU" Project="Release|Any CPU"/>
+    </Project>
+</Solution>
