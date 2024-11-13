@@ -32,9 +32,9 @@ public partial class BetterSettings
             SkipIntroLogoAnimationToggleSwitch.IsChecked = _configHelper.Config.IntroLogoAnimation;
             UwUToggleSwitch.IsChecked = _configHelper.Config.UwUModeActive;
 
-            var themes = Enum.GetValues(typeof(ApplicationTheme))
-                .Cast<ApplicationTheme>()
-                .Where(theme => theme != ApplicationTheme.Unknown)
+            var themes = Enum.GetValues(typeof(AvailableThemes))
+                .Cast<AvailableThemes>()
+                .Where(theme => theme != AvailableThemes.None)
                 .ToList();
 
             ThemeComboBox.ItemsSource = themes;
@@ -42,21 +42,6 @@ public partial class BetterSettings
             foreach (var theme in themes)
                 await BetterLogger.LogAsync($"Available Theme: {theme}", $"{nameof(BetterSettings)}.xaml.cs", Importance.Info);
 
-            if (themes.Contains(_configHelper.Config.ApplicationTheme))
-            {
-                ThemeComboBox.SelectedItem = _configHelper.Config.ApplicationTheme;
-                await BetterLogger.LogAsync($"Set ThemeComboBox.SelectedItem to: {_configHelper.Config.ApplicationTheme}",
-                    $"{nameof(BetterSettings)}.xaml.cs", Importance.Info);
-            }
-            else
-            {
-                await BetterLogger.LogAsync(
-                    $"ThemeComboBox.ItemsSource does not contain {_configHelper.Config.ApplicationTheme}",
-                    $"{nameof(BetterSettings)}.xaml.cs", Importance.Warning);
-                ThemeComboBox.SelectedItem = ApplicationTheme.Dark; // Default to Dark
-                await BetterLogger.LogAsync("Set ThemeComboBox.SelectedItem to default: Dark", $"{nameof(BetterSettings)}.xaml.cs",
-                    Importance.Info);
-            }
 
             CheckForUpdatesOnStartUpToggleSwitch.IsChecked = _configHelper.Config.Update.AutoUpdate;
             DiscordRpcToggleSwitch.IsChecked = _configHelper.Config.DiscordRpc;
@@ -131,10 +116,13 @@ public partial class BetterSettings
 
     private async void ThemeComboBox_OnSelectionChanged(object sender, SelectionChangedEventArgs e)
     {
-        _configHelper.Config.ApplicationTheme = (ApplicationTheme)ThemeComboBox.SelectedItem;
-        ApplicationThemeManager.Apply(_configHelper.Config.ApplicationTheme);
+        if (ThemeComboBox.SelectedItem == null) return;
+        var selectedTheme = (AvailableThemes)ThemeComboBox.SelectedItem;
+        _configHelper.Config.ApplicationTheme = selectedTheme;
         await _configHelper.UpdateConfigAsync();
+        await BetterLogger.LogAsync($"Theme changed to: {selectedTheme}", $"{nameof(BetterSettings)}.xaml.cs", Importance.Info);
     }
+
 
     private async void BackgroundChangeButton_OnClick(object sender, RoutedEventArgs e)
     {

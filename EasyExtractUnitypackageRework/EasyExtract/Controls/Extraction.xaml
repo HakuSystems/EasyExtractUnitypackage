@@ -7,7 +7,6 @@
     d:DataContext="{d:DesignInstance configModel:ConfigModel,
                                      IsDesignTimeCreatable=True}"
     mc:Ignorable="d"
-    ui:Design.Background="{DynamicResource ApplicationBackgroundBrush}"
     x:Class="EasyExtract.Controls.Extraction"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:boxIcons="http://metro.mahapps.com/winfx/xaml/iconpacks"
@@ -282,7 +281,8 @@
                             <ui:DynamicScrollViewer VerticalScrollBarVisibility="Auto" x:Name="ExtractedItemsScroller">
                                 <TreeView ItemsSource="{Binding ExtractedUnitypackages}" x:Name="UnityPackageTreeView">
                                     <TreeView.ItemTemplate>
-                                        <HierarchicalDataTemplate ItemsSource="{Binding SubdirectoryItemsGroupedByCategory}">
+                                        <HierarchicalDataTemplate
+                                            ItemsSource="{Binding SubdirectoryItemsGroupedByCategory}">
                                             <StackPanel Orientation="Horizontal">
                                                 <CheckBox
                                                     HorizontalAlignment="Left"

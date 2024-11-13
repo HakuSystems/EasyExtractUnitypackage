@@ -24,6 +24,7 @@ public partial class Dashboard
     {
         InitializeComponent();
         DataContext = this;
+        ThemeMode = ThemeMode.System;
     }
 
     public static Dashboard Instance
@@ -50,33 +51,20 @@ public partial class Dashboard
 
     private async void Dashboard_OnLoaded(object sender, RoutedEventArgs e)
     {
-        SystemThemeWatcher.Watch(this);
         await _configHelper.ReadConfigAsync();
+        var theme = _configHelper.Config.ApplicationTheme;
+        var themeMode = theme switch
+        {
+            AvailableThemes.System => ThemeMode.System,
+            AvailableThemes.Dark => ThemeMode.Dark,
+            AvailableThemes.Light => ThemeMode.Light,
+            _ => ThemeMode.System
+        };
+        Application.Current.ThemeMode = themeMode;
+        ThemeMode = themeMode;
         VersionTxt.Content = "V" + Application.ResourceAssembly.GetName().Version;
         _backgroundManager.UpdateBackground(_configHelper.Config.Backgrounds.BackgroundPath);
         _backgroundManager.UpdateOpacity(_configHelper.Config.Backgrounds.BackgroundOpacity);
-
-        var theme = _configHelper.Config.ApplicationTheme;
-        switch (theme)
-        {
-            case ApplicationTheme.Dark:
-                ApplicationThemeManager.Apply(ApplicationTheme.Dark);
-                await BetterLogger.LogAsync("Applied Dark Theme", $"{nameof(Dashboard)}.xaml.cs", Importance.Info);
-                break;
-            case ApplicationTheme.Light:
-                ApplicationThemeManager.Apply(ApplicationTheme.Light);
-                await BetterLogger.LogAsync("Applied Light Theme", $"{nameof(Dashboard)}.xaml.cs", Importance.Info);
-                break;
-            case ApplicationTheme.HighContrast:
-                ApplicationThemeManager.Apply(ApplicationTheme.HighContrast);
-                await BetterLogger.LogAsync("Applied High Contrast Theme", $"{nameof(Dashboard)}.xaml.cs", Importance.Info);
-                break;
-            default:
-                ApplicationThemeManager.Apply(ApplicationTheme.Dark);
-                await BetterLogger.LogAsync("Applied Dark Theme", $"{nameof(Dashboard)}.xaml.cs", Importance.Info)
-                    .ConfigureAwait(false);
-                break;
-        }
 
         var isUpToDate = await _updateHandler.IsUpToDate();
         var updateAvailable = !isUpToDate;
@@ -113,13 +101,11 @@ public partial class Dashboard
         if (_configHelper.Config.UwUModeActive)
         {
             NavView.Opacity = 0.2;
-            TitleBar.Title = "EasyExtractUwUnitypackage";
             Title = "EasyExtractUwUnitypackage";
             await UwUAnimation();
         }
         else
         {
-            TitleBar.Title = _configHelper.Config.AppTitle;
             Title = _configHelper.Config.AppTitle;
         }
     }

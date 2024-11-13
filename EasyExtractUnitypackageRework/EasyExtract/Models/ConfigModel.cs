@@ -5,7 +5,7 @@ namespace EasyExtract.Models;
 public class ConfigModel
 {
     public string AppTitle { get; set; } = "EasyExtractUnitypackage";
-    public ApplicationTheme ApplicationTheme { get; set; } = ApplicationTheme.Dark;
+    public AvailableThemes ApplicationTheme { get; set; } = AvailableThemes.System;
     public bool EasterEggHeader { get; set; } = true;
     public bool UwUModeActive { get; set; }
     public bool ContextMenuToggle { get; set; } = true;

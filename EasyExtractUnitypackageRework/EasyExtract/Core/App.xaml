@@ -9,10 +9,10 @@
     <Application.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
-                <ui:ThemesDictionary Theme="Dark" />
+                <ResourceDictionary
+                    Source="pack://application:,,,/PresentationFramework.Fluent;component/Themes/Fluent.xaml" />
                 <ui:ControlsDictionary />
             </ResourceDictionary.MergedDictionaries>
-            <SolidColorBrush Color="{DynamicResource BackgroundPrimaryBrush}" x:Key="BackgroundPrimaryBrush" />
             <utilities:BackgroundAndOpacityConverter x:Key="BackgroundAndOpacityConverter" />
             <FontFamily x:Key="SegoeFluentIcons">pack://application:,,,/;component/Fonts/#Segoe Fluent Icons</FontFamily>
         </ResourceDictionary>

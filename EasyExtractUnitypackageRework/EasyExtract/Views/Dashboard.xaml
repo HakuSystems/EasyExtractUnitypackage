@@ -1,23 +1,19 @@
-<ui:FluentWindow
+<Window
     AllowDrop="True"
+    AllowsTransparency="False"
     Drop="Dashboard_OnDrop"
-    ExtendsContentIntoTitleBar="True"
     FontFamily="{DynamicResource SegoeFluentIcons}"
     Foreground="{DynamicResource TextFillColorPrimaryBrush}"
     Loaded="Dashboard_OnLoaded"
     MinHeight="900"
     MinWidth="1900"
-    ResizeMode="CanResize"
+    ResizeMode="CanResizeWithGrip"
     SizeToContent="WidthAndHeight"
     Title="{Binding AppTitle}"
-    WindowBackdropType="Acrylic"
-    WindowCornerPreference="Round"
     WindowStartupLocation="CenterScreen"
-    WindowStyle="None"
     d:DataContext="{d:DesignInstance configModel:ConfigModel,
                                      IsDesignTimeCreatable=True}"
     mc:Ignorable="d"
-    ui:Design.Background="{DynamicResource ApplicationBackgroundBrush}"
     x:Class="EasyExtract.Views.Dashboard"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:configModel="clr-namespace:EasyExtract.Models"
@@ -27,12 +23,12 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
-    <ui:FluentWindow.Background>
+    <Window.Background>
         <MultiBinding Converter="{StaticResource BackgroundAndOpacityConverter}" UpdateSourceTrigger="PropertyChanged">
             <Binding Path="CurrentBackground" Source="{x:Static customDesign:BackgroundManager.Instance}" />
             <Binding Path="BackgroundOpacity" Source="{x:Static customDesign:BackgroundManager.Instance}" />
         </MultiBinding>
-    </ui:FluentWindow.Background>
+    </Window.Background>
 
     <Grid x:Name="MainGrid">
         <Grid.ColumnDefinitions>
@@ -44,14 +40,7 @@
             <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
-        <ui:TitleBar
-            Grid.ColumnSpan="3"
-            Grid.Row="0"
-            HorizontalContentAlignment="Center"
-            Title="{Binding AppTitle}"
-            VerticalAlignment="Top"
-            VerticalContentAlignment="Top"
-            x:Name="TitleBar" />
+
 
         <ui:NavigationView
             ContentOverlay="{Binding ElementName=ContentFrame}"
@@ -198,4 +187,4 @@
             </ui:NavigationView.FooterMenuItems>
         </ui:NavigationView>
     </Grid>
-</ui:FluentWindow>
+</Window>
