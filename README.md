@@ -15,7 +15,7 @@
 **EasyExtractUnitypackage** aims to simplify the process of extracting assets from Unity packages. Whether you're a game developer or a Unity enthusiast, this tool is crafted to enhance your workflow.
 
 ## Installation
-1. Download the latest release from our [GitHub repository](https://github.com/HakuSystems/EasyExtractUnitypackage).
+1. Download the latest release from our [GitHub repository](https://github.com/HakuSystems/EasyExtractUnitypackage/releases).
 2. Extract the downloaded file.
 3. Run the executable to start using the tool.
 
