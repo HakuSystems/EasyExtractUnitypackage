@@ -13,7 +13,6 @@
     xmlns:charts="clr-namespace:LiveCharts.Wpf;assembly=LiveCharts.Wpf"
     xmlns:configModel="clr-namespace:EasyExtract.Models"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-    xmlns:gif="https://github.com/XamlAnimatedGif/XamlAnimatedGif"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
@@ -110,11 +109,9 @@
                                 Height="150"
                                 HorizontalAlignment="Center"
                                 Margin="15"
-                                SourceUpdated="ExtractingIcon_OnSourceUpdated"
+                                Source="../Resources/ExtractionProcess/Closed.png"
                                 VerticalAlignment="Center"
-                                Width="150"
-                                gif:AnimationBehavior.RepeatBehavior="0:0:5"
-                                x:Name="ExtractingIcon" />
+                                Width="150" />
                             <StackPanel Orientation="Horizontal">
                                 <ui:Button
                                     Click="SearchFileManuallyButton_OnClick"

@@ -1,5 +1,4 @@
 using System.Collections.ObjectModel;
-using System.Windows.Data;
 using EasyExtract.Config;
 using EasyExtract.Models;
 using EasyExtract.Services;
@@ -7,7 +6,6 @@ using EasyExtract.Utilities;
 using LiveCharts;
 using LiveCharts.Wpf;
 using Wpf.Ui.Controls;
-using XamlAnimatedGif;
 using Brushes = System.Windows.Media.Brushes;
 
 namespace EasyExtract.Controls;
@@ -19,17 +17,6 @@ public partial class Extraction : UserControl, INotifyPropertyChanged
     /// </summary>
     private const string EasyExtractPreview = "EASYEXTRACTPREVIEW.png";
 
-    /// <summary>
-    ///     Represents the URI for the idle animation in the Extraction user control.
-    /// </summary>
-    private static readonly Uri IdleAnimationUri =
-        new("pack://application:,,,/EasyExtract;component/Resources/ExtractionProcess/Closed.png");
-
-    /// <summary>
-    ///     The URI for the extraction animation.
-    /// </summary>
-    private static readonly Uri ExtractionAnimationUri =
-        new("pack://application:,,,/EasyExtract;component/Resources/Gifs/IconAnim.gif");
 
     private readonly ConfigHelper ConfigHelper = new();
 
@@ -401,7 +388,6 @@ public partial class Extraction : UserControl, INotifyPropertyChanged
         await UpdateDiscordPresenceState();
 
         await UpdateQueueHeaderAsync();
-        await ChangeExtractionAnimationAsync();
         await UpdateInfoBadgesAsync();
         await ConfigHelper.ReadConfigAsync().ContinueWith(task =>
         {
@@ -584,27 +570,9 @@ public partial class Extraction : UserControl, INotifyPropertyChanged
         }).Task;
     }
 
-    /// <summary>
-    ///     Changes the extraction animation by updating the source URI of the ExtractingIcon control.
-    /// </summary>
-    private async Task ChangeExtractionAnimationAsync()
-    {
-        await Dispatcher.BeginInvoke((Action)(() =>
-        {
-            if (ExtractingIcon != null)
-                AnimationBehavior.SetSourceUri(ExtractingIcon,
-                    _isExtraction ? ExtractionAnimationUri : IdleAnimationUri);
-        }));
-    }
-
-    private async void ExtractingIcon_OnSourceUpdated(object? sender, DataTransferEventArgs e)
-    {
-        await ChangeExtractionAnimationAsync();
-    }
 
     private async void ExtractionBtn_OnClick(object sender, RoutedEventArgs e)
     {
-        await ChangeExtractionAnimationAsync();
         _isExtraction = true;
         await SetupUiForExtractionAsync();
 
@@ -803,7 +771,6 @@ public partial class Extraction : UserControl, INotifyPropertyChanged
                     ExtractionBtn.IsEnabled = true;
                     ExtractionBtn.Appearance = ControlAppearance.Primary;
                     UpdateSelectAllToggleContent();
-                    await ChangeExtractionAnimationAsync().ConfigureAwait(false);
                     _isExtraction = false;
                     await UpdateExtractedFiles();
                     return;
@@ -818,7 +785,6 @@ public partial class Extraction : UserControl, INotifyPropertyChanged
                 StatusProgressBar.Visibility = Visibility.Collapsed;
                 StatusBarDetailsTxt.Visibility = Visibility.Collapsed;
                 UpdateSelectAllToggleContent();
-                await ChangeExtractionAnimationAsync().ConfigureAwait(false);
                 _isExtraction = false;
                 await UpdateExtractedFiles();
                 StatusBar.Visibility = Visibility.Collapsed;
@@ -896,7 +862,6 @@ public partial class Extraction : UserControl, INotifyPropertyChanged
         //Update Info Badges
         await UpdateInfoBadgesAsync();
         //reset Extraction to normal
-        await ChangeExtractionAnimationAsync();
         _isExtraction = false;
         await UpdateExtractedFiles();
         StatusBar.Visibility = Visibility.Collapsed;
