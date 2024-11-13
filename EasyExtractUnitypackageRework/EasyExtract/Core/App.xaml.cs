@@ -22,11 +22,10 @@ public partial class App
     private async void App_OnExit(object sender, ExitEventArgs e)
     {
         DiscordRpcManager.Instance.Dispose();
-        await BetterLogger.LogAsync("Application exited", "App.xaml.cs", Importance.Info);
         base.OnExit(e);
     }
 
-    private async void App_OnStartup(object sender, StartupEventArgs e)
+    private void App_OnStartup(object sender, StartupEventArgs e)
     {
         DispatcherUnhandledException += Application_DispatcherUnhandledException;
         Exit += App_OnExit;
@@ -35,11 +34,11 @@ public partial class App
         {
             // Run the program logic directly
             var program = new Program();
-            await program.Run(e.Args);
+            _ = program.Run(e.Args);
         }
         else
         {
-            await Program.DeleteContextMenu();
+            _ = Program.DeleteContextMenu();
             InitializeComponent();
         }
     }
