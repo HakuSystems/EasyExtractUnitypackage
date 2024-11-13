@@ -191,6 +191,12 @@ public class UpdateHandler
             var releases = await client.Repository.Release.GetAll(_configHelper.Config.Update.RepoOwner,
                 _configHelper.Config.Update.RepoName);
             var latestRelease = releases.FirstOrDefault();
+            if (latestRelease.ToString().Contains("API rate limit exceeded"))
+            {
+                await BetterLogger.LogAsync("API rate limit exceeded", $"{nameof(UpdateHandler)}.cs", Importance.Warning);
+                return null;
+            }
+
             await BetterLogger.LogAsync($"Fetched latest release: {latestRelease?.TagName}", $"{nameof(UpdateHandler)}.cs",
                 Importance.Info);
             return latestRelease;
