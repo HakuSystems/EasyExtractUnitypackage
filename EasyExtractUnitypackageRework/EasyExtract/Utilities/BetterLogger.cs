@@ -6,6 +6,7 @@ namespace EasyExtract.Utilities;
 public class BetterLogger
 {
     private static readonly object _lock = new();
+    private static readonly string SessionStartTime = DateTime.Now.ToString("yyyyMMdd_HHmmss");
 
     public BetterLogger()
     {
@@ -20,12 +21,15 @@ public class BetterLogger
 
         Directory.CreateDirectory(logPath);
 
+        var logFileName = $"Log_{SessionStartTime}.txt";
+
         Log.Logger = new LoggerConfiguration()
             .MinimumLevel.Debug()
             .WriteTo.Console()
-            .WriteTo.File(Path.Combine(logPath, "Log.txt"), LogEventLevel.Information,
-                rollingInterval: RollingInterval.Day, shared: true)
+            .WriteTo.File(Path.Combine(logPath, logFileName), LogEventLevel.Information,
+                rollingInterval: RollingInterval.Infinite, shared: true)
             .CreateLogger();
+
         DeleteLogsFolderIfRequired();
     }
 
@@ -37,27 +41,15 @@ public class BetterLogger
 
         if (!Directory.Exists(logPath))
             Directory.CreateDirectory(logPath);
-        if (Directory.Exists(logPath))
-            return;
 
         var logFiles = Directory.GetFiles(logPath);
-        if (GetLogFileCreationDate(logFiles) < DateTime.Now.AddDays(-7))
-            DeleteLogsFolder();
-    }
 
-    private static void DeleteLogsFolder()
-    {
-        var applicationPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
-            "EasyExtract");
-        var logPath = Path.Combine(applicationPath, "Logs");
+        var currentLogFile = Path.Combine(logPath, $"Log_{SessionStartTime}.txt");
+        var filesToDelete = logFiles.Where(f => f != currentLogFile).ToArray();
 
-        if (!Directory.Exists(logPath))
-            Directory.CreateDirectory(logPath);
-
-        var logFiles = Directory.GetFiles(logPath);
-        foreach (var logFile in logFiles)
-            if (FileNotBeingUsed(logFile))
-                File.Delete(logFile);
+        foreach (var file in filesToDelete)
+            if (FileNotBeingUsed(file))
+                File.Delete(file);
     }
 
     private static bool FileNotBeingUsed(string logFile)
@@ -72,15 +64,6 @@ public class BetterLogger
             return false;
         }
     }
-
-    private static DateTime GetLogFileCreationDate(string[] logFiles)
-    {
-        if (logFiles.Length == 0)
-            return DateTime.Now;
-        var creationDates = logFiles.Select(logFile => File.GetCreationTime(logFile)).ToList();
-        return creationDates.Min();
-    }
-
 
     public static Task LogAsync(string message, string source, Importance importance)
     {
