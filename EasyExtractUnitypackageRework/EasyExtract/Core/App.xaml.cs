@@ -26,7 +26,7 @@ public partial class App
         base.OnExit(e);
     }
 
-    private void App_OnStartup(object sender, StartupEventArgs e)
+    private async void App_OnStartup(object sender, StartupEventArgs e)
     {
         DispatcherUnhandledException += Application_DispatcherUnhandledException;
         Exit += App_OnExit;
@@ -35,11 +35,11 @@ public partial class App
         {
             // Run the program logic directly
             var program = new Program();
-            _ = program.Run(e.Args);
+            await program.Run(e.Args);
         }
         else
         {
-            _ = Program.DeleteContextMenu();
+            await Program.DeleteContextMenu();
             InitializeComponent();
         }
     }
