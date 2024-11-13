@@ -3,6 +3,7 @@
     Drop="Extraction_OnDrop"
     FontFamily="{DynamicResource SegoeFluentIcons}"
     Foreground="{DynamicResource TextFillColorPrimaryBrush}"
+    ui:Design.Foreground="{DynamicResource TextFillColorPrimaryBrush}"
     Loaded="Extraction_OnLoaded"
     d:DataContext="{d:DesignInstance configModel:ConfigModel,
                                      IsDesignTimeCreatable=True}"
@@ -29,10 +30,11 @@
                     <TabItem.Header>
                         <StackPanel Orientation="Horizontal">
                             <ui:SymbolIcon
-                                Foreground="{DynamicResource AccentTextFillColorSecondaryBrush}"
                                 Margin="0,0,6,0"
                                 Symbol="DocumentTextExtract24" />
-                            <TextBlock Text="Extraction" />
+                            <ui:TextBlock
+                                FontTypography="Caption"
+                                Text="Extraction" />
                         </StackPanel>
                     </TabItem.Header>
                     <!--  Extraction Start  -->
@@ -43,7 +45,6 @@
                             <RowDefinition Height="Auto" />
                         </Grid.RowDefinitions>
                         <ui:CardExpander
-                            Foreground="{DynamicResource AccentTextFillColorSecondaryBrush}"
                             HorizontalAlignment="Stretch"
                             HorizontalContentAlignment="Stretch"
                             Icon="{ui:SymbolIcon DocumentQueue24}"
@@ -52,8 +53,9 @@
                             <ui:CardExpander.Header>
                                 <StackPanel Orientation="Horizontal">
                                     <StackPanel>
-                                        <TextBlock
+                                        <ui:TextBlock
                                             FontSize="24"
+                                            FontTypography="Title"
                                             FontWeight="Bold"
                                             Margin="5"
                                             Text="Queue"
@@ -130,7 +132,7 @@
                                     VerticalAlignment="Top"
                                     x:Name="ExtractionBtn" />
                             </StackPanel>
-                            <TextBlock
+                            <ui:TextBlock
                                 HorizontalAlignment="Center"
                                 Margin="5"
                                 Opacity="0.5"
@@ -144,10 +146,11 @@
                     <TabItem.Header>
                         <StackPanel Orientation="Horizontal">
                             <ui:SymbolIcon
-                                Foreground="{DynamicResource AccentTextFillColorSecondaryBrush}"
                                 Margin="0,0,6,0"
                                 Symbol="Settings24" />
-                            <TextBlock Text="Manage Extracted" />
+                            <ui:TextBlock
+                                FontTypography="Caption"
+                                Text="Manage Extracted" />
                             <ui:InfoBadge Severity="Success" x:Name="ManageExtractedInfoBadge" />
                         </StackPanel>
                     </TabItem.Header>
@@ -165,7 +168,6 @@
 
                         <!--  Unity Package Enumeration Start  -->
                         <ui:CardExpander
-                            Foreground="{DynamicResource AccentTextFillColorSecondaryBrush}"
                             Grid.Column="0"
                             Grid.ColumnSpan="2"
                             Grid.Row="0"
@@ -178,8 +180,9 @@
                             <ui:CardExpander.Header>
                                 <StackPanel Orientation="Horizontal">
                                     <StackPanel>
-                                        <TextBlock
+                                        <ui:TextBlock
                                             FontSize="24"
+                                            FontTypography="Title"
                                             FontWeight="Bold"
                                             Margin="5"
                                             Text="All Extracted Unitypackages" />
@@ -281,18 +284,18 @@
                                         <HierarchicalDataTemplate
                                             ItemsSource="{Binding SubdirectoryItemsGroupedByCategory}">
                                             <StackPanel Orientation="Horizontal">
-                                                <CheckBox
+                                                <ui:ToggleSwitch
                                                     HorizontalAlignment="Left"
                                                     IsChecked="{Binding PackageIsChecked, Mode=TwoWay}"
                                                     Margin="5"
                                                     VerticalAlignment="Center" />
                                                 <StackPanel Orientation="Vertical">
-                                                    <TextBlock
+                                                    <ui:TextBlock
                                                         FontWeight="Bold"
                                                         Margin="5"
                                                         Text="{Binding UnitypackageName}"
                                                         TextWrapping="Wrap" />
-                                                    <TextBlock
+                                                    <ui:TextBlock
                                                         FontWeight="UltraLight"
                                                         Margin="5"
                                                         Text="{Binding UnitypackageTotalFileCountMessage}"
@@ -319,7 +322,7 @@
                                             <!--  Category level  -->
                                             <HierarchicalDataTemplate.ItemTemplate>
                                                 <HierarchicalDataTemplate ItemsSource="{Binding Path=Value}">
-                                                    <TextBlock
+                                                    <ui:TextBlock
                                                         FontWeight="Bold"
                                                         Margin="20,0,0,0"
                                                         Text="{Binding Key}" />
@@ -345,12 +348,12 @@
                                                                                         <ColumnDefinition Width="Auto" />
                                                                                     </Grid.ColumnDefinitions>
                                                                                     <StackPanel Orientation="Vertical">
-                                                                                        <TextBlock
+                                                                                        <ui:TextBlock
                                                                                             FontWeight="Bold"
                                                                                             Margin="5"
                                                                                             Text="{Binding FileName}"
                                                                                             TextWrapping="Wrap" />
-                                                                                        <TextBlock
+                                                                                        <ui:TextBlock
                                                                                             FontWeight="UltraLight"
                                                                                             Margin="5"
                                                                                             Text="{Binding UnityFileMessasgeTooltip}"
@@ -360,7 +363,7 @@
                                                                                     <StackPanel Grid.Column="1">
                                                                                         <ui:SymbolIcon
                                                                                             FontSize="50"
-                                                                                            Foreground="{DynamicResource AccentTextFillColorSecondaryBrush}"
+
                                                                                             Height="50"
                                                                                             HorizontalAlignment="Center"
                                                                                             Symbol="{Binding SymbolIconImage}"
@@ -372,14 +375,14 @@
                                                                         </StackPanel>
                                                                     </ToolTip>
                                                                 </StackPanel.ToolTip>
-                                                                <CheckBox
+                                                                <ui:ToggleSwitch
                                                                     HorizontalAlignment="Left"
                                                                     IsChecked="{Binding IsChecked, Mode=TwoWay}"
                                                                     Margin="5"
                                                                     VerticalAlignment="Center" />
                                                                 <ui:SymbolIcon
                                                                     FontSize="35"
-                                                                    Foreground="{DynamicResource AccentTextFillColorSecondaryBrush}"
+
                                                                     Margin="5,0,0,0"
                                                                     Symbol="{Binding SymbolIconImage}"
                                                                     VerticalAlignment="Center" />
@@ -392,12 +395,12 @@
                                                                     VerticalAlignment="Center"
                                                                     Width="35" />
                                                                 <StackPanel Orientation="Vertical">
-                                                                    <TextBlock
+                                                                    <ui:TextBlock
                                                                         FontWeight="Bold"
                                                                         Margin="5"
                                                                         Text="{Binding FileName}"
                                                                         TextWrapping="Wrap" />
-                                                                    <TextBlock
+                                                                    <ui:TextBlock
                                                                         FontWeight="UltraLight"
                                                                         Margin="5"
                                                                         Text="{Binding UnityFileMessasge}"
@@ -424,10 +427,11 @@
                     <TabItem.Header>
                         <StackPanel Orientation="Horizontal">
                             <ui:SymbolIcon
-                                Foreground="{DynamicResource AccentTextFillColorSecondaryBrush}"
                                 Margin="0,0,6,0"
                                 Symbol="Warning24" />
-                            <TextBlock Text="Ignored" />
+                            <ui:TextBlock
+                                FontTypography="Caption"
+                                Text="Ignored" />
                             <ui:InfoBadge Severity="Caution" x:Name="ManageIgnoredInfoBadge" />
                         </StackPanel>
                     </TabItem.Header>
@@ -438,7 +442,6 @@
                             <RowDefinition Height="Auto" />
                         </Grid.RowDefinitions>
                         <ui:CardExpander
-                            Foreground="{DynamicResource AccentTextFillColorSecondaryBrush}"
                             HorizontalAlignment="Stretch"
                             HorizontalContentAlignment="Stretch"
                             Icon="{ui:SymbolIcon Warning24}"
@@ -449,8 +452,9 @@
                             <ui:CardExpander.Header>
                                 <StackPanel Orientation="Horizontal">
                                     <StackPanel>
-                                        <TextBlock
+                                        <ui:TextBlock
                                             FontSize="24"
+                                            FontTypography="Title"
                                             FontWeight="Bold"
                                             Margin="5"
                                             Text="Ignored" />
@@ -518,7 +522,7 @@
                 <StatusBarItem>
                     <StatusBarItem.Content>
                         <StackPanel Orientation="Horizontal">
-                            <TextBlock
+                            <ui:TextBlock
                                 Margin="5"
                                 VerticalAlignment="Center"
                                 x:Name="StatusBarText" />
@@ -528,7 +532,7 @@
                                 VerticalAlignment="Center"
                                 Width="150"
                                 x:Name="StatusProgressBar" />
-                            <TextBlock
+                            <ui:TextBlock
                                 Margin="5"
                                 VerticalAlignment="Center"
                                 x:Name="StatusBarDetailsTxt" />

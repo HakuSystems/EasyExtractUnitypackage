@@ -1,6 +1,7 @@
 <UserControl
     FontFamily="{DynamicResource SegoeFluentIcons}"
     Foreground="{DynamicResource TextFillColorPrimaryBrush}"
+    ui:Design.Foreground="{DynamicResource TextFillColorPrimaryBrush}"
     Loaded="About_OnLoaded"
     d:DesignHeight="450"
     d:DesignWidth="1530"

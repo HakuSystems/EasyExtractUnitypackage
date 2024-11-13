@@ -66,7 +66,7 @@ public partial class Dashboard
         _backgroundManager.UpdateBackground(_configHelper.Config.Backgrounds.BackgroundPath);
         _backgroundManager.UpdateOpacity(_configHelper.Config.Backgrounds.BackgroundOpacity);
 
-        var isUpToDate = await _updateHandler.IsUpToDate();
+        var isUpToDate = await _updateHandler.IsUpToDateOrUpdate(false);
         var updateAvailable = !isUpToDate;
 
         await Dispatcher.InvokeAsync(() =>
@@ -80,7 +80,7 @@ public partial class Dashboard
             CheckForUpdatesNavBtn.IsEnabled = updateAvailable;
         });
 
-        if (_configHelper.Config.Update.AutoUpdate && updateAvailable) await _updateHandler.Update();
+        if (_configHelper.Config.Update.AutoUpdate && updateAvailable) await _updateHandler.IsUpToDateOrUpdate(true);
 
         //EasterEggHeader
         EasterEggHeader.Visibility = _configHelper.Config.EasterEggHeader ? Visibility.Visible : Visibility.Collapsed;
@@ -177,7 +177,7 @@ public partial class Dashboard
 
     private async void CheckForUpdatesNavBtn_OnClick(object sender, RoutedEventArgs e)
     {
-        var isUpToDate = await _updateHandler.IsUpToDate();
+        var isUpToDate = await _updateHandler.IsUpToDateOrUpdate(false);
         var updateAvailable = !isUpToDate;
 
         await Dispatcher.InvokeAsync(() =>
@@ -191,7 +191,7 @@ public partial class Dashboard
             CheckForUpdatesNavBtn.IsEnabled = updateAvailable;
         });
 
-        if (updateAvailable) await _updateHandler.Update();
+        if (updateAvailable) await _updateHandler.IsUpToDateOrUpdate(true);
     }
 
     private async void DontShowAgainBtn_OnClick(object sender, RoutedEventArgs e)

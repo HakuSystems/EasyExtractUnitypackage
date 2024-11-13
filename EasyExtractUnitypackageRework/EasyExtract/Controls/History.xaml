@@ -1,5 +1,6 @@
 <UserControl
     Foreground="{DynamicResource TextFillColorPrimaryBrush}"
+    ui:Design.Foreground="{DynamicResource TextFillColorPrimaryBrush}"
     Loaded="History_OnLoaded"
     d:DataContext="{d:DesignInstance configModel:ConfigModel,
                                      IsDesignTimeCreatable=True}"

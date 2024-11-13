@@ -1,6 +1,7 @@
 <UserControl
     FontFamily="{DynamicResource SegoeFluentIcons}"
     Foreground="{DynamicResource TextFillColorPrimaryBrush}"
+    ui:Design.Foreground="{DynamicResource TextFillColorPrimaryBrush}"
     Loaded="SearchEverything_OnLoaded"
     d:DataContext="{d:DesignInstance Type=configModel:ConfigModel,
                                      IsDesignTimeCreatable=True}"

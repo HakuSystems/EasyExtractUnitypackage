@@ -8,36 +8,7 @@ public class UpdateHandler
 {
     private readonly ConfigHelper _configHelper = new();
 
-    public async Task<bool> IsUpToDate()
-    {
-        var latestRelease = await GetLatestReleaseAsync();
-        if (latestRelease != null)
-        {
-            var latestVersion = latestRelease.TagName.TrimStart('v', 'V');
-            var currentVersion = GetCurrentAssemblyVersion();
-
-            await BetterLogger.LogAsync($"Latest version found: {latestVersion}", $"{nameof(UpdateHandler)}.cs", Importance.Info);
-            await BetterLogger.LogAsync($"Current version: {currentVersion}", $"{nameof(UpdateHandler)}.cs", Importance.Info);
-
-            if (Version.TryParse(latestVersion, out var latest) && Version.TryParse(currentVersion, out var current))
-            {
-                await BetterLogger.LogAsync($"Parsed latest version: {latest}", $"{nameof(UpdateHandler)}.cs", Importance.Info);
-                await BetterLogger.LogAsync($"Parsed current version: {current}", $"{nameof(UpdateHandler)}.cs", Importance.Info);
-
-                var isUpToDate = latest <= current;
-                await BetterLogger.LogAsync($"Is up to date: {isUpToDate}", $"{nameof(UpdateHandler)}.cs", Importance.Info);
-
-                return isUpToDate;
-            }
-
-            await BetterLogger.LogAsync("Failed to parse version strings", $"{nameof(UpdateHandler)}.cs", Importance.Error);
-        }
-
-        await BetterLogger.LogAsync("Failed to fetch the latest release", $"{nameof(UpdateHandler)}.cs", Importance.Warning);
-        return false;
-    }
-
-    public async Task<bool> Update()
+    public async Task<bool> IsUpToDateOrUpdate(bool updateIfNeeded)
     {
         var latestRelease = await GetLatestReleaseAsync();
         if (latestRelease == null)
@@ -46,26 +17,46 @@ public class UpdateHandler
             return false;
         }
 
-        var asset = latestRelease.Assets.FirstOrDefault(a => a.Name.EndsWith(".rar"));
-        if (asset == null)
+        var latestVersion = latestRelease.TagName.TrimStart('v', 'V');
+        var currentVersion = GetCurrentAssemblyVersion();
+
+        await BetterLogger.LogAsync($"Latest version found: {latestVersion}", $"{nameof(UpdateHandler)}.cs", Importance.Info);
+        await BetterLogger.LogAsync($"Current version: {currentVersion}", $"{nameof(UpdateHandler)}.cs", Importance.Info);
+
+        if (Version.TryParse(latestVersion, out var latest) && Version.TryParse(currentVersion, out var current))
         {
-            await BetterLogger.LogAsync("No suitable asset found in the latest release", $"{nameof(UpdateHandler)}.cs",
-                Importance.Warning);
-            return false;
+            await BetterLogger.LogAsync($"Parsed latest version: {latest}", $"{nameof(UpdateHandler)}.cs", Importance.Info);
+            await BetterLogger.LogAsync($"Parsed current version: {current}", $"{nameof(UpdateHandler)}.cs", Importance.Info);
+
+            var isUpToDate = latest <= current;
+            await BetterLogger.LogAsync($"Is up to date: {isUpToDate}", $"{nameof(UpdateHandler)}.cs", Importance.Info);
+
+            if (isUpToDate || !updateIfNeeded) return isUpToDate;
+
+            var asset = latestRelease.Assets.FirstOrDefault(a => a.Name.EndsWith(".rar"));
+            if (asset == null)
+            {
+                await BetterLogger.LogAsync("No suitable asset found in the latest release", $"{nameof(UpdateHandler)}.cs",
+                    Importance.Warning);
+                return false;
+            }
+
+            var rarPath = await DownloadAssetAsync(asset.BrowserDownloadUrl, latestRelease.TagName);
+            var exePath = await ExtractRarAsync(rarPath);
+
+            if (string.IsNullOrEmpty(exePath))
+            {
+                await BetterLogger.LogAsync("Executable not found after extraction", $"{nameof(UpdateHandler)}.cs",
+                    Importance.Warning);
+                return false;
+            }
+
+            await BetterLogger.LogAsync("Update package downloaded and extracted", $"{nameof(UpdateHandler)}.cs", Importance.Info);
+            return await TryRunNewExecutable(latestRelease, exePath);
         }
 
-        var rarPath = await DownloadAssetAsync(asset.BrowserDownloadUrl, latestRelease.TagName);
-        var exePath = await ExtractRarAsync(rarPath);
-
-        if (string.IsNullOrEmpty(exePath))
-        {
-            await BetterLogger.LogAsync("Executable not found after extraction", $"{nameof(UpdateHandler)}.cs", Importance.Warning);
-            return false;
-        }
-
-        await BetterLogger.LogAsync("Update package downloaded and extracted", $"{nameof(UpdateHandler)}.cs", Importance.Info);
-
-        return await TryRunNewExecutable(latestRelease, exePath);
+        await BetterLogger.LogAsync("Failed to parse version strings", $"{nameof(UpdateHandler)}.cs", Importance.Error);
+        return false;
     }
 
     private async Task<bool> TryRunNewExecutable(Release latestRelease, string exePath)

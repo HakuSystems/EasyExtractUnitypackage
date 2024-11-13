@@ -1,6 +1,7 @@
 <UserControl
     FontFamily="{DynamicResource SegoeFluentIcons}"
     Foreground="{DynamicResource TextFillColorPrimaryBrush}"
+    ui:Design.Foreground="{DynamicResource TextFillColorPrimaryBrush}"
     Loaded="Feedback_OnLoaded"
     d:DataContext="{d:DesignInstance configModel:ConfigModel,
                                      IsDesignTimeCreatable=True}"
@@ -67,10 +68,10 @@
                     Text="Sending Request as Anonymous"
                     VerticalAlignment="Center"
                     x:Name="DiscordNameRequest" />
+
                 <ui:Button
                     Click="SubmitFeedbackButton_OnClick"
                     Content="Submit Feedback"
-                    Foreground="White"
                     Margin="10"
                     Padding="10,5"
                     x:Name="SubmitFeedbackButton" />
