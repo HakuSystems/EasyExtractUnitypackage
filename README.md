@@ -2,6 +2,17 @@
 
 **EasyExtractUnitypackage** is a powerful tool designed to seamlessly extract files from a `.unitypackage` without the hassle of importing them into Unity.
 
+
+## Star History
+
+<a href="https://star-history.com/#HakuSystems/EasyExtractUnitypackage&Date">
+ <picture>
+   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/svg?repos=HakuSystems/EasyExtractUnitypackage&type=Date&theme=dark" />
+   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/svg?repos=HakuSystems/EasyExtractUnitypackage&type=Date" />
+   <img alt="Star History Chart" src="https://api.star-history.com/svg?repos=HakuSystems/EasyExtractUnitypackage&type=Date" />
+ </picture>
+</a>
+
 ## Table of Contents
 - [Introduction](#introduction)
 - [Installation](#installation)
@@ -55,17 +66,6 @@ For any queries, suggestions, or feedback, please reach out to us:
 ![image](https://github.com/HakuSystems/EasyExtractUnitypackage/assets/66133638/e3247e91-a9c3-4514-ab1c-c5967f201327)
 ### Analytics!
 ![EasyExtract_zye5wbrrDe](https://github.com/HakuSystems/EasyExtractUnitypackage/assets/66133638/72e9f877-ff32-4177-95ce-9bfb764b81e5)
-
-
-## Star History
-
-<a href="https://star-history.com/#HakuSystems/EasyExtractUnitypackage&Date">
- <picture>
-   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/svg?repos=HakuSystems/EasyExtractUnitypackage&type=Date&theme=dark" />
-   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/svg?repos=HakuSystems/EasyExtractUnitypackage&type=Date" />
-   <img alt="Star History Chart" src="https://api.star-history.com/svg?repos=HakuSystems/EasyExtractUnitypackage&type=Date" />
- </picture>
-</a>
 
 
 
