@@ -3,11 +3,12 @@
     Drop="Extraction_OnDrop"
     FontFamily="{DynamicResource SegoeFluentIcons}"
     Foreground="{DynamicResource TextFillColorPrimaryBrush}"
-    ui:Design.Foreground="{DynamicResource TextFillColorPrimaryBrush}"
     Loaded="Extraction_OnLoaded"
     d:DataContext="{d:DesignInstance configModel:ConfigModel,
                                      IsDesignTimeCreatable=True}"
     mc:Ignorable="d"
+    ui:Design.Background="{DynamicResource ApplicationBackgroundBrush}"
+    ui:Design.Foreground="{DynamicResource TextFillColorPrimaryBrush}"
     x:Class="EasyExtract.Controls.Extraction"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:boxIcons="http://metro.mahapps.com/winfx/xaml/iconpacks"
@@ -29,12 +30,8 @@
                 <TabItem x:Name="ExtractionTab">
                     <TabItem.Header>
                         <StackPanel Orientation="Horizontal">
-                            <ui:SymbolIcon
-                                Margin="0,0,6,0"
-                                Symbol="DocumentTextExtract24" />
-                            <ui:TextBlock
-                                FontTypography="Caption"
-                                Text="Extraction" />
+                            <ui:SymbolIcon Margin="0,0,6,0" Symbol="DocumentTextExtract24" />
+                            <ui:TextBlock FontTypography="Caption" Text="Extraction" />
                         </StackPanel>
                     </TabItem.Header>
                     <!--  Extraction Start  -->
@@ -145,12 +142,8 @@
                 <TabItem IsSelected="True" x:Name="ManageExtractedTab">
                     <TabItem.Header>
                         <StackPanel Orientation="Horizontal">
-                            <ui:SymbolIcon
-                                Margin="0,0,6,0"
-                                Symbol="Settings24" />
-                            <ui:TextBlock
-                                FontTypography="Caption"
-                                Text="Manage Extracted" />
+                            <ui:SymbolIcon Margin="0,0,6,0" Symbol="Settings24" />
+                            <ui:TextBlock FontTypography="Caption" Text="Manage Extracted" />
                             <ui:InfoBadge Severity="Success" x:Name="ManageExtractedInfoBadge" />
                         </StackPanel>
                     </TabItem.Header>
@@ -281,8 +274,7 @@
                             <ui:DynamicScrollViewer VerticalScrollBarVisibility="Auto" x:Name="ExtractedItemsScroller">
                                 <TreeView ItemsSource="{Binding ExtractedUnitypackages}" x:Name="UnityPackageTreeView">
                                     <TreeView.ItemTemplate>
-                                        <HierarchicalDataTemplate
-                                            ItemsSource="{Binding SubdirectoryItemsGroupedByCategory}">
+                                        <HierarchicalDataTemplate ItemsSource="{Binding SubdirectoryItemsGroupedByCategory}">
                                             <StackPanel Orientation="Horizontal">
                                                 <ui:ToggleSwitch
                                                     HorizontalAlignment="Left"
@@ -363,7 +355,6 @@
                                                                                     <StackPanel Grid.Column="1">
                                                                                         <ui:SymbolIcon
                                                                                             FontSize="50"
-
                                                                                             Height="50"
                                                                                             HorizontalAlignment="Center"
                                                                                             Symbol="{Binding SymbolIconImage}"
@@ -382,7 +373,6 @@
                                                                     VerticalAlignment="Center" />
                                                                 <ui:SymbolIcon
                                                                     FontSize="35"
-
                                                                     Margin="5,0,0,0"
                                                                     Symbol="{Binding SymbolIconImage}"
                                                                     VerticalAlignment="Center" />
@@ -426,12 +416,8 @@
                 <TabItem>
                     <TabItem.Header>
                         <StackPanel Orientation="Horizontal">
-                            <ui:SymbolIcon
-                                Margin="0,0,6,0"
-                                Symbol="Warning24" />
-                            <ui:TextBlock
-                                FontTypography="Caption"
-                                Text="Ignored" />
+                            <ui:SymbolIcon Margin="0,0,6,0" Symbol="Warning24" />
+                            <ui:TextBlock FontTypography="Caption" Text="Ignored" />
                             <ui:InfoBadge Severity="Caution" x:Name="ManageIgnoredInfoBadge" />
                         </StackPanel>
                     </TabItem.Header>
