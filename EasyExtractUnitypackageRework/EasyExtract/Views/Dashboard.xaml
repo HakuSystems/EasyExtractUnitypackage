@@ -4,11 +4,9 @@
     Drop="Dashboard_OnDrop"
     FontFamily="{DynamicResource SegoeFluentIcons}"
     Foreground="{DynamicResource TextFillColorPrimaryBrush}"
-    Height="900"
     Loaded="Dashboard_OnLoaded"
     ResizeMode="CanResizeWithGrip"
     Title="{Binding AppTitle}"
-    Width="1900"
     WindowStartupLocation="CenterScreen"
     d:DataContext="{d:DesignInstance configModel:ConfigModel,
                                      IsDesignTimeCreatable=True}"
