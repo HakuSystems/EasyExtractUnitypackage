@@ -14,30 +14,50 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
-    <Grid>
 
-        <Grid>
+    <Grid Background="{DynamicResource ApplicationBackgroundBrush}">
+        <!--  Outer container to keep the content centered or spaced well  -->
+        <Grid
+            HorizontalAlignment="Center"
+            Margin="20"
+            MaxWidth="500"
+            VerticalAlignment="Center">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto" />
-                <RowDefinition Height="*" />
+                <RowDefinition Height="Auto" />
                 <RowDefinition Height="Auto" />
             </Grid.RowDefinitions>
+
+            <!--  Title or Heading  -->
             <ui:TextBlock
-                FontSize="24"
+                FontSize="26"
                 FontWeight="Bold"
                 Foreground="#2ca7f2"
                 Grid.Row="0"
                 HorizontalAlignment="Center"
-                Margin="10"
+                Margin="0,0,0,20"
                 Text="We value your feedback!" />
 
+            <!--  Main Content Section  -->
             <StackPanel
                 Grid.Row="1"
-                Margin="10"
-                Orientation="Vertical"
-                VerticalAlignment="Center">
-                <ui:TextBlock Margin="0,0,0,5" Text="How satisfied are you with this software?" />
-                <ComboBox HorizontalAlignment="Stretch" x:Name="FeedbackSelection">
+                Margin="0,0,0,20"
+                Orientation="Vertical">
+
+                <!--  Satisfaction Prompt  -->
+                <ui:TextBlock
+                    FontSize="14"
+                    FontWeight="SemiBold"
+                    Margin="0,0,0,8"
+                    Text="How satisfied are you with this software?" />
+
+                <!--  Satisfaction Selection  -->
+                <ComboBox
+                    BorderBrush="#7fc5ff"
+                    FontSize="13"
+                    HorizontalAlignment="Stretch"
+                    Margin="0,0,0,16"
+                    x:Name="FeedbackSelection">
                     <ComboBoxItem Content="Very Satisfied" />
                     <ComboBoxItem Content="Satisfied" />
                     <ComboBoxItem Content="Neutral" />
@@ -45,36 +65,55 @@
                     <ComboBoxItem Content="Very Dissatisfied" />
                 </ComboBox>
 
-                <ui:TextBlock Margin="0,15,0,5" Text="Your comment or Improvement Request:" />
+                <!--  Comment Label  -->
+                <ui:TextBlock
+                    FontSize="14"
+                    FontWeight="SemiBold"
+                    Margin="0,0,0,8"
+                    Text="Your comment or Improvement Request:" />
+
+                <!--  Comment Box  -->
                 <ui:TextBox
                     AcceptsReturn="True"
                     BorderBrush="#7fc5ff"
                     BorderThickness="1"
-                    Height="100"
+                    FontSize="13"
+                    Height="120"
                     MaxLength="1000"
+                    Padding="8"
                     TextWrapping="Wrap"
                     VerticalScrollBarVisibility="Auto"
                     x:Name="FeedbackTextBox" />
             </StackPanel>
 
+            <!--  Footer / Actions  -->
             <StackPanel
                 Grid.Row="2"
                 HorizontalAlignment="Right"
                 Orientation="Horizontal"
                 VerticalAlignment="Center">
+
+                <!--  Anonymous Info  -->
                 <ui:TextBlock
                     FontSize="12"
-                    FontWeight="Bold"
-                    Margin="10,0,0,0"
-                    Text="Sending Request as Anonymous"
+                    FontWeight="SemiBold"
+                    Margin="0,0,10,0"
+                    Text="Sending request as Anonymous"
                     VerticalAlignment="Center"
                     x:Name="DiscordNameRequest" />
 
+                <!--  Submit Button  -->
                 <ui:Button
+                    Background="#2ca7f2"
+                    BorderBrush="#2ca7f2"
+                    BorderThickness="1"
                     Click="SubmitFeedbackButton_OnClick"
                     Content="Submit Feedback"
-                    Margin="10"
-                    Padding="10,5"
+                    Cursor="Hand"
+                    FontSize="13"
+                    Foreground="White"
+                    Margin="0"
+                    Padding="16,6"
                     x:Name="SubmitFeedbackButton" />
             </StackPanel>
         </Grid>
