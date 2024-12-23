@@ -4,9 +4,11 @@
     Drop="Dashboard_OnDrop"
     FontFamily="{DynamicResource SegoeFluentIcons}"
     Foreground="{DynamicResource TextFillColorPrimaryBrush}"
+    Height="900"
     Loaded="Dashboard_OnLoaded"
     ResizeMode="CanResizeWithGrip"
     Title="{Binding AppTitle}"
+    Width="1600"
     WindowStartupLocation="CenterScreen"
     d:DataContext="{d:DesignInstance configModel:ConfigModel,
                                      IsDesignTimeCreatable=True}"
@@ -97,7 +99,7 @@
 
                                             <ui:Anchor
                                                 Appearance="Danger"
-                                                Content="Help us improve"
+                                                Content="Tell us and help us improve"
                                                 Icon="{ui:SymbolIcon Heart24}"
                                                 NavigateUri="https://discordapp.com/users/657301605195972628"
                                                 SnapsToDevicePixels="True"
