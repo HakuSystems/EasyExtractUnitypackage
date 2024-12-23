@@ -34,7 +34,6 @@ public partial class About
                 Margin = RandomMargin()
             };
             _cards.Add(card);
-            RandomCardDesign.Items.Add(card);
         }
 
         await BetterLogger.LogAsync("Added cards to RandomCardDesign",

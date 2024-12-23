@@ -1,9 +1,15 @@
 <UserControl
+    AutomationProperties.HelpText="Allows users to search for .unitypackage files and add them to the queue."
+    AutomationProperties.Name="SearchEverythingScreen"
+    Focusable="True"
     FontFamily="{DynamicResource SegoeFluentIcons}"
     Foreground="{DynamicResource TextFillColorPrimaryBrush}"
+    KeyboardNavigation.TabNavigation="Cycle"
     Loaded="SearchEverything_OnLoaded"
     d:DataContext="{d:DesignInstance Type=configModel:ConfigModel,
                                      IsDesignTimeCreatable=True}"
+    d:DesignHeight="450"
+    d:DesignWidth="500"
     mc:Ignorable="d"
     ui:Design.Background="{DynamicResource ApplicationBackgroundBrush}"
     ui:Design.Foreground="{DynamicResource TextFillColorPrimaryBrush}"
@@ -16,102 +22,158 @@
     xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
 
-    <Grid HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
-        <ui:PassiveScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto">
-            <StackPanel
-                HorizontalAlignment="Stretch"
-                Orientation="Vertical"
-                VerticalAlignment="Top">
-                <!--  Search Box  -->
-                <ui:TextBox
-                    FontSize="14"
-                    Icon="{ui:SymbolIcon Search24}"
-                    Margin="0,0,0,5"
-                    MinWidth="250"
-                    PlaceholderText="Search for a UnityPackage..."
-                    TextChanged="SearchEverythingTextBox_OnTextChanged"
-                    VerticalAlignment="Center"
-                    VerticalContentAlignment="Center"
-                    x:Name="SearchEverythingTextBox" />
-                <StackPanel Orientation="Vertical">
-                    <!--  Creation Date Filter Card  -->
-                    <ui:Card>
-                        <ui:ToggleSwitch
-                            Checked="CreationDateFilterSwitch_OnChecked"
-                            Unchecked="CreationDateFilterSwitch_OnUnchecked"
-                            x:Name="CreationDateFilterSwitch">
-                            <StackPanel HorizontalAlignment="Stretch">
-                                <ui:TextBlock
-                                    FontSize="12"
-                                    FontTypography="Caption"
-                                    HorizontalAlignment="Stretch"
-                                    Margin="8,0,0,0"
-                                    Text="Enable to see Filter"
-                                    VerticalAlignment="Center"
-                                    x:Name="CreationDateFilterCardFallback" />
-                                <Grid Visibility="Collapsed" x:Name="CreationDateFilterCard">
-                                    <Grid.RowDefinitions>
-                                        <RowDefinition Height="Auto" />
-                                        <RowDefinition Height="Auto" />
-                                    </Grid.RowDefinitions>
-                                    <StackPanel Margin="5" Orientation="Horizontal">
-                                        <ui:TextBlock
-                                            FontSize="14"
-                                            FontTypography="Title"
-                                            Margin="8,0,5,0"
-                                            Text="Search from"
-                                            VerticalAlignment="Center" />
-                                        <ui:CalendarDatePicker
-                                            Content="Pick a date"
-                                            Date="{x:Static sys:DateTime.Today}"
-                                            IsTodayHighlighted="True"
-                                            x:Name="CalendarStartCreationDatePicker" />
-                                        <ui:TextBlock
-                                            Margin="8,0,0,0"
-                                            Text="{Binding ElementName=CalendarStartCreationDatePicker, Path=Date, StringFormat=dd-MM-yyyy}"
-                                            VerticalAlignment="Center" />
-                                        <ui:TextBlock
-                                            FontSize="14"
-                                            FontTypography="Title"
-                                            Margin="8,0,5,0"
-                                            Text="to"
-                                            VerticalAlignment="Center" />
-                                        <ui:CalendarDatePicker
-                                            Content="Pick a date"
-                                            Date="{x:Static sys:DateTime.Today}"
-                                            IsTodayHighlighted="True"
-                                            x:Name="CalendarEndCreationDatePicker" />
-                                        <ui:TextBlock
-                                            Margin="8,0,0,0"
-                                            Text="{Binding ElementName=CalendarEndCreationDatePicker, Path=Date, StringFormat=dd-MM-yyyy}"
-                                            VerticalAlignment="Center" />
-                                    </StackPanel>
-                                    <StackPanel Grid.Row="1" Margin="5">
-                                        <ui:Button
-                                            Click="UpdateSearchResultCreationDateFilterBtn_OnClick"
-                                            Content="Update Search Result"
-                                            HorizontalAlignment="Stretch"
-                                            Icon="{ui:SymbolIcon SearchInfo24}"
-                                            Margin="5"
-                                            x:Name="UpdateSearchResultCreationDateFilterBtn" />
-                                    </StackPanel>
-                                </Grid>
-                            </StackPanel>
-                        </ui:ToggleSwitch>
-                    </ui:Card>
-                    <!--  Manual File Search  -->
-                    <ui:Button
-                        Appearance="Secondary"
-                        Click="SearchFileManuallyButton_OnClick"
-                        Content="Search File Manually"
-                        FontSize="14"
-                        HorizontalAlignment="Stretch"
-                        Icon="{ui:SymbolIcon DocumentSearch24}"
-                        Margin="0,5,0,5"
-                        x:Name="SearchFileManuallyButton" />
+    <!--  Subtle fade-in animation  -->
+    <UserControl.Triggers>
+        <EventTrigger RoutedEvent="UserControl.Loaded">
+            <BeginStoryboard>
+                <Storyboard>
+                    <DoubleAnimation
+                        Duration="0:0:0.35"
+                        From="0"
+                        Storyboard.TargetName="RootShadowBorder"
+                        Storyboard.TargetProperty="Opacity"
+                        To="1" />
+                </Storyboard>
+            </BeginStoryboard>
+        </EventTrigger>
+    </UserControl.Triggers>
 
-                    <!--  Search Results List  -->
+    <Border
+        AutomationProperties.HelpText="Main container for search UI and results."
+        AutomationProperties.Name="SearchEverythingContainer"
+        CornerRadius="10"
+        Margin="12"
+        Opacity="0"
+        x:Name="RootShadowBorder">
+        <Border.Effect>
+            <DropShadowEffect
+                BlurRadius="10"
+                Color="#40000000"
+                Direction="320"
+                ShadowDepth="6" />
+        </Border.Effect>
+
+        <Grid HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+            <ui:PassiveScrollViewer
+                AutomationProperties.HelpText="Scrolls through the search filters and results."
+                AutomationProperties.Name="SearchScrollViewer"
+                HorizontalScrollBarVisibility="Auto"
+                VerticalScrollBarVisibility="Auto">
+
+                <StackPanel
+                    AutomationProperties.HelpText="Holds the search bar, date filters, manual search, and results."
+                    AutomationProperties.Name="SearchEverythingPanel"
+                    HorizontalAlignment="Stretch"
+                    Margin="10"
+                    Orientation="Vertical"
+                    VerticalAlignment="Top">
+
+                    <!--  1) Search Box  -->
+                    <ui:TextBox
+                        AutomationProperties.HelpText="Type keywords to search for UnityPackage files."
+                        AutomationProperties.Name="SearchBox"
+                        FontSize="14"
+                        Icon="{ui:SymbolIcon Search24}"
+                        Margin="0,0,0,5"
+                        MinWidth="250"
+                        PlaceholderText="Search for a UnityPackage..."
+                        TextChanged="SearchEverythingTextBox_OnTextChanged"
+                        VerticalAlignment="Center"
+                        VerticalContentAlignment="Center"
+                        x:Name="SearchEverythingTextBox" />
+
+                    <!--  2) Creation Date Filter Card  -->
+                    <StackPanel Orientation="Vertical">
+                        <ui:Card AutomationProperties.HelpText="Enables filtering results by creation date."
+                                 AutomationProperties.Name="CreationDateFilterCardOuter">
+                            <ui:ToggleSwitch
+                                Checked="CreationDateFilterSwitch_OnChecked"
+                                Unchecked="CreationDateFilterSwitch_OnUnchecked"
+                                x:Name="CreationDateFilterSwitch">
+
+                                <StackPanel HorizontalAlignment="Stretch">
+                                    <ui:TextBlock
+                                        FontSize="12"
+                                        FontTypography="Caption"
+                                        HorizontalAlignment="Stretch"
+                                        Margin="8,0,0,0"
+                                        Text="Enable to see Filter"
+                                        VerticalAlignment="Center"
+                                        x:Name="CreationDateFilterCardFallback" />
+
+                                    <Grid Visibility="Collapsed" x:Name="CreationDateFilterCard">
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition Height="Auto" />
+                                            <RowDefinition Height="Auto" />
+                                        </Grid.RowDefinitions>
+
+                                        <StackPanel Margin="5" Orientation="Horizontal">
+                                            <ui:TextBlock
+                                                FontSize="14"
+                                                FontTypography="Title"
+                                                Margin="8,0,5,0"
+                                                Text="Search from"
+                                                VerticalAlignment="Center" />
+                                            <ui:CalendarDatePicker
+                                                Content="Pick a date"
+                                                Date="{x:Static sys:DateTime.Today}"
+                                                IsTodayHighlighted="True"
+                                                x:Name="CalendarStartCreationDatePicker" />
+                                            <ui:TextBlock
+                                                Margin="8,0,0,0"
+                                                Text="{Binding ElementName=CalendarStartCreationDatePicker, Path=Date, StringFormat=dd-MM-yyyy}"
+                                                VerticalAlignment="Center" />
+                                            <ui:TextBlock
+                                                FontSize="14"
+                                                FontTypography="Title"
+                                                Margin="8,0,5,0"
+                                                Text="to"
+                                                VerticalAlignment="Center" />
+                                            <ui:CalendarDatePicker
+                                                Content="Pick a date"
+                                                Date="{x:Static sys:DateTime.Today}"
+                                                IsTodayHighlighted="True"
+                                                x:Name="CalendarEndCreationDatePicker" />
+                                            <ui:TextBlock
+                                                Margin="8,0,0,0"
+                                                Text="{Binding ElementName=CalendarEndCreationDatePicker, Path=Date, StringFormat=dd-MM-yyyy}"
+                                                VerticalAlignment="Center" />
+                                        </StackPanel>
+
+                                        <StackPanel Grid.Row="1" Margin="5">
+                                            <ui:Button
+                                                AutomationProperties.HelpText="Apply date filter to search results."
+                                                AutomationProperties.Name="DateFilterUpdateButton"
+                                                Click="UpdateSearchResultCreationDateFilterBtn_OnClick"
+                                                Content="Update Search Result"
+                                                HorizontalAlignment="Stretch"
+                                                Icon="{ui:SymbolIcon SearchInfo24}"
+                                                Margin="5"
+                                                x:Name="UpdateSearchResultCreationDateFilterBtn" />
+                                        </StackPanel>
+                                    </Grid>
+                                </StackPanel>
+                            </ui:ToggleSwitch>
+                        </ui:Card>
+
+                        <!--  3) Manual File Search  -->
+                        <ui:Button
+                            Appearance="Secondary"
+                            AutomationProperties.HelpText="Open file dialog to locate a UnityPackage manually."
+                            AutomationProperties.Name="ManualFileSearchButton"
+                            Click="SearchFileManuallyButton_OnClick"
+                            Content="Search File Manually"
+                            FontSize="14"
+                            HorizontalAlignment="Stretch"
+                            Icon="{ui:SymbolIcon DocumentSearch24}"
+                            Margin="0,5,0,5"
+                            x:Name="SearchFileManuallyButton" />
+                    </StackPanel>
+
+                    <!--  4) Search Results List  -->
                     <ui:ListView
+                        AutomationProperties.HelpText="Displays matching unitypackage files."
+                        AutomationProperties.Name="SearchResultsList"
                         HorizontalAlignment="Stretch"
                         HorizontalContentAlignment="Stretch"
                         ItemsSource="{Binding Path=SearchEverythingList}"
@@ -163,7 +225,10 @@
                                             </ui:Card>
                                         </StackPanel>
                                     </ui:CardControl.Header>
+
                                     <ui:Button
+                                        AutomationProperties.HelpText="Adds this item to the extraction queue."
+                                        AutomationProperties.Name="QueueAddButton"
                                         Click="QueueAddButton_OnClick"
                                         Content="Add"
                                         FontSize="14"
@@ -176,15 +241,19 @@
                             </DataTemplate>
                         </ui:ListView.ItemTemplate>
                     </ui:ListView>
-                    <!--  Fallback / Status Text  -->
+
+                    <!--  5) Fallback / Status Text  -->
                     <TextBlock
+                        AutomationProperties.HelpText="Displayed if the external SearchEverything tool is unavailable."
+                        AutomationProperties.Name="FallbackStatus"
                         FontStyle="Italic"
                         HorizontalAlignment="Center"
                         Margin="10"
                         Text="Search Everything isn't supported on your computer."
-                        VerticalAlignment="Center"
                         x:Name="FallbackEverything" />
                     <TextBlock
+                        AutomationProperties.HelpText="Brief instructions for searching packages."
+                        AutomationProperties.Name="InstructionsText"
                         FontSize="14"
                         HorizontalAlignment="Center"
                         Margin="5"
@@ -193,20 +262,25 @@
                         Text="Search for a UnityPackage Name..."
                         x:Name="FoundText" />
                     <TextBlock
+                        AutomationProperties.HelpText="Credits the underlying search tool."
+                        AutomationProperties.Name="PoweredByText"
                         FontSize="14"
                         HorizontalAlignment="Center"
                         Margin="5"
                         Opacity="0.7"
                         Text="Powered by SearchEverything" />
+
+                    <!--  6) Status Updates  -->
+                    <TextBlock
+                        AutomationProperties.HelpText="Displays status messages about added items."
+                        AutomationProperties.Name="StatusUpdates"
+                        FontSize="14"
+                        HorizontalAlignment="Center"
+                        Margin="10"
+                        VerticalAlignment="Center"
+                        x:Name="AddedStatusTxt" />
                 </StackPanel>
-                <!--  Status Updates  -->
-                <TextBlock
-                    FontSize="14"
-                    HorizontalAlignment="Center"
-                    Margin="10"
-                    VerticalAlignment="Center"
-                    x:Name="AddedStatusTxt" />
-            </StackPanel>
-        </ui:PassiveScrollViewer>
-    </Grid>
+            </ui:PassiveScrollViewer>
+        </Grid>
+    </Border>
 </UserControl>

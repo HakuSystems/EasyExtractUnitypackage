@@ -1,6 +1,10 @@
 <UserControl
+    AutomationProperties.HelpText="Displays a special thank-you message to users of EasyExtract."
+    AutomationProperties.Name="EasterEggScreen"
+    Focusable="True"
     FontFamily="{DynamicResource SegoeFluentIcons}"
     Foreground="{DynamicResource TextFillColorPrimaryBrush}"
+    KeyboardNavigation.TabNavigation="Cycle"
     Loaded="EasterEgg_OnLoaded"
     d:DataContext="{d:DesignInstance configModel:ConfigModel,
                                      IsDesignTimeCreatable=True}"
@@ -16,45 +20,83 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
-    <Grid>
-        <Grid.RowDefinitions>
-            <RowDefinition Height="*" />
-            <RowDefinition Height="Auto" />
-        </Grid.RowDefinitions>
-        <ui:SymbolIcon
-            FontSize="100"
-            Foreground="Red"
-            Grid.Row="0"
-            Margin="5"
-            Opacity="0.2"
-            Symbol="Heart24"
-            x:Name="HeartIconToAnimate">
-            <ui:SymbolIcon.Triggers>
-                <EventTrigger RoutedEvent="Loaded">
-                    <BeginStoryboard>
-                        <Storyboard>
-                            <DoubleAnimation
-                                AutoReverse="True"
-                                Duration="0:0:0.5"
-                                From="100"
-                                RepeatBehavior="Forever"
-                                Storyboard.TargetName="HeartIconToAnimate"
-                                Storyboard.TargetProperty="FontSize"
-                                To="120" />
-                        </Storyboard>
-                    </BeginStoryboard>
-                </EventTrigger>
-            </ui:SymbolIcon.Triggers>
-        </ui:SymbolIcon>
-        <TextBlock
-            FontSize="30"
-            FontWeight="Bold"
-            Grid.Row="0"
-            HorizontalAlignment="Center"
-            Margin="5"
-            Opacity="0.5"
-            Text="Thanks for using EasyExtract!"
-            VerticalAlignment="Center" />
 
-    </Grid>
+    <!--  Subtle fade-in animation for the entire UserControl  -->
+    <UserControl.Triggers>
+        <EventTrigger RoutedEvent="UserControl.Loaded">
+            <BeginStoryboard>
+                <Storyboard>
+                    <DoubleAnimation
+                        Duration="0:0:0.35"
+                        From="0"
+                        Storyboard.TargetName="RootShadowBorder"
+                        Storyboard.TargetProperty="Opacity"
+                        To="1" />
+                </Storyboard>
+            </BeginStoryboard>
+        </EventTrigger>
+    </UserControl.Triggers>
+
+    <Border
+        AutomationProperties.HelpText="Contains the pulsing heart icon and a thank-you message."
+        AutomationProperties.Name="EasterEggContainer"
+        CornerRadius="10"
+        Margin="12"
+        Opacity="0"
+        x:Name="RootShadowBorder">
+        <Border.Effect>
+            <DropShadowEffect
+                BlurRadius="10"
+                Color="#40000000"
+                Direction="320"
+                ShadowDepth="6" />
+        </Border.Effect>
+
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="*" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+
+            <ui:SymbolIcon
+                AutomationProperties.HelpText="Heart icon that pulsates to show appreciation."
+                AutomationProperties.Name="PulsingHeartIcon"
+                FontSize="100"
+                Foreground="Red"
+                Grid.Row="0"
+                Margin="5"
+                Opacity="0.2"
+                Symbol="Heart24"
+                x:Name="HeartIconToAnimate">
+                <ui:SymbolIcon.Triggers>
+                    <EventTrigger RoutedEvent="Loaded">
+                        <BeginStoryboard>
+                            <Storyboard>
+                                <DoubleAnimation
+                                    AutoReverse="True"
+                                    Duration="0:0:0.5"
+                                    From="100"
+                                    RepeatBehavior="Forever"
+                                    Storyboard.TargetName="HeartIconToAnimate"
+                                    Storyboard.TargetProperty="FontSize"
+                                    To="120" />
+                            </Storyboard>
+                        </BeginStoryboard>
+                    </EventTrigger>
+                </ui:SymbolIcon.Triggers>
+            </ui:SymbolIcon>
+
+            <TextBlock
+                AutomationProperties.HelpText="Displays a friendly thank-you message for the user."
+                AutomationProperties.Name="ThankYouText"
+                FontSize="30"
+                FontWeight="Bold"
+                Grid.Row="0"
+                HorizontalAlignment="Center"
+                Margin="5"
+                Opacity="0.5"
+                Text="Thanks for using EasyExtract!"
+                VerticalAlignment="Center" />
+        </Grid>
+    </Border>
 </UserControl>
