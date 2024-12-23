@@ -94,7 +94,7 @@
                                                 Appearance="Tertiary"
                                                 Margin="0,0,0,4"
                                                 Opacity="1"
-                                                Text="Already Got a Solution for us?"
+                                                Text="Already Got a Better Solution for us?"
                                                 TextWrapping="WrapWithOverflow" />
 
                                             <ui:Anchor
