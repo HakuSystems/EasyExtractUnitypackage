@@ -21,7 +21,6 @@
     xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
 
-    <!--  Fade-in animation on load  -->
     <UserControl.Triggers>
         <EventTrigger RoutedEvent="UserControl.Loaded">
             <BeginStoryboard>
@@ -37,130 +36,132 @@
         </EventTrigger>
     </UserControl.Triggers>
 
-    <Border
-        AutomationProperties.HelpText="Main container for user feedback form."
-        AutomationProperties.Name="FeedbackContainer"
-        CornerRadius="10"
-        Margin="12"
-        Opacity="0"
-        x:Name="RootShadowBorder">
-        <Border.Effect>
-            <DropShadowEffect
-                BlurRadius="10"
-                Color="#40000000"
-                Direction="320"
-                ShadowDepth="6" />
-        </Border.Effect>
+    <Grid>
+        <Viewbox Stretch="Fill" StretchDirection="Both">
+            <Border
+                AutomationProperties.HelpText="Main container for user feedback form."
+                AutomationProperties.Name="FeedbackContainer"
+                CornerRadius="10"
+                Margin="12"
+                Opacity="0"
+                x:Name="RootShadowBorder">
+                <Border.Effect>
+                    <DropShadowEffect
+                        BlurRadius="10"
+                        Color="#40000000"
+                        Direction="320"
+                        ShadowDepth="6" />
+                </Border.Effect>
 
-        <Grid AutomationProperties.Name="FeedbackGrid" Background="{DynamicResource ApplicationBackgroundBrush}">
+                <Grid AutomationProperties.Name="FeedbackGrid" Background="{DynamicResource ApplicationBackgroundBrush}">
+                    <Grid
+                        HorizontalAlignment="Center"
+                        Margin="20"
+                        MaxWidth="500"
+                        VerticalAlignment="Center">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                        </Grid.RowDefinitions>
 
-            <Grid
-                HorizontalAlignment="Center"
-                Margin="20"
-                MaxWidth="500"
-                VerticalAlignment="Center">
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto" />
-                    <RowDefinition Height="Auto" />
-                    <RowDefinition Height="Auto" />
-                </Grid.RowDefinitions>
+                        <ui:TextBlock
+                            AutomationProperties.HelpText="Title prompting the user to provide feedback."
+                            AutomationProperties.Name="FeedbackTitle"
+                            FontSize="26"
+                            FontWeight="Bold"
+                            Foreground="#2ca7f2"
+                            Grid.Row="0"
+                            HorizontalAlignment="Center"
+                            Margin="0,0,0,20"
+                            Text="We value your feedback!" />
 
-                <ui:TextBlock
-                    AutomationProperties.HelpText="Title prompting the user to provide feedback."
-                    AutomationProperties.Name="FeedbackTitle"
-                    FontSize="26"
-                    FontWeight="Bold"
-                    Foreground="#2ca7f2"
-                    Grid.Row="0"
-                    HorizontalAlignment="Center"
-                    Margin="0,0,0,20"
-                    Text="We value your feedback!" />
+                        <StackPanel
+                            AutomationProperties.HelpText="Controls for selecting satisfaction level and entering a comment."
+                            AutomationProperties.Name="FeedbackFields"
+                            Grid.Row="1"
+                            Margin="0,0,0,20"
+                            Orientation="Vertical"
+                            x:Name="FeedbackFields">
+                            <ui:TextBlock
+                                AutomationProperties.Name="SatisfactionPrompt"
+                                FontSize="14"
+                                FontWeight="SemiBold"
+                                Margin="0,0,0,8"
+                                Text="How satisfied are you with this software?" />
 
-                <StackPanel
-                    AutomationProperties.HelpText="Controls for selecting satisfaction level and entering a comment."
-                    AutomationProperties.Name="FeedbackFields"
-                    Grid.Row="1"
-                    Margin="0,0,0,20"
-                    Orientation="Vertical">
+                            <ComboBox
+                                AutomationProperties.HelpText="Select your satisfaction level."
+                                AutomationProperties.Name="SatisfactionComboBox"
+                                BorderBrush="#7fc5ff"
+                                FontSize="13"
+                                HorizontalAlignment="Stretch"
+                                Margin="0,0,0,16"
+                                x:Name="FeedbackSelection">
+                                <ComboBoxItem Content="Very Satisfied" />
+                                <ComboBoxItem Content="Satisfied" />
+                                <ComboBoxItem Content="Neutral" />
+                                <ComboBoxItem Content="Dissatisfied" />
+                                <ComboBoxItem Content="Very Dissatisfied" />
+                            </ComboBox>
 
-                    <ui:TextBlock
-                        AutomationProperties.Name="SatisfactionPrompt"
-                        FontSize="14"
-                        FontWeight="SemiBold"
-                        Margin="0,0,0,8"
-                        Text="How satisfied are you with this software?" />
+                            <ui:TextBlock
+                                AutomationProperties.Name="CommentPrompt"
+                                FontSize="14"
+                                FontWeight="SemiBold"
+                                Margin="0,0,0,8"
+                                Text="Your comment or Improvement Request:" />
 
-                    <ComboBox
-                        AutomationProperties.HelpText="Select your satisfaction level."
-                        AutomationProperties.Name="SatisfactionComboBox"
-                        BorderBrush="#7fc5ff"
-                        FontSize="13"
-                        HorizontalAlignment="Stretch"
-                        Margin="0,0,0,16"
-                        x:Name="FeedbackSelection">
-                        <ComboBoxItem Content="Very Satisfied" />
-                        <ComboBoxItem Content="Satisfied" />
-                        <ComboBoxItem Content="Neutral" />
-                        <ComboBoxItem Content="Dissatisfied" />
-                        <ComboBoxItem Content="Very Dissatisfied" />
-                    </ComboBox>
+                            <ui:TextBox
+                                AcceptsReturn="True"
+                                AutomationProperties.HelpText="Type your feedback or suggestions here."
+                                AutomationProperties.Name="FeedbackCommentBox"
+                                BorderBrush="#7fc5ff"
+                                BorderThickness="1"
+                                FontSize="13"
+                                Height="120"
+                                MaxLength="1000"
+                                Padding="8"
+                                TextWrapping="Wrap"
+                                VerticalScrollBarVisibility="Auto"
+                                x:Name="FeedbackTextBox" />
+                        </StackPanel>
 
-                    <ui:TextBlock
-                        AutomationProperties.Name="CommentPrompt"
-                        FontSize="14"
-                        FontWeight="SemiBold"
-                        Margin="0,0,0,8"
-                        Text="Your comment or Improvement Request:" />
-
-                    <ui:TextBox
-                        AcceptsReturn="True"
-                        AutomationProperties.HelpText="Type your feedback or suggestions here."
-                        AutomationProperties.Name="FeedbackCommentBox"
-                        BorderBrush="#7fc5ff"
-                        BorderThickness="1"
-                        FontSize="13"
-                        Height="120"
-                        MaxLength="1000"
-                        Padding="8"
-                        TextWrapping="Wrap"
-                        VerticalScrollBarVisibility="Auto"
-                        x:Name="FeedbackTextBox" />
-                </StackPanel>
-
-                <StackPanel
-                    AutomationProperties.HelpText="Button to submit feedback, plus info about anonymity."
-                    AutomationProperties.Name="FeedbackActions"
-                    Grid.Row="2"
-                    HorizontalAlignment="Right"
-                    Orientation="Horizontal"
-                    VerticalAlignment="Center">
-
-                    <ui:TextBlock
-                        AutomationProperties.HelpText="Indicates that feedback will be sent anonymously."
-                        AutomationProperties.Name="AnonymousInfo"
-                        FontSize="12"
-                        FontWeight="SemiBold"
-                        Margin="0,0,10,0"
-                        Text="Sending request as Anonymous"
-                        VerticalAlignment="Center"
-                        x:Name="DiscordNameRequest" />
-
-                    <ui:Button
-                        AutomationProperties.HelpText="Click to submit your feedback."
-                        AutomationProperties.Name="SubmitFeedbackButton"
-                        Background="#2ca7f2"
-                        BorderBrush="#2ca7f2"
-                        BorderThickness="1"
-                        Click="SubmitFeedbackButton_OnClick"
-                        Content="Submit Feedback"
-                        Cursor="Hand"
-                        FontSize="13"
-                        Foreground="White"
-                        Margin="0"
-                        Padding="16,6"
-                        x:Name="SubmitFeedbackButton" />
-                </StackPanel>
-            </Grid>
-        </Grid>
-    </Border>
+                        <StackPanel
+                            AutomationProperties.HelpText="Button to submit feedback, plus info about anonymity."
+                            AutomationProperties.Name="FeedbackActions"
+                            Grid.Row="2"
+                            HorizontalAlignment="Right"
+                            Orientation="Horizontal"
+                            VerticalAlignment="Center"
+                            x:Name="FeedbackActions">
+                            <ui:TextBlock
+                                AutomationProperties.HelpText="Indicates that feedback will be sent anonymously."
+                                AutomationProperties.Name="AnonymousInfo"
+                                FontSize="12"
+                                FontWeight="SemiBold"
+                                Margin="0,0,10,0"
+                                Text="Sending request as Anonymous"
+                                VerticalAlignment="Center"
+                                x:Name="DiscordNameRequest" />
+                            <ui:Button
+                                AutomationProperties.HelpText="Click to submit your feedback."
+                                AutomationProperties.Name="SubmitFeedbackButton"
+                                Background="#2ca7f2"
+                                BorderBrush="#2ca7f2"
+                                BorderThickness="1"
+                                Click="SubmitFeedbackButton_OnClick"
+                                Content="Submit Feedback"
+                                Cursor="Hand"
+                                FontSize="13"
+                                Foreground="White"
+                                Margin="0"
+                                Padding="16,6"
+                                x:Name="SubmitFeedbackButton" />
+                        </StackPanel>
+                    </Grid>
+                </Grid>
+            </Border>
+        </Viewbox>
+    </Grid>
 </UserControl>
