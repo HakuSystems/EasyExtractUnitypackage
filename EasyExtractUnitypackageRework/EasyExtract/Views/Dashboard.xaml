@@ -40,16 +40,12 @@
             <!--  Constrain overall content if desired, helps readability on large screens  -->
             <Viewbox Stretch="Fill" StretchDirection="Both">
                 <Grid x:Name="MainGrid">
-                    <!--  You could limit the total width so it doesn't get too wide on big monitors  -->
-                    <!--<Grid MaxWidth="1500"> ... </Grid>-->
-
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*" />
                         <ColumnDefinition Width="*" />
                         <ColumnDefinition Width="*" />
                     </Grid.ColumnDefinitions>
                     <Grid.RowDefinitions>
-                        <!--  Potential area for a top bar, branding, or additional controls  -->
                         <RowDefinition Height="Auto" />
                         <RowDefinition Height="*" />
                     </Grid.RowDefinitions>
