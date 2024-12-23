@@ -7,10 +7,9 @@ namespace EasyExtract.Controls;
 
 public partial class SearchEverything : UserControl, INotifyPropertyChanged
 {
-    private readonly List<SearchEverythingModel> _tempList = new();
-    private readonly ConfigHelper ConfigHelper = new();
-    private readonly EverythingValidation EverythingValidation = new();
-
+    private readonly List<SearchEverythingModel> _allSearchResults = new();
+    private readonly ConfigHelper _configHelper = new();
+    private readonly EverythingValidation _everythingValidation = new();
     private List<SearchEverythingModel>? _searchEverythingList;
 
     public SearchEverything()
@@ -39,41 +38,40 @@ public partial class SearchEverything : UserControl, INotifyPropertyChanged
 
     private async void SearchEverything_OnLoaded(object sender, RoutedEventArgs e)
     {
-        if (!await EverythingValidation.AreSystemRequirementsMet())
+        if (!await _everythingValidation.AreSystemRequirementsMet())
         {
             FallbackEverything.Visibility = Visibility.Visible;
-            FallbackEverything.Text = await EverythingValidation.AreSystemRequirementsMetString();
-            await BetterLogger.LogAsync("System requirements not met for Everything",
-                Importance.Warning); // Log system requirements not met
+            FallbackEverything.Text = await _everythingValidation.AreSystemRequirementsMetString();
+            await BetterLogger.LogAsync("System requirements not met for Everything", Importance.Warning);
         }
         else
         {
-            _tempList.Clear();
+            _allSearchResults.Clear();
 
             Everything.Everything_SetSearchW("endwith:.unitypackage");
             Everything.Everything_SetRequestFlags(Everything.EVERYTHING_REQUEST_FILE_NAME
-                                                  | Everything.EVERYTHING_REQUEST_PATH
-            );
+                                                  | Everything.EVERYTHING_REQUEST_PATH);
             Everything.Everything_QueryW(true);
 
-            var myThread = new Thread(() => { LoopList(); });
+            var myThread = new Thread(LoopList)
+            {
+                IsBackground = true
+            };
             myThread.SetApartmentState(ApartmentState.STA);
             myThread.Start();
 
             FallbackEverything.Visibility = Visibility.Collapsed;
-            await BetterLogger.LogAsync("Everything search started",
-                Importance.Info); // Log search start
+            await BetterLogger.LogAsync("Everything search started", Importance.Info);
         }
 
         var isDiscordEnabled = false;
         try
         {
-            isDiscordEnabled = ConfigHelper.Config.DiscordRpc;
+            isDiscordEnabled = _configHelper.Config.DiscordRpc;
         }
         catch (Exception exception)
         {
-            await BetterLogger.LogAsync($"Error reading config: {exception.Message}",
-                Importance.Error); // Log error
+            await BetterLogger.LogAsync($"Error reading config: {exception.Message}", Importance.Error);
             throw;
         }
 
@@ -84,24 +82,22 @@ public partial class SearchEverything : UserControl, INotifyPropertyChanged
             }
             catch (Exception exception)
             {
-                await BetterLogger.LogAsync($"Error updating Discord presence: {exception.Message}",
-                    Importance.Error); // Log error
+                await BetterLogger.LogAsync($"Error updating Discord presence: {exception.Message}", Importance.Error);
                 throw;
             }
     }
 
     private async void LoopList()
     {
-        uint i;
-
-        for (i = 0; i < Everything.Everything_GetNumResults(); i++)
+        var resultCount = Everything.Everything_GetNumResults();
+        for (uint i = 0; i < resultCount; i++)
         {
             var path = Marshal.PtrToStringUni(Everything.Everything_GetResultFullPathName(i));
             var name = Marshal.PtrToStringUni(Everything.Everything_GetResultFileName(i));
-            var duplicate = _tempList.Find(x => x.UnityPackageName == name);
-            if (duplicate != null) continue;
+
+            if (_allSearchResults.Any(x => x.UnityPackageName == name)) continue;
             if (path != null)
-                _tempList.Add(new SearchEverythingModel
+                _allSearchResults.Add(new SearchEverythingModel
                 {
                     UnityPackageName = name,
                     UnityPackagePath = path,
@@ -111,24 +107,14 @@ public partial class SearchEverything : UserControl, INotifyPropertyChanged
                 });
         }
 
-        await BetterLogger.LogAsync($"LoopList processed {i} results",
-            Importance.Info); // Log loop processing
+        await BetterLogger.LogAsync($"LoopList processed {resultCount} results", Importance.Info);
     }
 
-    /// <summary>
-    ///     Retrieves the created or modified time of a file given its index in the search results.
-    /// </summary>
-    /// <param name="fileIndex">The index of the file in the search results.</param>
-    /// <param name="isCreationTime">
-    ///     Specifies whether to retrieve the creation time (true) or the last modified time (false)
-    ///     of the file.
-    /// </param>
-    /// <returns>
-    ///     The created or modified time of the file in the format "dd-MM-yyyy HH:mm:ss".
-    /// </returns>
     private string GetFileDateTime(uint fileIndex, bool isCreationTime)
     {
         var path = Marshal.PtrToStringUni(Everything.Everything_GetResultFullPathName(fileIndex));
+        if (path == null) return string.Empty;
+
         var file = new FileInfo(path);
         return isCreationTime
             ? file.CreationTime.ToString("dd-MM-yyyy")
@@ -137,17 +123,15 @@ public partial class SearchEverything : UserControl, INotifyPropertyChanged
 
     private async void SearchEverythingTextBox_OnTextChanged(object sender, TextChangedEventArgs e)
     {
-        if (string.IsNullOrEmpty(SearchEverythingTextBox.Text))
+        var query = SearchEverythingTextBox.Text;
+        if (string.IsNullOrWhiteSpace(query))
         {
             SearchEverythingList = null;
             FoundText.Text = "Search for a UnityPackage Name";
-            await BetterLogger.LogAsync("Search box cleared",
-                Importance.Info); // Log search clear
-            SearchEverythingList = _tempList.Where(x =>
-                {
-                    return x.UnityPackageName.StartsWith(SearchEverythingTextBox.Text,
-                        StringComparison.InvariantCultureIgnoreCase);
-                })
+            await BetterLogger.LogAsync("Search box cleared", Importance.Info);
+            // Re-populate default list when cleared
+            SearchEverythingList = _allSearchResults
+                .Where(x => x.UnityPackageName.StartsWith(query, StringComparison.InvariantCultureIgnoreCase))
                 .ToList();
             return;
         }
@@ -156,26 +140,23 @@ public partial class SearchEverything : UserControl, INotifyPropertyChanged
         {
             var creationDateStart = CalendarStartCreationDatePicker.Date;
             var endCreationDate = CalendarEndCreationDatePicker.Date;
-            SearchEverythingList = _tempList.Where(x =>
-                    x.UnityPackageName.StartsWith(SearchEverythingTextBox.Text,
-                        StringComparison.InvariantCultureIgnoreCase) &&
+
+            SearchEverythingList = _allSearchResults
+                .Where(x =>
+                    x.UnityPackageName.StartsWith(query, StringComparison.InvariantCultureIgnoreCase) &&
                     DateTime.Parse(x.CreatedTime.Replace("Creation Date: ", "")) >= creationDateStart &&
                     DateTime.Parse(x.CreatedTime.Replace("Creation Date: ", "")) <= endCreationDate)
                 .ToList();
-            FoundText.Text = $"Found {SearchEverythingList.Count} results";
         }
         else
         {
-            SearchEverythingList = _tempList.Where(x =>
-                    x.UnityPackageName.StartsWith(SearchEverythingTextBox.Text,
-                        StringComparison.InvariantCultureIgnoreCase))
+            SearchEverythingList = _allSearchResults
+                .Where(x => x.UnityPackageName.StartsWith(query, StringComparison.InvariantCultureIgnoreCase))
                 .ToList();
-            FoundText.Text = $"Found {SearchEverythingList.Count} results";
         }
 
-
-        await BetterLogger.LogAsync($"Search updated, found {SearchEverythingList.Count} results",
-            Importance.Info); // Log search update
+        FoundText.Text = $"Found {SearchEverythingList.Count} results";
+        await BetterLogger.LogAsync($"Search updated, found {SearchEverythingList.Count} results", Importance.Info);
     }
 
     private async void SearchFileManuallyButton_OnClick(object sender, RoutedEventArgs e)
@@ -186,6 +167,7 @@ public partial class SearchEverything : UserControl, INotifyPropertyChanged
             Title = "Select a Unity Package",
             Multiselect = true
         };
+
         if (openFileDialog.ShowDialog() == true)
         {
             var counter = 0;
@@ -195,8 +177,8 @@ public partial class SearchEverything : UserControl, INotifyPropertyChanged
                 var name = Path.GetFileName(file);
                 var duplicate = Extraction.SearchResultQueue?.Find(x => x.UnityPackageName == name);
                 if (duplicate != null) continue;
-                if (Extraction.SearchResultQueue == null)
-                    Extraction.SearchResultQueue = new List<SearchEverythingModel>();
+
+                Extraction.SearchResultQueue ??= new List<SearchEverythingModel>();
                 Extraction.SearchResultQueue.Add(new SearchEverythingModel
                 {
                     UnityPackageName = name,
@@ -214,34 +196,31 @@ public partial class SearchEverything : UserControl, INotifyPropertyChanged
                 };
             }
 
-            await BetterLogger.LogAsync($"Manually added {counter} files to the queue",
-                Importance.Info); // Log manual addition
+            await BetterLogger.LogAsync($"Manually added {counter} files to the queue", Importance.Info);
         }
     }
 
     private async void QueueAddButton_OnClick(object sender, RoutedEventArgs e)
     {
-        var selected = (SearchEverythingModel)((Button)sender).DataContext;
-        var id = selected.Id;
-        var name = selected.UnityPackageName;
-        var path = selected.UnityPackagePath;
-
-        var duplicate = Extraction.SearchResultQueue?.Find(x => x.UnityPackageName == name);
-        if (duplicate != null) return;
-        if (Extraction.SearchResultQueue == null)
-            Extraction.SearchResultQueue = new List<SearchEverythingModel>();
-        Extraction.SearchResultQueue.Add(new SearchEverythingModel
+        if (sender is Button button && button.DataContext is SearchEverythingModel selected)
         {
-            UnityPackageName = name,
-            UnityPackagePath = path,
-            Id = id,
-            ModifiedTime = string.Empty,
-            CreatedTime = string.Empty
-        });
-        AddedStatusTxt.Text = $"Added {name} to the queue";
+            var name = selected.UnityPackageName;
+            var duplicate = Extraction.SearchResultQueue?.Find(x => x.UnityPackageName == name);
+            if (duplicate != null) return;
 
-        await BetterLogger.LogAsync($"Added {name} to the queue",
-            Importance.Info); // Log queue addition
+            Extraction.SearchResultQueue ??= new List<SearchEverythingModel>();
+            Extraction.SearchResultQueue.Add(new SearchEverythingModel
+            {
+                UnityPackageName = name,
+                UnityPackagePath = selected.UnityPackagePath,
+                Id = selected.Id,
+                ModifiedTime = string.Empty,
+                CreatedTime = string.Empty
+            });
+
+            AddedStatusTxt.Text = $"Added {name} to the queue";
+            await BetterLogger.LogAsync($"Added {name} to the queue", Importance.Info);
+        }
     }
 
     private void CreationDateFilterSwitch_OnUnchecked(object sender, RoutedEventArgs e)
@@ -249,21 +228,20 @@ public partial class SearchEverything : UserControl, INotifyPropertyChanged
         CreationDateFilterCard.IsEnabled = false;
         CreationDateFilterCardFallback.Visibility = Visibility.Visible;
         CreationDateFilterCard.Visibility = Visibility.Collapsed;
-        if (!string.IsNullOrEmpty(SearchEverythingTextBox.Text))
+
+        var query = SearchEverythingTextBox.Text;
+        if (!string.IsNullOrWhiteSpace(query))
         {
-            SearchEverythingList = _tempList.Where(x =>
-                    x.UnityPackageName.StartsWith(SearchEverythingTextBox.Text,
-                        StringComparison.InvariantCultureIgnoreCase))
+            SearchEverythingList = _allSearchResults
+                .Where(x => x.UnityPackageName.StartsWith(query, StringComparison.InvariantCultureIgnoreCase))
                 .ToList();
             FoundText.Text = $"Found {SearchEverythingList.Count} results";
         }
         else
         {
-            SearchEverythingList = _tempList.Where(x =>
-                {
-                    return x.UnityPackageName.StartsWith(SearchEverythingTextBox.Text,
-                        StringComparison.InvariantCultureIgnoreCase);
-                })
+            // If no query, just reset to default
+            SearchEverythingList = _allSearchResults
+                .Where(x => x.UnityPackageName.StartsWith(query, StringComparison.InvariantCultureIgnoreCase))
                 .ToList();
             FoundText.Text = $"Found {SearchEverythingList.Count} results";
         }
@@ -274,21 +252,23 @@ public partial class SearchEverything : UserControl, INotifyPropertyChanged
         CreationDateFilterCard.IsEnabled = true;
         CreationDateFilterCardFallback.Visibility = Visibility.Collapsed;
         CreationDateFilterCard.Visibility = Visibility.Visible;
-        if (!string.IsNullOrEmpty(SearchEverythingTextBox.Text))
+
+        var query = SearchEverythingTextBox.Text;
+        if (!string.IsNullOrWhiteSpace(query))
         {
-            SearchEverythingList = _tempList.Where(x =>
-                    x.UnityPackageName.StartsWith(SearchEverythingTextBox.Text,
-                        StringComparison.InvariantCultureIgnoreCase))
+            SearchEverythingList = _allSearchResults
+                .Where(x => x.UnityPackageName.StartsWith(query, StringComparison.InvariantCultureIgnoreCase))
                 .ToList();
             FoundText.Text = $"Found {SearchEverythingList.Count} results";
         }
         else
         {
+            // If no search term, apply filter by creation date only
             var creationDateStart = CalendarStartCreationDatePicker.Date;
             var endCreationDate = CalendarEndCreationDatePicker.Date;
-            SearchEverythingList = _tempList.Where(x =>
-                    x.UnityPackageName.StartsWith(SearchEverythingTextBox.Text,
-                        StringComparison.InvariantCultureIgnoreCase) &&
+            SearchEverythingList = _allSearchResults
+                .Where(x =>
+                    x.UnityPackageName.StartsWith(query, StringComparison.InvariantCultureIgnoreCase) &&
                     DateTime.Parse(x.CreatedTime.Replace("Creation Date: ", "")) >= creationDateStart &&
                     DateTime.Parse(x.CreatedTime.Replace("Creation Date: ", "")) <= endCreationDate)
                 .ToList();
@@ -298,14 +278,17 @@ public partial class SearchEverything : UserControl, INotifyPropertyChanged
 
     private void UpdateSearchResultCreationDateFilterBtn_OnClick(object sender, RoutedEventArgs e)
     {
-        var textinput = SearchEverythingTextBox.Text;
+        var query = SearchEverythingTextBox.Text;
         var creationDateStart = CalendarStartCreationDatePicker.Date;
         var endCreationDate = CalendarEndCreationDatePicker.Date;
-        SearchEverythingList = _tempList.Where(x =>
-                x.UnityPackageName.StartsWith(textinput, StringComparison.InvariantCultureIgnoreCase) &&
+
+        SearchEverythingList = _allSearchResults
+            .Where(x =>
+                x.UnityPackageName.StartsWith(query, StringComparison.InvariantCultureIgnoreCase) &&
                 DateTime.Parse(x.CreatedTime.Replace("Creation Date: ", "")) >= creationDateStart &&
                 DateTime.Parse(x.CreatedTime.Replace("Creation Date: ", "")) <= endCreationDate)
             .ToList();
+
         FoundText.Text = $"Found {SearchEverythingList.Count} results";
     }
 }

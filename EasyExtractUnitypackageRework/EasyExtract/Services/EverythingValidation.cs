@@ -13,7 +13,7 @@ public record EverythingValidation
 
     private const string ProcessName = "Everything";
 
-    public static async Task<bool> AreSystemRequirementsMet()
+    public async Task<bool> AreSystemRequirementsMet()
     {
         var elapsedTime = Stopwatch.StartNew();
         await BetterLogger.LogAsync("Checking system requirements...",
@@ -26,7 +26,7 @@ public record EverythingValidation
         return result;
     }
 
-    public static async Task<string> AreSystemRequirementsMetString()
+    public async Task<string> AreSystemRequirementsMetString()
     {
         var missing = new StringBuilder();
         if (!await Is64BitOperatingSystem())

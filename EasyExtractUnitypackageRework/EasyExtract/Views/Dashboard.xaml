@@ -96,7 +96,7 @@
                                                 TextWrapping="WrapWithOverflow" />
 
                                             <ui:Anchor
-                                                Appearance="Transparent"
+                                                Appearance="Danger"
                                                 Content="Help us improve"
                                                 Icon="{ui:SymbolIcon Heart24}"
                                                 NavigateUri="https://discordapp.com/users/657301605195972628"

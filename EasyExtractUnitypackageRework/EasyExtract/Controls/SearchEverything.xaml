@@ -22,9 +22,9 @@
                 HorizontalAlignment="Stretch"
                 Orientation="Vertical"
                 VerticalAlignment="Top">
+                <!--  Search Box  -->
                 <ui:TextBox
                     FontSize="14"
-                    HorizontalAlignment="Stretch"
                     Icon="{ui:SymbolIcon Search24}"
                     Margin="0,0,0,5"
                     MinWidth="250"
@@ -34,6 +34,7 @@
                     VerticalContentAlignment="Center"
                     x:Name="SearchEverythingTextBox" />
                 <StackPanel Orientation="Vertical">
+                    <!--  Creation Date Filter Card  -->
                     <ui:Card>
                         <ui:ToggleSwitch
                             Checked="CreationDateFilterSwitch_OnChecked"
@@ -98,6 +99,7 @@
                             </StackPanel>
                         </ui:ToggleSwitch>
                     </ui:Card>
+                    <!--  Manual File Search  -->
                     <ui:Button
                         Appearance="Secondary"
                         Click="SearchFileManuallyButton_OnClick"
@@ -108,7 +110,7 @@
                         Margin="0,5,0,5"
                         x:Name="SearchFileManuallyButton" />
 
-
+                    <!--  Search Results List  -->
                     <ui:ListView
                         HorizontalAlignment="Stretch"
                         HorizontalContentAlignment="Stretch"
@@ -174,6 +176,7 @@
                             </DataTemplate>
                         </ui:ListView.ItemTemplate>
                     </ui:ListView>
+                    <!--  Fallback / Status Text  -->
                     <TextBlock
                         FontStyle="Italic"
                         HorizontalAlignment="Center"
@@ -196,6 +199,7 @@
                         Opacity="0.7"
                         Text="Powered by SearchEverything" />
                 </StackPanel>
+                <!--  Status Updates  -->
                 <TextBlock
                     FontSize="14"
                     HorizontalAlignment="Center"
