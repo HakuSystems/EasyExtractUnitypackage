@@ -26,7 +26,6 @@ public class ConfigHelper
     {
         try
         {
-            //t
             var json = await File.ReadAllTextAsync(ConfigPath).ConfigureAwait(false);
             Config = JsonConvert.DeserializeObject<ConfigModel>(json);
         }
