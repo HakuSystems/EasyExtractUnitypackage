@@ -43,7 +43,7 @@ public partial class SearchEverything : UserControl, INotifyPropertyChanged
         {
             FallbackEverything.Visibility = Visibility.Visible;
             FallbackEverything.Text = await EverythingValidation.AreSystemRequirementsMetString();
-            await BetterLogger.LogAsync("System requirements not met for Everything", "SearchEverything.xaml.cs",
+            await BetterLogger.LogAsync("System requirements not met for Everything",
                 Importance.Warning); // Log system requirements not met
         }
         else
@@ -61,7 +61,7 @@ public partial class SearchEverything : UserControl, INotifyPropertyChanged
             myThread.Start();
 
             FallbackEverything.Visibility = Visibility.Collapsed;
-            await BetterLogger.LogAsync("Everything search started", "SearchEverything.xaml.cs",
+            await BetterLogger.LogAsync("Everything search started",
                 Importance.Info); // Log search start
         }
 
@@ -72,7 +72,7 @@ public partial class SearchEverything : UserControl, INotifyPropertyChanged
         }
         catch (Exception exception)
         {
-            await BetterLogger.LogAsync($"Error reading config: {exception.Message}", "SearchEverything.xaml.cs",
+            await BetterLogger.LogAsync($"Error reading config: {exception.Message}",
                 Importance.Error); // Log error
             throw;
         }
@@ -85,7 +85,7 @@ public partial class SearchEverything : UserControl, INotifyPropertyChanged
             catch (Exception exception)
             {
                 await BetterLogger.LogAsync($"Error updating Discord presence: {exception.Message}",
-                    "SearchEverything.xaml.cs", Importance.Error); // Log error
+                    Importance.Error); // Log error
                 throw;
             }
     }
@@ -111,7 +111,7 @@ public partial class SearchEverything : UserControl, INotifyPropertyChanged
                 });
         }
 
-        await BetterLogger.LogAsync($"LoopList processed {i} results", "SearchEverything.xaml.cs",
+        await BetterLogger.LogAsync($"LoopList processed {i} results",
             Importance.Info); // Log loop processing
     }
 
@@ -141,7 +141,7 @@ public partial class SearchEverything : UserControl, INotifyPropertyChanged
         {
             SearchEverythingList = null;
             FoundText.Text = "Search for a UnityPackage Name";
-            await BetterLogger.LogAsync("Search box cleared", "SearchEverything.xaml.cs",
+            await BetterLogger.LogAsync("Search box cleared",
                 Importance.Info); // Log search clear
             SearchEverythingList = _tempList.Where(x =>
                 {
@@ -175,7 +175,7 @@ public partial class SearchEverything : UserControl, INotifyPropertyChanged
 
 
         await BetterLogger.LogAsync($"Search updated, found {SearchEverythingList.Count} results",
-            "SearchEverything.xaml.cs", Importance.Info); // Log search update
+            Importance.Info); // Log search update
     }
 
     private async void SearchFileManuallyButton_OnClick(object sender, RoutedEventArgs e)
@@ -214,7 +214,7 @@ public partial class SearchEverything : UserControl, INotifyPropertyChanged
                 };
             }
 
-            await BetterLogger.LogAsync($"Manually added {counter} files to the queue", "SearchEverything.xaml.cs",
+            await BetterLogger.LogAsync($"Manually added {counter} files to the queue",
                 Importance.Info); // Log manual addition
         }
     }
@@ -240,7 +240,7 @@ public partial class SearchEverything : UserControl, INotifyPropertyChanged
         });
         AddedStatusTxt.Text = $"Added {name} to the queue";
 
-        await BetterLogger.LogAsync($"Added {name} to the queue", "SearchEverything.xaml.cs",
+        await BetterLogger.LogAsync($"Added {name} to the queue",
             Importance.Info); // Log queue addition
     }
 

@@ -40,18 +40,18 @@ public partial class BetterSettings
             ThemeComboBox.ItemsSource = themes;
 
             foreach (var theme in themes)
-                await BetterLogger.LogAsync($"Available Theme: {theme}", $"{nameof(BetterSettings)}.xaml.cs", Importance.Info);
+                await BetterLogger.LogAsync($"Available Theme: {theme}", Importance.Info);
 
 
             CheckForUpdatesOnStartUpToggleSwitch.IsChecked = _configHelper.Config.Update.AutoUpdate;
             DiscordRpcToggleSwitch.IsChecked = _configHelper.Config.DiscordRpc;
             DefaultTempPathTextBox.Text = _configHelper.Config.DefaultTempPath;
             BackgroundOpacitySlider.Value = _configHelper.Config.Backgrounds.BackgroundOpacity;
-            await BetterLogger.LogAsync("UI updated to match config", $"{nameof(BetterSettings)}.xaml.cs", Importance.Info);
+            await BetterLogger.LogAsync("UI updated to match config", Importance.Info);
         }
         catch (Exception ex)
         {
-            await BetterLogger.LogAsync($"Exception in ChangeUiToMatchConfigAsync: {ex.Message}", $"{nameof(BetterSettings)}.xaml.cs",
+            await BetterLogger.LogAsync($"Exception in ChangeUiToMatchConfigAsync: {ex.Message}",
                 Importance.Error);
         }
     }
@@ -120,7 +120,7 @@ public partial class BetterSettings
         var selectedTheme = (AvailableThemes)ThemeComboBox.SelectedItem;
         _configHelper.Config.ApplicationTheme = selectedTheme;
         await _configHelper.UpdateConfigAsync();
-        await BetterLogger.LogAsync($"Theme changed to: {selectedTheme}", $"{nameof(BetterSettings)}.xaml.cs", Importance.Info);
+        await BetterLogger.LogAsync($"Theme changed to: {selectedTheme}", Importance.Info);
     }
 
 
@@ -157,7 +157,7 @@ public partial class BetterSettings
 
         _configHelper.Config.DefaultTempPath = folderDialog.FolderName;
         await _configHelper.UpdateConfigAsync();
-        await BetterLogger.LogAsync($"Default temp path set to: {folderDialog.FolderName}", "Settings.xaml.cs",
+        await BetterLogger.LogAsync($"Default temp path set to: {folderDialog.FolderName}",
             Importance.Info);
     }
 
@@ -167,7 +167,7 @@ public partial class BetterSettings
             Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "EasyExtract", "Temp");
         DefaultTempPathTextBox.Text = _configHelper.Config.DefaultTempPath;
         await _configHelper.UpdateConfigAsync();
-        await BetterLogger.LogAsync("Default temp path reset", "Settings.xaml.cs", Importance.Info);
+        await BetterLogger.LogAsync("Default temp path reset", Importance.Info);
     }
 
     private async void SkipIntroLogoAnimationToggleSwitch_OnChecked(object sender, RoutedEventArgs e)

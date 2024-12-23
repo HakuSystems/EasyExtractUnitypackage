@@ -88,13 +88,13 @@ public partial class Dashboard
         if (_configHelper.Config.Runs is { IsFirstRun: true })
         {
             NavView.Navigate(typeof(About));
-            await BetterLogger.LogAsync("First run detected, navigating to About", $"{nameof(Dashboard)}.xaml.cs", Importance.Info);
+            await BetterLogger.LogAsync("First run detected, navigating to About", Importance.Info);
             _configHelper.Config.Runs.IsFirstRun = false;
             await _configHelper.UpdateConfigAsync();
         }
         else
         {
-            await BetterLogger.LogAsync("Navigating to Extraction", $"{nameof(Dashboard)}.xaml.cs", Importance.Info);
+            await BetterLogger.LogAsync("Navigating to Extraction", Importance.Info);
             NavView.Navigate(typeof(Extraction));
         }
 
@@ -158,7 +158,7 @@ public partial class Dashboard
         if (e.Data.GetData(DataFormats.FileDrop) is string[] files)
             foreach (var file in files)
             {
-                await BetterLogger.LogAsync($"Dropped file: {file}", "Dashboard.xaml.cs", Importance.Info);
+                await BetterLogger.LogAsync($"Dropped file: {file}", Importance.Info);
                 var name = Path.GetFileName(file);
                 var duplicate = Extraction.QueueList?.Find(x => x.UnityPackageName == name);
                 if (duplicate != null) continue;
@@ -171,7 +171,7 @@ public partial class Dashboard
                 });
             }
 
-        await BetterLogger.LogAsync("Added dropped files to queue", "Dashboard.xaml.cs", Importance.Info);
+        await BetterLogger.LogAsync("Added dropped files to queue", Importance.Info);
     }
 
 

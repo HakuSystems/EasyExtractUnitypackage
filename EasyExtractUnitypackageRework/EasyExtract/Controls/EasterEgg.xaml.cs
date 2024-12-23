@@ -24,7 +24,7 @@ public partial class EasterEgg
         catch (Exception exception)
         {
             Console.WriteLine(exception);
-            await BetterLogger.LogAsync($"Error reading config: {exception.Message}", "EasterEgg.xaml.cs",
+            await BetterLogger.LogAsync($"Error reading config: {exception.Message}",
                 Importance.Error); // Log error
             throw;
         }
@@ -37,12 +37,12 @@ public partial class EasterEgg
             catch (Exception exception)
             {
                 Console.WriteLine(exception);
-                await BetterLogger.LogAsync($"Error updating Discord presence: {exception.Message}", "EasterEgg.xaml.cs",
+                await BetterLogger.LogAsync($"Error updating Discord presence: {exception.Message}",
                     Importance.Error); // Log error
                 throw;
             }
 
-        await BetterLogger.LogAsync("EasterEgg UserControl loaded", "EasterEgg.xaml.cs",
+        await BetterLogger.LogAsync("EasterEgg UserControl loaded",
             Importance.Info); // Log successful load
     }
 }

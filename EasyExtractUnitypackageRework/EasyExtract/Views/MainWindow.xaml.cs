@@ -19,7 +19,7 @@ public partial class MainWindow
 
     private async void AnimationBehavior_OnLoaded(object sender, RoutedEventArgs e)
     {
-        await BetterLogger.LogAsync("Application started", $"{nameof(MainWindow)}.xaml.cs", Importance.Info);
+        await BetterLogger.LogAsync("Application started", Importance.Info);
         await DiscordRpcManager.Instance.DiscordStart();
         await GenerateAllNecessaryFiles();
 

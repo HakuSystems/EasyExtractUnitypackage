@@ -198,7 +198,7 @@ public partial class Extraction : UserControl, INotifyPropertyChanged
             StatusProgressBar.Visibility = Visibility.Visible;
         }
 
-        await BetterLogger.LogAsync("Populated Extracted Files List", "Extraction.xaml.cs", Importance.Info);
+        await BetterLogger.LogAsync("Populated Extracted Files List", Importance.Info);
     }
 
     /// <summary>
@@ -579,7 +579,7 @@ public partial class Extraction : UserControl, INotifyPropertyChanged
         var (ignoredCounter, fileFinishedCounter) = await ProcessUnityPackages();
         await BetterLogger.LogAsync(
             $"Extraction Process Completed: {fileFinishedCounter} packages extracted, {ignoredCounter} packages ignored",
-            "Extraction.xaml.cs", Importance.Info);
+            Importance.Info);
 
         await UpdateUiAfterExtractionAsync(ignoredCounter, fileFinishedCounter);
         await UpdateInfoBadgesAsync();
@@ -824,7 +824,7 @@ public partial class Extraction : UserControl, INotifyPropertyChanged
             await UpdateQueueHeaderAsync();
         }
 
-        await BetterLogger.LogAsync("Manually Searched and Added Files", "Extraction.xaml.cs", Importance.Info);
+        await BetterLogger.LogAsync("Manually Searched and Added Files", Importance.Info);
     }
 
     /// <summary>
@@ -849,7 +849,7 @@ public partial class Extraction : UserControl, INotifyPropertyChanged
         }
 
         await UpdateQueueHeaderAsync();
-        await BetterLogger.LogAsync("Dropped Files Added to Queue", "Extraction.xaml.cs", Importance.Info);
+        await BetterLogger.LogAsync("Dropped Files Added to Queue", Importance.Info);
     }
 
     /// <summary>
@@ -994,7 +994,7 @@ public partial class Extraction : UserControl, INotifyPropertyChanged
             await UpdateExtractedFiles();
             UpdateSelectAllToggleContent();
         });
-        await BetterLogger.LogAsync("Deleted Selected Unitypackages and Files", "Extraction.xaml.cs", Importance.Info);
+        await BetterLogger.LogAsync("Deleted Selected Unitypackages and Files", Importance.Info);
     }
 
     private async void IgnoreSelectedBtn_OnClick(object sender, RoutedEventArgs e)

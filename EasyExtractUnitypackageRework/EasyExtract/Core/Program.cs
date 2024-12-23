@@ -15,7 +15,7 @@ public class Program
     {
         try
         {
-            await BetterLogger.LogAsync($"Run method invoked with arguments: {string.Join(", ", args)}", $"{nameof(Program)}.cs",
+            await BetterLogger.LogAsync($"Run method invoked with arguments: {string.Join(", ", args)}",
                 Importance.Info);
 
             var requireAdmin = !Debugger.IsAttached && _configHelper.Config.ContextMenuToggle && !IsRunningAsAdmin() &&
@@ -39,7 +39,7 @@ public class Program
                 if (elevatedIndex > extractIndex)
                 {
                     var path = string.Join(" ", args.Skip(extractIndex + 1).Take(elevatedIndex - extractIndex - 1));
-                    await BetterLogger.LogAsync($"Extract argument detected. Path: {path}", $"{nameof(Program)}.cs", Importance.Info);
+                    await BetterLogger.LogAsync($"Extract argument detected. Path: {path}", Importance.Info);
                     var extractionHandler = new ExtractionHandler();
                     await extractionHandler.ExtractUnitypackageFromContextMenu(path);
                     return;
@@ -55,12 +55,12 @@ public class Program
         }
         catch (UnauthorizedAccessException e)
         {
-            await BetterLogger.LogAsync($"An error occurred while processing: {e.Message}", $"{nameof(Program)}.cs",
+            await BetterLogger.LogAsync($"An error occurred while processing: {e.Message}",
                 Importance.Error);
         }
         catch (Exception e)
         {
-            await BetterLogger.LogAsync($"An error occurred: {e.Message}", $"{nameof(Program)}.cs", Importance.Error);
+            await BetterLogger.LogAsync($"An error occurred: {e.Message}", Importance.Error);
         }
     }
 
@@ -69,63 +69,63 @@ public class Program
         const string contextMenuPath = @"*\shell\ExtractWithEasyExtract";
         if (Registry.ClassesRoot.OpenSubKey(contextMenuPath) == null)
         {
-            await BetterLogger.LogAsync("Context menu entry not found", $"{nameof(Program)}.cs", Importance.Info);
+            await BetterLogger.LogAsync("Context menu entry not found", Importance.Info);
             if (Registry.ClassesRoot.OpenSubKey(contextMenuPath) != null)
                 try
                 {
                     Registry.ClassesRoot.DeleteSubKeyTree(contextMenuPath);
-                    await BetterLogger.LogAsync("Context menu entry deleted", $"{nameof(Program)}.cs", Importance.Info);
+                    await BetterLogger.LogAsync("Context menu entry deleted", Importance.Info);
                 }
                 catch (ArgumentException ex)
                 {
                     await BetterLogger.LogAsync($"Registry argument error: {ex.Message} - Subkey path: {contextMenuPath}",
-                        $"{nameof(Program)}.cs", Importance.Error);
+                        Importance.Error);
                 }
                 catch (UnauthorizedAccessException ex)
                 {
-                    await BetterLogger.LogAsync($"Permission error: {ex.Message}", $"{nameof(Program)}.cs", Importance.Error);
+                    await BetterLogger.LogAsync($"Permission error: {ex.Message}", Importance.Error);
                 }
                 catch (SecurityException ex)
                 {
-                    await BetterLogger.LogAsync($"Security error: {ex.Message}", $"{nameof(Program)}.cs", Importance.Error);
+                    await BetterLogger.LogAsync($"Security error: {ex.Message}", Importance.Error);
                 }
                 catch (InvalidOperationException ex)
                 {
-                    await BetterLogger.LogAsync($"Registry operation error: {ex.Message}", $"{nameof(Program)}.cs", Importance.Error);
+                    await BetterLogger.LogAsync($"Registry operation error: {ex.Message}", Importance.Error);
                 }
                 catch (Exception ex)
                 {
-                    await BetterLogger.LogAsync($"An unexpected error occurred: {ex.Message}", $"{nameof(Program)}.cs",
+                    await BetterLogger.LogAsync($"An unexpected error occurred: {ex.Message}",
                         Importance.Error);
                 }
             else
-                await BetterLogger.LogAsync("Context menu entry not found", $"{nameof(Program)}.cs", Importance.Info);
+                await BetterLogger.LogAsync("Context menu entry not found", Importance.Info);
 
             try
             {
                 Registry.ClassesRoot.DeleteSubKeyTree(contextMenuPath);
-                await BetterLogger.LogAsync("Context menu entry deleted", $"{nameof(Program)}.cs", Importance.Info);
+                await BetterLogger.LogAsync("Context menu entry deleted", Importance.Info);
             }
             catch (ArgumentException ex)
             {
                 await BetterLogger.LogAsync($"Registry argument error: {ex.Message} - Subkey path: {contextMenuPath}",
-                    $"{nameof(Program)}.cs", Importance.Error);
+                    Importance.Error);
             }
             catch (UnauthorizedAccessException ex)
             {
-                await BetterLogger.LogAsync($"Permission error: {ex.Message}", $"{nameof(Program)}.cs", Importance.Error);
+                await BetterLogger.LogAsync($"Permission error: {ex.Message}", Importance.Error);
             }
             catch (SecurityException ex)
             {
-                await BetterLogger.LogAsync($"Security error: {ex.Message}", $"{nameof(Program)}.cs", Importance.Error);
+                await BetterLogger.LogAsync($"Security error: {ex.Message}", Importance.Error);
             }
             catch (InvalidOperationException ex)
             {
-                await BetterLogger.LogAsync($"Registry operation error: {ex.Message}", $"{nameof(Program)}.cs", Importance.Error);
+                await BetterLogger.LogAsync($"Registry operation error: {ex.Message}", Importance.Error);
             }
             catch (Exception ex)
             {
-                await BetterLogger.LogAsync($"An unexpected error occurred: {ex.Message}", $"{nameof(Program)}.cs", Importance.Error);
+                await BetterLogger.LogAsync($"An unexpected error occurred: {ex.Message}", Importance.Error);
             }
         }
     }
@@ -147,7 +147,7 @@ public class Program
                 menuKey.SetValue("Icon", Assembly.GetExecutingAssembly().Location);
             }
 
-            await BetterLogger.LogAsync("Context menu entry registered", $"{nameof(Program)}.cs", Importance.Info);
+            await BetterLogger.LogAsync("Context menu entry registered", Importance.Info);
 
             // Register the command for the context menu entry
             using (var commandKey = Registry.ClassesRoot.CreateSubKey(contextMenuPath + @"\command"))
@@ -168,23 +168,23 @@ public class Program
                 commandKey.SetValue("", command);
             }
 
-            await BetterLogger.LogAsync("Context menu command registered", $"{nameof(Program)}.cs", Importance.Info);
+            await BetterLogger.LogAsync("Context menu command registered", Importance.Info);
         }
         catch (UnauthorizedAccessException ex)
         {
-            await BetterLogger.LogAsync($"Permission error: {ex.Message}", $"{nameof(Program)}.cs", Importance.Error);
+            await BetterLogger.LogAsync($"Permission error: {ex.Message}", Importance.Error);
         }
         catch (SecurityException ex)
         {
-            await BetterLogger.LogAsync($"Security error: {ex.Message}", $"{nameof(Program)}.cs", Importance.Error);
+            await BetterLogger.LogAsync($"Security error: {ex.Message}", Importance.Error);
         }
         catch (InvalidOperationException ex)
         {
-            await BetterLogger.LogAsync($"Registry operation error: {ex.Message}", $"{nameof(Program)}.cs", Importance.Error);
+            await BetterLogger.LogAsync($"Registry operation error: {ex.Message}", Importance.Error);
         }
         catch (Exception ex)
         {
-            await BetterLogger.LogAsync($"An unexpected error occurred: {ex.Message}", $"{nameof(Program)}.cs", Importance.Error);
+            await BetterLogger.LogAsync($"An unexpected error occurred: {ex.Message}", Importance.Error);
         }
     }
 
@@ -206,12 +206,12 @@ public class Program
         try
         {
             Process.Start(processInfo);
-            await BetterLogger.LogAsync("Exiting non-admin instance", $"{nameof(Program)}.cs", Importance.Info);
+            await BetterLogger.LogAsync("Exiting non-admin instance", Importance.Info);
             Environment.Exit(0); // Exit the current (non-admin) instance
         }
         catch (Exception e)
         {
-            await BetterLogger.LogAsync($"An error occurred while running as admin: {e.Message}", $"{nameof(Program)}.cs",
+            await BetterLogger.LogAsync($"An error occurred while running as admin: {e.Message}",
                 Importance.Error);
             // we cant show a Dialog here because the current doesn't have any active Window yet
             throw;
@@ -224,7 +224,7 @@ public class Program
         foreach (var process in Process.GetProcessesByName(processName))
             if (process.Id != Process.GetCurrentProcess().Id)
             {
-                await BetterLogger.LogAsync($"Killing process {process.Id}", $"{nameof(Program)}.cs", Importance.Info);
+                await BetterLogger.LogAsync($"Killing process {process.Id}", Importance.Info);
                 process.Kill();
             }
     }

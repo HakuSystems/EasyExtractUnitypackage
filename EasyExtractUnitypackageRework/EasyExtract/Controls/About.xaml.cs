@@ -20,7 +20,7 @@ public partial class About
     private async void About_OnLoaded(object sender, RoutedEventArgs e)
     {
         VersionCard.Footer = $"Version {Application.ResourceAssembly.GetName().Version}";
-        await BetterLogger.LogAsync("Set version in About UserControl", $"{nameof(About)}.xaml.cs",
+        await BetterLogger.LogAsync("Set version in About UserControl",
             Importance.Info); // Log version set
 
         const int maxCards = 10;
@@ -37,7 +37,7 @@ public partial class About
             RandomCardDesign.Items.Add(card);
         }
 
-        await BetterLogger.LogAsync("Added cards to RandomCardDesign", $"{nameof(About)}.xaml.cs",
+        await BetterLogger.LogAsync("Added cards to RandomCardDesign",
             Importance.Info); // Log card addition
 
         var repeatTimer = new DispatcherTimer
@@ -55,7 +55,7 @@ public partial class About
         catch (Exception exception)
         {
             Console.WriteLine(exception);
-            await BetterLogger.LogAsync($"Error reading config: {exception.Message}", $"{nameof(About)}.xaml.cs",
+            await BetterLogger.LogAsync($"Error reading config: {exception.Message}",
                 Importance.Error); // Log error
             throw;
         }
@@ -68,12 +68,12 @@ public partial class About
             catch (Exception exception)
             {
                 Console.WriteLine(exception);
-                await BetterLogger.LogAsync($"Error updating Discord presence: {exception.Message}", $"{nameof(About)}.xaml.cs",
+                await BetterLogger.LogAsync($"Error updating Discord presence: {exception.Message}",
                     Importance.Error); // Log error
                 throw;
             }
 
-        await BetterLogger.LogAsync("About UserControl loaded", $"{nameof(About)}.xaml.cs", Importance.Info); // Log successful load
+        await BetterLogger.LogAsync("About UserControl loaded", Importance.Info); // Log successful load
     }
 
     private static Thickness RandomMargin()

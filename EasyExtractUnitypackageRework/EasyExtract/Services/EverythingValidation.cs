@@ -16,13 +16,13 @@ public record EverythingValidation
     public static async Task<bool> AreSystemRequirementsMet()
     {
         var elapsedTime = Stopwatch.StartNew();
-        await BetterLogger.LogAsync("Checking system requirements...", $"{nameof(EverythingValidation)}.cs",
+        await BetterLogger.LogAsync("Checking system requirements...",
             Importance.Info); // Log start check
         var result = await Is64BitOperatingSystem() && await IsProcessRunning(ProcessName) && await DoesDllExist() &&
                      await CopyDllIfNecessary();
         elapsedTime.Stop();
         await BetterLogger.LogAsync($"System requirements checked in {elapsedTime.ElapsedMilliseconds}ms.",
-            $"{nameof(EverythingValidation)}.cs", Importance.Info); // Log end check
+            Importance.Info); // Log end check
         return result;
     }
 
@@ -37,7 +37,7 @@ public record EverythingValidation
         if (!await DoesDllExist()) missing.AppendLine("System requirement not met: 'Everything DLL' is missing.");
         if (!await CopyDllIfNecessary())
             missing.AppendLine("System requirement not met: Unable to copy the required DLL.");
-        await BetterLogger.LogAsync("Checked system requirements string.", $"{nameof(EverythingValidation)}.cs",
+        await BetterLogger.LogAsync("Checked system requirements string.",
             Importance.Info); // Log check string
         return missing.ToString();
     }
@@ -45,7 +45,7 @@ public record EverythingValidation
     private static async Task<bool> Is64BitOperatingSystem()
     {
         var result = Environment.Is64BitOperatingSystem;
-        await BetterLogger.LogAsync($"Is64BitOperatingSystem: {result}", $"{nameof(EverythingValidation)}.cs",
+        await BetterLogger.LogAsync($"Is64BitOperatingSystem: {result}",
             Importance.Info); // Log OS check
         return result;
     }
@@ -53,7 +53,7 @@ public record EverythingValidation
     private static async Task<bool> IsProcessRunning(string processName)
     {
         var result = Process.GetProcessesByName(processName).Length > 0;
-        await BetterLogger.LogAsync($"IsProcessRunning('{processName}'): {result}", $"{nameof(EverythingValidation)}.cs",
+        await BetterLogger.LogAsync($"IsProcessRunning('{processName}'): {result}",
             Importance.Info); // Log process check
         return result;
     }
@@ -63,7 +63,7 @@ public record EverythingValidation
         var dllPath = GetDllPath();
         if (File.Exists(await dllPath))
         {
-            await BetterLogger.LogAsync($"DLL exists at path: {dllPath}", $"{nameof(EverythingValidation)}.cs",
+            await BetterLogger.LogAsync($"DLL exists at path: {dllPath}",
                 Importance.Info); // Log DLL existence
             return true;
         }
@@ -74,12 +74,12 @@ public record EverythingValidation
             await DownloadDllAsync(await dllPath);
             elapsedTime.Stop();
             await BetterLogger.LogAsync($"Everything64.dll downloaded in {elapsedTime.ElapsedMilliseconds}ms.",
-                $"{nameof(EverythingValidation)}.cs", Importance.Info); // Log DLL download
+                Importance.Info); // Log DLL download
             return true;
         }
         catch (Exception ex)
         {
-            await BetterLogger.LogAsync($"Failed to download Everything64.dll: {ex.Message}", $"{nameof(EverythingValidation)}.cs",
+            await BetterLogger.LogAsync($"Failed to download Everything64.dll: {ex.Message}",
                 Importance.Error); // Log DLL download failure
             return false;
         }
@@ -98,7 +98,7 @@ public record EverythingValidation
         var path = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "EasyExtract",
             "ThirdParty", DllName);
         Directory.CreateDirectory(Path.GetDirectoryName(path) ?? throw new InvalidOperationException());
-        await BetterLogger.LogAsync($"DLL path determined: {path}", $"{nameof(EverythingValidation)}.cs",
+        await BetterLogger.LogAsync($"DLL path determined: {path}",
             Importance.Info); // Log DLL path
         return path;
     }
@@ -113,7 +113,6 @@ public record EverythingValidation
             if (File.Exists(destinationPath))
             {
                 await BetterLogger.LogAsync($"DLL already exists at destination: {destinationPath}",
-                    $"{nameof(EverythingValidation)}.cs",
                     Importance.Info); // Log DLL already exists
                 return true;
             }
@@ -121,13 +120,13 @@ public record EverythingValidation
             try
             {
                 File.Copy(await dllPath, destinationPath);
-                await BetterLogger.LogAsync("Everything64.dll moved to destination.", $"{nameof(EverythingValidation)}.cs",
+                await BetterLogger.LogAsync("Everything64.dll moved to destination.",
                     Importance.Info); // Log DLL move
                 return true;
             }
             catch (Exception ex)
             {
-                await BetterLogger.LogAsync($"Failed to copy Everything64.dll: {ex.Message}", $"{nameof(EverythingValidation)}.cs",
+                await BetterLogger.LogAsync($"Failed to copy Everything64.dll: {ex.Message}",
                     Importance.Error); // Log DLL copy failure
                 return false;
             }

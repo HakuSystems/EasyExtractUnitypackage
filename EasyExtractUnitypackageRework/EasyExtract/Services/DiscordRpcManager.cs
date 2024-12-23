@@ -40,7 +40,7 @@ public class DiscordRpcManager : IDisposable
             {
                 // Dispose managed state (managed objects)
                 if (Client is { IsDisposed: false }) Client.Dispose();
-                BetterLogger.LogAsync("Disposed DiscordRpcClient", $"{nameof(DiscordRpcManager)}.cs", Importance.Info)
+                BetterLogger.LogAsync("Disposed DiscordRpcClient", Importance.Info)
                     .Wait(); // Log disposal
             }
 
@@ -60,7 +60,7 @@ public class DiscordRpcManager : IDisposable
             Client.OnReady += (_, e) => Console.WriteLine($"Received Ready from user {e.User.Username}");
             Client.OnError += (_, e) => Console.WriteLine($"Error! {e.Message}");
             Client.OnClose += (_, e) => Console.WriteLine($"Close! {e}");
-            await BetterLogger.LogAsync("Discord RPC started", $"{nameof(DiscordRpcManager)}.cs", Importance.Info); // Log start
+            await BetterLogger.LogAsync("Discord RPC started", Importance.Info); // Log start
         }
     }
 
@@ -78,7 +78,7 @@ public class DiscordRpcManager : IDisposable
             catch (StringOutOfRangeException e)
             {
                 largeTextString = "Too many files extracted and/or unity packages";
-                await BetterLogger.LogAsync($"StringOutOfRangeException: {e.Message}", $"{nameof(DiscordRpcManager)}.cs",
+                await BetterLogger.LogAsync($"StringOutOfRangeException: {e.Message}",
                     Importance.Warning); // Log exception
             }
 
@@ -97,12 +97,12 @@ public class DiscordRpcManager : IDisposable
                     SmallImageText = $"V{Application.ResourceAssembly.GetName().Version}"
                 }
             });
-            await BetterLogger.LogAsync($"Updated Discord presence to state: {state}", "DiscordRpcManager.cs",
+            await BetterLogger.LogAsync($"Updated Discord presence to state: {state}",
                 Importance.Info); // Log presence update
         }
         catch (Exception ex)
         {
-            await BetterLogger.LogAsync($"Failed to update Discord presence: {ex.Message}", "DiscordRpcManager.cs",
+            await BetterLogger.LogAsync($"Failed to update Discord presence: {ex.Message}",
                 Importance.Error); // Log presence update failure
             Console.WriteLine($"Failed to Update Discord Presence: {ex.Message}");
         }

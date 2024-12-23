@@ -29,8 +29,8 @@ public class ExtractionHandler
             var targetFolder = await GetTargetFolderPath(unitypackage);
 
             // Debug logs for paths
-            await BetterLogger.LogAsync($"Temporary folder path: {tempFolder}", $"{nameof(ExtractionHandler)}.cs", Importance.Info);
-            await BetterLogger.LogAsync($"Target folder path: {targetFolder}", $"{nameof(ExtractionHandler)}.cs", Importance.Info);
+            await BetterLogger.LogAsync($"Temporary folder path: {tempFolder}", Importance.Info);
+            await BetterLogger.LogAsync($"Target folder path: {targetFolder}", Importance.Info);
 
             await CreateDirectories(tempFolder, targetFolder);
 
@@ -39,13 +39,13 @@ public class ExtractionHandler
 
             Directory.Delete(tempFolder, true);
 
-            await BetterLogger.LogAsync($"Successfully extracted {unitypackage.UnityPackageName}", $"{nameof(ExtractionHandler)}.cs",
+            await BetterLogger.LogAsync($"Successfully extracted {unitypackage.UnityPackageName}",
                 Importance.Info);
             return true;
         }
         catch (Exception e)
         {
-            await BetterLogger.LogAsync($"Error while extracting unitypackage: {e.Message}", $"{nameof(ExtractionHandler)}.cs",
+            await BetterLogger.LogAsync($"Error while extracting unitypackage: {e.Message}",
                 Importance.Error);
             return false;
         }
@@ -57,7 +57,7 @@ public class ExtractionHandler
         {
             var tempFolder = Path.Combine(_configHelper.Config.DefaultTempPath, unitypackage.UnityPackageName);
             await DeleteIfDirectoryExists(tempFolder);
-            await BetterLogger.LogAsync($"Temporary folder path set to: {tempFolder}", $"{nameof(ExtractionHandler)}.cs",
+            await BetterLogger.LogAsync($"Temporary folder path set to: {tempFolder}",
                 Importance.Info);
             return tempFolder;
         }
@@ -71,7 +71,7 @@ public class ExtractionHandler
         {
             var targetFolder = Path.Combine(_configHelper.Config.LastExtractedPath, unitypackage.UnityPackageName);
             await DeleteIfDirectoryExists(targetFolder);
-            await BetterLogger.LogAsync($"Target folder path set to: {targetFolder}", $"{nameof(ExtractionHandler)}.cs",
+            await BetterLogger.LogAsync($"Target folder path set to: {targetFolder}",
                 Importance.Info);
             return targetFolder;
         }
@@ -84,7 +84,7 @@ public class ExtractionHandler
         if (Directory.Exists(directory))
         {
             Directory.Delete(directory, true);
-            await BetterLogger.LogAsync($"Deleted existing directory: {directory}", $"{nameof(ExtractionHandler)}.cs",
+            await BetterLogger.LogAsync($"Deleted existing directory: {directory}",
                 Importance.Warning);
         }
     }
@@ -96,12 +96,12 @@ public class ExtractionHandler
             // Path validation
             if (dir.IndexOfAny(Path.GetInvalidPathChars()) >= 0)
             {
-                await BetterLogger.LogAsync($"Invalid directory path: {dir}", $"{nameof(ExtractionHandler)}.cs", Importance.Error);
+                await BetterLogger.LogAsync($"Invalid directory path: {dir}", Importance.Error);
                 throw new InvalidOperationException($"Invalid directory path: {dir}");
             }
 
             Directory.CreateDirectory(dir);
-            await BetterLogger.LogAsync($"Created directory: {dir}", $"{nameof(ExtractionHandler)}.cs", Importance.Info);
+            await BetterLogger.LogAsync($"Created directory: {dir}", Importance.Info);
         }
     }
 
@@ -132,7 +132,7 @@ public class ExtractionHandler
         });
 
         await BetterLogger.LogAsync($"Extracted and wrote files for {unitypackage.UnityPackageName} to temporary folder",
-            $"{nameof(ExtractionHandler)}.cs", Importance.Info);
+            Importance.Info);
     }
 
     private static async Task MoveFilesFromTempToTargetFolder(string tempFolder, string targetFolder)
@@ -170,12 +170,12 @@ public class ExtractionHandler
             catch (Exception ex)
             {
                 await BetterLogger.LogAsync($"Error while moving file from {d} to {targetFullFile}: {ex.Message}",
-                    $"{nameof(ExtractionHandler)}.cs", Importance.Error);
+                    Importance.Error);
             }
         }
 
         await BetterLogger.LogAsync($"Moved files from temporary folder to target folder: {targetFolder}",
-            $"{nameof(ExtractionHandler)}.cs", Importance.Info);
+            Importance.Info);
     }
 
     private static async Task MoveFileIfExists(string directory, string fileName, string targetFullPath, string targetFullFile)
@@ -191,19 +191,19 @@ public class ExtractionHandler
         catch (IOException ioEx)
         {
             await BetterLogger.LogAsync($"I/O error while moving file {sourceFilePath} to {targetFullFile}: {ioEx.Message}",
-                $"{nameof(ExtractionHandler)}.cs", Importance.Error);
+                Importance.Error);
         }
         catch (UnauthorizedAccessException uaEx)
         {
             await BetterLogger.LogAsync(
                 $"Access denied while moving file {sourceFilePath} to {targetFullFile}: {uaEx.Message}",
-                $"{nameof(ExtractionHandler)}.cs", Importance.Error);
+                Importance.Error);
         }
         catch (Exception ex)
         {
             await BetterLogger.LogAsync(
                 $"Unexpected error while moving file {sourceFilePath} to {targetFullFile}: {ex.Message}",
-                $"{nameof(ExtractionHandler)}.cs", Importance.Error);
+                Importance.Error);
         }
     }
 }

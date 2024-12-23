@@ -31,7 +31,7 @@ public class ConfigHelper
         }
         catch (Exception e)
         {
-            await BetterLogger.LogAsync($"Exception in ReadConfigAsync: {e.Message}", "ConfigHelper", Importance.Error);
+            await BetterLogger.LogAsync($"Exception in ReadConfigAsync: {e.Message}", Importance.Error);
         }
     }
 
@@ -44,11 +44,11 @@ public class ConfigHelper
             var json = JsonConvert.SerializeObject(Config, Formatting.Indented);
             await using var sw = new StreamWriter(ConfigPath, false);
             await sw.WriteAsync(json);
-            await BetterLogger.LogAsync($"Updated config file: {json}", "ConfigHelper", Importance.Debug);
+            await BetterLogger.LogAsync($"Updated config file: {json}", Importance.Debug);
         }
         catch (Exception e)
         {
-            await BetterLogger.LogAsync($"Exception in UpdateConfigAsync: {e.Message}", "ConfigHelper", Importance.Error);
+            await BetterLogger.LogAsync($"Exception in UpdateConfigAsync: {e.Message}", Importance.Error);
         }
         finally
         {

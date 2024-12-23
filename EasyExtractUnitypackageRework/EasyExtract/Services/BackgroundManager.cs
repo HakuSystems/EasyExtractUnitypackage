@@ -66,7 +66,7 @@ public class BackgroundManager : INotifyPropertyChanged
             Opacity = BackgroundOpacity,
             Stretch = Stretch.Fill
         };
-        await BetterLogger.LogAsync($"Background updated with image: {imagePath}", $"{nameof(BackgroundManager)}.cs",
+        await BetterLogger.LogAsync($"Background updated with image: {imagePath}",
             Importance.Info); // Log background update
     }
 
@@ -85,7 +85,7 @@ public class BackgroundManager : INotifyPropertyChanged
             _configHelper.Config.Backgrounds.BackgroundPath = uri.ToString();
             await UpdateBackground(uri.ToString());
             await _configHelper.UpdateConfigAsync();
-            await BetterLogger.LogAsync("Background reset to default", "BackgroundManager.cs",
+            await BetterLogger.LogAsync("Background reset to default",
                 Importance.Info); // Log background reset
         }
         catch (ResourceReferenceKeyNotFoundException ex)
@@ -95,7 +95,7 @@ public class BackgroundManager : INotifyPropertyChanged
                 Opacity = BackgroundOpacity,
                 Stretch = Stretch.Fill
             };
-            await BetterLogger.LogAsync($"Default background resource not found: {ex.Message}", "BackgroundManager.cs",
+            await BetterLogger.LogAsync($"Default background resource not found: {ex.Message}",
                 Importance.Warning); // Log resource not found
         }
     }

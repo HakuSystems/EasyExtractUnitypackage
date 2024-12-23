@@ -14,7 +14,7 @@ public partial class App
 
     private static async void Application_DispatcherUnhandledException(object sender, DispatcherUnhandledExceptionEventArgs e)
     {
-        await BetterLogger.LogAsync(e.Exception.Message, "App.xaml.cs", Importance.Error);
+        await BetterLogger.LogAsync(e.Exception.Message, Importance.Error);
         // we cant show a Dialog here because the current doesn't have any active Window yet
         e.Handled = true;
     }
