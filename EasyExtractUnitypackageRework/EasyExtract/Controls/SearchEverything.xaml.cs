@@ -129,13 +129,16 @@ public partial class SearchEverything : UserControl, INotifyPropertyChanged
             SearchEverythingList = null;
             FoundText.Text = "Search for a UnityPackage Name";
             await BetterLogger.LogAsync("Search box cleared", Importance.Info);
-            // Re-populate default list when cleared
-            SearchEverythingList = _allSearchResults
-                .Where(x => x.UnityPackageName.StartsWith(query, StringComparison.InvariantCultureIgnoreCase))
-                .ToList();
+
+            // Reset to default (or last known) results when cleared
+            SearchEverythingList = _allSearchResults.ToList();
             return;
         }
 
+        // Normalize query
+        query = query.Trim();
+
+        // Filter by creation date if toggled on
         if (CreationDateFilterSwitch.IsChecked == true)
         {
             var creationDateStart = CalendarStartCreationDatePicker.Date;
@@ -143,15 +146,28 @@ public partial class SearchEverything : UserControl, INotifyPropertyChanged
 
             SearchEverythingList = _allSearchResults
                 .Where(x =>
-                    x.UnityPackageName.StartsWith(query, StringComparison.InvariantCultureIgnoreCase) &&
-                    DateTime.Parse(x.CreatedTime.Replace("Creation Date: ", "")) >= creationDateStart &&
-                    DateTime.Parse(x.CreatedTime.Replace("Creation Date: ", "")) <= endCreationDate)
+                {
+                    // Convert the "Creation Date: ..." string back to a DateTime
+                    var createdDateString = x.CreatedTime.Replace("Creation Date: ", "");
+                    var fileCreatedDate = DateTime.Parse(createdDateString);
+
+                    // Partial substring match anywhere in the name (case-insensitive)
+                    var containsQuery = x.UnityPackageName
+                        .IndexOf(query, StringComparison.InvariantCultureIgnoreCase) >= 0;
+
+                    // Check date filter
+                    var isWithinDateRange = fileCreatedDate >= creationDateStart && fileCreatedDate <= endCreationDate;
+
+                    return containsQuery && isWithinDateRange;
+                })
                 .ToList();
         }
         else
         {
+            // No date filter: just partial substring match
             SearchEverythingList = _allSearchResults
-                .Where(x => x.UnityPackageName.StartsWith(query, StringComparison.InvariantCultureIgnoreCase))
+                .Where(x => x.UnityPackageName
+                    .IndexOf(query, StringComparison.InvariantCultureIgnoreCase) >= 0)
                 .ToList();
         }
 
