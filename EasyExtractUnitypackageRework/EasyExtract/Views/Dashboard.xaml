@@ -62,15 +62,6 @@
             Margin="12"
             VerticalAlignment="Stretch"
             x:Name="MainContentBorder">
-            <Border.Effect>
-                <DropShadowEffect
-                    BlurRadius="10"
-                    Color="#40000000"
-                    Direction="320"
-                    ShadowDepth="6" />
-            </Border.Effect>
-
-
             <Grid
                 HorizontalAlignment="Stretch"
                 VerticalAlignment="Stretch"
@@ -217,15 +208,40 @@
 
                     <ui:NavigationView.FooterMenuItems>
                         <ui:NavigationViewItem
-                            Content="Settings"
                             Foreground="{DynamicResource TextFillColorPrimaryBrush}"
                             Icon="{ui:SymbolIcon Settings24}"
-                            TargetPageType="{x:Type extraction:BetterSettings}" />
+                            TargetPageType="{x:Type extraction:BetterSettings}">
+                            <StackPanel
+                                Margin="6"
+                                Orientation="Horizontal"
+                                VerticalAlignment="Center">
+                                <TextBlock
+                                    FontSize="14"
+                                    Text="Settings"
+                                    VerticalAlignment="Center" />
+
+                                <Border
+                                    Background="#FF3B30"
+                                    CornerRadius="8"
+                                    Margin="6,0,0,0"
+                                    Padding="6,2"
+                                    VerticalAlignment="Center">
+                                    <TextBlock
+                                        FontSize="10"
+                                        FontWeight="Bold"
+                                        Foreground="White"
+                                        Text="NEW"
+                                        VerticalAlignment="Center" />
+                                </Border>
+                            </StackPanel>
+                        </ui:NavigationViewItem>
+
                         <ui:NavigationViewItem
                             Foreground="{DynamicResource TextFillColorPrimaryBrush}"
                             IsEnabled="False"
                             x:Name="VersionTxt" />
                     </ui:NavigationView.FooterMenuItems>
+
                 </ui:NavigationView>
             </Grid>
         </Border>

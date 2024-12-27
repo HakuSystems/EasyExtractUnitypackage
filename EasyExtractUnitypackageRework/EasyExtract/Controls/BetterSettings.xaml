@@ -86,8 +86,13 @@
                                     <ColumnDefinition Width="*" />
                                     <ColumnDefinition Width="Auto" />
                                 </Grid.ColumnDefinitions>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                </Grid.RowDefinitions>
 
                                 <ui:Card
+                                    Grid.Column="0"
                                     HorizontalAlignment="Left"
                                     Margin="5"
                                     VerticalAlignment="Center">
@@ -99,14 +104,31 @@
                                 </ui:Card>
 
                                 <StackPanel Grid.Column="1" VerticalAlignment="Center">
-                                    <ui:TextBlock
-                                        FontTypography="BodyStrong"
-                                        Text="Dynamic Scaling"
-                                        TextWrapping="WrapWithOverflow" />
+                                    <StackPanel Margin="6" Orientation="Horizontal">
+                                        <ui:TextBlock
+                                            FontTypography="BodyStrong"
+                                            Text="Dynamic Scaling"
+                                            TextWrapping="WrapWithOverflow" />
+
+                                        <Border
+                                            Background="#FF3B30"
+                                            CornerRadius="8"
+                                            Margin="6,0,0,0"
+                                            Padding="6,2"
+                                            VerticalAlignment="Center">
+                                            <TextBlock
+                                                FontSize="10"
+                                                FontWeight="Bold"
+                                                Foreground="White"
+                                                Text="Experimental New Feature"
+                                                VerticalAlignment="Center" />
+                                        </Border>
+                                    </StackPanel>
+
                                     <ui:TextBlock
                                         Appearance="Secondary"
                                         Opacity="0.5"
-                                        Text="Toggle dynamic scaling on/off, and choose the scaling mode."
+                                        Text="Enable or disable dynamic scaling, and select the preferred scaling mode."
                                         TextWrapping="WrapWithOverflow" />
                                 </StackPanel>
 
@@ -116,6 +138,7 @@
                                     VerticalAlignment="Center">
                                     <ui:TextBlock
                                         FontTypography="Caption"
+                                        Foreground="#FF3B30"
                                         Margin="0,0,5,0"
                                         Text="(Applies at restart)"
                                         VerticalAlignment="Center" />
@@ -131,6 +154,40 @@
                                                                          IsDesignTimeCreatable=True}"
                                         x:Name="DynamicScalingComboBox" />
                                 </StackPanel>
+                                <Grid
+                                    Grid.Column="0"
+                                    Grid.ColumnSpan="3"
+                                    Grid.Row="1">
+                                    <ui:CardExpander
+                                        Header="What Does Each Scaling Mode Do?"
+                                        Margin="5,5,5,5"
+                                        Padding="5">
+                                        <StackPanel>
+                                            <ui:TextBlock
+                                                Appearance="Secondary"
+                                                FontTypography="BodyStrong"
+                                                Text="Scaling modes determine how the application adapts to different DPI settings."
+                                                TextWrapping="WrapWithOverflow" />
+                                            <ui:TextBlock
+                                                Appearance="Secondary"
+                                                Opacity="0.5"
+                                                Text="In 'Simple' mode, only the main dashboard is scaled dynamically."
+                                                TextWrapping="WrapWithOverflow" />
+                                            <ui:TextBlock
+                                                Appearance="Secondary"
+                                                Opacity="0.5"
+                                                Text="In 'Experimental' mode, both the main dashboard and all its content are fully scaled dynamically. it may sometimes look unusual or inconsistent."
+                                                TextWrapping="WrapWithOverflow" />
+                                            <ui:InfoBar
+                                                IsClosable="False"
+                                                IsOpen="True"
+                                                Message="We recommend using 'Simple' mode as it is less likely to cause issues."
+                                                Padding="5"
+                                                Severity="Success"
+                                                Title="Recommendation" />
+                                        </StackPanel>
+                                    </ui:CardExpander>
+                                </Grid>
                             </Grid>
                         </ui:Card>
 
@@ -209,8 +266,11 @@
                                     <ui:TextBlock
                                         Appearance="Secondary"
                                         Opacity="0.5"
-                                        Text="When enabled, borders will appear (applies only to this Settings page)."
-                                        TextWrapping="Wrap" />
+                                        TextWrapping="WrapWithOverflow">
+                                        <Run Text="When enabled, borders will appear " />
+                                        <Run FontWeight="Bold" Text="(applies only to this Settings page)" />
+                                        <Run Text="." />
+                                    </ui:TextBlock>
                                 </StackPanel>
 
                                 <ui:ToggleSwitch
@@ -315,6 +375,7 @@
                                     VerticalAlignment="Center">
                                     <ui:TextBlock
                                         FontTypography="Caption"
+                                        Foreground="#FF3B30"
                                         Margin="0,0,5,0"
                                         Text="(Applies at restart)"
                                         VerticalAlignment="Center" />

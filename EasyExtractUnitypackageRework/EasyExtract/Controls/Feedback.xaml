@@ -50,7 +50,7 @@
                     ShadowDepth="6" />
             </Border.Effect>
 
-            <Grid AutomationProperties.Name="FeedbackGrid" Background="{DynamicResource ApplicationBackgroundBrush}">
+            <Grid AutomationProperties.Name="FeedbackGrid">
 
                 <Grid
                     HorizontalAlignment="Center"
