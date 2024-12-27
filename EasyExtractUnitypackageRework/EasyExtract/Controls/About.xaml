@@ -6,8 +6,6 @@
     Foreground="{DynamicResource TextFillColorPrimaryBrush}"
     KeyboardNavigation.TabNavigation="Cycle"
     Loaded="About_OnLoaded"
-    d:DesignHeight="450"
-    d:DesignWidth="1530"
     mc:Ignorable="d"
     ui:Design.Background="{DynamicResource ApplicationBackgroundBrush}"
     ui:Design.Foreground="{DynamicResource TextFillColorPrimaryBrush}"
@@ -38,259 +36,276 @@
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
 
-        <Viewbox Stretch="Fill" StretchDirection="Both">
-            <Border
-                CornerRadius="10"
-                Margin="12"
-                Opacity="0"
-                x:Name="RootBorder">
-                <Border.Effect>
-                    <DropShadowEffect
-                        BlurRadius="10"
-                        Color="#40000000"
-                        Direction="320"
-                        ShadowDepth="6" />
-                </Border.Effect>
+        <Border
+            CornerRadius="10"
+            Margin="12"
+            Opacity="0"
+            x:Name="RootBorder">
+            <Border.Effect>
+                <DropShadowEffect
+                    BlurRadius="10"
+                    Color="#40000000"
+                    Direction="320"
+                    ShadowDepth="6" />
+            </Border.Effect>
 
-                <ui:DynamicScrollViewer VerticalScrollBarVisibility="Auto">
-                    <StackPanel
-                        HorizontalAlignment="Center"
-                        Margin="20"
-                        MaxWidth="1200"
-                        Orientation="Vertical">
+            <ui:DynamicScrollViewer VerticalScrollBarVisibility="Auto">
+                <StackPanel
+                    HorizontalAlignment="Center"
+                    Margin="20"
+                    MaxWidth="1200"
+                    Orientation="Vertical">
 
-                        <ui:Card
-                            AutomationProperties.HelpText="Displays the application name and version information"
-                            AutomationProperties.Name="AboutVersionSection"
-                            HorizontalAlignment="Stretch"
-                            Margin="0,0,0,20"
-                            Padding="15"
-                            ui:Footer="Version"
-                            x:Name="VersionCard">
-                            <Grid>
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="Auto" />
-                                    <ColumnDefinition Width="*" />
-                                </Grid.ColumnDefinitions>
+                    <ui:Card
+                        AutomationProperties.HelpText="Displays the application name and version information"
+                        AutomationProperties.Name="AboutVersionSection"
+                        HorizontalAlignment="Stretch"
+                        Margin="0,0,0,20"
+                        Padding="15"
+                        ui:Footer="Version"
+                        x:Name="VersionCard">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
 
-                                <ui:Card
-                                    BorderThickness="8,1,1,15"
-                                    Padding="5"
-                                    VerticalAlignment="Top">
-                                    <ui:Image
-                                        AutomationProperties.Name="ApplicationLogo"
-                                        Height="60"
-                                        Margin="10"
-                                        Source="/EasyExtract;component/Resources/Small/EEUP_IconSmall@4x.png"
-                                        Stretch="UniformToFill"
-                                        Width="60" />
-                                </ui:Card>
+                            <ui:Card
+                                BorderThickness="8,1,1,15"
+                                Padding="5"
+                                VerticalAlignment="Top">
+                                <ui:Image
+                                    AutomationProperties.Name="ApplicationLogo"
+                                    Height="60"
+                                    Margin="10"
+                                    Source="/EasyExtract;component/Resources/Small/EEUP_IconSmall@4x.png"
+                                    Stretch="UniformToFill"
+                                    Width="60"
+                                    x:Name="ApplicationLogo" />
+                            </ui:Card>
 
-                                <StackPanel Grid.Column="1" Orientation="Vertical">
-                                    <ui:TextBlock
-                                        AutomationProperties.Name="AppTitle"
-                                        FontSize="26"
-                                        FontWeight="Bold"
-                                        Margin="10,0,0,0"
-                                        Text="EasyExtract"
-                                        x:Name="AppTitle" />
-                                    <ui:TextBlock
-                                        AutomationProperties.Name="AppDescription"
-                                        FontSize="16"
-                                        Margin="15,5,0,0"
-                                        Opacity="0.7"
-                                        Text="A Software to get files out of a .unitypackage without importing them into Unity."
-                                        TextWrapping="Wrap"
-                                        x:Name="AppDescription" />
-                                    <ui:Card
-                                        Background="#2ca7f2"
-                                        Height="2"
-                                        Margin="0,10,0,0" />
-                                </StackPanel>
-                            </Grid>
-                        </ui:Card>
-
-                        <ui:Card
-                            AutomationProperties.HelpText="Information about the open-source project and its developers"
-                            AutomationProperties.Name="OpenSourceSection"
-                            HorizontalAlignment="Stretch"
-                            Margin="0,0,0,20"
-                            Padding="15"
-                            ui:Footer="Open Source on Github!"
-                            x:Name="OpenSourceSection">
-                            <Grid>
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="Auto" />
-                                    <ColumnDefinition Width="*" />
-                                </Grid.ColumnDefinitions>
-
-                                <ui:Card
-                                    BorderThickness="8,1,1,15"
-                                    Padding="5"
-                                    VerticalAlignment="Top">
-                                    <ui:SymbolIcon
-                                        AutomationProperties.Name="DeveloperBoardIcon"
-                                        FontSize="50"
-                                        Margin="10"
-                                        Symbol="DeveloperBoard24" />
-                                </ui:Card>
-
-                                <StackPanel Grid.Column="1" Orientation="Vertical">
-                                    <ui:TextBlock
-                                        AutomationProperties.Name="DevelopersTitle"
-                                        FontSize="26"
-                                        FontWeight="Bold"
-                                        Margin="10,0,0,0"
-                                        Text="Developers"
-                                        x:Name="DevelopersTitle" />
-                                    <ui:TextBlock
-                                        AutomationProperties.Name="DevelopersDescription"
-                                        FontSize="16"
-                                        Margin="15,5,0,0"
-                                        Opacity="0.7"
-                                        Text="After countless hours spent wrestling with Unity packages, these two developers vowed to take a stand. Armed with caffeine and a healthy dose of sarcasm, they created EasyExtractUnitypackage to liberate assets and save fellow developers from unnecessary frustration."
-                                        TextWrapping="Wrap"
-                                        x:Name="DevelopersDescription" />
-                                    <ui:Card
-                                        Background="#2ca7f2"
-                                        Height="2"
-                                        Margin="0,10,0,0" />
-                                </StackPanel>
-                            </Grid>
-                        </ui:Card>
-
-                        <ui:Card
-                            AutomationProperties.HelpText="Displays the application's color scheme and icon preview"
-                            AutomationProperties.Name="ColorPaletteSection"
-                            HorizontalAlignment="Stretch"
-                            Margin="0,0,0,20"
-                            Padding="15"
-                            x:Name="ColorPaletteSection">
-                            <StackPanel Orientation="Vertical">
+                            <StackPanel Grid.Column="1" Orientation="Vertical">
                                 <ui:TextBlock
-                                    AutomationProperties.Name="ColorPaletteTitle"
+                                    AutomationProperties.Name="AppTitle"
                                     FontSize="26"
                                     FontWeight="Bold"
                                     Margin="10,0,0,0"
-                                    Text="Color Palette"
-                                    x:Name="ColorPaletteTitle" />
-
-                                <StackPanel
-                                    HorizontalAlignment="Center"
-                                    Margin="0,10,0,0"
-                                    Orientation="Horizontal">
-                                    <ui:Card Margin="5" Padding="5">
-                                        <ui:Image
-                                            AutomationProperties.Name="AppIconLarge"
-                                            Height="60"
-                                            Margin="10"
-                                            Source="/EasyExtract;component/Resources/Big/EEUP_IconBig@4x.png"
-                                            Stretch="UniformToFill"
-                                            Width="60"
-                                            x:Name="AppIconLarge" />
-                                    </ui:Card>
-
-                                    <ui:Card
-                                        AutomationProperties.Name="PrimaryTealColorSample"
-                                        Background="#04d3be"
-                                        Footer="#04d3be"
-                                        Height="60"
-                                        Margin="5"
-                                        Width="60"
-                                        x:Name="PrimaryTealColorSample" />
-                                    <ui:Card
-                                        AutomationProperties.Name="LightBlueAccentSample"
-                                        Background="#7fc5ff"
-                                        Footer="#7fc5ff"
-                                        Height="60"
-                                        Margin="5"
-                                        Width="60"
-                                        x:Name="LightBlueAccentSample" />
-                                    <ui:Card
-                                        AutomationProperties.Name="DeepBlueAccentSample"
-                                        Background="#2ca7f2"
-                                        Footer="#2ca7f2"
-                                        Height="60"
-                                        Margin="5"
-                                        Width="60"
-                                        x:Name="DeepBlueAccentSample" />
-                                    <ui:Card
-                                        AutomationProperties.Name="DarkGraySample"
-                                        Background="#4D4D4D"
-                                        Footer="#4D4D4D"
-                                        Height="60"
-                                        Margin="5"
-                                        Width="60"
-                                        x:Name="DarkGraySample" />
-                                    <ui:Card
-                                        AutomationProperties.Name="DarkerGraySample"
-                                        Background="#2b2b2b"
-                                        Footer="#2b2b2b"
-                                        Height="60"
-                                        Margin="5"
-                                        Width="60"
-                                        x:Name="DarkerGraySample" />
-                                </StackPanel>
-                            </StackPanel>
-                        </ui:Card>
-
-                        <ui:Card
-                            AutomationProperties.HelpText="Information about the application's branding and logo design"
-                            AutomationProperties.Name="BrandingSection"
-                            HorizontalAlignment="Stretch"
-                            Margin="0,0,0,20"
-                            Padding="15"
-                            ui:Footer="Made by DigitalAzure"
-                            x:Name="BrandingSection">
-                            <Grid>
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="Auto" />
-                                    <ColumnDefinition Width="*" />
-                                </Grid.ColumnDefinitions>
-                                <Grid.RowDefinitions>
-                                    <RowDefinition Height="Auto" />
-                                    <RowDefinition Height="Auto" />
-                                </Grid.RowDefinitions>
-
+                                    Text="EasyExtract"
+                                    x:Name="AppTitle" />
+                                <ui:TextBlock
+                                    AutomationProperties.Name="AppDescription"
+                                    FontSize="16"
+                                    Margin="15,5,0,0"
+                                    Opacity="0.7"
+                                    Text="A Software to get files out of a .unitypackage without importing them into Unity."
+                                    TextWrapping="Wrap"
+                                    x:Name="AppDescription" />
                                 <ui:Card
-                                    BorderThickness="8,1,1,15"
-                                    Padding="5"
-                                    VerticalAlignment="Top">
-                                    <ui:SymbolIcon
-                                        AutomationProperties.Name="BrandingIcon"
-                                        FontSize="50"
+                                    Background="#2ca7f2"
+                                    Height="2"
+                                    Margin="0,10,0,0" />
+                            </StackPanel>
+                        </Grid>
+                    </ui:Card>
+
+                    <ui:Card
+                        AutomationProperties.HelpText="Information about the open-source project and its developers"
+                        AutomationProperties.Name="OpenSourceSection"
+                        HorizontalAlignment="Stretch"
+                        Margin="0,0,0,20"
+                        Padding="15"
+                        ui:Footer="Open Source on Github!"
+                        x:Name="OpenSourceSection">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+
+                            <ui:Card
+                                BorderThickness="8,1,1,15"
+                                Padding="5"
+                                VerticalAlignment="Top">
+                                <ui:SymbolIcon
+                                    AutomationProperties.Name="DeveloperBoardIcon"
+                                    FontSize="50"
+                                    Margin="10"
+                                    Symbol="DeveloperBoard24"
+                                    x:Name="DeveloperBoardIcon" />
+                            </ui:Card>
+
+                            <StackPanel Grid.Column="1" Orientation="Vertical">
+                                <ui:TextBlock
+                                    AutomationProperties.Name="DevelopersTitle"
+                                    FontSize="26"
+                                    FontWeight="Bold"
+                                    Margin="10,0,0,0"
+                                    Text="Developers"
+                                    x:Name="DevelopersTitle" />
+                                <ui:TextBlock
+                                    AutomationProperties.Name="DevelopersDescription"
+                                    FontSize="16"
+                                    Margin="15,5,0,0"
+                                    Opacity="0.7"
+                                    Text="After countless hours spent wrestling with Unity packages, these two developers vowed to take a stand. Armed with caffeine and a healthy dose of sarcasm, they created EasyExtractUnitypackage to liberate assets and save fellow developers from unnecessary frustration."
+                                    TextWrapping="Wrap"
+                                    x:Name="DevelopersDescription" />
+                                <ui:Card
+                                    Background="#2ca7f2"
+                                    Height="2"
+                                    Margin="0,10,0,0" />
+                            </StackPanel>
+                        </Grid>
+                    </ui:Card>
+
+                    <ui:Card
+                        AutomationProperties.HelpText="Displays the application's color scheme and icon preview"
+                        AutomationProperties.Name="ColorPaletteSection"
+                        HorizontalAlignment="Stretch"
+                        Margin="0,0,0,20"
+                        Padding="15"
+                        x:Name="ColorPaletteSection">
+
+                        <StackPanel Orientation="Vertical">
+                            <ui:TextBlock
+                                AutomationProperties.Name="ColorPaletteTitle"
+                                FontSize="26"
+                                FontWeight="Bold"
+                                Margin="10,0,0,0"
+                                Text="Color Palette"
+                                x:Name="ColorPaletteTitle" />
+
+                            <StackPanel
+                                HorizontalAlignment="Center"
+                                Margin="0,10,0,0"
+                                Orientation="Horizontal">
+
+                                <ui:Card Margin="5" Padding="5">
+                                    <ui:Image
+                                        AutomationProperties.Name="AppIconLarge"
+                                        Height="60"
                                         Margin="10"
-                                        Symbol="DesignIdeas24"
-                                        x:Name="BrandingIcon" />
+                                        Source="/EasyExtract;component/Resources/Big/EEUP_IconBig@4x.png"
+                                        Stretch="UniformToFill"
+                                        Width="60"
+                                        x:Name="AppIconLarge" />
                                 </ui:Card>
 
-                                <StackPanel Grid.Column="1" Orientation="Vertical">
-                                    <ui:TextBlock
-                                        AutomationProperties.Name="BrandingTitle"
-                                        FontSize="26"
-                                        FontWeight="Bold"
-                                        Margin="10,0,0,0"
-                                        Text="Branding"
-                                        x:Name="BrandingTitle" />
-                                    <ui:TextBlock
-                                        AutomationProperties.Name="BrandingDescription"
-                                        FontSize="16"
-                                        Margin="15,5,0,0"
-                                        Opacity="0.7"
-                                        Text="Our logo visually represents the seamless extraction of assets from a Unity package, highlighting the core functionality of our application."
-                                        TextWrapping="Wrap"
-                                        x:Name="BrandingDescription" />
-                                    <ui:Card
-                                        Background="#2ca7f2"
-                                        Height="2"
-                                        Margin="0,10,0,0" />
-                                </StackPanel>
-                            </Grid>
-                        </ui:Card>
+                                <ui:Card
+                                    AutomationProperties.Name="PrimaryTealColorSample"
+                                    Background="#04d3be"
+                                    Footer="#04d3be"
+                                    Height="Auto"
+                                    Margin="5"
+                                    MinHeight="60"
+                                    MinWidth="60"
+                                    Width="Auto"
+                                    x:Name="PrimaryTealColorSample" />
 
-                    </StackPanel>
-                </ui:DynamicScrollViewer>
-            </Border>
-        </Viewbox>
+                                <ui:Card
+                                    AutomationProperties.Name="LightBlueAccentSample"
+                                    Background="#7fc5ff"
+                                    Footer="#7fc5ff"
+                                    Height="Auto"
+                                    Margin="5"
+                                    MinHeight="60"
+                                    MinWidth="60"
+                                    Width="Auto"
+                                    x:Name="LightBlueAccentSample" />
+
+                                <ui:Card
+                                    AutomationProperties.Name="DeepBlueAccentSample"
+                                    Background="#2ca7f2"
+                                    Footer="#2ca7f2"
+                                    Height="Auto"
+                                    Margin="5"
+                                    MinHeight="60"
+                                    MinWidth="60"
+                                    Width="Auto"
+                                    x:Name="DeepBlueAccentSample" />
+
+                                <ui:Card
+                                    AutomationProperties.Name="DarkGraySample"
+                                    Background="#4D4D4D"
+                                    Footer="#4D4D4D"
+                                    Height="Auto"
+                                    Margin="5"
+                                    MinHeight="60"
+                                    MinWidth="60"
+                                    Width="Auto"
+                                    x:Name="DarkGraySample" />
+
+                                <ui:Card
+                                    AutomationProperties.Name="DarkerGraySample"
+                                    Background="#2b2b2b"
+                                    Footer="#2b2b2b"
+                                    Height="Auto"
+                                    Margin="5"
+                                    MinHeight="60"
+                                    MinWidth="60"
+                                    Width="Auto"
+                                    x:Name="DarkerGraySample" />
+                            </StackPanel>
+                        </StackPanel>
+                    </ui:Card>
+
+                    <ui:Card
+                        AutomationProperties.HelpText="Information about the application's branding and logo design"
+                        AutomationProperties.Name="BrandingSection"
+                        HorizontalAlignment="Stretch"
+                        Margin="0,0,0,20"
+                        Padding="15"
+                        ui:Footer="Made by DigitalAzure"
+                        x:Name="BrandingSection">
+
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                            </Grid.RowDefinitions>
+
+                            <ui:Card
+                                BorderThickness="8,1,1,15"
+                                Padding="5"
+                                VerticalAlignment="Top">
+                                <ui:SymbolIcon
+                                    AutomationProperties.Name="BrandingIcon"
+                                    FontSize="50"
+                                    Margin="10"
+                                    Symbol="DesignIdeas24"
+                                    x:Name="BrandingIcon" />
+                            </ui:Card>
+
+                            <StackPanel Grid.Column="1" Orientation="Vertical">
+                                <ui:TextBlock
+                                    AutomationProperties.Name="BrandingTitle"
+                                    FontSize="26"
+                                    FontWeight="Bold"
+                                    Margin="10,0,0,0"
+                                    Text="Branding"
+                                    x:Name="BrandingTitle" />
+                                <ui:TextBlock
+                                    AutomationProperties.Name="BrandingDescription"
+                                    FontSize="16"
+                                    Margin="15,5,0,0"
+                                    Opacity="0.7"
+                                    Text="Our logo visually represents the seamless extraction of assets from a Unity package, highlighting the core functionality of our application."
+                                    TextWrapping="Wrap"
+                                    x:Name="BrandingDescription" />
+                                <ui:Card
+                                    Background="#2ca7f2"
+                                    Height="2"
+                                    Margin="0,10,0,0" />
+                            </StackPanel>
+                        </Grid>
+                    </ui:Card>
+
+                </StackPanel>
+            </ui:DynamicScrollViewer>
+        </Border>
     </Grid>
 </UserControl>

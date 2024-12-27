@@ -7,7 +7,10 @@
         <ImplicitUsings>enable</ImplicitUsings>
         <UseWPF>true</UseWPF>
         <ApplicationIcon>Resources\Smallicon.ico</ApplicationIcon>
-        <AssemblyVersion>2.0.6.5</AssemblyVersion>
+        <ApplicationManifest>Properties\app.manifest</ApplicationManifest>
+        <DpiAwareness>PerMonitorV2</DpiAwareness>
+        <DpiAware>true/pm</DpiAware>
+        <AssemblyVersion>2.0.6.6</AssemblyVersion>
         <LangVersion>default</LangVersion>
         <NoWarn>$(NoWarn);WPF0001</NoWarn>
     </PropertyGroup>

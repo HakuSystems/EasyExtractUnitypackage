@@ -96,10 +96,21 @@ public static class DialogHelper
 
     private static Grid EnsureRootGrid(Window owner)
     {
-        if (owner.Content is Grid existingGrid)
-            return existingGrid;
+        if (owner == null)
+        {
+            if (Application.Current.MainWindow?.Content is Grid mainWindowGrid)
+                return mainWindowGrid;
+
+            throw new ArgumentNullException(nameof(owner));
+        }
+
+        if (owner.Content is Grid ownerGrid)
+            return ownerGrid;
 
         var content = owner.Content;
+        if (content == null)
+            throw new InvalidOperationException("The content of the owner window cannot be null.");
+
         var rootGrid = CreateRootGrid();
         owner.Content = rootGrid;
 

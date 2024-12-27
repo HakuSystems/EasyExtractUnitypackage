@@ -6,10 +6,9 @@
     Foreground="{DynamicResource TextFillColorPrimaryBrush}"
     KeyboardNavigation.TabNavigation="Cycle"
     Loaded="BetterSettings_OnLoaded"
+    SizeChanged="BetterSettings_OnSizeChanged"
     d:DataContext="{d:DesignInstance configModel:ConfigModel,
                                      IsDesignTimeCreatable=True}"
-    d:DesignHeight="450"
-    d:DesignWidth="1530"
     mc:Ignorable="d"
     ui:Design.Background="{DynamicResource ApplicationBackgroundBrush}"
     ui:Design.Foreground="{DynamicResource TextFillColorPrimaryBrush}"
@@ -23,7 +22,6 @@
     xmlns:utilities="clr-namespace:EasyExtract.Utilities"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
 
-    <!--  Subtle fade-in animation on load  -->
     <UserControl.Triggers>
         <EventTrigger RoutedEvent="UserControl.Loaded">
             <BeginStoryboard>
@@ -48,541 +46,600 @@
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
 
-        <!--  Wrap the entire content in a Viewbox for uniform scaling  -->
-        <Viewbox Stretch="Fill" StretchDirection="Both">
-            <Border
-                CornerRadius="10"
-                Margin="12"
-                Opacity="0"
-                x:Name="RootShadowBorder">
-                <Border.Effect>
-                    <DropShadowEffect
-                        BlurRadius="10"
-                        Color="#40000000"
-                        Direction="320"
-                        ShadowDepth="6" />
-                </Border.Effect>
+        <Border
+            CornerRadius="10"
+            Margin="12"
+            Opacity="100"
+            x:Name="RootShadowBorder">
+            <Border.Effect>
+                <DropShadowEffect
+                    BlurRadius="10"
+                    Color="#40000000"
+                    Direction="320"
+                    ShadowDepth="6" />
+            </Border.Effect>
 
-                <ui:PassiveScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto">
-                    <Grid>
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="Auto" />
-                            <RowDefinition Height="Auto" />
-                            <RowDefinition Height="Auto" />
-                            <RowDefinition Height="Auto" />
-                        </Grid.RowDefinitions>
+            <ui:PassiveScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto">
 
-                        <StackPanel
-                            Grid.Row="1"
-                            Margin="12"
-                            Orientation="Vertical">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
 
-                            <!--  (1) Context Menu Activation Card  -->
-                            <ui:Card
-                                AutomationProperties.HelpText="Enable or disable context menu entry for .unitypackage files."
-                                AutomationProperties.Name="ContextMenuActivationCard"
-                                BorderBrush="#DDDDDD"
-                                BorderThickness="{Binding Converter={StaticResource BorderThicknessConverter}, Path=BorderThicknessActive}"
-                                Margin="0,0,0,12"
-                                Padding="10">
-                                <Grid>
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="Auto" />
-                                        <ColumnDefinition Width="*" />
-                                        <ColumnDefinition Width="Auto" />
-                                    </Grid.ColumnDefinitions>
+                    <StackPanel
+                        Grid.Row="0"
+                        Margin="12"
+                        Orientation="Vertical">
 
-                                    <ui:Card
-                                        HorizontalAlignment="Left"
+                        <ui:Card
+                            AutomationProperties.HelpText="Select dynamic scaling mode."
+                            AutomationProperties.Name="DynamicScalingCard"
+                            BorderBrush="#DDDDDD"
+                            BorderThickness="{Binding Converter={StaticResource BorderThicknessConverter}, Path=BorderThicknessActive}"
+                            Margin="0,0,0,12"
+                            Padding="10"
+                            x:Name="DynamicScalingCard">
+
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+
+                                <ui:Card
+                                    HorizontalAlignment="Left"
+                                    Margin="5"
+                                    VerticalAlignment="Center">
+                                    <ui:SymbolIcon
+                                        Foreground="{DynamicResource TextFillColorPrimaryBrush}"
+                                        HorizontalAlignment="Center"
+                                        Symbol="ZoomFit24"
+                                        VerticalAlignment="Center" />
+                                </ui:Card>
+
+                                <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                    <ui:TextBlock
+                                        FontTypography="BodyStrong"
+                                        Text="Dynamic Scaling"
+                                        TextWrapping="WrapWithOverflow" />
+                                    <ui:TextBlock
+                                        Appearance="Secondary"
+                                        Opacity="0.5"
+                                        Text="Toggle dynamic scaling on/off, and choose the scaling mode."
+                                        TextWrapping="WrapWithOverflow" />
+                                </StackPanel>
+
+                                <StackPanel
+                                    Grid.Column="2"
+                                    Orientation="Horizontal"
+                                    VerticalAlignment="Center">
+                                    <ui:TextBlock
+                                        FontTypography="Caption"
+                                        Margin="0,0,5,0"
+                                        Text="(Applies at restart)"
+                                        VerticalAlignment="Center" />
+
+                                    <ComboBox
+                                        DisplayMemberPath="."
+                                        ItemsSource="{Binding DynamicScalingMode}"
                                         Margin="5"
-                                        VerticalAlignment="Center">
-                                        <mahicons:Modern Kind="Connect" />
-                                    </ui:Card>
+                                        SelectedItem="{Binding DynamicScalingMode, Mode=TwoWay}"
+                                        SelectionChanged="DynamicScalingComboBox_OnSelectionChanged"
+                                        Width="150"
+                                        d:DataContext="{d:DesignInstance configModel:ConfigModel,
+                                                                         IsDesignTimeCreatable=True}"
+                                        x:Name="DynamicScalingComboBox" />
+                                </StackPanel>
+                            </Grid>
+                        </ui:Card>
 
-                                    <StackPanel Grid.Column="1" VerticalAlignment="Center">
-                                        <ui:TextBlock
-                                            FontTypography="BodyStrong"
-                                            Text="Context Menu Activation"
-                                            TextWrapping="WrapWithOverflow" />
-                                        <ui:TextBlock
-                                            Appearance="Secondary"
-                                            Opacity="0.5"
-                                            Text="Register a menu item in the registry to open this app by right-clicking on a .unitypackage."
-                                            TextWrapping="Wrap" />
-                                    </StackPanel>
 
-                                    <ui:ToggleSwitch
-                                        Checked="ContextMenuSwitch_OnChecked"
-                                        Grid.Column="2"
-                                        IsChecked="{Binding ContextMenuToggle, Mode=TwoWay}"
-                                        Margin="5"
-                                        Unchecked="ContextMenuSwitch_OnUnchecked"
-                                        x:Name="ContextMenuSwitch" />
-                                </Grid>
-                            </ui:Card>
+                        <ui:Card
+                            AutomationProperties.HelpText="Enable or disable context menu entry for .unitypackage files."
+                            AutomationProperties.Name="ContextMenuActivationCard"
+                            BorderBrush="#DDDDDD"
+                            BorderThickness="{Binding Converter={StaticResource BorderThicknessConverter}, Path=BorderThicknessActive}"
+                            Margin="0,0,0,12"
+                            Padding="10"
+                            x:Name="ContextMenuActivationCard">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
 
-                            <!--  (2) Enable Borders Card  -->
-                            <ui:Card
-                                AutomationProperties.HelpText="Toggle borders on the Settings page."
-                                AutomationProperties.Name="EnableBordersCard"
-                                BorderBrush="#DDDDDD"
-                                BorderThickness="{Binding Converter={StaticResource BorderThicknessConverter}, Path=BorderThicknessActive}"
-                                Margin="0,0,0,12"
-                                Padding="10">
-                                <Grid>
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="Auto" />
-                                        <ColumnDefinition Width="*" />
-                                        <ColumnDefinition Width="Auto" />
-                                    </Grid.ColumnDefinitions>
+                                <ui:Card
+                                    HorizontalAlignment="Left"
+                                    Margin="5"
+                                    VerticalAlignment="Center">
+                                    <mahicons:Modern Kind="Connect" />
+                                </ui:Card>
 
-                                    <ui:Card
-                                        HorizontalAlignment="Left"
-                                        Margin="5"
-                                        VerticalAlignment="Center">
-                                        <mahicons:Modern Kind="BorderAll" />
-                                    </ui:Card>
+                                <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                    <ui:TextBlock
+                                        FontTypography="BodyStrong"
+                                        Text="Context Menu Activation"
+                                        TextWrapping="WrapWithOverflow" />
+                                    <ui:TextBlock
+                                        Appearance="Secondary"
+                                        Opacity="0.5"
+                                        Text="Register a menu item in the registry to open this app by right-clicking on a .unitypackage."
+                                        TextWrapping="Wrap" />
+                                </StackPanel>
 
-                                    <StackPanel Grid.Column="1" VerticalAlignment="Center">
-                                        <ui:TextBlock
-                                            FontTypography="BodyStrong"
-                                            Text="Enable Borders"
-                                            TextWrapping="WrapWithOverflow" />
-                                        <ui:TextBlock
-                                            Appearance="Secondary"
-                                            Opacity="0.5"
-                                            Text="When enabled, borders will appear (applies only to this Settings page)."
-                                            TextWrapping="Wrap" />
-                                    </StackPanel>
+                                <ui:ToggleSwitch
+                                    Checked="ContextMenuSwitch_OnChecked"
+                                    Grid.Column="2"
+                                    IsChecked="{Binding ContextMenuToggle, Mode=TwoWay}"
+                                    Margin="5"
+                                    Unchecked="ContextMenuSwitch_OnUnchecked"
+                                    x:Name="ContextMenuSwitch" />
+                            </Grid>
+                        </ui:Card>
 
-                                    <ui:ToggleSwitch
-                                        Checked="BorderMenuSwitch_OnChecked"
-                                        Grid.Column="2"
-                                        IsChecked="{Binding BorderThicknessActive, Mode=TwoWay}"
-                                        Margin="5"
-                                        Unchecked="BorderMenuSwitch_OnUnchecked"
-                                        x:Name="BorderMenuSwitch" />
-                                </Grid>
-                            </ui:Card>
+                        <ui:Card
+                            AutomationProperties.HelpText="Toggle borders on the Settings page."
+                            AutomationProperties.Name="EnableBordersCard"
+                            BorderBrush="#DDDDDD"
+                            BorderThickness="{Binding Converter={StaticResource BorderThicknessConverter}, Path=BorderThicknessActive}"
+                            Margin="0,0,0,12"
+                            Padding="10"
+                            x:Name="EnableBordersCard">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
 
-                            <!--  (3) UwU Mode Activation Card  -->
-                            <ui:Card
-                                AutomationProperties.HelpText="Toggle special UI theme name for next application start."
-                                AutomationProperties.Name="UwUModeActivationCard"
-                                BorderBrush="#DDDDDD"
-                                BorderThickness="{Binding Converter={StaticResource BorderThicknessConverter}, Path=BorderThicknessActive}"
-                                Margin="0,0,0,12"
-                                Padding="10">
-                                <Grid>
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="Auto" />
-                                        <ColumnDefinition Width="*" />
-                                        <ColumnDefinition Width="Auto" />
-                                    </Grid.ColumnDefinitions>
+                                <ui:Card
+                                    HorizontalAlignment="Left"
+                                    Margin="5"
+                                    VerticalAlignment="Center">
+                                    <mahicons:Modern Kind="BorderAll" />
+                                </ui:Card>
 
-                                    <ui:Card
-                                        HorizontalAlignment="Left"
-                                        Margin="5"
-                                        VerticalAlignment="Center">
-                                        <ui:SymbolIcon
-                                            Foreground="{DynamicResource TextFillColorPrimaryBrush}"
-                                            HorizontalAlignment="Center"
-                                            Symbol="EmojiSparkle24"
-                                            VerticalAlignment="Center" />
-                                    </ui:Card>
+                                <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                    <ui:TextBlock
+                                        FontTypography="BodyStrong"
+                                        Text="Enable Borders"
+                                        TextWrapping="WrapWithOverflow" />
+                                    <ui:TextBlock
+                                        Appearance="Secondary"
+                                        Opacity="0.5"
+                                        Text="When enabled, borders will appear (applies only to this Settings page)."
+                                        TextWrapping="Wrap" />
+                                </StackPanel>
 
-                                    <StackPanel Grid.Column="1" VerticalAlignment="Center">
-                                        <ui:TextBlock
-                                            FontTypography="BodyStrong"
-                                            Text="UwU Mode Activation"
-                                            TextWrapping="WrapWithOverflow" />
-                                        <ui:TextBlock
-                                            Appearance="Secondary"
-                                            Opacity="0.5"
-                                            Text="When enabled, the title changes to 'UwU' on next application start."
-                                            TextWrapping="WrapWithOverflow" />
-                                    </StackPanel>
+                                <ui:ToggleSwitch
+                                    Checked="BorderMenuSwitch_OnChecked"
+                                    Grid.Column="2"
+                                    IsChecked="{Binding BorderThicknessActive, Mode=TwoWay}"
+                                    Margin="5"
+                                    Unchecked="BorderMenuSwitch_OnUnchecked"
+                                    x:Name="BorderMenuSwitch" />
+                            </Grid>
+                        </ui:Card>
 
-                                    <ui:ToggleSwitch
-                                        Checked="UwUToggleSwitch_OnChecked"
-                                        Grid.Column="2"
-                                        IsChecked="{Binding UwUModeActive, Mode=TwoWay}"
-                                        Margin="5"
-                                        Unchecked="UwUToggleSwitch_OnUnchecked"
-                                        x:Name="UwUToggleSwitch" />
-                                </Grid>
-                            </ui:Card>
+                        <ui:Card
+                            AutomationProperties.HelpText="Toggle special UI theme name for next application start."
+                            AutomationProperties.Name="UwUModeActivationCard"
+                            BorderBrush="#DDDDDD"
+                            BorderThickness="{Binding Converter={StaticResource BorderThicknessConverter}, Path=BorderThicknessActive}"
+                            Margin="0,0,0,12"
+                            Padding="10"
+                            x:Name="UwUModeActivationCard">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
 
-                            <!--  (4) Application Theme Card  -->
-                            <ui:Card
-                                AutomationProperties.HelpText="Select a visual theme for the application."
-                                AutomationProperties.Name="ApplicationThemeCard"
-                                BorderBrush="#DDDDDD"
-                                BorderThickness="{Binding Converter={StaticResource BorderThicknessConverter}, Path=BorderThicknessActive}"
-                                Margin="0,0,0,12"
-                                Padding="10">
-                                <Grid>
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="Auto" />
-                                        <ColumnDefinition Width="*" />
-                                        <ColumnDefinition Width="Auto" />
-                                    </Grid.ColumnDefinitions>
+                                <ui:Card
+                                    HorizontalAlignment="Left"
+                                    Margin="5"
+                                    VerticalAlignment="Center">
+                                    <ui:SymbolIcon
+                                        Foreground="{DynamicResource TextFillColorPrimaryBrush}"
+                                        HorizontalAlignment="Center"
+                                        Symbol="EmojiSparkle24"
+                                        VerticalAlignment="Center" />
+                                </ui:Card>
 
-                                    <ui:Card
-                                        HorizontalAlignment="Left"
-                                        Margin="5"
-                                        VerticalAlignment="Center">
-                                        <ui:SymbolIcon
-                                            Foreground="{DynamicResource TextFillColorPrimaryBrush}"
-                                            HorizontalAlignment="Center"
-                                            Symbol="DarkTheme24"
-                                            VerticalAlignment="Center" />
-                                    </ui:Card>
+                                <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                    <ui:TextBlock
+                                        FontTypography="BodyStrong"
+                                        Text="UwU Mode Activation"
+                                        TextWrapping="WrapWithOverflow" />
+                                    <ui:TextBlock
+                                        Appearance="Secondary"
+                                        Opacity="0.5"
+                                        Text="When enabled, the title changes to 'UwU' on next application start."
+                                        TextWrapping="WrapWithOverflow" />
+                                </StackPanel>
 
-                                    <StackPanel Grid.Column="1" VerticalAlignment="Center">
-                                        <ui:TextBlock
-                                            FontTypography="BodyStrong"
-                                            Text="Application Theme"
-                                            TextWrapping="WrapWithOverflow" />
-                                        <ui:TextBlock
-                                            Appearance="Secondary"
-                                            Opacity="0.5"
-                                            Text="Select the visual theme for the application."
-                                            TextWrapping="WrapWithOverflow" />
-                                    </StackPanel>
+                                <ui:ToggleSwitch
+                                    Checked="UwUToggleSwitch_OnChecked"
+                                    Grid.Column="2"
+                                    IsChecked="{Binding UwUModeActive, Mode=TwoWay}"
+                                    Margin="5"
+                                    Unchecked="UwUToggleSwitch_OnUnchecked"
+                                    x:Name="UwUToggleSwitch" />
+                            </Grid>
+                        </ui:Card>
 
-                                    <StackPanel
-                                        Grid.Column="2"
-                                        Orientation="Horizontal"
-                                        VerticalAlignment="Center">
-                                        <ui:TextBlock
-                                            FontTypography="Caption"
-                                            Margin="0,0,5,0"
-                                            Text="(Applies at restart)"
-                                            VerticalAlignment="Center" />
-                                        <ComboBox
-                                            ItemsSource="{Binding Themes}"
-                                            SelectedItem="{Binding ApplicationTheme, Mode=TwoWay}"
-                                            SelectionChanged="ThemeComboBox_OnSelectionChanged"
-                                            Width="150"
-                                            x:Name="ThemeComboBox" />
-                                    </StackPanel>
-                                </Grid>
-                            </ui:Card>
+                        <ui:Card
+                            AutomationProperties.HelpText="Select a visual theme for the application."
+                            AutomationProperties.Name="ApplicationThemeCard"
+                            BorderBrush="#DDDDDD"
+                            BorderThickness="{Binding Converter={StaticResource BorderThicknessConverter}, Path=BorderThicknessActive}"
+                            Margin="0,0,0,12"
+                            Padding="10"
+                            x:Name="ApplicationThemeCard">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
 
-                            <!--  (5) Custom Application Background Card  -->
-                            <ui:Card
-                                AutomationProperties.HelpText="Configure a custom background image and its opacity."
-                                AutomationProperties.Name="CustomApplicationBackgroundCard"
-                                BorderBrush="#DDDDDD"
-                                BorderThickness="{Binding Converter={StaticResource BorderThicknessConverter}, Path=BorderThicknessActive}"
-                                Margin="0,0,0,12"
-                                Padding="10">
-                                <Grid>
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="Auto" />
-                                        <ColumnDefinition Width="*" />
-                                    </Grid.ColumnDefinitions>
-                                    <Grid.RowDefinitions>
-                                        <RowDefinition Height="Auto" />
-                                        <RowDefinition Height="Auto" />
-                                    </Grid.RowDefinitions>
+                                <ui:Card
+                                    HorizontalAlignment="Left"
+                                    Margin="5"
+                                    VerticalAlignment="Center">
+                                    <ui:SymbolIcon
+                                        Foreground="{DynamicResource TextFillColorPrimaryBrush}"
+                                        HorizontalAlignment="Center"
+                                        Symbol="DarkTheme24"
+                                        VerticalAlignment="Center" />
+                                </ui:Card>
 
-                                    <ui:Card
-                                        Grid.RowSpan="2"
-                                        HorizontalAlignment="Left"
-                                        Margin="5,0,5,0"
-                                        VerticalAlignment="Stretch">
-                                        <ui:SymbolIcon
-                                            Foreground="{DynamicResource TextFillColorPrimaryBrush}"
-                                            HorizontalAlignment="Center"
-                                            Symbol="ColorBackground24"
-                                            VerticalAlignment="Center" />
-                                    </ui:Card>
+                                <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                    <ui:TextBlock
+                                        FontTypography="BodyStrong"
+                                        Text="Application Theme"
+                                        TextWrapping="WrapWithOverflow" />
+                                    <ui:TextBlock
+                                        Appearance="Secondary"
+                                        Opacity="0.5"
+                                        Text="Select the visual theme for the application."
+                                        TextWrapping="WrapWithOverflow" />
+                                </StackPanel>
 
-                                    <StackPanel
-                                        Grid.Column="1"
-                                        Grid.Row="0"
-                                        VerticalAlignment="Top">
-                                        <ui:TextBlock
-                                            FontTypography="BodyStrong"
-                                            Text="Custom Application Background"
-                                            TextWrapping="WrapWithOverflow" />
-                                        <ui:TextBlock
-                                            Appearance="Secondary"
-                                            Opacity="0.5"
-                                            Text="Set a custom image as the application's background."
-                                            TextWrapping="WrapWithOverflow" />
-                                    </StackPanel>
+                                <StackPanel
+                                    Grid.Column="2"
+                                    Orientation="Horizontal"
+                                    VerticalAlignment="Center">
+                                    <ui:TextBlock
+                                        FontTypography="Caption"
+                                        Margin="0,0,5,0"
+                                        Text="(Applies at restart)"
+                                        VerticalAlignment="Center" />
+                                    <ComboBox
+                                        DisplayMemberPath="."
+                                        ItemsSource="{Binding Themes}"
+                                        MinWidth="150"
+                                        SelectedItem="{Binding ApplicationTheme, Mode=TwoWay}"
+                                        SelectionChanged="ThemeComboBox_OnSelectionChanged"
+                                        x:Name="ThemeComboBox" />
+                                </StackPanel>
+                            </Grid>
+                        </ui:Card>
 
-                                    <ui:Card
-                                        Grid.Column="1"
-                                        Grid.ColumnSpan="2"
-                                        Grid.Row="1"
-                                        Margin="0,5,0,0"
-                                        Padding="5">
-                                        <Grid>
-                                            <Grid.RowDefinitions>
-                                                <RowDefinition Height="Auto" />
-                                                <RowDefinition Height="Auto" />
-                                            </Grid.RowDefinitions>
-                                            <StackPanel Orientation="Horizontal">
-                                                <TextBlock
-                                                    Margin="0,0,8,0"
-                                                    Text="Background Opacity"
-                                                    VerticalAlignment="Center" />
-                                                <Slider
-                                                    Margin="0,0,10,0"
-                                                    Maximum="1"
-                                                    Minimum="0"
-                                                    ToolTip="Set the opacity of the background wallpaper"
-                                                    Value="{Binding Backgrounds.BackgroundOpacity, Mode=TwoWay}"
-                                                    ValueChanged="BackgroundOpacitySlider_OnValueChanged"
-                                                    VerticalAlignment="Center"
-                                                    x:Name="BackgroundOpacitySlider" />
-                                                <ui:Button
-                                                    Click="BackgroundChangeButton_OnClick"
-                                                    Content="Change Background"
-                                                    Icon="{ui:SymbolIcon Edit24}"
-                                                    Margin="0,0,5,0"
-                                                    x:Name="BackgroundChangeButton" />
-                                                <ui:Button
-                                                    Click="BackgroundResetButton_OnClick"
-                                                    Content="Reset Background"
-                                                    Icon="{ui:SymbolIcon ArrowReset24}"
-                                                    x:Name="BackgroundResetButton" />
-                                            </StackPanel>
-                                        </Grid>
-                                    </ui:Card>
-                                </Grid>
-                            </ui:Card>
+                        <ui:Card
+                            AutomationProperties.HelpText="Configure a custom background image and its opacity."
+                            AutomationProperties.Name="CustomApplicationBackgroundCard"
+                            BorderBrush="#DDDDDD"
+                            BorderThickness="{Binding Converter={StaticResource BorderThicknessConverter}, Path=BorderThicknessActive}"
+                            Margin="0,0,0,12"
+                            Padding="10"
+                            x:Name="CustomApplicationBackgroundCard">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                </Grid.RowDefinitions>
 
-                            <!--  (6) Check for Updates on Startup Card  -->
-                            <ui:Card
-                                AutomationProperties.HelpText="Toggle automatic update checks when the application starts."
-                                AutomationProperties.Name="UpdateCheckCard"
-                                BorderBrush="#DDDDDD"
-                                BorderThickness="{Binding Converter={StaticResource BorderThicknessConverter}, Path=BorderThicknessActive}"
-                                Margin="0,0,0,12"
-                                Padding="10">
-                                <Grid>
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="Auto" />
-                                        <ColumnDefinition Width="*" />
-                                        <ColumnDefinition Width="Auto" />
-                                    </Grid.ColumnDefinitions>
+                                <ui:Card
+                                    Grid.RowSpan="2"
+                                    HorizontalAlignment="Left"
+                                    Margin="5,0,5,0"
+                                    VerticalAlignment="Stretch">
+                                    <ui:SymbolIcon
+                                        Foreground="{DynamicResource TextFillColorPrimaryBrush}"
+                                        HorizontalAlignment="Center"
+                                        Symbol="ColorBackground24"
+                                        VerticalAlignment="Center" />
+                                </ui:Card>
 
-                                    <ui:Card
-                                        HorizontalAlignment="Left"
-                                        Margin="5"
-                                        VerticalAlignment="Center">
-                                        <ui:SymbolIcon
-                                            Foreground="{DynamicResource TextFillColorPrimaryBrush}"
-                                            HorizontalAlignment="Center"
-                                            Symbol="ArrowDownload24"
-                                            VerticalAlignment="Center" />
-                                    </ui:Card>
+                                <StackPanel
+                                    Grid.Column="1"
+                                    Grid.Row="0"
+                                    VerticalAlignment="Top">
+                                    <ui:TextBlock
+                                        FontTypography="BodyStrong"
+                                        Text="Custom Application Background"
+                                        TextWrapping="WrapWithOverflow" />
+                                    <ui:TextBlock
+                                        Appearance="Secondary"
+                                        Opacity="0.5"
+                                        Text="Set a custom image as the application's background."
+                                        TextWrapping="WrapWithOverflow" />
+                                </StackPanel>
 
-                                    <StackPanel Grid.Column="1" VerticalAlignment="Center">
-                                        <ui:TextBlock
-                                            FontTypography="BodyStrong"
-                                            Text="Update"
-                                            TextWrapping="WrapWithOverflow" />
-                                        <ui:TextBlock
-                                            Appearance="Secondary"
-                                            Opacity="0.5"
-                                            Text="Check for updates on startup."
-                                            TextWrapping="WrapWithOverflow" />
-                                    </StackPanel>
-
-                                    <ui:ToggleSwitch
-                                        Checked="CheckForUpdatesOnStartUpToggleSwitch_OnChecked"
-                                        Grid.Column="2"
-                                        IsChecked="{Binding AutoUpdate, Mode=TwoWay}"
-                                        Margin="5"
-                                        Unchecked="CheckForUpdatesOnStartUpToggleSwitch_OnUnchecked"
-                                        x:Name="CheckForUpdatesOnStartUpToggleSwitch" />
-                                </Grid>
-                            </ui:Card>
-
-                            <!--  (7) Skip Intro Logo Animation Card  -->
-                            <ui:Card
-                                AutomationProperties.HelpText="Toggle skipping the animated logo at startup."
-                                AutomationProperties.Name="NoIntroCard"
-                                BorderBrush="#DDDDDD"
-                                BorderThickness="{Binding Converter={StaticResource BorderThicknessConverter}, Path=BorderThicknessActive}"
-                                Margin="0,0,0,12"
-                                Padding="10">
-                                <Grid>
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="Auto" />
-                                        <ColumnDefinition Width="*" />
-                                        <ColumnDefinition Width="Auto" />
-                                    </Grid.ColumnDefinitions>
-
-                                    <ui:Card
-                                        HorizontalAlignment="Left"
-                                        Margin="5"
-                                        VerticalAlignment="Center">
-                                        <ui:SymbolIcon
-                                            Foreground="{DynamicResource TextFillColorPrimaryBrush}"
-                                            HorizontalAlignment="Center"
-                                            Symbol="SkipForwardTab24"
-                                            VerticalAlignment="Center" />
-                                    </ui:Card>
-
-                                    <StackPanel Grid.Column="1" VerticalAlignment="Center">
-                                        <ui:TextBlock
-                                            FontTypography="BodyStrong"
-                                            Text="No Intro, Please!"
-                                            TextWrapping="WrapWithOverflow" />
-                                        <ui:TextBlock
-                                            Appearance="Secondary"
-                                            Opacity="0.5"
-                                            Text="Hides the animated logo at startup."
-                                            TextWrapping="WrapWithOverflow" />
-                                    </StackPanel>
-
-                                    <ui:ToggleSwitch
-                                        Checked="SkipIntroLogoAnimationToggleSwitch_OnChecked"
-                                        Grid.Column="2"
-                                        IsChecked="{Binding IntroLogoAnimation, Mode=TwoWay}"
-                                        Margin="5"
-                                        Unchecked="SkipIntroLogoAnimationToggleSwitch_OnUnchecked"
-                                        x:Name="SkipIntroLogoAnimationToggleSwitch" />
-                                </Grid>
-                            </ui:Card>
-
-                            <!--  (8) Discord RPC Card  -->
-                            <ui:Card
-                                AutomationProperties.HelpText="Toggle Discord Rich Presence to show current activity."
-                                AutomationProperties.Name="DiscordRpcCard"
-                                BorderBrush="#DDDDDD"
-                                BorderThickness="{Binding Converter={StaticResource BorderThicknessConverter}, Path=BorderThicknessActive}"
-                                Margin="0,0,0,12"
-                                Padding="10">
-                                <Grid>
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="Auto" />
-                                        <ColumnDefinition Width="*" />
-                                        <ColumnDefinition Width="Auto" />
-                                    </Grid.ColumnDefinitions>
-
-                                    <ui:Card
-                                        HorizontalAlignment="Left"
-                                        Margin="5"
-                                        VerticalAlignment="Center">
-                                        <ui:SymbolIcon
-                                            Foreground="{DynamicResource TextFillColorPrimaryBrush}"
-                                            HorizontalAlignment="Center"
-                                            Symbol="Apps24"
-                                            VerticalAlignment="Center" />
-                                    </ui:Card>
-
-                                    <StackPanel Grid.Column="1" VerticalAlignment="Center">
-                                        <ui:TextBlock
-                                            FontTypography="BodyStrong"
-                                            Text="Discord RPC"
-                                            TextWrapping="WrapWithOverflow" />
-                                        <ui:TextBlock
-                                            Appearance="Secondary"
-                                            Opacity="0.5"
-                                            Text="Show what you're doing on Discord."
-                                            TextWrapping="WrapWithOverflow" />
-                                    </StackPanel>
-
-                                    <ui:ToggleSwitch
-                                        Checked="DiscordRpcToggleSwitch_OnChecked"
-                                        Grid.Column="2"
-                                        IsChecked="{Binding DiscordRpc, Mode=TwoWay}"
-                                        Margin="5"
-                                        Unchecked="DiscordRpcToggleSwitch_OnUnchecked"
-                                        x:Name="DiscordRpcToggleSwitch" />
-                                </Grid>
-                            </ui:Card>
-
-                            <!--  (9) Default Temp Path Card  -->
-                            <ui:Card
-                                AutomationProperties.HelpText="Set or reset the default path for temporary file extraction."
-                                AutomationProperties.Name="DefaultTempPathCard"
-                                BorderBrush="#DDDDDD"
-                                BorderThickness="{Binding Converter={StaticResource BorderThicknessConverter}, Path=BorderThicknessActive}"
-                                Margin="0,0,0,12"
-                                Padding="10">
-                                <Grid>
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="Auto" />
-                                        <ColumnDefinition Width="*" />
-                                        <ColumnDefinition Width="Auto" />
-                                    </Grid.ColumnDefinitions>
-                                    <Grid.RowDefinitions>
-                                        <RowDefinition Height="Auto" />
-                                        <RowDefinition Height="Auto" />
-                                    </Grid.RowDefinitions>
-
-                                    <ui:Card
-                                        Grid.RowSpan="2"
-                                        HorizontalAlignment="Left"
-                                        Margin="5,0,5,0"
-                                        VerticalAlignment="Stretch">
-                                        <ui:SymbolIcon
-                                            Foreground="{DynamicResource TextFillColorPrimaryBrush}"
-                                            HorizontalAlignment="Center"
-                                            Symbol="Folder24"
-                                            VerticalAlignment="Center" />
-                                    </ui:Card>
-
-                                    <StackPanel
-                                        Grid.Column="1"
-                                        Grid.Row="0"
-                                        VerticalAlignment="Top">
-                                        <ui:TextBlock
-                                            FontTypography="BodyStrong"
-                                            Text="Default Temp Path"
-                                            TextWrapping="WrapWithOverflow" />
-                                        <ui:TextBlock
-                                            Appearance="Secondary"
-                                            Opacity="0.5"
-                                            Text="Change the default TEMP path for extracted files."
-                                            TextWrapping="WrapWithOverflow" />
-                                    </StackPanel>
-
-                                    <ui:Card
-                                        Grid.Column="1"
-                                        Grid.ColumnSpan="2"
-                                        Grid.Row="1"
-                                        Margin="0,5,0,0"
-                                        Padding="5">
+                                <ui:Card
+                                    Grid.Column="1"
+                                    Grid.ColumnSpan="2"
+                                    Grid.Row="1"
+                                    Margin="0,5,0,0"
+                                    Padding="5">
+                                    <Grid>
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition Height="Auto" />
+                                            <RowDefinition Height="Auto" />
+                                        </Grid.RowDefinitions>
                                         <StackPanel Orientation="Horizontal">
-                                            <ui:TextBox
-                                                HorizontalAlignment="Stretch"
-                                                IsTextSelectionEnabled="True"
+                                            <TextBlock
+                                                Margin="0,0,8,0"
+                                                Text="Background Opacity"
+                                                VerticalAlignment="Center" />
+                                            <Slider
                                                 Margin="0,0,10,0"
-                                                PlaceholderText="Default Temp Path"
-                                                Text="{Binding DefaultTempPath, Mode=TwoWay}"
-                                                ToolTip="{Binding DefaultTempPath, Mode=OneWay}"
+                                                Maximum="1"
+                                                Minimum="0"
+                                                ToolTip="Set the opacity of the background wallpaper"
+                                                Value="{Binding Backgrounds.BackgroundOpacity, Mode=TwoWay}"
+                                                ValueChanged="BackgroundOpacitySlider_OnValueChanged"
                                                 VerticalAlignment="Center"
-                                                x:Name="DefaultTempPathTextBox" />
+                                                x:Name="BackgroundOpacitySlider" />
                                             <ui:Button
-                                                Click="DefaultTempPathChangeButton_OnClick"
-                                                Content="Change"
+                                                Click="BackgroundChangeButton_OnClick"
+                                                Content="Change Background"
                                                 Icon="{ui:SymbolIcon Edit24}"
                                                 Margin="0,0,5,0"
-                                                x:Name="DefaultTempPathChangeButton" />
+                                                x:Name="BackgroundChangeButton" />
                                             <ui:Button
-                                                Click="DefaultTempPathResetButton_OnClick"
-                                                Content="Reset"
+                                                Click="BackgroundResetButton_OnClick"
+                                                Content="Reset Background"
                                                 Icon="{ui:SymbolIcon ArrowReset24}"
-                                                x:Name="DefaultTempPathResetButton" />
+                                                x:Name="BackgroundResetButton" />
                                         </StackPanel>
-                                    </ui:Card>
-                                </Grid>
-                            </ui:Card>
+                                    </Grid>
+                                </ui:Card>
+                            </Grid>
+                        </ui:Card>
 
-                        </StackPanel>
-                    </Grid>
-                </ui:PassiveScrollViewer>
-            </Border>
-        </Viewbox>
+                        <ui:Card
+                            AutomationProperties.HelpText="Toggle automatic update checks when the application starts."
+                            AutomationProperties.Name="UpdateCheckCard"
+                            BorderBrush="#DDDDDD"
+                            BorderThickness="{Binding Converter={StaticResource BorderThicknessConverter}, Path=BorderThicknessActive}"
+                            Margin="0,0,0,12"
+                            Padding="10"
+                            x:Name="UpdateCheckCard">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+
+                                <ui:Card
+                                    HorizontalAlignment="Left"
+                                    Margin="5"
+                                    VerticalAlignment="Center">
+                                    <ui:SymbolIcon
+                                        Foreground="{DynamicResource TextFillColorPrimaryBrush}"
+                                        HorizontalAlignment="Center"
+                                        Symbol="ArrowDownload24"
+                                        VerticalAlignment="Center" />
+                                </ui:Card>
+
+                                <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                    <ui:TextBlock
+                                        FontTypography="BodyStrong"
+                                        Text="Update"
+                                        TextWrapping="WrapWithOverflow" />
+                                    <ui:TextBlock
+                                        Appearance="Secondary"
+                                        Opacity="0.5"
+                                        Text="Check for updates on startup."
+                                        TextWrapping="WrapWithOverflow" />
+                                </StackPanel>
+
+                                <ui:ToggleSwitch
+                                    Checked="CheckForUpdatesOnStartUpToggleSwitch_OnChecked"
+                                    Grid.Column="2"
+                                    IsChecked="{Binding AutoUpdate, Mode=TwoWay}"
+                                    Margin="5"
+                                    Unchecked="CheckForUpdatesOnStartUpToggleSwitch_OnUnchecked"
+                                    x:Name="CheckForUpdatesOnStartUpToggleSwitch" />
+                            </Grid>
+                        </ui:Card>
+
+                        <ui:Card
+                            AutomationProperties.HelpText="Toggle skipping the animated logo at startup."
+                            AutomationProperties.Name="NoIntroCard"
+                            BorderBrush="#DDDDDD"
+                            BorderThickness="{Binding Converter={StaticResource BorderThicknessConverter}, Path=BorderThicknessActive}"
+                            Margin="0,0,0,12"
+                            Padding="10"
+                            x:Name="NoIntroCard">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+
+                                <ui:Card
+                                    HorizontalAlignment="Left"
+                                    Margin="5"
+                                    VerticalAlignment="Center">
+                                    <ui:SymbolIcon
+                                        Foreground="{DynamicResource TextFillColorPrimaryBrush}"
+                                        HorizontalAlignment="Center"
+                                        Symbol="SkipForwardTab24"
+                                        VerticalAlignment="Center" />
+                                </ui:Card>
+
+                                <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                    <ui:TextBlock
+                                        FontTypography="BodyStrong"
+                                        Text="No Intro, Please!"
+                                        TextWrapping="WrapWithOverflow" />
+                                    <ui:TextBlock
+                                        Appearance="Secondary"
+                                        Opacity="0.5"
+                                        Text="Hides the animated logo at startup."
+                                        TextWrapping="WrapWithOverflow" />
+                                </StackPanel>
+
+                                <ui:ToggleSwitch
+                                    Checked="SkipIntroLogoAnimationToggleSwitch_OnChecked"
+                                    Grid.Column="2"
+                                    IsChecked="{Binding IntroLogoAnimation, Mode=TwoWay}"
+                                    Margin="5"
+                                    Unchecked="SkipIntroLogoAnimationToggleSwitch_OnUnchecked"
+                                    x:Name="SkipIntroLogoAnimationToggleSwitch" />
+                            </Grid>
+                        </ui:Card>
+
+                        <ui:Card
+                            AutomationProperties.HelpText="Toggle Discord Rich Presence to show current activity."
+                            AutomationProperties.Name="DiscordRpcCard"
+                            BorderBrush="#DDDDDD"
+                            BorderThickness="{Binding Converter={StaticResource BorderThicknessConverter}, Path=BorderThicknessActive}"
+                            Margin="0,0,0,12"
+                            Padding="10"
+                            x:Name="DiscordRpcCard">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+
+                                <ui:Card
+                                    HorizontalAlignment="Left"
+                                    Margin="5"
+                                    VerticalAlignment="Center">
+                                    <ui:SymbolIcon
+                                        Foreground="{DynamicResource TextFillColorPrimaryBrush}"
+                                        HorizontalAlignment="Center"
+                                        Symbol="Apps24"
+                                        VerticalAlignment="Center" />
+                                </ui:Card>
+
+                                <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                    <ui:TextBlock
+                                        FontTypography="BodyStrong"
+                                        Text="Discord RPC"
+                                        TextWrapping="WrapWithOverflow" />
+                                    <ui:TextBlock
+                                        Appearance="Secondary"
+                                        Opacity="0.5"
+                                        Text="Show what you're doing on Discord."
+                                        TextWrapping="WrapWithOverflow" />
+                                </StackPanel>
+
+                                <ui:ToggleSwitch
+                                    Checked="DiscordRpcToggleSwitch_OnChecked"
+                                    Grid.Column="2"
+                                    IsChecked="{Binding DiscordRpc, Mode=TwoWay}"
+                                    Margin="5"
+                                    Unchecked="DiscordRpcToggleSwitch_OnUnchecked"
+                                    x:Name="DiscordRpcToggleSwitch" />
+                            </Grid>
+                        </ui:Card>
+
+                        <ui:Card
+                            AutomationProperties.HelpText="Set or reset the default path for temporary file extraction."
+                            AutomationProperties.Name="DefaultTempPathCard"
+                            BorderBrush="#DDDDDD"
+                            BorderThickness="{Binding Converter={StaticResource BorderThicknessConverter}, Path=BorderThicknessActive}"
+                            Margin="0,0,0,12"
+                            Padding="10"
+                            x:Name="DefaultTempPathCard">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                </Grid.RowDefinitions>
+
+                                <ui:Card
+                                    Grid.RowSpan="2"
+                                    HorizontalAlignment="Left"
+                                    Margin="5,0,5,0"
+                                    VerticalAlignment="Stretch">
+                                    <ui:SymbolIcon
+                                        Foreground="{DynamicResource TextFillColorPrimaryBrush}"
+                                        HorizontalAlignment="Center"
+                                        Symbol="Folder24"
+                                        VerticalAlignment="Center" />
+                                </ui:Card>
+
+                                <StackPanel
+                                    Grid.Column="1"
+                                    Grid.Row="0"
+                                    VerticalAlignment="Top">
+                                    <ui:TextBlock
+                                        FontTypography="BodyStrong"
+                                        Text="Default Temp Path"
+                                        TextWrapping="WrapWithOverflow" />
+                                    <ui:TextBlock
+                                        Appearance="Secondary"
+                                        Opacity="0.5"
+                                        Text="Change the default TEMP path for extracted files."
+                                        TextWrapping="WrapWithOverflow" />
+                                </StackPanel>
+
+                                <ui:Card
+                                    Grid.Column="1"
+                                    Grid.ColumnSpan="2"
+                                    Grid.Row="1"
+                                    Margin="0,5,0,0"
+                                    Padding="5">
+                                    <StackPanel Orientation="Horizontal">
+                                        <ui:TextBox
+                                            HorizontalAlignment="Stretch"
+                                            IsTextSelectionEnabled="True"
+                                            Margin="0,0,10,0"
+                                            PlaceholderText="Default Temp Path"
+                                            Text="{Binding DefaultTempPath, Mode=TwoWay}"
+                                            ToolTip="{Binding DefaultTempPath, Mode=OneWay}"
+                                            VerticalAlignment="Center"
+                                            x:Name="DefaultTempPathTextBox" />
+                                        <ui:Button
+                                            Click="DefaultTempPathChangeButton_OnClick"
+                                            Content="Change"
+                                            Icon="{ui:SymbolIcon Edit24}"
+                                            Margin="0,0,5,0"
+                                            x:Name="DefaultTempPathChangeButton" />
+                                        <ui:Button
+                                            Click="DefaultTempPathResetButton_OnClick"
+                                            Content="Reset"
+                                            Icon="{ui:SymbolIcon ArrowReset24}"
+                                            x:Name="DefaultTempPathResetButton" />
+                                    </StackPanel>
+                                </ui:Card>
+                            </Grid>
+                        </ui:Card>
+                    </StackPanel>
+                </Grid>
+            </ui:PassiveScrollViewer>
+        </Border>
     </Grid>
 </UserControl>

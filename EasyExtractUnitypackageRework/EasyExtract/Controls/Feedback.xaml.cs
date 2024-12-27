@@ -1,4 +1,7 @@
 using System.Text;
+using System.Windows.Media;
+using EasyExtract.Config;
+using EasyExtract.Models;
 using EasyExtract.Services;
 using Newtonsoft.Json;
 
@@ -6,6 +9,8 @@ namespace EasyExtract.Controls;
 
 public partial class Feedback
 {
+    private readonly ConfigHelper _configHelper = new();
+
     public Feedback()
     {
         InitializeComponent();
@@ -108,6 +113,37 @@ public partial class Feedback
             {
                 await DialogHelper.ShowErrorDialogAsync(Window.GetWindow(this), "Error",
                     "An unexpected error occurred. Please check the logs for more information.", "OK");
+            }
+        }
+    }
+
+    private void Feedback_OnSizeChanged(object sender, SizeChangedEventArgs e)
+    {
+        switch (_configHelper.Config.DynamicScalingMode)
+        {
+            case DynamicScalingModes.Off:
+                break;
+
+            case DynamicScalingModes.Simple:
+            {
+                break;
+            }
+            case DynamicScalingModes.Experimental:
+            {
+                var scaleFactor = e.NewSize.Width / 800.0;
+
+                switch (scaleFactor)
+                {
+                    case < 0.5:
+                        scaleFactor = 0.5;
+                        break;
+                    case > 2.0:
+                        scaleFactor = 2.0;
+                        break;
+                }
+
+                RootShadowBorder.LayoutTransform = new ScaleTransform(scaleFactor, scaleFactor);
+                break;
             }
         }
     }

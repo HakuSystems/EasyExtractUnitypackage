@@ -1,4 +1,5 @@
 using System.Collections.ObjectModel;
+using System.Windows.Media;
 using EasyExtract.Config;
 using EasyExtract.Models;
 using EasyExtract.Services;
@@ -162,5 +163,37 @@ public partial class History : UserControl, INotifyPropertyChanged
         NoHistoryLabel.Visibility = Visibility.Visible;
         await ConfigHelper.UpdateConfigAsync();
         await BetterLogger.LogAsync("Cleared all history", Importance.Info); // Log clearing history
+    }
+
+
+    private void History_OnSizeChanged(object sender, SizeChangedEventArgs e)
+    {
+        switch (ConfigHelper.Config.DynamicScalingMode)
+        {
+            case DynamicScalingModes.Off:
+                break;
+
+            case DynamicScalingModes.Simple:
+            {
+                break;
+            }
+            case DynamicScalingModes.Experimental:
+            {
+                var scaleFactor = e.NewSize.Width / 800.0;
+
+                switch (scaleFactor)
+                {
+                    case < 0.5:
+                        scaleFactor = 0.5;
+                        break;
+                    case > 2.0:
+                        scaleFactor = 2.0;
+                        break;
+                }
+
+                RootShadowBorder.LayoutTransform = new ScaleTransform(scaleFactor, scaleFactor);
+                break;
+            }
+        }
     }
 }

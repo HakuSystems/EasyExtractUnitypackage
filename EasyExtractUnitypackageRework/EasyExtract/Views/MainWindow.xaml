@@ -4,9 +4,10 @@
     Background="Transparent"
     FontFamily="{DynamicResource SegoeFluentIcons}"
     Foreground="{DynamicResource TextFillColorPrimaryBrush}"
-    Height="450"
+    MinHeight="450"
+    MinWidth="800"
     ShowInTaskbar="False"
-    Width="800"
+    SizeChanged="MainWindow_OnSizeChanged"
     WindowStartupLocation="CenterScreen"
     WindowStyle="None"
     mc:Ignorable="d"
@@ -16,7 +17,18 @@
     xmlns:gif="https://github.com/XamlAnimatedGif/XamlAnimatedGif"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
-    <StackPanel Background="Transparent">
-        <Image gif:AnimationBehavior.Loaded="AnimationBehavior_OnLoaded" gif:AnimationBehavior.SourceUri="pack://application:,,,/EasyExtract;component/Resources/Gifs/LogoAnimation.gif" />
-    </StackPanel>
+
+    <Grid
+        HorizontalAlignment="Stretch"
+        VerticalAlignment="Stretch"
+        x:Name="RootGrid">
+
+        <Image
+            HorizontalAlignment="Center"
+            Stretch="Uniform"
+            VerticalAlignment="Center"
+            gif:AnimationBehavior.Loaded="AnimationBehavior_OnLoaded"
+            gif:AnimationBehavior.SourceUri="pack://application:,,,/EasyExtract;component/Resources/Gifs/LogoAnimation.gif"
+            x:Name="LogoImage" />
+    </Grid>
 </Window>

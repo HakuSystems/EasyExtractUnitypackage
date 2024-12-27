@@ -4,6 +4,7 @@ namespace EasyExtract.Models;
 
 public class ConfigModel
 {
+    public DynamicScalingModes DynamicScalingMode { get; set; } = DynamicScalingModes.Off; 
     public string AppTitle { get; set; } = "EasyExtractUnitypackage";
     public AvailableThemes ApplicationTheme { get; set; } = AvailableThemes.System;
     public bool EasterEggHeader { get; set; } = true;

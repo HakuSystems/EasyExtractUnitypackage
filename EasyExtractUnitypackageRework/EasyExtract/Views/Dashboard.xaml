@@ -7,12 +7,11 @@
     Focusable="True"
     FontFamily="{DynamicResource SegoeFluentIcons}"
     Foreground="{DynamicResource TextFillColorPrimaryBrush}"
-    Height="900"
     KeyboardNavigation.TabNavigation="Cycle"
     Loaded="Dashboard_OnLoaded"
     ResizeMode="CanResizeWithGrip"
+    SizeChanged="Dashboard_OnSizeChanged"
     Title="{Binding AppTitle}"
-    Width="1600"
     WindowStartupLocation="CenterScreen"
     d:DataContext="{d:DesignInstance configModel:ConfigModel,
                                      IsDesignTimeCreatable=True}"
@@ -28,7 +27,6 @@
     xmlns:extraction="clr-namespace:EasyExtract.Controls"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
-    xmlns:utilities="clr-namespace:EasyExtract.Utilities"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
 
     <Window.Triggers>
@@ -53,218 +51,183 @@
         </MultiBinding>
     </Window.Background>
 
-    <Grid x:Name="DialogHelperGrid">
-        <utilities:DpiDecorator>
-            <Border
-                AutomationProperties.HelpText="Contains the primary UI elements of the application."
-                AutomationProperties.Name="MainContentContainer"
-                Margin="12"
-                x:Name="MainContentBorder">
-                <Border.Effect>
-                    <DropShadowEffect
-                        BlurRadius="10"
-                        Color="#40000000"
-                        Direction="320"
-                        ShadowDepth="6" />
-                </Border.Effect>
+    <Grid
+        HorizontalAlignment="Stretch"
+        VerticalAlignment="Stretch"
+        x:Name="DialogHelperGrid">
+        <Border
+            AutomationProperties.HelpText="Contains the primary UI elements of the application."
+            AutomationProperties.Name="MainContentContainer"
+            HorizontalAlignment="Stretch"
+            Margin="12"
+            VerticalAlignment="Stretch"
+            x:Name="MainContentBorder">
+            <Border.Effect>
+                <DropShadowEffect
+                    BlurRadius="10"
+                    Color="#40000000"
+                    Direction="320"
+                    ShadowDepth="6" />
+            </Border.Effect>
 
-                <Viewbox
-                    AutomationProperties.HelpText="Scales the main interface for different screen resolutions."
-                    AutomationProperties.Name="ScaledMainView"
-                    Opacity="0"
-                    Stretch="Fill"
-                    StretchDirection="Both"
-                    x:Name="MainViewbox">
 
-                    <Grid x:Name="MainGrid">
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="Auto" />
-                            <RowDefinition Height="*" />
-                        </Grid.RowDefinitions>
+            <Grid
+                HorizontalAlignment="Stretch"
+                VerticalAlignment="Stretch"
+                x:Name="MainGrid">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                </Grid.RowDefinitions>
 
-                        <StackPanel
-                            Grid.Row="0"
-                            Margin="0,0,0,8"
-                            Orientation="Horizontal">
-                            <ui:CardControl
-                                AutomationProperties.HelpText="Displays app creators and an optional Easter egg."
-                                AutomationProperties.Name="EasterEggHeader"
-                                Padding="8"
-                                x:Name="EasterEggHeader">
-                                <ui:CardControl.Icon>
-                                    <ui:SymbolIcon
-                                        AutomationProperties.HelpText="Heart icon that triggers Easter egg events."
-                                        AutomationProperties.Name="HeartIcon"
-                                        Foreground="Red"
-                                        HorizontalAlignment="Center"
-                                        Margin="0,0,5,0"
-                                        MouseDown="HeartIcon_OnMouseDown"
-                                        MouseEnter="HeartIcon_OnMouseEnter"
-                                        MouseLeave="HeartIcon_OnMouseLeave"
-                                        Symbol="Heart24"
-                                        VerticalAlignment="Center"
-                                        x:Name="HeartIcon" />
-                                </ui:CardControl.Icon>
-                                <ui:CardControl.Header>
-                                    <StackPanel>
-                                        <ui:TextBlock
-                                            FontTypography="BodyStrong"
-                                            Margin="0,0,0,2"
-                                            Text="Application made by"
-                                            TextWrapping="WrapWithOverflow" />
-                                        <ui:TextBlock
-                                            Appearance="Secondary"
-                                            Opacity="0.6"
-                                            Text="HakuSystems, Jan-Fcloud."
-                                            TextWrapping="WrapWithOverflow" />
-                                        <ui:Button
-                                            Appearance="Secondary"
-                                            AutomationProperties.HelpText="Hides this header section from future display."
-                                            AutomationProperties.Name="DontShowAgainButton"
-                                            Click="DontShowAgainBtn_OnClick"
-                                            Content="Don’t show this again"
-                                            Icon="{ui:SymbolIcon SlideHide24}"
-                                            Margin="5,8,0,0"
-                                            x:Name="DontShowAgainBtn" />
-                                    </StackPanel>
-                                </ui:CardControl.Header>
-                            </ui:CardControl>
-                        </StackPanel>
+                <StackPanel
+                    Grid.Row="0"
+                    HorizontalAlignment="Left"
+                    Margin="0,0,0,8"
+                    Orientation="Horizontal"
+                    VerticalAlignment="Top"
+                    x:Name="HeaderStackPanel">
 
-                        <ui:NavigationView
-                            AutomationProperties.HelpText="Primary navigation for the EasyExtract application."
-                            AutomationProperties.Name="MainNavigation"
-                            FontWeight="DemiBold"
+                    <ui:CardControl
+                        AutomationProperties.HelpText="Displays app creators and an optional Easter egg."
+                        AutomationProperties.Name="EasterEggHeader"
+                        HorizontalAlignment="Left"
+                        Padding="8"
+                        VerticalAlignment="Top"
+                        x:Name="EasterEggHeader">
+                        <ui:CardControl.Icon>
+                            <ui:SymbolIcon
+                                AutomationProperties.HelpText="Heart icon that triggers Easter egg events."
+                                AutomationProperties.Name="HeartIcon"
+                                Foreground="Red"
+                                HorizontalAlignment="Center"
+                                Margin="0,0,5,0"
+                                MouseDown="HeartIcon_OnMouseDown"
+                                MouseEnter="HeartIcon_OnMouseEnter"
+                                MouseLeave="HeartIcon_OnMouseLeave"
+                                Symbol="Heart24"
+                                VerticalAlignment="Center"
+                                x:Name="HeartIcon" />
+                        </ui:CardControl.Icon>
+                        <ui:CardControl.Header>
+                            <StackPanel>
+                                <ui:TextBlock
+                                    FontTypography="BodyStrong"
+                                    Margin="0,0,0,2"
+                                    Text="Application made by"
+                                    TextWrapping="WrapWithOverflow" />
+                                <ui:TextBlock
+                                    Appearance="Secondary"
+                                    Opacity="0.6"
+                                    Text="HakuSystems, Jan-Fcloud."
+                                    TextWrapping="WrapWithOverflow" />
+                                <ui:Button
+                                    Appearance="Secondary"
+                                    AutomationProperties.HelpText="Hides this header section from future display."
+                                    AutomationProperties.Name="DontShowAgainButton"
+                                    Click="DontShowAgainBtn_OnClick"
+                                    Content="Don’t show this again"
+                                    Icon="{ui:SymbolIcon SlideHide24}"
+                                    Margin="5,8,0,0"
+                                    x:Name="DontShowAgainBtn" />
+                            </StackPanel>
+                        </ui:CardControl.Header>
+                    </ui:CardControl>
+                </StackPanel>
+
+                <ui:NavigationView
+                    AutomationProperties.HelpText="Primary navigation for the EasyExtract application."
+                    AutomationProperties.Name="MainNavigation"
+                    FontWeight="DemiBold"
+                    Foreground="{DynamicResource TextFillColorPrimaryBrush}"
+                    Grid.Row="1"
+                    HorizontalAlignment="Stretch"
+                    HorizontalContentAlignment="Stretch"
+                    IsBackButtonVisible="Collapsed"
+                    IsPaneToggleVisible="False"
+                    PaneDisplayMode="Left"
+                    PaneTitle="EasyExtractUnitypackage"
+                    Transition="FadeInWithSlide"
+                    VerticalAlignment="Stretch"
+                    VerticalContentAlignment="Stretch"
+                    x:Name="NavView">
+
+                    <ui:NavigationView.MenuItems>
+                        <ui:NavigationViewItem
+                            Content="Extract"
                             Foreground="{DynamicResource TextFillColorPrimaryBrush}"
-                            Grid.Row="1"
-                            HorizontalAlignment="Stretch"
-                            HorizontalContentAlignment="Stretch"
-                            IsBackButtonVisible="Collapsed"
-                            IsPaneToggleVisible="False"
-                            PaneDisplayMode="Left"
-                            PaneTitle="EasyExtractUnitypackage"
-                            Transition="FadeInWithSlide"
-                            VerticalAlignment="Stretch"
-                            VerticalContentAlignment="Stretch"
-                            x:Name="NavView">
+                            Icon="{ui:SymbolIcon DocumentTextExtract24}"
+                            TargetPageTag="Extraction"
+                            TargetPageType="{x:Type extraction:Extraction}"
+                            x:Name="ExtractionNavBtn" />
 
-                            <ui:NavigationView.MenuItems>
-                                <ui:NavigationViewItem Foreground="Gold" Icon="{ui:SymbolIcon SlideSize24}">
-                                    <ui:NavigationViewItem.Content>
-                                        <StackPanel
-                                            AutomationProperties.HelpText="Informational message about UI resizing."
-                                            AutomationProperties.Name="WeirdResizingSection"
-                                            Margin="12"
-                                            Orientation="Vertical"
-                                            x:Name="WeirdResizingSection">
-                                            <ui:TextBlock
-                                                FontTypography="BodyStrong"
-                                                Margin="0,0,0,8"
-                                                Text="Weird Resizing"
-                                                TextWrapping="WrapWithOverflow" />
-                                            <ui:TextBlock
-                                                Appearance="Secondary"
-                                                Margin="0,0,0,10"
-                                                Opacity="0.6"
-                                                Text="We’re testing a new resizing approach and plan to refine it further in future updates."
-                                                TextWrapping="WrapWithOverflow" />
-                                            <StackPanel Orientation="Vertical">
-                                                <ui:TextBlock
-                                                    Appearance="Tertiary"
-                                                    Margin="0,0,0,4"
-                                                    Text="Already got a better solution for us?"
-                                                    TextWrapping="WrapWithOverflow" />
-                                                <ui:Anchor
-                                                    Appearance="Danger"
-                                                    AutomationProperties.HelpText="Links to Discord profile for feedback or improvement suggestions."
-                                                    AutomationProperties.Name="HelpImproveButton"
-                                                    Content="Tell us and help us improve"
-                                                    Icon="{ui:SymbolIcon Heart24}"
-                                                    NavigateUri="https://discordapp.com/users/657301605195972628"
-                                                    ToolTip="Click to open the developer's Discord profile."
-                                                    x:Name="HelpUsBtn" />
-                                            </StackPanel>
-                                        </StackPanel>
-                                    </ui:NavigationViewItem.Content>
-                                </ui:NavigationViewItem>
+                        <ui:NavigationViewItem
+                            Content="Search"
+                            Foreground="{DynamicResource TextFillColorPrimaryBrush}"
+                            Icon="{ui:SymbolIcon Search24}"
+                            TargetPageTag="SearchEverything"
+                            TargetPageType="{x:Type extraction:SearchEverything}" />
 
-                                <ui:NavigationViewItem
-                                    Content="Extract"
-                                    Foreground="{DynamicResource TextFillColorPrimaryBrush}"
-                                    Icon="{ui:SymbolIcon DocumentTextExtract24}"
-                                    TargetPageTag="Extraction"
-                                    TargetPageType="{x:Type extraction:Extraction}" />
+                        <ui:NavigationViewItem
+                            Content="History"
+                            Foreground="{DynamicResource TextFillColorPrimaryBrush}"
+                            Icon="{ui:SymbolIcon History24}"
+                            TargetPageTag="History"
+                            TargetPageType="{x:Type extraction:History}" />
 
-                                <ui:NavigationViewItem
-                                    Content="Search"
-                                    Foreground="{DynamicResource TextFillColorPrimaryBrush}"
-                                    Icon="{ui:SymbolIcon Search24}"
-                                    TargetPageTag="SearchEverything"
-                                    TargetPageType="{x:Type extraction:SearchEverything}" />
+                        <ui:NavigationViewItem
+                            Content="About"
+                            Foreground="{DynamicResource TextFillColorPrimaryBrush}"
+                            Icon="{ui:SymbolIcon Heart24}"
+                            TargetPageTag="About"
+                            TargetPageType="{x:Type extraction:About}" />
 
-                                <ui:NavigationViewItem
-                                    Content="History"
-                                    Foreground="{DynamicResource TextFillColorPrimaryBrush}"
-                                    Icon="{ui:SymbolIcon History24}"
-                                    TargetPageTag="History"
-                                    TargetPageType="{x:Type extraction:History}" />
+                        <ui:NavigationViewItem
+                            Content="Feedback"
+                            Foreground="{DynamicResource TextFillColorPrimaryBrush}"
+                            Icon="{ui:SymbolIcon PersonFeedback24}"
+                            TargetPageTag="Feedback"
+                            TargetPageType="{x:Type extraction:Feedback}" />
 
-                                <ui:NavigationViewItem
-                                    Content="About"
-                                    Foreground="{DynamicResource TextFillColorPrimaryBrush}"
-                                    Icon="{ui:SymbolIcon Heart24}"
-                                    TargetPageTag="About"
-                                    TargetPageType="{x:Type extraction:About}" />
+                        <ui:NavigationViewItem
+                            AutomationProperties.HelpText="Checks for latest version updates."
+                            AutomationProperties.Name="CheckForUpdatesItem"
+                            Click="CheckForUpdatesNavBtn_OnClick"
+                            Foreground="{DynamicResource TextFillColorPrimaryBrush}"
+                            Icon="{ui:SymbolIcon ArrowSyncCircle24}"
+                            TargetPageTag="Updater"
+                            x:Name="CheckForUpdatesNavBtn">
+                            <ui:NavigationViewItem.Content>
+                                <StackPanel>
+                                    <ui:TextBlock
+                                        FontTypography="BodyStrong"
+                                        Text="Check for updates"
+                                        TextWrapping="WrapWithOverflow"
+                                        x:Name="CheckForUpdatesTxt" />
+                                    <ui:TextBlock
+                                        Appearance="Secondary"
+                                        Opacity="0.6"
+                                        Text="You are up to date."
+                                        TextWrapping="WrapWithOverflow"
+                                        x:Name="CheckForUpdatesDesc" />
+                                </StackPanel>
+                            </ui:NavigationViewItem.Content>
+                        </ui:NavigationViewItem>
+                    </ui:NavigationView.MenuItems>
 
-                                <ui:NavigationViewItem
-                                    Content="Feedback"
-                                    Foreground="{DynamicResource TextFillColorPrimaryBrush}"
-                                    Icon="{ui:SymbolIcon PersonFeedback24}"
-                                    TargetPageTag="Feedback"
-                                    TargetPageType="{x:Type extraction:Feedback}" />
-
-                                <ui:NavigationViewItem
-                                    AutomationProperties.HelpText="Checks for latest version updates."
-                                    AutomationProperties.Name="CheckForUpdatesItem"
-                                    Click="CheckForUpdatesNavBtn_OnClick"
-                                    Foreground="{DynamicResource TextFillColorPrimaryBrush}"
-                                    Icon="{ui:SymbolIcon ArrowSyncCircle24}"
-                                    TargetPageTag="Updater"
-                                    x:Name="CheckForUpdatesNavBtn">
-                                    <ui:NavigationViewItem.Content>
-                                        <StackPanel>
-                                            <ui:TextBlock
-                                                FontTypography="BodyStrong"
-                                                Text="Check for updates"
-                                                TextWrapping="WrapWithOverflow"
-                                                x:Name="CheckForUpdatesTxt" />
-                                            <ui:TextBlock
-                                                Appearance="Secondary"
-                                                Opacity="0.6"
-                                                Text="You are up to date."
-                                                TextWrapping="WrapWithOverflow"
-                                                x:Name="CheckForUpdatesDesc" />
-                                        </StackPanel>
-                                    </ui:NavigationViewItem.Content>
-                                </ui:NavigationViewItem>
-                            </ui:NavigationView.MenuItems>
-
-
-                            <ui:NavigationView.FooterMenuItems>
-                                <ui:NavigationViewItem
-                                    Content="Settings"
-                                    Foreground="{DynamicResource TextFillColorPrimaryBrush}"
-                                    Icon="{ui:SymbolIcon Settings24}"
-                                    TargetPageType="{x:Type extraction:BetterSettings}" />
-                                <ui:NavigationViewItem
-                                    Foreground="{DynamicResource TextFillColorPrimaryBrush}"
-                                    IsEnabled="False"
-                                    x:Name="VersionTxt" />
-                            </ui:NavigationView.FooterMenuItems>
-                        </ui:NavigationView>
-                    </Grid>
-                </Viewbox>
-            </Border>
-        </utilities:DpiDecorator>
+                    <ui:NavigationView.FooterMenuItems>
+                        <ui:NavigationViewItem
+                            Content="Settings"
+                            Foreground="{DynamicResource TextFillColorPrimaryBrush}"
+                            Icon="{ui:SymbolIcon Settings24}"
+                            TargetPageType="{x:Type extraction:BetterSettings}" />
+                        <ui:NavigationViewItem
+                            Foreground="{DynamicResource TextFillColorPrimaryBrush}"
+                            IsEnabled="False"
+                            x:Name="VersionTxt" />
+                    </ui:NavigationView.FooterMenuItems>
+                </ui:NavigationView>
+            </Grid>
+        </Border>
     </Grid>
 </Window>

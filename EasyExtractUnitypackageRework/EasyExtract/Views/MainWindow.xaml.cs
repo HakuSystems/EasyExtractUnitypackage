@@ -67,4 +67,21 @@ public partial class MainWindow
         var ignoredUnityPackagesFolder = Path.Combine(appdataFolder, "IgnoredUnitypackages");
         if (!Directory.Exists(ignoredUnityPackagesFolder)) Directory.CreateDirectory(ignoredUnityPackagesFolder);
     }
+
+    private void MainWindow_OnSizeChanged(object sender, SizeChangedEventArgs e)
+    {
+        // no config call, since this should be always enabled
+        var scaleFactor = e.NewSize.Width / 800.0;
+
+        if (scaleFactor < 1.0)
+        {
+            LogoImage.Width = 400 * scaleFactor;
+            LogoImage.Height = 200 * scaleFactor;
+        }
+        else
+        {
+            LogoImage.Width = double.NaN;
+            LogoImage.Height = double.NaN;
+        }
+    }
 }

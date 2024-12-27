@@ -1,3 +1,4 @@
+using System.Windows.Media;
 using EasyExtract.Config;
 using EasyExtract.Models;
 using EasyExtract.Services;
@@ -27,6 +28,11 @@ public partial class BetterSettings
     {
         try
         {
+            var dynamicScalingMode = Enum.GetValues(typeof(DynamicScalingModes))
+                .Cast<DynamicScalingModes>()
+                .ToList();
+            DynamicScalingComboBox.ItemsSource = dynamicScalingMode;
+
             BorderMenuSwitch.IsChecked = _configHelper.Config.BorderThicknessActive;
             ContextMenuSwitch.IsChecked = _configHelper.Config.ContextMenuToggle;
             SkipIntroLogoAnimationToggleSwitch.IsChecked = _configHelper.Config.IntroLogoAnimation;
@@ -216,5 +222,44 @@ public partial class BetterSettings
     private async void BorderMenuSwitch_OnUnchecked(object sender, RoutedEventArgs e)
     {
         await UpdateBorderThicknessConfigAsync();
+    }
+
+    private void BetterSettings_OnSizeChanged(object sender, SizeChangedEventArgs e)
+    {
+        switch (_configHelper.Config.DynamicScalingMode)
+        {
+            case DynamicScalingModes.Off:
+                break;
+
+            case DynamicScalingModes.Simple:
+            {
+                break;
+            }
+            case DynamicScalingModes.Experimental:
+            {
+                var scaleFactor = e.NewSize.Width / 1100.0;
+                switch (scaleFactor)
+                {
+                    case < 0.5:
+                        scaleFactor = 0.5;
+                        break;
+                    case > 2.0:
+                        scaleFactor = 2.0;
+                        break;
+                }
+
+                RootShadowBorder.LayoutTransform = new ScaleTransform(scaleFactor, scaleFactor);
+                break;
+            }
+        }
+    }
+
+
+    private async void DynamicScalingComboBox_OnSelectionChanged(object sender, SelectionChangedEventArgs e)
+    {
+        if (DynamicScalingComboBox.SelectedItem == null) return;
+        var selectedMode = (DynamicScalingModes)DynamicScalingComboBox.SelectedItem;
+        _configHelper.Config.DynamicScalingMode = selectedMode;
+        await _configHelper.UpdateConfigAsync();
     }
 }

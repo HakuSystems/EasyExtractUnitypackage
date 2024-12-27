@@ -13,7 +13,7 @@ using TextBlock = Wpf.Ui.Controls.TextBlock;
 
 namespace EasyExtract.Views;
 
-public partial class Dashboard
+public partial class Dashboard : Window
 {
     private static Dashboard? _instance;
     private readonly BackgroundManager _backgroundManager = BackgroundManager.Instance;
@@ -200,5 +200,49 @@ public partial class Dashboard
         _configHelper.Config.EasterEggHeader = false;
         await _configHelper.UpdateConfigAsync();
         EasterEggHeader.Visibility = Visibility.Collapsed;
+    }
+
+    private void Dashboard_OnSizeChanged(object sender, SizeChangedEventArgs e)
+    {
+        switch (_configHelper.Config.DynamicScalingMode)
+        {
+            case DynamicScalingModes.Off:
+                DialogHelperGrid.LayoutTransform = Transform.Identity;
+                return;
+            case DynamicScalingModes.Simple:
+            {
+                var scaleFactor = e.NewSize.Width / 1600.0;
+
+                switch (scaleFactor)
+                {
+                    case < 0.5:
+                        scaleFactor = 0.5;
+                        break;
+                    case > 2.0:
+                        scaleFactor = 2.0;
+                        break;
+                }
+
+                DialogHelperGrid.LayoutTransform = new ScaleTransform(scaleFactor, scaleFactor);
+                break;
+            }
+            case DynamicScalingModes.Experimental:
+            {
+                var scaleFactor = e.NewSize.Width / 1600.0;
+
+                switch (scaleFactor)
+                {
+                    case < 0.5:
+                        scaleFactor = 0.5;
+                        break;
+                    case > 2.0:
+                        scaleFactor = 2.0;
+                        break;
+                }
+
+                DialogHelperGrid.LayoutTransform = new ScaleTransform(scaleFactor, scaleFactor);
+                break;
+            }
+        }
     }
 }

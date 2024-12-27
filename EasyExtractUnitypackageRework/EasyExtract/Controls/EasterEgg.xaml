@@ -6,10 +6,9 @@
     Foreground="{DynamicResource TextFillColorPrimaryBrush}"
     KeyboardNavigation.TabNavigation="Cycle"
     Loaded="EasterEgg_OnLoaded"
+    SizeChanged="EasterEgg_OnSizeChanged"
     d:DataContext="{d:DesignInstance configModel:ConfigModel,
                                      IsDesignTimeCreatable=True}"
-    d:DesignHeight="450"
-    d:DesignWidth="800"
     mc:Ignorable="d"
     ui:Design.Background="{DynamicResource ApplicationBackgroundBrush}"
     ui:Design.Foreground="{DynamicResource TextFillColorPrimaryBrush}"
@@ -21,7 +20,6 @@
     xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
 
-    <!--  Subtle fade-in animation for the entire UserControl  -->
     <UserControl.Triggers>
         <EventTrigger RoutedEvent="UserControl.Loaded">
             <BeginStoryboard>
@@ -38,69 +36,68 @@
     </UserControl.Triggers>
 
     <Grid>
-        <Viewbox Stretch="Fill" StretchDirection="Both">
-            <Border
-                AutomationProperties.HelpText="Contains the pulsing heart icon and a thank-you message."
-                AutomationProperties.Name="EasterEggContainer"
-                CornerRadius="10"
-                Margin="12"
-                Opacity="0"
-                x:Name="RootShadowBorder">
-                <Border.Effect>
-                    <DropShadowEffect
-                        BlurRadius="10"
-                        Color="#40000000"
-                        Direction="320"
-                        ShadowDepth="6" />
-                </Border.Effect>
+        <Border
+            AutomationProperties.HelpText="Contains the pulsing heart icon and a thank-you message."
+            AutomationProperties.Name="EasterEggContainer"
+            CornerRadius="10"
+            Margin="12"
+            Opacity="0"
+            x:Name="RootShadowBorder">
+            <Border.Effect>
+                <DropShadowEffect
+                    BlurRadius="10"
+                    Color="#40000000"
+                    Direction="320"
+                    ShadowDepth="6" />
+            </Border.Effect>
 
-                <Grid>
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="*" />
-                        <RowDefinition Height="Auto" />
-                    </Grid.RowDefinitions>
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="*" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
 
-                    <ui:SymbolIcon
-                        AutomationProperties.HelpText="Heart icon that pulsates to show appreciation."
-                        AutomationProperties.Name="PulsingHeartIcon"
-                        FontSize="100"
-                        Foreground="Red"
-                        Grid.Row="0"
-                        Margin="5"
-                        Opacity="0.2"
-                        Symbol="Heart24"
-                        x:Name="HeartIconToAnimate">
-                        <ui:SymbolIcon.Triggers>
-                            <EventTrigger RoutedEvent="Loaded">
-                                <BeginStoryboard>
-                                    <Storyboard>
-                                        <DoubleAnimation
-                                            AutoReverse="True"
-                                            Duration="0:0:0.5"
-                                            From="100"
-                                            RepeatBehavior="Forever"
-                                            Storyboard.TargetName="HeartIconToAnimate"
-                                            Storyboard.TargetProperty="FontSize"
-                                            To="120" />
-                                    </Storyboard>
-                                </BeginStoryboard>
-                            </EventTrigger>
-                        </ui:SymbolIcon.Triggers>
-                    </ui:SymbolIcon>
+                <ui:SymbolIcon
+                    AutomationProperties.HelpText="Heart icon that pulsates to show appreciation."
+                    AutomationProperties.Name="PulsingHeartIcon"
+                    FontSize="100"
+                    Foreground="Red"
+                    Grid.Row="0"
+                    Margin="5"
+                    Opacity="0.2"
+                    Symbol="Heart24"
+                    x:Name="HeartIconToAnimate">
+                    <ui:SymbolIcon.Triggers>
+                        <EventTrigger RoutedEvent="Loaded">
+                            <BeginStoryboard>
+                                <Storyboard>
+                                    <DoubleAnimation
+                                        AutoReverse="True"
+                                        Duration="0:0:0.5"
+                                        From="100"
+                                        RepeatBehavior="Forever"
+                                        Storyboard.TargetName="HeartIconToAnimate"
+                                        Storyboard.TargetProperty="FontSize"
+                                        To="120" />
+                                </Storyboard>
+                            </BeginStoryboard>
+                        </EventTrigger>
+                    </ui:SymbolIcon.Triggers>
+                </ui:SymbolIcon>
 
-                    <TextBlock
-                        AutomationProperties.HelpText="Displays a friendly thank-you message for the user."
-                        AutomationProperties.Name="ThankYouText"
-                        FontSize="30"
-                        FontWeight="Bold"
-                        Grid.Row="0"
-                        HorizontalAlignment="Center"
-                        Margin="5"
-                        Opacity="0.5"
-                        Text="Thanks for using EasyExtract!"
-                        VerticalAlignment="Center" />
-                </Grid>
-            </Border>
-        </Viewbox>
+                <TextBlock
+                    AutomationProperties.HelpText="Displays a friendly thank-you message for the user."
+                    AutomationProperties.Name="ThankYouText"
+                    FontSize="30"
+                    FontWeight="Bold"
+                    Grid.Row="0"
+                    HorizontalAlignment="Center"
+                    Margin="5"
+                    Opacity="0.5"
+                    Text="Thanks for using EasyExtract!"
+                    VerticalAlignment="Center"
+                    x:Name="ThankYouText" />
+            </Grid>
+        </Border>
     </Grid>
 </UserControl>

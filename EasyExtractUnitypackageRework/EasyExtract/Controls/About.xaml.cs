@@ -1,3 +1,4 @@
+using System.Windows.Media;
 using EasyExtract.Config;
 using EasyExtract.Models;
 using EasyExtract.Services;
@@ -84,5 +85,35 @@ public partial class About
     private void ChangeRandomMargins()
     {
         foreach (var card in _cards) card.Margin = RandomMargin();
+    }
+
+    private void About_OnSizeChanged(object sender, SizeChangedEventArgs e)
+    {
+        switch (_configHelper.Config.DynamicScalingMode)
+        {
+            case DynamicScalingModes.Off:
+                break;
+
+            case DynamicScalingModes.Simple:
+            {
+                break;
+            }
+            case DynamicScalingModes.Experimental:
+            {
+                var scaleFactor = e.NewSize.Width / 1530.0;
+                switch (scaleFactor)
+                {
+                    case < 0.5:
+                        scaleFactor = 0.5;
+                        break;
+                    case > 2.0:
+                        scaleFactor = 2.0;
+                        break;
+                }
+
+                RootBorder.LayoutTransform = new ScaleTransform(scaleFactor, scaleFactor);
+                break;
+            }
+        }
     }
 }
