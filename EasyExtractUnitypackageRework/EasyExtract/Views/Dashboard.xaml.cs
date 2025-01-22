@@ -22,7 +22,6 @@ public partial class Dashboard : Window
     public Dashboard()
     {
         InitializeComponent();
-        DataContext = this;
         ThemeMode = ThemeMode.System;
     }
 
@@ -58,8 +57,8 @@ public partial class Dashboard : Window
         Application.Current.ThemeMode = themeMode;
         ThemeMode = themeMode;
         VersionTxt.Content = "V" + Application.ResourceAssembly.GetName().Version;
-        _backgroundManager.UpdateBackground(ConfigHandler.Instance.Config.Backgrounds.BackgroundPath);
-        _backgroundManager.UpdateOpacity(ConfigHandler.Instance.Config.Backgrounds.BackgroundOpacity);
+        await _backgroundManager.UpdateBackground(ConfigHandler.Instance.Config.Backgrounds.BackgroundPath);
+        await _backgroundManager.UpdateOpacity(ConfigHandler.Instance.Config.Backgrounds.BackgroundOpacity);
 
         var isUpToDate = await _updateHandler.IsUpToDateOrUpdate(false);
         var updateAvailable = !isUpToDate;
@@ -82,11 +81,11 @@ public partial class Dashboard : Window
         EasterEggHeader.Visibility =
             ConfigHandler.Instance.Config.EasterEggHeader ? Visibility.Visible : Visibility.Collapsed;
 
-        if (ConfigHandler.Instance.Config.Runs is { IsFirstRun: true })
+        if (ConfigHandler.Instance.Config.FirstRun)
         {
             NavView.Navigate(typeof(About));
             await BetterLogger.LogAsync("First run detected, navigating to About", Importance.Info);
-            ConfigHandler.Instance.Config.Runs.IsFirstRun = false;
+            ConfigHandler.Instance.Config.FirstRun = false;
         }
         else
         {
@@ -125,26 +124,42 @@ public partial class Dashboard : Window
         Grid.SetRowSpan(textBlock, int.MaxValue);
         Grid.SetColumnSpan(textBlock, int.MaxValue);
         MainGrid.Children.Add(textBlock);
-        var fadeInOutAnimation = new DoubleAnimation(0, 1, new Duration(TimeSpan.FromSeconds(1)))
+
+        var fadeInOutAnimation = new DoubleAnimation
         {
+            From = 0,
+            To = 1,
+            Duration = new Duration(TimeSpan.FromSeconds(1)),
             AutoReverse = true,
-            EasingFunction = new SineEase
-            {
-                EasingMode = EasingMode.EaseInOut
-            }
+            EasingFunction = new SineEase { EasingMode = EasingMode.EaseInOut }
+        };
+
+        var scaleAnimation = new DoubleAnimation
+        {
+            From = 1,
+            To = 1.2,
+            Duration = new Duration(TimeSpan.FromSeconds(1)),
+            AutoReverse = true,
+            EasingFunction = new SineEase { EasingMode = EasingMode.EaseInOut }
         };
 
         var storyboard = new Storyboard();
         storyboard.Children.Add(fadeInOutAnimation);
+        storyboard.Children.Add(scaleAnimation);
+
         Storyboard.SetTarget(fadeInOutAnimation, textBlock);
         Storyboard.SetTargetProperty(fadeInOutAnimation, new PropertyPath(OpacityProperty));
 
-        textBlock.BeginAnimation(OpacityProperty, fadeInOutAnimation);
+        Storyboard.SetTarget(scaleAnimation, textBlock.RenderTransform);
+        Storyboard.SetTargetProperty(scaleAnimation, new PropertyPath(ScaleTransform.ScaleXProperty));
 
+        // Link X and Y scaling together for uniform scaling
+        textBlock.RenderTransform.BeginAnimation(ScaleTransform.ScaleYProperty, scaleAnimation);
 
         storyboard.Completed += (_, _) => { MainGrid.Children.Remove(textBlock); };
         storyboard.Begin();
-        await Task.Delay(1000);
+
+        await Task.Delay(TimeSpan.FromSeconds(2));
         NavView.Opacity = 1;
     }
 

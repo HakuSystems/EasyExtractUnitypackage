@@ -116,7 +116,6 @@ public class ConfigHandler
         {
             var json = JsonConvert.SerializeObject(Config, Formatting.Indented);
             await File.WriteAllTextAsync(ConfigPath, json).ConfigureAwait(false);
-            await BetterLogger.LogAsync($"Updated config file at {ConfigPath}", Importance.Debug);
         }
         catch (Exception ex)
         {

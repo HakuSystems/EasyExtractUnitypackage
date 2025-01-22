@@ -28,6 +28,8 @@ public class ConfigModel : INotifyPropertyChanged
     private bool _extractedCategoryStructure = true;
     private ObservableCollection<ExtractedUnitypackageModel> _extractedUnitypackages = new();
 
+    private bool _firstRun;
+
     private ObservableCollection<HistoryModel> _history = new();
     private ObservableCollection<IgnoredPackageInventory> _ignoredUnityPackages = new();
     private bool _introLogoAnimation;
@@ -36,8 +38,6 @@ public class ConfigModel : INotifyPropertyChanged
         Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "EasyExtract", "Extracted");
 
     private string _primaryColorHex = "#2ca7f2"; // Default Color from Colors.xaml
-
-    private RunsModel _runs = new();
     private ObservableCollection<SearchEverythingModel> _searchEverything = new();
     private string _secondaryColorHex = "#4D4D4D"; // Default Color from Colors.xaml
     private string _textColorHex = "#7fc5ff"; // Default Color from Colors.xaml
@@ -257,14 +257,14 @@ public class ConfigModel : INotifyPropertyChanged
         }
     }
 
-    public RunsModel Runs
+    public bool FirstRun
     {
-        get => _runs;
+        get => _firstRun;
         set
         {
-            if (_runs != value)
+            if (_firstRun != value)
             {
-                _runs = value;
+                _firstRun = value;
                 OnPropertyChanged();
             }
         }

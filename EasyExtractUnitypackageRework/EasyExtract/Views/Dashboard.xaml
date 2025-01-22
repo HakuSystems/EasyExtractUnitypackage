@@ -3,6 +3,7 @@
     AllowsTransparency="False"
     AutomationProperties.HelpText="Main application window for EasyExtract, offering navigation, extraction, and additional features."
     AutomationProperties.Name="DashboardWindow"
+    DataContext="{Binding Config, Source={x:Static config:ConfigHandler.Instance}}"
     Drop="Dashboard_OnDrop"
     Focusable="True"
     FontFamily="{DynamicResource GlobalFontFamily}"
