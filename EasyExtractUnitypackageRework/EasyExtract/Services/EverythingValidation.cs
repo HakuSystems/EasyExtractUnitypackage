@@ -1,5 +1,5 @@
 using System.Text;
-using EasyExtract.Models;
+using EasyExtract.Config.Models;
 using EasyExtract.Utilities;
 
 namespace EasyExtract.Services;

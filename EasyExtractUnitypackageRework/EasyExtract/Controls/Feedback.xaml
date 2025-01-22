@@ -6,14 +6,14 @@
     Foreground="{DynamicResource TextFillColorPrimaryBrush}"
     KeyboardNavigation.TabNavigation="Cycle"
     Loaded="Feedback_OnLoaded"
-    d:DataContext="{d:DesignInstance configModel:ConfigModel,
+    d:DataContext="{d:DesignInstance config:ConfigModel,
                                      IsDesignTimeCreatable=True}"
     mc:Ignorable="d"
     ui:Design.Background="{DynamicResource ApplicationBackgroundBrush}"
     ui:Design.Foreground="{DynamicResource TextFillColorPrimaryBrush}"
     x:Class="EasyExtract.Controls.Feedback"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-    xmlns:configModel="clr-namespace:EasyExtract.Models"
+    xmlns:config="clr-namespace:EasyExtract.Config"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"

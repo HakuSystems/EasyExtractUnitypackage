@@ -1,7 +1,7 @@
 using System.Globalization;
 using System.IO.Compression;
 using EasyExtract.Config;
-using EasyExtract.Models;
+using EasyExtract.Config.Models;
 using EasyExtract.Utilities;
 using SharpCompress.Readers.Tar;
 

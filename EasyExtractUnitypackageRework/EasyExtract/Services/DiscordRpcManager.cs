@@ -1,7 +1,7 @@
 using DiscordRPC;
 using DiscordRPC.Exceptions;
 using EasyExtract.Config;
-using EasyExtract.Models;
+using EasyExtract.Config.Models;
 using EasyExtract.Utilities;
 using Application = System.Windows.Application;
 

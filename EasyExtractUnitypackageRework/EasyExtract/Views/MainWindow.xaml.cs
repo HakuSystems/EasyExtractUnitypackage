@@ -1,5 +1,5 @@
 ﻿using EasyExtract.Config;
-using EasyExtract.Models;
+using EasyExtract.Config.Models;
 using EasyExtract.Services;
 using EasyExtract.Utilities;
 

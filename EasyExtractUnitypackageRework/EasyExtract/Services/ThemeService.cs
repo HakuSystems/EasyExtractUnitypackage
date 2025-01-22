@@ -1,4 +1,5 @@
-﻿using EasyExtract.Models;
+﻿using EasyExtract.Config;
+using EasyExtract.Config.Models;
 using EasyExtract.Utilities;
 
 namespace EasyExtract.Services;

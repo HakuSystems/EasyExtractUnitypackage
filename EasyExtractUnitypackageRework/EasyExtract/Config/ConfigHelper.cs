@@ -1,5 +1,5 @@
 using AutoMapper;
-using EasyExtract.Models;
+using EasyExtract.Config.Models;
 using EasyExtract.Utilities;
 using Newtonsoft.Json;
 

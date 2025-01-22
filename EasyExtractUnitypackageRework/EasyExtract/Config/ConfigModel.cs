@@ -1,6 +1,7 @@
 using System.Collections.ObjectModel;
+using EasyExtract.Config.Models;
 
-namespace EasyExtract.Models;
+namespace EasyExtract.Config;
 
 public class ConfigModel : INotifyPropertyChanged
 {

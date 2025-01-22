@@ -1,7 +1,7 @@
 ﻿using EasyExtract.Config;
 using EasyExtract.Services;
 using EasyExtract.Utilities;
-using Importance = EasyExtract.Models.Importance;
+using Importance = EasyExtract.Config.Models.Importance;
 
 namespace EasyExtract.Core;
 

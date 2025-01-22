@@ -1,6 +1,6 @@
 using System.Windows.Media;
 
-namespace EasyExtract.Models;
+namespace EasyExtract.Config.Models;
 
 public class ExtractedFiles : INotifyPropertyChanged
 {
@@ -105,27 +105,15 @@ public class ExtractedFiles : INotifyPropertyChanged
         }
     }
 
-    private string unityFileMessasge
-    {
-        get => $"Category: {Category} / File Size: {Size}";
-    }
+    private string unityFileMessasge => $"Category: {Category} / File Size: {Size}";
 
 
-    public string UnityFileMessasge
-    {
-        get => unityFileMessasge;
-    }
+    public string UnityFileMessasge => unityFileMessasge;
 
-    private string unityFileMessasgeTooltip
-    {
-        get => $"Category: {Category}\nFile Size: {Size}";
-    }
+    private string unityFileMessasgeTooltip => $"Category: {Category}\nFile Size: {Size}";
 
 
-    public string UnityFileMessasgeTooltip
-    {
-        get => unityFileMessasgeTooltip;
-    }
+    public string UnityFileMessasgeTooltip => unityFileMessasgeTooltip;
 
     public event PropertyChangedEventHandler? PropertyChanged;
 

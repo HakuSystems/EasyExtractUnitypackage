@@ -1,6 +1,6 @@
 using System.Windows.Media;
 using EasyExtract.Config;
-using EasyExtract.Models;
+using EasyExtract.Config.Models;
 using EasyExtract.Services;
 using EasyExtract.Utilities;
 using Wpf.Ui.Controls;

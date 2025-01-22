@@ -1,7 +1,7 @@
 using System.Windows.Media;
 using Wpf.Ui.Controls;
 
-namespace EasyExtract.Models;
+namespace EasyExtract.Config.Models;
 
 public class ExtractedUnitypackageModel : INotifyPropertyChanged
 {
@@ -39,55 +39,36 @@ public class ExtractedUnitypackageModel : INotifyPropertyChanged
     private int unitypackageTotalScriptCount;
     private int unitypackageTotalShaderCount;
 
-    private string linkDetectionCountMessage
-    {
-        get => LinkDetectionCount > 0
+    private string linkDetectionCountMessage =>
+        LinkDetectionCount > 0
             ? $"Possible Link(s) Detected: {LinkDetectionCount}"
             : "No Links Detected";
-    }
 
-    private string malicousDiscordWebhookCountMessage
-    {
-        get => MalicousDiscordWebhookCount > 0
+    private string malicousDiscordWebhookCountMessage =>
+        MalicousDiscordWebhookCount > 0
             ? $"Possible Malicious Discord Webhook(s): {MalicousDiscordWebhookCount}"
             : "No Malicious Discord Webhooks Found";
-    }
 
 
-    private string unitypackageTotalFileCountMessage
-    {
-        get => $"Total Files: {UnitypackageTotalFileCount:N2} / Package Size: {UnitypackageSize}";
-    }
+    private string unitypackageTotalFileCountMessage =>
+        $"Total Files: {UnitypackageTotalFileCount:N2} / Package Size: {UnitypackageSize}";
 
-    public string LinkDetectionCountMessage
-    {
-        get => linkDetectionCountMessage;
-    }
+    public string LinkDetectionCountMessage => linkDetectionCountMessage;
 
-    public string MalicousDiscordWebhookCountMessage
-    {
-        get => malicousDiscordWebhookCountMessage;
-    }
+    public string MalicousDiscordWebhookCountMessage => malicousDiscordWebhookCountMessage;
 
-    public string UnitypackageTotalFileCountMessage
-    {
-        get => unitypackageTotalFileCountMessage;
-    }
+    public string UnitypackageTotalFileCountMessage => unitypackageTotalFileCountMessage;
 
 
-    public SolidColorBrush GetCurrentLinkDetectionColor
-    {
-        get => LinkDetectionCount > 0
+    public SolidColorBrush GetCurrentLinkDetectionColor =>
+        LinkDetectionCount > 0
             ? new SolidColorBrush(Colors.Red)
             : new SolidColorBrush(Colors.Green);
-    }
 
-    public SolidColorBrush GetCurrentMalicousDiscordWebhookColor
-    {
-        get => MalicousDiscordWebhookCount > 0
+    public SolidColorBrush GetCurrentMalicousDiscordWebhookColor =>
+        MalicousDiscordWebhookCount > 0
             ? new SolidColorBrush(Colors.Red)
             : new SolidColorBrush(Colors.Green);
-    }
 
 
     public bool PackageIsChecked
@@ -350,12 +331,10 @@ public class ExtractedUnitypackageModel : INotifyPropertyChanged
         }
     }
 
-    public Dictionary<string, List<ExtractedFiles>> SubdirectoryItemsGroupedByCategory
-    {
-        get => SubdirectoryItems
+    public Dictionary<string, List<ExtractedFiles>> SubdirectoryItemsGroupedByCategory =>
+        SubdirectoryItems
             .GroupBy(file => file.Category)
             .ToDictionary(group => group.Key, group => group.ToList());
-    }
 
     public event PropertyChangedEventHandler PropertyChanged;
 

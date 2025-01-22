@@ -1,4 +1,4 @@
-﻿using EasyExtract.Models;
+﻿using EasyExtract.Config;
 
 namespace EasyExtract.Services;
 
@@ -10,7 +10,7 @@ public class ContrastCheckerService
     public ContrastCheckerService(ConfigModel config)
     {
         _config = config;
-        _colorConverter = new ColorConverter(); 
+        _colorConverter = new ColorConverter();
 
         EnsureContrastBindings();
     }

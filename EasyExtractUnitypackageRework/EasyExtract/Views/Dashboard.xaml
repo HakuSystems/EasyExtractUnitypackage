@@ -13,7 +13,7 @@
     SizeChanged="Dashboard_OnSizeChanged"
     Title="{Binding AppTitle}"
     WindowStartupLocation="CenterScreen"
-    d:DataContext="{d:DesignInstance configModel:ConfigModel,
+    d:DataContext="{d:DesignInstance config:ConfigModel,
                                      IsDesignTimeCreatable=True}"
     mc:Ignorable="d"
     ui:Design.Background="{DynamicResource ApplicationBackgroundBrush}"
@@ -21,7 +21,7 @@
     x:Class="EasyExtract.Views.Dashboard"
     x:Name="DashboardWindow"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-    xmlns:configModel="clr-namespace:EasyExtract.Models"
+    xmlns:config="clr-namespace:EasyExtract.Config"
     xmlns:customDesign="clr-namespace:EasyExtract.Services"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:extraction="clr-namespace:EasyExtract.Controls"
