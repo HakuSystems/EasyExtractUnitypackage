@@ -9,12 +9,12 @@
     <Application.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
-                <ResourceDictionary
-                    Source="pack://application:,,,/PresentationFramework.Fluent;component/Themes/Fluent.xaml" />
+                <ResourceDictionary Source="pack://application:,,,/PresentationFramework.Fluent;component/Themes/Fluent.xaml" />
                 <ui:ControlsDictionary />
+                <ResourceDictionary Source="../Resources/Colors.xaml" />
             </ResourceDictionary.MergedDictionaries>
             <utilities:BackgroundAndOpacityConverter x:Key="BackgroundAndOpacityConverter" />
-            <FontFamily x:Key="SegoeFluentIcons">pack://application:,,,/;component/Fonts/#Segoe Fluent Icons</FontFamily>
+            <FontFamily x:Key="GlobalFontFamily">/EasyExtract;component/../Fonts/#Poppins</FontFamily>
         </ResourceDictionary>
     </Application.Resources>
 </Application>

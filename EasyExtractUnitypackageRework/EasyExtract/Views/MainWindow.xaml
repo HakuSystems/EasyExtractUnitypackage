@@ -2,7 +2,7 @@
     AllowDrop="True"
     AllowsTransparency="True"
     Background="Transparent"
-    FontFamily="{DynamicResource SegoeFluentIcons}"
+    FontFamily="{DynamicResource GlobalFontFamily}"
     Foreground="{DynamicResource TextFillColorPrimaryBrush}"
     MinHeight="450"
     MinWidth="800"

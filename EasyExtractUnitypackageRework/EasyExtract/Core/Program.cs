@@ -9,8 +9,6 @@ namespace EasyExtract.Core;
 
 public class Program
 {
-    private readonly ConfigHelper _configHelper = new();
-
     public async Task Run(string[] args)
     {
         try
@@ -18,7 +16,8 @@ public class Program
             await BetterLogger.LogAsync($"Run method invoked with arguments: {string.Join(", ", args)}",
                 Importance.Info);
 
-            var requireAdmin = !Debugger.IsAttached && _configHelper.Config.ContextMenuToggle && !IsRunningAsAdmin() &&
+            var requireAdmin = !Debugger.IsAttached && ConfigHandler.Instance.Config.ContextMenuToggle &&
+                               !IsRunningAsAdmin() &&
                                !args.Contains("--elevated");
 
             if (requireAdmin)
@@ -47,7 +46,7 @@ public class Program
             }
 
             await DeleteContextMenu();
-            if (_configHelper.Config.ContextMenuToggle) await RegisterContextMenu();
+            if (ConfigHandler.Instance.Config.ContextMenuToggle) await RegisterContextMenu();
 
             var app = new App();
             app.InitializeComponent();
@@ -78,7 +77,8 @@ public class Program
                 }
                 catch (ArgumentException ex)
                 {
-                    await BetterLogger.LogAsync($"Registry argument error: {ex.Message} - Subkey path: {contextMenuPath}",
+                    await BetterLogger.LogAsync(
+                        $"Registry argument error: {ex.Message} - Subkey path: {contextMenuPath}",
                         Importance.Error);
                 }
                 catch (UnauthorizedAccessException ex)
@@ -160,7 +160,8 @@ public class Program
 
                 string command;
                 if (versionComparison > 0)
-                    command = $"\"{Assembly.GetExecutingAssembly().Location.Replace(".dll", ".exe")}\" {commandSuffix} \"%1\"";
+                    command =
+                        $"\"{Assembly.GetExecutingAssembly().Location.Replace(".dll", ".exe")}\" {commandSuffix} \"%1\"";
                 else
                     // If assembly version is <= 2.0.6.3
                     command = $"\"{Assembly.GetExecutingAssembly().Location}\" {commandSuffix} \"%1\"";

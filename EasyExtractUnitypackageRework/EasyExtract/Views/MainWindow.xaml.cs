@@ -10,8 +10,6 @@ namespace EasyExtract.Views;
 /// </summary>
 public partial class MainWindow
 {
-    private readonly ConfigHelper _configHelper = new();
-
     public MainWindow()
     {
         InitializeComponent();
@@ -23,7 +21,7 @@ public partial class MainWindow
         await DiscordRpcManager.Instance.DiscordStart();
         await GenerateAllNecessaryFiles();
 
-        if (!_configHelper.Config.IntroLogoAnimation)
+        if (!ConfigHandler.Instance.Config.IntroLogoAnimation)
         {
             var timer = new DispatcherTimer
             {
