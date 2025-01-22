@@ -15,32 +15,7 @@ public partial class EasterEgg
 
     private async void EasterEgg_OnLoaded(object sender, RoutedEventArgs e)
     {
-        bool isDiscordEnabled;
-        try
-        {
-            isDiscordEnabled = ConfigHandler.Instance.Config.DiscordRpc;
-        }
-        catch (Exception exception)
-        {
-            Console.WriteLine(exception);
-            await BetterLogger.LogAsync($"Error reading config: {exception.Message}",
-                Importance.Error); // Log error
-            throw;
-        }
-
-        if (isDiscordEnabled)
-            try
-            {
-                await DiscordRpcManager.Instance.UpdatePresenceAsync("Easter Egg");
-            }
-            catch (Exception exception)
-            {
-                Console.WriteLine(exception);
-                await BetterLogger.LogAsync($"Error updating Discord presence: {exception.Message}",
-                    Importance.Error); // Log error
-                throw;
-            }
-
+        await DiscordRpcManager.Instance.TryUpdatePresenceAsync("EasterEgg");
         await BetterLogger.LogAsync("EasterEgg UserControl loaded",
             Importance.Info); // Log successful load
     }

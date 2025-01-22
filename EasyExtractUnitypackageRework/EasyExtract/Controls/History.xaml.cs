@@ -58,30 +58,7 @@ public partial class History : UserControl, INotifyPropertyChanged
 
     private async void History_OnLoaded(object sender, RoutedEventArgs e)
     {
-        var isDiscordEnabled = false;
-        try
-        {
-            isDiscordEnabled = ConfigHandler.Instance.Config.DiscordRpc;
-        }
-        catch (Exception exception)
-        {
-            await BetterLogger.LogAsync($"Error reading config: {exception.Message}",
-                Importance.Error); // Log error
-            throw;
-        }
-
-        if (isDiscordEnabled)
-            try
-            {
-                await DiscordRpcManager.Instance.UpdatePresenceAsync("History");
-            }
-            catch (Exception exception)
-            {
-                await BetterLogger.LogAsync($"Error updating Discord presence: {exception.Message}",
-                    Importance.Error); // Log error
-                throw;
-            }
-
+        await DiscordRpcManager.Instance.TryUpdatePresenceAsync("History");
         TotalExtracted = ConfigHandler.Instance.Config.TotalExtracted;
         TotalFilesExtracted = ConfigHandler.Instance.Config.TotalFilesExtracted;
         await LoadHistory();

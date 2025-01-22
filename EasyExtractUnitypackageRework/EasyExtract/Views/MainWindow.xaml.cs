@@ -1,6 +1,5 @@
 ﻿using EasyExtract.Config;
 using EasyExtract.Config.Models;
-using EasyExtract.Services;
 using EasyExtract.Utilities;
 
 namespace EasyExtract.Views;
@@ -18,7 +17,6 @@ public partial class MainWindow
     private async void AnimationBehavior_OnLoaded(object sender, RoutedEventArgs e)
     {
         await BetterLogger.LogAsync("Application started", Importance.Info);
-        await DiscordRpcManager.Instance.DiscordStart();
         await GenerateAllNecessaryFiles();
 
         if (!ConfigHandler.Instance.Config.IntroLogoAnimation)

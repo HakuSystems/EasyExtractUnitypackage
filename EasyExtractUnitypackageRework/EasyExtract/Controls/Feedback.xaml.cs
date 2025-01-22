@@ -22,12 +22,7 @@ public partial class Feedback
     private async void Feedback_OnLoaded(object sender, RoutedEventArgs e)
     {
         GetDiscordUsername();
-        await UpdateDiscordPresence();
-    }
-
-    private static async Task UpdateDiscordPresence()
-    {
-        await DiscordRpcManager.Instance.UpdatePresenceAsync("Feedback");
+        await DiscordRpcManager.Instance.TryUpdatePresenceAsync("Feedback");
     }
 
     private void GetDiscordUsername()

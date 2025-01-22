@@ -64,27 +64,7 @@ public partial class SearchEverything : UserControl, INotifyPropertyChanged
             await BetterLogger.LogAsync("Everything search started", Importance.Info);
         }
 
-        var isDiscordEnabled = false;
-        try
-        {
-            isDiscordEnabled = ConfigHandler.Instance.Config.DiscordRpc;
-        }
-        catch (Exception exception)
-        {
-            await BetterLogger.LogAsync($"Error reading config: {exception.Message}", Importance.Error);
-            throw;
-        }
-
-        if (isDiscordEnabled)
-            try
-            {
-                await DiscordRpcManager.Instance.UpdatePresenceAsync("Search Everything");
-            }
-            catch (Exception exception)
-            {
-                await BetterLogger.LogAsync($"Error updating Discord presence: {exception.Message}", Importance.Error);
-                throw;
-            }
+        await DiscordRpcManager.Instance.TryUpdatePresenceAsync("Search Everything");
     }
 
     private async void LoopList()

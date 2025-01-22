@@ -46,31 +46,7 @@ public partial class About
         repeatTimer.Tick += (_, _) => ChangeRandomMargins();
         repeatTimer.Start();
 
-        bool isDiscordEnabled;
-        try
-        {
-            isDiscordEnabled = ConfigHandler.Instance.Config.DiscordRpc;
-        }
-        catch (Exception exception)
-        {
-            Console.WriteLine(exception);
-            await BetterLogger.LogAsync($"Error reading config: {exception.Message}",
-                Importance.Error); // Log error
-            throw;
-        }
-
-        if (isDiscordEnabled)
-            try
-            {
-                await DiscordRpcManager.Instance.UpdatePresenceAsync("About");
-            }
-            catch (Exception exception)
-            {
-                Console.WriteLine(exception);
-                await BetterLogger.LogAsync($"Error updating Discord presence: {exception.Message}",
-                    Importance.Error); // Log error
-                throw;
-            }
+        await DiscordRpcManager.Instance.TryUpdatePresenceAsync("About");
 
         await BetterLogger.LogAsync("About UserControl loaded", Importance.Info); // Log successful load
     }

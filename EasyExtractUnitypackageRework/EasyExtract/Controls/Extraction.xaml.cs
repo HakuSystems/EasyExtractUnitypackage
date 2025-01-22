@@ -383,7 +383,7 @@ public partial class Extraction : UserControl, INotifyPropertyChanged
     private async void Extraction_OnLoaded(object sender, RoutedEventArgs e)
     {
         await CalculateScrollerHeightAsync();
-        await UpdateDiscordPresenceState();
+        await DiscordRpcManager.Instance.TryUpdatePresenceAsync("Extraction");
 
         await UpdateQueueHeaderAsync();
         await UpdateInfoBadgesAsync();
@@ -507,36 +507,6 @@ public partial class Extraction : UserControl, INotifyPropertyChanged
         }));
     }
 
-    /// <summary>
-    ///     Updates the presence state of the Discord client.
-    /// </summary>
-    /// <remarks>
-    ///     This method checks if Discord RPC is enabled in the configuration and updates the presence state accordingly.
-    /// </remarks>
-    private async Task UpdateDiscordPresenceState()
-    {
-        var isDiscordEnabled = false;
-        try
-        {
-            isDiscordEnabled = ConfigHandler.Instance.Config.DiscordRpc;
-        }
-        catch (Exception exception)
-        {
-            Console.WriteLine(exception);
-            throw;
-        }
-
-        if (isDiscordEnabled)
-            try
-            {
-                await DiscordRpcManager.Instance.UpdatePresenceAsync("Extraction");
-            }
-            catch (Exception exception)
-            {
-                Console.WriteLine(exception);
-                throw;
-            }
-    }
 
     /// <summary>
     ///     Updates the header of the queue asynchronously based on the current count of items in the queue.

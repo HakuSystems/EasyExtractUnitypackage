@@ -103,7 +103,7 @@ public partial class BetterSettings
     private async void DiscordRpcToggleSwitch_OnChecked(object sender, RoutedEventArgs e)
     {
         ConfigHandler.Instance.Config.DiscordRpc = DiscordRpcToggleSwitch.IsChecked ?? false;
-        await DiscordRpcManager.Instance.UpdatePresenceAsync("Settings");
+        await DiscordRpcManager.Instance.TryUpdatePresenceAsync("Settings");
     }
 
     private async void DiscordRpcToggleSwitch_OnUnchecked(object sender, RoutedEventArgs e)
