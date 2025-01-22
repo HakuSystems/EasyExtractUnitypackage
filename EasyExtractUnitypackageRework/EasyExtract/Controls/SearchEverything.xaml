@@ -62,8 +62,7 @@
 
                     <!--  2) Creation Date Filter Card  -->
                     <StackPanel Orientation="Vertical">
-                        <ui:Card AutomationProperties.HelpText="Enables filtering results by creation date."
-                                 AutomationProperties.Name="CreationDateFilterCardOuter">
+                        <ui:Card AutomationProperties.HelpText="Enables filtering results by creation date." AutomationProperties.Name="CreationDateFilterCardOuter">
                             <ui:ToggleSwitch
                                 Checked="CreationDateFilterSwitch_OnChecked"
                                 Unchecked="CreationDateFilterSwitch_OnUnchecked"

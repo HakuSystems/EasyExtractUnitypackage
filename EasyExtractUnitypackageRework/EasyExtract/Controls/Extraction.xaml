@@ -28,7 +28,6 @@
 
 
     <Grid x:Name="MainGrid">
-
         <ui:PassiveScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto">
             <Grid>
                 <Grid.RowDefinitions>
@@ -71,9 +70,7 @@
                                     <StackPanel Orientation="Horizontal">
                                         <StackPanel>
                                             <ui:TextBlock
-                                                FontSize="24"
                                                 FontTypography="Title"
-                                                FontWeight="Bold"
                                                 Margin="5"
                                                 Text="Queue"
                                                 x:Name="QueueHeaderText" />
@@ -104,9 +101,8 @@
                                                             Text="{Binding UnityPackageName}"
                                                             TextWrapping="WrapWithOverflow" />
                                                         <ui:TextBlock
-                                                            Appearance="Secondary"
+                                                            FontTypography="Caption"
                                                             HorizontalAlignment="Left"
-                                                            Opacity="0.5"
                                                             Text="{Binding UnityPackagePath}"
                                                             TextWrapping="WrapWithOverflow" />
                                                     </StackPanel>
@@ -157,9 +153,9 @@
                                         x:Name="ExtractionBtn" />
                                 </StackPanel>
                                 <ui:TextBlock
+                                    FontTypography="Body"
                                     HorizontalAlignment="Center"
                                     Margin="5"
-                                    Opacity="0.5"
                                     Text="Drag and drop is enabled"
                                     VerticalAlignment="Top" />
                             </StackPanel>
@@ -200,9 +196,7 @@
                                 x:Name="ExtractedPackagesExpander">
                                 <ui:CardExpander.Header>
                                     <ui:TextBlock
-                                        FontSize="24"
                                         FontTypography="Title"
-                                        FontWeight="Bold"
                                         Margin="5"
                                         Text="All Extracted Unitypackages" />
                                 </ui:CardExpander.Header>
@@ -320,12 +314,12 @@
                                                             VerticalAlignment="Center" />
                                                         <StackPanel Orientation="Vertical">
                                                             <ui:TextBlock
-                                                                FontWeight="Bold"
+                                                                FontTypography="BodyStrong"
                                                                 Margin="5"
                                                                 Text="{Binding UnitypackageName}"
                                                                 TextWrapping="Wrap" />
                                                             <ui:TextBlock
-                                                                FontWeight="UltraLight"
+                                                                FontTypography="Body"
                                                                 Margin="5"
                                                                 Text="{Binding UnitypackageTotalFileCountMessage}"
                                                                 TextWrapping="Wrap" />
@@ -350,7 +344,7 @@
                                                     <HierarchicalDataTemplate.ItemTemplate>
                                                         <HierarchicalDataTemplate ItemsSource="{Binding Path=Value}">
                                                             <ui:TextBlock
-                                                                FontWeight="Bold"
+                                                                FontTypography="BodyStrong"
                                                                 Margin="20,0,0,0"
                                                                 Text="{Binding Key}" />
 
@@ -379,12 +373,12 @@
                                                                                             <StackPanel
                                                                                                 Orientation="Vertical">
                                                                                                 <ui:TextBlock
-                                                                                                    FontWeight="Bold"
+                                                                                                    FontTypography="BodyStrong"
                                                                                                     Margin="5"
                                                                                                     Text="{Binding FileName}"
                                                                                                     TextWrapping="Wrap" />
                                                                                                 <ui:TextBlock
-                                                                                                    FontWeight="UltraLight"
+                                                                                                    FontTypography="Body"
                                                                                                     Margin="5"
                                                                                                     Text="{Binding UnityFileMessasgeTooltip}"
                                                                                                     TextWrapping="Wrap" />
@@ -424,12 +418,12 @@
                                                                             Width="35" />
                                                                         <StackPanel Orientation="Vertical">
                                                                             <ui:TextBlock
-                                                                                FontWeight="Bold"
+                                                                                FontTypography="BodyStrong"
                                                                                 Margin="5"
                                                                                 Text="{Binding FileName}"
                                                                                 TextWrapping="Wrap" />
                                                                             <ui:TextBlock
-                                                                                FontWeight="UltraLight"
+                                                                                FontTypography="Body"
                                                                                 Margin="5"
                                                                                 Text="{Binding UnityFileMessasge}"
                                                                                 TextWrapping="Wrap" />
@@ -478,9 +472,7 @@
                                     <StackPanel Orientation="Horizontal">
                                         <StackPanel>
                                             <ui:TextBlock
-                                                FontSize="24"
                                                 FontTypography="Title"
-                                                FontWeight="Bold"
                                                 Margin="5"
                                                 Text="Ignored" />
                                         </StackPanel>
@@ -510,9 +502,8 @@
                                                             Text="{Binding IgnoredUnityPackageName}"
                                                             TextWrapping="WrapWithOverflow" />
                                                         <ui:TextBlock
-                                                            Appearance="Secondary"
+                                                            FontTypography="Caption"
                                                             HorizontalAlignment="Left"
-                                                            Opacity="0.5"
                                                             Text="{Binding IgnoredReason}"
                                                             TextWrapping="WrapWithOverflow" />
                                                     </StackPanel>
@@ -549,6 +540,7 @@
                         <StatusBarItem.Content>
                             <StackPanel Orientation="Horizontal">
                                 <ui:TextBlock
+                                    FontTypography="Caption"
                                     Margin="5"
                                     VerticalAlignment="Center"
                                     x:Name="StatusBarText" />
@@ -559,6 +551,7 @@
                                     VerticalAlignment="Center"
                                     x:Name="StatusProgressBar" />
                                 <ui:TextBlock
+                                    FontTypography="Caption"
                                     Margin="5"
                                     VerticalAlignment="Center"
                                     x:Name="StatusBarDetailsTxt" />
