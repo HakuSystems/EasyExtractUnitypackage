@@ -1,13 +1,12 @@
 using EasyExtract.Config;
 using EasyExtract.Models;
 using EasyExtract.Utilities;
+using Octokit;
 
 namespace EasyExtract.Services;
 
 public class UpdateHandler
 {
-    private readonly ConfigHelper _configHelper = new();
-
     public async Task<bool> IsUpToDateOrUpdate(bool updateIfNeeded)
     {
         var latestRelease = await GetLatestReleaseAsync();
@@ -179,8 +178,8 @@ public class UpdateHandler
         try
         {
             var client = new GitHubClient(new ProductHeaderValue("GitHubUpdater"));
-            var releases = await client.Repository.Release.GetAll(_configHelper.Config.Update.RepoOwner,
-                _configHelper.Config.Update.RepoName);
+            var releases = await client.Repository.Release.GetAll(ConfigHandler.Instance.Config.Update.RepoOwner,
+                ConfigHandler.Instance.Config.Update.RepoName);
             var latestRelease = releases.FirstOrDefault();
             if (latestRelease.ToString().Contains("API rate limit exceeded"))
             {
