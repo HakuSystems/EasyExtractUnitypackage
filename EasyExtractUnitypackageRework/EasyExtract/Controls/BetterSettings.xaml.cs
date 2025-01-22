@@ -232,7 +232,7 @@ public partial class BetterSettings
                         break;
                 }
 
-                RootShadowBorder.LayoutTransform = new ScaleTransform(scaleFactor, scaleFactor);
+                MainGrid.LayoutTransform = new ScaleTransform(scaleFactor, scaleFactor);
                 break;
             }
         }

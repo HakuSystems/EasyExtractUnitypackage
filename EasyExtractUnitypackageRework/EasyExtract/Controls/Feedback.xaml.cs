@@ -137,7 +137,7 @@ public partial class Feedback
                         break;
                 }
 
-                RootShadowBorder.LayoutTransform = new ScaleTransform(scaleFactor, scaleFactor);
+                MainGrid.LayoutTransform = new ScaleTransform(scaleFactor, scaleFactor);
                 break;
             }
         }

@@ -45,7 +45,7 @@ public partial class EasterEgg
                         break;
                 }
 
-                RootShadowBorder.LayoutTransform = new ScaleTransform(scaleFactor, scaleFactor);
+                MainGrid.LayoutTransform = new ScaleTransform(scaleFactor, scaleFactor);
                 break;
             }
         }

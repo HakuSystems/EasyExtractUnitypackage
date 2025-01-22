@@ -86,7 +86,7 @@ public partial class About
                         break;
                 }
 
-                RootBorder.LayoutTransform = new ScaleTransform(scaleFactor, scaleFactor);
+                MainGrid.LayoutTransform = new ScaleTransform(scaleFactor, scaleFactor);
                 break;
             }
         }

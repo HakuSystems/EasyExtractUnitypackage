@@ -19,176 +19,146 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
-    <!--  Subtle fade-in animation  -->
-    <UserControl.Triggers>
-        <EventTrigger RoutedEvent="UserControl.Loaded">
-            <BeginStoryboard>
-                <Storyboard>
-                    <DoubleAnimation
-                        Duration="0:0:0.35"
-                        From="0"
-                        Storyboard.TargetName="RootShadowBorder"
-                        Storyboard.TargetProperty="Opacity"
-                        To="1" />
-                </Storyboard>
-            </BeginStoryboard>
-        </EventTrigger>
-    </UserControl.Triggers>
 
-    <Grid>
-        <Border
-            AutomationProperties.HelpText="Main container for history information."
-            AutomationProperties.Name="HistoryContainer"
-            CornerRadius="10"
-            Margin="12"
-            Opacity="0"
-            x:Name="RootShadowBorder">
-            <Border.Effect>
-                <DropShadowEffect
-                    BlurRadius="10"
-                    Color="#40000000"
-                    Direction="320"
-                    ShadowDepth="6" />
-            </Border.Effect>
+    <Grid x:Name="MainGrid">
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="2*" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
 
-            <Grid>
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto" />
-                    <RowDefinition Height="2*" />
-                    <RowDefinition Height="Auto" />
-                </Grid.RowDefinitions>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*" />
-                    <ColumnDefinition Width="*" />
-                </Grid.ColumnDefinitions>
+            <ui:CardExpander
+                AutomationProperties.HelpText="Displays the total number of individual files extracted by EasyExtract."
+                AutomationProperties.Name="TotalFilesExtractedExpander"
+                Content="{Binding TotalFilesExtracted}"
+                Grid.Column="0"
+                Grid.Row="0"
+                Header="Total Files Extracted"
+                Icon="{ui:SymbolIcon Document24}"
+                IsEnabled="False"
+                IsExpanded="True"
+                Margin="15"
+                x:Name="FilesExtractedCardExpander" />
 
-                <ui:CardExpander
-                    AutomationProperties.HelpText="Displays the total number of individual files extracted by EasyExtract."
-                    AutomationProperties.Name="TotalFilesExtractedExpander"
-                    Content="{Binding TotalFilesExtracted}"
-                    Grid.Column="0"
-                    Grid.Row="0"
-                    Header="Total Files Extracted"
-                    Icon="{ui:SymbolIcon Document24}"
-                    IsEnabled="False"
-                    IsExpanded="True"
-                    Margin="15"
-                    x:Name="FilesExtractedCardExpander" />
+            <ui:CardExpander
+                AutomationProperties.HelpText="Displays the total number of .unitypackage files extracted."
+                AutomationProperties.Name="TotalUnityPackagesExtractedExpander"
+                Content="{Binding TotalExtracted}"
+                Grid.Column="1"
+                Grid.Row="0"
+                Header="Total Unitypackages Extracted"
+                Icon="{ui:SymbolIcon DocumentHeartPulse24}"
+                IsEnabled="False"
+                IsExpanded="True"
+                Margin="15"
+                x:Name="UnityPackagesExtractedCardExpander" />
 
-                <ui:CardExpander
-                    AutomationProperties.HelpText="Displays the total number of .unitypackage files extracted."
-                    AutomationProperties.Name="TotalUnityPackagesExtractedExpander"
-                    Content="{Binding TotalExtracted}"
-                    Grid.Column="1"
-                    Grid.Row="0"
-                    Header="Total Unitypackages Extracted"
-                    Icon="{ui:SymbolIcon DocumentHeartPulse24}"
-                    IsEnabled="False"
-                    IsExpanded="True"
-                    Margin="15"
-                    x:Name="UnityPackagesExtractedCardExpander" />
-
-                <ui:ListView
-                    AutomationProperties.HelpText="Lists previously extracted .unitypackage files with dates and file paths."
-                    AutomationProperties.Name="HistoryListView"
-                    Grid.Column="0"
-                    Grid.ColumnSpan="2"
-                    Grid.Row="1"
-                    HorizontalAlignment="Stretch"
-                    HorizontalContentAlignment="Stretch"
-                    ItemsSource="{Binding Path=History}"
-                    Margin="15"
-                    x:Name="HistoryListView">
-                    <ui:ListView.ItemTemplate>
-                        <DataTemplate>
-                            <ui:CardControl>
-                                <ui:CardControl.Icon>
-                                    <ui:SymbolIcon
-                                        HorizontalAlignment="Center"
-                                        Margin="0,0,5,0"
-                                        Symbol="FolderZip24"
-                                        VerticalAlignment="Center" />
-                                </ui:CardControl.Icon>
-                                <ui:CardControl.Header>
+            <ui:ListView
+                AutomationProperties.HelpText="Lists previously extracted .unitypackage files with dates and file paths."
+                AutomationProperties.Name="HistoryListView"
+                Grid.Column="0"
+                Grid.ColumnSpan="2"
+                Grid.Row="1"
+                HorizontalAlignment="Stretch"
+                HorizontalContentAlignment="Stretch"
+                ItemsSource="{Binding Path=History}"
+                Margin="15"
+                x:Name="HistoryListView">
+                <ui:ListView.ItemTemplate>
+                    <DataTemplate>
+                        <ui:CardControl>
+                            <ui:CardControl.Icon>
+                                <ui:SymbolIcon
+                                    HorizontalAlignment="Center"
+                                    Margin="0,0,5,0"
+                                    Symbol="FolderZip24"
+                                    VerticalAlignment="Center" />
+                            </ui:CardControl.Icon>
+                            <ui:CardControl.Header>
+                                <StackPanel>
                                     <StackPanel>
-                                        <StackPanel>
-                                            <ui:TextBlock
-                                                FontTypography="BodyStrong"
-                                                Text="{Binding FileName}"
-                                                TextWrapping="WrapWithOverflow" />
-                                            <ui:TextBlock
-                                                Appearance="Secondary"
-                                                Opacity="0.5"
-                                                Text="{Binding ExtractedPath}"
-                                                TextWrapping="WrapWithOverflow" />
-                                        </StackPanel>
-                                        <StackPanel HorizontalAlignment="Center" Orientation="Vertical">
-                                            <ui:TextBlock
-                                                FontTypography="BodyStrong"
-                                                Opacity="0.2"
-                                                Text="{Binding ExtractedDate}"
-                                                TextWrapping="WrapWithOverflow" />
-                                        </StackPanel>
+                                        <ui:TextBlock
+                                            FontTypography="BodyStrong"
+                                            Text="{Binding FileName}"
+                                            TextWrapping="WrapWithOverflow" />
+                                        <ui:TextBlock
+                                            Appearance="Secondary"
+                                            Opacity="0.5"
+                                            Text="{Binding ExtractedPath}"
+                                            TextWrapping="WrapWithOverflow" />
                                     </StackPanel>
-                                </ui:CardControl.Header>
-
-                                <ui:Card>
-                                    <StackPanel Orientation="Horizontal">
-                                        <ui:Button
-                                            AutomationProperties.HelpText="Opens the folder where the file was extracted."
-                                            AutomationProperties.Name="OpenFolderButton"
-                                            Click="OpenFolderButton_OnClick"
-                                            Icon="{ui:SymbolIcon OpenFolder24}"
-                                            Margin="5"
-                                            ToolTip="Open Folder"
-                                            x:Name="OpenFolderButton" />
-                                        <ui:Button
-                                            AutomationProperties.HelpText="Deletes the item from the history list."
-                                            AutomationProperties.Name="DeleteHistoryButton"
-                                            Click="DeleteBtn_OnClick"
-                                            Icon="{ui:SymbolIcon Delete24}"
-                                            Margin="5"
-                                            ToolTip="Delete"
-                                            x:Name="DeleteBtn" />
+                                    <StackPanel HorizontalAlignment="Center" Orientation="Vertical">
+                                        <ui:TextBlock
+                                            FontTypography="BodyStrong"
+                                            Opacity="0.2"
+                                            Text="{Binding ExtractedDate}"
+                                            TextWrapping="WrapWithOverflow" />
                                     </StackPanel>
-                                </ui:Card>
-                            </ui:CardControl>
-                        </DataTemplate>
-                    </ui:ListView.ItemTemplate>
-                </ui:ListView>
+                                </StackPanel>
+                            </ui:CardControl.Header>
 
-                <StackPanel
-                    AutomationProperties.HelpText="Button to clear history and label if none is found."
-                    AutomationProperties.Name="HistoryBottomSection"
-                    Grid.Column="0"
-                    Grid.ColumnSpan="2"
-                    Grid.Row="2"
+                            <ui:Card>
+                                <StackPanel Orientation="Horizontal">
+                                    <ui:Button
+                                        AutomationProperties.HelpText="Opens the folder where the file was extracted."
+                                        AutomationProperties.Name="OpenFolderButton"
+                                        Click="OpenFolderButton_OnClick"
+                                        Icon="{ui:SymbolIcon OpenFolder24}"
+                                        Margin="5"
+                                        ToolTip="Open Folder"
+                                        x:Name="OpenFolderButton" />
+                                    <ui:Button
+                                        AutomationProperties.HelpText="Deletes the item from the history list."
+                                        AutomationProperties.Name="DeleteHistoryButton"
+                                        Click="DeleteBtn_OnClick"
+                                        Icon="{ui:SymbolIcon Delete24}"
+                                        Margin="5"
+                                        ToolTip="Delete"
+                                        x:Name="DeleteBtn" />
+                                </StackPanel>
+                            </ui:Card>
+                        </ui:CardControl>
+                    </DataTemplate>
+                </ui:ListView.ItemTemplate>
+            </ui:ListView>
+
+            <StackPanel
+                AutomationProperties.HelpText="Button to clear history and label if none is found."
+                AutomationProperties.Name="HistoryBottomSection"
+                Grid.Column="0"
+                Grid.ColumnSpan="2"
+                Grid.Row="2"
+                HorizontalAlignment="Center"
+                Margin="0,10,0,10"
+                Orientation="Vertical"
+                VerticalAlignment="Bottom"
+                x:Name="HistoryBottomSection">
+
+                <ui:Button
+                    AutomationProperties.HelpText="Clears all history entries."
+                    AutomationProperties.Name="ClearHistoryButton"
+                    Click="ClearHistoryButton_OnClick"
+                    Content="Clear History"
                     HorizontalAlignment="Center"
-                    Margin="0,10,0,10"
-                    Orientation="Vertical"
-                    VerticalAlignment="Bottom"
-                    x:Name="HistoryBottomSection">
+                    Icon="{ui:SymbolIcon Subtract24}"
+                    VerticalAlignment="Center"
+                    x:Name="ClearHistoryButton" />
 
-                    <ui:Button
-                        AutomationProperties.HelpText="Clears all history entries."
-                        AutomationProperties.Name="ClearHistoryButton"
-                        Click="ClearHistoryButton_OnClick"
-                        Content="Clear History"
-                        HorizontalAlignment="Center"
-                        Icon="{ui:SymbolIcon Subtract24}"
-                        VerticalAlignment="Center"
-                        x:Name="ClearHistoryButton" />
+                <Label
+                    AutomationProperties.HelpText="Appears when there are no history records."
+                    AutomationProperties.Name="NoHistoryLabel"
+                    Content="No History Found"
+                    HorizontalAlignment="Center"
+                    VerticalAlignment="Center"
+                    Visibility="Visible"
+                    x:Name="NoHistoryLabel" />
+            </StackPanel>
+        </Grid>
 
-                    <Label
-                        AutomationProperties.HelpText="Appears when there are no history records."
-                        AutomationProperties.Name="NoHistoryLabel"
-                        Content="No History Found"
-                        HorizontalAlignment="Center"
-                        VerticalAlignment="Center"
-                        Visibility="Visible"
-                        x:Name="NoHistoryLabel" />
-                </StackPanel>
-            </Grid>
-        </Border>
     </Grid>
 </UserControl>

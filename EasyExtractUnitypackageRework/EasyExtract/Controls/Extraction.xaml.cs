@@ -1201,7 +1201,7 @@ public partial class Extraction : UserControl, INotifyPropertyChanged
                         break;
                 }
 
-                RootShadowBorder.LayoutTransform = new ScaleTransform(scaleFactor, scaleFactor);
+                MainGrid.LayoutTransform = new ScaleTransform(scaleFactor, scaleFactor);
                 break;
             }
         }
