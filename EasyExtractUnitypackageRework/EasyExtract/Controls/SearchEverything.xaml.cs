@@ -9,7 +9,6 @@ namespace EasyExtract.Controls;
 public partial class SearchEverything : UserControl, INotifyPropertyChanged
 {
     private readonly List<SearchEverythingModel> _allSearchResults = new();
-    private readonly ConfigHelper _configHelper = new();
     private readonly EverythingValidation _everythingValidation = new();
     private List<SearchEverythingModel>? _searchEverythingList;
 
@@ -68,7 +67,7 @@ public partial class SearchEverything : UserControl, INotifyPropertyChanged
         var isDiscordEnabled = false;
         try
         {
-            isDiscordEnabled = _configHelper.Config.DiscordRpc;
+            isDiscordEnabled = ConfigHandler.Instance.Config.DiscordRpc;
         }
         catch (Exception exception)
         {
@@ -311,7 +310,7 @@ public partial class SearchEverything : UserControl, INotifyPropertyChanged
 
     private void SearchEverything_OnSizeChanged(object sender, SizeChangedEventArgs e)
     {
-        switch (_configHelper.Config.DynamicScalingMode)
+        switch (ConfigHandler.Instance.Config.DynamicScalingMode)
         {
             case DynamicScalingModes.Off:
                 break;

@@ -2,7 +2,7 @@
     AutomationProperties.HelpText="Allows users to search for .unitypackage files and add them to the queue."
     AutomationProperties.Name="SearchEverythingScreen"
     Focusable="True"
-    FontFamily="{DynamicResource SegoeFluentIcons}"
+    FontFamily="{DynamicResource GlobalFontFamily}"
     Foreground="{DynamicResource TextFillColorPrimaryBrush}"
     KeyboardNavigation.TabNavigation="Cycle"
     Loaded="SearchEverything_OnLoaded"
