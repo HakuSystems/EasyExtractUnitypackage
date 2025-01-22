@@ -49,7 +49,7 @@ public partial class BetterSettings
             CheckForUpdatesOnStartUpToggleSwitch.IsChecked = ConfigHandler.Instance.Config.Update.AutoUpdate;
             DiscordRpcToggleSwitch.IsChecked = ConfigHandler.Instance.Config.DiscordRpc;
             DefaultTempPathTextBox.Text = ConfigHandler.Instance.Config.DefaultTempPath;
-            BackgroundOpacitySlider.Value = ConfigHandler.Instance.Config.Backgrounds.BackgroundOpacity;
+            BackgroundOpacitySlider.Value = ConfigHandler.Instance.Config.CustomBackgroundImage.BackgroundOpacity;
             await BetterLogger.LogAsync("UI updated to match config", Importance.Info);
         }
         catch (Exception ex)
@@ -77,12 +77,12 @@ public partial class BetterSettings
     private async void BackgroundOpacitySlider_OnValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
     {
         var currentBackground = _backgroundManager.CurrentBackground;
-        ConfigHandler.Instance.Config.Backgrounds.BackgroundOpacity = (float)BackgroundOpacitySlider.Value;
-        ConfigHandler.Instance.Config.Backgrounds.BackgroundPath =
+        ConfigHandler.Instance.Config.CustomBackgroundImage.BackgroundOpacity = (float)BackgroundOpacitySlider.Value;
+        ConfigHandler.Instance.Config.CustomBackgroundImage.BackgroundPath =
             currentBackground.ImageSource
                 .ToString(); // Save the current background path
         // since it's not saved in the config when changing opacity.
-        _backgroundManager.UpdateOpacity(ConfigHandler.Instance.Config.Backgrounds.BackgroundOpacity);
+        _backgroundManager.UpdateOpacity(ConfigHandler.Instance.Config.CustomBackgroundImage.BackgroundOpacity);
     }
 
     private async void CheckForUpdatesOnStartUpToggleSwitch_OnChecked(object sender, RoutedEventArgs e)
@@ -123,7 +123,7 @@ public partial class BetterSettings
 
     private async void BackgroundChangeButton_OnClick(object sender, RoutedEventArgs e)
     {
-        ConfigHandler.Instance.Config.Backgrounds.BackgroundPath = string.Empty;
+        ConfigHandler.Instance.Config.CustomBackgroundImage.BackgroundPath = string.Empty;
         var openFileDialog = new OpenFileDialog
         {
             Filter = "Image Files (*.jpg, *.jpeg, *.png)|*.jpg;*.jpeg;*.png",
@@ -131,15 +131,15 @@ public partial class BetterSettings
         };
         var result = openFileDialog.ShowDialog();
         if (result != true) return;
-        ConfigHandler.Instance.Config.Backgrounds.BackgroundPath = openFileDialog.FileName;
+        ConfigHandler.Instance.Config.CustomBackgroundImage.BackgroundPath = openFileDialog.FileName;
 
-        _backgroundManager.UpdateBackground(ConfigHandler.Instance.Config.Backgrounds.BackgroundPath);
-        _backgroundManager.UpdateOpacity(ConfigHandler.Instance.Config.Backgrounds.BackgroundOpacity);
+        _backgroundManager.UpdateBackground(ConfigHandler.Instance.Config.CustomBackgroundImage.BackgroundPath);
+        _backgroundManager.UpdateOpacity(ConfigHandler.Instance.Config.CustomBackgroundImage.BackgroundOpacity);
     }
 
     private async void BackgroundResetButton_OnClick(object sender, RoutedEventArgs e)
     {
-        ConfigHandler.Instance.Config.Backgrounds.BackgroundPath = string.Empty;
+        ConfigHandler.Instance.Config.CustomBackgroundImage.BackgroundPath = string.Empty;
         _backgroundManager.ResetBackground();
     }
 

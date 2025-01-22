@@ -57,8 +57,8 @@ public partial class Dashboard : Window
         Application.Current.ThemeMode = themeMode;
         ThemeMode = themeMode;
         VersionTxt.Content = "V" + Application.ResourceAssembly.GetName().Version;
-        await _backgroundManager.UpdateBackground(ConfigHandler.Instance.Config.Backgrounds.BackgroundPath);
-        await _backgroundManager.UpdateOpacity(ConfigHandler.Instance.Config.Backgrounds.BackgroundOpacity);
+        await _backgroundManager.UpdateBackground(ConfigHandler.Instance.Config.CustomBackgroundImage.BackgroundPath);
+        await _backgroundManager.UpdateOpacity(ConfigHandler.Instance.Config.CustomBackgroundImage.BackgroundOpacity);
 
         var isUpToDate = await _updateHandler.IsUpToDateOrUpdate(false);
         var updateAvailable = !isUpToDate;

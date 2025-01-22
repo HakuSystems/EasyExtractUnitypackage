@@ -9,13 +9,13 @@ public class ConfigModel : INotifyPropertyChanged
     private AvailableThemes _applicationTheme = AvailableThemes.System;
     private string _appTitle = "EasyExtractUnitypackage";
     private string _backgroundColorHex = "#2b2b2b"; // Default Color from Colors.xaml
-    private BackgroundModel _backgrounds = new();
     private bool _borderThicknessActive;
     private bool _contextMenuToggle = true;
     private string _currentThemeComponentsContrast = "N/A";
     private string _currentThemeContrastRatio = "N/A";
     private string _currentThemeHeadlinesContrast = "N/A";
     private string _currentThemeTextContrast = "N/A";
+    private BackgroundModel _custombackgroundImage = new();
 
     private string _defaultTempPath =
         Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "EasyExtract", "Temp");
@@ -426,14 +426,14 @@ public class ConfigModel : INotifyPropertyChanged
         }
     }
 
-    public BackgroundModel Backgrounds
+    public BackgroundModel CustomBackgroundImage
     {
-        get => _backgrounds;
+        get => _custombackgroundImage;
         set
         {
-            if (_backgrounds != value)
+            if (_custombackgroundImage != value)
             {
-                _backgrounds = value;
+                _custombackgroundImage = value;
                 OnPropertyChanged();
             }
         }

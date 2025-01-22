@@ -456,7 +456,7 @@
                                                 Maximum="1"
                                                 Minimum="0"
                                                 ToolTip="Set the opacity of the background wallpaper"
-                                                Value="{Binding Backgrounds.BackgroundOpacity, Mode=TwoWay}"
+                                                Value="{Binding CustomBackgroundImage.BackgroundOpacity, Mode=TwoWay}"
                                                 ValueChanged="BackgroundOpacitySlider_OnValueChanged"
                                                 VerticalAlignment="Center"
                                                 x:Name="BackgroundOpacitySlider" />

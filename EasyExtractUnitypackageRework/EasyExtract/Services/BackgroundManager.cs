@@ -78,7 +78,7 @@ public class BackgroundManager : INotifyPropertyChanged
                 Opacity = BackgroundOpacity,
                 Stretch = Stretch.Fill
             };
-            ConfigHandler.Instance.Config.Backgrounds.BackgroundPath = uri.ToString();
+            ConfigHandler.Instance.Config.CustomBackgroundImage.BackgroundPath = uri.ToString();
             await UpdateBackground(uri.ToString());
             await BetterLogger.LogAsync("Background reset to default",
                 Importance.Info); // Log background reset
@@ -99,7 +99,7 @@ public class BackgroundManager : INotifyPropertyChanged
     {
         BackgroundOpacity = opacity;
         _currentBackground.Opacity = opacity;
-        ConfigHandler.Instance.Config.Backgrounds.BackgroundOpacity = opacity;
+        ConfigHandler.Instance.Config.CustomBackgroundImage.BackgroundOpacity = opacity;
     }
 
     private void OnPropertyChanged(string propertyName)
