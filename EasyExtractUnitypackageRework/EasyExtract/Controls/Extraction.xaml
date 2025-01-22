@@ -4,7 +4,7 @@
     AutomationProperties.Name="ExtractionScreen"
     Drop="Extraction_OnDrop"
     Focusable="True"
-    FontFamily="{DynamicResource SegoeFluentIcons}"
+    FontFamily="{DynamicResource GlobalFontFamily}"
     Foreground="{DynamicResource TextFillColorPrimaryBrush}"
     KeyboardNavigation.TabNavigation="Cycle"
     Loaded="Extraction_OnLoaded"

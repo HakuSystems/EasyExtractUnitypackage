@@ -3,13 +3,12 @@ using System.IO.Compression;
 using EasyExtract.Config;
 using EasyExtract.Models;
 using EasyExtract.Utilities;
+using SharpCompress.Readers.Tar;
 
 namespace EasyExtract.Services;
 
 public class ExtractionHandler
 {
-    private readonly ConfigHelper _configHelper = new();
-
     public async Task ExtractUnitypackageFromContextMenu(string path)
     {
         var unitypackage = new SearchEverythingModel
@@ -55,7 +54,7 @@ public class ExtractionHandler
     {
         if (unitypackage.UnityPackageName != null)
         {
-            var tempFolder = Path.Combine(_configHelper.Config.DefaultTempPath, unitypackage.UnityPackageName);
+            var tempFolder = Path.Combine(ConfigHandler.Instance.Config.DefaultTempPath, unitypackage.UnityPackageName);
             await DeleteIfDirectoryExists(tempFolder);
             await BetterLogger.LogAsync($"Temporary folder path set to: {tempFolder}",
                 Importance.Info);
@@ -69,7 +68,8 @@ public class ExtractionHandler
     {
         if (unitypackage.UnityPackageName != null)
         {
-            var targetFolder = Path.Combine(_configHelper.Config.LastExtractedPath, unitypackage.UnityPackageName);
+            var targetFolder = Path.Combine(ConfigHandler.Instance.Config.LastExtractedPath,
+                unitypackage.UnityPackageName);
             await DeleteIfDirectoryExists(targetFolder);
             await BetterLogger.LogAsync($"Target folder path set to: {targetFolder}",
                 Importance.Info);
@@ -105,34 +105,93 @@ public class ExtractionHandler
         }
     }
 
+    //!! recently added fix for corrupted .unitypackage files or Encrypted files
     private async Task ExtractAndWriteFiles(SearchEverythingModel unitypackage, string tempFolder)
     {
-        await Task.Run(() =>
+        List<string> extractedEntries = new();
+        List<string> skippedEntries = new();
+
+        await Task.Run(async () =>
         {
-            using var inStream = File.OpenRead(unitypackage.UnityPackagePath);
-            using var gzipStream = new GZipStream(inStream, CompressionMode.Decompress);
-            using var memoryStream = new MemoryStream();
-            gzipStream.CopyTo(memoryStream);
-            memoryStream.Position = 0;
-            using var archive = ArchiveFactory.Open(memoryStream);
+            try
+            {
+                using var inStream = File.OpenRead(unitypackage.UnityPackagePath);
+                using var gzipStream = new GZipStream(inStream, CompressionMode.Decompress);
 
-            foreach (var entry in archive.Entries.Where(e => !e.IsDirectory))
-                if (entry.Key != null)
+                // Instead of TarArchive.Open, use TarReader for entry-by-entry reading
+                using var reader = TarReader.Open(gzipStream);
+
+                // Move to the next entry one by one
+                while (reader.MoveToNextEntry())
                 {
-                    var filePath = Path.Combine(tempFolder, entry.Key);
+                    var entry = reader.Entry;
 
-                    // Creates all directories and subdirectories as specified by filePath.
+                    // SharpCompress might set IsEncrypted for certain formats that support encryption.
+                    // .tar generally doesn't, but let's check anyway:
+                    if (entry.IsEncrypted)
+                    {
+                        skippedEntries.Add($"{entry.Key} is encrypted. Skipped.");
+                        continue;
+                    }
+
+                    // If it's a directory entry, just skip
+                    if (entry.IsDirectory)
+                        continue;
+
+                    // Attempt to extract
+                    var filePath = Path.Combine(tempFolder, entry.Key);
                     Directory.CreateDirectory(Path.GetDirectoryName(filePath) ?? string.Empty);
 
-                    entry.WriteToFile(filePath, new ExtractionOptions
+                    try
                     {
-                        Overwrite = true
-                    });
+                        // Write the current entry to the file system
+                        using (var fileStream = File.Create(filePath))
+                        {
+                            await Task.Run(() => reader.WriteEntryTo(fileStream));
+                        }
+
+                        extractedEntries.Add(entry.Key);
+                    }
+                    catch (IncompleteArchiveException)
+                    {
+                        // Means the TAR data is corrupted for this entry
+                        skippedEntries.Add($"{entry.Key} is corrupted. Skipped.");
+                    }
+                    catch (Exception ex)
+                    {
+                        // Some other unexpected error
+                        skippedEntries.Add($"{entry.Key} failed: {ex.Message}");
+                    }
                 }
+            }
+            catch (Exception ex)
+            {
+                // If the entire file fails (e.g., not GZIP, not TAR, or truncated at the very beginning),
+                // you land here. Nothing is extracted.
+                await BetterLogger.LogAsync(
+                    $"Failed to iterate TAR file. Possibly corrupted or not a valid .unitypackage. Error: {ex.Message}",
+                    Importance.Error
+                );
+            }
         });
 
-        await BetterLogger.LogAsync($"Extracted and wrote files for {unitypackage.UnityPackageName} to temporary folder",
-            Importance.Info);
+        // Summarize results
+        if (extractedEntries.Any())
+            await BetterLogger.LogAsync(
+                $"Extracted {extractedEntries.Count} file(s) from {unitypackage.UnityPackageName}.",
+                Importance.Info
+            );
+        if (skippedEntries.Any())
+            foreach (var fail in skippedEntries)
+                await BetterLogger.LogAsync(
+                    $"Skipped entry: {fail}",
+                    Importance.Warning
+                );
+        else
+            await BetterLogger.LogAsync(
+                "All entries extracted successfully.",
+                Importance.Info
+            );
     }
 
     private static async Task MoveFilesFromTempToTargetFolder(string tempFolder, string targetFolder)
@@ -164,7 +223,8 @@ public class ExtractionHandler
                 {
                     await MoveFileIfExists(d, "asset", targetFullPath, targetFullFile);
                     await MoveFileIfExists(d, "asset.meta", targetFullPath, targetFullFile + ".meta");
-                    await MoveFileIfExists(d, "preview.png", targetFullPath, targetFullFile + ".EASYEXTRACTPREVIEW.png");
+                    await MoveFileIfExists(d, "preview.png", targetFullPath,
+                        targetFullFile + ".EASYEXTRACTPREVIEW.png");
                 }
             }
             catch (Exception ex)
@@ -178,7 +238,8 @@ public class ExtractionHandler
             Importance.Info);
     }
 
-    private static async Task MoveFileIfExists(string directory, string fileName, string targetFullPath, string targetFullFile)
+    private static async Task MoveFileIfExists(string directory, string fileName, string targetFullPath,
+        string targetFullFile)
     {
         var sourceFilePath = Path.Combine(directory, fileName);
         if (!File.Exists(sourceFilePath)) return;
@@ -190,7 +251,8 @@ public class ExtractionHandler
         }
         catch (IOException ioEx)
         {
-            await BetterLogger.LogAsync($"I/O error while moving file {sourceFilePath} to {targetFullFile}: {ioEx.Message}",
+            await BetterLogger.LogAsync(
+                $"I/O error while moving file {sourceFilePath} to {targetFullFile}: {ioEx.Message}",
                 Importance.Error);
         }
         catch (UnauthorizedAccessException uaEx)

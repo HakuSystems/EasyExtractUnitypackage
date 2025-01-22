@@ -9,7 +9,6 @@ namespace EasyExtract.Controls;
 
 public partial class History : UserControl, INotifyPropertyChanged
 {
-    private readonly ConfigHelper ConfigHelper = new();
     private ObservableCollection<HistoryModel> _history = new();
 
     private int _totalExtracted;
@@ -20,7 +19,7 @@ public partial class History : UserControl, INotifyPropertyChanged
     public History()
     {
         InitializeComponent();
-        DataContext = ConfigHelper.Config;
+        DataContext = ConfigHandler.Instance.Config;
     }
 
 
@@ -62,7 +61,7 @@ public partial class History : UserControl, INotifyPropertyChanged
         var isDiscordEnabled = false;
         try
         {
-            isDiscordEnabled = ConfigHelper.Config.DiscordRpc;
+            isDiscordEnabled = ConfigHandler.Instance.Config.DiscordRpc;
         }
         catch (Exception exception)
         {
@@ -83,8 +82,8 @@ public partial class History : UserControl, INotifyPropertyChanged
                 throw;
             }
 
-        TotalExtracted = ConfigHelper.Config.TotalExtracted;
-        TotalFilesExtracted = ConfigHelper.Config.TotalFilesExtracted;
+        TotalExtracted = ConfigHandler.Instance.Config.TotalExtracted;
+        TotalFilesExtracted = ConfigHandler.Instance.Config.TotalFilesExtracted;
         await LoadHistory();
         await CalculateTotalExtracted();
         await BetterLogger.LogAsync("History loaded and totals calculated",
@@ -106,17 +105,16 @@ public partial class History : UserControl, INotifyPropertyChanged
 
         TotalFilesExtracted = totalFilesExtracted;
         TotalExtracted = totalUnitypackagesExtracted;
-        ConfigHelper.Config.TotalExtracted = totalUnitypackagesExtracted;
-        ConfigHelper.Config.TotalFilesExtracted = totalFilesExtracted;
+        ConfigHandler.Instance.Config.TotalExtracted = totalUnitypackagesExtracted;
+        ConfigHandler.Instance.Config.TotalFilesExtracted = totalFilesExtracted;
 
-        await ConfigHelper.UpdateConfigAsync();
         await BetterLogger.LogAsync("Calculated total extracted files and updated config",
             Importance.Info); // Log calculation
     }
 
     private async Task LoadHistory()
     {
-        if (ConfigHelper.Config.History == null || ConfigHelper.Config.History.Count == 0)
+        if (ConfigHandler.Instance.Config.History == null || ConfigHandler.Instance.Config.History.Count == 0)
         {
             ClearHistoryButton.Visibility = Visibility.Collapsed;
             NoHistoryLabel.Visibility = Visibility.Visible;
@@ -126,7 +124,7 @@ public partial class History : UserControl, INotifyPropertyChanged
 
         ClearHistoryButton.Visibility = Visibility.Visible;
         NoHistoryLabel.Visibility = Visibility.Collapsed;
-        HistoryList = ConfigHelper.Config.History;
+        HistoryList = ConfigHandler.Instance.Config.History;
         await BetterLogger.LogAsync("Loaded history", Importance.Info); // Log history load
     }
 
@@ -145,8 +143,7 @@ public partial class History : UserControl, INotifyPropertyChanged
     {
         if (sender is not Button button || button.DataContext is not HistoryModel history) return;
         HistoryList.Remove(history);
-        ConfigHelper.Config!.History.Remove(history);
-        await ConfigHelper.UpdateConfigAsync();
+        ConfigHandler.Instance.Config!.History.Remove(history);
         await BetterLogger.LogAsync($"Deleted history item: {history.ExtractedPath}",
             Importance.Info); // Log deletion
         if (HistoryList.Count == 0) NoHistoryLabel.Visibility = Visibility.Visible;
@@ -155,20 +152,19 @@ public partial class History : UserControl, INotifyPropertyChanged
     private async void ClearHistoryButton_OnClick(object sender, RoutedEventArgs e)
     {
         HistoryList.Clear();
-        ConfigHelper.Config!.History.Clear();
-        ConfigHelper.Config.TotalExtracted = 0;
-        ConfigHelper.Config.TotalFilesExtracted = 0;
+        ConfigHandler.Instance.Config!.History.Clear();
+        ConfigHandler.Instance.Config.TotalExtracted = 0;
+        ConfigHandler.Instance.Config.TotalFilesExtracted = 0;
         TotalExtracted = 0;
         TotalFilesExtracted = 0;
         NoHistoryLabel.Visibility = Visibility.Visible;
-        await ConfigHelper.UpdateConfigAsync();
         await BetterLogger.LogAsync("Cleared all history", Importance.Info); // Log clearing history
     }
 
 
     private void History_OnSizeChanged(object sender, SizeChangedEventArgs e)
     {
-        switch (ConfigHelper.Config.DynamicScalingMode)
+        switch (ConfigHandler.Instance.Config.DynamicScalingMode)
         {
             case DynamicScalingModes.Off:
                 break;

@@ -9,7 +9,6 @@ namespace EasyExtract.Services;
 public class BackgroundManager : INotifyPropertyChanged
 {
     private static BackgroundManager? _instance;
-    private readonly ConfigHelper _configHelper = new();
     private double _backgroundOpacity;
     private ImageBrush _currentBackground;
 
@@ -23,10 +22,7 @@ public class BackgroundManager : INotifyPropertyChanged
         _backgroundOpacity = 1.0;
     }
 
-    public static BackgroundManager Instance
-    {
-        get => _instance ??= new BackgroundManager();
-    }
+    public static BackgroundManager Instance => _instance ??= new BackgroundManager();
 
     public ImageBrush CurrentBackground
     {
@@ -82,9 +78,8 @@ public class BackgroundManager : INotifyPropertyChanged
                 Opacity = BackgroundOpacity,
                 Stretch = Stretch.Fill
             };
-            _configHelper.Config.Backgrounds.BackgroundPath = uri.ToString();
+            ConfigHandler.Instance.Config.Backgrounds.BackgroundPath = uri.ToString();
             await UpdateBackground(uri.ToString());
-            await _configHelper.UpdateConfigAsync();
             await BetterLogger.LogAsync("Background reset to default",
                 Importance.Info); // Log background reset
         }
@@ -104,8 +99,7 @@ public class BackgroundManager : INotifyPropertyChanged
     {
         BackgroundOpacity = opacity;
         _currentBackground.Opacity = opacity;
-        _configHelper.Config.Backgrounds.BackgroundOpacity = opacity;
-        await _configHelper.UpdateConfigAsync();
+        ConfigHandler.Instance.Config.Backgrounds.BackgroundOpacity = opacity;
     }
 
     private void OnPropertyChanged(string propertyName)

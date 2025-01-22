@@ -11,7 +11,6 @@ namespace EasyExtract.Controls;
 public partial class About
 {
     private readonly List<Card> _cards = new();
-    private readonly ConfigHelper _configHelper = new();
 
     public About()
     {
@@ -50,7 +49,7 @@ public partial class About
         bool isDiscordEnabled;
         try
         {
-            isDiscordEnabled = _configHelper.Config.DiscordRpc;
+            isDiscordEnabled = ConfigHandler.Instance.Config.DiscordRpc;
         }
         catch (Exception exception)
         {
@@ -89,7 +88,7 @@ public partial class About
 
     private void About_OnSizeChanged(object sender, SizeChangedEventArgs e)
     {
-        switch (_configHelper.Config.DynamicScalingMode)
+        switch (ConfigHandler.Instance.Config.DynamicScalingMode)
         {
             case DynamicScalingModes.Off:
                 break;

@@ -10,7 +10,6 @@ namespace EasyExtract.Services;
 public class DiscordRpcManager : IDisposable
 {
     private static DiscordRpcManager? _instance;
-    private static readonly ConfigHelper ConfigHelper = new();
     private readonly Timestamps timestamps;
     internal DiscordRpcClient? Client;
     private bool disposedValue;
@@ -21,10 +20,7 @@ public class DiscordRpcManager : IDisposable
         _ = DiscordStart();
     }
 
-    public static DiscordRpcManager Instance
-    {
-        get => _instance ??= new DiscordRpcManager();
-    }
+    public static DiscordRpcManager Instance => _instance ??= new DiscordRpcManager();
 
     public void Dispose()
     {
@@ -66,8 +62,8 @@ public class DiscordRpcManager : IDisposable
 
     public async Task UpdatePresenceAsync(string state)
     {
-        var unityPackageCount = ConfigHelper.Config.TotalExtracted;
-        var fileCount = ConfigHelper.Config.TotalFilesExtracted;
+        var unityPackageCount = ConfigHandler.Instance.Config.TotalExtracted;
+        var fileCount = ConfigHandler.Instance.Config.TotalFilesExtracted;
         var largeTextString = $"U: {unityPackageCount} | F: {fileCount}";
 
         if (largeTextString.Length > 127)

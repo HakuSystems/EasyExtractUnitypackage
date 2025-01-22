@@ -9,19 +9,15 @@ namespace EasyExtract.Controls;
 
 public partial class Feedback
 {
-    private readonly ConfigHelper _configHelper = new();
-
     public Feedback()
     {
         InitializeComponent();
     }
 
-    private static string SenderName
-    {
-        get => DiscordRpcManager.Instance.Client.CurrentUser != null
+    private static string SenderName =>
+        DiscordRpcManager.Instance.Client.CurrentUser != null
             ? DiscordRpcManager.Instance.Client.CurrentUser.Username
             : "Anonymous";
-    }
 
     private async void Feedback_OnLoaded(object sender, RoutedEventArgs e)
     {
@@ -45,13 +41,15 @@ public partial class Feedback
     {
         if (string.IsNullOrWhiteSpace(FeedbackTextBox.Text))
         {
-            await DialogHelper.ShowErrorDialogAsync(Window.GetWindow(this), "Warning", "Please enter your feedback.", "OK");
+            await DialogHelper.ShowErrorDialogAsync(Window.GetWindow(this), "Warning", "Please enter your feedback.",
+                "OK");
             return;
         }
 
         if (FeedbackSelection.SelectedIndex.Equals(-1))
         {
-            await DialogHelper.ShowErrorDialogAsync(Window.GetWindow(this), "Warning", "Please select your satisfaction level.",
+            await DialogHelper.ShowErrorDialogAsync(Window.GetWindow(this), "Warning",
+                "Please select your satisfaction level.",
                 "OK");
             return;
         }
@@ -88,7 +86,8 @@ public partial class Feedback
                 var response = await client.PostAsync(url, content);
                 if (response.IsSuccessStatusCode)
                 {
-                    await DialogHelper.ShowErrorDialogAsync(Window.GetWindow(this), "Success", "Feedback submitted successfully.",
+                    await DialogHelper.ShowErrorDialogAsync(Window.GetWindow(this), "Success",
+                        "Feedback submitted successfully.",
                         "OK");
                 }
                 else
@@ -100,7 +99,8 @@ public partial class Feedback
                     {
                         string errorMessage = errorResponse.message;
                         string errorStatus = errorResponse.status;
-                        await DialogHelper.ShowErrorDialogAsync(Window.GetWindow(this), errorStatus.ToUpper(), errorMessage, "OK");
+                        await DialogHelper.ShowErrorDialogAsync(Window.GetWindow(this), errorStatus.ToUpper(),
+                            errorMessage, "OK");
                     }
                 }
             }
@@ -119,7 +119,7 @@ public partial class Feedback
 
     private void Feedback_OnSizeChanged(object sender, SizeChangedEventArgs e)
     {
-        switch (_configHelper.Config.DynamicScalingMode)
+        switch (ConfigHandler.Instance.Config.DynamicScalingMode)
         {
             case DynamicScalingModes.Off:
                 break;

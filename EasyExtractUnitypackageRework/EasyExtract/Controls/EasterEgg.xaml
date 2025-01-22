@@ -2,7 +2,7 @@
     AutomationProperties.HelpText="Displays a special thank-you message to users of EasyExtract."
     AutomationProperties.Name="EasterEggScreen"
     Focusable="True"
-    FontFamily="{DynamicResource SegoeFluentIcons}"
+    FontFamily="{DynamicResource GlobalFontFamily}"
     Foreground="{DynamicResource TextFillColorPrimaryBrush}"
     KeyboardNavigation.TabNavigation="Cycle"
     Loaded="EasterEgg_OnLoaded"

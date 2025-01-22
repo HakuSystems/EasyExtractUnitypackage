@@ -2,6 +2,7 @@
     AutomationProperties.HelpText="Displays total files, total unitypackages extracted, and a list of extraction history."
     AutomationProperties.Name="HistoryScreen"
     Focusable="True"
+    FontFamily="{DynamicResource GlobalFontFamily}"
     Foreground="{DynamicResource TextFillColorPrimaryBrush}"
     KeyboardNavigation.TabNavigation="Cycle"
     Loaded="History_OnLoaded"

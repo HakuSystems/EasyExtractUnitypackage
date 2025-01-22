@@ -5,7 +5,7 @@
     AutomationProperties.Name="DashboardWindow"
     Drop="Dashboard_OnDrop"
     Focusable="True"
-    FontFamily="{DynamicResource SegoeFluentIcons}"
+    FontFamily="{DynamicResource GlobalFontFamily}"
     Foreground="{DynamicResource TextFillColorPrimaryBrush}"
     KeyboardNavigation.TabNavigation="Cycle"
     Loaded="Dashboard_OnLoaded"
@@ -36,7 +36,7 @@
                     <DoubleAnimation
                         Duration="0:0:0.35"
                         From="0"
-                        Storyboard.TargetName="MainViewbox"
+                        Storyboard.TargetName="DialogHelperGrid"
                         Storyboard.TargetProperty="Opacity"
                         To="1" />
                 </Storyboard>
@@ -208,33 +208,10 @@
 
                     <ui:NavigationView.FooterMenuItems>
                         <ui:NavigationViewItem
+                            Content="Settings"
                             Foreground="{DynamicResource TextFillColorPrimaryBrush}"
                             Icon="{ui:SymbolIcon Settings24}"
-                            TargetPageType="{x:Type extraction:BetterSettings}">
-                            <StackPanel
-                                Margin="6"
-                                Orientation="Horizontal"
-                                VerticalAlignment="Center">
-                                <TextBlock
-                                    FontSize="14"
-                                    Text="Settings"
-                                    VerticalAlignment="Center" />
-
-                                <Border
-                                    Background="#FF3B30"
-                                    CornerRadius="8"
-                                    Margin="6,0,0,0"
-                                    Padding="6,2"
-                                    VerticalAlignment="Center">
-                                    <TextBlock
-                                        FontSize="10"
-                                        FontWeight="Bold"
-                                        Foreground="White"
-                                        Text="NEW"
-                                        VerticalAlignment="Center" />
-                                </Border>
-                            </StackPanel>
-                        </ui:NavigationViewItem>
+                            TargetPageType="{x:Type extraction:BetterSettings}" />
 
                         <ui:NavigationViewItem
                             Foreground="{DynamicResource TextFillColorPrimaryBrush}"

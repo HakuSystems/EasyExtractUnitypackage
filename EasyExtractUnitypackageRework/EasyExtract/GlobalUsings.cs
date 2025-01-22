@@ -15,7 +15,6 @@ global using System.Windows.Controls;
 global using System.Windows.Media.Imaging;
 global using System.Windows.Threading;
 global using Microsoft.Win32;
-global using Octokit;
 global using Serilog.Events;
 global using SharpCompress.Archives;
 global using SharpCompress.Common;

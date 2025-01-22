@@ -9,19 +9,16 @@ namespace EasyExtract.Controls;
 public partial class BetterSettings
 {
     private readonly BackgroundManager _backgroundManager = BackgroundManager.Instance;
-    private readonly ConfigHelper _configHelper = new();
 
     public BetterSettings()
     {
         InitializeComponent();
-        DataContext = _configHelper.Config;
+        DataContext = ConfigHandler.Instance.Config;
     }
 
     private async void BetterSettings_OnLoaded(object sender, RoutedEventArgs e)
     {
-        await _configHelper.ReadConfigAsync();
         await ChangeUiToMatchConfigAsync();
-        await _configHelper.UpdateConfigAsync();
     }
 
     private async Task ChangeUiToMatchConfigAsync()
@@ -33,10 +30,10 @@ public partial class BetterSettings
                 .ToList();
             DynamicScalingComboBox.ItemsSource = dynamicScalingMode;
 
-            BorderMenuSwitch.IsChecked = _configHelper.Config.BorderThicknessActive;
-            ContextMenuSwitch.IsChecked = _configHelper.Config.ContextMenuToggle;
-            SkipIntroLogoAnimationToggleSwitch.IsChecked = _configHelper.Config.IntroLogoAnimation;
-            UwUToggleSwitch.IsChecked = _configHelper.Config.UwUModeActive;
+            BorderMenuSwitch.IsChecked = ConfigHandler.Instance.Config.BorderThicknessActive;
+            ContextMenuSwitch.IsChecked = ConfigHandler.Instance.Config.ContextMenuToggle;
+            SkipIntroLogoAnimationToggleSwitch.IsChecked = ConfigHandler.Instance.Config.IntroLogoAnimation;
+            UwUToggleSwitch.IsChecked = ConfigHandler.Instance.Config.UwUModeActive;
 
             var themes = Enum.GetValues(typeof(AvailableThemes))
                 .Cast<AvailableThemes>()
@@ -49,10 +46,10 @@ public partial class BetterSettings
                 await BetterLogger.LogAsync($"Available Theme: {theme}", Importance.Info);
 
 
-            CheckForUpdatesOnStartUpToggleSwitch.IsChecked = _configHelper.Config.Update.AutoUpdate;
-            DiscordRpcToggleSwitch.IsChecked = _configHelper.Config.DiscordRpc;
-            DefaultTempPathTextBox.Text = _configHelper.Config.DefaultTempPath;
-            BackgroundOpacitySlider.Value = _configHelper.Config.Backgrounds.BackgroundOpacity;
+            CheckForUpdatesOnStartUpToggleSwitch.IsChecked = ConfigHandler.Instance.Config.Update.AutoUpdate;
+            DiscordRpcToggleSwitch.IsChecked = ConfigHandler.Instance.Config.DiscordRpc;
+            DefaultTempPathTextBox.Text = ConfigHandler.Instance.Config.DefaultTempPath;
+            BackgroundOpacitySlider.Value = ConfigHandler.Instance.Config.Backgrounds.BackgroundOpacity;
             await BetterLogger.LogAsync("UI updated to match config", Importance.Info);
         }
         catch (Exception ex)
@@ -69,8 +66,7 @@ public partial class BetterSettings
 
     private async Task UwUToggleSwitchCheckUnCheck()
     {
-        _configHelper.Config.UwUModeActive = UwUToggleSwitch.IsChecked ?? false;
-        await _configHelper.UpdateConfigAsync();
+        ConfigHandler.Instance.Config.UwUModeActive = UwUToggleSwitch.IsChecked ?? false;
     }
 
     private async void UwUToggleSwitch_OnUnchecked(object sender, RoutedEventArgs e)
@@ -81,13 +77,12 @@ public partial class BetterSettings
     private async void BackgroundOpacitySlider_OnValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
     {
         var currentBackground = _backgroundManager.CurrentBackground;
-        _configHelper.Config.Backgrounds.BackgroundOpacity = (float)BackgroundOpacitySlider.Value;
-        _configHelper.Config.Backgrounds.BackgroundPath =
+        ConfigHandler.Instance.Config.Backgrounds.BackgroundOpacity = (float)BackgroundOpacitySlider.Value;
+        ConfigHandler.Instance.Config.Backgrounds.BackgroundPath =
             currentBackground.ImageSource
                 .ToString(); // Save the current background path
         // since it's not saved in the config when changing opacity.
-        _backgroundManager.UpdateOpacity(_configHelper.Config.Backgrounds.BackgroundOpacity);
-        await _configHelper.UpdateConfigAsync();
+        _backgroundManager.UpdateOpacity(ConfigHandler.Instance.Config.Backgrounds.BackgroundOpacity);
     }
 
     private async void CheckForUpdatesOnStartUpToggleSwitch_OnChecked(object sender, RoutedEventArgs e)
@@ -97,8 +92,7 @@ public partial class BetterSettings
 
     private async Task CheckForUpdatesUpdateToggle()
     {
-        _configHelper.Config.Update.AutoUpdate = CheckForUpdatesOnStartUpToggleSwitch.IsChecked ?? false;
-        await _configHelper.UpdateConfigAsync();
+        ConfigHandler.Instance.Config.Update.AutoUpdate = CheckForUpdatesOnStartUpToggleSwitch.IsChecked ?? false;
     }
 
     private async void CheckForUpdatesOnStartUpToggleSwitch_OnUnchecked(object sender, RoutedEventArgs e)
@@ -108,15 +102,13 @@ public partial class BetterSettings
 
     private async void DiscordRpcToggleSwitch_OnChecked(object sender, RoutedEventArgs e)
     {
-        _configHelper.Config.DiscordRpc = DiscordRpcToggleSwitch.IsChecked ?? false;
-        await _configHelper.UpdateConfigAsync();
+        ConfigHandler.Instance.Config.DiscordRpc = DiscordRpcToggleSwitch.IsChecked ?? false;
         await DiscordRpcManager.Instance.UpdatePresenceAsync("Settings");
     }
 
     private async void DiscordRpcToggleSwitch_OnUnchecked(object sender, RoutedEventArgs e)
     {
-        _configHelper.Config.DiscordRpc = DiscordRpcToggleSwitch.IsChecked ?? false;
-        await _configHelper.UpdateConfigAsync();
+        ConfigHandler.Instance.Config.DiscordRpc = DiscordRpcToggleSwitch.IsChecked ?? false;
         DiscordRpcManager.Instance.Dispose();
     }
 
@@ -124,15 +116,14 @@ public partial class BetterSettings
     {
         if (ThemeComboBox.SelectedItem == null) return;
         var selectedTheme = (AvailableThemes)ThemeComboBox.SelectedItem;
-        _configHelper.Config.ApplicationTheme = selectedTheme;
-        await _configHelper.UpdateConfigAsync();
+        ConfigHandler.Instance.Config.ApplicationTheme = selectedTheme;
         await BetterLogger.LogAsync($"Theme changed to: {selectedTheme}", Importance.Info);
     }
 
 
     private async void BackgroundChangeButton_OnClick(object sender, RoutedEventArgs e)
     {
-        _configHelper.Config.Backgrounds.BackgroundPath = string.Empty;
+        ConfigHandler.Instance.Config.Backgrounds.BackgroundPath = string.Empty;
         var openFileDialog = new OpenFileDialog
         {
             Filter = "Image Files (*.jpg, *.jpeg, *.png)|*.jpg;*.jpeg;*.png",
@@ -140,18 +131,16 @@ public partial class BetterSettings
         };
         var result = openFileDialog.ShowDialog();
         if (result != true) return;
-        _configHelper.Config.Backgrounds.BackgroundPath = openFileDialog.FileName;
+        ConfigHandler.Instance.Config.Backgrounds.BackgroundPath = openFileDialog.FileName;
 
-        _backgroundManager.UpdateBackground(_configHelper.Config.Backgrounds.BackgroundPath);
-        _backgroundManager.UpdateOpacity(_configHelper.Config.Backgrounds.BackgroundOpacity);
-        await _configHelper.UpdateConfigAsync();
+        _backgroundManager.UpdateBackground(ConfigHandler.Instance.Config.Backgrounds.BackgroundPath);
+        _backgroundManager.UpdateOpacity(ConfigHandler.Instance.Config.Backgrounds.BackgroundOpacity);
     }
 
     private async void BackgroundResetButton_OnClick(object sender, RoutedEventArgs e)
     {
-        _configHelper.Config.Backgrounds.BackgroundPath = string.Empty;
+        ConfigHandler.Instance.Config.Backgrounds.BackgroundPath = string.Empty;
         _backgroundManager.ResetBackground();
-        await _configHelper.UpdateConfigAsync();
     }
 
     private async void DefaultTempPathChangeButton_OnClick(object sender, RoutedEventArgs e)
@@ -161,18 +150,16 @@ public partial class BetterSettings
         if (result != true) return;
         DefaultTempPathTextBox.Text = folderDialog.FolderName;
 
-        _configHelper.Config.DefaultTempPath = folderDialog.FolderName;
-        await _configHelper.UpdateConfigAsync();
+        ConfigHandler.Instance.Config.DefaultTempPath = folderDialog.FolderName;
         await BetterLogger.LogAsync($"Default temp path set to: {folderDialog.FolderName}",
             Importance.Info);
     }
 
     private async void DefaultTempPathResetButton_OnClick(object sender, RoutedEventArgs e)
     {
-        _configHelper.Config.DefaultTempPath =
+        ConfigHandler.Instance.Config.DefaultTempPath =
             Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "EasyExtract", "Temp");
-        DefaultTempPathTextBox.Text = _configHelper.Config.DefaultTempPath;
-        await _configHelper.UpdateConfigAsync();
+        DefaultTempPathTextBox.Text = ConfigHandler.Instance.Config.DefaultTempPath;
         await BetterLogger.LogAsync("Default temp path reset", Importance.Info);
     }
 
@@ -183,8 +170,7 @@ public partial class BetterSettings
 
     private async Task SkipIntroLogoAnimationToggleSwitchCheckUnCheck()
     {
-        _configHelper.Config.IntroLogoAnimation = SkipIntroLogoAnimationToggleSwitch.IsChecked ?? false;
-        await _configHelper.UpdateConfigAsync();
+        ConfigHandler.Instance.Config.IntroLogoAnimation = SkipIntroLogoAnimationToggleSwitch.IsChecked ?? false;
     }
 
     private async void SkipIntroLogoAnimationToggleSwitch_OnUnchecked(object sender, RoutedEventArgs e)
@@ -204,8 +190,7 @@ public partial class BetterSettings
 
     private async Task UpdateContextMenuToggleSettingAsync()
     {
-        _configHelper.Config.ContextMenuToggle = ContextMenuSwitch.IsChecked ?? false;
-        await _configHelper.UpdateConfigAsync();
+        ConfigHandler.Instance.Config.ContextMenuToggle = ContextMenuSwitch.IsChecked ?? false;
     }
 
     private async void BorderMenuSwitch_OnChecked(object sender, RoutedEventArgs e)
@@ -215,8 +200,7 @@ public partial class BetterSettings
 
     private async Task UpdateBorderThicknessConfigAsync()
     {
-        _configHelper.Config.BorderThicknessActive = BorderMenuSwitch.IsChecked ?? false;
-        await _configHelper.UpdateConfigAsync();
+        ConfigHandler.Instance.Config.BorderThicknessActive = BorderMenuSwitch.IsChecked ?? false;
     }
 
     private async void BorderMenuSwitch_OnUnchecked(object sender, RoutedEventArgs e)
@@ -226,7 +210,7 @@ public partial class BetterSettings
 
     private void BetterSettings_OnSizeChanged(object sender, SizeChangedEventArgs e)
     {
-        switch (_configHelper.Config.DynamicScalingMode)
+        switch (ConfigHandler.Instance.Config.DynamicScalingMode)
         {
             case DynamicScalingModes.Off:
                 break;
@@ -259,7 +243,6 @@ public partial class BetterSettings
     {
         if (DynamicScalingComboBox.SelectedItem == null) return;
         var selectedMode = (DynamicScalingModes)DynamicScalingComboBox.SelectedItem;
-        _configHelper.Config.DynamicScalingMode = selectedMode;
-        await _configHelper.UpdateConfigAsync();
+        ConfigHandler.Instance.Config.DynamicScalingMode = selectedMode;
     }
 }

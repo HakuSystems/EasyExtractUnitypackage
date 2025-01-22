@@ -2,7 +2,7 @@
     AutomationProperties.HelpText="Collects user feedback about EasyExtract application."
     AutomationProperties.Name="FeedbackScreen"
     Focusable="True"
-    FontFamily="{DynamicResource SegoeFluentIcons}"
+    FontFamily="{DynamicResource GlobalFontFamily}"
     Foreground="{DynamicResource TextFillColorPrimaryBrush}"
     KeyboardNavigation.TabNavigation="Cycle"
     Loaded="Feedback_OnLoaded"

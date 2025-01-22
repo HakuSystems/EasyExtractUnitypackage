@@ -17,7 +17,6 @@ public partial class Dashboard : Window
 {
     private static Dashboard? _instance;
     private readonly BackgroundManager _backgroundManager = BackgroundManager.Instance;
-    private readonly ConfigHelper _configHelper = new();
     private readonly UpdateHandler _updateHandler = new();
 
     public Dashboard()
@@ -27,10 +26,7 @@ public partial class Dashboard : Window
         ThemeMode = ThemeMode.System;
     }
 
-    public static Dashboard Instance
-    {
-        get => _instance ??= new Dashboard();
-    }
+    public static Dashboard Instance => _instance ??= new Dashboard();
 
 
     private void HeartIcon_OnMouseEnter(object sender, MouseEventArgs e)
@@ -51,8 +47,7 @@ public partial class Dashboard : Window
 
     private async void Dashboard_OnLoaded(object sender, RoutedEventArgs e)
     {
-        await _configHelper.ReadConfigAsync();
-        var theme = _configHelper.Config.ApplicationTheme;
+        var theme = ConfigHandler.Instance.Config.ApplicationTheme;
         var themeMode = theme switch
         {
             AvailableThemes.System => ThemeMode.System,
@@ -63,8 +58,8 @@ public partial class Dashboard : Window
         Application.Current.ThemeMode = themeMode;
         ThemeMode = themeMode;
         VersionTxt.Content = "V" + Application.ResourceAssembly.GetName().Version;
-        _backgroundManager.UpdateBackground(_configHelper.Config.Backgrounds.BackgroundPath);
-        _backgroundManager.UpdateOpacity(_configHelper.Config.Backgrounds.BackgroundOpacity);
+        _backgroundManager.UpdateBackground(ConfigHandler.Instance.Config.Backgrounds.BackgroundPath);
+        _backgroundManager.UpdateOpacity(ConfigHandler.Instance.Config.Backgrounds.BackgroundOpacity);
 
         var isUpToDate = await _updateHandler.IsUpToDateOrUpdate(false);
         var updateAvailable = !isUpToDate;
@@ -80,17 +75,18 @@ public partial class Dashboard : Window
             CheckForUpdatesNavBtn.IsEnabled = updateAvailable;
         });
 
-        if (_configHelper.Config.Update.AutoUpdate && updateAvailable) await _updateHandler.IsUpToDateOrUpdate(true);
+        if (ConfigHandler.Instance.Config.Update.AutoUpdate && updateAvailable)
+            await _updateHandler.IsUpToDateOrUpdate(true);
 
         //EasterEggHeader
-        EasterEggHeader.Visibility = _configHelper.Config.EasterEggHeader ? Visibility.Visible : Visibility.Collapsed;
+        EasterEggHeader.Visibility =
+            ConfigHandler.Instance.Config.EasterEggHeader ? Visibility.Visible : Visibility.Collapsed;
 
-        if (_configHelper.Config.Runs is { IsFirstRun: true })
+        if (ConfigHandler.Instance.Config.Runs is { IsFirstRun: true })
         {
             NavView.Navigate(typeof(About));
             await BetterLogger.LogAsync("First run detected, navigating to About", Importance.Info);
-            _configHelper.Config.Runs.IsFirstRun = false;
-            await _configHelper.UpdateConfigAsync();
+            ConfigHandler.Instance.Config.Runs.IsFirstRun = false;
         }
         else
         {
@@ -98,7 +94,7 @@ public partial class Dashboard : Window
             NavView.Navigate(typeof(Extraction));
         }
 
-        if (_configHelper.Config.UwUModeActive)
+        if (ConfigHandler.Instance.Config.UwUModeActive)
         {
             NavView.Opacity = 0.2;
             Title = "EasyExtractUwUnitypackage";
@@ -106,7 +102,7 @@ public partial class Dashboard : Window
         }
         else
         {
-            Title = _configHelper.Config.AppTitle;
+            Title = ConfigHandler.Instance.Config.AppTitle;
         }
     }
 
@@ -197,14 +193,13 @@ public partial class Dashboard : Window
     private async void DontShowAgainBtn_OnClick(object sender, RoutedEventArgs e)
     {
         //EasterEggHeader
-        _configHelper.Config.EasterEggHeader = false;
-        await _configHelper.UpdateConfigAsync();
+        ConfigHandler.Instance.Config.EasterEggHeader = false;
         EasterEggHeader.Visibility = Visibility.Collapsed;
     }
 
     private void Dashboard_OnSizeChanged(object sender, SizeChangedEventArgs e)
     {
-        switch (_configHelper.Config.DynamicScalingMode)
+        switch (ConfigHandler.Instance.Config.DynamicScalingMode)
         {
             case DynamicScalingModes.Off:
                 DialogHelperGrid.LayoutTransform = Transform.Identity;

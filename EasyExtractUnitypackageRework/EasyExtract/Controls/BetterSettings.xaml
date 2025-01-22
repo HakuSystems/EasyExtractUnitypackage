@@ -2,7 +2,7 @@
     AutomationProperties.HelpText="Displays various application settings for EasyExtract."
     AutomationProperties.Name="BetterSettingsScreen"
     Focusable="True"
-    FontFamily="{DynamicResource SegoeFluentIcons}"
+    FontFamily="{DynamicResource GlobalFontFamily}"
     Foreground="{DynamicResource TextFillColorPrimaryBrush}"
     KeyboardNavigation.TabNavigation="Cycle"
     Loaded="BetterSettings_OnLoaded"

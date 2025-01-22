@@ -8,8 +8,6 @@ namespace EasyExtract.Controls;
 
 public partial class EasterEgg
 {
-    private readonly ConfigHelper _configHelper = new();
-
     public EasterEgg()
     {
         InitializeComponent();
@@ -20,7 +18,7 @@ public partial class EasterEgg
         bool isDiscordEnabled;
         try
         {
-            isDiscordEnabled = _configHelper.Config.DiscordRpc;
+            isDiscordEnabled = ConfigHandler.Instance.Config.DiscordRpc;
         }
         catch (Exception exception)
         {
@@ -49,7 +47,7 @@ public partial class EasterEgg
 
     private void EasterEgg_OnSizeChanged(object sender, SizeChangedEventArgs e)
     {
-        switch (_configHelper.Config.DynamicScalingMode)
+        switch (ConfigHandler.Instance.Config.DynamicScalingMode)
         {
             case DynamicScalingModes.Off:
                 break;
