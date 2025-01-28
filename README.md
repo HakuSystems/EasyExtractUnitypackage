@@ -1,5 +1,5 @@
 # Plans for the Future:
-- Upgrade to Avalonia in order to make EasyExtractUnitypackage available for MacOS & Linux instead of the current sate: "Only Windows"
+- **Upgrade to Avalonia in order to make EasyExtractUnitypackage available for MacOS & Linux instead of the current sate: "Only Windows"** (This is being worked on currently.)
 - Adjustable UI Theme
 - Even more Data, from unitypackages
 
