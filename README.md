@@ -92,5 +92,5 @@ We are currently seeking a talented UI Designer to join our team and help make E
 - Conduct user research and usability testing to gather feedback
 - Create wireframes, prototypes, and high-fidelity mockups
 
-If you are interested and believe you have the skills to contribute to our project, please contact us through our [Discord server](https://discord.gg/Wn7XfhPCyD).
+If you are interested and believe you have the skills to contribute to our project, please contact us through our [Discord server](https://uploader.hakusystems.net/go/Discord%20-%20EasyExtractUnitypackage).
 
