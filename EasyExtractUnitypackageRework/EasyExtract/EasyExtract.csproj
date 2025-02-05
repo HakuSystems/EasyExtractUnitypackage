@@ -124,7 +124,9 @@
         <Resource Include="Resources\Gifs\LogoAnimation.gif">
             <CopyToOutputDirectory>Always</CopyToOutputDirectory>
         </Resource>
-        <Resource Include="Resources\Gifs\IconAnim.gif"/>
+        <Resource Include="Resources\Gifs\IconAnim.gif">
+            <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+        </Resource>
         <None Remove="Resources\uwuMode.png"/>
         <None Remove="Resources\ExtractionProcess\Closed.png"/>
         <Resource Include="Resources\ExtractionProcess\Closed.png"/>
