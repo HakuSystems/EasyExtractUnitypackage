@@ -19,6 +19,7 @@ public partial class About
 
     private async void About_OnLoaded(object sender, RoutedEventArgs e)
     {
+        if (ConfigHandler.Instance.Config.UwUModeActive) BetterUwUifyer.ApplyUwUModeToVisualTree(this);
         VersionCard.Footer = $"Version {Application.ResourceAssembly.GetName().Version}";
         await BetterLogger.LogAsync("Set version in About UserControl",
             Importance.Info); // Log version set

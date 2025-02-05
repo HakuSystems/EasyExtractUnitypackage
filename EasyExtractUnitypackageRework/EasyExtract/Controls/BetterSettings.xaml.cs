@@ -23,6 +23,7 @@ public partial class BetterSettings
 
     private async Task ChangeUiToMatchConfigAsync()
     {
+        if (ConfigHandler.Instance.Config.UwUModeActive) BetterUwUifyer.ApplyUwUModeToVisualTree(this);
         try
         {
             var dynamicScalingMode = Enum.GetValues(typeof(DynamicScalingModes))

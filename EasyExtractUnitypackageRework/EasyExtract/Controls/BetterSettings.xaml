@@ -273,7 +273,7 @@
                     </ui:Card>
 
                     <ui:Card
-                        AutomationProperties.HelpText="Toggle special UI theme name for next application start."
+                        AutomationProperties.HelpText="Toggle UwU Mode to make your UI extra cute on next launch!"
                         AutomationProperties.Name="UwUModeActivationCard"
                         BorderBrush="#DDDDDD"
                         BorderThickness="{Binding Converter={StaticResource BorderThicknessConverter}, Path=BorderThicknessActive}"
@@ -301,12 +301,12 @@
                             <StackPanel Grid.Column="1" VerticalAlignment="Center">
                                 <ui:TextBlock
                                     FontTypography="BodyStrong"
-                                    Text="UwU Mode Activation"
+                                    Text="Enable UwU Mode"
                                     TextWrapping="WrapWithOverflow" />
                                 <ui:TextBlock
                                     Appearance="Secondary"
                                     Opacity="0.5"
-                                    Text="When enabled, the title changes to 'UwU' on next application start."
+                                    Text="When enabled, the title and text will transform into irresistibly cute UwU style on the next launch."
                                     TextWrapping="WrapWithOverflow" />
                             </StackPanel>
 

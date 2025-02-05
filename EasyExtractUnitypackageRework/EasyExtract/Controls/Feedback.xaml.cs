@@ -21,6 +21,7 @@ public partial class Feedback
 
     private async void Feedback_OnLoaded(object sender, RoutedEventArgs e)
     {
+        if (ConfigHandler.Instance.Config.UwUModeActive) BetterUwUifyer.ApplyUwUModeToVisualTree(this);
         GetDiscordUsername();
         await DiscordRpcManager.Instance.TryUpdatePresenceAsync("Feedback");
     }

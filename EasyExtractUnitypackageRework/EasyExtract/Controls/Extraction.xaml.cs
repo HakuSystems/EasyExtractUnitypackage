@@ -382,6 +382,7 @@ public partial class Extraction : UserControl, INotifyPropertyChanged
     /// <param name="e">The event data.</param>
     private async void Extraction_OnLoaded(object sender, RoutedEventArgs e)
     {
+        if (ConfigHandler.Instance.Config.UwUModeActive) BetterUwUifyer.ApplyUwUModeToVisualTree(this);
         await CalculateScrollerHeightAsync();
         await DiscordRpcManager.Instance.TryUpdatePresenceAsync("Extraction");
 

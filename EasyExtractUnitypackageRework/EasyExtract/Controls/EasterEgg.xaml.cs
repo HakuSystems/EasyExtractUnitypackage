@@ -15,6 +15,7 @@ public partial class EasterEgg
 
     private async void EasterEgg_OnLoaded(object sender, RoutedEventArgs e)
     {
+        if (ConfigHandler.Instance.Config.UwUModeActive) BetterUwUifyer.ApplyUwUModeToVisualTree(this);
         await DiscordRpcManager.Instance.TryUpdatePresenceAsync("EasterEgg");
         await BetterLogger.LogAsync("EasterEgg UserControl loaded",
             Importance.Info); // Log successful load

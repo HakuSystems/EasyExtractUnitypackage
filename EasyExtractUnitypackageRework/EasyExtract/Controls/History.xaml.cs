@@ -58,6 +58,7 @@ public partial class History : UserControl, INotifyPropertyChanged
 
     private async void History_OnLoaded(object sender, RoutedEventArgs e)
     {
+        if (ConfigHandler.Instance.Config.UwUModeActive) BetterUwUifyer.ApplyUwUModeToVisualTree(this);
         await DiscordRpcManager.Instance.TryUpdatePresenceAsync("History");
         TotalExtracted = ConfigHandler.Instance.Config.TotalExtracted;
         TotalFilesExtracted = ConfigHandler.Instance.Config.TotalFilesExtracted;

@@ -38,6 +38,7 @@ public partial class SearchEverything : UserControl, INotifyPropertyChanged
 
     private async void SearchEverything_OnLoaded(object sender, RoutedEventArgs e)
     {
+        if (ConfigHandler.Instance.Config.UwUModeActive) BetterUwUifyer.ApplyUwUModeToVisualTree(this);
         if (!await _everythingValidation.AreSystemRequirementsMet())
         {
             FallbackEverything.Visibility = Visibility.Visible;
