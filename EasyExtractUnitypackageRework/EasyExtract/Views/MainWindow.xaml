@@ -4,10 +4,7 @@
     Background="Transparent"
     FontFamily="{DynamicResource GlobalFontFamily}"
     Foreground="{DynamicResource TextFillColorPrimaryBrush}"
-    MinHeight="450"
-    MinWidth="800"
     ShowInTaskbar="False"
-    SizeChanged="MainWindow_OnSizeChanged"
     WindowStartupLocation="CenterScreen"
     WindowStyle="None"
     mc:Ignorable="d"
@@ -18,17 +15,10 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
 
-    <Grid
-        HorizontalAlignment="Stretch"
-        VerticalAlignment="Stretch"
-        x:Name="RootGrid">
 
-        <Image
-            HorizontalAlignment="Center"
-            Stretch="Uniform"
-            VerticalAlignment="Center"
-            gif:AnimationBehavior.Loaded="AnimationBehavior_OnLoaded"
-            gif:AnimationBehavior.SourceUri="pack://application:,,,/EasyExtract;component/Resources/Gifs/LogoAnimation.gif"
-            x:Name="LogoImage" />
-    </Grid>
+    <Image
+        Stretch="Uniform"
+        gif:AnimationBehavior.Loaded="AnimationBehavior_OnLoaded"
+        gif:AnimationBehavior.SourceUri="pack://application:,,,/EasyExtract;component/Resources/Gifs/LogoAnimation.gif"
+        x:Name="LogoImage" />
 </Window>
