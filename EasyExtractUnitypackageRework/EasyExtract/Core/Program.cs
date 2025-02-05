@@ -43,13 +43,23 @@ public class Program
                 }
             }
 
-            await RegistryHelper.DeleteContextMenuEntry();
+            await Task.Run(() => RegistryHelper.DeleteContextMenuEntry());
             if (ConfigHandler.Instance.Config.ContextMenuToggle)
-                await RegistryHelper.RegisterContextMenuEntry();
+                await Task.Run(() => RegistryHelper.RegisterContextMenuEntry());
 
-            var app = new App();
-            app.InitializeComponent();
-            app.Run();
+
+            if (Application.Current == null)
+            {
+                var app = new App();
+                app.InitializeComponent();
+                app.Run();
+            }
+            else
+            {
+                await BetterLogger.LogAsync(
+                    "Application instance already exists. Skipping creation.",
+                    Importance.Info);
+            }
         }
         catch (UnauthorizedAccessException ex)
         {

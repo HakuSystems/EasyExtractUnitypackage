@@ -40,12 +40,16 @@ public partial class App
 
         if (config.ContextMenuToggle)
         {
-            var program = new Program();
-            _ = program.Run(e.Args);
+            await Task.Run(async () =>
+            {
+                var program = new Program();
+                await program.Run(e.Args);
+            });
+            await Dispatcher.InvokeAsync(InitializeComponent);
         }
         else
         {
-            _ = RegistryHelper.DeleteContextMenuEntry();
+            await RegistryHelper.DeleteContextMenuEntry();
             InitializeComponent();
         }
     }

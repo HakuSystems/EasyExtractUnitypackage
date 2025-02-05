@@ -71,6 +71,32 @@ public class ConfigHandler
         }
 
         await BetterLogger.LogAsync("ConfigHandler initialization completed.", Importance.Info);
+        await GenerateAllNecessaryFiles();
+    }
+
+    private static Task GenerateAllNecessaryFiles()
+    {
+        //Appdata folder
+        var appdata = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
+        var appdataFolder = Path.Combine(appdata, "EasyExtract");
+        if (!Directory.Exists(appdataFolder)) Directory.CreateDirectory(appdataFolder);
+
+        //EasyExtract\Extracted
+        var extractedFolder = Path.Combine(appdataFolder, "Extracted");
+        if (!Directory.Exists(extractedFolder)) Directory.CreateDirectory(extractedFolder);
+
+        //EasyExtract\Temp
+        var tempFolder = Path.Combine(appdataFolder, "Temp");
+        if (!Directory.Exists(tempFolder)) Directory.CreateDirectory(tempFolder);
+
+        //EasyExtract\ThirdParty
+        var thirdPartyFolder = Path.Combine(appdataFolder, "ThirdParty");
+        if (!Directory.Exists(thirdPartyFolder)) Directory.CreateDirectory(thirdPartyFolder);
+
+        //EasyExtract\IgnoredUnity packages
+        var ignoredUnityPackagesFolder = Path.Combine(appdataFolder, "IgnoredUnitypackages");
+        if (!Directory.Exists(ignoredUnityPackagesFolder)) Directory.CreateDirectory(ignoredUnityPackagesFolder);
+        return Task.CompletedTask;
     }
 
     /// <summary>
