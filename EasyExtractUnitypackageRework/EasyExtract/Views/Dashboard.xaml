@@ -1,9 +1,7 @@
 <Window
-    AllowsTransparency="False"
     DataContext="{Binding Config, Source={x:Static config:ConfigHandler.Instance}}"
     FontFamily="{DynamicResource GlobalFontFamily}"
     Foreground="{DynamicResource TextFillColorPrimaryBrush}"
-    Height="802"
     KeyboardNavigation.TabNavigation="Cycle"
     Loaded="Dashboard_OnLoaded"
     MinHeight="600"
@@ -11,7 +9,6 @@
     ResizeMode="CanResizeWithGrip"
     SizeChanged="Dashboard_OnSizeChanged"
     Title="{Binding AppTitle}"
-    Width="1450"
     WindowStartupLocation="CenterScreen"
     d:DataContext="{d:DesignInstance config:ConfigModel,
                                      IsDesignTimeCreatable=True}"
@@ -31,21 +28,6 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
-
-    <Window.Triggers>
-        <EventTrigger RoutedEvent="Window.Loaded">
-            <BeginStoryboard>
-                <Storyboard>
-                    <DoubleAnimation
-                        Duration="0:0:0.35"
-                        From="0"
-                        Storyboard.TargetName="DialogHelperGrid"
-                        Storyboard.TargetProperty="Opacity"
-                        To="1" />
-                </Storyboard>
-            </BeginStoryboard>
-        </EventTrigger>
-    </Window.Triggers>
 
     <Window.Background>
         <MultiBinding Converter="{StaticResource BackgroundAndOpacityConverter}" UpdateSourceTrigger="PropertyChanged">
@@ -70,60 +52,17 @@
                     <RowDefinition Height="Auto" />
                     <RowDefinition Height="*" />
                 </Grid.RowDefinitions>
-
-                <!--  Replace Header StackPanel with a WrapPanel for adaptive wrapping  -->
-                <WrapPanel
-                    Grid.Row="0"
-                    HorizontalAlignment="Left"
-                    Margin="0,0,0,8"
-                    Orientation="Horizontal"
-                    x:Name="HeaderWrapPanel">
-                    <ui:CardControl
-                        AutomationProperties.HelpText="Displays app creators and an optional Easter egg."
-                        AutomationProperties.Name="EasterEggHeader"
-                        HorizontalAlignment="Left"
-                        Padding="8"
-                        VerticalAlignment="Top"
-                        x:Name="EasterEggHeader">
-                        <ui:CardControl.Icon>
-                            <ui:SymbolIcon
-                                AutomationProperties.HelpText="Heart icon that triggers Easter egg events."
-                                AutomationProperties.Name="HeartIcon"
-                                Foreground="Red"
-                                HorizontalAlignment="Center"
-                                Margin="0,0,5,0"
-                                MouseDown="HeartIcon_OnMouseDown"
-                                MouseEnter="HeartIcon_OnMouseEnter"
-                                MouseLeave="HeartIcon_OnMouseLeave"
-                                Symbol="Heart24"
-                                VerticalAlignment="Center"
-                                x:Name="HeartIcon" />
-                        </ui:CardControl.Icon>
-                        <ui:CardControl.Header>
-                            <StackPanel>
-                                <ui:TextBlock
-                                    FontTypography="BodyStrong"
-                                    Margin="0,0,0,2"
-                                    Text="Application made by"
-                                    TextWrapping="WrapWithOverflow" />
-                                <ui:TextBlock
-                                    Appearance="Secondary"
-                                    FontTypography="Caption"
-                                    Opacity="0.6"
-                                    Text="HakuSystems, Jan-Fcloud."
-                                    TextWrapping="WrapWithOverflow" />
-                                <ui:Button
-                                    AutomationProperties.HelpText="Hides this header section from future display."
-                                    AutomationProperties.Name="DontShowAgainButton"
-                                    Click="DontShowAgainBtn_OnClick"
-                                    Content="Don’t show this again"
-                                    Icon="{ui:SymbolIcon SlideHide24}"
-                                    Margin="5,8,0,0"
-                                    x:Name="DontShowAgainBtn" />
-                            </StackPanel>
-                        </ui:CardControl.Header>
-                    </ui:CardControl>
-                </WrapPanel>
+                <ui:TextBlock
+                    FontTypography="Title"
+                    Foreground="{DynamicResource TextFillColorPrimaryBrush}"
+                    Grid.RowSpan="2"
+                    HorizontalAlignment="Center"
+                    Panel.ZIndex="1"
+                    Text="PLEASE WAIT.&#x0a;&#x0a;The App is Updating.&#x0a;&#x0a;Please Dont interact with the App.&#x0a;&#x0a;We are Restarting the App for you."
+                    TextAlignment="Center"
+                    VerticalAlignment="Center"
+                    Visibility="Collapsed"
+                    x:Name="CurrentlyUpdatingTextBlock" />
 
                 <!--  NavigationView with flexible sizing  -->
                 <ui:NavigationView
@@ -184,31 +123,6 @@
                             Icon="{ui:SymbolIcon PersonFeedback24}"
                             TargetPageTag="Feedback"
                             TargetPageType="{x:Type extraction:Feedback}" />
-                        <ui:NavigationViewItem
-                            AutomationProperties.HelpText="Checks for latest version updates."
-                            AutomationProperties.Name="CheckForUpdatesItem"
-                            Click="CheckForUpdatesNavBtn_OnClick"
-                            Foreground="{DynamicResource TextFillColorPrimaryBrush}"
-                            Icon="{ui:SymbolIcon ArrowSyncCircle24}"
-                            TargetPageTag="Updater"
-                            x:Name="CheckForUpdatesNavBtn">
-                            <ui:NavigationViewItem.Content>
-                                <StackPanel>
-                                    <ui:TextBlock
-                                        FontTypography="BodyStrong"
-                                        Text="Check for updates"
-                                        TextWrapping="WrapWithOverflow"
-                                        x:Name="CheckForUpdatesTxt" />
-                                    <ui:TextBlock
-                                        Appearance="Secondary"
-                                        FontTypography="Caption"
-                                        Opacity="0.6"
-                                        Text="You are up to date."
-                                        TextWrapping="WrapWithOverflow"
-                                        x:Name="CheckForUpdatesDesc" />
-                                </StackPanel>
-                            </ui:NavigationViewItem.Content>
-                        </ui:NavigationViewItem>
                     </ui:NavigationView.MenuItems>
 
                     <ui:NavigationView.FooterMenuItems>
@@ -217,10 +131,29 @@
                             Foreground="{DynamicResource TextFillColorPrimaryBrush}"
                             Icon="{ui:SymbolIcon Settings24}"
                             TargetPageType="{x:Type extraction:BetterSettings}" />
-                        <ui:NavigationViewItem
-                            Foreground="{DynamicResource TextFillColorPrimaryBrush}"
-                            IsEnabled="False"
-                            x:Name="VersionTxt" />
+                        <StackPanel Orientation="Vertical">
+                            <ui:TextBlock
+                                Appearance="Secondary"
+                                FontTypography="Caption"
+                                HorizontalAlignment="Center"
+                                Margin="5"
+                                MouseDown="CheckForUpdatesDesc_OnMouseDown"
+                                Opacity="0.6"
+                                Text="Checking for updates..."
+                                TextWrapping="WrapWithOverflow"
+                                VerticalAlignment="Center"
+                                x:Name="CheckForUpdatesDesc" />
+                            <ui:TextBlock
+                                Appearance="Secondary"
+                                FontTypography="Caption"
+                                HorizontalAlignment="Center"
+                                MouseDown="UpdateTextBlock_OnMouseDown"
+                                Opacity="0.6"
+                                Text="{Binding Update.CurrentVersion, StringFormat='{}{0} - made with ✨ And ❤️'}"
+                                TextWrapping="WrapWithOverflow"
+                                VerticalAlignment="Center"
+                                x:Name="UpdateTextBlock" />
+                        </StackPanel>
                     </ui:NavigationView.FooterMenuItems>
                 </ui:NavigationView>
             </Grid>

@@ -23,7 +23,6 @@ public class ConfigModel : INotifyPropertyChanged
 
 
     private DynamicScalingModes _dynamicScalingMode = DynamicScalingModes.Simple;
-    private bool _easterEggHeader = true;
     private bool _extractedCategoryStructure = true;
     private ObservableCollection<ExtractedUnitypackageModel> _extractedUnitypackages = new();
 
@@ -198,19 +197,6 @@ public class ConfigModel : INotifyPropertyChanged
             if (_applicationTheme != value)
             {
                 _applicationTheme = value;
-                OnPropertyChanged();
-            }
-        }
-    }
-
-    public bool EasterEggHeader
-    {
-        get => _easterEggHeader;
-        set
-        {
-            if (_easterEggHeader != value)
-            {
-                _easterEggHeader = value;
                 OnPropertyChanged();
             }
         }

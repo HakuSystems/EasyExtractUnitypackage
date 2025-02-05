@@ -6,7 +6,6 @@ using EasyExtract.Config.Models;
 using EasyExtract.Controls;
 using EasyExtract.Services;
 using EasyExtract.Utilities;
-using Wpf.Ui.Controls;
 using Application = System.Windows.Application;
 using Color = System.Windows.Media.Color;
 using Size = System.Windows.Size;
@@ -31,21 +30,6 @@ public partial class Dashboard : Window
 
     public static Dashboard Instance => _instance ??= new Dashboard();
 
-    private void HeartIcon_OnMouseEnter(object sender, MouseEventArgs e)
-    {
-        HeartIcon.Symbol = SymbolRegular.HeartBroken24;
-    }
-
-    private void HeartIcon_OnMouseLeave(object sender, MouseEventArgs e)
-    {
-        HeartIcon.Symbol = SymbolRegular.Heart24;
-    }
-
-    private void HeartIcon_OnMouseDown(object sender, MouseButtonEventArgs e)
-    {
-        HeartIcon.Symbol = SymbolRegular.HeartPulse24;
-        NavView.Navigate(typeof(EasterEgg));
-    }
 
     private async void Dashboard_OnLoaded(object sender, RoutedEventArgs e)
     {
@@ -59,29 +43,29 @@ public partial class Dashboard : Window
         };
         Application.Current.ThemeMode = themeMode;
         ThemeMode = themeMode;
-        VersionTxt.Content = "V" + Application.ResourceAssembly.GetName().Version;
         await _backgroundManager.UpdateBackground(ConfigHandler.Instance.Config.CustomBackgroundImage.BackgroundPath);
         await _backgroundManager.UpdateOpacity(ConfigHandler.Instance.Config.CustomBackgroundImage.BackgroundOpacity);
 
-        var isUpToDate = await _updateHandler.IsUpToDateOrUpdate(false);
-        var updateAvailable = !isUpToDate;
+        var updateAvailable = !await _updateHandler.IsUpToDateOrUpdate(false);
 
         await Dispatcher.InvokeAsync(() =>
         {
-            CheckForUpdatesTxt.Text = updateAvailable ? "New Update Available" : "Check for Updates";
-            CheckForUpdatesTxt.Foreground =
-                new SolidColorBrush(updateAvailable ? Color.FromRgb(255, 0, 0) : Color.FromRgb(0, 255, 0));
             CheckForUpdatesDesc.Text = updateAvailable
-                ? "Click here to update EasyExtractUnitypackage!"
-                : "You're running the latest version of EasyExtractUnitypackage!";
-            CheckForUpdatesNavBtn.IsEnabled = updateAvailable;
+                ? "An update is available. Click here to update."
+                : "You are up to date.";
+            if (!updateAvailable) return;
+            CheckForUpdatesDesc.TextDecorations = TextDecorations.Underline;
+            CheckForUpdatesDesc.Cursor = Cursors.Hand;
+            CheckForUpdatesDesc.Foreground = new SolidColorBrush(Color.FromArgb(255, 255, 0, 0));
         });
 
         if (ConfigHandler.Instance.Config.Update.AutoUpdate && updateAvailable)
+        {
+            await DialogHelper.ShowInfoDialogAsync(this, "Update available",
+                "An update is available and will be installed automatically.\nbecause you have enabled automatic updates in the settings.\nPlease Dont Interact with the application until the update is installed. (the app will automatically restart)");
+            CurrentlyUpdatingTextBlock.Visibility = Visibility.Visible;
             await _updateHandler.IsUpToDateOrUpdate(true);
-
-        EasterEggHeader.Visibility =
-            ConfigHandler.Instance.Config.EasterEggHeader ? Visibility.Visible : Visibility.Collapsed;
+        }
 
         if (ConfigHandler.Instance.Config.FirstRun)
         {
@@ -276,32 +260,6 @@ public partial class Dashboard : Window
         await BetterLogger.LogAsync("Added dropped files to queue", Importance.Info);
     }
 
-    private async void CheckForUpdatesNavBtn_OnClick(object sender, RoutedEventArgs e)
-    {
-        var isUpToDate = await _updateHandler.IsUpToDateOrUpdate(false);
-        var updateAvailable = !isUpToDate;
-
-        await Dispatcher.InvokeAsync(() =>
-        {
-            CheckForUpdatesTxt.Text = updateAvailable ? "New Update Available" : "Check for Updates";
-            CheckForUpdatesTxt.Foreground =
-                new SolidColorBrush(updateAvailable ? Color.FromRgb(255, 0, 0) : Color.FromRgb(0, 255, 0));
-            CheckForUpdatesDesc.Text = updateAvailable
-                ? "Click here to update EasyExtractUnitypackage!"
-                : "You're running the latest version of EasyExtractUnitypackage!";
-            CheckForUpdatesNavBtn.IsEnabled = updateAvailable;
-        });
-
-        if (updateAvailable)
-            await _updateHandler.IsUpToDateOrUpdate(true);
-    }
-
-    private async void DontShowAgainBtn_OnClick(object sender, RoutedEventArgs e)
-    {
-        ConfigHandler.Instance.Config.EasterEggHeader = false;
-        EasterEggHeader.Visibility = Visibility.Collapsed;
-    }
-
     private void Dashboard_OnSizeChanged(object sender, SizeChangedEventArgs e)
     {
         switch (ConfigHandler.Instance.Config.DynamicScalingMode)
@@ -320,6 +278,36 @@ public partial class Dashboard : Window
                 DialogHelperGrid.LayoutTransform = new ScaleTransform(scaleFactor, scaleFactor);
                 break;
             }
+        }
+    }
+
+    private void UpdateTextBlock_OnMouseDown(object sender, MouseButtonEventArgs e)
+    {
+        //pink text blinking
+        var pink = new SolidColorBrush(Color.FromArgb(255, 237, 187, 238));
+        var pinkAnimation = new ColorAnimation
+        {
+            From = pink.Color,
+            To = Colors.White,
+            Duration = TimeSpan.FromSeconds(0.3),
+            AutoReverse = true,
+            RepeatBehavior = new RepeatBehavior(3)
+        };
+
+        UpdateTextBlock.Foreground = pink;
+        UpdateTextBlock.Foreground.BeginAnimation(SolidColorBrush.ColorProperty, pinkAnimation);
+
+
+        NavView.Navigate(typeof(EasterEgg));
+    }
+
+    private async void CheckForUpdatesDesc_OnMouseDown(object sender, MouseButtonEventArgs e)
+    {
+        var updateAvailable = !await _updateHandler.IsUpToDateOrUpdate(false);
+        if (updateAvailable)
+        {
+            CurrentlyUpdatingTextBlock.Visibility = Visibility.Visible;
+            await _updateHandler.IsUpToDateOrUpdate(true);
         }
     }
 }
