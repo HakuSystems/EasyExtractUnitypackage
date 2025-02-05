@@ -78,8 +78,6 @@
                     OpenPaneLength="310"
                     Padding="42,0,42,0"
                     PaneDisplayMode="Left"
-                    PaneTitle="EasyExtractUnitypackage"
-                    TitleBar="{Binding ElementName=TitleBar, Mode=OneWay}"
                     Transition="FadeInWithSlide"
                     VerticalAlignment="Stretch"
                     VerticalContentAlignment="Stretch"
@@ -116,7 +114,8 @@
                             Foreground="{DynamicResource TextFillColorPrimaryBrush}"
                             Icon="{ui:SymbolIcon Heart24}"
                             TargetPageTag="About"
-                            TargetPageType="{x:Type extraction:About}" />
+                            TargetPageType="{x:Type extraction:About}"
+                            x:Name="AboutNavBtn" />
                         <ui:NavigationViewItem
                             Content="Feedback"
                             Foreground="{DynamicResource TextFillColorPrimaryBrush}"
