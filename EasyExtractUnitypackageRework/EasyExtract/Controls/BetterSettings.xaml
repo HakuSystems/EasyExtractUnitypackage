@@ -224,54 +224,6 @@
                                 x:Name="ContextMenuSwitch" />
                         </Grid>
                     </ui:Card>
-
-                    <ui:Card
-                        AutomationProperties.HelpText="Toggle borders on the Settings page."
-                        AutomationProperties.Name="EnableBordersCard"
-                        BorderBrush="#DDDDDD"
-                        BorderThickness="{Binding Converter={StaticResource BorderThicknessConverter}, Path=BorderThicknessActive}"
-                        Margin="0,0,0,12"
-                        Padding="10"
-                        x:Name="EnableBordersCard">
-                        <Grid>
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="Auto" />
-                                <ColumnDefinition Width="*" />
-                                <ColumnDefinition Width="Auto" />
-                            </Grid.ColumnDefinitions>
-
-                            <ui:Card
-                                HorizontalAlignment="Left"
-                                Margin="5"
-                                VerticalAlignment="Center">
-                                <mahicons:Modern Kind="BorderAll" />
-                            </ui:Card>
-
-                            <StackPanel Grid.Column="1" VerticalAlignment="Center">
-                                <ui:TextBlock
-                                    FontTypography="BodyStrong"
-                                    Text="Enable Borders"
-                                    TextWrapping="WrapWithOverflow" />
-                                <ui:TextBlock
-                                    Appearance="Secondary"
-                                    Opacity="0.5"
-                                    TextWrapping="WrapWithOverflow">
-                                    <Run Text="When enabled, borders will appear " />
-                                    <Run FontWeight="Bold" Text="(applies only to this Settings page)" />
-                                    <Run Text="." />
-                                </ui:TextBlock>
-                            </StackPanel>
-
-                            <ui:ToggleSwitch
-                                Checked="BorderMenuSwitch_OnChecked"
-                                Grid.Column="2"
-                                IsChecked="{Binding BorderThicknessActive, Mode=TwoWay}"
-                                Margin="5"
-                                Unchecked="BorderMenuSwitch_OnUnchecked"
-                                x:Name="BorderMenuSwitch" />
-                        </Grid>
-                    </ui:Card>
-
                     <ui:Card
                         AutomationProperties.HelpText="Toggle UwU Mode to make your UI extra cute on next launch!"
                         AutomationProperties.Name="UwUModeActivationCard"

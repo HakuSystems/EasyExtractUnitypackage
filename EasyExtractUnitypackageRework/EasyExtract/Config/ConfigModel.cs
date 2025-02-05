@@ -9,7 +9,6 @@ public class ConfigModel : INotifyPropertyChanged
     private AvailableThemes _applicationTheme = AvailableThemes.System;
     private string _appTitle = "EasyExtractUnitypackage";
     private string _backgroundColorHex = "#2b2b2b"; // Default Color from Colors.xaml
-    private bool _borderThicknessActive;
     private bool _contextMenuToggle = true;
     private string _currentThemeComponentsContrast = "N/A";
     private string _currentThemeContrastRatio = "N/A";
@@ -309,18 +308,6 @@ public class ConfigModel : INotifyPropertyChanged
         }
     }
 
-    public bool BorderThicknessActive
-    {
-        get => _borderThicknessActive;
-        set
-        {
-            if (_borderThicknessActive != value)
-            {
-                _borderThicknessActive = value;
-                OnPropertyChanged();
-            }
-        }
-    }
 
     public string DefaultTempPath
     {

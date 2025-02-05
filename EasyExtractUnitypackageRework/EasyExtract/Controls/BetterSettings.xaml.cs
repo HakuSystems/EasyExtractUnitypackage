@@ -31,7 +31,6 @@ public partial class BetterSettings
                 .ToList();
             DynamicScalingComboBox.ItemsSource = dynamicScalingMode;
 
-            BorderMenuSwitch.IsChecked = ConfigHandler.Instance.Config.BorderThicknessActive;
             ContextMenuSwitch.IsChecked = ConfigHandler.Instance.Config.ContextMenuToggle;
             SkipIntroLogoAnimationToggleSwitch.IsChecked = ConfigHandler.Instance.Config.IntroLogoAnimation;
             UwUToggleSwitch.IsChecked = ConfigHandler.Instance.Config.UwUModeActive;
@@ -192,21 +191,6 @@ public partial class BetterSettings
     private async Task UpdateContextMenuToggleSettingAsync()
     {
         ConfigHandler.Instance.Config.ContextMenuToggle = ContextMenuSwitch.IsChecked ?? false;
-    }
-
-    private async void BorderMenuSwitch_OnChecked(object sender, RoutedEventArgs e)
-    {
-        await UpdateBorderThicknessConfigAsync();
-    }
-
-    private async Task UpdateBorderThicknessConfigAsync()
-    {
-        ConfigHandler.Instance.Config.BorderThicknessActive = BorderMenuSwitch.IsChecked ?? false;
-    }
-
-    private async void BorderMenuSwitch_OnUnchecked(object sender, RoutedEventArgs e)
-    {
-        await UpdateBorderThicknessConfigAsync();
     }
 
     private void BetterSettings_OnSizeChanged(object sender, SizeChangedEventArgs e)
