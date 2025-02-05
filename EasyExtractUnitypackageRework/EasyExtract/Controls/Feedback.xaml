@@ -40,6 +40,7 @@
                     AutomationProperties.HelpText="Title prompting the user to provide feedback."
                     AutomationProperties.Name="FeedbackTitle"
                     FontSize="26"
+                    FontTypography="TitleLarge"
                     FontWeight="Bold"
                     Foreground="#2ca7f2"
                     Grid.Row="0"
@@ -57,6 +58,7 @@
                     <ui:TextBlock
                         AutomationProperties.Name="SatisfactionPrompt"
                         FontSize="14"
+                        FontTypography="BodyStrong"
                         FontWeight="SemiBold"
                         Margin="0,0,0,8"
                         Text="How satisfied are you with this software?" />
@@ -79,6 +81,7 @@
                     <ui:TextBlock
                         AutomationProperties.Name="CommentPrompt"
                         FontSize="14"
+                        FontTypography="BodyStrong"
                         FontWeight="SemiBold"
                         Margin="0,0,0,8"
                         Text="Your comment or Improvement Request:" />
@@ -110,6 +113,7 @@
                         AutomationProperties.HelpText="Indicates that feedback will be sent anonymously."
                         AutomationProperties.Name="AnonymousInfo"
                         FontSize="12"
+                        FontTypography="Caption"
                         FontWeight="SemiBold"
                         Margin="0,0,10,0"
                         Text="Sending request as Anonymous"

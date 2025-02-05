@@ -97,6 +97,7 @@
                                                 IsTodayHighlighted="True"
                                                 x:Name="CalendarStartCreationDatePicker" />
                                             <ui:TextBlock
+                                                FontTypography="Caption"
                                                 Margin="8,0,0,0"
                                                 Text="{Binding ElementName=CalendarStartCreationDatePicker, Path=Date, StringFormat=dd-MM-yyyy}"
                                                 VerticalAlignment="Center" />
@@ -112,11 +113,11 @@
                                                 IsTodayHighlighted="True"
                                                 x:Name="CalendarEndCreationDatePicker" />
                                             <ui:TextBlock
+                                                FontTypography="Caption"
                                                 Margin="8,0,0,0"
                                                 Text="{Binding ElementName=CalendarEndCreationDatePicker, Path=Date, StringFormat=dd-MM-yyyy}"
                                                 VerticalAlignment="Center" />
                                         </StackPanel>
-
                                         <StackPanel Grid.Row="1" Margin="5">
                                             <ui:Button
                                                 AutomationProperties.HelpText="Apply date filter to search results."
@@ -175,6 +176,7 @@
                                             <ui:TextBlock
                                                 Appearance="Secondary"
                                                 FontSize="12"
+                                                FontTypography="Caption"
                                                 Margin="0,5,0,0"
                                                 Opacity="0.5"
                                                 Text="{Binding UnityPackagePath}"
@@ -184,6 +186,7 @@
                                                     <ui:TextBlock
                                                         Appearance="Secondary"
                                                         FontSize="12"
+                                                        FontTypography="Caption"
                                                         Margin="0,5,0,0"
                                                         Opacity="0.5"
                                                         Text="{Binding ModifiedTime}"
@@ -191,6 +194,7 @@
                                                     <ui:TextBlock
                                                         Appearance="Secondary"
                                                         FontSize="12"
+                                                        FontTypography="Caption"
                                                         Margin="0,5,0,0"
                                                         Opacity="0.5"
                                                         Text="{Binding CreatedTime}"
@@ -199,7 +203,6 @@
                                             </ui:Card>
                                         </StackPanel>
                                     </ui:CardControl.Header>
-
                                     <ui:Button
                                         AutomationProperties.HelpText="Adds this item to the extraction queue."
                                         AutomationProperties.Name="QueueAddButton"
@@ -217,28 +220,31 @@
                     </ui:ListView>
 
                     <!--  5) Fallback / Status Text  -->
-                    <TextBlock
+                    <ui:TextBlock
                         AutomationProperties.HelpText="Displayed if the external SearchEverything tool is unavailable."
                         AutomationProperties.Name="FallbackStatus"
                         FontStyle="Italic"
+                        FontTypography="Caption"
                         HorizontalAlignment="Center"
                         Margin="10"
                         Text="Search Everything isn't supported on your computer."
                         x:Name="FallbackEverything" />
-                    <TextBlock
+                    <ui:TextBlock
                         AutomationProperties.HelpText="Brief instructions for searching packages."
                         AutomationProperties.Name="InstructionsText"
                         FontSize="14"
+                        FontTypography="Body"
                         HorizontalAlignment="Center"
                         Margin="5"
                         MaxWidth="500"
                         Opacity="0.5"
                         Text="Search for a UnityPackage Name..."
                         x:Name="FoundText" />
-                    <TextBlock
+                    <ui:TextBlock
                         AutomationProperties.HelpText="Credits the underlying search tool."
                         AutomationProperties.Name="PoweredByText"
                         FontSize="14"
+                        FontTypography="Caption"
                         HorizontalAlignment="Center"
                         Margin="5"
                         Opacity="0.7"
@@ -246,10 +252,11 @@
                         x:Name="PoweredByText" />
 
                     <!--  6) Status Updates  -->
-                    <TextBlock
+                    <ui:TextBlock
                         AutomationProperties.HelpText="Displays status messages about added items."
                         AutomationProperties.Name="StatusUpdates"
                         FontSize="14"
+                        FontTypography="Body"
                         HorizontalAlignment="Center"
                         Margin="10"
                         VerticalAlignment="Center"
@@ -257,6 +264,5 @@
                 </StackPanel>
             </ui:PassiveScrollViewer>
         </Grid>
-
     </Grid>
 </UserControl>

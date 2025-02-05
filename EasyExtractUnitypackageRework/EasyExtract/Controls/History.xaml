@@ -89,6 +89,7 @@
                                             TextWrapping="WrapWithOverflow" />
                                         <ui:TextBlock
                                             Appearance="Secondary"
+                                            FontTypography="Caption"
                                             Opacity="0.5"
                                             Text="{Binding ExtractedPath}"
                                             TextWrapping="WrapWithOverflow" />
@@ -149,17 +150,16 @@
                     Icon="{ui:SymbolIcon Subtract24}"
                     VerticalAlignment="Center"
                     x:Name="ClearHistoryButton" />
-
-                <Label
+                <ui:TextBlock
                     AutomationProperties.HelpText="Appears when there are no history records."
                     AutomationProperties.Name="NoHistoryLabel"
-                    Content="No History Found"
+                    FontTypography="BodyStrong"
                     HorizontalAlignment="Center"
+                    Text="No History Found"
                     VerticalAlignment="Center"
                     Visibility="Visible"
                     x:Name="NoHistoryLabel" />
             </StackPanel>
         </Grid>
-
     </Grid>
 </UserControl>

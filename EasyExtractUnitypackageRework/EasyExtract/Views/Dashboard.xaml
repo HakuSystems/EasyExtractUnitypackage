@@ -107,6 +107,7 @@
                                     TextWrapping="WrapWithOverflow" />
                                 <ui:TextBlock
                                     Appearance="Secondary"
+                                    FontTypography="Caption"
                                     Opacity="0.6"
                                     Text="HakuSystems, Jan-Fcloud."
                                     TextWrapping="WrapWithOverflow" />
@@ -192,6 +193,7 @@
                                         x:Name="CheckForUpdatesTxt" />
                                     <ui:TextBlock
                                         Appearance="Secondary"
+                                        FontTypography="Caption"
                                         Opacity="0.6"
                                         Text="You are up to date."
                                         TextWrapping="WrapWithOverflow"

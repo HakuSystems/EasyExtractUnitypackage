@@ -58,10 +58,11 @@
                 </ui:SymbolIcon.Triggers>
             </ui:SymbolIcon>
 
-            <TextBlock
+            <ui:TextBlock
                 AutomationProperties.HelpText="Displays a friendly thank-you message for the user."
                 AutomationProperties.Name="ThankYouText"
                 FontSize="30"
+                FontTypography="TitleLarge"
                 FontWeight="Bold"
                 Grid.Row="0"
                 HorizontalAlignment="Center"
