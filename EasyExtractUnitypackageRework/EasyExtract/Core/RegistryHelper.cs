@@ -27,8 +27,8 @@ public static class RegistryHelper
                 }
             }
         }
-        catch (Exception ex) when (ex is ArgumentException || ex is UnauthorizedAccessException ||
-                                   ex is SecurityException || ex is InvalidOperationException)
+        catch (Exception ex) when (ex is ArgumentException or UnauthorizedAccessException or SecurityException
+                                       or InvalidOperationException)
         {
             await BetterLogger.LogAsync($"Registry deletion error: {ex.Message} - Path: {ContextMenuPath}",
                 Importance.Error);

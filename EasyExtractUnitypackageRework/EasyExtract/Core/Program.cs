@@ -98,10 +98,20 @@ public class Program
     private static async Task KillAllProcesses(string processName)
     {
         foreach (var process in Process.GetProcessesByName(processName))
-            if (process.Id != Process.GetCurrentProcess().Id)
+        {
+            // Skip the current process
+            if (process.Id == Process.GetCurrentProcess().Id)
+                continue;
+            try
             {
                 await BetterLogger.LogAsync($"Killing process {process.Id}", Importance.Info);
                 process.Kill();
+                await process.WaitForExitAsync(); // Wait for the process to exit completely
             }
+            catch (Exception ex)
+            {
+                await BetterLogger.LogAsync($"Error killing process {process.Id}: {ex.Message}", Importance.Error);
+            }
+        }
     }
 }

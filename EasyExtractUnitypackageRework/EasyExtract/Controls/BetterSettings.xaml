@@ -186,11 +186,28 @@
                                 <mahicons:Modern Kind="Connect" />
                             </ui:Card>
 
+
                             <StackPanel Grid.Column="1" VerticalAlignment="Center">
-                                <ui:TextBlock
-                                    FontTypography="BodyStrong"
-                                    Text="Context Menu Activation"
-                                    TextWrapping="WrapWithOverflow" />
+                                <StackPanel Margin="6" Orientation="Horizontal">
+                                    <ui:TextBlock
+                                        FontTypography="BodyStrong"
+                                        Text="Context Menu Activation"
+                                        TextWrapping="WrapWithOverflow" />
+
+                                    <Border
+                                        CornerRadius="8"
+                                        Margin="6,0,0,0"
+                                        Padding="6,2"
+                                        VerticalAlignment="Center">
+                                        <TextBlock
+                                            FontSize="10"
+                                            FontWeight="Bold"
+                                            Foreground="White"
+                                            Text="This Requires Admin Rights"
+                                            VerticalAlignment="Center" />
+                                    </Border>
+                                </StackPanel>
+
                                 <ui:TextBlock
                                     Appearance="Secondary"
                                     Opacity="0.5"
