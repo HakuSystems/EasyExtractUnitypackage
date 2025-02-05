@@ -15,11 +15,28 @@ public class BackgroundManager : INotifyPropertyChanged
 
     private BackgroundManager()
     {
+        var configImage = ConfigHandler.Instance.Config.CustomBackgroundImage;
+        _backgroundOpacity = configImage.BackgroundOpacity > 0 ? configImage.BackgroundOpacity : 1.0;
         _currentBackground = new ImageBrush
         {
-            Stretch = Stretch.Fill
+            Stretch = Stretch.Fill,
+            Opacity = _backgroundOpacity
         };
-        _backgroundOpacity = 1.0;
+
+        if (string.IsNullOrEmpty(configImage.BackgroundPath)) return;
+        try
+        {
+            CurrentBackground = new ImageBrush(new BitmapImage(new Uri(configImage.BackgroundPath)))
+            {
+                Opacity = _backgroundOpacity,
+                Stretch = Stretch.Fill
+            };
+        }
+        catch (Exception ex)
+        {
+            // Log or handle the error if the image cannot be loaded
+            _ = BetterLogger.LogAsync($"Error loading background from config: {ex.Message}", Importance.Warning);
+        }
     }
 
     public static BackgroundManager Instance => _instance ??= new BackgroundManager();
@@ -62,8 +79,8 @@ public class BackgroundManager : INotifyPropertyChanged
             Opacity = BackgroundOpacity,
             Stretch = Stretch.Fill
         };
-        await BetterLogger.LogAsync($"Background updated with image: {imagePath}",
-            Importance.Info); // Log background update
+        ConfigHandler.Instance.Config.CustomBackgroundImage.BackgroundPath = imagePath;
+        await BetterLogger.LogAsync($"Background updated with image: {imagePath}", Importance.Info);
     }
 
     public async Task ResetBackground()
@@ -73,25 +90,23 @@ public class BackgroundManager : INotifyPropertyChanged
             var uri = new Uri(new StringBuilder().Append(
                     "\u0068\u0074\u0074\u0070\u0073\u003a\u002f\u002f\u0072\u0061\u0077\u002e\u0067\u0069\u0074\u0068\u0075\u0062\u0075\u0073\u0065\u0072\u0063\u006f\u006e\u0074\u0065\u006e\u0074\u002e\u0063\u006f\u006d\u002f\u0048\u0061\u006b\u0075\u0053\u0079\u0073\u0074\u0065\u006d\u0073\u002f\u0047\u0072\u0061\u0070\u0068\u0069\u0063\u0073\u0053\u0074\u0075\u0066\u0066\u002f\u006d\u0061\u0069\u006e\u002f\u0045\u0061\u0073\u0079\u0045\u0078\u0074\u0072\u0061\u0063\u0074\u0055\u006e\u0069\u0074\u0079\u0070\u0061\u0063\u006b\u0061\u0067\u0065\u005f\u0042\u0061\u0063\u006b\u0067\u0072\u006f\u0075\u006e\u0064\u0025\u0032\u0030\u0038\u004b\u002e\u0070\u006e\u0067")
                 .ToString());
-            CurrentBackground = new ImageBrush(new BitmapImage(new Uri(uri.ToString())))
+            CurrentBackground = new ImageBrush(new BitmapImage(uri))
             {
                 Opacity = BackgroundOpacity,
                 Stretch = Stretch.Fill
             };
             ConfigHandler.Instance.Config.CustomBackgroundImage.BackgroundPath = uri.ToString();
             await UpdateBackground(uri.ToString());
-            await BetterLogger.LogAsync("Background reset to default",
-                Importance.Info); // Log background reset
+            await BetterLogger.LogAsync("Background reset to default", Importance.Info);
         }
-        catch (ResourceReferenceKeyNotFoundException ex)
+        catch (Exception ex)
         {
             CurrentBackground = new ImageBrush
             {
                 Opacity = BackgroundOpacity,
                 Stretch = Stretch.Fill
             };
-            await BetterLogger.LogAsync($"Default background resource not found: {ex.Message}",
-                Importance.Warning); // Log resource not found
+            await BetterLogger.LogAsync($"Default background resource not found: {ex.Message}", Importance.Warning);
         }
     }
 
@@ -100,6 +115,7 @@ public class BackgroundManager : INotifyPropertyChanged
         BackgroundOpacity = opacity;
         _currentBackground.Opacity = opacity;
         ConfigHandler.Instance.Config.CustomBackgroundImage.BackgroundOpacity = opacity;
+        await BetterLogger.LogAsync($"Background opacity updated to: {opacity}", Importance.Info);
     }
 
     private void OnPropertyChanged(string propertyName)

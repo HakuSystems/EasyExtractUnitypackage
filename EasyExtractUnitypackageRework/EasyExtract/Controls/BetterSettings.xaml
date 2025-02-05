@@ -441,50 +441,6 @@
                     </ui:Card>
 
                     <ui:Card
-                        AutomationProperties.HelpText="Toggle skipping the animated logo at startup."
-                        AutomationProperties.Name="NoIntroCard"
-                        Margin="0,0,0,12"
-                        Padding="10"
-                        x:Name="NoIntroCard">
-                        <Grid>
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="Auto" />
-                                <ColumnDefinition Width="*" />
-                                <ColumnDefinition Width="Auto" />
-                            </Grid.ColumnDefinitions>
-                            <ui:Card
-                                HorizontalAlignment="Left"
-                                Margin="5"
-                                VerticalAlignment="Center">
-                                <ui:SymbolIcon
-                                    Foreground="{DynamicResource TextFillColorPrimaryBrush}"
-                                    HorizontalAlignment="Center"
-                                    Symbol="SkipForwardTab24"
-                                    VerticalAlignment="Center" />
-                            </ui:Card>
-                            <StackPanel Grid.Column="1" VerticalAlignment="Center">
-                                <ui:TextBlock
-                                    FontTypography="BodyStrong"
-                                    Text="No Intro, Please!"
-                                    TextWrapping="WrapWithOverflow" />
-                                <ui:TextBlock
-                                    Appearance="Secondary"
-                                    FontTypography="Caption"
-                                    Opacity="0.5"
-                                    Text="Hides the animated logo at startup."
-                                    TextWrapping="WrapWithOverflow" />
-                            </StackPanel>
-                            <ui:ToggleSwitch
-                                Checked="SkipIntroLogoAnimationToggleSwitch_OnChecked"
-                                Grid.Column="2"
-                                IsChecked="{Binding IntroLogoAnimation, Mode=TwoWay}"
-                                Margin="5"
-                                Unchecked="SkipIntroLogoAnimationToggleSwitch_OnUnchecked"
-                                x:Name="SkipIntroLogoAnimationToggleSwitch" />
-                        </Grid>
-                    </ui:Card>
-
-                    <ui:Card
                         AutomationProperties.HelpText="Toggle Discord Rich Presence to show current activity."
                         AutomationProperties.Name="DiscordRpcCard"
                         Margin="0,0,0,12"

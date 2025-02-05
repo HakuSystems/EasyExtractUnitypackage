@@ -1,6 +1,5 @@
 ﻿<Application
     Startup="App_OnStartup"
-    StartupUri="/Views/MainWindow.xaml"
     x:Class="EasyExtract.Core.App"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"

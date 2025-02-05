@@ -31,7 +31,6 @@ public class ConfigModel : INotifyPropertyChanged
 
     private ObservableCollection<HistoryModel> _history = new();
     private ObservableCollection<IgnoredPackageInventory> _ignoredUnityPackages = new();
-    private bool _introLogoAnimation;
 
     private string _lastExtractedPath =
         Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "EasyExtract", "Extracted");
@@ -243,18 +242,6 @@ public class ConfigModel : INotifyPropertyChanged
         }
     }
 
-    public bool IntroLogoAnimation
-    {
-        get => _introLogoAnimation;
-        set
-        {
-            if (_introLogoAnimation != value)
-            {
-                _introLogoAnimation = value;
-                OnPropertyChanged();
-            }
-        }
-    }
 
     public bool FirstRun
     {

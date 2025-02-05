@@ -32,7 +32,6 @@ public partial class BetterSettings
             DynamicScalingComboBox.ItemsSource = dynamicScalingMode;
 
             ContextMenuSwitch.IsChecked = ConfigHandler.Instance.Config.ContextMenuToggle;
-            SkipIntroLogoAnimationToggleSwitch.IsChecked = ConfigHandler.Instance.Config.IntroLogoAnimation;
             UwUToggleSwitch.IsChecked = ConfigHandler.Instance.Config.UwUModeActive;
 
             var themes = Enum.GetValues(typeof(AvailableThemes))
@@ -161,21 +160,6 @@ public partial class BetterSettings
             Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "EasyExtract", "Temp");
         DefaultTempPathTextBox.Text = ConfigHandler.Instance.Config.DefaultTempPath;
         await BetterLogger.LogAsync("Default temp path reset", Importance.Info);
-    }
-
-    private async void SkipIntroLogoAnimationToggleSwitch_OnChecked(object sender, RoutedEventArgs e)
-    {
-        await SkipIntroLogoAnimationToggleSwitchCheckUnCheck();
-    }
-
-    private async Task SkipIntroLogoAnimationToggleSwitchCheckUnCheck()
-    {
-        ConfigHandler.Instance.Config.IntroLogoAnimation = SkipIntroLogoAnimationToggleSwitch.IsChecked ?? false;
-    }
-
-    private async void SkipIntroLogoAnimationToggleSwitch_OnUnchecked(object sender, RoutedEventArgs e)
-    {
-        await SkipIntroLogoAnimationToggleSwitchCheckUnCheck();
     }
 
     private async void ContextMenuSwitch_OnChecked(object sender, RoutedEventArgs e)

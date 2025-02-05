@@ -40,11 +40,8 @@ public partial class App
 
         if (config.ContextMenuToggle)
         {
-            await Task.Run(async () =>
-            {
-                var program = new Program();
-                await program.Run(e.Args);
-            });
+            var program = new Program();
+            await program.Main(e.Args);
             await Dispatcher.InvokeAsync(InitializeComponent);
         }
         else

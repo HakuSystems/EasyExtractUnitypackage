@@ -3,12 +3,14 @@ using EasyExtract.Config;
 using EasyExtract.Config.Models;
 using EasyExtract.Services;
 using EasyExtract.Utilities;
+using EasyExtract.Views;
 
 namespace EasyExtract.Core;
 
 public class Program
 {
-    public async Task Run(string[] args)
+    [STAThread]
+    public async Task Main(string[] args)
     {
         try
         {
@@ -48,18 +50,9 @@ public class Program
                 await Task.Run(() => RegistryHelper.RegisterContextMenuEntry());
 
 
-            if (Application.Current == null)
-            {
-                var app = new App();
-                app.InitializeComponent();
-                app.Run();
-            }
-            else
-            {
-                await BetterLogger.LogAsync(
-                    "Application instance already exists. Skipping creation.",
-                    Importance.Info);
-            }
+            var dashboard = new Dashboard();
+            dashboard.InitializeComponent();
+            dashboard.Show();
         }
         catch (UnauthorizedAccessException ex)
         {

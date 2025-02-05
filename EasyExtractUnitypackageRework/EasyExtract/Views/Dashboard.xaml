@@ -27,6 +27,7 @@
     xmlns:customDesign="clr-namespace:EasyExtract.Services"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:extraction="clr-namespace:EasyExtract.Controls"
+    xmlns:gif="https://github.com/XamlAnimatedGif/XamlAnimatedGif"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
@@ -145,6 +146,13 @@
                     VerticalContentAlignment="Stretch"
                     x:Name="NavView">
                     <ui:NavigationView.MenuItems>
+                        <Image
+                            Stretch="Uniform"
+                            gif:AnimationBehavior.AutoStart="True"
+                            gif:AnimationBehavior.CacheFramesInMemory="True"
+                            gif:AnimationBehavior.RepeatBehavior="1x"
+                            gif:AnimationBehavior.SourceUri="pack://application:,,,/EasyExtract;component/Resources/Gifs/LogoAnimation.gif"
+                            x:Name="LogoImage" />
                         <ui:NavigationViewItem
                             Content="Extract"
                             Foreground="{DynamicResource TextFillColorPrimaryBrush}"
