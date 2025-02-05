@@ -6,6 +6,7 @@
     Foreground="{DynamicResource TextFillColorPrimaryBrush}"
     KeyboardNavigation.TabNavigation="Cycle"
     Loaded="SearchEverything_OnLoaded"
+    Margin="0,32,0,0"
     SizeChanged="SearchEverything_OnSizeChanged"
     d:DataContext="{d:DesignInstance Type=config:ConfigModel,
                                      IsDesignTimeCreatable=True}"

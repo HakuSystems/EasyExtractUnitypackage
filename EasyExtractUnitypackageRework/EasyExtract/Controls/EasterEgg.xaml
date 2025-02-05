@@ -6,6 +6,7 @@
     Foreground="{DynamicResource TextFillColorPrimaryBrush}"
     KeyboardNavigation.TabNavigation="Cycle"
     Loaded="EasterEgg_OnLoaded"
+    Margin="0,32,0,0"
     SizeChanged="EasterEgg_OnSizeChanged"
     d:DataContext="{d:DesignInstance config:ConfigModel,
                                      IsDesignTimeCreatable=True}"

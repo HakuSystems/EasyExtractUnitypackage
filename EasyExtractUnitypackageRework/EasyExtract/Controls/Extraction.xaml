@@ -8,6 +8,7 @@
     Foreground="{DynamicResource TextFillColorPrimaryBrush}"
     KeyboardNavigation.TabNavigation="Cycle"
     Loaded="Extraction_OnLoaded"
+    Margin="0,32,0,0"
     SizeChanged="Extraction_OnSizeChanged"
     d:DataContext="{d:DesignInstance config:ConfigModel,
                                      IsDesignTimeCreatable=True}"
@@ -304,8 +305,7 @@
                                             ItemsSource="{Binding ExtractedUnitypackages}"
                                             x:Name="UnityPackageTreeView">
                                             <TreeView.ItemTemplate>
-                                                <HierarchicalDataTemplate
-                                                    ItemsSource="{Binding SubdirectoryItemsGroupedByCategory}">
+                                                <HierarchicalDataTemplate ItemsSource="{Binding SubdirectoryItemsGroupedByCategory}">
                                                     <StackPanel Orientation="Horizontal">
                                                         <ui:ToggleSwitch
                                                             HorizontalAlignment="Left"
@@ -330,8 +330,7 @@
                                                                         Kind="RegularLink"
                                                                         x:Name="LinkDetectionIcon" />
                                                                 </ui:Card>
-                                                                <ui:Card
-                                                                    ToolTip="{Binding MalicousDiscordWebhookCountMessage}">
+                                                                <ui:Card ToolTip="{Binding MalicousDiscordWebhookCountMessage}">
                                                                     <boxIcons:PackIconBoxIcons
                                                                         Foreground="{Binding GetCurrentMalicousDiscordWebhookColor}"
                                                                         Kind="LogosDiscordAlt"
@@ -350,8 +349,7 @@
 
                                                             <HierarchicalDataTemplate.ItemTemplate>
                                                                 <DataTemplate>
-                                                                    <StackPanel Margin="40,0,0,0"
-                                                                        Orientation="Horizontal">
+                                                                    <StackPanel Margin="40,0,0,0" Orientation="Horizontal">
                                                                         <StackPanel.ToolTip>
                                                                             <ToolTip>
                                                                                 <StackPanel Orientation="Vertical">
@@ -365,13 +363,10 @@
                                                                                     <ui:Card>
                                                                                         <Grid>
                                                                                             <Grid.ColumnDefinitions>
-                                                                                                <ColumnDefinition
-                                                                                                    Width="*" />
-                                                                                                <ColumnDefinition
-                                                                                                    Width="Auto" />
+                                                                                                <ColumnDefinition Width="*" />
+                                                                                                <ColumnDefinition Width="Auto" />
                                                                                             </Grid.ColumnDefinitions>
-                                                                                            <StackPanel
-                                                                                                Orientation="Vertical">
+                                                                                            <StackPanel Orientation="Vertical">
                                                                                                 <ui:TextBlock
                                                                                                     FontTypography="BodyStrong"
                                                                                                     Margin="5"

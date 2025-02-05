@@ -6,6 +6,7 @@
     Foreground="{DynamicResource TextFillColorPrimaryBrush}"
     KeyboardNavigation.TabNavigation="Cycle"
     Loaded="Feedback_OnLoaded"
+    Margin="0,32,0,0"
     d:DataContext="{d:DesignInstance config:ConfigModel,
                                      IsDesignTimeCreatable=True}"
     mc:Ignorable="d"
