@@ -69,13 +69,11 @@ public partial class Dashboard : Window
 
         if (ConfigHandler.Instance.Config.FirstRun)
         {
-            NavView.Navigate(typeof(About));
-            await BetterLogger.LogAsync("First run detected, navigating to About", Importance.Info);
+            NavView.Navigate(typeof(BetterSettings));
             ConfigHandler.Instance.Config.FirstRun = false;
         }
         else
         {
-            await BetterLogger.LogAsync("Navigating to Extraction", Importance.Info);
             NavView.Navigate(typeof(Extraction));
         }
 

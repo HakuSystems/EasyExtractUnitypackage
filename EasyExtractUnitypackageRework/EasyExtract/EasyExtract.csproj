@@ -148,11 +148,6 @@
     </ItemGroup>
 
     <ItemGroup>
-        <Page Update="Controls\About.xaml">
-            <Generator>MSBuild:Compile</Generator>
-            <XamlRuntime>Wpf</XamlRuntime>
-            <SubType>Designer</SubType>
-        </Page>
         <Page Update="Controls\EasterEgg.xaml">
             <Generator>MSBuild:Compile</Generator>
             <XamlRuntime>Wpf</XamlRuntime>

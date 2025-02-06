@@ -90,6 +90,16 @@
                             gif:AnimationBehavior.RepeatBehavior="1x"
                             gif:AnimationBehavior.SourceUri="pack://application:,,,/EasyExtract;component/Resources/Gifs/LogoAnimation.gif"
                             x:Name="LogoImage" />
+                        <ui:Card Margin="10" Padding="10">
+                            <ui:TextBlock
+                                Appearance="Secondary"
+                                FontTypography="Caption"
+                                HorizontalAlignment="Center"
+                                Opacity="0.6"
+                                Text="Made by HakuSystems and Jan-Fcloud"
+                                TextWrapping="WrapWithOverflow"
+                                VerticalAlignment="Center" />
+                        </ui:Card>
                         <ui:NavigationViewItem
                             Content="Extract"
                             Foreground="{DynamicResource TextFillColorPrimaryBrush}"
@@ -110,26 +120,19 @@
                             TargetPageTag="History"
                             TargetPageType="{x:Type extraction:History}" />
                         <ui:NavigationViewItem
-                            Content="About"
-                            Foreground="{DynamicResource TextFillColorPrimaryBrush}"
-                            Icon="{ui:SymbolIcon Heart24}"
-                            TargetPageTag="About"
-                            TargetPageType="{x:Type extraction:About}"
-                            x:Name="AboutNavBtn" />
-                        <ui:NavigationViewItem
                             Content="Feedback"
                             Foreground="{DynamicResource TextFillColorPrimaryBrush}"
                             Icon="{ui:SymbolIcon PersonFeedback24}"
                             TargetPageTag="Feedback"
                             TargetPageType="{x:Type extraction:Feedback}" />
-                    </ui:NavigationView.MenuItems>
-
-                    <ui:NavigationView.FooterMenuItems>
                         <ui:NavigationViewItem
                             Content="Settings"
                             Foreground="{DynamicResource TextFillColorPrimaryBrush}"
                             Icon="{ui:SymbolIcon Settings24}"
                             TargetPageType="{x:Type extraction:BetterSettings}" />
+                    </ui:NavigationView.MenuItems>
+
+                    <ui:NavigationView.FooterMenuItems>
                         <StackPanel Orientation="Vertical">
                             <ui:TextBlock
                                 Appearance="Secondary"
@@ -152,6 +155,16 @@
                                 TextWrapping="WrapWithOverflow"
                                 VerticalAlignment="Center"
                                 x:Name="UpdateTextBlock" />
+                            <ui:TextBlock
+                                Appearance="Secondary"
+                                FontTypography="Caption"
+                                HorizontalAlignment="Center"
+                                Margin="5"
+                                MouseDown="UpdateTextBlock_OnMouseDown"
+                                Opacity="0.4"
+                                Text="Credits to DigitalAzure for the Logo"
+                                TextWrapping="WrapWithOverflow"
+                                VerticalAlignment="Center" />
                         </StackPanel>
                     </ui:NavigationView.FooterMenuItems>
                 </ui:NavigationView>

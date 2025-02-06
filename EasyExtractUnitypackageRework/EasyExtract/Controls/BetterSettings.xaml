@@ -247,13 +247,24 @@
                                     Text="When enabled, the title and text will transform into cute UwU style on the next launch."
                                     TextWrapping="WrapWithOverflow" />
                             </StackPanel>
-                            <ui:ToggleSwitch
-                                Checked="UwUToggleSwitch_OnChecked"
+
+                            <StackPanel
                                 Grid.Column="2"
-                                IsChecked="{Binding UwUModeActive, Mode=TwoWay}"
-                                Margin="5"
-                                Unchecked="UwUToggleSwitch_OnUnchecked"
-                                x:Name="UwUToggleSwitch" />
+                                Orientation="Horizontal"
+                                VerticalAlignment="Center">
+                                <ui:TextBlock
+                                    FontTypography="Caption"
+                                    Foreground="#FF3B30"
+                                    Margin="0,0,5,0"
+                                    Text="(Applies at restart)"
+                                    VerticalAlignment="Center" />
+                                <ui:ToggleSwitch
+                                    Checked="UwUToggleSwitch_OnChecked"
+                                    IsChecked="{Binding UwUModeActive, Mode=TwoWay}"
+                                    Margin="5"
+                                    Unchecked="UwUToggleSwitch_OnUnchecked"
+                                    x:Name="UwUToggleSwitch" />
+                            </StackPanel>
                         </Grid>
                     </ui:Card>
 
