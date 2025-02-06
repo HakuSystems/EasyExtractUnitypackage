@@ -20,16 +20,9 @@ public partial class App
         e.Handled = true;
     }
 
-    private async void App_OnExit(object sender, ExitEventArgs e)
-    {
-        DiscordRpcManager.Instance.Dispose();
-        base.OnExit(e);
-    }
-
     private async void App_OnStartup(object sender, StartupEventArgs e)
     {
         DispatcherUnhandledException += Application_DispatcherUnhandledException;
-        Exit += App_OnExit;
 
         await ConfigHandler.Instance.InitializeIfNeededAsync();
         var config = ConfigHandler.Instance.Config;
