@@ -383,7 +383,6 @@ public partial class Extraction : UserControl, INotifyPropertyChanged
     private async void Extraction_OnLoaded(object sender, RoutedEventArgs e)
     {
         if (ConfigHandler.Instance.Config.UwUModeActive) BetterUwUifyer.ApplyUwUModeToVisualTree(this);
-        await CalculateScrollerHeightAsync();
         await DiscordRpcManager.Instance.TryUpdatePresenceAsync("Extraction");
 
         await UpdateQueueHeaderAsync();
@@ -464,19 +463,6 @@ public partial class Extraction : UserControl, INotifyPropertyChanged
         UpdateSelectAllToggleContent();
     }
 
-
-    /// <summary>
-    ///     Asynchronously calculates the height of the scroller in the Extraction user control.
-    /// </summary>
-    private async Task CalculateScrollerHeightAsync()
-    {
-        await Dispatcher.BeginInvoke((Action)(() =>
-        {
-            //max window height - height of the other elements
-            var height = (int)ActualHeight - 200;
-            ExtractedItemsScroller.MaxHeight = height;
-        }));
-    }
 
     /// <summary>
     ///     Asynchronously updates the information badges related to extraction.

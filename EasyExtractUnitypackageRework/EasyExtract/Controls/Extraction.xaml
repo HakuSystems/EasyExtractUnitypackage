@@ -19,7 +19,6 @@
     ui:Design.Foreground="{DynamicResource TextFillColorPrimaryBrush}"
     x:Class="EasyExtract.Controls.Extraction"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-    xmlns:boxIcons="http://metro.mahapps.com/winfx/xaml/iconpacks"
     xmlns:charts="clr-namespace:LiveCharts.Wpf;assembly=LiveCharts.Wpf"
     xmlns:config="clr-namespace:EasyExtract.Config"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
@@ -27,117 +26,54 @@
     xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
 
-
     <Grid x:Name="MainGrid">
         <ui:PassiveScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto">
-            <Grid>
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="*" />
-                    <RowDefinition Height="Auto" />
-                    <RowDefinition Height="Auto" />
-                </Grid.RowDefinitions>
-
-                <TabControl
-                    AutomationProperties.HelpText="Tab control for switching between Extraction, Manage Extracted, and Ignored packages."
-                    AutomationProperties.Name="ExtractionTabs"
-                    SelectionChanged="Tabs_OnSelectionChanged"
-                    x:Name="Tabs">
-
-                    <!--  Extraction TAB  -->
+            <StackPanel>
+                <!--  TabControl with three simplified tabs  -->
+                <TabControl SelectionChanged="Tabs_OnSelectionChanged" x:Name="Tabs">
+                    <!--  Extraction Tab  -->
                     <TabItem x:Name="ExtractionTab">
                         <TabItem.Header>
-                            <StackPanel Orientation="Horizontal">
+                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                                 <ui:SymbolIcon Margin="0,0,6,0" Symbol="DocumentTextExtract24" />
                                 <ui:TextBlock FontTypography="Caption" Text="Extraction" />
                             </StackPanel>
                         </TabItem.Header>
-
-                        <Grid>
-                            <Grid.RowDefinitions>
-                                <RowDefinition Height="Auto" />
-                                <RowDefinition Height="*" />
-                                <RowDefinition Height="Auto" />
-                            </Grid.RowDefinitions>
-
+                        <StackPanel Margin="15">
+                            <!--  Queue Section  -->
                             <ui:CardExpander
-                                AutomationProperties.HelpText="Expandable card showing queued unitypackage files for extraction."
-                                AutomationProperties.Name="QueueExpander"
                                 HorizontalAlignment="Stretch"
-                                HorizontalContentAlignment="Stretch"
                                 Icon="{ui:SymbolIcon DocumentQueue24}"
-                                VerticalAlignment="Top"
                                 x:Name="QueueExpander">
                                 <ui:CardExpander.Header>
-                                    <StackPanel Orientation="Horizontal">
-                                        <StackPanel>
-                                            <ui:TextBlock
-                                                FontTypography="Title"
-                                                Margin="5"
-                                                Text="Queue"
-                                                x:Name="QueueHeaderText" />
-                                        </StackPanel>
-                                    </StackPanel>
+                                    <ui:TextBlock
+                                        FontTypography="Title"
+                                        Margin="5"
+                                        Text="Queue"
+                                        x:Name="QueueHeaderText" />
                                 </ui:CardExpander.Header>
-
                                 <ui:ListView
-                                    HorizontalAlignment="Stretch"
-                                    HorizontalContentAlignment="Stretch"
                                     ItemsSource="{Binding Path=SearchEverything}"
-                                    Margin="15"
-                                    x:Name="QueueListView">
-                                    <ui:ListView.ItemTemplate>
-                                        <DataTemplate>
-                                            <ui:CardControl>
-                                                <ui:CardControl.Icon>
-                                                    <ui:SymbolIcon
-                                                        HorizontalAlignment="Center"
-                                                        Margin="0,0,5,0"
-                                                        Symbol="FolderZip24"
-                                                        VerticalAlignment="Center" />
-                                                </ui:CardControl.Icon>
-                                                <ui:CardControl.Header>
-                                                    <StackPanel HorizontalAlignment="Stretch">
-                                                        <ui:TextBlock
-                                                            FontTypography="BodyStrong"
-                                                            Text="{Binding UnityPackageName}"
-                                                            TextWrapping="WrapWithOverflow" />
-                                                        <ui:TextBlock
-                                                            FontTypography="Caption"
-                                                            HorizontalAlignment="Left"
-                                                            Text="{Binding UnityPackagePath}"
-                                                            TextWrapping="WrapWithOverflow" />
-                                                    </StackPanel>
-                                                </ui:CardControl.Header>
-                                            </ui:CardControl>
-                                        </DataTemplate>
-                                    </ui:ListView.ItemTemplate>
-                                </ui:ListView>
+                                    Margin="10"
+                                    x:Name="QueueListView" />
                             </ui:CardExpander>
 
+                            <!--  Extraction Buttons & Image  -->
                             <StackPanel
-                                AutomationProperties.HelpText="Buttons to start extraction or search for files manually."
-                                AutomationProperties.Name="ExtractionButtons"
-                                Grid.Row="1"
                                 HorizontalAlignment="Center"
                                 Margin="15"
                                 Orientation="Vertical"
-                                VerticalAlignment="Top"
                                 x:Name="ExtractionButtons">
-
                                 <Image
                                     Height="150"
-                                    HorizontalAlignment="Center"
                                     Margin="15"
                                     Source="../Resources/ExtractionProcess/Closed.png"
-                                    VerticalAlignment="Center"
                                     Width="150"
                                     x:Name="ExtractionImage" />
-
                                 <StackPanel HorizontalAlignment="Center" Orientation="Horizontal">
                                     <ui:Button
                                         Click="SearchFileManuallyButton_OnClick"
                                         Content="Search File To Extract"
-                                        HorizontalAlignment="Stretch"
                                         Icon="{ui:SymbolIcon DocumentSearch24}"
                                         Margin="5"
                                         ToolTip="Search for a .unitypackage to add to the queue."
@@ -146,54 +82,34 @@
                                         Appearance="Primary"
                                         Click="ExtractionBtn_OnClick"
                                         Content="Start Extraction"
-                                        HorizontalAlignment="Stretch"
                                         Icon="{ui:SymbolIcon Flash24}"
                                         Margin="5"
                                         ToolTip="Begin extracting queued packages."
-                                        VerticalAlignment="Top"
                                         x:Name="ExtractionBtn" />
                                 </StackPanel>
                                 <ui:TextBlock
                                     FontTypography="Body"
                                     HorizontalAlignment="Center"
                                     Margin="5"
-                                    Text="Drag and drop is enabled"
-                                    VerticalAlignment="Top" />
+                                    Text="Drag and drop is enabled" />
                             </StackPanel>
-                        </Grid>
+                        </StackPanel>
                     </TabItem>
 
-                    <!--  Manage Extracted TAB  -->
+                    <!--  Manage Extracted Tab  -->
                     <TabItem IsSelected="True" x:Name="ManageExtractedTab">
                         <TabItem.Header>
-                            <StackPanel Orientation="Horizontal">
+                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                                 <ui:SymbolIcon Margin="0,0,6,0" Symbol="Settings24" />
                                 <ui:TextBlock FontTypography="Caption" Text="Manage Extracted" />
                                 <ui:InfoBadge Severity="Success" x:Name="ManageExtractedInfoBadge" />
                             </StackPanel>
                         </TabItem.Header>
-
-                        <Grid>
-                            <Grid.RowDefinitions>
-                                <RowDefinition Height="Auto" />
-                                <RowDefinition Height="*" />
-                            </Grid.RowDefinitions>
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*" />
-                                <ColumnDefinition Width="*" />
-                            </Grid.ColumnDefinitions>
-
+                        <StackPanel Margin="15">
                             <ui:CardExpander
-                                AutomationProperties.HelpText="Expandable view of all extracted .unitypackage files."
-                                AutomationProperties.Name="ExtractedPackagesExpander"
-                                Grid.Column="0"
-                                Grid.ColumnSpan="2"
-                                Grid.Row="0"
                                 HorizontalAlignment="Stretch"
                                 Icon="{ui:SymbolIcon FolderZip24}"
                                 IsExpanded="True"
-                                VerticalAlignment="Top"
-                                VerticalContentAlignment="Stretch"
                                 x:Name="ExtractedPackagesExpander">
                                 <ui:CardExpander.Header>
                                     <ui:TextBlock
@@ -201,339 +117,197 @@
                                         Margin="5"
                                         Text="All Extracted Unitypackages" />
                                 </ui:CardExpander.Header>
-
-                                <StackPanel Margin="10,0,10,10" Orientation="Vertical">
+                                <!--  Settings & Actions  -->
+                                <StackPanel Margin="10" Orientation="Vertical">
+                                    <StackPanel Margin="0,0,0,10" Orientation="Horizontal">
+                                        <ui:ToggleSwitch
+                                            Checked="SelectAllUnitypackageToggle_OnChecked"
+                                            Content="Select All"
+                                            Margin="5"
+                                            Unchecked="SelectAllUnitypackageToggle_OnUnchecked"
+                                            x:Name="SelectAllUnitypackageToggle" />
+                                        <ui:TextBox
+                                            Icon="{ui:SymbolIcon Search24}"
+                                            Margin="5"
+                                            MinWidth="300"
+                                            PlaceholderText="Search unitypackage..."
+                                            TextChanged="SearchBar_OnTextChanged"
+                                            x:Name="SearchBar" />
+                                        <ui:ToggleSwitch
+                                            Checked="CategoryStructureBool_OnChecked"
+                                            Content="Category Structure"
+                                            IsChecked="True"
+                                            Margin="5"
+                                            ToolTip="Group files by category"
+                                            Unchecked="CategoryStructureBool_OnUnchecked"
+                                            x:Name="CategoryStructureBool" />
+                                    </StackPanel>
+                                    <StackPanel Orientation="Horizontal">
+                                        <ui:Button
+                                            Click="DeleteSelectedBtn_OnClick"
+                                            Content="Delete Selected"
+                                            Icon="{ui:SymbolIcon Delete24}"
+                                            Margin="5"
+                                            x:Name="DeleteSelectedBtn" />
+                                        <ui:Button
+                                            Click="OpenSelectedDirectoryBtn_OnClick"
+                                            Content="Open Extracted Directory"
+                                            Icon="{ui:SymbolIcon Open24}"
+                                            Margin="5"
+                                            x:Name="OpenSelectedDirectoryBtn" />
+                                        <ui:Button
+                                            Click="MoveToDifferentDirectoryBtn_OnClick"
+                                            Content="Move Selected"
+                                            Icon="{ui:SymbolIcon Directions24}"
+                                            Margin="5"
+                                            x:Name="MoveToDifferentDirectoryBtn" />
+                                        <ui:Button
+                                            Click="IgnoreSelectedBtn_OnClick"
+                                            Content="Ignore Selected"
+                                            Icon="{ui:SymbolIcon Dismiss24}"
+                                            Margin="5"
+                                            x:Name="IgnoreSelectedBtn" />
+                                    </StackPanel>
+                                    <!--  Analytics  -->
                                     <ui:CardExpander
-                                        AutomationProperties.HelpText="Additional settings for selecting or filtering extracted packages."
-                                        AutomationProperties.Name="SettingsExpander"
-                                        Header="Settings"
-                                        HorizontalAlignment="Stretch"
-                                        IsExpanded="True"
-                                        Padding="10"
-                                        x:Name="SettingsExpander">
-                                        <StackPanel Orientation="Vertical">
-                                            <ui:Card Margin="0,0,0,0">
-                                                <StackPanel Orientation="Horizontal">
-                                                    <ui:ToggleSwitch
-                                                        Checked="SelectAllUnitypackageToggle_OnChecked"
-                                                        Content="Select All"
-                                                        HorizontalAlignment="Left"
-                                                        Margin="5"
-                                                        Unchecked="SelectAllUnitypackageToggle_OnUnchecked"
-                                                        x:Name="SelectAllUnitypackageToggle" />
-                                                    <ui:TextBox
-                                                        Icon="{ui:SymbolIcon Search24}"
-                                                        Margin="10,5,5,5"
-                                                        MaxLines="1"
-                                                        MinWidth="300"
-                                                        PlaceholderText="Search unitypackage..."
-                                                        TextChanged="SearchBar_OnTextChanged"
-                                                        x:Name="SearchBar" />
-                                                    <ui:ToggleSwitch
-                                                        Checked="CategoryStructureBool_OnChecked"
-                                                        Content="Category Structure"
-                                                        IsChecked="True"
-                                                        Margin="5"
-                                                        ToolTip="Enable to group files by category"
-                                                        Unchecked="CategoryStructureBool_OnUnchecked"
-                                                        x:Name="CategoryStructureBool" />
-                                                </StackPanel>
-                                            </ui:Card>
-
-                                            <ui:Card Margin="0,10,0,0">
-                                                <StackPanel Orientation="Horizontal">
-                                                    <ui:Button
-                                                        Click="DeleteSelectedBtn_OnClick"
-                                                        Content="Delete Selected"
-                                                        Icon="{ui:SymbolIcon Delete24}"
-                                                        Margin="5"
-                                                        x:Name="DeleteSelectedBtn" />
-                                                    <ui:Button
-                                                        Click="OpenSelectedDirectoryBtn_OnClick"
-                                                        Content="Open Extracted Directory"
-                                                        Icon="{ui:SymbolIcon Open24}"
-                                                        Margin="5"
-                                                        x:Name="OpenSelectedDirectoryBtn" />
-                                                    <ui:Button
-                                                        Click="MoveToDifferentDirectoryBtn_OnClick"
-                                                        Content="Move Selected"
-                                                        Icon="{ui:SymbolIcon Directions24}"
-                                                        Margin="5"
-                                                        x:Name="MoveToDifferentDirectoryBtn" />
-                                                    <ui:Button
-                                                        Click="IgnoreSelectedBtn_OnClick"
-                                                        Content="Ignore Selected"
-                                                        Icon="{ui:SymbolIcon Dismiss24}"
-                                                        Margin="5"
-                                                        x:Name="IgnoreSelectedBtn" />
-                                                </StackPanel>
-                                            </ui:Card>
-
-                                            <ui:Card Margin="0,10,0,0">
-                                                <ui:CardExpander
-                                                    AutomationProperties.HelpText="Displays charts and statistics about extracted packages."
-                                                    AutomationProperties.Name="AnalyticsExpander"
-                                                    Expanded="AnalyticsExpander_OnExpanded"
-                                                    Header="View Analytics"
-                                                    Icon="{ui:SymbolIcon DataArea24}"
-                                                    x:Name="AnalyticsExpander">
-                                                    <charts:CartesianChart
-                                                        Foreground="{DynamicResource TextFillColorPrimaryBrush}"
-                                                        Height="200"
-                                                        HorizontalContentAlignment="Stretch"
-                                                        LegendLocation="Right"
-                                                        x:Name="UnityPackageChart">
-                                                        <charts:CartesianChart.AxisX>
-                                                            <charts:Axis IsEnabled="False" ShowLabels="False" />
-                                                        </charts:CartesianChart.AxisX>
-                                                        <charts:CartesianChart.AxisY>
-                                                            <charts:Axis FontSize="14" IsMerged="True" />
-                                                        </charts:CartesianChart.AxisY>
-                                                    </charts:CartesianChart>
-                                                </ui:CardExpander>
-                                            </ui:Card>
-                                        </StackPanel>
-                                    </ui:CardExpander>
-
-                                    <ui:DynamicScrollViewer
+                                        Expanded="AnalyticsExpander_OnExpanded"
+                                        Header="View Analytics"
+                                        Icon="{ui:SymbolIcon DataArea24}"
                                         Margin="0,10,0,0"
-                                        VerticalScrollBarVisibility="Auto"
-                                        x:Name="ExtractedItemsScroller">
-                                        <TreeView
-                                            AutomationProperties.HelpText="TreeView displaying directories, files, and categories of extracted packages."
-                                            AutomationProperties.Name="UnityPackageTreeView"
-                                            ItemsSource="{Binding ExtractedUnitypackages}"
-                                            x:Name="UnityPackageTreeView">
-                                            <TreeView.ItemTemplate>
-                                                <HierarchicalDataTemplate ItemsSource="{Binding SubdirectoryItemsGroupedByCategory}">
-                                                    <StackPanel Orientation="Horizontal">
-                                                        <ui:ToggleSwitch
-                                                            HorizontalAlignment="Left"
-                                                            IsChecked="{Binding PackageIsChecked, Mode=TwoWay}"
-                                                            Margin="5"
-                                                            VerticalAlignment="Center" />
-                                                        <StackPanel Orientation="Vertical">
-                                                            <ui:TextBlock
-                                                                FontTypography="BodyStrong"
-                                                                Margin="5"
-                                                                Text="{Binding UnitypackageName}"
-                                                                TextWrapping="Wrap" />
-                                                            <ui:TextBlock
-                                                                FontTypography="Body"
-                                                                Margin="5"
-                                                                Text="{Binding UnitypackageTotalFileCountMessage}"
-                                                                TextWrapping="Wrap" />
-                                                            <StackPanel Orientation="Horizontal">
-                                                                <ui:Card ToolTip="{Binding LinkDetectionCountMessage}">
-                                                                    <boxIcons:PackIconBoxIcons
-                                                                        Foreground="{Binding GetCurrentLinkDetectionColor}"
-                                                                        Kind="RegularLink"
-                                                                        x:Name="LinkDetectionIcon" />
-                                                                </ui:Card>
-                                                                <ui:Card ToolTip="{Binding MalicousDiscordWebhookCountMessage}">
-                                                                    <boxIcons:PackIconBoxIcons
-                                                                        Foreground="{Binding GetCurrentMalicousDiscordWebhookColor}"
-                                                                        Kind="LogosDiscordAlt"
-                                                                        x:Name="DiscordWebhookIcon" />
-                                                                </ui:Card>
-                                                            </StackPanel>
-                                                        </StackPanel>
-                                                    </StackPanel>
-
-                                                    <HierarchicalDataTemplate.ItemTemplate>
-                                                        <HierarchicalDataTemplate ItemsSource="{Binding Path=Value}">
-                                                            <ui:TextBlock
-                                                                FontTypography="BodyStrong"
-                                                                Margin="20,0,0,0"
-                                                                Text="{Binding Key}" />
-
-                                                            <HierarchicalDataTemplate.ItemTemplate>
-                                                                <DataTemplate>
-                                                                    <StackPanel Margin="40,0,0,0" Orientation="Horizontal">
-                                                                        <StackPanel.ToolTip>
-                                                                            <ToolTip>
-                                                                                <StackPanel Orientation="Vertical">
-                                                                                    <ui:Card>
-                                                                                        <Image
-                                                                                            Height="200"
-                                                                                            Margin="5"
-                                                                                            Source="{Binding PreviewImage}"
-                                                                                            Width="200" />
-                                                                                    </ui:Card>
-                                                                                    <ui:Card>
-                                                                                        <Grid>
-                                                                                            <Grid.ColumnDefinitions>
-                                                                                                <ColumnDefinition Width="*" />
-                                                                                                <ColumnDefinition Width="Auto" />
-                                                                                            </Grid.ColumnDefinitions>
-                                                                                            <StackPanel Orientation="Vertical">
-                                                                                                <ui:TextBlock
-                                                                                                    FontTypography="BodyStrong"
-                                                                                                    Margin="5"
-                                                                                                    Text="{Binding FileName}"
-                                                                                                    TextWrapping="Wrap" />
-                                                                                                <ui:TextBlock
-                                                                                                    FontTypography="Body"
-                                                                                                    Margin="5"
-                                                                                                    Text="{Binding UnityFileMessasgeTooltip}"
-                                                                                                    TextWrapping="Wrap" />
-                                                                                            </StackPanel>
-                                                                                            <StackPanel Grid.Column="1">
-                                                                                                <ui:SymbolIcon
-                                                                                                    FontSize="50"
-                                                                                                    Height="50"
-                                                                                                    HorizontalAlignment="Center"
-                                                                                                    Symbol="{Binding SymbolIconImage}"
-                                                                                                    VerticalAlignment="Center"
-                                                                                                    Width="50" />
-                                                                                            </StackPanel>
-                                                                                        </Grid>
-                                                                                    </ui:Card>
-                                                                                </StackPanel>
-                                                                            </ToolTip>
-                                                                        </StackPanel.ToolTip>
-
-                                                                        <ui:ToggleSwitch
-                                                                            HorizontalAlignment="Left"
-                                                                            IsChecked="{Binding IsChecked, Mode=TwoWay}"
-                                                                            Margin="5"
-                                                                            VerticalAlignment="Center" />
-                                                                        <ui:SymbolIcon
-                                                                            FontSize="35"
-                                                                            Margin="5,0,0,0"
-                                                                            Symbol="{Binding SymbolIconImage}"
-                                                                            VerticalAlignment="Center" />
-                                                                        <ui:ImageIcon
-                                                                            Height="35"
-                                                                            Margin="5,0,0,0"
-                                                                            MinHeight="35"
-                                                                            MinWidth="35"
-                                                                            Source="{Binding PreviewImage}"
-                                                                            VerticalAlignment="Center"
-                                                                            Width="35" />
-                                                                        <StackPanel Orientation="Vertical">
-                                                                            <ui:TextBlock
-                                                                                FontTypography="BodyStrong"
-                                                                                Margin="5"
-                                                                                Text="{Binding FileName}"
-                                                                                TextWrapping="Wrap" />
-                                                                            <ui:TextBlock
-                                                                                FontTypography="Body"
-                                                                                Margin="5"
-                                                                                Text="{Binding UnityFileMessasge}"
-                                                                                TextWrapping="Wrap" />
-                                                                        </StackPanel>
-                                                                    </StackPanel>
-                                                                </DataTemplate>
-                                                            </HierarchicalDataTemplate.ItemTemplate>
-                                                        </HierarchicalDataTemplate>
-                                                    </HierarchicalDataTemplate.ItemTemplate>
-                                                </HierarchicalDataTemplate>
-                                            </TreeView.ItemTemplate>
-                                        </TreeView>
-                                    </ui:DynamicScrollViewer>
+                                        x:Name="AnalyticsExpander">
+                                        <charts:CartesianChart
+                                            Foreground="{DynamicResource TextFillColorPrimaryBrush}"
+                                            Height="200"
+                                            HorizontalContentAlignment="Stretch"
+                                            LegendLocation="Right"
+                                            x:Name="UnityPackageChart">
+                                            <charts:CartesianChart.AxisX>
+                                                <charts:Axis IsEnabled="False" ShowLabels="False" />
+                                            </charts:CartesianChart.AxisX>
+                                            <charts:CartesianChart.AxisY>
+                                                <charts:Axis FontSize="14" IsMerged="True" />
+                                            </charts:CartesianChart.AxisY>
+                                        </charts:CartesianChart>
+                                    </ui:CardExpander>
                                 </StackPanel>
                             </ui:CardExpander>
-                        </Grid>
+
+                            <!--  Extracted Items TreeView  -->
+                            <ui:DynamicScrollViewer Margin="0,10,0,0" VerticalScrollBarVisibility="Auto">
+                                <TreeView ItemsSource="{Binding ExtractedUnitypackages}" x:Name="UnityPackageTreeView">
+                                    <TreeView.ItemTemplate>
+                                        <HierarchicalDataTemplate
+                                            ItemsSource="{Binding SubdirectoryItemsGroupedByCategory}">
+                                            <StackPanel Orientation="Horizontal">
+                                                <ui:ToggleSwitch IsChecked="{Binding PackageIsChecked, Mode=TwoWay}"
+                                                                 Margin="5" />
+                                                <StackPanel Orientation="Vertical">
+                                                    <ui:TextBlock
+                                                        FontTypography="BodyStrong"
+                                                        Margin="5"
+                                                        Text="{Binding UnitypackageName}"
+                                                        TextWrapping="Wrap" />
+                                                    <ui:TextBlock
+                                                        FontTypography="Body"
+                                                        Margin="5"
+                                                        Text="{Binding UnitypackageTotalFileCountMessage}"
+                                                        TextWrapping="Wrap" />
+                                                </StackPanel>
+                                            </StackPanel>
+                                            <HierarchicalDataTemplate.ItemTemplate>
+                                                <HierarchicalDataTemplate ItemsSource="{Binding Path=Value}">
+                                                    <ui:TextBlock
+                                                        FontTypography="BodyStrong"
+                                                        Margin="20,0,0,0"
+                                                        Text="{Binding Key}" />
+                                                    <HierarchicalDataTemplate.ItemTemplate>
+                                                        <DataTemplate>
+                                                            <StackPanel Margin="40,0,0,0" Orientation="Horizontal">
+                                                                <ui:ToggleSwitch
+                                                                    IsChecked="{Binding IsChecked, Mode=TwoWay}"
+                                                                    Margin="5" />
+                                                                <ui:SymbolIcon
+                                                                    FontSize="35"
+                                                                    Margin="5,0,0,0"
+                                                                    Symbol="{Binding SymbolIconImage}"
+                                                                    VerticalAlignment="Center" />
+                                                                <ui:ImageIcon
+                                                                    Height="35"
+                                                                    Margin="5,0,0,0"
+                                                                    Source="{Binding PreviewImage}"
+                                                                    VerticalAlignment="Center"
+                                                                    Width="35" />
+                                                                <StackPanel Orientation="Vertical">
+                                                                    <ui:TextBlock
+                                                                        FontTypography="BodyStrong"
+                                                                        Margin="5"
+                                                                        Text="{Binding FileName}"
+                                                                        TextWrapping="Wrap" />
+                                                                    <ui:TextBlock
+                                                                        FontTypography="Body"
+                                                                        Margin="5"
+                                                                        Text="{Binding UnityFileMessasge}"
+                                                                        TextWrapping="Wrap" />
+                                                                </StackPanel>
+                                                            </StackPanel>
+                                                        </DataTemplate>
+                                                    </HierarchicalDataTemplate.ItemTemplate>
+                                                </HierarchicalDataTemplate>
+                                            </HierarchicalDataTemplate.ItemTemplate>
+                                        </HierarchicalDataTemplate>
+                                    </TreeView.ItemTemplate>
+                                </TreeView>
+                            </ui:DynamicScrollViewer>
+                        </StackPanel>
                     </TabItem>
 
-                    <!--  Ignored TAB  -->
+                    <!--  Ignored Tab  -->
                     <TabItem>
                         <TabItem.Header>
-                            <StackPanel Orientation="Horizontal">
+                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                                 <ui:SymbolIcon Margin="0,0,6,0" Symbol="Warning24" />
                                 <ui:TextBlock FontTypography="Caption" Text="Ignored" />
                                 <ui:InfoBadge Severity="Caution" x:Name="ManageIgnoredInfoBadge" />
                             </StackPanel>
                         </TabItem.Header>
-
-                        <Grid>
-                            <Grid.RowDefinitions>
-                                <RowDefinition Height="Auto" />
-                                <RowDefinition Height="*" />
-                            </Grid.RowDefinitions>
-
+                        <StackPanel Margin="15">
                             <ui:CardExpander
-                                AutomationProperties.HelpText="Shows list of ignored packages and reasons for ignoring."
-                                AutomationProperties.Name="IgnoredExpander"
-                                Grid.Row="0"
                                 HorizontalAlignment="Stretch"
-                                HorizontalContentAlignment="Stretch"
                                 Icon="{ui:SymbolIcon Warning24}"
                                 IsExpanded="True"
-                                VerticalAlignment="Top"
                                 x:Name="IgnoredExpander">
                                 <ui:CardExpander.Header>
-                                    <StackPanel Orientation="Horizontal">
-                                        <StackPanel>
-                                            <ui:TextBlock
-                                                FontTypography="Title"
-                                                Margin="5"
-                                                Text="Ignored" />
-                                        </StackPanel>
-                                    </StackPanel>
+                                    <ui:TextBlock
+                                        FontTypography="Title"
+                                        Margin="5"
+                                        Text="Ignored" />
                                 </ui:CardExpander.Header>
-
                                 <ui:ListView
-                                    HorizontalAlignment="Stretch"
-                                    HorizontalContentAlignment="Stretch"
                                     ItemsSource="{Binding IgnoredUnityPackages}"
-                                    Margin="15"
-                                    x:Name="IgnoredListView">
-                                    <ui:ListView.ItemTemplate>
-                                        <DataTemplate>
-                                            <ui:CardControl>
-                                                <ui:CardControl.Icon>
-                                                    <ui:SymbolIcon
-                                                        HorizontalAlignment="Center"
-                                                        Margin="0,0,5,0"
-                                                        Symbol="FolderZip24"
-                                                        VerticalAlignment="Center" />
-                                                </ui:CardControl.Icon>
-                                                <ui:CardControl.Header>
-                                                    <StackPanel HorizontalAlignment="Stretch">
-                                                        <ui:TextBlock
-                                                            FontTypography="BodyStrong"
-                                                            Text="{Binding IgnoredUnityPackageName}"
-                                                            TextWrapping="WrapWithOverflow" />
-                                                        <ui:TextBlock
-                                                            FontTypography="Caption"
-                                                            HorizontalAlignment="Left"
-                                                            Text="{Binding IgnoredReason}"
-                                                            TextWrapping="WrapWithOverflow" />
-                                                    </StackPanel>
-                                                </ui:CardControl.Header>
-                                            </ui:CardControl>
-                                        </DataTemplate>
-                                    </ui:ListView.ItemTemplate>
-                                </ui:ListView>
+                                    Margin="10"
+                                    x:Name="IgnoredListView" />
                             </ui:CardExpander>
-
-                            <StackPanel Grid.Row="1">
-                                <ui:Button
-                                    Click="ClearIgnoredListBtn_OnClick"
-                                    Content="Clear Ignored List"
-                                    HorizontalAlignment="Stretch"
-                                    Icon="{ui:SymbolIcon Delete24}"
-                                    Margin="5"
-                                    ToolTip="Remove all items from the ignored list."
-                                    x:Name="ClearIgnoredListBtn" />
-                            </StackPanel>
-                        </Grid>
+                            <ui:Button
+                                Click="ClearIgnoredListBtn_OnClick"
+                                Content="Clear Ignored List"
+                                HorizontalAlignment="Stretch"
+                                Icon="{ui:SymbolIcon Delete24}"
+                                Margin="5"
+                                x:Name="ClearIgnoredListBtn" />
+                        </StackPanel>
                     </TabItem>
                 </TabControl>
 
+                <!--  Status Bar  -->
                 <StatusBar
-                    AutomationProperties.HelpText="Displays current status and progress of extraction processes."
-                    AutomationProperties.Name="ExtractionStatusBar"
-                    Grid.Row="2"
                     HorizontalAlignment="Stretch"
+                    Margin="0,10,0,0"
                     VerticalAlignment="Bottom"
                     Visibility="Collapsed"
                     x:Name="StatusBar">
                     <StatusBarItem>
                         <StatusBarItem.Content>
-                            <StackPanel Orientation="Horizontal">
+                            <StackPanel HorizontalAlignment="Center" Orientation="Horizontal">
                                 <ui:TextBlock
                                     FontTypography="Caption"
                                     Margin="5"
@@ -554,7 +328,7 @@
                         </StatusBarItem.Content>
                     </StatusBarItem>
                 </StatusBar>
-            </Grid>
+            </StackPanel>
         </ui:PassiveScrollViewer>
     </Grid>
 </UserControl>
