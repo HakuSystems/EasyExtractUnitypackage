@@ -223,6 +223,49 @@
                                                     <HierarchicalDataTemplate.ItemTemplate>
                                                         <DataTemplate>
                                                             <StackPanel Margin="40,0,0,0" Orientation="Horizontal">
+
+                                                                <StackPanel.ToolTip>
+                                                                    <ToolTip>
+                                                                        <StackPanel Orientation="Vertical">
+                                                                            <ui:Card>
+                                                                                <Image
+                                                                                    Height="200"
+                                                                                    Margin="5"
+                                                                                    Source="{Binding PreviewImage}"
+                                                                                    Width="200" />
+                                                                            </ui:Card>
+                                                                            <ui:Card>
+                                                                                <Grid>
+                                                                                    <Grid.ColumnDefinitions>
+                                                                                        <ColumnDefinition Width="*" />
+                                                                                        <ColumnDefinition Width="Auto" />
+                                                                                    </Grid.ColumnDefinitions>
+                                                                                    <StackPanel Orientation="Vertical">
+                                                                                        <ui:TextBlock
+                                                                                            FontTypography="BodyStrong"
+                                                                                            Margin="5"
+                                                                                            Text="{Binding FileName}"
+                                                                                            TextWrapping="Wrap" />
+                                                                                        <ui:TextBlock
+                                                                                            FontTypography="Body"
+                                                                                            Margin="5"
+                                                                                            Text="{Binding UnityFileMessasgeTooltip}"
+                                                                                            TextWrapping="Wrap" />
+                                                                                    </StackPanel>
+                                                                                    <StackPanel Grid.Column="1">
+                                                                                        <ui:SymbolIcon
+                                                                                            FontSize="50"
+                                                                                            Height="50"
+                                                                                            HorizontalAlignment="Center"
+                                                                                            Symbol="{Binding SymbolIconImage}"
+                                                                                            VerticalAlignment="Center"
+                                                                                            Width="50" />
+                                                                                    </StackPanel>
+                                                                                </Grid>
+                                                                            </ui:Card>
+                                                                        </StackPanel>
+                                                                    </ToolTip>
+                                                                </StackPanel.ToolTip>
                                                                 <ui:ToggleSwitch
                                                                     IsChecked="{Binding IsChecked, Mode=TwoWay}"
                                                                     Margin="5" />
