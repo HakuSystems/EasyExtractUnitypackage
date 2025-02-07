@@ -10,7 +10,13 @@
 
 ## Star History
 
-[![Star History Chart](https://api.star-history.com/svg?repos=HakuSystems/EasyExtractUnitypackage&type=Date)](https://star-history.com/#HakuSystems/EasyExtractUnitypackage&Date)
+<a href="https://star-history.com/#HakuSystems/EasyExtractUnitypackage&Date">
+ <picture>
+   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/svg?repos=HakuSystems/EasyExtractUnitypackage&type=Date&theme=dark" />
+   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/svg?repos=HakuSystems/EasyExtractUnitypackage&type=Date" />
+   <img alt="Star History Chart" src="https://api.star-history.com/svg?repos=HakuSystems/EasyExtractUnitypackage&type=Date" />
+ </picture>
+</a>
 
 ## Table of Contents
 - [Introduction](#introduction)
