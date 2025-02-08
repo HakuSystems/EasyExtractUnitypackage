@@ -1,13 +1,12 @@
-# Plans for the Future:
-- **Upgrade to Avalonia in order to make EasyExtractUnitypackage available for MacOS & Linux instead of the current sate: "Only Windows"** (This is being worked on currently.)
-- Adjustable UI Theme
-- Even more Data, from unitypackages
+# Plans for the Future
+- **Cross-Platform Support:** Upgrade to Avalonia to make EasyExtractUnitypackage available on macOS and Linux (currently, only Windows is supported; work is underway).
+- **Adjustable UI Themes:** Further refine theme options (light, dark, etc) for a fully customizable user interface.
+- **Enhanced Data Insights:** Integrate even more data extracted from Unity packages to offer deeper analytics and reporting.
 
 # EasyExtractUnitypackage
 [Website](https://hakusystems.net/easyextractunitypackage)
 
-**EasyExtractUnitypackage** is a powerful tool designed to seamlessly extract files from a `.unitypackage` without the hassle of importing them into Unity.
-
+**EasyExtractUnitypackage** is a powerful tool designed to seamlessly extract files from a `.unitypackage` without the hassle of importing them into Unity. This tool allows Unity developers and enthusiasts to preview, selectively integrate, and manage assets efficiently—all without the overhead of launching the Unity Editor.
 
 ## Star History
 
@@ -24,73 +23,80 @@
 - [Installation](#installation)
 - [Usage](#usage)
 - [Features](#features)
-- [Contact](#contact)
 - [Images](#images)
+- [Contact](#contact)
 - [Designer Wanted](#designer-wanted)
+- [Plans for the Future](#plans-for-the-future)
 
 ## Introduction
-**EasyExtractUnitypackage** aims to simplify the process of extracting assets from Unity packages. Whether you're a game developer or a Unity enthusiast, this tool is crafted to enhance your workflow.
+**EasyExtractUnitypackage** aims to simplify the process of extracting assets from Unity packages. Whether you are a game developer or a Unity enthusiast, this tool is crafted to enhance your workflow by allowing you to:
+- Extract Unity asset packages externally.
+- Avoid the need for a full Unity project just to access or preview assets.
+- Streamline asset management and integration.
 
 ## Installation
 1. Download the latest release from our [GitHub repository](https://github.com/HakuSystems/EasyExtractUnitypackage/releases).
-2. Extract the downloaded file.
+2. Extract the downloaded archive.
 3. Run the executable to start using the tool.
 
 ## Usage
-1. Launch the application.
-2. Drag and drop your `.unitypackage` file or use the file picker.
-3. Click on 'Extract' and let the tool do its magic!
+1. Launch the EasyExtractUnitypackage application.
+2. Drag and drop your `.unitypackage` file into the interface (or use the file picker).
+3. Click on the **Extract** button and let the tool handle the rest!
 
 ## Features
-- **Context menu**: by right-clicking on an .unitypackage file, you can easily Extract it!
-- **Fast Extraction**: Utilizes the `.gz` file structure for quick access and extraction.
-- **Customizable Settings**: Tailor the application to your preferences.
-- **Notifications**: Stay informed with notifications upon completion of the extraction process.
-- **Discord Integration**: Join our [Discord server](https://discord.gg/Wn7XfhPCyD) for real-time updates and community interactions.
-- **UI Enhancements**: Improved navigation and user experience.
-- **Theme Selection**: Switch between light, dark, and high contrast modes.
-- **Extraction Queue**: Manage multiple extraction tasks seamlessly.
-- **LiveCharts Integration**: Visualize extracted data with interactive charts.
-- **History Feature**: Track and manage previous extractions.
-
-## Contact
-For any queries, suggestions, or feedback, please reach out to us:
-- Discord: [EasyExtractUnitypackage Discord](https://discord.gg/Wn7XfhPCyD)
+- **Context Menu Integration:** Right-click on a `.unitypackage` file in your file explorer to extract it instantly.
+- **Fast Extraction:** Leverages the native `.gz` compression of Unity packages for rapid file unpacking.
+- **Customizable Settings:** Tailor the application to your preferences with adjustable themes and UI settings.
+- **Notifications:** Receive alerts upon extraction completion, enabling you to multitask effectively.
+- **Extraction Queue:** Process multiple Unity packages sequentially with an intuitive queue system.
+- **History and Analytics:** Track previous extractions and review detailed analytics through interactive charts.
+- **Search Integration:** Quickly locate Unity package files on your system without manual searching.
+- **Community Support:** Engage with our Discord community for real-time updates, feedback, and support.
 
 ## Images
-### Right click to extract Unitypackages! (Only Available for V2.0.5.7 or above)
-![Screenshot 2024-06-28 232203](https://github.com/HakuSystems/EasyExtractUnitypackage/assets/66133638/8f75d32a-1737-4b86-9f64-11390b60a618)
-### Settings
-![EasyExtract_LtFyBzBwmL](https://github.com/HakuSystems/EasyExtractUnitypackage/assets/66133638/dfa85198-0a1d-4e50-8104-084b66a58fa1)
-### Category Based Management of Unitypackages
-![EasyExtract_UAM3RkMLdv](https://github.com/HakuSystems/EasyExtractUnitypackage/assets/66133638/f1f6f77a-fd76-4552-883e-a1c91a6d6f57)
-### See Whats inside
-![Discord_QpvvikEB8O](https://github.com/HakuSystems/EasyExtractUnitypackage/assets/66133638/517cbcf7-81eb-4041-ba23-fe4dc8ccb284)
-### Search your whole Computer without Searching manually (Thanks to SearchEverything)
-![EasyExtract_yQDarlbz0y](https://github.com/HakuSystems/EasyExtractUnitypackage/assets/66133638/21e134d6-fd3a-4a40-9112-2a21b8d58b19)
-### History!
-![image](https://github.com/HakuSystems/EasyExtractUnitypackage/assets/66133638/e3247e91-a9c3-4514-ab1c-c5967f201327)
-### Analytics!
-![EasyExtract_zye5wbrrDe](https://github.com/HakuSystems/EasyExtractUnitypackage/assets/66133638/72e9f877-ff32-4177-95ce-9bfb764b81e5)
 
+### Right-Click Extraction (V2.0.5.7 or above)
+![Right-Click Extraction](https://github.com/HakuSystems/EasyExtractUnitypackage/assets/66133638/8f75d32a-1737-4b86-9f64-11390b60a618)
 
+### Settings Interface
+![Settings](https://github.com/HakuSystems/EasyExtractUnitypackage/assets/66133638/dfa85198-0a1d-4e50-8104-084b66a58fa1)
+
+### Category-Based Management
+![Category Management](https://github.com/HakuSystems/EasyExtractUnitypackage/assets/66133638/f1f6f77a-fd76-4552-883e-a1c91a6d6f57)
+
+### Inside View
+![Inside View](https://github.com/HakuSystems/EasyExtractUnitypackage/assets/66133638/517cbcf7-81eb-4041-ba23-fe4dc8ccb284)
+
+### System-Wide Search Integration
+![Search Integration](https://github.com/HakuSystems/EasyExtractUnitypackage/assets/66133638/21e134d6-fd3a-4a40-9112-2a21b8d58b19)
+
+### Extraction History
+![History Feature](https://github.com/HakuSystems/EasyExtractUnitypackage/assets/66133638/e3247e91-a9c3-4514-ab1c-c5967f201327)
+
+### Analytics Overview
+![Analytics Overview](https://github.com/HakuSystems/EasyExtractUnitypackage/assets/66133638/72e9f877-ff32-4177-95ce-9bfb764b81e5)
+
+## Contact
+For queries, suggestions, or feedback, please reach out to us:
+- **Discord:** [EasyExtractUnitypackage Discord](https://discord.gg/Wn7XfhPCyD)
 
 ## Designer Wanted
+We are currently seeking a talented UI/UX Designer to help enhance the user experience of EasyExtractUnitypackage. The application is built with WPF, and while we have a foundational design, we are looking for expertise to elevate the interface.
 
-We are currently seeking a talented UI Designer to join our team and help make EasyExtractUnitypackage even more user-friendly. The application is written in WPF, and while we have a decent level of UI design skills, we are looking for someone with expertise to elevate the user experience to the next level.
+### Requirements
+- Proven experience in UI/UX design, especially with WPF applications.
+- Proficiency with design tools such as Adobe XD, Illustrator, or Photoshop.
+- Ability to create intuitive, visually appealing interfaces.
+- Awareness of current design trends and best practices.
+- Excellent communication skills and a collaborative approach.
 
-### Requirements:
-- Proven experience in UI/UX design, particularly with WPF applications
-- Familiarity with design tools like Adobe XD, Ilustrator, or Photoshop
-- Ability to create intuitive and visually appealing interfaces
-- Knowledge of current design trends and best practices
-- Strong communication skills and a collaborative mindset
+### Responsibilities
+- Refine and improve the current UI design of EasyExtractUnitypackage.
+- Collaborate with our development team to implement design changes.
+- Conduct user research and usability testing to gather actionable feedback.
+- Develop wireframes, prototypes, and high-fidelity mockups.
 
-### Responsibilities:
-- Improve and refine the current UI design of EasyExtractUnitypackage
-- Collaborate with the development team to implement design changes
-- Conduct user research and usability testing to gather feedback
-- Create wireframes, prototypes, and high-fidelity mockups
+If you are interested and believe you have the skills to contribute, please contact us via our [Discord server](https://uploader.hakusystems.net/go/Discord%20-%20EasyExtractUnitypackage).
 
-If you are interested and believe you have the skills to contribute to our project, please contact us through our [Discord server](https://uploader.hakusystems.net/go/Discord%20-%20EasyExtractUnitypackage).
-
+---
