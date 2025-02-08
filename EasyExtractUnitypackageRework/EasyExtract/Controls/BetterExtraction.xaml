@@ -15,8 +15,7 @@
     xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
     <StackPanel HorizontalAlignment="Stretch" VerticalAlignment="Center">
-        <ui:CardExpander
-            Icon="{ui:ImageIcon 'pack://application:,,,/EasyExtract;component/Resources/Big/EEUP_IconBig@4x.png', Width=38, Height=35}">
+        <ui:CardExpander Icon="{ui:ImageIcon 'pack://application:,,,/EasyExtract;component/Resources/Big/EEUP_IconBig@4x.png', Width=38, Height=35}">
             <ui:CardExpander.Header>
                 <Grid>
                     <Grid.RowDefinitions>
