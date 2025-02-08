@@ -14,6 +14,7 @@
             </ResourceDictionary.MergedDictionaries>
             <utilities:BackgroundAndOpacityConverter x:Key="BackgroundAndOpacityConverter" />
             <FontFamily x:Key="GlobalFontFamily">/EasyExtract;component/../Fonts/#Poppins</FontFamily>
+            <utilities:NumberFormatConverter x:Key="NumberFormatConverter" />
         </ResourceDictionary>
     </Application.Resources>
 </Application>

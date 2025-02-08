@@ -90,16 +90,87 @@
                             gif:AnimationBehavior.RepeatBehavior="1x"
                             gif:AnimationBehavior.SourceUri="pack://application:,,,/EasyExtract;component/Resources/Gifs/LogoAnimation.gif"
                             x:Name="LogoImage" />
-                        <ui:Card Margin="10" Padding="10">
-                            <ui:TextBlock
-                                Appearance="Secondary"
-                                FontTypography="Caption"
-                                HorizontalAlignment="Center"
-                                Opacity="0.6"
-                                Text="Made by HakuSystems and Jan-Fcloud"
-                                TextWrapping="WrapWithOverflow"
-                                VerticalAlignment="Center" />
+                        <ui:Card Background="{Binding BackgroundColorHex}" Padding="16">
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                </Grid.RowDefinitions>
+                                <Grid Grid.Row="0">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="Auto" />
+                                    </Grid.ColumnDefinitions>
+                                    <ui:TextBlock
+                                        Appearance="Primary"
+                                        FontTypography="Body"
+                                        Text="Total Extracted"
+                                        TextWrapping="WrapWithOverflow"
+                                        VerticalAlignment="Center" />
+                                    <ui:Button
+                                        Background="Transparent"
+                                        Click="DetailsBtn_OnClick"
+                                        Content="Details"
+                                        Grid.Column="1"
+                                        HorizontalAlignment="Right"
+                                        Icon="{ui:SymbolIcon MoreCircle24}"
+                                        VerticalAlignment="Center"
+                                        x:Name="DetailsBtn" />
+                                </Grid>
+                                <StackPanel
+                                    Grid.Row="1"
+                                    Margin="0,10,0,10"
+                                    Orientation="Vertical">
+                                    <ui:TextBlock
+                                        Appearance="Primary"
+                                        FontTypography="TitleLarge"
+                                        Foreground="{Binding AccentColorHex}"
+                                        Text="{Binding TotalExtracted, Converter={StaticResource NumberFormatConverter}, UpdateSourceTrigger=PropertyChanged}"
+                                        TextWrapping="WrapWithOverflow"
+                                        VerticalAlignment="Center" />
+                                    <ui:TextBlock
+                                        Appearance="Primary"
+                                        FontTypography="Caption"
+                                        Opacity="0.6"
+                                        Text="Unitypackages"
+                                        TextWrapping="WrapWithOverflow"
+                                        VerticalAlignment="Center" />
+                                    <Rectangle
+                                        Fill="{Binding SecondaryColorHex}"
+                                        Height="2"
+                                        HorizontalAlignment="Stretch"
+                                        Margin="0,10,0,0" />
+                                </StackPanel>
+                                <Grid Grid.Row="2">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="Auto" />
+                                    </Grid.ColumnDefinitions>
+                                    <ui:TextBlock
+                                        Appearance="Primary"
+                                        FontTypography="Caption"
+                                        Opacity="0.6"
+                                        Text="Files"
+                                        TextWrapping="WrapWithOverflow"
+                                        VerticalAlignment="Center" />
+                                    <ui:TextBlock
+                                        FontTypography="Caption"
+                                        Foreground="{Binding PrimaryColorHex}"
+                                        Grid.Column="1"
+                                        Padding="5"
+                                        Text="{Binding TotalFilesExtracted, Converter={StaticResource NumberFormatConverter}, UpdateSourceTrigger=PropertyChanged}"
+                                        VerticalAlignment="Center" />
+                                </Grid>
+                            </Grid>
                         </ui:Card>
+                        <ui:NavigationViewItem
+                            Content="Better Extract"
+                            Foreground="{DynamicResource TextFillColorPrimaryBrush}"
+                            Icon="{ui:SymbolIcon Star24}"
+                            TargetPageTag="Extraction"
+                            TargetPageType="{x:Type extraction:BetterExtraction}"
+                            x:Name="BetterExtractionBtn" />
                         <ui:NavigationViewItem
                             Content="Extract"
                             Foreground="{DynamicResource TextFillColorPrimaryBrush}"
@@ -113,12 +184,12 @@
                             Icon="{ui:SymbolIcon Search24}"
                             TargetPageTag="SearchEverything"
                             TargetPageType="{x:Type extraction:SearchEverything}" />
-                        <ui:NavigationViewItem
+                        <!--<ui:NavigationViewItem
                             Content="History"
                             Foreground="{DynamicResource TextFillColorPrimaryBrush}"
                             Icon="{ui:SymbolIcon History24}"
                             TargetPageTag="History"
-                            TargetPageType="{x:Type extraction:History}" />
+                            TargetPageType="{x:Type extraction:History}" />-->
                         <ui:NavigationViewItem
                             Content="Feedback"
                             Foreground="{DynamicResource TextFillColorPrimaryBrush}"
@@ -130,6 +201,7 @@
                             Foreground="{DynamicResource TextFillColorPrimaryBrush}"
                             Icon="{ui:SymbolIcon Settings24}"
                             TargetPageType="{x:Type extraction:BetterSettings}" />
+
                     </ui:NavigationView.MenuItems>
 
                     <ui:NavigationView.FooterMenuItems>
@@ -165,6 +237,17 @@
                                 Text="Credits to DigitalAzure for the Logo"
                                 TextWrapping="WrapWithOverflow"
                                 VerticalAlignment="Center" />
+
+                            <ui:Card Margin="10" Padding="10">
+                                <ui:TextBlock
+                                    Appearance="Secondary"
+                                    FontTypography="Caption"
+                                    HorizontalAlignment="Center"
+                                    Opacity="0.6"
+                                    Text="Made by HakuSystems and Jan-Fcloud"
+                                    TextWrapping="WrapWithOverflow"
+                                    VerticalAlignment="Center" />
+                            </ui:Card>
                         </StackPanel>
                     </ui:NavigationView.FooterMenuItems>
                 </ui:NavigationView>

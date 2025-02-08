@@ -14,6 +14,7 @@ public partial class History : UserControl, INotifyPropertyChanged
     private int _totalExtracted;
     // TotalFilesExtracted & TotalExtracted are not used in this file.
 
+    //todo: Total GB, Total Extracted Unitypckgs, Total Extracted Files, Total Time saved because of EasyExtract (the time average of all extractions)
     private int _totalFilesExtracted;
 
     public History()

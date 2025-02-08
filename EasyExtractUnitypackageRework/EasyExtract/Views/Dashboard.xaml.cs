@@ -74,7 +74,7 @@ public partial class Dashboard : Window
         }
         else
         {
-            NavView.Navigate(typeof(Extraction));
+            NavView.Navigate(typeof(BetterExtraction));
         }
 
         if (ConfigHandler.Instance.Config.UwUModeActive)
@@ -307,5 +307,10 @@ public partial class Dashboard : Window
             CurrentlyUpdatingTextBlock.Visibility = Visibility.Visible;
             await _updateHandler.IsUpToDateOrUpdate(true);
         }
+    }
+
+    private void DetailsBtn_OnClick(object sender, RoutedEventArgs e)
+    {
+        NavView.Navigate(typeof(History));
     }
 }

@@ -34,6 +34,7 @@ public class ExtractionHandler
             await CreateDirectories(tempFolder, targetFolder);
 
             await ExtractAndWriteFiles(unitypackage, tempFolder);
+            ConfigHandler.Instance.Config.TotalExtracted++;
             await MoveFilesFromTempToTargetFolder(tempFolder, targetFolder);
 
             Directory.Delete(tempFolder, true);
@@ -118,7 +119,7 @@ public class ExtractionHandler
                 using var inStream = File.OpenRead(unitypackage.UnityPackagePath);
                 using var gzipStream = new GZipStream(inStream, CompressionMode.Decompress);
 
-                // Instead of TarArchive.Open, use TarReader for entry-by-entry reading
+                // Use TarReader for entry-by-entry reading
                 using var reader = TarReader.Open(gzipStream);
 
                 // Move to the next entry one by one
@@ -138,7 +139,7 @@ public class ExtractionHandler
                     if (entry.IsDirectory)
                         continue;
 
-                    // Attempt to extract
+                    // Determine the file path and ensure its directory exists.
                     var filePath = Path.Combine(tempFolder, entry.Key);
                     Directory.CreateDirectory(Path.GetDirectoryName(filePath) ?? string.Empty);
 
@@ -151,15 +152,14 @@ public class ExtractionHandler
                         }
 
                         extractedEntries.Add(entry.Key);
+                        ConfigHandler.Instance.Config.TotalFilesExtracted++;
                     }
                     catch (IncompleteArchiveException)
                     {
-                        // Means the TAR data is corrupted for this entry
                         skippedEntries.Add($"{entry.Key} is corrupted. Skipped.");
                     }
                     catch (Exception ex)
                     {
-                        // Some other unexpected error
                         skippedEntries.Add($"{entry.Key} failed: {ex.Message}");
                     }
                 }
