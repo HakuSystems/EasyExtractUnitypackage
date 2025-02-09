@@ -86,7 +86,7 @@
                                             FontTypography="Caption"
                                             FontWeight="Bold"
                                             Foreground="White"
-                                            Text="Experimental New Feature"
+                                            Text="Experimental"
                                             VerticalAlignment="Center" />
                                     </Border>
                                 </StackPanel>

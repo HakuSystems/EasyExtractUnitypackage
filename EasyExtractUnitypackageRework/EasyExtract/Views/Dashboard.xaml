@@ -90,9 +90,12 @@
                             gif:AnimationBehavior.RepeatBehavior="1x"
                             gif:AnimationBehavior.SourceUri="pack://application:,,,/EasyExtract;component/Resources/Gifs/LogoAnimation.gif"
                             x:Name="LogoImage" />
-                        <ui:Card Background="{Binding BackgroundColorHex}" Padding="16">
+
+                        <ui:Card Margin="10" Padding="10">
+
                             <Grid>
                                 <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto" />
                                     <RowDefinition Height="Auto" />
                                     <RowDefinition Height="Auto" />
                                     <RowDefinition Height="Auto" />
@@ -162,8 +165,17 @@
                                         Text="{Binding TotalFilesExtracted, Converter={StaticResource NumberFormatConverter}, UpdateSourceTrigger=PropertyChanged}"
                                         VerticalAlignment="Center" />
                                 </Grid>
+                                <ui:Button
+                                    Background="Transparent"
+                                    Click="SettingsBtn_OnClick"
+                                    Content="App Settings"
+                                    Grid.Row="3"
+                                    HorizontalAlignment="Stretch"
+                                    Icon="{ui:SymbolIcon Settings24}"
+                                    x:Name="SettingsBtn" />
                             </Grid>
                         </ui:Card>
+                        <!--
                         <ui:NavigationViewItem
                             Content="Better Extract"
                             Foreground="{DynamicResource TextFillColorPrimaryBrush}"
@@ -177,31 +189,19 @@
                             Icon="{ui:SymbolIcon DocumentTextExtract24}"
                             TargetPageTag="Extraction"
                             TargetPageType="{x:Type extraction:Extraction}"
-                            x:Name="ExtractionNavBtn" />
-                        <ui:NavigationViewItem
+                            x:Name="ExtractionNavBtn" />-->
+                        <!--<ui:NavigationViewItem
                             Content="Search"
                             Foreground="{DynamicResource TextFillColorPrimaryBrush}"
                             Icon="{ui:SymbolIcon Search24}"
                             TargetPageTag="SearchEverything"
-                            TargetPageType="{x:Type extraction:SearchEverything}" />
-                        <!--<ui:NavigationViewItem
-                            Content="History"
-                            Foreground="{DynamicResource TextFillColorPrimaryBrush}"
-                            Icon="{ui:SymbolIcon History24}"
-                            TargetPageTag="History"
-                            TargetPageType="{x:Type extraction:History}" />-->
+                            TargetPageType="{x:Type extraction:SearchEverything}" />-->
                         <ui:NavigationViewItem
                             Content="Feedback"
                             Foreground="{DynamicResource TextFillColorPrimaryBrush}"
                             Icon="{ui:SymbolIcon PersonFeedback24}"
                             TargetPageTag="Feedback"
                             TargetPageType="{x:Type extraction:Feedback}" />
-                        <ui:NavigationViewItem
-                            Content="Settings"
-                            Foreground="{DynamicResource TextFillColorPrimaryBrush}"
-                            Icon="{ui:SymbolIcon Settings24}"
-                            TargetPageType="{x:Type extraction:BetterSettings}" />
-
                     </ui:NavigationView.MenuItems>
 
                     <ui:NavigationView.FooterMenuItems>
