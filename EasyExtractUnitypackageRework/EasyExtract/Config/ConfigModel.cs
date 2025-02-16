@@ -1,4 +1,5 @@
 using System.Collections.ObjectModel;
+using EasyExtract.BetterExtraction;
 using EasyExtract.Config.Models;
 
 namespace EasyExtract.Config;
@@ -28,6 +29,7 @@ public class ConfigModel : INotifyPropertyChanged
 
     private bool _firstRun;
 
+
     private ObservableCollection<HistoryModel> _history = new();
     private ObservableCollection<IgnoredPackageInventory> _ignoredUnityPackages = new();
 
@@ -41,8 +43,22 @@ public class ConfigModel : INotifyPropertyChanged
 
     private int _totalExtracted;
     private int _totalFilesExtracted;
+    private List<UnitypackageFileInfo> _unitypackageFiles = new();
     private UpdateModel _update = new();
     private bool _uwUModeActive;
+
+    public List<UnitypackageFileInfo> UnitypackageFiles
+    {
+        get => _unitypackageFiles;
+        set
+        {
+            if (_unitypackageFiles != value)
+            {
+                _unitypackageFiles = value;
+                OnPropertyChanged();
+            }
+        }
+    }
 
 
     public string TextColorHex

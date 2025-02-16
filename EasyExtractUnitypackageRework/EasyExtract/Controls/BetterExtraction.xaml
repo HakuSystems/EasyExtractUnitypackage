@@ -3,6 +3,7 @@
     FontFamily="{DynamicResource GlobalFontFamily}"
     Foreground="{DynamicResource TextFillColorPrimaryBrush}"
     KeyboardNavigation.TabNavigation="Cycle"
+    Loaded="BetterExtraction_OnLoaded"
     Margin="0,32,0,0"
     d:DataContext="{d:DesignInstance config:ConfigModel,
                                      IsDesignTimeCreatable=True}"
@@ -18,13 +19,26 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <UserControl.Resources>
+        <!--  for Files in Queue  -->
+        <CollectionViewSource Source="{Binding UnitypackageFiles}" x:Key="QueueFiles" />
+        <!--  for Currently Extracting Files  -->
+        <CollectionViewSource Source="{Binding UnitypackageFiles}" x:Key="ExtractingFiles" />
+    </UserControl.Resources>
+
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
         </Grid.RowDefinitions>
 
-        <ui:Card Margin="10" Padding="10">
+        <!--  Existing Header Card  -->
+        <ui:Card
+            Grid.Row="0"
+            Margin="10"
+            Padding="10">
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*" />
@@ -44,16 +58,12 @@
                         FontTypography="Title"
                         Margin="0,0,0,8"
                         Text="EasyExtract"
-                        TextAlignment="Justify"
-                        TextWrapping="WrapWithOverflow"
                         VerticalAlignment="Center" />
                     <ui:TextBlock
                         FontTypography="Title"
                         Foreground="#04d3be"
                         Margin="0,0,0,8"
                         Text="Unitypackage"
-                        TextAlignment="Justify"
-                        TextWrapping="WrapWithOverflow"
                         VerticalAlignment="Center" />
                 </StackPanel>
 
@@ -64,19 +74,19 @@
                     Margin="5,0,0,16"
                     Opacity="0.6"
                     Text="Effortlessly extract and manage Unity assets without launching the Unity Editor."
-                    TextAlignment="Left"
                     TextWrapping="WrapWithOverflow" />
 
                 <StackPanel
                     Grid.Column="0"
                     Grid.Row="2"
-                    HorizontalAlignment="Stretch"
                     Orientation="Horizontal">
                     <ui:Button
                         Background="Transparent"
+                        Click="LocateUnitypackageButton_OnClick"
                         Content="Locate Unitypackage"
                         Icon="{ui:SymbolIcon Folder24}"
-                        Margin="7" />
+                        Margin="7"
+                        x:Name="LocateUnitypackageButton" />
                     <ui:Button
                         Background="Transparent"
                         Content="Start Extraction"
@@ -96,12 +106,107 @@
             </Grid>
         </ui:Card>
 
+        <!--  Search Box  -->
         <ui:AutoSuggestBox
             Grid.Row="1"
             Margin="10,0,10,0"
             Padding="10"
             PlaceholderText="Search Unitypackage" />
+
+        <!--  File Lists Section  -->
+        <Grid Grid.Row="2" Margin="10">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+
+            <!--  Files in Queue  -->
+            <StackPanel Grid.Column="0" Margin="5">
+                <ui:CardExpander Header="Unitypackage(s) in Queue" Icon="{ui:SymbolIcon DocumentQueue24}">
+                    <ui:DynamicScrollViewer Height="300" VerticalScrollBarVisibility="Auto">
+                        <ui:ListView ItemsSource="{Binding Source={StaticResource QueueFiles}}">
+                            <ui:ListView.ItemTemplate>
+                                <DataTemplate>
+                                    <Border
+                                        BorderThickness="1"
+                                        CornerRadius="8"
+                                        Margin="4"
+                                        Padding="10">
+                                        <Grid ToolTip="{Binding FilePath}">
+                                            <Grid.RowDefinitions>
+                                                <RowDefinition Height="Auto" />
+                                                <RowDefinition Height="Auto" />
+                                            </Grid.RowDefinitions>
+                                            <!--  File Name  -->
+                                            <ui:TextBlock
+                                                FontTypography="Subtitle"
+                                                Grid.Row="0"
+                                                Text="{Binding FileName}" />
+                                            <!--  Additional file details  -->
+                                            <StackPanel
+                                                Grid.Row="1"
+                                                Margin="0,5,0,0"
+                                                Orientation="Horizontal">
+                                                <ui:TextBlock FontWeight="SemiBold" Text="Size: " />
+                                                <ui:TextBlock Margin="0,0,10,0"
+                                                              Text="{Binding FileSize, Converter={StaticResource FileSizeConverter}}" />
+                                                <ui:TextBlock FontWeight="SemiBold" Text="Date: " />
+                                                <ui:TextBlock Margin="0,0,10,0" Text="{Binding FileDate}" />
+                                                <ui:TextBlock FontWeight="SemiBold" Text="Ext: " />
+                                                <ui:TextBlock Text="{Binding FileExtension}" />
+                                            </StackPanel>
+                                        </Grid>
+                                    </Border>
+                                </DataTemplate>
+                            </ui:ListView.ItemTemplate>
+                        </ui:ListView>
+                    </ui:DynamicScrollViewer>
+                </ui:CardExpander>
+            </StackPanel>
+
+            <!--  Currently Extracting  -->
+            <StackPanel Grid.Column="1" Margin="5">
+                <ui:CardExpander Header="Currently Extracting" Icon="{ui:SymbolIcon DocumentTextExtract24}">
+                    <ui:DynamicScrollViewer Height="300" VerticalScrollBarVisibility="Auto">
+                        <ui:ListView ItemsSource="{Binding Source={StaticResource ExtractingFiles}}">
+                            <ui:ListView.ItemTemplate>
+                                <DataTemplate>
+                                    <Border
+                                        BorderThickness="1"
+                                        CornerRadius="8"
+                                        Margin="4"
+                                        Padding="10">
+                                        <Grid ToolTip="{Binding FilePath}">
+                                            <Grid.RowDefinitions>
+                                                <RowDefinition Height="Auto" />
+                                                <RowDefinition Height="Auto" />
+                                            </Grid.RowDefinitions>
+                                            <!--  File Name  -->
+                                            <ui:TextBlock
+                                                FontTypography="Subtitle"
+                                                Grid.Row="0"
+                                                Text="{Binding FileName}" />
+                                            <!--  Additional file details  -->
+                                            <StackPanel
+                                                Grid.Row="1"
+                                                Margin="0,5,0,0"
+                                                Orientation="Horizontal">
+                                                <ui:TextBlock FontWeight="SemiBold" Text="Size: " />
+                                                <ui:TextBlock Margin="0,0,10,0"
+                                                              Text="{Binding FileSize, Converter={StaticResource FileSizeConverter}}" />
+                                                <ui:TextBlock FontWeight="SemiBold" Text="Date: " />
+                                                <ui:TextBlock Margin="0,0,10,0" Text="{Binding FileDate}" />
+                                                <ui:TextBlock FontWeight="SemiBold" Text="Ext: " />
+                                                <ui:TextBlock Text="{Binding FileExtension}" />
+                                            </StackPanel>
+                                        </Grid>
+                                    </Border>
+                                </DataTemplate>
+                            </ui:ListView.ItemTemplate>
+                        </ui:ListView>
+                    </ui:DynamicScrollViewer>
+                </ui:CardExpander>
+            </StackPanel>
+        </Grid>
     </Grid>
-
-
 </UserControl>

@@ -15,6 +15,7 @@
             <utilities:BackgroundAndOpacityConverter x:Key="BackgroundAndOpacityConverter" />
             <FontFamily x:Key="GlobalFontFamily">/EasyExtract;component/../Fonts/#Poppins</FontFamily>
             <utilities:NumberFormatConverter x:Key="NumberFormatConverter" />
+            <utilities:FileSizeConverter x:Key="FileSizeConverter" />
         </ResourceDictionary>
     </Application.Resources>
 </Application>

@@ -74,7 +74,7 @@ public partial class Dashboard : Window
         }
         else
         {
-            NavView.Navigate(typeof(BetterExtraction));
+            NavView.Navigate(typeof(Controls.BetterExtraction));
         }
 
         if (ConfigHandler.Instance.Config.UwUModeActive)
