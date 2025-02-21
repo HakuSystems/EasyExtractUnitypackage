@@ -12,12 +12,12 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="Avalonia" Version="11.2.3"/>
-        <PackageReference Include="Avalonia.Desktop" Version="11.2.3"/>
-        <PackageReference Include="Avalonia.Themes.Fluent" Version="11.2.3"/>
-        <PackageReference Include="Avalonia.Fonts.Inter" Version="11.2.3"/>
+        <PackageReference Include="Avalonia" Version="11.2.4"/>
+        <PackageReference Include="Avalonia.Desktop" Version="11.2.4"/>
+        <PackageReference Include="Avalonia.Themes.Fluent" Version="11.2.4"/>
+        <PackageReference Include="Avalonia.Fonts.Inter" Version="11.2.4"/>
         <!--Condition below is needed to remove Avalonia.Diagnostics package from build output in Release configuration.-->
-        <PackageReference Include="Avalonia.Diagnostics" Version="11.2.3">
+        <PackageReference Include="Avalonia.Diagnostics" Version="11.2.4">
             <IncludeAssets Condition="'$(Configuration)' != 'Debug'">none</IncludeAssets>
             <PrivateAssets Condition="'$(Configuration)' != 'Debug'">all</PrivateAssets>
         </PackageReference>
