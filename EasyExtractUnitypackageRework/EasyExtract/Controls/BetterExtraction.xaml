@@ -119,8 +119,30 @@
                     PlaceholderText="Search Unitypackage"
                     TextChanged="SearchUnitypackageBox_OnTextChanged"
                     ToolTip="Search for Unitypackage on your system"
-                    Visibility="Collapsed"
                     x:Name="SearchUnitypackageBox" />
+                <ui:CardExpander
+                    Grid.Column="0"
+                    Grid.Row="3"
+                    Header="OH NO, SOMETHING WENT WRONG!"
+                    Icon="{ui:SymbolIcon ErrorCircle24}"
+                    IsExpanded="True"
+                    Margin="7,0,7,0"
+                    Padding="10"
+                    Visibility="Collapsed"
+                    x:Name="SearchUnitypackageBoxExpanderError">
+                    <StackPanel>
+                        <ui:TextBlock
+                            Opacity="0.6"
+                            Text="System requirements not met for Search Everything"
+                            x:Name="SearchUnitypackageBoxFallback" />
+                        <ui:Button
+                            Click="SearchUnitypackageBoxFallbackButton_OnClick"
+                            Content="Retry"
+                            Icon="{ui:SymbolIcon ArrowRepeatAll24}"
+                            Margin="0,10,0,0"
+                            Padding="10" />
+                    </StackPanel>
+                </ui:CardExpander>
             </Grid>
         </ui:Card>
 

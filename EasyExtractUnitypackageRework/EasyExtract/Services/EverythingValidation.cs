@@ -55,18 +55,18 @@ public class EverythingValidation
         return status.ToString();
     }
 
-    private Task<bool> Is64BitOperatingSystemAsync()
+    private async Task<bool> Is64BitOperatingSystemAsync()
     {
         var is64Bit = Environment.Is64BitOperatingSystem;
-        BetterLogger.LogAsync($"Is64BitOperatingSystem: {is64Bit}", Importance.Info);
-        return Task.FromResult(is64Bit);
+        await BetterLogger.LogAsync($"Is64BitOperatingSystem: {is64Bit}", Importance.Info);
+        return is64Bit;
     }
 
-    private Task<bool> IsProcessRunningAsync(string processName)
+    private async Task<bool> IsProcessRunningAsync(string processName)
     {
         var isRunning = Process.GetProcessesByName(processName).Length > 0;
-        BetterLogger.LogAsync($"IsProcessRunning('{processName}'): {isRunning}", Importance.Info);
-        return Task.FromResult(isRunning);
+        await BetterLogger.LogAsync($"IsProcessRunning('{processName}'): {isRunning}", Importance.Info);
+        return isRunning;
     }
 
     private async Task<bool> EnsureDllExistsAsync()
