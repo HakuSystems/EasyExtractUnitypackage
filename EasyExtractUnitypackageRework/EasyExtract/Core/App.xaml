@@ -16,6 +16,7 @@
             <FontFamily x:Key="GlobalFontFamily">/EasyExtract;component/../Fonts/#Poppins</FontFamily>
             <utilities:NumberFormatConverter x:Key="NumberFormatConverter" />
             <utilities:FileSizeConverter x:Key="FileSizeConverter" />
+            <utilities:QueueOpacityConverter x:Key="QueueOpacityConverter" />
         </ResourceDictionary>
     </Application.Resources>
 </Application>

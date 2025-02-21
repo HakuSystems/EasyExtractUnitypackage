@@ -38,6 +38,7 @@ public class ConfigModel : INotifyPropertyChanged
 
     private string _primaryColorHex = "#2ca7f2"; // Default Color from Colors.xaml
     private ObservableCollection<SearchEverythingModel> _searchEverything = new();
+    private List<SearchEverythingModel> _searchEverythingResults = new();
     private string _secondaryColorHex = "#4D4D4D"; // Default Color from Colors.xaml
     private string _textColorHex = "#7fc5ff"; // Default Color from Colors.xaml
 
@@ -46,6 +47,19 @@ public class ConfigModel : INotifyPropertyChanged
     private List<UnitypackageFileInfo> _unitypackageFiles = new();
     private UpdateModel _update = new();
     private bool _uwUModeActive;
+
+    public List<SearchEverythingModel> SearchEverythingResults
+    {
+        get => _searchEverythingResults;
+        set
+        {
+            if (_searchEverythingResults != value)
+            {
+                _searchEverythingResults = value;
+                OnPropertyChanged();
+            }
+        }
+    }
 
     public List<UnitypackageFileInfo> UnitypackageFiles
     {

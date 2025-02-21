@@ -13,8 +13,8 @@ public class ExtractionHandler
     {
         var unitypackage = new SearchEverythingModel
         {
-            UnityPackageName = Path.GetFileNameWithoutExtension(path),
-            UnityPackagePath = path
+            FileName = Path.GetFileNameWithoutExtension(path),
+            FilePath = path
         };
 
         await ExtractUnitypackage(unitypackage);
@@ -39,7 +39,7 @@ public class ExtractionHandler
 
             Directory.Delete(tempFolder, true);
 
-            await BetterLogger.LogAsync($"Successfully extracted {unitypackage.UnityPackageName}",
+            await BetterLogger.LogAsync($"Successfully extracted {unitypackage.FileName}",
                 Importance.Info);
             return true;
         }
@@ -53,9 +53,9 @@ public class ExtractionHandler
 
     private async Task<string> GetTempFolderPath(SearchEverythingModel unitypackage)
     {
-        if (unitypackage.UnityPackageName != null)
+        if (unitypackage.FileName != null)
         {
-            var tempFolder = Path.Combine(ConfigHandler.Instance.Config.DefaultTempPath, unitypackage.UnityPackageName);
+            var tempFolder = Path.Combine(ConfigHandler.Instance.Config.DefaultTempPath, unitypackage.FileName);
             await DeleteIfDirectoryExists(tempFolder);
             await BetterLogger.LogAsync($"Temporary folder path set to: {tempFolder}",
                 Importance.Info);
@@ -67,10 +67,10 @@ public class ExtractionHandler
 
     private async Task<string> GetTargetFolderPath(SearchEverythingModel unitypackage)
     {
-        if (unitypackage.UnityPackageName != null)
+        if (unitypackage.FileName != null)
         {
             var targetFolder = Path.Combine(ConfigHandler.Instance.Config.LastExtractedPath,
-                unitypackage.UnityPackageName);
+                unitypackage.FileName);
             await DeleteIfDirectoryExists(targetFolder);
             await BetterLogger.LogAsync($"Target folder path set to: {targetFolder}",
                 Importance.Info);
@@ -116,7 +116,7 @@ public class ExtractionHandler
         {
             try
             {
-                using var inStream = File.OpenRead(unitypackage.UnityPackagePath);
+                using var inStream = File.OpenRead(unitypackage.FilePath);
                 using var gzipStream = new GZipStream(inStream, CompressionMode.Decompress);
 
                 // Use TarReader for entry-by-entry reading
@@ -178,7 +178,7 @@ public class ExtractionHandler
         // Summarize results
         if (extractedEntries.Any())
             await BetterLogger.LogAsync(
-                $"Extracted {extractedEntries.Count} file(s) from {unitypackage.UnityPackageName}.",
+                $"Extracted {extractedEntries.Count} file(s) from {unitypackage.FileName}.",
                 Importance.Info
             );
         if (skippedEntries.Any())

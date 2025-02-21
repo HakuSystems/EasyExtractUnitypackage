@@ -21,10 +21,9 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
 
     <UserControl.Resources>
-        <!--  for Files in Queue  -->
         <CollectionViewSource Source="{Binding UnitypackageFiles}" x:Key="QueueFiles" />
-        <!--  for Currently Extracting Files  -->
         <CollectionViewSource Source="{Binding UnitypackageFiles}" x:Key="ExtractingFiles" />
+        <CollectionViewSource Source="{Binding SearchEverythingResults}" x:Key="SearchResults" />
     </UserControl.Resources>
 
     <Grid>
@@ -34,7 +33,6 @@
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
 
-        <!--  Existing Header Card  -->
         <ui:Card
             Grid.Row="0"
             Margin="10"
@@ -98,7 +96,6 @@
                         Margin="7"
                         Padding="10"
                         x:Name="LocateUnitypackageButton" />
-
                     <ui:Button
                         Background="Transparent"
                         Content="Start Extraction"
@@ -107,7 +104,6 @@
                         Margin="7"
                         Padding="10"
                         PressedForeground="#2ca7f2" />
-
                 </StackPanel>
 
                 <ui:Image
@@ -119,17 +115,73 @@
                     Source="../Resources/ExtractionProcess/Closed.png"
                     VerticalAlignment="Center" />
 
-                <!--  Search Box Will only show if the user has the correct 64-bit system  -->
-                <ui:AutoSuggestBox
+                <ui:CardExpander
                     Grid.Column="0"
                     Grid.Row="3"
-                    Icon="{ui:SymbolIcon Search24}"
+                    Icon="{ui:SymbolIcon Sparkle24}"
                     Margin="7,0,7,0"
                     Padding="10"
-                    PlaceholderText="Search Unitypackage"
-                    TextChanged="SearchUnitypackageBox_OnTextChanged"
                     ToolTip="Search for Unitypackage on your system"
-                    x:Name="SearchUnitypackageBox" />
+                    x:Name="SearchUnitypackageBox">
+                    <ui:CardExpander.Header>
+                        <ui:TextBox
+                            Icon="{ui:SymbolIcon Search24}"
+                            Margin="7"
+                            Padding="10"
+                            PlaceholderText="Search Unitypackage(s)"
+                            TextChanged="SearchUnitypackageBoxInput_OnTextChanged"
+                            x:Name="SearchUnitypackageBoxInput" />
+                    </ui:CardExpander.Header>
+                    <ui:CardExpander.Content>
+                        <ui:DynamicScrollViewer Height="300" VerticalScrollBarVisibility="Auto">
+                            <ui:ListView
+                                ItemsSource="{Binding Source={StaticResource SearchResults}}"
+                                SelectionChanged="SearchUnitypackageBoxResultsListView_OnSelectionChanged"
+                                x:Name="SearchUnitypackageBoxResultsListView">
+                                <ui:ListView.ItemTemplate>
+                                    <DataTemplate>
+                                        <Border
+                                            BorderThickness="1"
+                                            CornerRadius="8"
+                                            Margin="4"
+                                            Opacity="{Binding ., Converter={StaticResource QueueOpacityConverter}}"
+                                            Padding="10">
+                                            <Grid ToolTip="{Binding FilePath}">
+                                                <Grid.RowDefinitions>
+                                                    <RowDefinition Height="Auto" />
+                                                    <RowDefinition Height="Auto" />
+                                                </Grid.RowDefinitions>
+                                                <ui:TextBlock
+                                                    FontTypography="Subtitle"
+                                                    Grid.Row="0"
+                                                    Text="{Binding FileName}" />
+                                                <StackPanel
+                                                    Grid.Row="1"
+                                                    Margin="0,5,0,0"
+                                                    Orientation="Horizontal">
+                                                    <ui:TextBlock FontWeight="SemiBold" Text="Size: " />
+                                                    <ui:TextBlock Margin="0,0,10,0"
+                                                                  Text="{Binding FileSize, Converter={StaticResource FileSizeConverter}}" />
+                                                    <ui:TextBlock FontWeight="SemiBold" Text="Last Modified Date: " />
+                                                    <ui:TextBlock Margin="0,0,10,0"
+                                                                  Text="{Binding ModifiedTime, StringFormat='{}{0:dd/MM/yyyy}'}" />
+                                                    <ui:TextBlock FontWeight="SemiBold" Text="Created Date: " />
+                                                    <ui:TextBlock Margin="0,0,10,0"
+                                                                  Text="{Binding CreatedTime, StringFormat='{}{0:dd/MM/yyyy}'}" />
+                                                    <ui:TextBlock
+                                                        Foreground="#f44336"
+                                                        Margin="0,0,10,0"
+                                                        Opacity="0.6"
+                                                        Text="Click to Add to Queue" />
+                                                </StackPanel>
+                                            </Grid>
+                                        </Border>
+                                    </DataTemplate>
+                                </ui:ListView.ItemTemplate>
+                            </ui:ListView>
+                        </ui:DynamicScrollViewer>
+                    </ui:CardExpander.Content>
+                </ui:CardExpander>
                 <ui:CardExpander
                     Grid.Column="0"
                     Grid.Row="3"
@@ -156,16 +208,17 @@
             </Grid>
         </ui:Card>
 
-        <!--  File Lists Section  -->
         <Grid Grid.Row="2" Margin="10">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*" />
                 <ColumnDefinition Width="*" />
             </Grid.ColumnDefinitions>
 
-            <!--  Files in Queue  -->
             <StackPanel Grid.Column="0" Margin="5">
-                <ui:CardExpander Header="Unitypackage(s) in Queue" Icon="{ui:SymbolIcon DocumentQueue24}">
+                <ui:CardExpander
+                    Header="Unitypackage(s) in Queue"
+                    Icon="{ui:SymbolIcon DocumentQueue24}"
+                    IsExpanded="True">
                     <ui:DynamicScrollViewer Height="300" VerticalScrollBarVisibility="Auto">
                         <ui:ListView ItemsSource="{Binding Source={StaticResource QueueFiles}}">
                             <ui:ListView.ItemTemplate>
@@ -180,12 +233,10 @@
                                                 <RowDefinition Height="Auto" />
                                                 <RowDefinition Height="Auto" />
                                             </Grid.RowDefinitions>
-                                            <!--  File Name  -->
                                             <ui:TextBlock
                                                 FontTypography="Subtitle"
                                                 Grid.Row="0"
                                                 Text="{Binding FileName}" />
-                                            <!--  Additional file details  -->
                                             <StackPanel
                                                 Grid.Row="1"
                                                 Margin="0,5,0,0"
@@ -207,9 +258,11 @@
                 </ui:CardExpander>
             </StackPanel>
 
-            <!--  Currently Extracting  -->
             <StackPanel Grid.Column="1" Margin="5">
-                <ui:CardExpander Header="Currently Extracting" Icon="{ui:SymbolIcon DocumentTextExtract24}">
+                <ui:CardExpander
+                    Header="Currently Extracting"
+                    Icon="{ui:SymbolIcon DocumentTextExtract24}"
+                    IsExpanded="True">
                     <ui:DynamicScrollViewer Height="300" VerticalScrollBarVisibility="Auto">
                         <ui:ListView ItemsSource="{Binding Source={StaticResource ExtractingFiles}}">
                             <ui:ListView.ItemTemplate>
@@ -224,12 +277,10 @@
                                                 <RowDefinition Height="Auto" />
                                                 <RowDefinition Height="Auto" />
                                             </Grid.RowDefinitions>
-                                            <!--  File Name  -->
                                             <ui:TextBlock
                                                 FontTypography="Subtitle"
                                                 Grid.Row="0"
                                                 Text="{Binding FileName}" />
-                                            <!--  Additional file details  -->
                                             <StackPanel
                                                 Grid.Row="1"
                                                 Margin="0,5,0,0"

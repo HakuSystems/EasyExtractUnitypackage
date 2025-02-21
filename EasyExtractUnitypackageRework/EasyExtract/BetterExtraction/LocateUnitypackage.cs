@@ -1,6 +1,4 @@
-﻿using System.Security.Cryptography;
-using System.Text;
-using EasyExtract.Config;
+﻿using EasyExtract.Config;
 
 namespace EasyExtract.BetterExtraction;
 
@@ -17,6 +15,7 @@ public class LocateUnitypackage
     }
 
     private OpenFileDialog OpenUnitypackageDialog { get; }
+    private HashChecks HashChecks { get; } = new();
     private FilterQueue FilterQueue { get; } = new();
 
     public List<UnitypackageFileInfo>? LocateUnitypackageFiles()
@@ -30,7 +29,7 @@ public class LocateUnitypackage
 
         var fileDetails = fileInfos.Select(file =>
         {
-            var hash = ComputeFileHash(file);
+            var hash = HashChecks.ComputeFileHash(file);
             return new UnitypackageFileInfo
             {
                 FileName = file.Name,
@@ -47,16 +46,5 @@ public class LocateUnitypackage
         FilterQueue.FilterDuplicates();
 
         return fileDetails;
-    }
-
-    private string ComputeFileHash(FileInfo file)
-    {
-        using var stream = file.OpenRead();
-        using var md5 = MD5.Create();
-        var hashBytes = md5.ComputeHash(stream);
-        var sb = new StringBuilder();
-        foreach (var b in hashBytes)
-            sb.Append(b.ToString("x2"));
-        return sb.ToString();
     }
 }

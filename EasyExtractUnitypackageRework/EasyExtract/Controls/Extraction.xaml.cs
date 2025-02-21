@@ -578,7 +578,7 @@ public partial class Extraction : UserControl, INotifyPropertyChanged
                 continue;
             }
 
-            StatusBarText.Text = $"Extracting {unitypackage.UnityPackageName}...";
+            StatusBarText.Text = $"Extracting {unitypackage.FileName}...";
             if (await ExtractionHandler.ExtractUnitypackage(unitypackage))
             {
                 fileFinishedCounter++;
@@ -603,12 +603,12 @@ public partial class Extraction : UserControl, INotifyPropertyChanged
     {
         ConfigHandler.Instance.Config.History.Add(new HistoryModel
         {
-            FileName = unitypackage.UnityPackageName,
+            FileName = unitypackage.FileName,
             ExtractedPath =
-                Path.Combine(ConfigHandler.Instance.Config.LastExtractedPath, unitypackage.UnityPackageName),
+                Path.Combine(ConfigHandler.Instance.Config.LastExtractedPath, unitypackage.FileName),
             ExtractedDate = DateTime.Now,
             TotalFiles = Directory.GetFiles(
-                Path.Combine(ConfigHandler.Instance.Config.LastExtractedPath, unitypackage.UnityPackageName),
+                Path.Combine(ConfigHandler.Instance.Config.LastExtractedPath, unitypackage.FileName),
                 "*.*", SearchOption.AllDirectories).Length
         });
     }
@@ -625,9 +625,9 @@ public partial class Extraction : UserControl, INotifyPropertyChanged
     {
         return Task.Run(() =>
         {
-            if (!File.Exists(unitypackage.UnityPackagePath)) return (false, "File not found");
+            if (!File.Exists(unitypackage.FilePath)) return (false, "File not found");
 
-            var fileInfo = new FileInfo(unitypackage.UnityPackagePath);
+            var fileInfo = new FileInfo(unitypackage.FilePath);
 
             if (fileInfo.Extension != ".unitypackage") return (false, "File is not a Unitypackage");
 
@@ -647,7 +647,7 @@ public partial class Extraction : UserControl, INotifyPropertyChanged
         {
             IgnoredUnitypackages.Add(new IgnoredPackageInventory
             {
-                IgnoredUnityPackageName = unitypackage.UnityPackageName,
+                IgnoredUnityPackageName = unitypackage.FileName,
                 IgnoredReason = reason
             });
             await MoveIgnoredUnitypackageAsync(unitypackage);
@@ -660,7 +660,7 @@ public partial class Extraction : UserControl, INotifyPropertyChanged
     {
         ConfigHandler.Instance.Config.IgnoredUnityPackages.Add(new IgnoredPackageInventory
         {
-            IgnoredUnityPackageName = unitypackage.UnityPackageName,
+            IgnoredUnityPackageName = unitypackage.FileName,
             IgnoredReason = reason
         });
     }
@@ -671,13 +671,13 @@ public partial class Extraction : UserControl, INotifyPropertyChanged
             "EasyExtract", "IgnoredUnitypackages");
         if (!Directory.Exists(ignoredAppDataDirectory)) Directory.CreateDirectory(ignoredAppDataDirectory);
 
-        var ignoredUnitypackagePath = Path.Combine(ignoredAppDataDirectory, unitypackage.UnityPackageName);
+        var ignoredUnitypackagePath = Path.Combine(ignoredAppDataDirectory, unitypackage.FileName);
 
         // Check if the destination already exists and delete it if it does
         if (Directory.Exists(ignoredUnitypackagePath) || File.Exists(ignoredUnitypackagePath))
             Directory.Delete(ignoredUnitypackagePath, true);
 
-        await Task.Run(() => Directory.Move(unitypackage.UnityPackagePath, ignoredUnitypackagePath));
+        await Task.Run(() => Directory.Move(unitypackage.FilePath, ignoredUnitypackagePath));
     }
 
 
@@ -757,12 +757,12 @@ public partial class Extraction : UserControl, INotifyPropertyChanged
             foreach (var fileName in openFileDialog.FileNames)
             {
                 var duplicate = QueueListView.Items.Cast<SearchEverythingModel>()
-                    .FirstOrDefault(x => x.UnityPackageName == Path.GetFileName(fileName));
+                    .FirstOrDefault(x => x.FileName == Path.GetFileName(fileName));
                 if (duplicate != null) continue;
                 QueueListView.Items.Add(new SearchEverythingModel
                 {
-                    UnityPackageName = Path.GetFileName(fileName),
-                    UnityPackagePath = fileName
+                    FileName = Path.GetFileName(fileName),
+                    FilePath = fileName
                 });
             }
 
@@ -784,12 +784,12 @@ public partial class Extraction : UserControl, INotifyPropertyChanged
         foreach (var fileName in files)
         {
             var duplicate = QueueListView.Items.Cast<SearchEverythingModel>()
-                .FirstOrDefault(x => x.UnityPackageName == Path.GetFileName(fileName));
+                .FirstOrDefault(x => x.FileName == Path.GetFileName(fileName));
             if (duplicate != null) continue;
             QueueListView.Items.Add(new SearchEverythingModel
             {
-                UnityPackageName = Path.GetFileName(fileName),
-                UnityPackagePath = fileName
+                FileName = Path.GetFileName(fileName),
+                FilePath = fileName
             });
         }
 
@@ -942,8 +942,8 @@ public partial class Extraction : UserControl, INotifyPropertyChanged
             {
                 await AddToIgnoredUnitypackagesAsync(new SearchEverythingModel
                 {
-                    UnityPackageName = unitypackage.UnitypackageName,
-                    UnityPackagePath = unitypackage.UnitypackagePath
+                    FileName = unitypackage.UnitypackageName,
+                    FilePath = unitypackage.UnitypackagePath
                 }, "Manually ignored");
                 ExtractedUnitypackages.Remove(unitypackage);
             }
