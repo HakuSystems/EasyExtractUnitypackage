@@ -109,13 +109,18 @@
                     Source="../Resources/ExtractionProcess/Closed.png"
                     VerticalAlignment="Center" />
 
-                <!--  Search Box  -->
+                <!--  Search Box Will only show if the user has the correct 64-bit system  -->
                 <ui:AutoSuggestBox
+                    Grid.Column="0"
                     Grid.Row="3"
                     Icon="{ui:SymbolIcon Search24}"
                     Margin="7,0,7,0"
                     Padding="10"
-                    PlaceholderText="Search Unitypackage" />
+                    PlaceholderText="Search Unitypackage"
+                    TextChanged="SearchUnitypackageBox_OnTextChanged"
+                    ToolTip="Search for Unitypackage on your system"
+                    Visibility="Collapsed"
+                    x:Name="SearchUnitypackageBox" />
             </Grid>
         </ui:Card>
 
