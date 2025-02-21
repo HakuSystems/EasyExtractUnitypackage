@@ -48,6 +48,7 @@
                     <RowDefinition Height="Auto" />
                     <RowDefinition Height="Auto" />
                     <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
                 </Grid.RowDefinitions>
 
                 <StackPanel
@@ -86,13 +87,17 @@
                         Content="Locate Unitypackage"
                         Icon="{ui:SymbolIcon Folder24}"
                         Margin="7"
+                        Padding="10"
                         x:Name="LocateUnitypackageButton" />
+
                     <ui:Button
                         Background="Transparent"
                         Content="Start Extraction"
                         Foreground="#2ca7f2"
                         Icon="{ui:SymbolIcon Next24}"
-                        Margin="7" />
+                        Margin="7"
+                        Padding="10" />
+
                 </StackPanel>
 
                 <ui:Image
@@ -103,15 +108,16 @@
                     MaxWidth="50"
                     Source="../Resources/ExtractionProcess/Closed.png"
                     VerticalAlignment="Center" />
+
+                <!--  Search Box  -->
+                <ui:AutoSuggestBox
+                    Grid.Row="3"
+                    Icon="{ui:SymbolIcon Search24}"
+                    Margin="7,0,7,0"
+                    Padding="10"
+                    PlaceholderText="Search Unitypackage" />
             </Grid>
         </ui:Card>
-
-        <!--  Search Box  -->
-        <ui:AutoSuggestBox
-            Grid.Row="1"
-            Margin="10,0,10,0"
-            Padding="10"
-            PlaceholderText="Search Unitypackage" />
 
         <!--  File Lists Section  -->
         <Grid Grid.Row="2" Margin="10">
