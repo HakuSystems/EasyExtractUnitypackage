@@ -17,6 +17,7 @@
             <utilities:NumberFormatConverter x:Key="NumberFormatConverter" />
             <utilities:FileSizeConverter x:Key="FileSizeConverter" />
             <utilities:QueueOpacityConverter x:Key="QueueOpacityConverter" />
+            <utilities:QueueIsEnabledConverter x:Key="QueueIsEnabledConverter" />
         </ResourceDictionary>
     </Application.Resources>
 </Application>

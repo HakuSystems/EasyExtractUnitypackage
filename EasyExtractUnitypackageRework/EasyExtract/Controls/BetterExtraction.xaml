@@ -143,6 +143,7 @@
                                         <Border
                                             BorderThickness="1"
                                             CornerRadius="8"
+                                            IsEnabled="{Binding ., Converter={StaticResource QueueIsEnabledConverter}}"
                                             Margin="4"
                                             Opacity="{Binding ., Converter={StaticResource QueueOpacityConverter}}"
                                             Padding="10">

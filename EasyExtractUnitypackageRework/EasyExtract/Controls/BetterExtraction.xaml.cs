@@ -25,6 +25,8 @@ public partial class BetterExtraction
 
     private HashChecks HashChecks { get; } = new();
 
+    private FilterQueue FilterQueue { get; } = new();
+
     private void LocateUnitypackageButton_OnClick(object sender, RoutedEventArgs e)
     {
         UnitypackageLocator.LocateUnitypackageFiles();
@@ -197,6 +199,7 @@ public partial class BetterExtraction
             ConfigHandler.Instance.Config.UnitypackageFiles.Add(newUnitypackageModel);
         }
 
+        FilterQueue.FilterDuplicates();
         ConfigHandler.Instance.OverrideConfig();
         SyncFileCollections();
         SearchUnitypackageBox.IsExpanded = false;
