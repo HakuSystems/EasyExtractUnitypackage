@@ -43,29 +43,21 @@ public partial class BetterExtraction
         extractingFiles.View.Refresh();
     }
 
+    private void SetupFilter(string resourceKey, Func<object, bool> filterPredicate)
+    {
+        var cvs = Resources[resourceKey] as CollectionViewSource
+                  ?? throw new InvalidOperationException($"Resource '{resourceKey}' not found.");
+        cvs.Filter += (sender, args) => { args.Accepted = filterPredicate(args.Item); };
+    }
+
     private async void BetterExtraction_OnLoaded(object sender, RoutedEventArgs e)
     {
         ConfigHandler.Instance.Config.SearchEverythingResults.Clear();
         await CheckSystemRequirementsAndUpdateUiAsync(true);
         ConfigHandler.Instance.OverrideConfig();
-        var queueFiles = Resources[QueueFilesKey] as CollectionViewSource ??
-                         throw new InvalidOperationException($"Resource '{QueueFilesKey}' not found.");
-        queueFiles.Filter += (s, args) =>
-        {
-            if (args.Item is UnitypackageFileInfo file)
-                args.Accepted = file.IsInQueue;
-            else
-                args.Accepted = false;
-        };
-        var extractingFiles = Resources[ExtractingFilesKey] as CollectionViewSource ??
-                              throw new InvalidOperationException($"Resource '{ExtractingFilesKey}' not found.");
-        extractingFiles.Filter += (s, args) =>
-        {
-            if (args.Item is UnitypackageFileInfo file)
-                args.Accepted = !file.IsInQueue;
-            else
-                args.Accepted = false;
-        };
+        SetupFilter(QueueFilesKey, item => item is UnitypackageFileInfo file && file.IsInQueue);
+        SetupFilter(ExtractingFilesKey, item => item is UnitypackageFileInfo file && !file.IsInQueue);
+
         var searchResults = Resources["SearchResults"] as CollectionViewSource ??
                             throw new InvalidOperationException("Resource 'SearchResults' not found.");
         searchResults.Filter += (s, args) =>
