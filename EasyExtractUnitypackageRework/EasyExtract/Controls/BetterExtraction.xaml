@@ -83,6 +83,15 @@
                     Orientation="Horizontal">
                     <ui:Button
                         Background="Transparent"
+                        Click="ClearQueueButton_OnClick"
+                        Content="Clear Queue"
+                        Foreground="#f44336"
+                        Icon="{ui:SymbolIcon Delete24}"
+                        Margin="7"
+                        Padding="10"
+                        PressedForeground="#f44336" />
+                    <ui:Button
+                        Background="Transparent"
                         Click="LocateUnitypackageButton_OnClick"
                         Content="Locate Unitypackage"
                         Icon="{ui:SymbolIcon Folder24}"
@@ -96,7 +105,8 @@
                         Foreground="#2ca7f2"
                         Icon="{ui:SymbolIcon Next24}"
                         Margin="7"
-                        Padding="10" />
+                        Padding="10"
+                        PressedForeground="#2ca7f2" />
 
                 </StackPanel>
 

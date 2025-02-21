@@ -112,4 +112,11 @@ public partial class BetterExtraction
     {
         await CheckSystemRequirementsAndUpdateUiAsync(true);
     }
+
+    private void ClearQueueButton_OnClick(object sender, RoutedEventArgs e)
+    {
+        ConfigHandler.Instance.Config.UnitypackageFiles.Clear();
+        ConfigHandler.Instance.OverrideConfig(); // Force save
+        SyncFileCollections();
+    }
 }
