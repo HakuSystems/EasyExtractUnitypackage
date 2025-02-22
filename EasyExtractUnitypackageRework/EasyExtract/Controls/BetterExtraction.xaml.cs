@@ -39,8 +39,16 @@ public partial class BetterExtraction
                          throw new InvalidOperationException($"Resource '{QueueFilesKey}' not found.");
         var extractingFiles = Resources[ExtractingFilesKey] as CollectionViewSource ??
                               throw new InvalidOperationException($"Resource '{ExtractingFilesKey}' not found.");
+        UpdateClearQueueButtonVisibility();
         queueFiles.View.Refresh();
         extractingFiles.View.Refresh();
+    }
+
+    private void UpdateClearQueueButtonVisibility()
+    {
+        ClearQueueButton.Visibility = ConfigHandler.Instance.Config.UnitypackageFiles.Any(file => file.IsInQueue)
+            ? Visibility.Visible
+            : Visibility.Collapsed;
     }
 
     private void SetupFilter(string resourceKey, Func<object, bool> filterPredicate)
@@ -53,7 +61,6 @@ public partial class BetterExtraction
     private async void BetterExtraction_OnLoaded(object sender, RoutedEventArgs e)
     {
         ConfigHandler.Instance.Config.SearchEverythingResults.Clear();
-        await CheckSystemRequirementsAndUpdateUiAsync(true);
         ConfigHandler.Instance.OverrideConfig();
         SetupFilter(QueueFilesKey, item => item is UnitypackageFileInfo file && file.IsInQueue);
         SetupFilter(ExtractingFilesKey, item => item is UnitypackageFileInfo file && !file.IsInQueue);
@@ -153,20 +160,29 @@ public partial class BetterExtraction
 
     private void ClearQueueButton_OnClick(object sender, RoutedEventArgs e)
     {
-        ConfigHandler.Instance.Config.UnitypackageFiles.Clear();
+        foreach (var unitypackageFile in ConfigHandler.Instance.Config.UnitypackageFiles
+                     .Where(u => u.IsInQueue)
+                     .ToList()) // ToList() to avoid modifying the collection while iterating
+            ConfigHandler.Instance.Config.UnitypackageFiles.Remove(unitypackageFile);
+
         ConfigHandler.Instance.OverrideConfig();
         SyncFileCollections();
     }
 
     private async void SearchUnitypackageBoxInput_OnTextChanged(object sender, TextChangedEventArgs e)
     {
-        await CheckSystemRequirementsAndUpdateUiAsync(false);
+        await ExpandSearchBoxAndRefresh(false);
+        if (string.IsNullOrWhiteSpace(SearchUnitypackageBoxInput.Text))
+            return;
+    }
+
+    private async Task ExpandSearchBoxAndRefresh(bool forceCheck)
+    {
+        await CheckSystemRequirementsAndUpdateUiAsync(forceCheck);
         SearchUnitypackageBox.IsExpanded = true;
         var searchResults = Resources["SearchResults"] as CollectionViewSource;
         if (searchResults != null)
             searchResults.View.Refresh();
-        if (string.IsNullOrWhiteSpace(SearchUnitypackageBoxInput.Text))
-            return;
     }
 
     private void SearchUnitypackageBoxResultsListView_OnSelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -195,5 +211,19 @@ public partial class BetterExtraction
         ConfigHandler.Instance.OverrideConfig();
         SyncFileCollections();
         SearchUnitypackageBox.IsExpanded = false;
+    }
+
+    private async void SearchUnitypackageBoxInput_OnGotFocus(object sender, RoutedEventArgs e)
+    {
+        await ExpandSearchBoxAndRefresh(true);
+        QueueFilesExpander.IsExpanded = false;
+        ExtractingFilesExpander.IsExpanded = false;
+    }
+
+    private void SearchUnitypackageBoxInput_OnLostFocus(object sender, RoutedEventArgs e)
+    {
+        SearchUnitypackageBox.IsExpanded = false;
+        QueueFilesExpander.IsExpanded = true;
+        ExtractingFilesExpander.IsExpanded = true;
     }
 }

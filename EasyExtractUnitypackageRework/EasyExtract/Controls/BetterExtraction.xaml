@@ -16,6 +16,7 @@
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:config="clr-namespace:EasyExtract.Config"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
@@ -79,15 +80,18 @@
                     Grid.Column="0"
                     Grid.Row="2"
                     Orientation="Horizontal">
-                    <ui:Button
-                        Background="Transparent"
-                        Click="ClearQueueButton_OnClick"
-                        Content="Clear Queue"
-                        Foreground="#f44336"
-                        Icon="{ui:SymbolIcon Delete24}"
-                        Margin="7"
-                        Padding="10"
-                        PressedForeground="#f44336" />
+                    <materialDesign:TransitioningContent OpeningEffect="{materialDesign:TransitionEffect FadeIn}"
+                                                         x:Name="ClearQueueButton">
+                        <ui:Button
+                            Background="Transparent"
+                            Click="ClearQueueButton_OnClick"
+                            Content="Clear Queue"
+                            Foreground="#f44336"
+                            Icon="{ui:SymbolIcon Delete24}"
+                            Margin="7"
+                            Padding="10"
+                            PressedForeground="#f44336" />
+                    </materialDesign:TransitioningContent>
                     <ui:Button
                         Background="Transparent"
                         Click="LocateUnitypackageButton_OnClick"
@@ -125,7 +129,9 @@
                     x:Name="SearchUnitypackageBox">
                     <ui:CardExpander.Header>
                         <ui:TextBox
+                            GotFocus="SearchUnitypackageBoxInput_OnGotFocus"
                             Icon="{ui:SymbolIcon Search24}"
+                            LostFocus="SearchUnitypackageBoxInput_OnLostFocus"
                             Margin="7"
                             Padding="10"
                             PlaceholderText="Search Unitypackage(s)"
@@ -140,43 +146,46 @@
                                 x:Name="SearchUnitypackageBoxResultsListView">
                                 <ui:ListView.ItemTemplate>
                                     <DataTemplate>
-                                        <Border
-                                            BorderThickness="1"
-                                            CornerRadius="8"
-                                            IsEnabled="{Binding ., Converter={StaticResource QueueIsEnabledConverter}}"
-                                            Margin="4"
-                                            Opacity="{Binding ., Converter={StaticResource QueueOpacityConverter}}"
-                                            Padding="10">
-                                            <Grid ToolTip="{Binding FilePath}">
-                                                <Grid.RowDefinitions>
-                                                    <RowDefinition Height="Auto" />
-                                                    <RowDefinition Height="Auto" />
-                                                </Grid.RowDefinitions>
-                                                <ui:TextBlock
-                                                    FontTypography="Subtitle"
-                                                    Grid.Row="0"
-                                                    Text="{Binding FileName}" />
-                                                <StackPanel
-                                                    Grid.Row="1"
-                                                    Margin="0,5,0,0"
-                                                    Orientation="Horizontal">
-                                                    <ui:TextBlock FontWeight="SemiBold" Text="Size: " />
-                                                    <ui:TextBlock Margin="0,0,10,0"
-                                                                  Text="{Binding FileSize, Converter={StaticResource FileSizeConverter}}" />
-                                                    <ui:TextBlock FontWeight="SemiBold" Text="Last Modified Date: " />
-                                                    <ui:TextBlock Margin="0,0,10,0"
-                                                                  Text="{Binding ModifiedTime, StringFormat='{}{0:dd/MM/yyyy}'}" />
-                                                    <ui:TextBlock FontWeight="SemiBold" Text="Created Date: " />
-                                                    <ui:TextBlock Margin="0,0,10,0"
-                                                                  Text="{Binding CreatedTime, StringFormat='{}{0:dd/MM/yyyy}'}" />
+                                        <materialDesign:TransitioningContent
+                                            OpeningEffect="{materialDesign:TransitionEffect FadeIn}">
+                                            <Border
+                                                BorderThickness="1"
+                                                CornerRadius="8"
+                                                IsEnabled="{Binding ., Converter={StaticResource QueueIsEnabledConverter}}"
+                                                Margin="4"
+                                                Opacity="{Binding ., Converter={StaticResource QueueOpacityConverter}}"
+                                                Padding="10">
+                                                <Grid ToolTip="{Binding FilePath}">
+                                                    <Grid.RowDefinitions>
+                                                        <RowDefinition Height="Auto" />
+                                                        <RowDefinition Height="Auto" />
+                                                    </Grid.RowDefinitions>
                                                     <ui:TextBlock
-                                                        Foreground="#f44336"
-                                                        Margin="0,0,10,0"
-                                                        Opacity="0.6"
-                                                        Text="Click to Add to Queue" />
-                                                </StackPanel>
-                                            </Grid>
-                                        </Border>
+                                                        FontTypography="Subtitle"
+                                                        Grid.Row="0"
+                                                        Text="{Binding FileName}" />
+                                                    <StackPanel
+                                                        Grid.Row="1"
+                                                        Margin="0,5,0,0"
+                                                        Orientation="Horizontal">
+                                                        <ui:TextBlock FontWeight="SemiBold" Text="Size: " />
+                                                        <ui:TextBlock Margin="0,0,10,0"
+                                                                      Text="{Binding FileSize, Converter={StaticResource FileSizeConverter}}" />
+                                                        <ui:TextBlock FontWeight="SemiBold" Text="Last Modified Date: " />
+                                                        <ui:TextBlock Margin="0,0,10,0"
+                                                                      Text="{Binding ModifiedTime, StringFormat='{}{0:dd/MM/yyyy}'}" />
+                                                        <ui:TextBlock FontWeight="SemiBold" Text="Created Date: " />
+                                                        <ui:TextBlock Margin="0,0,10,0"
+                                                                      Text="{Binding CreatedTime, StringFormat='{}{0:dd/MM/yyyy}'}" />
+                                                        <ui:TextBlock
+                                                            Foreground="#f44336"
+                                                            Margin="0,0,10,0"
+                                                            Opacity="0.6"
+                                                            Text="Click to Add to Queue" />
+                                                    </StackPanel>
+                                                </Grid>
+                                            </Border>
+                                        </materialDesign:TransitioningContent>
                                     </DataTemplate>
                                 </ui:ListView.ItemTemplate>
                             </ui:ListView>
@@ -219,39 +228,43 @@
                 <ui:CardExpander
                     Header="Unitypackage(s) in Queue"
                     Icon="{ui:SymbolIcon DocumentQueue24}"
-                    IsExpanded="True">
+                    IsExpanded="True"
+                    x:Name="QueueFilesExpander">
                     <ui:DynamicScrollViewer Height="300" VerticalScrollBarVisibility="Auto">
                         <ui:ListView ItemsSource="{Binding Source={StaticResource QueueFiles}}">
                             <ui:ListView.ItemTemplate>
                                 <DataTemplate>
-                                    <Border
-                                        BorderThickness="1"
-                                        CornerRadius="8"
-                                        Margin="4"
-                                        Padding="10">
-                                        <Grid ToolTip="{Binding FilePath}">
-                                            <Grid.RowDefinitions>
-                                                <RowDefinition Height="Auto" />
-                                                <RowDefinition Height="Auto" />
-                                            </Grid.RowDefinitions>
-                                            <ui:TextBlock
-                                                FontTypography="Subtitle"
-                                                Grid.Row="0"
-                                                Text="{Binding FileName}" />
-                                            <StackPanel
-                                                Grid.Row="1"
-                                                Margin="0,5,0,0"
-                                                Orientation="Horizontal">
-                                                <ui:TextBlock FontWeight="SemiBold" Text="Size: " />
-                                                <ui:TextBlock Margin="0,0,10,0"
-                                                              Text="{Binding FileSize, Converter={StaticResource FileSizeConverter}}" />
-                                                <ui:TextBlock FontWeight="SemiBold" Text="Date: " />
-                                                <ui:TextBlock Margin="0,0,10,0" Text="{Binding FileDate}" />
-                                                <ui:TextBlock FontWeight="SemiBold" Text="Ext: " />
-                                                <ui:TextBlock Text="{Binding FileExtension}" />
-                                            </StackPanel>
-                                        </Grid>
-                                    </Border>
+                                    <materialDesign:TransitioningContent
+                                        OpeningEffect="{materialDesign:TransitionEffect FadeIn}">
+                                        <Border
+                                            BorderThickness="1"
+                                            CornerRadius="8"
+                                            Margin="4"
+                                            Padding="10">
+                                            <Grid ToolTip="{Binding FilePath}">
+                                                <Grid.RowDefinitions>
+                                                    <RowDefinition Height="Auto" />
+                                                    <RowDefinition Height="Auto" />
+                                                </Grid.RowDefinitions>
+                                                <ui:TextBlock
+                                                    FontTypography="Subtitle"
+                                                    Grid.Row="0"
+                                                    Text="{Binding FileName}" />
+                                                <StackPanel
+                                                    Grid.Row="1"
+                                                    Margin="0,5,0,0"
+                                                    Orientation="Horizontal">
+                                                    <ui:TextBlock FontWeight="SemiBold" Text="Size: " />
+                                                    <ui:TextBlock Margin="0,0,10,0"
+                                                                  Text="{Binding FileSize, Converter={StaticResource FileSizeConverter}}" />
+                                                    <ui:TextBlock FontWeight="SemiBold" Text="Date: " />
+                                                    <ui:TextBlock Margin="0,0,10,0" Text="{Binding FileDate}" />
+                                                    <ui:TextBlock FontWeight="SemiBold" Text="Ext: " />
+                                                    <ui:TextBlock Text="{Binding FileExtension}" />
+                                                </StackPanel>
+                                            </Grid>
+                                        </Border>
+                                    </materialDesign:TransitioningContent>
                                 </DataTemplate>
                             </ui:ListView.ItemTemplate>
                         </ui:ListView>
@@ -263,39 +276,43 @@
                 <ui:CardExpander
                     Header="Currently Extracting"
                     Icon="{ui:SymbolIcon DocumentTextExtract24}"
-                    IsExpanded="True">
+                    IsExpanded="True"
+                    x:Name="ExtractingFilesExpander">
                     <ui:DynamicScrollViewer Height="300" VerticalScrollBarVisibility="Auto">
                         <ui:ListView ItemsSource="{Binding Source={StaticResource ExtractingFiles}}">
                             <ui:ListView.ItemTemplate>
                                 <DataTemplate>
-                                    <Border
-                                        BorderThickness="1"
-                                        CornerRadius="8"
-                                        Margin="4"
-                                        Padding="10">
-                                        <Grid ToolTip="{Binding FilePath}">
-                                            <Grid.RowDefinitions>
-                                                <RowDefinition Height="Auto" />
-                                                <RowDefinition Height="Auto" />
-                                            </Grid.RowDefinitions>
-                                            <ui:TextBlock
-                                                FontTypography="Subtitle"
-                                                Grid.Row="0"
-                                                Text="{Binding FileName}" />
-                                            <StackPanel
-                                                Grid.Row="1"
-                                                Margin="0,5,0,0"
-                                                Orientation="Horizontal">
-                                                <ui:TextBlock FontWeight="SemiBold" Text="Size: " />
-                                                <ui:TextBlock Margin="0,0,10,0"
-                                                              Text="{Binding FileSize, Converter={StaticResource FileSizeConverter}}" />
-                                                <ui:TextBlock FontWeight="SemiBold" Text="Date: " />
-                                                <ui:TextBlock Margin="0,0,10,0" Text="{Binding FileDate}" />
-                                                <ui:TextBlock FontWeight="SemiBold" Text="Ext: " />
-                                                <ui:TextBlock Text="{Binding FileExtension}" />
-                                            </StackPanel>
-                                        </Grid>
-                                    </Border>
+                                    <materialDesign:TransitioningContent
+                                        OpeningEffect="{materialDesign:TransitionEffect FadeIn}">
+                                        <Border
+                                            BorderThickness="1"
+                                            CornerRadius="8"
+                                            Margin="4"
+                                            Padding="10">
+                                            <Grid ToolTip="{Binding FilePath}">
+                                                <Grid.RowDefinitions>
+                                                    <RowDefinition Height="Auto" />
+                                                    <RowDefinition Height="Auto" />
+                                                </Grid.RowDefinitions>
+                                                <ui:TextBlock
+                                                    FontTypography="Subtitle"
+                                                    Grid.Row="0"
+                                                    Text="{Binding FileName}" />
+                                                <StackPanel
+                                                    Grid.Row="1"
+                                                    Margin="0,5,0,0"
+                                                    Orientation="Horizontal">
+                                                    <ui:TextBlock FontWeight="SemiBold" Text="Size: " />
+                                                    <ui:TextBlock Margin="0,0,10,0"
+                                                                  Text="{Binding FileSize, Converter={StaticResource FileSizeConverter}}" />
+                                                    <ui:TextBlock FontWeight="SemiBold" Text="Date: " />
+                                                    <ui:TextBlock Margin="0,0,10,0" Text="{Binding FileDate}" />
+                                                    <ui:TextBlock FontWeight="SemiBold" Text="Ext: " />
+                                                    <ui:TextBlock Text="{Binding FileExtension}" />
+                                                </StackPanel>
+                                            </Grid>
+                                        </Border>
+                                    </materialDesign:TransitioningContent>
                                 </DataTemplate>
                             </ui:ListView.ItemTemplate>
                         </ui:ListView>
