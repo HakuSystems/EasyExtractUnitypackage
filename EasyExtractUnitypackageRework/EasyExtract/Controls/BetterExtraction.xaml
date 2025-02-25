@@ -34,10 +34,93 @@
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
 
+        <materialDesign:TransitioningContent
+            Grid.Row="0"
+            OpeningEffect="{materialDesign:TransitionEffect ExpandIn}"
+            Visibility="Collapsed"
+            x:Name="CurrentlyExtractingCard">
+            <ui:Card
+                Margin="10"
+                Padding="10"
+                VerticalAlignment="Top">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+                    <StackPanel
+                        Grid.Row="0"
+                        Orientation="Horizontal"
+                        VerticalAlignment="Center">
+                        <ui:TextBlock
+                            FontTypography="Title"
+                            Foreground="#2CA7F2"
+                            Text="Currently Extracting"
+                            VerticalAlignment="Center" />
+                        <ui:Button
+                            Content="Details"
+                            Margin="10,0,0,0"
+                            x:Name="ExtractionDetailsBtn" />
+                    </StackPanel>
+                    <StackPanel Grid.Row="1" Margin="0,10,0,0">
+                        <ui:TextBlock
+                            FontTypography="Subtitle"
+                            Text="Extracting File: [File Name]"
+                            x:Name="ExtractionTitleText" />
+                        <ui:TextBlock
+                            FontTypography="Body"
+                            Margin="0,5,0,0"
+                            Text="File 0 of 0"
+                            x:Name="ExtractionCaptionText" />
+                    </StackPanel>
+                    <ui:TextBlock
+                        FontTypography="Body"
+                        Grid.Row="2"
+                        Margin="0,5,0,0"
+                        x:Name="ExtractionFileProgressText">
+                        <ui:TextBlock.Text>
+                            <MultiBinding StringFormat="Extracted {0} of {1} files">
+                                <Binding Converter="{StaticResource NumberFormatConverter}" Path="ExtractedCount" />
+                                <Binding Converter="{StaticResource NumberFormatConverter}" Path="TotalEntryCount" />
+                            </MultiBinding>
+                        </ui:TextBlock.Text>
+                    </ui:TextBlock>
+                    <StackPanel
+                        Grid.Row="3"
+                        Margin="0,10,0,0"
+                        Orientation="Horizontal">
+                        <ui:TextBlock
+                            FontTypography="Body"
+                            Text="Overall elapsed:"
+                            VerticalAlignment="Center" />
+                        <ui:TextBlock
+                            FontTypography="Body"
+                            Margin="5,0,0,0"
+                            Text="00:00:00"
+                            VerticalAlignment="Center"
+                            x:Name="ExtractionElapsedText" />
+                    </StackPanel>
+                    <ui:TextBlock
+                        FontTypography="Body"
+                        Grid.Row="4"
+                        Margin="0,10,0,0"
+                        Text="Overall progress: 0%"
+                        x:Name="ExtractionProgressText" />
+                </Grid>
+            </ui:Card>
+        </materialDesign:TransitioningContent>
+
+
+        <!--  Main Extraction Card (shown when not processing)  -->
         <ui:Card
             Grid.Row="0"
             Margin="10"
-            Padding="10">
+            Padding="10"
+            Visibility="Visible"
+            x:Name="BetterExtractionCard">
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*" />
@@ -102,12 +185,29 @@
                         x:Name="LocateUnitypackageButton" />
                     <ui:Button
                         Background="Transparent"
-                        Content="Start Extraction"
+                        Click="StartExtractionButton_OnClick"
                         Foreground="#2ca7f2"
                         Icon="{ui:SymbolIcon Next24}"
                         Margin="7"
                         Padding="10"
-                        PressedForeground="#2ca7f2" />
+                        PressedForeground="#2ca7f2"
+                        x:Name="StartExtractionButton">
+                        <ui:Button.Content>
+                            <materialDesign:TransitioningContent
+                                OpeningEffect="{materialDesign:TransitionEffect FadeIn}">
+                                <StackPanel Orientation="Horizontal">
+                                    <ProgressBar
+                                        Height="20"
+                                        IsIndeterminate="True"
+                                        Margin="5,0,5,0"
+                                        Visibility="Collapsed"
+                                        Width="20"
+                                        x:Name="StartExtractionButtonProgressRing" />
+                                    <ui:TextBlock Text="Start Extraction" x:Name="StartExtractionButtonText" />
+                                </StackPanel>
+                            </materialDesign:TransitioningContent>
+                        </ui:Button.Content>
+                    </ui:Button>
                 </StackPanel>
 
                 <ui:Image

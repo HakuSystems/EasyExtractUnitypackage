@@ -11,6 +11,8 @@ public partial class BetterExtraction
 {
     private const string QueueFilesKey = "QueueFiles";
     private const string ExtractingFilesKey = "ExtractingFiles";
+
+    private readonly FileProgress _currentFileProgress = new();
     private bool _hasCheckedSystemRequirements;
 
     private int _recheckCount;
@@ -28,6 +30,7 @@ public partial class BetterExtraction
     private EverythingValidation EverythingValidation { get; } = new();
     private HashChecks HashChecks { get; } = new();
     private FilterQueue FilterQueue { get; } = new();
+    private ExtractionHandler ExtractionHandler { get; } = new();
 
     private void LocateUnitypackageButton_OnClick(object sender, RoutedEventArgs e)
     {
@@ -124,13 +127,9 @@ public partial class BetterExtraction
             return _systemRequirementsMet.Value;
 
         if (!forceCheck)
-        {
             _hasCheckedSystemRequirements = true;
-        }
         else
-        {
             _recheckCount++;
-        }
 
         var requirementsMet = await EverythingValidation.AreSystemRequirementsMetAsync();
         _systemRequirementsMet = requirementsMet;
@@ -236,5 +235,84 @@ public partial class BetterExtraction
         SearchUnitypackageBox.IsExpanded = false;
         QueueFilesExpander.IsExpanded = true;
         ExtractingFilesExpander.IsExpanded = true;
+    }
+
+    private async void StartExtractionFromQueue()
+    {
+        BetterExtractionCard.Visibility = Visibility.Collapsed;
+        CurrentlyExtractingCard.Visibility = Visibility.Visible;
+        StartExtractionButton.IsEnabled = false;
+
+        var queuedFiles = ConfigHandler.Instance.Config.UnitypackageFiles.Where(file => file.IsInQueue).ToList();
+        var totalFiles = queuedFiles.Count;
+        if (totalFiles == 0)
+        {
+            CurrentlyExtractingCard.Visibility = Visibility.Collapsed;
+            BetterExtractionCard.Visibility = Visibility.Visible;
+            StartExtractionButton.IsEnabled = true;
+            return;
+        }
+
+        var overallStartTime = DateTime.Now;
+        var processedFiles = 0;
+        foreach (var file in queuedFiles)
+        {
+            file.IsInQueue = false;
+            ConfigHandler.Instance.OverrideConfig();
+            SyncFileCollections();
+
+            ExtractionTitleText.Text = $"Extracting File: {file.FileName}";
+            ExtractionCaptionText.Text = $"File {processedFiles + 1} of {totalFiles}";
+
+            _currentFileProgress.ExtractedCount = 0;
+            _currentFileProgress.TotalEntryCount = 0;
+
+            var unitypackageModel = new SearchEverythingModel { FileName = file.FileName, FilePath = file.FilePath };
+            var fileExtractionProgress = new Progress<(int extracted, int total)>(progressData =>
+            {
+                _currentFileProgress.ExtractedCount = progressData.extracted;
+                _currentFileProgress.TotalEntryCount = progressData.total;
+            });
+
+            var extractionTask = ExtractionHandler.ExtractUnitypackage(unitypackageModel, fileExtractionProgress);
+            while (!extractionTask.IsCompleted)
+            {
+                var overallElapsed = DateTime.Now - overallStartTime;
+                var filesProgressPercentage = totalFiles > 0
+                    ? (double)processedFiles / totalFiles
+                    : 0.0;
+                var currentFileProgressPercentage = _currentFileProgress.TotalEntryCount > 0
+                    ? (double)_currentFileProgress.ExtractedCount / _currentFileProgress.TotalEntryCount
+                    : 0.0;
+
+                var overallProgressPercent =
+                    (filesProgressPercentage + currentFileProgressPercentage / totalFiles) * 100;
+
+                ExtractionElapsedText.Text = overallElapsed.ToString(@"hh\:mm\:ss");
+                ExtractionProgressText.Text = $"Overall progress: {overallProgressPercent:F0}%";
+                await Task.Delay(1000);
+            }
+
+            var success = await extractionTask;
+            processedFiles++;
+            if (success)
+                ConfigHandler.Instance.Config.UnitypackageFiles.Remove(file);
+            else
+                file.IsInQueue = true;
+            ConfigHandler.Instance.OverrideConfig();
+            SyncFileCollections();
+        }
+
+        CurrentlyExtractingCard.Visibility = Visibility.Collapsed;
+        BetterExtractionCard.Visibility = Visibility.Visible;
+        StartExtractionButton.IsEnabled = true;
+        StartExtractionButtonText.Text = "Start Extraction";
+    }
+
+
+    private void StartExtractionButton_OnClick(object sender, RoutedEventArgs e)
+    {
+        StartExtractionFromQueue();
+        SyncFileCollections();
     }
 }
