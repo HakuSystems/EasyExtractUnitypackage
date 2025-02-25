@@ -12,7 +12,11 @@ public partial class BetterExtraction
     private const string QueueFilesKey = "QueueFiles";
     private const string ExtractingFilesKey = "ExtractingFiles";
     private bool _hasCheckedSystemRequirements;
+
     private int _recheckCount;
+
+    // cache the system requirements result
+    private bool? _systemRequirementsMet;
 
     public BetterExtraction()
     {
@@ -22,9 +26,7 @@ public partial class BetterExtraction
 
     private LocateUnitypackage UnitypackageLocator { get; } = new();
     private EverythingValidation EverythingValidation { get; } = new();
-
     private HashChecks HashChecks { get; } = new();
-
     private FilterQueue FilterQueue { get; } = new();
 
     private void LocateUnitypackageButton_OnClick(object sender, RoutedEventArgs e)
@@ -72,11 +74,8 @@ public partial class BetterExtraction
             if (args.Item is SearchEverythingModel model)
             {
                 var searchText = SearchUnitypackageBoxInput.Text;
-                if (string.IsNullOrWhiteSpace(searchText))
-                    args.Accepted = true;
-                else
-                    args.Accepted = model.FileName.IndexOf(searchText, StringComparison.InvariantCultureIgnoreCase) >=
-                                    0;
+                args.Accepted = string.IsNullOrWhiteSpace(searchText) ||
+                                model.FileName.IndexOf(searchText, StringComparison.InvariantCultureIgnoreCase) >= 0;
             }
             else
             {
@@ -90,6 +89,7 @@ public partial class BetterExtraction
     private void PopulateSearchResultsAsync()
     {
         var resultCount = Everything.Everything_GetNumResults();
+        var addedNewItem = false;
         for (uint i = 0; i < resultCount; i++)
         {
             var path = Everything.GetResultFullPathName(i);
@@ -111,19 +111,30 @@ public partial class BetterExtraction
                 CreatedTime = SearchEverythingFileChecks.GetFileDateTime(i, true)
             };
             ConfigHandler.Instance.Config.SearchEverythingResults.Add(model);
-            ConfigHandler.Instance.OverrideConfig();
+            addedNewItem = true;
         }
+
+        if (addedNewItem)
+            ConfigHandler.Instance.OverrideConfig();
     }
 
     private async Task<bool> CheckSystemRequirementsAndUpdateUiAsync(bool forceCheck)
     {
-        if (!forceCheck && _hasCheckedSystemRequirements)
-            return true;
+        if (!forceCheck && _systemRequirementsMet.HasValue)
+            return _systemRequirementsMet.Value;
+
         if (!forceCheck)
+        {
             _hasCheckedSystemRequirements = true;
+        }
         else
+        {
             _recheckCount++;
+        }
+
         var requirementsMet = await EverythingValidation.AreSystemRequirementsMetAsync();
+        _systemRequirementsMet = requirementsMet;
+
         if (!requirementsMet)
         {
             SearchUnitypackageBox.Visibility = Visibility.Collapsed;
@@ -155,6 +166,7 @@ public partial class BetterExtraction
 
     private async void SearchUnitypackageBoxFallbackButton_OnClick(object sender, RoutedEventArgs e)
     {
+        _systemRequirementsMet = null;
         await CheckSystemRequirementsAndUpdateUiAsync(true);
     }
 
@@ -181,8 +193,7 @@ public partial class BetterExtraction
         await CheckSystemRequirementsAndUpdateUiAsync(forceCheck);
         SearchUnitypackageBox.IsExpanded = true;
         var searchResults = Resources["SearchResults"] as CollectionViewSource;
-        if (searchResults != null)
-            searchResults.View.Refresh();
+        searchResults?.View.Refresh();
     }
 
     private void SearchUnitypackageBoxResultsListView_OnSelectionChanged(object sender, SelectionChangedEventArgs e)
