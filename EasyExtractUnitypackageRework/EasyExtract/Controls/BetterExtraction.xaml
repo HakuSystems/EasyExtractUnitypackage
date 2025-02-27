@@ -41,10 +41,11 @@
             x:Name="CurrentlyExtractingCard">
             <ui:Card
                 Margin="10"
-                Padding="10"
+                Padding="15"
                 VerticalAlignment="Top">
                 <Grid>
                     <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
                         <RowDefinition Height="Auto" />
                         <RowDefinition Height="Auto" />
                         <RowDefinition Height="Auto" />
@@ -56,38 +57,41 @@
                         Orientation="Horizontal"
                         VerticalAlignment="Center">
                         <ui:TextBlock
+                            Appearance="Primary"
                             FontTypography="Title"
-                            Foreground="#2CA7F2"
+                            Foreground="#04d3be"
                             Text="Currently Extracting"
                             VerticalAlignment="Center" />
-                        <ui:Button
-                            Content="Details"
-                            Margin="10,0,0,0"
-                            x:Name="ExtractionDetailsBtn" />
                     </StackPanel>
+
+                    <!--  File Information Section  -->
                     <StackPanel Grid.Row="1" Margin="0,10,0,0">
                         <ui:TextBlock
                             FontTypography="Subtitle"
                             Text="Extracting File: [File Name]"
                             x:Name="ExtractionTitleText" />
+                    </StackPanel>
+
+                    <!--  Progress Section  -->
+                    <StackPanel Grid.Row="2" Margin="0,10,0,0">
+                        <ui:TextBlock
+                            FontTypography="Body"
+                            Text="Extraction Progress:"
+                            x:Name="ExtractionProgressText" />
+                        <ProgressBar
+                            Height="20"
+                            Margin="0,5,0,0"
+                            Maximum="100"
+                            Minimum="0"
+                            x:Name="ExtractionProgressBar" />
                         <ui:TextBlock
                             FontTypography="Body"
                             Margin="0,5,0,0"
-                            Text="File 0 of 0"
+                            Text="Extracted 0 of 0 files"
                             x:Name="ExtractionCaptionText" />
                     </StackPanel>
-                    <ui:TextBlock
-                        FontTypography="Body"
-                        Grid.Row="2"
-                        Margin="0,5,0,0"
-                        x:Name="ExtractionFileProgressText">
-                        <ui:TextBlock.Text>
-                            <MultiBinding StringFormat="Extracted {0} of {1} files">
-                                <Binding Converter="{StaticResource NumberFormatConverter}" Path="ExtractedCount" />
-                                <Binding Converter="{StaticResource NumberFormatConverter}" Path="TotalEntryCount" />
-                            </MultiBinding>
-                        </ui:TextBlock.Text>
-                    </ui:TextBlock>
+
+                    <!--  Elapsed Time Section  -->
                     <StackPanel
                         Grid.Row="3"
                         Margin="0,10,0,0"
@@ -103,12 +107,6 @@
                             VerticalAlignment="Center"
                             x:Name="ExtractionElapsedText" />
                     </StackPanel>
-                    <ui:TextBlock
-                        FontTypography="Body"
-                        Grid.Row="4"
-                        Margin="0,10,0,0"
-                        Text="Overall progress: 0%"
-                        x:Name="ExtractionProgressText" />
                 </Grid>
             </ui:Card>
         </materialDesign:TransitioningContent>
@@ -324,7 +322,10 @@
                 <ColumnDefinition Width="*" />
             </Grid.ColumnDefinitions>
 
-            <StackPanel Grid.Column="0" Margin="5">
+            <StackPanel
+                Grid.Column="0"
+                Grid.ColumnSpan="2"
+                Margin="5">
                 <ui:CardExpander
                     Header="Unitypackage(s) in Queue"
                     Icon="{ui:SymbolIcon DocumentQueue24}"
@@ -332,54 +333,6 @@
                     x:Name="QueueFilesExpander">
                     <ui:DynamicScrollViewer Height="300" VerticalScrollBarVisibility="Auto">
                         <ui:ListView ItemsSource="{Binding Source={StaticResource QueueFiles}}">
-                            <ui:ListView.ItemTemplate>
-                                <DataTemplate>
-                                    <materialDesign:TransitioningContent
-                                        OpeningEffect="{materialDesign:TransitionEffect FadeIn}">
-                                        <Border
-                                            BorderThickness="1"
-                                            CornerRadius="8"
-                                            Margin="4"
-                                            Padding="10">
-                                            <Grid ToolTip="{Binding FilePath}">
-                                                <Grid.RowDefinitions>
-                                                    <RowDefinition Height="Auto" />
-                                                    <RowDefinition Height="Auto" />
-                                                </Grid.RowDefinitions>
-                                                <ui:TextBlock
-                                                    FontTypography="Subtitle"
-                                                    Grid.Row="0"
-                                                    Text="{Binding FileName}" />
-                                                <StackPanel
-                                                    Grid.Row="1"
-                                                    Margin="0,5,0,0"
-                                                    Orientation="Horizontal">
-                                                    <ui:TextBlock FontWeight="SemiBold" Text="Size: " />
-                                                    <ui:TextBlock Margin="0,0,10,0"
-                                                                  Text="{Binding FileSize, Converter={StaticResource FileSizeConverter}}" />
-                                                    <ui:TextBlock FontWeight="SemiBold" Text="Date: " />
-                                                    <ui:TextBlock Margin="0,0,10,0" Text="{Binding FileDate}" />
-                                                    <ui:TextBlock FontWeight="SemiBold" Text="Ext: " />
-                                                    <ui:TextBlock Text="{Binding FileExtension}" />
-                                                </StackPanel>
-                                            </Grid>
-                                        </Border>
-                                    </materialDesign:TransitioningContent>
-                                </DataTemplate>
-                            </ui:ListView.ItemTemplate>
-                        </ui:ListView>
-                    </ui:DynamicScrollViewer>
-                </ui:CardExpander>
-            </StackPanel>
-
-            <StackPanel Grid.Column="1" Margin="5">
-                <ui:CardExpander
-                    Header="Currently Extracting"
-                    Icon="{ui:SymbolIcon DocumentTextExtract24}"
-                    IsExpanded="True"
-                    x:Name="ExtractingFilesExpander">
-                    <ui:DynamicScrollViewer Height="300" VerticalScrollBarVisibility="Auto">
-                        <ui:ListView ItemsSource="{Binding Source={StaticResource ExtractingFiles}}">
                             <ui:ListView.ItemTemplate>
                                 <DataTemplate>
                                     <materialDesign:TransitioningContent

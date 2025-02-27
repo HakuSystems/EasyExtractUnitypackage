@@ -227,14 +227,12 @@ public partial class BetterExtraction
     {
         await ExpandSearchBoxAndRefresh(true);
         QueueFilesExpander.IsExpanded = false;
-        ExtractingFilesExpander.IsExpanded = false;
     }
 
     private void SearchUnitypackageBoxInput_OnLostFocus(object sender, RoutedEventArgs e)
     {
         SearchUnitypackageBox.IsExpanded = false;
         QueueFilesExpander.IsExpanded = true;
-        ExtractingFilesExpander.IsExpanded = true;
     }
 
     private async void StartExtractionFromQueue()
@@ -295,7 +293,8 @@ public partial class BetterExtraction
                     (filesProgressPercentage + currentFileProgressPercentage / totalFiles) * 100;
 
                 ExtractionElapsedText.Text = overallElapsed.ToString(@"hh\:mm\:ss");
-                ExtractionProgressText.Text = $"Overall progress: {overallProgressPercent:F0}%";
+                ExtractionProgressBar.Value = overallProgressPercent;
+                ExtractionProgressText.Text = $"{overallProgressPercent:0.00}%";
                 await Task.Delay(1000);
             }
 
