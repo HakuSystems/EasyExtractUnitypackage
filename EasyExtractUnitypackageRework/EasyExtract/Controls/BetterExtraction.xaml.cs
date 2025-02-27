@@ -262,7 +262,9 @@ public partial class BetterExtraction
             SyncFileCollections();
 
             ExtractionTitleText.Text = $"Extracting File: {file.FileName}";
-            ExtractionCaptionText.Text = $"File {processedFiles + 1} of {totalFiles}";
+            ExtractionCaptionText.Text =
+                $"({_currentFileProgress.ExtractedCount} of {_currentFileProgress.TotalEntryCount} files)";
+
 
             _currentFileProgress.ExtractedCount = 0;
             _currentFileProgress.TotalEntryCount = 0;
@@ -272,6 +274,10 @@ public partial class BetterExtraction
             {
                 _currentFileProgress.ExtractedCount = progressData.extracted;
                 _currentFileProgress.TotalEntryCount = progressData.total;
+
+                // Update UI
+                ExtractionCaptionText.Text =
+                    $"({_currentFileProgress.ExtractedCount} of {_currentFileProgress.TotalEntryCount} files)";
             });
 
             var extractionTask = ExtractionHandler.ExtractUnitypackage(unitypackageModel, fileExtractionProgress);
