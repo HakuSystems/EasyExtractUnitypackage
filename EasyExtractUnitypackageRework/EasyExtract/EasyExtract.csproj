@@ -58,19 +58,19 @@
             <Version>5.2.2-ci914</Version>
         </PackageReference>
         <PackageReference Include="Microsoft.Extensions.DependencyInjection">
-            <Version>9.0.2</Version>
+            <Version>10.0.0-preview.1.25080.5</Version>
         </PackageReference>
         <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions">
-            <Version>9.0.2</Version>
+            <Version>10.0.0-preview.1.25080.5</Version>
         </PackageReference>
         <PackageReference Include="Microsoft.Extensions.Logging">
-            <Version>9.0.2</Version>
+            <Version>10.0.0-preview.1.25080.5</Version>
         </PackageReference>
         <PackageReference Include="Microsoft.Extensions.Logging.Abstractions">
-            <Version>9.0.2</Version>
+            <Version>10.0.0-preview.1.25080.5</Version>
         </PackageReference>
         <PackageReference Include="Microsoft.Extensions.Options">
-            <Version>9.0.2</Version>
+            <Version>10.0.0-preview.1.25080.5</Version>
         </PackageReference>
         <PackageReference Include="Microsoft.NETCore.Platforms">
             <Version>8.0.0-preview.7.23375.6</Version>
