@@ -219,20 +219,20 @@
                 <ui:CardExpander
                     Grid.Column="0"
                     Grid.Row="3"
-                    Icon="{ui:SymbolIcon Sparkle24}"
+                    Icon="{ui:SymbolIcon Search24}"
                     Margin="7,0,7,0"
                     Padding="10"
                     ToolTip="Search for Unitypackage on your system"
                     x:Name="SearchUnitypackageBox">
                     <ui:CardExpander.Header>
                         <ui:TextBox
-                            GotFocus="SearchUnitypackageBoxInput_OnGotFocus"
-                            Icon="{ui:SymbolIcon Search24}"
+                            HorizontalAlignment="Stretch"
+                            IconPlacement="Left"
                             LostFocus="SearchUnitypackageBoxInput_OnLostFocus"
-                            Margin="7"
-                            Padding="10"
-                            PlaceholderText="Search Unitypackage(s)"
+                            Margin="0,0,7,0"
+                            PlaceholderText="Search Unitypackage(s) on your system"
                             TextChanged="SearchUnitypackageBoxInput_OnTextChanged"
+                            VerticalAlignment="Stretch"
                             x:Name="SearchUnitypackageBoxInput" />
                     </ui:CardExpander.Header>
                     <ui:CardExpander.Content>
@@ -346,13 +346,20 @@
                                                     <RowDefinition Height="Auto" />
                                                     <RowDefinition Height="Auto" />
                                                 </Grid.RowDefinitions>
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="Auto" />
+                                                    <ColumnDefinition Width="Auto" />
+                                                </Grid.ColumnDefinitions>
                                                 <ui:TextBlock
                                                     FontTypography="Subtitle"
+                                                    Grid.Column="1"
                                                     Grid.Row="0"
+                                                    Margin="5,5,0,0"
                                                     Text="{Binding FileName}" />
                                                 <StackPanel
+                                                    Grid.Column="1"
                                                     Grid.Row="1"
-                                                    Margin="0,5,0,0"
+                                                    Margin="5,5,0,0"
                                                     Orientation="Horizontal">
                                                     <ui:TextBlock FontWeight="SemiBold" Text="Size: " />
                                                     <ui:TextBlock Margin="0,0,10,0"
@@ -362,6 +369,20 @@
                                                     <ui:TextBlock FontWeight="SemiBold" Text="Ext: " />
                                                     <ui:TextBlock Text="{Binding FileExtension}" />
                                                 </StackPanel>
+                                                <ui:Button
+                                                    Background="Transparent"
+                                                    Click="QueueFilesRemoveButton_OnClick"
+                                                    Foreground="#f44336"
+                                                    Grid.Column="0"
+                                                    Grid.Row="0"
+                                                    Grid.RowSpan="2"
+                                                    Icon="{ui:SymbolIcon Delete24}"
+                                                    Margin="7"
+                                                    Padding="15"
+                                                    PressedForeground="#f44336"
+                                                    ToolTip="Remove from Queue"
+                                                    x:Name="QueueFilesRemoveButton" />
+
                                             </Grid>
                                         </Border>
                                     </materialDesign:TransitioningContent>

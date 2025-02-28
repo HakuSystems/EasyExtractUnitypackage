@@ -63,6 +63,7 @@ public partial class BetterExtraction
 
     private async void BetterExtraction_OnLoaded(object sender, RoutedEventArgs e)
     {
+        await DiscordRpcManager.Instance.TryUpdatePresenceAsync("Extraction");
         ConfigHandler.Instance.Config.SearchEverythingResults.Clear();
         ConfigHandler.Instance.OverrideConfig();
         SetupFilter(QueueFilesKey, item => item is UnitypackageFileInfo file && file.IsInQueue);
@@ -127,17 +128,21 @@ public partial class BetterExtraction
 
         _recheckCount = forceCheck ? _recheckCount + 1 : 0;
 
-        var requirementsMet = await EverythingValidation.AreSystemRequirementsMetAsync();
+        var requirementsMet = await Task.Run(() => EverythingValidation.AreSystemRequirementsMetAsync());
         _systemRequirementsMet = requirementsMet;
 
-        SearchUnitypackageBox.Visibility = requirementsMet ? Visibility.Visible : Visibility.Collapsed;
-        SearchUnitypackageBoxExpanderError.Visibility = requirementsMet ? Visibility.Collapsed : Visibility.Visible;
+        Application.Current.Dispatcher.Invoke(() =>
+        {
+            SearchUnitypackageBox.Visibility = requirementsMet ? Visibility.Visible : Visibility.Collapsed;
+            SearchUnitypackageBoxExpanderError.Visibility = requirementsMet ? Visibility.Collapsed : Visibility.Visible;
+        });
 
         if (!requirementsMet)
         {
-            var statusMessage = await EverythingValidation.GetSystemRequirementsStatusAsync();
+            var statusMessage = await Task.Run(() => EverythingValidation.GetSystemRequirementsStatusAsync());
             statusMessage = forceCheck ? $"Re-check (attempt #{_recheckCount}): {statusMessage}" : statusMessage;
-            SearchUnitypackageBoxFallback.Text = statusMessage;
+
+            Application.Current.Dispatcher.Invoke(() => { SearchUnitypackageBoxFallback.Text = statusMessage; });
 
             var logMessage = forceCheck
                 ? $"System requirements still not met after attempt #{_recheckCount}."
@@ -147,10 +152,13 @@ public partial class BetterExtraction
         else if (forceCheck)
         {
             await BetterLogger.LogAsync("System requirements met after re-check.", Importance.Info);
-            Everything.Everything_SetSearchW("endwith:.unitypackage");
-            Everything.Everything_SetRequestFlags(Everything.RequestFileName | Everything.RequestPath);
-            Everything.Everything_QueryW(true);
-            await Task.Run(PopulateSearchResultsAsync);
+            await Task.Run(() =>
+            {
+                Everything.Everything_SetSearchW("endwith:.unitypackage");
+                Everything.Everything_SetRequestFlags(Everything.RequestFileName | Everything.RequestPath);
+                Everything.Everything_QueryW(true);
+                Task.Run(PopulateSearchResultsAsync);
+            });
         }
 
         return requirementsMet;
@@ -175,9 +183,12 @@ public partial class BetterExtraction
 
     private async void SearchUnitypackageBoxInput_OnTextChanged(object sender, TextChangedEventArgs e)
     {
-        await ExpandSearchBoxAndRefreshAsync(false);
+        await ExpandSearchBoxAndRefreshAsync(true);
         if (string.IsNullOrWhiteSpace(SearchUnitypackageBoxInput.Text))
-            return;
+        {
+            SearchUnitypackageBox.IsExpanded = false;
+            QueueFilesExpander.IsExpanded = true;
+        }
     }
 
     private async Task ExpandSearchBoxAndRefreshAsync(bool forceCheck)
@@ -216,12 +227,6 @@ public partial class BetterExtraction
         ConfigHandler.Instance.OverrideConfig();
         SyncFileCollections();
         SearchUnitypackageBox.IsExpanded = false;
-    }
-
-    private async void SearchUnitypackageBoxInput_OnGotFocus(object sender, RoutedEventArgs e)
-    {
-        await ExpandSearchBoxAndRefreshAsync(true);
-        QueueFilesExpander.IsExpanded = false;
     }
 
     private void SearchUnitypackageBoxInput_OnLostFocus(object sender, RoutedEventArgs e)
