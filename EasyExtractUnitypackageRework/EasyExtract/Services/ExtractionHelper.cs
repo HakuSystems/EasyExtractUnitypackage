@@ -177,32 +177,46 @@ public record ExtractionHelper
     public static async Task<string?> GetCategoryByExtension(string extension)
     {
         const string? img = "Image";
+        const string? audio = "Audio";
+        const string? animation = "Animation";
+        const string? scene = "Scene";
+        const string? material = "Material";
+        const string? asset = "Asset";
+        const string? controller = "Controller";
+        const string? font = "Font";
+        const string? configuration = "Configuration";
+        const string? data = "Data";
+        const string? script = "Script";
+        const string? shader = "Shader";
+        const string? prefab = "Prefab";
+        const string? unknown = "Unknown";
+        const string? model = "3D Object";
         var category = extension switch
         {
-            ".cs" => "Script",
-            ".shader" => "Shader",
-            ".prefab" => "Prefab",
-            ".fbx" => "3D Object",
+            ".cs" => script,
+            ".shader" => shader,
+            ".prefab" => prefab,
+            ".fbx" => model,
             ".png" => img,
             ".jpg" => img,
             ".jpeg" => img,
             ".tga" => img,
             ".psd" => img,
-            ".mp3" => "Audio",
-            ".wav" => "Audio",
-            ".ogg" => "Audio",
-            ".anim" => "Animation",
-            ".unity" => "Scene",
-            ".mat" => "Material",
-            ".asset" => "Asset",
-            ".controller" => "Controller",
-            ".ttf" => "Font",
-            ".otf" => "Font",
-            ".meta" => "Configuration",
-            ".json" => "Data",
-            ".xml" => "Data",
-            ".yaml" => "Data",
-            _ => "Document"
+            ".mp3" => audio,
+            ".wav" => audio,
+            ".ogg" => audio,
+            ".anim" => animation,
+            ".unity" => scene,
+            ".mat" => material,
+            ".asset" => asset,
+            ".controller" => controller,
+            ".ttf" => font,
+            ".otf" => font,
+            ".meta" => configuration,
+            ".json" => data,
+            ".xml" => data,
+            ".yaml" => data,
+            _ => unknown
         };
 
         return category;

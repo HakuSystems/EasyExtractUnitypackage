@@ -106,7 +106,7 @@ public class ExtractionHandler
         }
     }
 
-    private async Task ExtractAndWriteFiles(SearchEverythingModel unitypackage, string tempFolder,
+    private static async Task ExtractAndWriteFiles(SearchEverythingModel unitypackage, string tempFolder,
         IProgress<(int extracted, int total)> fileProgress = null)
     {
         List<string> extractedEntries = new();
