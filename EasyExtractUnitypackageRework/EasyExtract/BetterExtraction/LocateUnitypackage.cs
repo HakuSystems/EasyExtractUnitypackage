@@ -4,21 +4,17 @@ namespace EasyExtract.BetterExtraction;
 
 public class LocateUnitypackage
 {
-    public LocateUnitypackage()
+    private OpenFileDialog OpenUnitypackageDialog { get; } = new()
     {
-        OpenUnitypackageDialog = new OpenFileDialog
-        {
-            Filter = "Unitypackage files (*.unitypackage)|*.unitypackage",
-            Title = "Select a Unitypackage file",
-            Multiselect = true
-        };
-    }
+        Filter = "Unitypackage files (*.unitypackage)|*.unitypackage",
+        Title = "Select a Unitypackage file",
+        Multiselect = true
+    };
 
-    private OpenFileDialog OpenUnitypackageDialog { get; }
     private HashChecks HashChecks { get; } = new();
     private FilterQueue FilterQueue { get; } = new();
 
-    public List<UnitypackageFileInfo>? LocateUnitypackageFiles()
+    public async Task<List<UnitypackageFileInfo>?> LocateUnitypackageFilesAsync()
     {
         if (OpenUnitypackageDialog.ShowDialog() != true)
             return null;
@@ -27,7 +23,7 @@ public class LocateUnitypackage
             .Select(file => new FileInfo(file))
             .ToList();
 
-        var fileDetails = fileInfos.Select(file =>
+        var fileDetails = await Task.Run(() => fileInfos.Select(file =>
         {
             var hash = HashChecks.ComputeFileHash(file);
             return new UnitypackageFileInfo
@@ -40,7 +36,7 @@ public class LocateUnitypackage
                 FileExtension = file.Extension,
                 IsInQueue = true // Mark file as currently in queue
             };
-        }).ToList();
+        }).ToList());
 
         ConfigHandler.Instance.Config.UnitypackageFiles.AddRange(fileDetails);
         FilterQueue.FilterDuplicates();

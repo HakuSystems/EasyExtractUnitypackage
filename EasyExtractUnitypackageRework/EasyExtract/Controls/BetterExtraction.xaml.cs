@@ -32,9 +32,9 @@ public partial class BetterExtraction
     private FilterQueue FilterQueue { get; } = new();
     private ExtractionHandler ExtractionHandler { get; } = new();
 
-    private void LocateUnitypackageButton_OnClick(object sender, RoutedEventArgs e)
+    private async void LocateUnitypackageButton_OnClick(object sender, RoutedEventArgs e)
     {
-        UnitypackageLocator.LocateUnitypackageFiles();
+        await UnitypackageLocator.LocateUnitypackageFilesAsync();
         SyncFileCollections();
     }
 
