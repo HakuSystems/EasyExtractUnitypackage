@@ -394,4 +394,15 @@ public partial class Dashboard : Window
     {
         UpdateDragDropText("Drag and Drop is Supported!", DragDropColors.DefaultText);
     }
+
+
+    private void DetailsCard_OnMouseEnter(object sender, MouseEventArgs e)
+    {
+        DetailsBtnFocusPoint.Visibility = Visibility.Visible;
+    }
+
+    private void DetailsCard_OnMouseLeave(object sender, MouseEventArgs e)
+    {
+        DetailsBtnFocusPoint.Visibility = Visibility.Collapsed;
+    }
 }

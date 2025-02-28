@@ -96,8 +96,12 @@
                             gif:AnimationBehavior.SourceUri="pack://application:,,,/EasyExtract;component/Resources/Gifs/LogoAnimation.gif"
                             x:Name="LogoImage" />
 
-                        <ui:Card Margin="10" Padding="10">
-
+                        <ui:Card
+                            Margin="10"
+                            MouseEnter="DetailsCard_OnMouseEnter"
+                            MouseLeave="DetailsCard_OnMouseLeave"
+                            Padding="10"
+                            x:Name="DetailsCard">
                             <Grid>
                                 <Grid.RowDefinitions>
                                     <RowDefinition Height="Auto" />
@@ -116,15 +120,20 @@
                                         Text="Total Extracted"
                                         TextWrapping="WrapWithOverflow"
                                         VerticalAlignment="Center" />
-                                    <ui:Button
-                                        Background="Transparent"
-                                        Click="DetailsBtn_OnClick"
-                                        Content="Details"
+                                    <materialDesign:TransitioningContent
                                         Grid.Column="1"
-                                        HorizontalAlignment="Right"
-                                        Icon="{ui:SymbolIcon MoreCircle24}"
-                                        VerticalAlignment="Center"
-                                        x:Name="DetailsBtn" />
+                                        OpeningEffect="{materialDesign:TransitionEffect FadeIn}"
+                                        Visibility="Collapsed"
+                                        x:Name="DetailsBtnFocusPoint">
+                                        <ui:Button
+                                            Background="Transparent"
+                                            Click="DetailsBtn_OnClick"
+                                            Content="Details"
+                                            HorizontalAlignment="Right"
+                                            Icon="{ui:SymbolIcon MoreCircle24}"
+                                            VerticalAlignment="Center"
+                                            x:Name="DetailsBtn" />
+                                    </materialDesign:TransitioningContent>
                                 </Grid>
                                 <StackPanel
                                     Grid.Row="1"
