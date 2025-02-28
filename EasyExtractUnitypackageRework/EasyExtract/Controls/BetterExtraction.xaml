@@ -377,6 +377,7 @@
                                                     Grid.Row="0"
                                                     Grid.RowSpan="2"
                                                     Icon="{ui:SymbolIcon Delete24}"
+                                                    IsEnabled="{Binding IsExtracting, Converter={StaticResource InverseBooleanConverter}}"
                                                     Margin="7"
                                                     Padding="15"
                                                     PressedForeground="#f44336"

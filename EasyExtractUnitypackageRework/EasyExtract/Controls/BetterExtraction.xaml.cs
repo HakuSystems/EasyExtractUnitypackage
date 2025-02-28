@@ -242,6 +242,7 @@ public partial class BetterExtraction
         StartExtractionButton.IsEnabled = false;
 
         var queuedFiles = ConfigHandler.Instance.Config.UnitypackageFiles.Where(file => file.IsInQueue).ToList();
+        queuedFiles.ForEach(file => file.IsExtracting = true); // Set all in queue to IsExtracting = true
         var totalFiles = queuedFiles.Count;
         if (totalFiles == 0)
         {
@@ -276,7 +277,9 @@ public partial class BetterExtraction
             if (await extractionTask)
                 ConfigHandler.Instance.Config.UnitypackageFiles.Remove(file);
             else
+            {
                 file.IsInQueue = true;
+            }
 
             ConfigHandler.Instance.OverrideConfig();
             SyncFileCollections();

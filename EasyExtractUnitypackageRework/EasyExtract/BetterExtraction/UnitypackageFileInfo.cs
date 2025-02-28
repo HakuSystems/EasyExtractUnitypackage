@@ -9,4 +9,5 @@ public class UnitypackageFileInfo
     public string? FilePath { get; set; }
     public string? FileExtension { get; set; }
     public bool IsInQueue { get; set; } = true; // default value
+    public bool IsExtracting { get; set; } = false; // default value
 }

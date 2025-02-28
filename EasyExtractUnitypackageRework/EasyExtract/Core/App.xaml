@@ -18,6 +18,7 @@
             <utilities:FileSizeConverter x:Key="FileSizeConverter" />
             <utilities:QueueOpacityConverter x:Key="QueueOpacityConverter" />
             <utilities:QueueIsEnabledConverter x:Key="QueueIsEnabledConverter" />
+            <utilities:InverseBooleanConverter x:Key="InverseBooleanConverter" />
         </ResourceDictionary>
     </Application.Resources>
 </Application>
