@@ -1,5 +1,4 @@
 ﻿<UserControl
-    Focusable="True"
     FontFamily="{DynamicResource GlobalFontFamily}"
     Foreground="{DynamicResource TextFillColorPrimaryBrush}"
     KeyboardNavigation.TabNavigation="Cycle"

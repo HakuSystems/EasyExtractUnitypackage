@@ -294,7 +294,7 @@ public partial class Dashboard : Window
 
     private void DetailsBtn_OnClick(object sender, RoutedEventArgs e)
     {
-        NavView.Navigate(typeof(History));
+        NavView.Navigate(typeof(BetterDetails));
     }
 
     private void SettingsBtn_OnClick(object sender, RoutedEventArgs e)
