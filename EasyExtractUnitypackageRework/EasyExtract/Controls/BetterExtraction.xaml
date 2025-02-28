@@ -23,7 +23,6 @@
 
     <UserControl.Resources>
         <CollectionViewSource Source="{Binding UnitypackageFiles}" x:Key="QueueFiles" />
-        <CollectionViewSource Source="{Binding UnitypackageFiles}" x:Key="ExtractingFiles" />
         <CollectionViewSource Source="{Binding SearchEverythingResults}" x:Key="SearchResults" />
     </UserControl.Resources>
 

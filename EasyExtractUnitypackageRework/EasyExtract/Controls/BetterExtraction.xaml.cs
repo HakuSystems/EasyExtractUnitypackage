@@ -10,7 +10,6 @@ namespace EasyExtract.Controls;
 public partial class BetterExtraction
 {
     private const string QueueFilesKey = "QueueFiles";
-    private const string ExtractingFilesKey = "ExtractingFiles";
 
     private readonly FileProgress _currentFileProgress = new();
     private bool _hasCheckedSystemRequirements;
@@ -34,19 +33,18 @@ public partial class BetterExtraction
 
     private async void LocateUnitypackageButton_OnClick(object sender, RoutedEventArgs e)
     {
-        await UnitypackageLocator.LocateUnitypackageFilesAsync();
-        SyncFileCollections();
+        var result = await UnitypackageLocator.LocateUnitypackageFilesAsync();
+        if (result != null) SyncFileCollections();
     }
 
     private void SyncFileCollections()
     {
-        var queueFiles = Resources[QueueFilesKey] as CollectionViewSource ??
-                         throw new InvalidOperationException($"Resource '{QueueFilesKey}' not found.");
-        var extractingFiles = Resources[ExtractingFilesKey] as CollectionViewSource ??
-                              throw new InvalidOperationException($"Resource '{ExtractingFilesKey}' not found.");
+        if (Resources[QueueFilesKey] is CollectionViewSource queueFiles)
+            queueFiles.View.Refresh();
+        else
+            throw new InvalidOperationException($"Resource '{QueueFilesKey}' not found.");
+
         UpdateClearQueueButtonVisibility();
-        queueFiles.View.Refresh();
-        extractingFiles.View.Refresh();
     }
 
     private void UpdateClearQueueButtonVisibility()
@@ -68,23 +66,24 @@ public partial class BetterExtraction
         ConfigHandler.Instance.Config.SearchEverythingResults.Clear();
         ConfigHandler.Instance.OverrideConfig();
         SetupFilter(QueueFilesKey, item => item is UnitypackageFileInfo file && file.IsInQueue);
-        SetupFilter(ExtractingFilesKey, item => item is UnitypackageFileInfo file && !file.IsInQueue);
 
-        var searchResults = Resources["SearchResults"] as CollectionViewSource ??
-                            throw new InvalidOperationException("Resource 'SearchResults' not found.");
-        searchResults.Filter += (s, args) =>
-        {
-            if (args.Item is SearchEverythingModel model)
+        if (Resources["SearchResults"] is CollectionViewSource searchResults)
+            searchResults.Filter += (s, args) =>
             {
-                var searchText = SearchUnitypackageBoxInput.Text;
-                args.Accepted = string.IsNullOrWhiteSpace(searchText) ||
-                                model.FileName.IndexOf(searchText, StringComparison.InvariantCultureIgnoreCase) >= 0;
-            }
-            else
-            {
-                args.Accepted = false;
-            }
-        };
+                if (args.Item is SearchEverythingModel model)
+                {
+                    var searchText = SearchUnitypackageBoxInput.Text;
+                    args.Accepted = string.IsNullOrWhiteSpace(searchText) ||
+                                    model.FileName.IndexOf(searchText, StringComparison.InvariantCultureIgnoreCase) >=
+                                    0;
+                }
+                else
+                {
+                    args.Accepted = false;
+                }
+            };
+        else
+            throw new InvalidOperationException("Resource 'SearchResults' not found.");
 
         SyncFileCollections();
     }
@@ -126,34 +125,28 @@ public partial class BetterExtraction
         if (!forceCheck && _systemRequirementsMet.HasValue)
             return _systemRequirementsMet.Value;
 
-        if (!forceCheck)
-            _hasCheckedSystemRequirements = true;
-        else
-            _recheckCount++;
+        _recheckCount = forceCheck ? _recheckCount + 1 : 0;
 
         var requirementsMet = await EverythingValidation.AreSystemRequirementsMetAsync();
         _systemRequirementsMet = requirementsMet;
 
+        SearchUnitypackageBox.Visibility = requirementsMet ? Visibility.Visible : Visibility.Collapsed;
+        SearchUnitypackageBoxExpanderError.Visibility = requirementsMet ? Visibility.Collapsed : Visibility.Visible;
+
         if (!requirementsMet)
         {
-            SearchUnitypackageBox.Visibility = Visibility.Collapsed;
-            SearchUnitypackageBoxExpanderError.Visibility = Visibility.Visible;
             var statusMessage = await EverythingValidation.GetSystemRequirementsStatusAsync();
-            if (forceCheck)
-                statusMessage = $"re-check (attempt #{_recheckCount}): " + statusMessage;
+            statusMessage = forceCheck ? $"Re-check (attempt #{_recheckCount}): {statusMessage}" : statusMessage;
             SearchUnitypackageBoxFallback.Text = statusMessage;
+
             var logMessage = forceCheck
-                ? $"System requirements still not met after fallback attempt #{_recheckCount}."
-                : "System requirements not met for Search Everything";
+                ? $"System requirements still not met after attempt #{_recheckCount}."
+                : "System requirements not met initially.";
             await BetterLogger.LogAsync(logMessage, Importance.Warning);
         }
-        else
+        else if (forceCheck)
         {
-            _recheckCount = 0;
-            SearchUnitypackageBoxExpanderError.Visibility = Visibility.Collapsed;
-            SearchUnitypackageBox.Visibility = Visibility.Visible;
-            if (forceCheck)
-                await BetterLogger.LogAsync("System requirements met after fallback attempt.", Importance.Info);
+            await BetterLogger.LogAsync("System requirements met after re-check.", Importance.Info);
             Everything.Everything_SetSearchW("endwith:.unitypackage");
             Everything.Everything_SetRequestFlags(Everything.RequestFileName | Everything.RequestPath);
             Everything.Everything_QueryW(true);
@@ -182,17 +175,19 @@ public partial class BetterExtraction
 
     private async void SearchUnitypackageBoxInput_OnTextChanged(object sender, TextChangedEventArgs e)
     {
-        await ExpandSearchBoxAndRefresh(false);
+        await ExpandSearchBoxAndRefreshAsync(false);
         if (string.IsNullOrWhiteSpace(SearchUnitypackageBoxInput.Text))
             return;
     }
 
-    private async Task ExpandSearchBoxAndRefresh(bool forceCheck)
+    private async Task ExpandSearchBoxAndRefreshAsync(bool forceCheck)
     {
-        await CheckSystemRequirementsAndUpdateUiAsync(forceCheck);
-        SearchUnitypackageBox.IsExpanded = true;
-        var searchResults = Resources["SearchResults"] as CollectionViewSource;
-        searchResults?.View.Refresh();
+        var requirementsMet = await CheckSystemRequirementsAndUpdateUiAsync(forceCheck);
+        if (requirementsMet)
+        {
+            SearchUnitypackageBox.IsExpanded = true;
+            if (Resources["SearchResults"] is CollectionViewSource searchResults) searchResults.View.Refresh();
+        }
     }
 
     private void SearchUnitypackageBoxResultsListView_OnSelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -225,7 +220,7 @@ public partial class BetterExtraction
 
     private async void SearchUnitypackageBoxInput_OnGotFocus(object sender, RoutedEventArgs e)
     {
-        await ExpandSearchBoxAndRefresh(true);
+        await ExpandSearchBoxAndRefreshAsync(true);
         QueueFilesExpander.IsExpanded = false;
     }
 
