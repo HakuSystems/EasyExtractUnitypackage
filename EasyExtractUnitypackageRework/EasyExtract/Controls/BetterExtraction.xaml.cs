@@ -329,4 +329,15 @@ public partial class BetterExtraction
         StartExtractionFromQueue();
         SyncFileCollections();
     }
+
+    private void QueueFilesRemoveButton_OnClick(object sender, RoutedEventArgs e)
+    {
+        if (sender is not Button button)
+            return;
+        if (button.DataContext is not UnitypackageFileInfo file)
+            return;
+        ConfigHandler.Instance.Config.UnitypackageFiles.Remove(file);
+        ConfigHandler.Instance.OverrideConfig();
+        SyncFileCollections();
+    }
 }
