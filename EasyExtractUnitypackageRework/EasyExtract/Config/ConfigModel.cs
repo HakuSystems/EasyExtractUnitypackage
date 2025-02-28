@@ -36,14 +36,34 @@ public class ConfigModel : INotifyPropertyChanged
     private string _lastExtractedPath =
         Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "EasyExtract", "Extracted");
 
+    private int _maliciousDiscordWebhooks;
+
     private string _primaryColorHex = "#2ca7f2"; // Default Color from Colors.xaml
     private ObservableCollection<SearchEverythingModel> _searchEverything = new();
     private List<SearchEverythingModel> _searchEverythingResults = new();
     private string _secondaryColorHex = "#4D4D4D"; // Default Color from Colors.xaml
     private string _textColorHex = "#7fc5ff"; // Default Color from Colors.xaml
 
+    private int _total3DObjects;
+
+    private int _totalAnimations;
+
+    private int _totalAudios;
+
+    private int _totalConfigurations;
+
+    private int _totalControllers;
+
     private int _totalExtracted;
     private int _totalFilesExtracted;
+
+    private int _totalFolders;
+
+    private int _totalImages;
+
+    private int _totalMaterials;
+
+    private int _totalScripts;
     private List<UnitypackageFileInfo> _unitypackageFiles = new();
     private UpdateModel _update = new();
     private bool _uwUModeActive;
@@ -424,6 +444,136 @@ public class ConfigModel : INotifyPropertyChanged
             if (_custombackgroundImage != value)
             {
                 _custombackgroundImage = value;
+                OnPropertyChanged();
+            }
+        }
+    }
+
+    public int TotalFolders
+    {
+        get => _totalFolders;
+        set
+        {
+            if (_totalFolders != value)
+            {
+                _totalFolders = value;
+                OnPropertyChanged();
+            }
+        }
+    }
+
+    public int TotalScripts
+    {
+        get => _totalScripts;
+        set
+        {
+            if (_totalScripts != value)
+            {
+                _totalScripts = value;
+                OnPropertyChanged();
+            }
+        }
+    }
+
+    public int TotalMaterials
+    {
+        get => _totalMaterials;
+        set
+        {
+            if (_totalMaterials != value)
+            {
+                _totalMaterials = value;
+                OnPropertyChanged();
+            }
+        }
+    }
+
+    public int Total3DObjects
+    {
+        get => _total3DObjects;
+        set
+        {
+            if (_total3DObjects != value)
+            {
+                _total3DObjects = value;
+                OnPropertyChanged();
+            }
+        }
+    }
+
+    public int TotalImages
+    {
+        get => _totalImages;
+        set
+        {
+            if (_totalImages != value)
+            {
+                _totalImages = value;
+                OnPropertyChanged();
+            }
+        }
+    }
+
+    public int TotalAudios
+    {
+        get => _totalAudios;
+        set
+        {
+            if (_totalAudios != value)
+            {
+                _totalAudios = value;
+                OnPropertyChanged();
+            }
+        }
+    }
+
+    public int TotalControllers
+    {
+        get => _totalControllers;
+        set
+        {
+            if (_totalControllers != value)
+            {
+                _totalControllers = value;
+                OnPropertyChanged();
+            }
+        }
+    }
+
+    public int TotalConfigurations
+    {
+        get => _totalConfigurations;
+        set
+        {
+            if (_totalConfigurations != value)
+            {
+                _totalConfigurations = value;
+                OnPropertyChanged();
+            }
+        }
+    }
+
+    public int TotalAnimations
+    {
+        get => _totalAnimations;
+        set
+        {
+            if (_totalAnimations != value)
+            {
+                _totalAnimations = value;
+                OnPropertyChanged();
+            }
+        }
+    }
+
+    public int MaliciousDiscordWebhooks
+    {
+        get => _maliciousDiscordWebhooks;
+        set
+        {
+            if (_maliciousDiscordWebhooks != value)
+            {
+                _maliciousDiscordWebhooks = value;
                 OnPropertyChanged();
             }
         }

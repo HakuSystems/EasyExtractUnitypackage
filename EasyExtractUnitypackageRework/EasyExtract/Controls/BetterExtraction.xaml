@@ -159,8 +159,7 @@
                     Grid.Column="0"
                     Grid.Row="2"
                     Orientation="Horizontal">
-                    <materialDesign:TransitioningContent OpeningEffect="{materialDesign:TransitionEffect FadeIn}"
-                                                         x:Name="ClearQueueButton">
+                    <materialDesign:TransitioningContent OpeningEffect="{materialDesign:TransitionEffect FadeIn}" x:Name="ClearQueueButton">
                         <ui:Button
                             Background="Transparent"
                             Click="ClearQueueButton_OnClick"
@@ -189,8 +188,7 @@
                         PressedForeground="#2ca7f2"
                         x:Name="StartExtractionButton">
                         <ui:Button.Content>
-                            <materialDesign:TransitioningContent
-                                OpeningEffect="{materialDesign:TransitionEffect FadeIn}">
+                            <materialDesign:TransitioningContent OpeningEffect="{materialDesign:TransitionEffect FadeIn}">
                                 <StackPanel Orientation="Horizontal">
                                     <ProgressBar
                                         Height="20"
@@ -242,8 +240,7 @@
                                 x:Name="SearchUnitypackageBoxResultsListView">
                                 <ui:ListView.ItemTemplate>
                                     <DataTemplate>
-                                        <materialDesign:TransitioningContent
-                                            OpeningEffect="{materialDesign:TransitionEffect FadeIn}">
+                                        <materialDesign:TransitioningContent OpeningEffect="{materialDesign:TransitionEffect FadeIn}">
                                             <Border
                                                 BorderThickness="1"
                                                 CornerRadius="8"
@@ -265,14 +262,11 @@
                                                         Margin="0,5,0,0"
                                                         Orientation="Horizontal">
                                                         <ui:TextBlock FontWeight="SemiBold" Text="Size: " />
-                                                        <ui:TextBlock Margin="0,0,10,0"
-                                                                      Text="{Binding FileSize, Converter={StaticResource FileSizeConverter}}" />
+                                                        <ui:TextBlock Margin="0,0,10,0" Text="{Binding FileSize, Converter={StaticResource FileSizeConverter}}" />
                                                         <ui:TextBlock FontWeight="SemiBold" Text="Last Modified Date: " />
-                                                        <ui:TextBlock Margin="0,0,10,0"
-                                                                      Text="{Binding ModifiedTime, StringFormat='{}{0:dd/MM/yyyy}'}" />
+                                                        <ui:TextBlock Margin="0,0,10,0" Text="{Binding ModifiedTime, StringFormat='{}{0:dd/MM/yyyy}'}" />
                                                         <ui:TextBlock FontWeight="SemiBold" Text="Created Date: " />
-                                                        <ui:TextBlock Margin="0,0,10,0"
-                                                                      Text="{Binding CreatedTime, StringFormat='{}{0:dd/MM/yyyy}'}" />
+                                                        <ui:TextBlock Margin="0,0,10,0" Text="{Binding CreatedTime, StringFormat='{}{0:dd/MM/yyyy}'}" />
                                                         <ui:TextBlock
                                                             Foreground="#f44336"
                                                             Margin="0,0,10,0"
@@ -333,8 +327,7 @@
                         <ui:ListView ItemsSource="{Binding Source={StaticResource QueueFiles}}">
                             <ui:ListView.ItemTemplate>
                                 <DataTemplate>
-                                    <materialDesign:TransitioningContent
-                                        OpeningEffect="{materialDesign:TransitionEffect FadeIn}">
+                                    <materialDesign:TransitioningContent OpeningEffect="{materialDesign:TransitionEffect FadeIn}">
                                         <Border
                                             BorderThickness="1"
                                             CornerRadius="8"
@@ -361,8 +354,7 @@
                                                     Margin="5,5,0,0"
                                                     Orientation="Horizontal">
                                                     <ui:TextBlock FontWeight="SemiBold" Text="Size: " />
-                                                    <ui:TextBlock Margin="0,0,10,0"
-                                                                  Text="{Binding FileSize, Converter={StaticResource FileSizeConverter}}" />
+                                                    <ui:TextBlock Margin="0,0,10,0" Text="{Binding FileSize, Converter={StaticResource FileSizeConverter}}" />
                                                     <ui:TextBlock FontWeight="SemiBold" Text="Date: " />
                                                     <ui:TextBlock Margin="0,0,10,0" Text="{Binding FileDate}" />
                                                     <ui:TextBlock FontWeight="SemiBold" Text="Ext: " />

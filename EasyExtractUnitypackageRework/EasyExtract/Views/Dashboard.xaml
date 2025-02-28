@@ -153,11 +153,7 @@
                                         Text="Unitypackages"
                                         TextWrapping="WrapWithOverflow"
                                         VerticalAlignment="Center" />
-                                    <Rectangle
-                                        Fill="{Binding SecondaryColorHex}"
-                                        Height="2"
-                                        HorizontalAlignment="Stretch"
-                                        Margin="0,10,0,0" />
+                                    <Separator />
                                 </StackPanel>
                                 <Grid Grid.Row="2">
                                     <Grid.ColumnDefinitions>

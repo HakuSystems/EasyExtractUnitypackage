@@ -1,11 +1,10 @@
 ﻿<UserControl
     FontFamily="{DynamicResource GlobalFontFamily}"
     Foreground="{DynamicResource TextFillColorPrimaryBrush}"
-    KeyboardNavigation.TabNavigation="Cycle"
     Loaded="BetterDetails_OnLoaded"
     d:DataContext="{d:DesignInstance config:ConfigModel,
                                      IsDesignTimeCreatable=True}"
-    d:DesignHeight="450"
+    d:DesignHeight="650"
     d:DesignWidth="800"
     mc:Ignorable="d"
     ui:Design.Background="{DynamicResource ApplicationBackgroundBrush}"
@@ -16,4 +15,139 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
-    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" />
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <Grid Margin="20">
+        <ui:Card Padding="20">
+            <StackPanel>
+                <ui:TextBlock
+                    FontSize="24"
+                    FontWeight="Bold"
+                    Margin="0,0,0,10"
+                    Text="Total Extracted Details" />
+                <Separator />
+
+                <UniformGrid Columns="2" Margin="0,10,0,0">
+                    <StackPanel Margin="0,5">
+                        <ui:SymbolIcon FontSize="20" Symbol="Folder24" />
+                        <ui:TextBlock
+                            FontTypography="Subtitle"
+                            FontWeight="SemiBold"
+                            Text="Folders" />
+                        <ui:TextBlock FontTypography="Body"
+                                      Text="{Binding TotalFolders, Converter={StaticResource NumberFormatConverter}, UpdateSourceTrigger=PropertyChanged}" />
+                    </StackPanel>
+
+                    <StackPanel Margin="0,5">
+                        <ui:SymbolIcon FontSize="20" Symbol="Document24" />
+                        <ui:TextBlock
+                            FontTypography="Subtitle"
+                            FontWeight="SemiBold"
+                            Text="Files" />
+                        <ui:TextBlock FontTypography="Body"
+                                      Text="{Binding TotalFilesExtracted, Converter={StaticResource NumberFormatConverter}, UpdateSourceTrigger=PropertyChanged}" />
+                    </StackPanel>
+
+                    <StackPanel Margin="0,5">
+                        <ui:SymbolIcon FontSize="20" Symbol="Code24" />
+                        <ui:TextBlock
+                            FontTypography="Subtitle"
+                            FontWeight="SemiBold"
+                            Text="Scripts" />
+                        <ui:TextBlock FontTypography="Body"
+                                      Text="{Binding TotalScripts, Converter={StaticResource NumberFormatConverter}, UpdateSourceTrigger=PropertyChanged}" />
+                    </StackPanel>
+
+                    <StackPanel Margin="0,5">
+                        <ui:SymbolIcon FontSize="20" Symbol="PaintBrush24" />
+                        <ui:TextBlock
+                            FontTypography="Subtitle"
+                            FontWeight="SemiBold"
+                            Text="Materials" />
+                        <ui:TextBlock FontTypography="Body"
+                                      Text="{Binding TotalMaterials, Converter={StaticResource NumberFormatConverter}, UpdateSourceTrigger=PropertyChanged}" />
+                    </StackPanel>
+
+                    <StackPanel Margin="0,5">
+                        <ui:SymbolIcon FontSize="20" Symbol="Cube24" />
+                        <ui:TextBlock
+                            FontTypography="Subtitle"
+                            FontWeight="SemiBold"
+                            Text="3D Objects" />
+                        <ui:TextBlock FontTypography="Body"
+                                      Text="{Binding Total3DObjects, Converter={StaticResource NumberFormatConverter}, UpdateSourceTrigger=PropertyChanged}" />
+                    </StackPanel>
+
+                    <StackPanel Margin="0,5">
+                        <ui:SymbolIcon FontSize="20" Symbol="Image24" />
+                        <ui:TextBlock
+                            FontTypography="Subtitle"
+                            FontWeight="SemiBold"
+                            Text="Images" />
+                        <ui:TextBlock FontTypography="Body"
+                                      Text="{Binding TotalImages, Converter={StaticResource NumberFormatConverter}, UpdateSourceTrigger=PropertyChanged}" />
+                    </StackPanel>
+
+                    <StackPanel Margin="0,5">
+                        <ui:SymbolIcon FontSize="20" Symbol="MusicNote216" />
+                        <ui:TextBlock
+                            FontTypography="Subtitle"
+                            FontWeight="SemiBold"
+                            Text="Audio" />
+                        <ui:TextBlock FontTypography="Body"
+                                      Text="{Binding TotalAudios, Converter={StaticResource NumberFormatConverter}, UpdateSourceTrigger=PropertyChanged}" />
+                    </StackPanel>
+
+                    <StackPanel Margin="0,5">
+                        <ui:SymbolIcon FontSize="20" Symbol="XboxController24" />
+                        <ui:TextBlock
+                            FontTypography="Subtitle"
+                            FontWeight="SemiBold"
+                            Text="Controllers" />
+                        <ui:TextBlock FontTypography="Body"
+                                      Text="{Binding TotalControllers, Converter={StaticResource NumberFormatConverter}, UpdateSourceTrigger=PropertyChanged}" />
+                    </StackPanel>
+
+                    <StackPanel Margin="0,5">
+                        <ui:SymbolIcon FontSize="20" Symbol="Settings24" />
+                        <ui:TextBlock
+                            FontTypography="Subtitle"
+                            FontWeight="SemiBold"
+                            Text="Configurations" />
+                        <ui:TextBlock FontTypography="Body"
+                                      Text="{Binding TotalConfigurations, Converter={StaticResource NumberFormatConverter}, UpdateSourceTrigger=PropertyChanged}" />
+                    </StackPanel>
+
+                    <StackPanel Margin="0,5">
+                        <ui:SymbolIcon FontSize="20" Symbol="Video24" />
+                        <ui:TextBlock
+                            FontTypography="Subtitle"
+                            FontWeight="SemiBold"
+                            Text="Animations" />
+                        <ui:TextBlock FontTypography="Body"
+                                      Text="{Binding TotalAnimations, Converter={StaticResource NumberFormatConverter}, UpdateSourceTrigger=PropertyChanged}" />
+                    </StackPanel>
+                </UniformGrid>
+
+                <Separator Margin="0,15,0,10" />
+
+                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                    <ui:SymbolIcon
+                        FontSize="20"
+                        Foreground="Orange"
+                        Symbol="Warning24" />
+                    <ui:TextBlock
+                        FontTypography="Subtitle"
+                        FontWeight="Bold"
+                        Margin="5,0"
+                        Text="Malicious Scripts Detected:" />
+                    <ui:TextBlock
+                        FontTypography="Subtitle"
+                        Foreground="Orange"
+                        Text="{Binding MaliciousDiscordWebhooks, Converter={StaticResource NumberFormatConverter}, UpdateSourceTrigger=PropertyChanged}" />
+                </StackPanel>
+            </StackPanel>
+        </ui:Card>
+    </Grid>
+
+</UserControl>
