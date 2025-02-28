@@ -1,13 +1,14 @@
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
+using EasyExtract.BetterExtraction;
 using EasyExtract.Config;
 using EasyExtract.Config.Models;
 using EasyExtract.Controls;
 using EasyExtract.Services;
-using EasyExtract.Utilities;
 using Application = System.Windows.Application;
 using Color = System.Windows.Media.Color;
+using ColorConverter = System.Windows.Media.ColorConverter;
 using Size = System.Windows.Size;
 using TextBlock = Wpf.Ui.Controls.TextBlock;
 
@@ -17,8 +18,14 @@ public partial class Dashboard : Window
 {
     private static Dashboard? _instance;
     private readonly BackgroundManager _backgroundManager = BackgroundManager.Instance;
+    private readonly FilterQueue _filterQueue = new();
+
+    private readonly HashChecks _hashChecks = new();
+
+    private readonly TimeSpan _resetDelayForDrop = TimeSpan.FromSeconds(3);
     private readonly UpdateHandler _updateHandler = new();
     private readonly Random random = new();
+    private CancellationTokenSource _dragDropResetToken;
 
     private DispatcherTimer? sparkleTimer;
 
@@ -234,30 +241,6 @@ public partial class Dashboard : Window
         sb.Begin();
     }
 
-    private async void Dashboard_OnDrop(object sender, DragEventArgs e)
-    {
-        if (!e.Data.GetDataPresent(DataFormats.FileDrop))
-            return;
-        if (e.Data.GetData(DataFormats.FileDrop) is string[] files)
-            foreach (var file in files)
-            {
-                await BetterLogger.LogAsync($"Dropped file: {file}", Importance.Info);
-                var name = Path.GetFileName(file);
-                var duplicate = Extraction.QueueList?.Find(x => x.FileName == name);
-                if (duplicate != null)
-                    continue;
-                Extraction.QueueList ??= new List<SearchEverythingModel>();
-                Extraction.QueueList.Add(new SearchEverythingModel
-                {
-                    FileName = name,
-                    FilePath = file,
-                    Id = 0
-                });
-            }
-
-        await BetterLogger.LogAsync("Added dropped files to queue", Importance.Info);
-    }
-
     private void Dashboard_OnSizeChanged(object sender, SizeChangedEventArgs e)
     {
         switch (ConfigHandler.Instance.Config.DynamicScalingMode)
@@ -317,5 +300,98 @@ public partial class Dashboard : Window
     private void SettingsBtn_OnClick(object sender, RoutedEventArgs e)
     {
         NavView.Navigate(typeof(BetterSettings));
+    }
+
+    private void Dashboard_OnDragLeave(object sender, DragEventArgs e)
+    {
+        UpdateDragDropText("Move your Unitypackage somewhere else to drop it", DragDropColors.DragLeave);
+        ScheduleTextReset();
+    }
+
+    private void Dashboard_OnDragOver(object sender, DragEventArgs e)
+    {
+        CancelPendingReset();
+        UpdateDragDropText("Ready to drop", DragDropColors.DragOver);
+    }
+
+    private void Dashboard_OnDrop(object sender, DragEventArgs e)
+    {
+        UpdateDragDropText("Added to queue!", DragDropColors.Dropped);
+        ScheduleTextReset();
+        AddToQueue(e);
+    }
+
+    private async void AddToQueue(DragEventArgs dragEventArgs)
+    {
+        if (!dragEventArgs.Data.GetDataPresent(DataFormats.FileDrop))
+            return;
+
+        var droppedFiles = (string[])dragEventArgs.Data.GetData(DataFormats.FileDrop);
+
+        var unitypackageFiles = droppedFiles
+            .Where(file => file.EndsWith(".unitypackage", StringComparison.OrdinalIgnoreCase))
+            .Select(filePath => new FileInfo(filePath))
+            .ToList();
+
+        if (!unitypackageFiles.Any())
+        {
+            UpdateDragDropText("No valid Unitypackage files found!", DragDropColors.DragLeave);
+            ScheduleTextReset();
+            return;
+        }
+
+        var fileDetails = await Task.Run(() => unitypackageFiles.Select(file =>
+        {
+            var hash = _hashChecks.ComputeFileHash(file);
+            return new UnitypackageFileInfo
+            {
+                FileName = file.Name,
+                FileHash = hash,
+                FileSize = file.Length.ToString(),
+                FileDate = file.LastWriteTime.ToString("yyyy-MM-dd HH:mm:ss"),
+                FilePath = file.FullName,
+                FileExtension = file.Extension,
+                IsInQueue = true
+            };
+        }).ToList());
+
+        ConfigHandler.Instance.Config.UnitypackageFiles.AddRange(fileDetails);
+        _filterQueue.FilterDuplicates();
+    }
+
+
+    private void UpdateDragDropText(string text, string colorHex, double opacity = 1)
+    {
+        DragDropDetectionTxt.Text = text;
+        DragDropDetectionTxt.Foreground = new SolidColorBrush(
+            (Color)ColorConverter.ConvertFromString(colorHex));
+        DragDropDetectionTxt.Opacity = opacity;
+    }
+
+    private void ScheduleTextReset()
+    {
+        CancelPendingReset();
+
+        _dragDropResetToken = new CancellationTokenSource();
+        var token = _dragDropResetToken.Token;
+
+        Task.Delay(_resetDelayForDrop, token).ContinueWith(task =>
+        {
+            if (task.IsCanceled) return;
+
+            Dispatcher.Invoke(ResetDragDropText);
+        }, token);
+    }
+
+    private void CancelPendingReset()
+    {
+        _dragDropResetToken?.Cancel();
+        _dragDropResetToken?.Dispose();
+        _dragDropResetToken = null;
+    }
+
+    private void ResetDragDropText()
+    {
+        UpdateDragDropText("Drag and Drop is Supported!", DragDropColors.DefaultText);
     }
 }
