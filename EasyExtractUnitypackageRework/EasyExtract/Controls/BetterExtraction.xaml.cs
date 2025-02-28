@@ -245,24 +245,19 @@ public partial class BetterExtraction
         var totalFiles = queuedFiles.Count;
         if (totalFiles == 0)
         {
-            CurrentlyExtractingCard.Visibility = Visibility.Collapsed;
-            BetterExtractionCard.Visibility = Visibility.Visible;
-            StartExtractionButton.IsEnabled = true;
+            ResetExtractionUI();
             return;
         }
 
         var overallStartTime = DateTime.Now;
-        var processedFiles = 0;
-        foreach (var file in queuedFiles)
+        for (var processedFiles = 0; processedFiles < queuedFiles.Count; processedFiles++)
         {
+            var file = queuedFiles[processedFiles];
             file.IsInQueue = false;
             ConfigHandler.Instance.OverrideConfig();
             SyncFileCollections();
 
-            ExtractionTitleText.Text = $"Extracting File: {file.FileName}";
-            ExtractionCaptionText.Text =
-                $"({_currentFileProgress.ExtractedCount} of {_currentFileProgress.TotalEntryCount} files)";
-
+            UpdateFileExtractionUI(file);
 
             _currentFileProgress.ExtractedCount = 0;
             _currentFileProgress.TotalEntryCount = 0;
@@ -272,46 +267,65 @@ public partial class BetterExtraction
             {
                 _currentFileProgress.ExtractedCount = progressData.extracted;
                 _currentFileProgress.TotalEntryCount = progressData.total;
-
-                // Update UI
-                ExtractionCaptionText.Text =
-                    $"({_currentFileProgress.ExtractedCount} of {_currentFileProgress.TotalEntryCount} files)";
+                UpdateFileProgressUI();
             });
 
             var extractionTask = ExtractionHandler.ExtractUnitypackage(unitypackageModel, fileExtractionProgress);
-            while (!extractionTask.IsCompleted)
-            {
-                var overallElapsed = DateTime.Now - overallStartTime;
-                var filesProgressPercentage = totalFiles > 0
-                    ? (double)processedFiles / totalFiles
-                    : 0.0;
-                var currentFileProgressPercentage = _currentFileProgress.TotalEntryCount > 0
-                    ? (double)_currentFileProgress.ExtractedCount / _currentFileProgress.TotalEntryCount
-                    : 0.0;
+            await MonitorProgressAsync(extractionTask, overallStartTime, totalFiles, processedFiles);
 
-                var overallProgressPercent =
-                    (filesProgressPercentage + currentFileProgressPercentage / totalFiles) * 100;
-
-                ExtractionElapsedText.Text = overallElapsed.ToString(@"hh\:mm\:ss");
-                ExtractionProgressBar.Value = overallProgressPercent;
-                ExtractionProgressText.Text = $"{overallProgressPercent:0.00}%";
-                await Task.Delay(1000);
-            }
-
-            var success = await extractionTask;
-            processedFiles++;
-            if (success)
+            if (await extractionTask)
                 ConfigHandler.Instance.Config.UnitypackageFiles.Remove(file);
             else
                 file.IsInQueue = true;
+
             ConfigHandler.Instance.OverrideConfig();
             SyncFileCollections();
         }
 
+        ResetExtractionUI();
+    }
+
+    private void ResetExtractionUI()
+    {
         CurrentlyExtractingCard.Visibility = Visibility.Collapsed;
         BetterExtractionCard.Visibility = Visibility.Visible;
         StartExtractionButton.IsEnabled = true;
         StartExtractionButtonText.Text = "Start Extraction";
+    }
+
+    private void UpdateFileExtractionUI(UnitypackageFileInfo file)
+    {
+        ExtractionTitleText.Text = $"Extracting File: {file.FileName}";
+        ExtractionCaptionText.Text =
+            $"({_currentFileProgress.ExtractedCount} of {_currentFileProgress.TotalEntryCount} files)";
+    }
+
+    private void UpdateFileProgressUI()
+    {
+        ExtractionCaptionText.Text =
+            $"({_currentFileProgress.ExtractedCount} of {_currentFileProgress.TotalEntryCount} files)";
+    }
+
+    private async Task MonitorProgressAsync(Task extractionTask, DateTime overallStartTime, int totalFiles,
+        int processedFiles)
+    {
+        while (!extractionTask.IsCompleted)
+        {
+            var overallElapsed = DateTime.Now - overallStartTime;
+            var filesProgressPercentage = (double)processedFiles / totalFiles;
+            var currentFileProgressPercentage = _currentFileProgress.TotalEntryCount > 0
+                ? (double)_currentFileProgress.ExtractedCount / _currentFileProgress.TotalEntryCount
+                : 0.0;
+
+            var overallProgressPercent =
+                (filesProgressPercentage + currentFileProgressPercentage / totalFiles) * 100;
+
+            ExtractionElapsedText.Text = overallElapsed.ToString(@"hh\:mm\:ss");
+            ExtractionProgressBar.Value = overallProgressPercent;
+            ExtractionProgressText.Text = $"{overallProgressPercent:0.00}%";
+
+            await Task.Delay(1000);
+        }
     }
 
 
