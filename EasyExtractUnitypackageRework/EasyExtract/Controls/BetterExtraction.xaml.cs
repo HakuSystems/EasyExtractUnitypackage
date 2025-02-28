@@ -240,7 +240,7 @@ public partial class BetterExtraction
         var totalFiles = queuedFiles.Count;
         if (totalFiles == 0)
         {
-            ResetExtractionUI();
+            ResetExtractionUi();
             return;
         }
 
@@ -252,7 +252,7 @@ public partial class BetterExtraction
             ConfigHandler.Instance.OverrideConfig();
             SyncFileCollections();
 
-            UpdateFileExtractionUI(file);
+            UpdateFileExtractionUi(file);
 
             _currentFileProgress.ExtractedCount = 0;
             _currentFileProgress.TotalEntryCount = 0;
@@ -262,7 +262,7 @@ public partial class BetterExtraction
             {
                 _currentFileProgress.ExtractedCount = progressData.extracted;
                 _currentFileProgress.TotalEntryCount = progressData.total;
-                UpdateFileProgressUI();
+                UpdateFileProgressUi();
             });
 
             var extractionTask = ExtractionHandler.ExtractUnitypackage(unitypackageModel, fileExtractionProgress);
@@ -277,10 +277,10 @@ public partial class BetterExtraction
             SyncFileCollections();
         }
 
-        ResetExtractionUI();
+        ResetExtractionUi();
     }
 
-    private void ResetExtractionUI()
+    private void ResetExtractionUi()
     {
         CurrentlyExtractingCard.Visibility = Visibility.Collapsed;
         BetterExtractionCard.Visibility = Visibility.Visible;
@@ -288,14 +288,14 @@ public partial class BetterExtraction
         StartExtractionButtonText.Text = "Start Extraction";
     }
 
-    private void UpdateFileExtractionUI(UnitypackageFileInfo file)
+    private void UpdateFileExtractionUi(UnitypackageFileInfo file)
     {
         ExtractionTitleText.Text = $"Extracting File: {file.FileName}";
         ExtractionCaptionText.Text =
             $"({_currentFileProgress.ExtractedCount} of {_currentFileProgress.TotalEntryCount} files)";
     }
 
-    private void UpdateFileProgressUI()
+    private void UpdateFileProgressUi()
     {
         ExtractionCaptionText.Text =
             $"({_currentFileProgress.ExtractedCount} of {_currentFileProgress.TotalEntryCount} files)";
