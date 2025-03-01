@@ -1,4 +1,5 @@
 using EasyExtract.Config.Models;
+using EasyExtract.Services;
 using Serilog;
 
 namespace EasyExtract.Utilities;
@@ -200,6 +201,8 @@ public static class BetterLogger
                     break;
                 case Importance.Error:
                     Log.Error(logEntryColored);
+                    DialogHelper.ShowErrorDialogAsync(null, "Error", message,
+                        "OK"); // it should also work without await
                     break;
                 case Importance.Debug:
                     Log.Debug(logEntryColored);

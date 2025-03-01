@@ -30,6 +30,7 @@
     xmlns:gif="https://github.com/XamlAnimatedGif/XamlAnimatedGif"
     xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:skia="clr-namespace:SkiaSharp.Views.WPF;assembly=SkiaSharp.Views.WPF"
     xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
 
@@ -198,68 +199,74 @@
                     </ui:NavigationView.MenuItems>
 
                     <ui:NavigationView.FooterMenuItems>
-                        <StackPanel Orientation="Vertical">
-                            <ui:TextBlock
-                                Appearance="Secondary"
-                                FontTypography="Caption"
-                                HorizontalAlignment="Center"
-                                Margin="5"
-                                MouseDown="CheckForUpdatesDesc_OnMouseDown"
-                                Opacity="0.6"
-                                Text="Checking for updates..."
-                                TextWrapping="WrapWithOverflow"
-                                VerticalAlignment="Center"
-                                x:Name="CheckForUpdatesDesc" />
-                            <ui:TextBlock
-                                Appearance="Secondary"
-                                FontTypography="Caption"
-                                HorizontalAlignment="Center"
-                                MouseDown="UpdateTextBlock_OnMouseDown"
-                                Opacity="0.6"
-                                Text="{Binding Update.CurrentVersion, StringFormat='{}{0} - made with ✨ And ❤️'}"
-                                TextWrapping="WrapWithOverflow"
-                                VerticalAlignment="Center"
-                                x:Name="UpdateTextBlock" />
-                            <ui:TextBlock
-                                Appearance="Secondary"
-                                FontTypography="Caption"
-                                HorizontalAlignment="Center"
-                                Margin="5"
-                                MouseDown="UpdateTextBlock_OnMouseDown"
-                                Opacity="0.4"
-                                Text="Credits to DigitalAzure for the Logo"
-                                TextWrapping="WrapWithOverflow"
-                                VerticalAlignment="Center" />
+                        <Grid>
+                            <skia:SKElement PaintSurface="GradientCanvas_OnPaintSurface" x:Name="GradientCanvas" />
+                            <StackPanel Orientation="Vertical">
+                                <ui:TextBlock
+                                    Appearance="Secondary"
+                                    FontTypography="Caption"
+                                    HorizontalAlignment="Center"
+                                    Margin="5"
+                                    MouseDown="CheckForUpdatesDesc_OnMouseDown"
+                                    Opacity="0.6"
+                                    Text="Checking for updates..."
+                                    TextWrapping="WrapWithOverflow"
+                                    VerticalAlignment="Center"
+                                    x:Name="CheckForUpdatesDesc" />
+                                <ui:TextBlock
+                                    Appearance="Secondary"
+                                    FontTypography="Caption"
+                                    HorizontalAlignment="Center"
+                                    MouseDown="UpdateTextBlock_OnMouseDown"
+                                    Opacity="0.6"
+                                    Text="{Binding Update.CurrentVersion, StringFormat='{}{0} - made with ✨ And ❤️'}"
+                                    TextWrapping="WrapWithOverflow"
+                                    VerticalAlignment="Center"
+                                    x:Name="UpdateTextBlock" />
+                                <ui:TextBlock
+                                    Appearance="Secondary"
+                                    FontTypography="Caption"
+                                    HorizontalAlignment="Center"
+                                    Margin="5"
+                                    MouseDown="UpdateTextBlock_OnMouseDown"
+                                    Opacity="0.4"
+                                    Text="Credits to DigitalAzure for the Logo"
+                                    TextWrapping="WrapWithOverflow"
+                                    VerticalAlignment="Center" />
 
-                            <StackPanel HorizontalAlignment="Center" Orientation="Horizontal">
-                                <ui:Button
-                                    Click="FeedbackBtnFooter_OnClick"
-                                    HorizontalAlignment="Left"
-                                    Icon="{ui:SymbolIcon PersonFeedback24}"
-                                    Margin="10"
-                                    Padding="5"
-                                    ToolTip="Send Feedback"
-                                    x:Name="FeedbackBtnFooter" />
-                                <ui:Card Padding="10">
-                                    <ui:TextBlock
-                                        Appearance="Secondary"
-                                        FontTypography="Caption"
-                                        HorizontalAlignment="Center"
-                                        Opacity="0.6"
-                                        Text="Made by HakuSystems and Jan-Fcloud"
-                                        TextWrapping="WrapWithOverflow"
-                                        VerticalAlignment="Center" />
-                                </ui:Card>
-                                <ui:Button
-                                    Click="SettingsBtnFooter_OnClick"
-                                    HorizontalAlignment="Right"
-                                    Icon="{ui:SymbolIcon Settings24}"
-                                    Margin="10"
-                                    Padding="5"
-                                    ToolTip="Settings"
-                                    x:Name="SettingsBtnFooter" />
+
+                                <StackPanel HorizontalAlignment="Center" Orientation="Horizontal">
+                                    <ui:Button
+                                        Click="FeedbackBtnFooter_OnClick"
+                                        HorizontalAlignment="Left"
+                                        Icon="{ui:SymbolIcon PersonFeedback24}"
+                                        Margin="10"
+                                        Padding="5"
+                                        ToolTip="Send Feedback"
+                                        x:Name="FeedbackBtnFooter" />
+
+                                    <ui:Card Padding="10">
+                                        <ui:TextBlock
+                                            Appearance="Secondary"
+                                            FontTypography="Caption"
+                                            HorizontalAlignment="Center"
+                                            Opacity="0.6"
+                                            Text="Made by HakuSystems and Jan-Fcloud"
+                                            TextWrapping="WrapWithOverflow"
+                                            VerticalAlignment="Center" />
+                                    </ui:Card>
+
+                                    <ui:Button
+                                        Click="SettingsBtnFooter_OnClick"
+                                        HorizontalAlignment="Right"
+                                        Icon="{ui:SymbolIcon Settings24}"
+                                        Margin="10"
+                                        Padding="5"
+                                        ToolTip="Settings"
+                                        x:Name="SettingsBtnFooter" />
+                                </StackPanel>
                             </StackPanel>
-                        </StackPanel>
+                        </Grid>
                     </ui:NavigationView.FooterMenuItems>
                 </ui:NavigationView>
             </Grid>

@@ -6,6 +6,8 @@ using EasyExtract.Config;
 using EasyExtract.Config.Models;
 using EasyExtract.Controls;
 using EasyExtract.Services;
+using SkiaSharp;
+using SkiaSharp.Views.Desktop;
 using Application = System.Windows.Application;
 using Color = System.Windows.Media.Color;
 using ColorConverter = System.Windows.Media.ColorConverter;
@@ -68,10 +70,12 @@ public partial class Dashboard : Window
 
         if (ConfigHandler.Instance.Config.Update.AutoUpdate && updateAvailable)
         {
-            await DialogHelper.ShowInfoDialogAsync(this, "Update available",
-                "An update is available and will be installed automatically.\nbecause you have enabled automatic updates in the settings.\nPlease Dont Interact with the application until the update is installed. (the app will automatically restart)");
-            CurrentlyUpdatingTextBlock.Visibility = Visibility.Visible;
-            await _updateHandler.IsUpToDateOrUpdate(true);
+            if (await _updateHandler.IsUpToDateOrUpdate(true))
+            {
+                await DialogHelper.ShowInfoDialogAsync(this, "Update available",
+                    "An update is available and will be installed automatically.\nbecause you have enabled automatic updates in the settings.\nPlease Dont Interact with the application until the update is installed. (the app will automatically restart)");
+                CurrentlyUpdatingTextBlock.Visibility = Visibility.Visible;
+            }
         }
 
         if (ConfigHandler.Instance.Config.FirstRun)
@@ -414,5 +418,34 @@ public partial class Dashboard : Window
     private void SettingsBtnFooter_OnClick(object sender, RoutedEventArgs e)
     {
         NavView.Navigate(typeof(BetterSettings));
+    }
+
+    private void GradientCanvas_OnPaintSurface(object? sender, SKPaintSurfaceEventArgs e)
+    {
+        var canvas = e.Surface.Canvas;
+        canvas.Clear(SKColors.Transparent);
+
+        float width = e.Info.Width;
+        float height = e.Info.Height;
+
+        using var paint = new SKPaint
+        {
+            Shader = SKShader.CreateRadialGradient(
+                new SKPoint(width / 2, height), // Bottom-center position
+                height, // Larger radius to clearly fill
+                new[]
+                {
+                    SKColor.Parse(ConfigHandler.Instance.Config.PrimaryColorHex).WithAlpha(240),
+                    SKColor.Parse(ConfigHandler.Instance.Config.PrimaryColorHex).WithAlpha(0)
+                },
+                new[] { 0f, 1f },
+                SKShaderTileMode.Clamp),
+            MaskFilter = SKMaskFilter.CreateBlur(SKBlurStyle.Normal, 150),
+            BlendMode = SKBlendMode.SoftLight,
+            IsAntialias = true
+        };
+
+        // Clearly visible glow circle at bottom-center
+        canvas.DrawCircle(width / 2, height, height, paint);
     }
 }
