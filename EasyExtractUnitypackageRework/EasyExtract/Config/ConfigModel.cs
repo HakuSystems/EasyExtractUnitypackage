@@ -36,7 +36,6 @@ public class ConfigModel : INotifyPropertyChanged
     private string _lastExtractedPath =
         Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "EasyExtract", "Extracted");
 
-    private int _maliciousDiscordWebhooks;
 
     private string _primaryColorHex = "#2ca7f2"; // Default Color from Colors.xaml
     private ObservableCollection<SearchEverythingModel> _searchEverything = new();
@@ -53,6 +52,8 @@ public class ConfigModel : INotifyPropertyChanged
     private int _totalConfigurations;
 
     private int _totalControllers;
+
+    private int _totalEncryptedFiles;
 
     private int _totalExtracted;
     private int _totalFilesExtracted;
@@ -553,6 +554,19 @@ public class ConfigModel : INotifyPropertyChanged
         }
     }
 
+    public int TotalEncryptedFiles
+    {
+        get => _totalEncryptedFiles;
+        set
+        {
+            if (_totalEncryptedFiles != value)
+            {
+                _totalEncryptedFiles = value;
+                OnPropertyChanged();
+            }
+        }
+    }
+
     public int TotalAnimations
     {
         get => _totalAnimations;
@@ -561,19 +575,6 @@ public class ConfigModel : INotifyPropertyChanged
             if (_totalAnimations != value)
             {
                 _totalAnimations = value;
-                OnPropertyChanged();
-            }
-        }
-    }
-
-    public int MaliciousDiscordWebhooks
-    {
-        get => _maliciousDiscordWebhooks;
-        set
-        {
-            if (_maliciousDiscordWebhooks != value)
-            {
-                _maliciousDiscordWebhooks = value;
                 OnPropertyChanged();
             }
         }

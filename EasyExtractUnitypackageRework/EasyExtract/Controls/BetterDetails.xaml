@@ -34,8 +34,7 @@
                             FontTypography="Subtitle"
                             FontWeight="SemiBold"
                             Text="Folders" />
-                        <ui:TextBlock FontTypography="Body"
-                                      Text="{Binding TotalFolders, Converter={StaticResource NumberFormatConverter}, UpdateSourceTrigger=PropertyChanged}" />
+                        <ui:TextBlock FontTypography="Body" Text="{Binding TotalFolders, Converter={StaticResource NumberFormatConverter}, UpdateSourceTrigger=PropertyChanged}" />
                     </StackPanel>
 
                     <StackPanel Margin="0,5">
@@ -44,8 +43,7 @@
                             FontTypography="Subtitle"
                             FontWeight="SemiBold"
                             Text="Files" />
-                        <ui:TextBlock FontTypography="Body"
-                                      Text="{Binding TotalFilesExtracted, Converter={StaticResource NumberFormatConverter}, UpdateSourceTrigger=PropertyChanged}" />
+                        <ui:TextBlock FontTypography="Body" Text="{Binding TotalFilesExtracted, Converter={StaticResource NumberFormatConverter}, UpdateSourceTrigger=PropertyChanged}" />
                     </StackPanel>
 
                     <StackPanel Margin="0,5">
@@ -54,8 +52,7 @@
                             FontTypography="Subtitle"
                             FontWeight="SemiBold"
                             Text="Scripts" />
-                        <ui:TextBlock FontTypography="Body"
-                                      Text="{Binding TotalScripts, Converter={StaticResource NumberFormatConverter}, UpdateSourceTrigger=PropertyChanged}" />
+                        <ui:TextBlock FontTypography="Body" Text="{Binding TotalScripts, Converter={StaticResource NumberFormatConverter}, UpdateSourceTrigger=PropertyChanged}" />
                     </StackPanel>
 
                     <StackPanel Margin="0,5">
@@ -64,8 +61,7 @@
                             FontTypography="Subtitle"
                             FontWeight="SemiBold"
                             Text="Materials" />
-                        <ui:TextBlock FontTypography="Body"
-                                      Text="{Binding TotalMaterials, Converter={StaticResource NumberFormatConverter}, UpdateSourceTrigger=PropertyChanged}" />
+                        <ui:TextBlock FontTypography="Body" Text="{Binding TotalMaterials, Converter={StaticResource NumberFormatConverter}, UpdateSourceTrigger=PropertyChanged}" />
                     </StackPanel>
 
                     <StackPanel Margin="0,5">
@@ -74,8 +70,7 @@
                             FontTypography="Subtitle"
                             FontWeight="SemiBold"
                             Text="3D Objects" />
-                        <ui:TextBlock FontTypography="Body"
-                                      Text="{Binding Total3DObjects, Converter={StaticResource NumberFormatConverter}, UpdateSourceTrigger=PropertyChanged}" />
+                        <ui:TextBlock FontTypography="Body" Text="{Binding Total3DObjects, Converter={StaticResource NumberFormatConverter}, UpdateSourceTrigger=PropertyChanged}" />
                     </StackPanel>
 
                     <StackPanel Margin="0,5">
@@ -84,8 +79,7 @@
                             FontTypography="Subtitle"
                             FontWeight="SemiBold"
                             Text="Images" />
-                        <ui:TextBlock FontTypography="Body"
-                                      Text="{Binding TotalImages, Converter={StaticResource NumberFormatConverter}, UpdateSourceTrigger=PropertyChanged}" />
+                        <ui:TextBlock FontTypography="Body" Text="{Binding TotalImages, Converter={StaticResource NumberFormatConverter}, UpdateSourceTrigger=PropertyChanged}" />
                     </StackPanel>
 
                     <StackPanel Margin="0,5">
@@ -93,9 +87,8 @@
                         <ui:TextBlock
                             FontTypography="Subtitle"
                             FontWeight="SemiBold"
-                            Text="Audio" />
-                        <ui:TextBlock FontTypography="Body"
-                                      Text="{Binding TotalAudios, Converter={StaticResource NumberFormatConverter}, UpdateSourceTrigger=PropertyChanged}" />
+                            Text="Audios" />
+                        <ui:TextBlock FontTypography="Body" Text="{Binding TotalAudios, Converter={StaticResource NumberFormatConverter}, UpdateSourceTrigger=PropertyChanged}" />
                     </StackPanel>
 
                     <StackPanel Margin="0,5">
@@ -104,8 +97,7 @@
                             FontTypography="Subtitle"
                             FontWeight="SemiBold"
                             Text="Controllers" />
-                        <ui:TextBlock FontTypography="Body"
-                                      Text="{Binding TotalControllers, Converter={StaticResource NumberFormatConverter}, UpdateSourceTrigger=PropertyChanged}" />
+                        <ui:TextBlock FontTypography="Body" Text="{Binding TotalControllers, Converter={StaticResource NumberFormatConverter}, UpdateSourceTrigger=PropertyChanged}" />
                     </StackPanel>
 
                     <StackPanel Margin="0,5">
@@ -114,8 +106,7 @@
                             FontTypography="Subtitle"
                             FontWeight="SemiBold"
                             Text="Configurations" />
-                        <ui:TextBlock FontTypography="Body"
-                                      Text="{Binding TotalConfigurations, Converter={StaticResource NumberFormatConverter}, UpdateSourceTrigger=PropertyChanged}" />
+                        <ui:TextBlock FontTypography="Body" Text="{Binding TotalConfigurations, Converter={StaticResource NumberFormatConverter}, UpdateSourceTrigger=PropertyChanged}" />
                     </StackPanel>
 
                     <StackPanel Margin="0,5">
@@ -124,28 +115,12 @@
                             FontTypography="Subtitle"
                             FontWeight="SemiBold"
                             Text="Animations" />
-                        <ui:TextBlock FontTypography="Body"
-                                      Text="{Binding TotalAnimations, Converter={StaticResource NumberFormatConverter}, UpdateSourceTrigger=PropertyChanged}" />
+                        <ui:TextBlock FontTypography="Body" Text="{Binding TotalAnimations, Converter={StaticResource NumberFormatConverter}, UpdateSourceTrigger=PropertyChanged}" />
                     </StackPanel>
                 </UniformGrid>
 
                 <Separator Margin="0,15,0,10" />
 
-                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                    <ui:SymbolIcon
-                        FontSize="20"
-                        Foreground="Orange"
-                        Symbol="Warning24" />
-                    <ui:TextBlock
-                        FontTypography="Subtitle"
-                        FontWeight="Bold"
-                        Margin="5,0"
-                        Text="Malicious Scripts Detected:" />
-                    <ui:TextBlock
-                        FontTypography="Subtitle"
-                        Foreground="Orange"
-                        Text="{Binding MaliciousDiscordWebhooks, Converter={StaticResource NumberFormatConverter}, UpdateSourceTrigger=PropertyChanged}" />
-                </StackPanel>
             </StackPanel>
         </ui:Card>
     </Grid>

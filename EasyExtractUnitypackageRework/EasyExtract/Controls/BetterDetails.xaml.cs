@@ -28,7 +28,5 @@ public partial class BetterDetails : UserControl
         model.TotalControllers = await ExtractionHelper.GetTotalControllerCount(_extractionPath);
         model.TotalConfigurations = await ExtractionHelper.GetTotalConfigurationCount(_extractionPath);
         model.TotalAnimations = await ExtractionHelper.GetTotalAnimationCount(_extractionPath);
-
-        model.MaliciousDiscordWebhooks = await ExtractionHelper.GetMalicousDiscordWebhookCount(_extractionPath);
     }
 }
