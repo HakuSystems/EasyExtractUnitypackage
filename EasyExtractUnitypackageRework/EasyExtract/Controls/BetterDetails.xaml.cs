@@ -1,5 +1,6 @@
 ﻿using EasyExtract.Config;
 using EasyExtract.Services;
+using EasyExtract.Views;
 
 namespace EasyExtract.Controls;
 
@@ -28,5 +29,11 @@ public partial class BetterDetails : UserControl
         model.TotalControllers = await ExtractionHelper.GetTotalControllerCount(_extractionPath);
         model.TotalConfigurations = await ExtractionHelper.GetTotalConfigurationCount(_extractionPath);
         model.TotalAnimations = await ExtractionHelper.GetTotalAnimationCount(_extractionPath);
+    }
+
+    private void FeedbackButton_OnClick(object sender, RoutedEventArgs e)
+    {
+        var dashboard = Dashboard.Instance;
+        dashboard.NavView.Navigate(typeof(Feedback));
     }
 }

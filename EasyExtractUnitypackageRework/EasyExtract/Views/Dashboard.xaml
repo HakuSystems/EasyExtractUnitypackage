@@ -27,7 +27,6 @@
     xmlns:config="clr-namespace:EasyExtract.Config"
     xmlns:customDesign="clr-namespace:EasyExtract.Services"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-    xmlns:extraction="clr-namespace:EasyExtract.Controls"
     xmlns:gif="https://github.com/XamlAnimatedGif/XamlAnimatedGif"
     xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
@@ -175,43 +174,16 @@
                                         Text="{Binding TotalFilesExtracted, Converter={StaticResource NumberFormatConverter}, UpdateSourceTrigger=PropertyChanged}"
                                         VerticalAlignment="Center" />
                                 </Grid>
-                                <ui:Button
+                                <!--<ui:Button
                                     Background="Transparent"
                                     Click="SettingsBtn_OnClick"
                                     Content="App Settings"
                                     Grid.Row="3"
                                     HorizontalAlignment="Stretch"
                                     Icon="{ui:SymbolIcon Settings24}"
-                                    x:Name="SettingsBtn" />
+                                    x:Name="SettingsBtn" />-->
                             </Grid>
                         </ui:Card>
-                        <!--
-                        <ui:NavigationViewItem
-                            Content="Better Extract"
-                            Foreground="{DynamicResource TextFillColorPrimaryBrush}"
-                            Icon="{ui:SymbolIcon Star24}"
-                            TargetPageTag="Extraction"
-                            TargetPageType="{x:Type extraction:BetterExtraction}"
-                            x:Name="BetterExtractionBtn" />
-                        <ui:NavigationViewItem
-                            Content="Extract"
-                            Foreground="{DynamicResource TextFillColorPrimaryBrush}"
-                            Icon="{ui:SymbolIcon DocumentTextExtract24}"
-                            TargetPageTag="Extraction"
-                            TargetPageType="{x:Type extraction:Extraction}"
-                            x:Name="ExtractionNavBtn" />-->
-                        <!--<ui:NavigationViewItem
-                            Content="Search"
-                            Foreground="{DynamicResource TextFillColorPrimaryBrush}"
-                            Icon="{ui:SymbolIcon Search24}"
-                            TargetPageTag="SearchEverything"
-                            TargetPageType="{x:Type extraction:SearchEverything}" />-->
-                        <ui:NavigationViewItem
-                            Content="Feedback"
-                            Foreground="{DynamicResource TextFillColorPrimaryBrush}"
-                            Icon="{ui:SymbolIcon PersonFeedback24}"
-                            TargetPageTag="Feedback"
-                            TargetPageType="{x:Type extraction:Feedback}" />
                         <materialDesign:TransitioningContent OpeningEffect="{materialDesign:TransitionEffect ExpandIn}">
                             <ui:TextBlock
                                 FontTypography="Caption"
@@ -259,16 +231,34 @@
                                 TextWrapping="WrapWithOverflow"
                                 VerticalAlignment="Center" />
 
-                            <ui:Card Margin="10" Padding="10">
-                                <ui:TextBlock
-                                    Appearance="Secondary"
-                                    FontTypography="Caption"
-                                    HorizontalAlignment="Center"
-                                    Opacity="0.6"
-                                    Text="Made by HakuSystems and Jan-Fcloud"
-                                    TextWrapping="WrapWithOverflow"
-                                    VerticalAlignment="Center" />
-                            </ui:Card>
+                            <StackPanel HorizontalAlignment="Center" Orientation="Horizontal">
+                                <ui:Button
+                                    Click="FeedbackBtnFooter_OnClick"
+                                    HorizontalAlignment="Left"
+                                    Icon="{ui:SymbolIcon PersonFeedback24}"
+                                    Margin="10"
+                                    Padding="5"
+                                    ToolTip="Send Feedback"
+                                    x:Name="FeedbackBtnFooter" />
+                                <ui:Card Padding="10">
+                                    <ui:TextBlock
+                                        Appearance="Secondary"
+                                        FontTypography="Caption"
+                                        HorizontalAlignment="Center"
+                                        Opacity="0.6"
+                                        Text="Made by HakuSystems and Jan-Fcloud"
+                                        TextWrapping="WrapWithOverflow"
+                                        VerticalAlignment="Center" />
+                                </ui:Card>
+                                <ui:Button
+                                    Click="SettingsBtnFooter_OnClick"
+                                    HorizontalAlignment="Right"
+                                    Icon="{ui:SymbolIcon Settings24}"
+                                    Margin="10"
+                                    Padding="5"
+                                    ToolTip="Settings"
+                                    x:Name="SettingsBtnFooter" />
+                            </StackPanel>
                         </StackPanel>
                     </ui:NavigationView.FooterMenuItems>
                 </ui:NavigationView>

@@ -405,4 +405,14 @@ public partial class Dashboard : Window
     {
         DetailsBtnFocusPoint.Visibility = Visibility.Collapsed;
     }
+
+    private void FeedbackBtnFooter_OnClick(object sender, RoutedEventArgs e)
+    {
+        NavView.Navigate(typeof(Feedback));
+    }
+
+    private void SettingsBtnFooter_OnClick(object sender, RoutedEventArgs e)
+    {
+        NavView.Navigate(typeof(BetterSettings));
+    }
 }
