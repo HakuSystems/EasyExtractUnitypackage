@@ -41,14 +41,24 @@ public partial class ExtractedContent
     {
         ExtractedUnitypackages.Clear();
         var path = ConfigHandler.Instance.Config.LastExtractedPath;
+
         if (!Directory.Exists(path)) return;
 
-        foreach (var dir in Directory.GetDirectories(path))
+        var dirs = Directory.GetDirectories(path);
+        var tasks = dirs.Select(async dir =>
         {
             var pkg = await CreateUnitypackageModelAsync(dir);
             await AddSubItemsAsync(pkg, dir);
-            ExtractedUnitypackages.Add(pkg);
-        }
+            return pkg;
+        }).ToList();
+
+        var pkgs = await Task.WhenAll(tasks);
+
+        Application.Current.Dispatcher.Invoke(() =>
+        {
+            foreach (var pkg in pkgs)
+                ExtractedUnitypackages.Add(pkg);
+        });
     }
 
 
@@ -66,12 +76,18 @@ public partial class ExtractedContent
 
     private async Task AddSubItemsAsync(ExtractedUnitypackageModel pkg, string dir)
     {
-        foreach (var file in new DirectoryInfo(dir).EnumerateFiles("*.*", SearchOption.AllDirectories))
-        {
-            if (file.Name.EndsWith(".EASYEXTRACTPREVIEW.png")) continue;
+        var files = new DirectoryInfo(dir)
+            .EnumerateFiles("*.*", SearchOption.AllDirectories)
+            .Where(f => !f.Name.EndsWith(".EASYEXTRACTPREVIEW.png"))
+            .ToList();
 
-            var previewImage = await GetOrCreatePreviewAsync(file);
-            pkg.SubdirectoryItems.Add(new ExtractedFiles
+        var subItemTasks = files.Select(async file =>
+        {
+            var previewImageTask = GetOrCreatePreviewAsync(file);
+            var securityWarningTask = GetSecurityWarningAsync(file, pkg);
+            await Task.WhenAll(previewImageTask, securityWarningTask);
+
+            return new ExtractedFiles
             {
                 FileName = file.Name,
                 FilePath = file.FullName,
@@ -81,12 +97,22 @@ public partial class ExtractedContent
                 ExtractedDate = file.CreationTime,
                 SymbolIconImage = await _extractionHelper.GetSymbolByExtension(file.Extension),
                 IsCodeFile = new[] { ".cs", ".json", ".shader", ".txt" }.Contains(file.Extension.ToLower()),
-                PreviewImage = previewImage,
-                SecurityWarning = await GetSecurityWarningAsync(file, pkg)
-            });
-        }
+                PreviewImage = previewImageTask.Result,
+                SecurityWarning = securityWarningTask.Result
+            };
+        });
 
-        pkg.DetailsSeverity = pkg.IsDangerousPackage ? InfoBarSeverity.Warning : InfoBarSeverity.Success;
+        var subItems = await Task.WhenAll(subItemTasks);
+
+        Application.Current.Dispatcher.Invoke(() =>
+        {
+            foreach (var item in subItems)
+                pkg.SubdirectoryItems.Add(item);
+
+            pkg.DetailsSeverity = pkg.IsDangerousPackage
+                ? InfoBarSeverity.Warning
+                : InfoBarSeverity.Success;
+        });
     }
 
     private string GetVSCodeExecutablePath()
@@ -137,21 +163,22 @@ public partial class ExtractedContent
         if (_previewCache.TryGetValue(previewPath, out var cached))
             return cached;
 
+        BitmapImage? previewImage = null;
         if (File.Exists(previewPath))
         {
-            var previewImage = LoadImageWithFileRelease(previewPath);
-            _previewCache[previewPath] = previewImage;
-            return previewImage;
+            previewImage = await LoadImageWithoutLockAsync(previewPath);
         }
-
-        var generatedPreview = await GeneratePreviewImageAsync(file);
-        if (generatedPreview != null)
+        else
         {
-            CodeToImageConverter.SaveImageToFile(generatedPreview, previewPath);
-            _previewCache[previewPath] = generatedPreview;
+            previewImage = await GeneratePreviewImageAsync(file);
+            if (previewImage != null)
+                await Task.Run(() => CodeToImageConverter.SaveImageToFile(previewImage, previewPath));
         }
 
-        return generatedPreview;
+        if (previewImage != null)
+            _previewCache[previewPath] = previewImage;
+
+        return previewImage;
     }
 
     private BitmapImage LoadImageWithFileRelease(string path)
@@ -204,15 +231,12 @@ public partial class ExtractedContent
         try
         {
             var bitmap = new BitmapImage();
-            await using (var stream = new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.Read))
-            {
-                bitmap.BeginInit();
-                bitmap.CacheOption = BitmapCacheOption.OnLoad; // Crucial fix here
-                bitmap.StreamSource = stream;
-                bitmap.EndInit();
-                bitmap.Freeze(); // Freeze to avoid cross-thread issues
-            }
-
+            await using var stream = File.Open(filePath, FileMode.Open, FileAccess.Read, FileShare.Read);
+            bitmap.BeginInit();
+            bitmap.CacheOption = BitmapCacheOption.OnLoad;
+            bitmap.StreamSource = stream;
+            bitmap.EndInit();
+            bitmap.Freeze();
             return bitmap;
         }
         catch (Exception ex)
@@ -223,22 +247,26 @@ public partial class ExtractedContent
     }
 
 
-    private async void RefreshExtractedButton_OnClick(object sender, RoutedEventArgs e)
+    private void RefreshExtractedButton_OnClick(object sender, RoutedEventArgs e)
     {
-        _previewCache.Clear(); // Clear cache to force re-generate previews
-        await UpdateExtractedFilesAsync();
+        Task.Run(async () =>
+        {
+            _previewCache.Clear();
+            await UpdateExtractedFilesAsync();
+        });
     }
 
 
     private void ExtractedSearchBox_OnTextChanged(object sender, TextChangedEventArgs e)
     {
-        var query = ExtractedSearchBox.Text.ToLower();
+        var query = ExtractedSearchBox.Text.ToLowerInvariant();
 
         _extractedPackagesView.Filter = item =>
         {
             if (item is ExtractedUnitypackageModel pkg)
-                return pkg.UnitypackageName.ToLower().Contains(query) ||
-                       pkg.SubdirectoryItems.Any(i => i.FileName.ToLower().Contains(query));
+                return pkg.UnitypackageName.Contains(query, StringComparison.OrdinalIgnoreCase)
+                       || pkg.SubdirectoryItems.Any(i =>
+                           i.FileName.Contains(query, StringComparison.OrdinalIgnoreCase));
             return false;
         };
 
@@ -247,13 +275,18 @@ public partial class ExtractedContent
 
     private async void DeleteExtractedButton_OnClick(object sender, RoutedEventArgs e)
     {
-        foreach (var pkg in ExtractedUnitypackages.Where(x => x.PackageIsChecked).ToList())
+        var packagesToDelete = ExtractedUnitypackages
+            .Where(x => x.PackageIsChecked)
+            .ToList();
+
+        foreach (var pkg in packagesToDelete)
         {
             try
             {
                 ClearPreviewsFromCache(pkg.UnitypackagePath);
-                Directory.Delete(pkg.UnitypackagePath, true);
-                ExtractedUnitypackages.Remove(pkg);
+                await Task.Run(() => Directory.Delete(pkg.UnitypackagePath, true));
+
+                Application.Current.Dispatcher.Invoke(() => ExtractedUnitypackages.Remove(pkg));
             }
             catch (Exception ex)
             {
@@ -265,7 +298,7 @@ public partial class ExtractedContent
     private void ClearPreviewsFromCache(string directoryPath)
     {
         var keysToRemove = _previewCache.Keys
-            .Where(key => key.StartsWith(directoryPath, StringComparison.InvariantCultureIgnoreCase))
+            .Where(key => key.StartsWith(directoryPath, StringComparison.OrdinalIgnoreCase))
             .ToList();
 
         foreach (var key in keysToRemove)
@@ -277,8 +310,7 @@ public partial class ExtractedContent
     {
         var selected = ExtractedUnitypackages.FirstOrDefault(x => x.PackageIsChecked);
         if (selected != null)
-            Process.Start(new ProcessStartInfo("explorer.exe", $"\"{selected.UnitypackagePath}\"")
-                { UseShellExecute = true });
+            Process.Start(new ProcessStartInfo("explorer.exe", selected.UnitypackagePath) { UseShellExecute = true });
     }
 
     private void OpenFileInEditor_OnClick(object sender, RoutedEventArgs e)
@@ -288,7 +320,7 @@ public partial class ExtractedContent
             var codePath = GetVSCodeExecutablePath();
             if (string.IsNullOrEmpty(codePath)) return;
 
-            Process.Start(codePath, $"\"{path}\"");
+            Process.Start(new ProcessStartInfo(codePath, path) { UseShellExecute = true });
         }
     }
 
