@@ -85,7 +85,7 @@
                         <ui:TextBlock
                             FontTypography="Body"
                             Margin="0,5,0,0"
-                            Text="Extracted 0 of 0 files"
+                            Text="{Binding CurrentExtractedCount, StringFormat='Extracted {0} of {1} files', UpdateSourceTrigger=PropertyChanged, FallbackValue='Extracted 0 of 0 files', TargetNullValue='Extracted 0 of 0 files'}"
                             x:Name="ExtractionCaptionText" />
                     </StackPanel>
 

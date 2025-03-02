@@ -448,4 +448,9 @@ public partial class Dashboard : Window
         // Clearly visible glow circle at bottom-center
         canvas.DrawCircle(width / 2, height, height, paint);
     }
+
+    private void TestBtn_OnClick(object sender, RoutedEventArgs e)
+    {
+        NavView.Navigate(typeof(ExtractedContent));
+    }
 }

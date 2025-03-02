@@ -20,7 +20,8 @@ public class ExtractionHandler
         await ExtractUnitypackage(unitypackage);
     }
 
-    public async Task<bool> ExtractUnitypackage(SearchEverythingModel unitypackage,
+    public async Task<bool> ExtractUnitypackage(
+        SearchEverythingModel unitypackage,
         IProgress<(int extracted, int total)> fileProgress = null)
     {
         try
@@ -28,29 +29,84 @@ public class ExtractionHandler
             var tempFolder = await GetTempFolderPath(unitypackage);
             var targetFolder = await GetTargetFolderPath(unitypackage);
 
-            await BetterLogger.LogAsync($"Temporary folder path: {tempFolder}", Importance.Info);
-            await BetterLogger.LogAsync($"Target folder path: {targetFolder}", Importance.Info);
-
             await CreateDirectories(tempFolder, targetFolder);
 
-            // Pass the progress callback to the extraction process.
-            await ExtractAndWriteFiles(unitypackage, tempFolder, fileProgress);
-            ConfigHandler.Instance.Config.TotalExtracted++;
-            await MoveFilesFromTempToTargetFolder(tempFolder, targetFolder);
+            var progress = new Progress<(int extracted, int total)>(value =>
+            {
+                ConfigHandler.Instance.Config.CurrentExtractedCount = value.extracted;
+                ConfigHandler.Instance.Config.TotalFilesToExtract = value.total;
+            });
 
+            await ExtractAndWriteFiles(unitypackage, tempFolder, progress);
+            await MoveFilesFromTempToTargetFolder(tempFolder, targetFolder);
             Directory.Delete(tempFolder, true);
 
-            await BetterLogger.LogAsync($"Successfully extracted {unitypackage.FileName}",
-                Importance.Info);
+            var extractionHelper = new ExtractionHelper();
+
+            // Directly update properties to ensure no double counting
+            var extractedPackage = new ExtractedUnitypackageModel
+            {
+                UnitypackageName = unitypackage.FileName,
+                UnitypackagePath = targetFolder,
+                UnitypackageExtractedDate = DateTime.Now,
+                UnitypackageSize = new FileSizeConverter().Convert(
+                    await ExtractionHelper.GetTotalSizeInBytesAsync(targetFolder),
+                    typeof(string), null, CultureInfo.CurrentCulture)?.ToString(),
+
+                UnitypackageTotalFolderCount = await ExtractionHelper.GetTotalFolderCount(targetFolder),
+                UnitypackageTotalFileCount = await ExtractionHelper.GetTotalFileCount(targetFolder),
+                UnitypackageTotalScriptCount = await ExtractionHelper.GetTotalScriptCount(targetFolder),
+                UnitypackageTotalMaterialCount = await ExtractionHelper.GetTotalMaterialCount(targetFolder),
+                UnitypackageTotal3DObjectCount = await ExtractionHelper.GetTotal3DObjectCount(targetFolder),
+                UnitypackageTotalImageCount = await ExtractionHelper.GetTotalImageCount(targetFolder),
+                UnitypackageTotalAudioCount = await ExtractionHelper.GetTotalAudioCount(targetFolder),
+                UnitypackageTotalControllerCount = await ExtractionHelper.GetTotalControllerCount(targetFolder),
+                UnitypackageTotalConfigurationCount = await ExtractionHelper.GetTotalConfigurationCount(targetFolder),
+                UnitypackageTotalAnimationCount = await ExtractionHelper.GetTotalAnimationCount(targetFolder),
+                UnitypackageTotalAssetCount = await ExtractionHelper.GetTotalAssetCount(targetFolder),
+                UnitypackageTotalSceneCount = await ExtractionHelper.GetTotalSceneCount(targetFolder),
+                UnitypackageTotalShaderCount = await ExtractionHelper.GetTotalShaderCount(targetFolder),
+                UnitypackageTotalPrefabCount = await ExtractionHelper.GetTotalPrefabCount(targetFolder),
+                UnitypackageTotalFontCount = await ExtractionHelper.GetTotalFontCount(targetFolder),
+                UnitypackageTotalDataCount = await ExtractionHelper.GetTotalDataCount(targetFolder),
+
+                HasEncryptedDll = await CheckForEncryptedDlls(targetFolder, extractionHelper),
+                MalicousDiscordWebhookCount = await ExtractionHelper.GetMalicousDiscordWebhookCount(targetFolder),
+                LinkDetectionCount = await ExtractionHelper.GetTotalLinkDetectionCount(targetFolder)
+            };
+
+            // Batch UI update
+            Application.Current.Dispatcher.Invoke(() =>
+            {
+                ConfigHandler.Instance.Config.ExtractedUnitypackages.Add(extractedPackage);
+                ConfigHandler.Instance.Config.TotalExtracted =
+                    ConfigHandler.Instance.Config.ExtractedUnitypackages.Count;
+
+                // Update TotalFilesExtracted just once clearly after extraction
+                ConfigHandler.Instance.Config.TotalFilesExtracted =
+                    ConfigHandler.Instance.Config.ExtractedUnitypackages.Sum(pkg => pkg.UnitypackageTotalFileCount);
+            });
+
+            await BetterLogger.LogAsync($"Successfully extracted {unitypackage.FileName}", Importance.Info);
             return true;
         }
         catch (Exception e)
         {
-            await BetterLogger.LogAsync($"Error while extracting unitypackage: {e.Message}",
-                Importance.Error);
+            await BetterLogger.LogAsync($"Error while extracting unitypackage: {e.Message}", Importance.Error);
             return false;
         }
     }
+
+    private async Task<bool> CheckForEncryptedDlls(string folder, ExtractionHelper helper)
+    {
+        var dllFiles = Directory.GetFiles(folder, "*.dll", SearchOption.AllDirectories);
+        foreach (var dll in dllFiles)
+            if (await helper.IsEncryptedDll(dll))
+                return true;
+
+        return false;
+    }
+
 
     private async Task<string> GetTempFolderPath(SearchEverythingModel unitypackage)
     {
@@ -106,14 +162,15 @@ public class ExtractionHandler
         }
     }
 
-    private static async Task ExtractAndWriteFiles(SearchEverythingModel unitypackage, string tempFolder,
+    private static async Task ExtractAndWriteFiles(
+        SearchEverythingModel unitypackage,
+        string tempFolder,
         IProgress<(int extracted, int total)> fileProgress = null)
     {
-        List<string> extractedEntries = new();
-        List<string> skippedEntries = new();
+        var extractedCount = 0;
 
-        // First pass: count valid entries.
-        var totalValidEntries = 0;
+        // Cache entries only once
+        var entries = new List<IEntry>();
         using (var inStream = File.OpenRead(unitypackage.FilePath))
         using (var gzipStream = new GZipStream(inStream, CompressionMode.Decompress))
         using (var reader = TarReader.Open(gzipStream))
@@ -121,71 +178,64 @@ public class ExtractionHandler
             while (reader.MoveToNextEntry())
             {
                 var entry = reader.Entry;
-                if (entry.IsEncrypted || entry.IsDirectory)
-                    continue;
-                totalValidEntries++;
+                if (!entry.IsEncrypted && !entry.IsDirectory)
+                    entries.Add(entry);
             }
         }
 
-        // Initialize count of extracted entries.
-        var extractedCount = 0;
+        var totalValidEntries = entries.Count;
 
-        // Second pass: extract files.
+        // Initialize UI progress only once
+        Application.Current.Dispatcher.Invoke(() =>
+        {
+            ConfigHandler.Instance.Config.TotalFilesToExtract = totalValidEntries;
+            ConfigHandler.Instance.Config.CurrentExtractedCount = 0;
+        });
+
+        // Perform extraction asynchronously
         await Task.Run(async () =>
         {
-            using (var inStream = File.OpenRead(unitypackage.FilePath))
-            using (var gzipStream = new GZipStream(inStream, CompressionMode.Decompress))
-            using (var reader = TarReader.Open(gzipStream))
+            using var inStream = File.OpenRead(unitypackage.FilePath);
+            using var gzipStream = new GZipStream(inStream, CompressionMode.Decompress);
+            using var reader = TarReader.Open(gzipStream);
+
+            while (reader.MoveToNextEntry())
             {
-                while (reader.MoveToNextEntry())
+                var entry = reader.Entry;
+                if (entry.IsEncrypted || entry.IsDirectory)
+                    continue;
+
+                var filePath = Path.Combine(tempFolder, entry.Key);
+                Directory.CreateDirectory(Path.GetDirectoryName(filePath) ?? string.Empty);
+
+                try
                 {
-                    var entry = reader.Entry;
-                    if (entry.IsEncrypted)
+                    await using (var fileStream = File.Create(filePath))
                     {
-                        skippedEntries.Add($"{entry.Key} is encrypted. Skipped.");
-                        continue;
+                        reader.WriteEntryTo(fileStream);
                     }
 
-                    if (entry.IsDirectory)
-                        continue;
+                    extractedCount++;
 
-                    var filePath = Path.Combine(tempFolder, entry.Key);
-                    Directory.CreateDirectory(Path.GetDirectoryName(filePath) ?? string.Empty);
+                    // Update progress only after each file extraction
+                    fileProgress?.Report((extractedCount, totalValidEntries));
 
-                    try
-                    {
-                        using (var fileStream = File.Create(filePath))
+                    // Batch UI updates to reduce lag
+                    if (extractedCount % 5 == 0 || extractedCount == totalValidEntries)
+                        Application.Current.Dispatcher.Invoke(() =>
                         {
-                            await Task.Run(() => reader.WriteEntryTo(fileStream));
-                        }
-
-                        extractedEntries.Add(entry.Key);
-                        extractedCount++;
-                        fileProgress?.Report((extractedCount, totalValidEntries));
+                            ConfigHandler.Instance.Config.CurrentExtractedCount = extractedCount;
+                            ConfigHandler.Instance.Config.TotalFilesExtracted++;
+                        });
+                    else
                         ConfigHandler.Instance.Config.TotalFilesExtracted++;
-                    }
-                    catch (IncompleteArchiveException)
-                    {
-                        skippedEntries.Add($"{entry.Key} is corrupted. Skipped.");
-                    }
-                    catch (Exception ex)
-                    {
-                        skippedEntries.Add($"{entry.Key} failed: {ex.Message}");
-                    }
+                }
+                catch (Exception ex)
+                {
+                    await BetterLogger.LogAsync($"Failed to extract {entry.Key}: {ex.Message}", Importance.Error);
                 }
             }
         });
-
-        // Log summary.
-        if (extractedEntries.Any())
-            await BetterLogger.LogAsync(
-                $"Extracted {extractedEntries.Count} file(s) from {unitypackage.FileName}.",
-                Importance.Info);
-        if (skippedEntries.Any())
-            foreach (var fail in skippedEntries)
-                await BetterLogger.LogAsync($"Skipped entry: {fail}", Importance.Warning);
-        else
-            await BetterLogger.LogAsync("All entries extracted successfully.", Importance.Info);
     }
 
     private static async Task MoveFilesFromTempToTargetFolder(string tempFolder, string targetFolder)

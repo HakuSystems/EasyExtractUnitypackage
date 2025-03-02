@@ -314,20 +314,27 @@ public partial class BetterExtraction
     {
         while (!extractionTask.IsCompleted)
         {
-            var overallElapsed = DateTime.Now - overallStartTime;
-            var filesProgressPercentage = (double)processedFiles / totalFiles;
-            var currentFileProgressPercentage = _currentFileProgress.TotalEntryCount > 0
-                ? (double)_currentFileProgress.ExtractedCount / _currentFileProgress.TotalEntryCount
-                : 0.0;
+            var elapsed = DateTime.Now - overallStartTime;
 
-            var overallProgressPercent =
-                (filesProgressPercentage + currentFileProgressPercentage / totalFiles) * 100;
+            Application.Current.Dispatcher.Invoke(() =>
+            {
+                ExtractionElapsedText.Text = elapsed.ToString(@"hh\:mm\:ss");
 
-            ExtractionElapsedText.Text = overallElapsed.ToString(@"hh\:mm\:ss");
-            ExtractionProgressBar.Value = overallProgressPercent;
-            ExtractionProgressText.Text = $"{overallProgressPercent:0.00}%";
+                var totalFilesToExtract = ConfigHandler.Instance.Config.TotalFilesToExtract;
+                var currentExtractedCount = ConfigHandler.Instance.Config.CurrentExtractedCount;
 
-            await Task.Delay(1000);
+                if (totalFilesToExtract > 0)
+                {
+                    var fileProgressPercent = (double)currentExtractedCount / totalFilesToExtract;
+                    var overallPercent = (processedFiles + fileProgressPercent) / totalFiles * 100;
+
+                    ExtractionProgressBar.Value = overallPercent;
+                    ExtractionProgressText.Text = $"{overallPercent:0.00}%";
+                    ExtractionCaptionText.Text = $"Extracted {currentExtractedCount} of {totalFilesToExtract} files";
+                }
+            });
+
+            await Task.Delay(500); // Faster updates for smoother progress
         }
     }
 

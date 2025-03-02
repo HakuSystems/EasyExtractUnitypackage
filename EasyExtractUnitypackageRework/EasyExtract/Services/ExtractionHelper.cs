@@ -4,6 +4,14 @@ namespace EasyExtract.Services;
 
 public record ExtractionHelper
 {
+    public static async Task<long> GetTotalSizeInBytesAsync(string directory)
+    {
+        var files = Directory.GetFiles(directory, "*.*", SearchOption.AllDirectories);
+        var totalBytes = files.Sum(file => new FileInfo(file).Length);
+        return totalBytes;
+    }
+
+
     public static async Task<int> GetTotalFileCount(string directory)
     {
         var count = Directory.GetFiles(directory, "*.*", SearchOption.AllDirectories).Length;

@@ -172,7 +172,7 @@
                                         Foreground="{Binding PrimaryColorHex}"
                                         Grid.Column="1"
                                         Padding="5"
-                                        Text="{Binding TotalFilesExtracted, Converter={StaticResource NumberFormatConverter}, UpdateSourceTrigger=PropertyChanged}"
+                                        Text="{Binding TotalFilesExtracted, Converter={StaticResource NumberFormatConverter}}"
                                         VerticalAlignment="Center" />
                                 </Grid>
                                 <!--<ui:Button
@@ -196,6 +196,10 @@
                                 VerticalAlignment="Center"
                                 x:Name="DragDropDetectionTxt" />
                         </materialDesign:TransitioningContent>
+                        <ui:Button
+                            Click="TestBtn_OnClick"
+                            Content="TEST"
+                            x:Name="TestBtn" />
                     </ui:NavigationView.MenuItems>
 
                     <ui:NavigationView.FooterMenuItems>
