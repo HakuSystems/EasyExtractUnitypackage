@@ -4,27 +4,6 @@ namespace EasyExtract.Services;
 
 public record ExtractionHelper
 {
-    /// <summary>
-    ///     Gets the readable file size representation of the given size.
-    /// </summary>
-    /// <param name="size">The size to convert.</param>
-    /// <returns>The readable file size.</returns>
-    public async Task<string> GetReadableFileSize(long size)
-    {
-        string[] sizes =
-        [
-            "B", "KB", "MB", "GB", "TB"
-        ];
-        var order = 0;
-        while (size >= 1024 && order < sizes.Length - 1)
-        {
-            order++;
-            size = size / 1024;
-        }
-
-        return $"{size:0.##} {sizes[order]}";
-    }
-
     public static async Task<int> GetTotalFileCount(string directory)
     {
         var count = Directory.GetFiles(directory, "*.*", SearchOption.AllDirectories).Length;
