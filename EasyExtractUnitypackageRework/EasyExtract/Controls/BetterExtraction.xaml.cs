@@ -277,9 +277,7 @@ public partial class BetterExtraction
             if (await extractionTask)
                 ConfigHandler.Instance.Config.UnitypackageFiles.Remove(file);
             else
-            {
                 file.IsInQueue = true;
-            }
 
             ConfigHandler.Instance.OverrideConfig();
             SyncFileCollections();

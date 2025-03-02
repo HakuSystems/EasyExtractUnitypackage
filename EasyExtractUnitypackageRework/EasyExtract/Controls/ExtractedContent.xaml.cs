@@ -60,7 +60,7 @@ public partial class ExtractedContent
             UnitypackageName = Path.GetFileName(dir),
             UnitypackagePath = dir,
             UnitypackageSize = new FileSizeConverter().Convert(size, null, null, CultureInfo.CurrentCulture).ToString(),
-            UnitypackageExtractedDate = Directory.GetCreationTime(dir),
+            UnitypackageExtractedDate = Directory.GetCreationTime(dir)
         };
     }
 
@@ -157,7 +157,6 @@ public partial class ExtractedContent
         var previews = Directory.GetFiles(ConfigHandler.Instance.Config.LastExtractedPath, "*.EASYEXTRACTPREVIEW.png",
             SearchOption.AllDirectories);
         foreach (var preview in previews)
-        {
             try
             {
                 File.Delete(preview);
@@ -166,7 +165,6 @@ public partial class ExtractedContent
             {
                 await BetterLogger.LogAsync(ex.ToString(), Importance.Error);
             }
-        }
 
         _previewCache.Clear();
 

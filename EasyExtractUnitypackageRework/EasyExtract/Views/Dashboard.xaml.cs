@@ -69,14 +69,12 @@ public partial class Dashboard : Window
         });
 
         if (ConfigHandler.Instance.Config.Update.AutoUpdate && updateAvailable)
-        {
             if (await _updateHandler.IsUpToDateOrUpdate(true))
             {
                 await DialogHelper.ShowInfoDialogAsync(this, "Update available",
                     "An update is available and will be installed automatically.\nbecause you have enabled automatic updates in the settings.\nPlease Dont Interact with the application until the update is installed. (the app will automatically restart)");
                 CurrentlyUpdatingTextBlock.Visibility = Visibility.Visible;
             }
-        }
 
         if (ConfigHandler.Instance.Config.FirstRun)
         {
