@@ -68,7 +68,8 @@ public partial class BetterExtraction
 
         var extractionFolder = Path.Combine(appDataFolder, "Extracted");
 
-        var folderExists = Directory.Exists(extractionFolder);
+        var folderExists = Directory.Exists(extractionFolder) &&
+                           Directory.EnumerateFileSystemEntries(extractionFolder).Any();
 
         Application.Current.Dispatcher.Invoke(() =>
         {
