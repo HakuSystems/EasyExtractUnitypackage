@@ -19,6 +19,8 @@
             <utilities:QueueOpacityConverter x:Key="QueueOpacityConverter" />
             <utilities:QueueIsEnabledConverter x:Key="QueueIsEnabledConverter" />
             <utilities:InverseBooleanConverter x:Key="InverseBooleanConverter" />
+            <utilities:StringToVisibilityConverter x:Key="StringToVisibilityConverter" />
+            <utilities:BoolToVisibilityConverter x:Key="BoolToVisibilityConverter" />
         </ResourceDictionary>
     </Application.Resources>
 </Application>
