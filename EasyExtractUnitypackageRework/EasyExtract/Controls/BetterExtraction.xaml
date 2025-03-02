@@ -159,6 +159,37 @@
                     Grid.Column="0"
                     Grid.Row="2"
                     Orientation="Horizontal">
+                    <ui:Button
+                        Background="Transparent"
+                        Click="LocateUnitypackageButton_OnClick"
+                        Content="Locate Unitypackage"
+                        Icon="{ui:SymbolIcon Folder24}"
+                        Margin="7"
+                        Padding="10"
+                        x:Name="LocateUnitypackageButton" />
+                    <materialDesign:TransitioningContent OpeningEffect="{materialDesign:TransitionEffect FadeIn}" x:Name="StartExtractionButton">
+                        <ui:Button
+                            Background="Transparent"
+                            Click="StartExtractionButton_OnClick"
+                            Content="Start Extraction"
+                            Foreground="#2ca7f2"
+                            Icon="{ui:SymbolIcon Next24}"
+                            Margin="7"
+                            Padding="10"
+                            PressedForeground="#2ca7f2" />
+                    </materialDesign:TransitioningContent>
+
+                    <materialDesign:TransitioningContent OpeningEffect="{materialDesign:TransitionEffect FadeIn}" x:Name="ViewExtractionButton">
+                        <ui:Button
+                            Background="Transparent"
+                            Click="ViewExtractionButton_OnClick"
+                            Content="View Extracted"
+                            Foreground="#04d3be"
+                            Icon="{ui:SymbolIcon ContentView24}"
+                            Margin="7"
+                            Padding="10"
+                            PressedForeground="#04d3be" />
+                    </materialDesign:TransitioningContent>
                     <materialDesign:TransitioningContent OpeningEffect="{materialDesign:TransitionEffect FadeIn}" x:Name="ClearQueueButton">
                         <ui:Button
                             Background="Transparent"
@@ -170,38 +201,8 @@
                             Padding="10"
                             PressedForeground="#f44336" />
                     </materialDesign:TransitioningContent>
-                    <ui:Button
-                        Background="Transparent"
-                        Click="LocateUnitypackageButton_OnClick"
-                        Content="Locate Unitypackage"
-                        Icon="{ui:SymbolIcon Folder24}"
-                        Margin="7"
-                        Padding="10"
-                        x:Name="LocateUnitypackageButton" />
-                    <ui:Button
-                        Background="Transparent"
-                        Click="StartExtractionButton_OnClick"
-                        Foreground="#2ca7f2"
-                        Icon="{ui:SymbolIcon Next24}"
-                        Margin="7"
-                        Padding="10"
-                        PressedForeground="#2ca7f2"
-                        x:Name="StartExtractionButton">
-                        <ui:Button.Content>
-                            <materialDesign:TransitioningContent OpeningEffect="{materialDesign:TransitionEffect FadeIn}">
-                                <StackPanel Orientation="Horizontal">
-                                    <ProgressBar
-                                        Height="20"
-                                        IsIndeterminate="True"
-                                        Margin="5,0,5,0"
-                                        Visibility="Collapsed"
-                                        Width="20"
-                                        x:Name="StartExtractionButtonProgressRing" />
-                                    <ui:TextBlock Text="Start Extraction" x:Name="StartExtractionButtonText" />
-                                </StackPanel>
-                            </materialDesign:TransitioningContent>
-                        </ui:Button.Content>
-                    </ui:Button>
+
+
                 </StackPanel>
 
                 <ui:Image

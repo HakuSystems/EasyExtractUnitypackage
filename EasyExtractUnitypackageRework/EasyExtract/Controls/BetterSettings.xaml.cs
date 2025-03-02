@@ -3,6 +3,7 @@ using EasyExtract.Config;
 using EasyExtract.Config.Models;
 using EasyExtract.Services;
 using EasyExtract.Utilities;
+using EasyExtract.Views;
 
 namespace EasyExtract.Controls;
 
@@ -18,6 +19,7 @@ public partial class BetterSettings
 
     private async void BetterSettings_OnLoaded(object sender, RoutedEventArgs e)
     {
+        Dashboard.Instance.NavigateBackBtn.Visibility = Visibility.Visible;
         await ChangeUiToMatchConfigAsync();
     }
 

@@ -5,6 +5,7 @@ using EasyExtract.Config;
 using EasyExtract.Config.Models;
 using EasyExtract.Services;
 using EasyExtract.Utilities;
+using EasyExtract.Views;
 using Wpf.Ui.Controls;
 using Button = System.Windows.Controls.Button;
 
@@ -32,6 +33,8 @@ public partial class ExtractedContent
 
     private async void ExtractedContent_Loaded(object sender, RoutedEventArgs e)
     {
+        Dashboard.Instance.NavigateBackBtn.Visibility = Visibility.Visible;
+
         await DiscordRpcManager.Instance.TryUpdatePresenceAsync("Extracted Content");
         await UpdateExtractedFilesAsync();
     }

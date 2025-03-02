@@ -20,6 +20,7 @@ public partial class BetterDetails : UserControl
     private async void BetterDetails_OnLoaded(object sender, RoutedEventArgs e)
     {
         await DiscordRpcManager.Instance.TryUpdatePresenceAsync("Details");
+        Dashboard.Instance.NavigateBackBtn.Visibility = Visibility.Visible;
         await LoadDetailsAsync();
     }
 

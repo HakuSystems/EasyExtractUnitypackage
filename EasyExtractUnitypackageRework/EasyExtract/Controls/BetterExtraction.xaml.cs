@@ -4,6 +4,7 @@ using EasyExtract.Config;
 using EasyExtract.Config.Models;
 using EasyExtract.Services;
 using EasyExtract.Utilities;
+using EasyExtract.Views;
 
 namespace EasyExtract.Controls;
 
@@ -44,8 +45,39 @@ public partial class BetterExtraction
         else
             throw new InvalidOperationException($"Resource '{QueueFilesKey}' not found.");
 
+        UpdateViewExtractionButtonVisibility();
+        UpdateStartExtractionButtonVisibility();
         UpdateClearQueueButtonVisibility();
     }
+
+    private void UpdateStartExtractionButtonVisibility()
+    {
+        StartExtractionButton.Visibility = ConfigHandler.Instance.Config.UnitypackageFiles.Any(file => file.IsInQueue)
+            ? Visibility.Visible
+            : Visibility.Collapsed;
+    }
+
+    private void UpdateViewExtractionButtonVisibility()
+    {
+        var appDataFolder = Path.Combine(
+            Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
+            "EasyExtract");
+
+        if (!Directory.Exists(appDataFolder))
+            Directory.CreateDirectory(appDataFolder);
+
+        var extractionFolder = Path.Combine(appDataFolder, "Extracted");
+
+        var folderExists = Directory.Exists(extractionFolder);
+
+        Application.Current.Dispatcher.Invoke(() =>
+        {
+            ViewExtractionButton.Visibility = folderExists
+                ? Visibility.Visible
+                : Visibility.Collapsed;
+        });
+    }
+
 
     private void UpdateClearQueueButtonVisibility()
     {
@@ -63,6 +95,8 @@ public partial class BetterExtraction
 
     private async void BetterExtraction_OnLoaded(object sender, RoutedEventArgs e)
     {
+        Dashboard.Instance.NavigateBackBtn.Visibility = Visibility.Hidden;
+
         await DiscordRpcManager.Instance.TryUpdatePresenceAsync("Extraction");
         ConfigHandler.Instance.Config.SearchEverythingResults.Clear();
         ConfigHandler.Instance.OverrideConfig();
@@ -291,7 +325,6 @@ public partial class BetterExtraction
         CurrentlyExtractingCard.Visibility = Visibility.Collapsed;
         BetterExtractionCard.Visibility = Visibility.Visible;
         StartExtractionButton.IsEnabled = true;
-        StartExtractionButtonText.Text = "Start Extraction";
     }
 
     private void UpdateFileExtractionUi(UnitypackageFileInfo file)
@@ -352,5 +385,10 @@ public partial class BetterExtraction
         ConfigHandler.Instance.Config.UnitypackageFiles.Remove(file);
         ConfigHandler.Instance.OverrideConfig();
         SyncFileCollections();
+    }
+
+    private void ViewExtractionButton_OnClick(object sender, RoutedEventArgs e)
+    {
+        Dashboard.Instance.NavView.Navigate(typeof(ExtractedContent));
     }
 }

@@ -3,6 +3,7 @@ using EasyExtract.Config;
 using EasyExtract.Config.Models;
 using EasyExtract.Services;
 using EasyExtract.Utilities;
+using EasyExtract.Views;
 
 namespace EasyExtract.Controls;
 
@@ -15,6 +16,8 @@ public partial class EasterEgg
 
     private async void EasterEgg_OnLoaded(object sender, RoutedEventArgs e)
     {
+        Dashboard.Instance.NavigateBackBtn.Visibility = Visibility.Visible;
+
         if (ConfigHandler.Instance.Config.UwUModeActive) BetterUwUifyer.ApplyUwUModeToVisualTree(this);
         await DiscordRpcManager.Instance.TryUpdatePresenceAsync("EasterEgg");
         await BetterLogger.LogAsync("EasterEgg UserControl loaded",

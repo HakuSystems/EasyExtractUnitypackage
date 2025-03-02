@@ -34,10 +34,14 @@ public partial class Dashboard : Window
     public Dashboard()
     {
         InitializeComponent();
+        if (_instance == null)
+            _instance = this;
         ThemeMode = ThemeMode.System;
     }
 
-    public static Dashboard Instance => _instance ??= new Dashboard();
+    public static Dashboard Instance => _instance
+                                        ?? throw new InvalidOperationException(
+                                            "Dashboard has not yet been initialized.");
 
 
     private async void Dashboard_OnLoaded(object sender, RoutedEventArgs e)
@@ -405,7 +409,7 @@ public partial class Dashboard : Window
 
     private void DetailsCard_OnMouseLeave(object sender, MouseEventArgs e)
     {
-        DetailsBtnFocusPoint.Visibility = Visibility.Collapsed;
+        DetailsBtnFocusPoint.Visibility = Visibility.Hidden;
     }
 
     private void FeedbackBtnFooter_OnClick(object sender, RoutedEventArgs e)
@@ -447,8 +451,8 @@ public partial class Dashboard : Window
         canvas.DrawCircle(width / 2, height, height, paint);
     }
 
-    private void TestBtn_OnClick(object sender, RoutedEventArgs e)
+    private void NavigateBackBtn_OnClick(object sender, RoutedEventArgs e)
     {
-        NavView.Navigate(typeof(ExtractedContent));
+        NavView.GoBack();
     }
 }

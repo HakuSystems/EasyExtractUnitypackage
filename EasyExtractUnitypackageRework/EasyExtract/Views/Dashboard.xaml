@@ -123,7 +123,7 @@
                                     <materialDesign:TransitioningContent
                                         Grid.Column="1"
                                         OpeningEffect="{materialDesign:TransitionEffect FadeIn}"
-                                        Visibility="Collapsed"
+                                        Visibility="Hidden"
                                         x:Name="DetailsBtnFocusPoint">
                                         <ui:Button
                                             Background="Transparent"
@@ -196,10 +196,6 @@
                                 VerticalAlignment="Center"
                                 x:Name="DragDropDetectionTxt" />
                         </materialDesign:TransitioningContent>
-                        <ui:Button
-                            Click="TestBtn_OnClick"
-                            Content="TEST"
-                            x:Name="TestBtn" />
                     </ui:NavigationView.MenuItems>
 
                     <ui:NavigationView.FooterMenuItems>
@@ -269,6 +265,18 @@
                                         ToolTip="Settings"
                                         x:Name="SettingsBtnFooter" />
                                 </StackPanel>
+                                <materialDesign:TransitioningContent
+                                    OpeningEffect="{materialDesign:TransitionEffect FadeIn}"
+                                    Visibility="Hidden"
+                                    x:Name="NavigateBackBtn">
+                                    <ui:Button
+                                        Click="NavigateBackBtn_OnClick"
+                                        Content="Back"
+                                        HorizontalAlignment="Stretch"
+                                        Icon="{ui:SymbolIcon ArrowLeft24}"
+                                        Padding="15"
+                                        ToolTip="Go Back" />
+                                </materialDesign:TransitioningContent>
                             </StackPanel>
                         </Grid>
                     </ui:NavigationView.FooterMenuItems>

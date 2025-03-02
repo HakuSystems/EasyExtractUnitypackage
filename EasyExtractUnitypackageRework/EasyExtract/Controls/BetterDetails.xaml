@@ -121,8 +121,7 @@
                                 FontTypography="Subtitle"
                                 FontWeight="SemiBold"
                                 Text="Animations" />
-                            <ui:TextBlock FontTypography="Body"
-                                          Text="{Binding TotalAnimations, Converter={StaticResource NumberFormatConverter}, UpdateSourceTrigger=PropertyChanged}" />
+                            <ui:TextBlock FontTypography="Body" Text="{Binding TotalAnimations, Converter={StaticResource NumberFormatConverter}, UpdateSourceTrigger=PropertyChanged}" />
                         </StackPanel>
 
                         <StackPanel Margin="0,5">
@@ -131,8 +130,7 @@
                                 FontTypography="Subtitle"
                                 FontWeight="SemiBold"
                                 Text="Configurations" />
-                            <ui:TextBlock FontTypography="Body"
-                                          Text="{Binding TotalConfigurations, Converter={StaticResource NumberFormatConverter}, UpdateSourceTrigger=PropertyChanged}" />
+                            <ui:TextBlock FontTypography="Body" Text="{Binding TotalConfigurations, Converter={StaticResource NumberFormatConverter}, UpdateSourceTrigger=PropertyChanged}" />
                         </StackPanel>
 
                     </UniformGrid>

@@ -3,6 +3,7 @@ using System.Windows.Media;
 using EasyExtract.Config;
 using EasyExtract.Config.Models;
 using EasyExtract.Services;
+using EasyExtract.Views;
 using Newtonsoft.Json;
 
 namespace EasyExtract.Controls;
@@ -21,6 +22,8 @@ public partial class Feedback
 
     private async void Feedback_OnLoaded(object sender, RoutedEventArgs e)
     {
+        Dashboard.Instance.NavigateBackBtn.Visibility = Visibility.Visible;
+
         if (ConfigHandler.Instance.Config.UwUModeActive) BetterUwUifyer.ApplyUwUModeToVisualTree(this);
         GetDiscordUsername();
         await DiscordRpcManager.Instance.TryUpdatePresenceAsync("Feedback");
