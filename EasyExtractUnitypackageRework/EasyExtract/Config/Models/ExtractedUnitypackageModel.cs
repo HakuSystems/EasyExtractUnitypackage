@@ -5,6 +5,10 @@ namespace EasyExtract.Config.Models;
 
 public class ExtractedUnitypackageModel : INotifyPropertyChanged
 {
+    private bool _hasEncryptedDll;
+
+
+    private bool _isCategoryView = true;
     private int base64DetectionCount;
     private InfoBarSeverity detailsSeverity = InfoBarSeverity.Informational;
 
@@ -39,37 +43,48 @@ public class ExtractedUnitypackageModel : INotifyPropertyChanged
     private int unitypackageTotalScriptCount;
     private int unitypackageTotalShaderCount;
 
-    private string linkDetectionCountMessage =>
-        LinkDetectionCount > 0
-            ? $"Possible Link(s) Detected: {LinkDetectionCount}"
-            : "No Links Detected";
+    public bool HasEncryptedDll
+    {
+        get => _hasEncryptedDll;
+        set
+        {
+            _hasEncryptedDll = value;
+            OnPropertyChanged();
+        }
+    }
 
-    private string malicousDiscordWebhookCountMessage =>
-        MalicousDiscordWebhookCount > 0
-            ? $"Possible Malicious Discord Webhook(s): {MalicousDiscordWebhookCount}"
-            : "No Malicious Discord Webhooks Found";
+    private string encryptedDllMessage => HasEncryptedDll ? "Encrypted DLL detected!" : "No encrypted DLLs";
+    public string EncryptedDllMessage => encryptedDllMessage;
 
+    public SolidColorBrush GetEncryptedDllColor =>
+        HasEncryptedDll ? new SolidColorBrush(Colors.Red) : new SolidColorBrush(Colors.Green);
 
-    private string unitypackageTotalFileCountMessage =>
-        $"Total Files: {UnitypackageTotalFileCount:N2} / Package Size: {UnitypackageSize}";
+    public bool IsDangerousPackage => HasEncryptedDll || MalicousDiscordWebhookCount > 0 || LinkDetectionCount > 0;
 
-    public string LinkDetectionCountMessage => linkDetectionCountMessage;
+    public string PackageSecuritySummary
+    {
+        get
+        {
+            var messages = new List<string>();
+            if (HasEncryptedDll) messages.Add("Encrypted DLL detected!");
+            if (MalicousDiscordWebhookCount > 0) messages.Add("Discord webhook detected!");
+            if (LinkDetectionCount > 0) messages.Add("Suspicious links detected!");
+            return messages.Any() ? $"⚠️ Possible Dangerous Package ({string.Join(", ", messages)})" : "";
+        }
+    }
 
-    public string MalicousDiscordWebhookCountMessage => malicousDiscordWebhookCountMessage;
+    public bool IsCategoryView
+    {
+        get => _isCategoryView;
+        set
+        {
+            _isCategoryView = value;
+            OnPropertyChanged();
+            OnPropertyChanged(nameof(CurrentStructure));
+        }
+    }
 
-    public string UnitypackageTotalFileCountMessage => unitypackageTotalFileCountMessage;
-
-
-    public SolidColorBrush GetCurrentLinkDetectionColor =>
-        LinkDetectionCount > 0
-            ? new SolidColorBrush(Colors.Red)
-            : new SolidColorBrush(Colors.Green);
-
-    public SolidColorBrush GetCurrentMalicousDiscordWebhookColor =>
-        MalicousDiscordWebhookCount > 0
-            ? new SolidColorBrush(Colors.Red)
-            : new SolidColorBrush(Colors.Green);
-
+    public object CurrentStructure => SubdirectoryItemsGroupedByCategory;
 
     public bool PackageIsChecked
     {
@@ -77,16 +92,6 @@ public class ExtractedUnitypackageModel : INotifyPropertyChanged
         set
         {
             packageIsChecked = value;
-            OnPropertyChanged();
-        }
-    }
-
-    public string UnitypackageDetails
-    {
-        get => unitypackageDetails;
-        set
-        {
-            unitypackageDetails = value;
             OnPropertyChanged();
         }
     }
@@ -117,166 +122,6 @@ public class ExtractedUnitypackageModel : INotifyPropertyChanged
         set
         {
             linkDetectionCount = value;
-            OnPropertyChanged();
-        }
-    }
-
-    public int UnitypackageTotalFileCount
-    {
-        get => unitypackageTotalFileCount;
-        set
-        {
-            unitypackageTotalFileCount = value;
-            OnPropertyChanged();
-        }
-    }
-
-    public int UnitypackageTotalFolderCount
-    {
-        get => unitypackageTotalFolderCount;
-        set
-        {
-            unitypackageTotalFolderCount = value;
-            OnPropertyChanged();
-        }
-    }
-
-    public int UnitypackageTotalScriptCount
-    {
-        get => unitypackageTotalScriptCount;
-        set
-        {
-            unitypackageTotalScriptCount = value;
-            OnPropertyChanged();
-        }
-    }
-
-    public int UnitypackageTotalShaderCount
-    {
-        get => unitypackageTotalShaderCount;
-        set
-        {
-            unitypackageTotalShaderCount = value;
-            OnPropertyChanged();
-        }
-    }
-
-    public int UnitypackageTotalPrefabCount
-    {
-        get => unitypackageTotalPrefabCount;
-        set
-        {
-            unitypackageTotalPrefabCount = value;
-            OnPropertyChanged();
-        }
-    }
-
-    public int UnitypackageTotal3DObjectCount
-    {
-        get => unitypackageTotal3DObjectCount;
-        set
-        {
-            unitypackageTotal3DObjectCount = value;
-            OnPropertyChanged();
-        }
-    }
-
-    public int UnitypackageTotalImageCount
-    {
-        get => unitypackageTotalImageCount;
-        set
-        {
-            unitypackageTotalImageCount = value;
-            OnPropertyChanged();
-        }
-    }
-
-    public int UnitypackageTotalAudioCount
-    {
-        get => unitypackageTotalAudioCount;
-        set
-        {
-            unitypackageTotalAudioCount = value;
-            OnPropertyChanged();
-        }
-    }
-
-    public int UnitypackageTotalAnimationCount
-    {
-        get => unitypackageTotalAnimationCount;
-        set
-        {
-            unitypackageTotalAnimationCount = value;
-            OnPropertyChanged();
-        }
-    }
-
-    public int UnitypackageTotalSceneCount
-    {
-        get => unitypackageTotalSceneCount;
-        set
-        {
-            unitypackageTotalSceneCount = value;
-            OnPropertyChanged();
-        }
-    }
-
-    public int UnitypackageTotalMaterialCount
-    {
-        get => unitypackageTotalMaterialCount;
-        set
-        {
-            unitypackageTotalMaterialCount = value;
-            OnPropertyChanged();
-        }
-    }
-
-    public int UnitypackageTotalAssetCount
-    {
-        get => unitypackageTotalAssetCount;
-        set
-        {
-            unitypackageTotalAssetCount = value;
-            OnPropertyChanged();
-        }
-    }
-
-    public int UnitypackageTotalControllerCount
-    {
-        get => unitypackageTotalControllerCount;
-        set
-        {
-            unitypackageTotalControllerCount = value;
-            OnPropertyChanged();
-        }
-    }
-
-    public int UnitypackageTotalFontCount
-    {
-        get => unitypackageTotalFontCount;
-        set
-        {
-            unitypackageTotalFontCount = value;
-            OnPropertyChanged();
-        }
-    }
-
-    public int UnitypackageTotalConfigurationCount
-    {
-        get => unitypackageTotalConfigurationCount;
-        set
-        {
-            unitypackageTotalConfigurationCount = value;
-            OnPropertyChanged();
-        }
-    }
-
-    public int UnitypackageTotalDataCount
-    {
-        get => unitypackageTotalDataCount;
-        set
-        {
-            unitypackageTotalDataCount = value;
             OnPropertyChanged();
         }
     }

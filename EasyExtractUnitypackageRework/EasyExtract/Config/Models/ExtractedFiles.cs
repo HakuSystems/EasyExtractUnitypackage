@@ -10,9 +10,31 @@ public class ExtractedFiles : INotifyPropertyChanged
     private readonly string _size = "No Size Available";
     private string _extension = "No Extension Available";
     private DateTime _extractedDate = DateTime.Now;
-    private bool _isChecked;
+
+    private bool _isCodeFile;
     private ImageSource? _previewImage;
+    private string _securityWarning = string.Empty;
     private string _symbolIcon = "No Symbol Icon Available";
+
+    public string SecurityWarning
+    {
+        get => _securityWarning;
+        set
+        {
+            _securityWarning = value;
+            OnPropertyChanged();
+        }
+    }
+
+    public bool IsCodeFile
+    {
+        get => _isCodeFile;
+        set
+        {
+            _isCodeFile = value;
+            OnPropertyChanged();
+        }
+    }
 
 
     public ImageSource? PreviewImage
@@ -35,15 +57,6 @@ public class ExtractedFiles : INotifyPropertyChanged
         }
     }
 
-    public bool IsChecked
-    {
-        get => _isChecked;
-        set
-        {
-            _isChecked = value;
-            OnPropertyChanged();
-        }
-    }
 
     public string FileName
     {
@@ -104,16 +117,6 @@ public class ExtractedFiles : INotifyPropertyChanged
             OnPropertyChanged();
         }
     }
-
-    private string unityFileMessasge => $"Category: {Category} / File Size: {Size}";
-
-
-    public string UnityFileMessasge => unityFileMessasge;
-
-    private string unityFileMessasgeTooltip => $"Category: {Category}\nFile Size: {Size}";
-
-
-    public string UnityFileMessasgeTooltip => unityFileMessasgeTooltip;
 
     public event PropertyChangedEventHandler? PropertyChanged;
 
