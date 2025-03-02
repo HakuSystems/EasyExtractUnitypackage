@@ -36,86 +36,85 @@
                     x:Name="RefreshExtractedButton" />
 
                 <ui:Button
-                    Click="EditSuspiciousLinkList_OnClick"
-                    Content="Edit Suspicious Link List"
+                    Click="EditAllowedLinkList_OnClick"
+                    Content="Edit Allowed Link List"
                     Margin="10,0,0,0" />
             </StackPanel>
 
 
             <ui:Card Padding="10">
-                <ui:DynamicScrollViewer VerticalScrollBarVisibility="Auto">
-                    <ui:Card Padding="10">
-                        <Grid>
-                            <ui:DynamicScrollViewer VerticalScrollBarVisibility="Auto">
-                                <TreeView SelectedItemChanged="ExtractedTreeView_OnSelectedItemChanged" x:Name="ExtractedTreeView">
-                                    <TreeView.ItemTemplate>
-                                        <HierarchicalDataTemplate ItemsSource="{Binding CurrentStructure}">
-                                            <StackPanel Orientation="Vertical">
-                                                <ui:TextBlock FontTypography="Subtitle" Text="{Binding UnitypackageName}" />
-                                                <ui:TextBlock
-                                                    FontTypography="Caption"
-                                                    Foreground="Red"
-                                                    Margin="0,2,0,5"
-                                                    Text="{Binding PackageSecuritySummary}"
-                                                    Visibility="{Binding IsDangerousPackage, Converter={StaticResource BoolToVisibilityConverter}}" />
+                <Grid Height="500">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+                    <ui:DynamicScrollViewer IsScrollingVertically="True" VerticalScrollBarVisibility="Auto">
+                        <TreeView SelectedItemChanged="ExtractedTreeView_OnSelectedItemChanged" x:Name="ExtractedTreeView">
+                            <TreeView.ItemTemplate>
+                                <HierarchicalDataTemplate ItemsSource="{Binding CurrentStructure}">
+                                    <StackPanel Orientation="Vertical">
+                                        <ui:TextBlock FontTypography="Subtitle" Text="{Binding UnitypackageName}" />
+                                        <ui:TextBlock
+                                            FontTypography="Caption"
+                                            Foreground="Red"
+                                            Margin="0,2,0,5"
+                                            Text="{Binding PackageSecuritySummary}"
+                                            Visibility="{Binding IsDangerousPackage, Converter={StaticResource BoolToVisibilityConverter}}" />
+                                    </StackPanel>
+
+                                    <HierarchicalDataTemplate.ItemTemplate>
+                                        <HierarchicalDataTemplate ItemsSource="{Binding Value}">
+                                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                                <ui:SymbolIcon Margin="20,0,5,0" Symbol="Folder24" />
+                                                <ui:TextBlock FontTypography="BodyStrong" Text="{Binding Key}" />
                                             </StackPanel>
 
                                             <HierarchicalDataTemplate.ItemTemplate>
-                                                <HierarchicalDataTemplate ItemsSource="{Binding Value}">
-                                                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                                                        <ui:SymbolIcon Margin="20,0,5,0" Symbol="Folder24" />
-                                                        <ui:TextBlock FontTypography="BodyStrong" Text="{Binding Key}" />
-                                                    </StackPanel>
-
-                                                    <HierarchicalDataTemplate.ItemTemplate>
-                                                        <DataTemplate>
-                                                            <StackPanel Margin="40,2,0,2" Orientation="Horizontal">
-                                                                <ui:ToggleSwitch IsChecked="{Binding IsChecked, Mode=TwoWay}" Margin="5,0" />
-                                                                <ui:SymbolIcon
-                                                                    Height="25"
-                                                                    Margin="5,0"
-                                                                    Symbol="{Binding SymbolIconImage}"
-                                                                    Width="25" />
+                                                <DataTemplate>
+                                                    <StackPanel Margin="40,2,0,2" Orientation="Horizontal">
+                                                        <ui:ToggleSwitch IsChecked="{Binding IsChecked, Mode=TwoWay}" Margin="5,0" />
+                                                        <ui:SymbolIcon
+                                                            Height="25"
+                                                            Margin="5,0"
+                                                            Symbol="{Binding SymbolIconImage}"
+                                                            Width="25" />
+                                                        <ui:Image
+                                                            Height="25"
+                                                            Margin="5,0"
+                                                            Source="{Binding PreviewImage}"
+                                                            Width="25">
+                                                            <ui:Image.ToolTip>
                                                                 <ui:Image
-                                                                    Height="25"
-                                                                    Margin="5,0"
+                                                                    MaxHeight="200"
+                                                                    MaxWidth="200"
                                                                     Source="{Binding PreviewImage}"
-                                                                    Width="25">
-                                                                    <ui:Image.ToolTip>
-                                                                        <Image
-                                                                            MaxHeight="200"
-                                                                            MaxWidth="200"
-                                                                            Source="{Binding PreviewImage}"
-                                                                            Stretch="Uniform" />
-                                                                    </ui:Image.ToolTip>
-                                                                </ui:Image>
-                                                                <ui:TextBlock
-                                                                    FontTypography="Body"
-                                                                    Margin="10,0,0,0"
-                                                                    Text="{Binding FileName}" />
-                                                                <ui:TextBlock
-                                                                    Foreground="Red"
-                                                                    Margin="10,0,0,0"
-                                                                    Text="{Binding SecurityWarning}"
-                                                                    Visibility="{Binding SecurityWarning, Converter={StaticResource StringToVisibilityConverter}}" />
-                                                                <ui:Button
-                                                                    Click="OpenFileInEditor_OnClick"
-                                                                    Content="Open in VS Code"
-                                                                    Margin="10,0,0,0"
-                                                                    Tag="{Binding FilePath}"
-                                                                    Visibility="{Binding IsCodeFile, Converter={StaticResource BoolToVisibilityConverter}}" />
-                                                            </StackPanel>
-                                                        </DataTemplate>
-                                                    </HierarchicalDataTemplate.ItemTemplate>
-                                                </HierarchicalDataTemplate>
+                                                                    Stretch="Uniform" />
+                                                            </ui:Image.ToolTip>
+                                                        </ui:Image>
+                                                        <ui:TextBlock
+                                                            FontTypography="Body"
+                                                            Margin="10,0,0,0"
+                                                            Text="{Binding FileName}" />
+                                                        <ui:TextBlock
+                                                            Foreground="Red"
+                                                            Margin="10,0,0,0"
+                                                            Text="{Binding SecurityWarning}"
+                                                            Visibility="{Binding SecurityWarning, Converter={StaticResource StringToVisibilityConverter}}" />
+                                                        <ui:Button
+                                                            Click="OpenFileInEditor_OnClick"
+                                                            Content="Open in VS Code"
+                                                            Margin="10,0,0,0"
+                                                            Tag="{Binding FilePath}"
+                                                            Visibility="{Binding IsCodeFile, Converter={StaticResource BoolToVisibilityConverter}}" />
+                                                    </StackPanel>
+                                                </DataTemplate>
                                             </HierarchicalDataTemplate.ItemTemplate>
                                         </HierarchicalDataTemplate>
-                                    </TreeView.ItemTemplate>
-                                </TreeView>
-                            </ui:DynamicScrollViewer>
-                        </Grid>
-                    </ui:Card>
-                </ui:DynamicScrollViewer>
+                                    </HierarchicalDataTemplate.ItemTemplate>
+                                </HierarchicalDataTemplate>
+                            </TreeView.ItemTemplate>
+                        </TreeView>
+                    </ui:DynamicScrollViewer>
+                </Grid>
             </ui:Card>
 
             <StackPanel

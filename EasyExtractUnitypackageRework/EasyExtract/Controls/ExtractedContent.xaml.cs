@@ -83,9 +83,10 @@ public partial class ExtractedContent
 
         var subItemTasks = files.Select(async file =>
         {
-            var previewImageTask = GetOrCreatePreviewAsync(file);
+            var previewTask = GetOrCreatePreviewAsync(file);
             var securityWarningTask = GetSecurityWarningAsync(file, pkg);
-            await Task.WhenAll(previewImageTask, securityWarningTask);
+
+            await Task.WhenAll(previewTask, securityWarningTask);
 
             return new ExtractedFiles
             {
@@ -97,7 +98,7 @@ public partial class ExtractedContent
                 ExtractedDate = file.CreationTime,
                 SymbolIconImage = await _extractionHelper.GetSymbolByExtension(file.Extension),
                 IsCodeFile = new[] { ".cs", ".json", ".shader", ".txt" }.Contains(file.Extension.ToLower()),
-                PreviewImage = previewImageTask.Result,
+                PreviewImage = previewTask.Result,
                 SecurityWarning = securityWarningTask.Result
             };
         });
@@ -194,15 +195,21 @@ public partial class ExtractedContent
     }
 
 
-    private void EditSuspiciousLinkList_OnClick(object sender, RoutedEventArgs e)
+    private void EditAllowedLinkList_OnClick(object sender, RoutedEventArgs e)
     {
         var appDataFolder = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
             "EasyExtract");
         Directory.CreateDirectory(appDataFolder);
-        var linkFilePath = Path.Combine(appDataFolder, "suspicious_links.txt");
+        var linkFilePath = Path.Combine(appDataFolder, "allowed_links.txt");
 
         if (!File.Exists(linkFilePath))
-            File.WriteAllText(linkFilePath, "http://example.com\nhttps://discord.com/api/webhooks");
+        {
+            var documentation = "# Allowed Links List\n" +
+                                "# Add links below (one per line). Lines starting with '#' are comments and ignored.\n" +
+                                "http://example.com\n" +
+                                "https://discord.com/api/webhooks";
+            File.WriteAllText(linkFilePath, documentation);
+        }
 
         Process.Start(new ProcessStartInfo("notepad.exe", linkFilePath) { UseShellExecute = true });
     }
