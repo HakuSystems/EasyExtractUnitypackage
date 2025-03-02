@@ -34,10 +34,6 @@
                     Content="Refresh"
                     Margin="10,0,0,0"
                     x:Name="RefreshExtractedButton" />
-                <ui:Button
-                    Click="ClearCachedPreviews_OnClick"
-                    Content="Clear Cached Previews"
-                    Margin="10,0,0,0" />
 
                 <ui:Button
                     Click="EditSuspiciousLinkList_OnClick"
@@ -51,13 +47,11 @@
                     <ui:Card Padding="10">
                         <Grid>
                             <ui:DynamicScrollViewer VerticalScrollBarVisibility="Auto">
-                                <TreeView SelectedItemChanged="ExtractedTreeView_OnSelectedItemChanged"
-                                          x:Name="ExtractedTreeView">
+                                <TreeView SelectedItemChanged="ExtractedTreeView_OnSelectedItemChanged" x:Name="ExtractedTreeView">
                                     <TreeView.ItemTemplate>
                                         <HierarchicalDataTemplate ItemsSource="{Binding CurrentStructure}">
                                             <StackPanel Orientation="Vertical">
-                                                <ui:TextBlock FontTypography="Subtitle"
-                                                              Text="{Binding UnitypackageName}" />
+                                                <ui:TextBlock FontTypography="Subtitle" Text="{Binding UnitypackageName}" />
                                                 <ui:TextBlock
                                                     FontTypography="Caption"
                                                     Foreground="Red"
@@ -76,9 +70,7 @@
                                                     <HierarchicalDataTemplate.ItemTemplate>
                                                         <DataTemplate>
                                                             <StackPanel Margin="40,2,0,2" Orientation="Horizontal">
-                                                                <ui:ToggleSwitch
-                                                                    IsChecked="{Binding IsChecked, Mode=TwoWay}"
-                                                                    Margin="5,0" />
+                                                                <ui:ToggleSwitch IsChecked="{Binding IsChecked, Mode=TwoWay}" Margin="5,0" />
                                                                 <ui:SymbolIcon
                                                                     Height="25"
                                                                     Margin="5,0"

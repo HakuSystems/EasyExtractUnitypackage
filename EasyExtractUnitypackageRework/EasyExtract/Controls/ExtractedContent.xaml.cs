@@ -134,41 +134,36 @@ public partial class ExtractedContent
     private async Task<BitmapImage?> GetOrCreatePreviewAsync(FileInfo file)
     {
         var previewPath = $"{file.FullName}.EASYEXTRACTPREVIEW.png";
-        if (_previewCache.TryGetValue(previewPath, out var cached)) return cached;
+        if (_previewCache.TryGetValue(previewPath, out var cached))
+            return cached;
 
-        BitmapImage previewImage;
         if (File.Exists(previewPath))
         {
-            previewImage = new BitmapImage(new Uri(previewPath));
-        }
-        else
-        {
-            previewImage = await GeneratePreviewImageAsync(file);
-            if (previewImage != null)
-                CodeToImageConverter.SaveImageToFile(previewImage, previewPath);
+            var previewImage = LoadImageWithFileRelease(previewPath);
+            _previewCache[previewPath] = previewImage;
+            return previewImage;
         }
 
-        _previewCache[previewPath] = previewImage;
-        return previewImage;
+        var generatedPreview = await GeneratePreviewImageAsync(file);
+        if (generatedPreview != null)
+        {
+            CodeToImageConverter.SaveImageToFile(generatedPreview, previewPath);
+            _previewCache[previewPath] = generatedPreview;
+        }
+
+        return generatedPreview;
     }
 
-    private async void ClearCachedPreviews_OnClick(object sender, RoutedEventArgs e)
+    private BitmapImage LoadImageWithFileRelease(string path)
     {
-        var previews = Directory.GetFiles(ConfigHandler.Instance.Config.LastExtractedPath, "*.EASYEXTRACTPREVIEW.png",
-            SearchOption.AllDirectories);
-        foreach (var preview in previews)
-            try
-            {
-                File.Delete(preview);
-            }
-            catch (Exception ex)
-            {
-                await BetterLogger.LogAsync(ex.ToString(), Importance.Error);
-            }
-
-        _previewCache.Clear();
-
-        await UpdateExtractedFilesAsync();
+        var bitmap = new BitmapImage();
+        using var stream = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read);
+        bitmap.BeginInit();
+        bitmap.CacheOption = BitmapCacheOption.OnLoad; // Crucial to allow file deletion
+        bitmap.StreamSource = stream;
+        bitmap.EndInit();
+        bitmap.Freeze(); // Prevent cross-thread issues
+        return bitmap;
     }
 
 
@@ -190,7 +185,9 @@ public partial class ExtractedContent
     {
         var imageExtensions = new[] { ".png", ".jpg", ".jpeg", ".bmp", ".tga", ".psd" };
         if (imageExtensions.Contains(file.Extension.ToLower()))
-            return new BitmapImage(new Uri(file.FullName));
+        {
+            return await LoadImageWithoutLockAsync(file.FullName);
+        }
 
         var codeExtensions = new[] { ".cs", ".txt", ".json", ".shader" };
         if (codeExtensions.Contains(file.Extension.ToLower()))
@@ -202,11 +199,36 @@ public partial class ExtractedContent
         return null;
     }
 
+    private async Task<BitmapImage?> LoadImageWithoutLockAsync(string filePath)
+    {
+        try
+        {
+            var bitmap = new BitmapImage();
+            await using (var stream = new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.Read))
+            {
+                bitmap.BeginInit();
+                bitmap.CacheOption = BitmapCacheOption.OnLoad; // Crucial fix here
+                bitmap.StreamSource = stream;
+                bitmap.EndInit();
+                bitmap.Freeze(); // Freeze to avoid cross-thread issues
+            }
+
+            return bitmap;
+        }
+        catch (Exception ex)
+        {
+            await BetterLogger.LogAsync($"Failed to load image '{filePath}': {ex.Message}", Importance.Error);
+            return null;
+        }
+    }
+
 
     private async void RefreshExtractedButton_OnClick(object sender, RoutedEventArgs e)
     {
+        _previewCache.Clear(); // Clear cache to force re-generate previews
         await UpdateExtractedFilesAsync();
     }
+
 
     private void ExtractedSearchBox_OnTextChanged(object sender, TextChangedEventArgs e)
     {
@@ -223,14 +245,33 @@ public partial class ExtractedContent
         _extractedPackagesView.Refresh();
     }
 
-    private void DeleteExtractedButton_OnClick(object sender, RoutedEventArgs e)
+    private async void DeleteExtractedButton_OnClick(object sender, RoutedEventArgs e)
     {
         foreach (var pkg in ExtractedUnitypackages.Where(x => x.PackageIsChecked).ToList())
         {
-            Directory.Delete(pkg.UnitypackagePath, true);
-            ExtractedUnitypackages.Remove(pkg);
+            try
+            {
+                ClearPreviewsFromCache(pkg.UnitypackagePath);
+                Directory.Delete(pkg.UnitypackagePath, true);
+                ExtractedUnitypackages.Remove(pkg);
+            }
+            catch (Exception ex)
+            {
+                await BetterLogger.LogAsync($"Failed to delete {pkg.UnitypackagePath}: {ex.Message}", Importance.Error);
+            }
         }
     }
+
+    private void ClearPreviewsFromCache(string directoryPath)
+    {
+        var keysToRemove = _previewCache.Keys
+            .Where(key => key.StartsWith(directoryPath, StringComparison.InvariantCultureIgnoreCase))
+            .ToList();
+
+        foreach (var key in keysToRemove)
+            _previewCache.Remove(key);
+    }
+
 
     private void OpenExtractedDirectoryButton_OnClick(object sender, RoutedEventArgs e)
     {
