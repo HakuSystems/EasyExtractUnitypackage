@@ -43,6 +43,24 @@ public class ExtractedUnitypackageModel : INotifyPropertyChanged
     private int unitypackageTotalScriptCount;
     private int unitypackageTotalShaderCount;
 
+    public int UnitypackageTotalFolderCount { get; set; }
+    public int UnitypackageTotalFileCount { get; set; }
+    public int UnitypackageTotalScriptCount { get; set; }
+    public int UnitypackageTotalMaterialCount { get; set; }
+    public int UnitypackageTotal3DObjectCount { get; set; }
+    public int UnitypackageTotalImageCount { get; set; }
+    public int UnitypackageTotalAudioCount { get; set; }
+    public int UnitypackageTotalControllerCount { get; set; }
+    public int UnitypackageTotalConfigurationCount { get; set; }
+    public int UnitypackageTotalAnimationCount { get; set; }
+    public int UnitypackageTotalAssetCount { get; set; }
+    public int UnitypackageTotalSceneCount { get; set; }
+    public int UnitypackageTotalShaderCount { get; set; }
+    public int UnitypackageTotalPrefabCount { get; set; }
+    public int UnitypackageTotalFontCount { get; set; }
+    public int UnitypackageTotalDataCount { get; set; }
+
+
     public bool HasEncryptedDll
     {
         get => _hasEncryptedDll;

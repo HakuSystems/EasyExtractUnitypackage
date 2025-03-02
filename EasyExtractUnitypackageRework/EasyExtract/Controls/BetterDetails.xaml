@@ -23,14 +23,26 @@
         <materialDesign:TransitioningContent OpeningEffect="{materialDesign:TransitionEffect FadeIn}">
             <ui:Card Padding="20">
                 <StackPanel>
-                    <ui:TextBlock
-                        FontSize="24"
-                        FontWeight="Bold"
-                        Margin="0,0,0,10"
-                        Text="Total Extracted Details" />
+                    <DockPanel>
+                        <ui:TextBlock
+                            FontSize="24"
+                            FontWeight="Bold"
+                            Text="Total Extracted Details" />
+
+                        <ui:Button
+                            Click="RefreshButton_OnClick"
+                            Content="Refresh"
+                            DockPanel.Dock="Right"
+                            Margin="10,0,0,10"
+                            ToolTip="Refresh Details" />
+                    </DockPanel>
+
                     <Separator />
 
                     <UniformGrid Columns="2" Margin="0,10,0,0">
+
+                        <!--  All Category-based details  -->
+
                         <StackPanel Margin="0,5">
                             <ui:SymbolIcon FontSize="20" Symbol="Folder24" />
                             <ui:TextBlock
@@ -104,26 +116,83 @@
                         </StackPanel>
 
                         <StackPanel Margin="0,5">
-                            <ui:SymbolIcon FontSize="20" Symbol="Settings24" />
-                            <ui:TextBlock
-                                FontTypography="Subtitle"
-                                FontWeight="SemiBold"
-                                Text="Configurations" />
-                            <ui:TextBlock FontTypography="Body" Text="{Binding TotalConfigurations, Converter={StaticResource NumberFormatConverter}, UpdateSourceTrigger=PropertyChanged}" />
-                        </StackPanel>
-
-                        <StackPanel Margin="0,5">
                             <ui:SymbolIcon FontSize="20" Symbol="Video24" />
                             <ui:TextBlock
                                 FontTypography="Subtitle"
                                 FontWeight="SemiBold"
                                 Text="Animations" />
-                            <ui:TextBlock FontTypography="Body" Text="{Binding TotalAnimations, Converter={StaticResource NumberFormatConverter}, UpdateSourceTrigger=PropertyChanged}" />
+                            <ui:TextBlock FontTypography="Body"
+                                          Text="{Binding TotalAnimations, Converter={StaticResource NumberFormatConverter}, UpdateSourceTrigger=PropertyChanged}" />
                         </StackPanel>
+
+                        <StackPanel Margin="0,5">
+                            <ui:SymbolIcon FontSize="20" Symbol="Settings24" />
+                            <ui:TextBlock
+                                FontTypography="Subtitle"
+                                FontWeight="SemiBold"
+                                Text="Configurations" />
+                            <ui:TextBlock FontTypography="Body"
+                                          Text="{Binding TotalConfigurations, Converter={StaticResource NumberFormatConverter}, UpdateSourceTrigger=PropertyChanged}" />
+                        </StackPanel>
+
                     </UniformGrid>
 
                     <Separator Margin="0,15,0,10" />
 
+                    <StackPanel
+                        Margin="0,10,0,0"
+                        Orientation="Horizontal"
+                        VerticalAlignment="Center">
+                        <ui:Button Click="ExportCsvButton_OnClick" Padding="12,6">
+                            Export as CSV
+                        </ui:Button>
+
+                        <ui:Button
+                            Click="ExportJsonButton_OnClick"
+                            Margin="10,0,0,0"
+                            Padding="12,6">
+                            Export as JSON
+                        </ui:Button>
+
+                        <ui:Button
+                            Click="ExportXmlButton_OnClick"
+                            Margin="10,0,0,0"
+                            Padding="12,6">
+                            Export as XML
+                        </ui:Button>
+
+                        <StackPanel
+                            Margin="20,0,0,0"
+                            Orientation="Horizontal"
+                            VerticalAlignment="Center">
+                            <ui:SymbolIcon
+                                FontSize="18"
+                                Symbol="Storage24"
+                                VerticalAlignment="Center" />
+                            <ui:TextBlock
+                                FontSize="14"
+                                FontWeight="SemiBold"
+                                Margin="5,0,0,0"
+                                Text="{Binding TotalSizeBytes, Converter={StaticResource FileSizeConverter}, StringFormat='Storage Used: {0}'}"
+                                VerticalAlignment="Center" />
+                        </StackPanel>
+
+                        <StackPanel
+                            Margin="20,0,0,0"
+                            Orientation="Horizontal"
+                            VerticalAlignment="Center">
+                            <ui:SymbolIcon
+                                FontSize="18"
+                                Symbol="Archive24"
+                                VerticalAlignment="Center" />
+                            <ui:TextBlock
+                                FontSize="14"
+                                FontWeight="SemiBold"
+                                Margin="5,0,0,0"
+                                Text="{Binding TotalExtracted, StringFormat='Packages Extracted: {0:N0}'}"
+                                VerticalAlignment="Center" />
+                        </StackPanel>
+                    </StackPanel>
                 </StackPanel>
             </ui:Card>
         </materialDesign:TransitioningContent>

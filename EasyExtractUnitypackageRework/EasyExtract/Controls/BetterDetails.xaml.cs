@@ -1,6 +1,9 @@
-﻿using EasyExtract.Config;
+﻿using System.Text;
+using System.Xml.Linq;
+using EasyExtract.Config;
 using EasyExtract.Services;
 using EasyExtract.Views;
+using Newtonsoft.Json;
 
 namespace EasyExtract.Controls;
 
@@ -17,6 +20,21 @@ public partial class BetterDetails : UserControl
     private async void BetterDetails_OnLoaded(object sender, RoutedEventArgs e)
     {
         await DiscordRpcManager.Instance.TryUpdatePresenceAsync("Details");
+        await LoadDetailsAsync();
+    }
+
+    private void FeedbackButton_OnClick(object sender, RoutedEventArgs e)
+    {
+        Dashboard.Instance.NavView.Navigate(typeof(Feedback));
+    }
+
+    private async void RefreshButton_OnClick(object sender, RoutedEventArgs e)
+    {
+        await LoadDetailsAsync();
+    }
+
+    private async Task LoadDetailsAsync()
+    {
         var model = (ConfigModel)DataContext;
 
         model.TotalFolders = await ExtractionHelper.GetTotalFolderCount(_extractionPath);
@@ -29,11 +47,102 @@ public partial class BetterDetails : UserControl
         model.TotalControllers = await ExtractionHelper.GetTotalControllerCount(_extractionPath);
         model.TotalConfigurations = await ExtractionHelper.GetTotalConfigurationCount(_extractionPath);
         model.TotalAnimations = await ExtractionHelper.GetTotalAnimationCount(_extractionPath);
+
+        model.TotalSizeBytes = await ExtractionHelper.GetTotalSizeInBytesAsync(_extractionPath);
+        model.TotalExtracted = model.ExtractedUnitypackages.Count;
+        model.LastExtractionTime = DateTime.Now;
     }
 
-    private void FeedbackButton_OnClick(object sender, RoutedEventArgs e)
+    private async void ExportJsonButton_OnClick(object sender, RoutedEventArgs e)
     {
-        var dashboard = Dashboard.Instance;
-        dashboard.NavView.Navigate(typeof(Feedback));
+        var model = (ConfigModel)DataContext;
+
+        var details = new
+        {
+            model.TotalFolders,
+            model.TotalFilesExtracted,
+            model.TotalScripts,
+            model.TotalMaterials,
+            model.Total3DObjects,
+            model.TotalImages,
+            model.TotalAudios,
+            model.TotalControllers,
+            model.TotalConfigurations,
+            model.TotalAnimations,
+            TotalSize = model.TotalSizeBytes,
+            LastExtracted = model.LastExtractionTime
+        };
+
+        var json = JsonConvert.SerializeObject(details, Formatting.Indented);
+
+        var saveFileDialog = new SaveFileDialog
+        {
+            FileName = "ExtractedDetails.json",
+            Filter = "JSON files (*.json)|*.json"
+        };
+
+        if (saveFileDialog.ShowDialog() == true)
+            await File.WriteAllTextAsync(saveFileDialog.FileName, json);
+    }
+
+    private async void ExportXmlButton_OnClick(object sender, RoutedEventArgs e)
+    {
+        var model = (ConfigModel)DataContext;
+
+        var xDoc = new XDocument(
+            new XElement("ExtractedDetails",
+                new XElement("Folders", model.TotalFolders),
+                new XElement("Files", model.TotalFilesExtracted),
+                new XElement("Scripts", model.TotalScripts),
+                new XElement("Materials", model.TotalMaterials),
+                new XElement("Objects3D", model.Total3DObjects),
+                new XElement("Images", model.TotalImages),
+                new XElement("Audios", model.TotalAudios),
+                new XElement("Controllers", model.TotalControllers),
+                new XElement("Configurations", model.TotalConfigurations),
+                new XElement("Animations", model.TotalAnimations),
+                new XElement("TotalSizeBytes", model.TotalSizeBytes),
+                new XElement("LastExtracted", model.LastExtractionTime.ToString("o"))
+            )
+        );
+
+        var saveFileDialog = new SaveFileDialog
+        {
+            FileName = "ExtractedDetails.xml",
+            Filter = "XML files (*.xml)|*.xml"
+        };
+
+        if (saveFileDialog.ShowDialog() == true)
+            await File.WriteAllTextAsync(saveFileDialog.FileName, xDoc.ToString());
+    }
+
+
+    private async void ExportCsvButton_OnClick(object sender, RoutedEventArgs e)
+    {
+        var model = (ConfigModel)DataContext;
+
+        var csvContent = new StringBuilder();
+        csvContent.AppendLine("Category,Count");
+        csvContent.AppendLine($"Folders,{model.TotalFolders}");
+        csvContent.AppendLine($"Files,{model.TotalFilesExtracted}");
+        csvContent.AppendLine($"Scripts,{model.TotalScripts}");
+        csvContent.AppendLine($"Materials,{model.TotalMaterials}");
+        csvContent.AppendLine($"3D Objects,{model.Total3DObjects}");
+        csvContent.AppendLine($"Images,{model.TotalImages}");
+        csvContent.AppendLine($"Audios,{model.TotalAudios}");
+        csvContent.AppendLine($"Controllers,{model.TotalControllers}");
+        csvContent.AppendLine($"Configurations,{model.TotalConfigurations}");
+        csvContent.AppendLine($"Animations,{model.TotalAnimations}");
+        csvContent.AppendLine($"Total Size,{model.TotalSizeBytes}");
+        csvContent.AppendLine($"Last Extracted,{model.LastExtractionTime:G}");
+
+        var saveFileDialog = new SaveFileDialog
+        {
+            FileName = "ExtractedDetails.csv",
+            Filter = "CSV files (*.csv)|*.csv"
+        };
+
+        if (saveFileDialog.ShowDialog() == true)
+            await File.WriteAllTextAsync(saveFileDialog.FileName, csvContent.ToString());
     }
 }

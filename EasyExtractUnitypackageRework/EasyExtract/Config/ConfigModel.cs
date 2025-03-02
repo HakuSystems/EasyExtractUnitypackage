@@ -11,6 +11,8 @@ public class ConfigModel : INotifyPropertyChanged
     private string _appTitle = "EasyExtractUnitypackage";
     private string _backgroundColorHex = "#2b2b2b"; // Default Color from Colors.xaml
     private bool _contextMenuToggle = true;
+
+    private int _currentExtractedCount;
     private string _currentThemeComponentsContrast = "N/A";
     private string _currentThemeContrastRatio = "N/A";
     private string _currentThemeHeadlinesContrast = "N/A";
@@ -33,8 +35,12 @@ public class ConfigModel : INotifyPropertyChanged
     private ObservableCollection<HistoryModel> _history = new();
     private ObservableCollection<IgnoredPackageInventory> _ignoredUnityPackages = new();
 
+    private bool _isLoading;
+
     private string _lastExtractedPath =
         Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "EasyExtract", "Extracted");
+
+    private DateTime _lastExtractionTime;
 
 
     private string _primaryColorHex = "#2ca7f2"; // Default Color from Colors.xaml
@@ -58,6 +64,8 @@ public class ConfigModel : INotifyPropertyChanged
     private int _totalExtracted;
     private int _totalFilesExtracted;
 
+    private int _totalFilesToExtract;
+
     private int _totalFolders;
 
     private int _totalImages;
@@ -65,9 +73,52 @@ public class ConfigModel : INotifyPropertyChanged
     private int _totalMaterials;
 
     private int _totalScripts;
+
+
+    private long _totalSizeBytes;
     private List<UnitypackageFileInfo> _unitypackageFiles = new();
     private UpdateModel _update = new();
     private bool _uwUModeActive;
+
+    public long TotalSizeBytes
+    {
+        get => _totalSizeBytes;
+        set
+        {
+            if (_totalSizeBytes != value)
+            {
+                _totalSizeBytes = value;
+                OnPropertyChanged();
+            }
+        }
+    }
+
+    public bool IsLoading
+    {
+        get => _isLoading;
+        set
+        {
+            if (_isLoading != value)
+            {
+                _isLoading = value;
+                OnPropertyChanged();
+            }
+        }
+    }
+
+    public DateTime LastExtractionTime
+    {
+        get => _lastExtractionTime;
+        set
+        {
+            if (_lastExtractionTime != value)
+            {
+                _lastExtractionTime = value;
+                OnPropertyChanged();
+            }
+        }
+    }
+
 
     public List<SearchEverythingModel> SearchEverythingResults
     {
@@ -369,6 +420,26 @@ public class ConfigModel : INotifyPropertyChanged
                 _totalExtracted = value;
                 OnPropertyChanged();
             }
+        }
+    }
+
+    public int CurrentExtractedCount
+    {
+        get => _currentExtractedCount;
+        set
+        {
+            _currentExtractedCount = value;
+            OnPropertyChanged();
+        }
+    }
+
+    public int TotalFilesToExtract
+    {
+        get => _totalFilesToExtract;
+        set
+        {
+            _totalFilesToExtract = value;
+            OnPropertyChanged();
         }
     }
 
