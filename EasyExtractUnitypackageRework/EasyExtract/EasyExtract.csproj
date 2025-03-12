@@ -13,6 +13,12 @@
         <AssemblyVersion>2.0.6.7</AssemblyVersion>
         <LangVersion>default</LangVersion>
         <NoWarn>$(NoWarn);WPF0001</NoWarn>
+        <Version>2.0.6.7</Version>
+        <Authors>HakuSystems</Authors>
+        <NeutralLanguage>en</NeutralLanguage>
+        <PublicSign>false</PublicSign>
+        <DelaySign>false</DelaySign>
+        <StartupObject>EasyExtract.Core.Program</StartupObject>
     </PropertyGroup>
 
     <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
@@ -20,6 +26,7 @@
         <Prefer32bit>false</Prefer32bit>
         <Optimize>true</Optimize>
         <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+        <DebugType>full</DebugType>
     </PropertyGroup>
 
     <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
