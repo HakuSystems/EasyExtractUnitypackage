@@ -16,8 +16,6 @@ public partial class ExtractedContent
     private readonly ICollectionView _extractedPackagesView;
     private readonly ExtractionHelper _extractionHelper = new();
 
-    private readonly bool _isCategoryView = true;
-
 
     private readonly Dictionary<string, BitmapImage> _previewCache = new();
 
@@ -57,7 +55,7 @@ public partial class ExtractedContent
 
         var pkgs = await Task.WhenAll(tasks);
 
-        Application.Current.Dispatcher.Invoke(() =>
+        Application.Current.Dispatcher.InvokeAsync(() =>
         {
             foreach (var pkg in pkgs)
                 ExtractedUnitypackages.Add(pkg);
@@ -65,16 +63,16 @@ public partial class ExtractedContent
     }
 
 
-    private async Task<ExtractedUnitypackageModel> CreateUnitypackageModelAsync(string dir)
+    private Task<ExtractedUnitypackageModel> CreateUnitypackageModelAsync(string dir)
     {
         var size = new DirectoryInfo(dir).EnumerateFiles("*.*", SearchOption.AllDirectories).Sum(f => f.Length);
-        return new ExtractedUnitypackageModel
+        return Task.FromResult(new ExtractedUnitypackageModel
         {
             UnitypackageName = Path.GetFileName(dir),
             UnitypackagePath = dir,
             UnitypackageSize = new FileSizeConverter().Convert(size, null, null, CultureInfo.CurrentCulture).ToString(),
             UnitypackageExtractedDate = Directory.GetCreationTime(dir)
-        };
+        });
     }
 
     private async Task AddSubItemsAsync(ExtractedUnitypackageModel pkg, string dir)
@@ -108,7 +106,7 @@ public partial class ExtractedContent
 
         var subItems = await Task.WhenAll(subItemTasks);
 
-        Application.Current.Dispatcher.Invoke(() =>
+        Application.Current.Dispatcher.InvokeAsync(() =>
         {
             foreach (var item in subItems)
                 pkg.SubdirectoryItems.Add(item);
@@ -119,7 +117,7 @@ public partial class ExtractedContent
         });
     }
 
-    private string GetVSCodeExecutablePath()
+    private static string GetVsCodeExecutablePath()
     {
         var possiblePaths = new[]
         {
@@ -167,7 +165,7 @@ public partial class ExtractedContent
         if (_previewCache.TryGetValue(previewPath, out var cached))
             return cached;
 
-        BitmapImage? previewImage = null;
+        BitmapImage? previewImage;
         if (File.Exists(previewPath))
         {
             previewImage = await LoadImageWithoutLockAsync(previewPath);
@@ -183,18 +181,6 @@ public partial class ExtractedContent
             _previewCache[previewPath] = previewImage;
 
         return previewImage;
-    }
-
-    private BitmapImage LoadImageWithFileRelease(string path)
-    {
-        var bitmap = new BitmapImage();
-        using var stream = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read);
-        bitmap.BeginInit();
-        bitmap.CacheOption = BitmapCacheOption.OnLoad; // Crucial to allow file deletion
-        bitmap.StreamSource = stream;
-        bitmap.EndInit();
-        bitmap.Freeze(); // Prevent cross-thread issues
-        return bitmap;
     }
 
 
@@ -218,13 +204,10 @@ public partial class ExtractedContent
     }
 
 
-    private async Task<BitmapImage?> GeneratePreviewImageAsync(FileInfo file)
+    private static async Task<BitmapImage?> GeneratePreviewImageAsync(FileInfo file)
     {
         var imageExtensions = new[] { ".png", ".jpg", ".jpeg", ".bmp", ".tga", ".psd" };
-        if (imageExtensions.Contains(file.Extension.ToLower()))
-        {
-            return await LoadImageWithoutLockAsync(file.FullName);
-        }
+        if (imageExtensions.Contains(file.Extension.ToLower())) return await LoadImageWithoutLockAsync(file.FullName);
 
         var codeExtensions = new[] { ".cs", ".txt", ".json", ".shader" };
         if (codeExtensions.Contains(file.Extension.ToLower()))
@@ -236,7 +219,7 @@ public partial class ExtractedContent
         return null;
     }
 
-    private async Task<BitmapImage?> LoadImageWithoutLockAsync(string filePath)
+    private static async Task<BitmapImage?> LoadImageWithoutLockAsync(string filePath)
     {
         try
         {
@@ -290,19 +273,17 @@ public partial class ExtractedContent
             .ToList();
 
         foreach (var pkg in packagesToDelete)
-        {
             try
             {
                 ClearPreviewsFromCache(pkg.UnitypackagePath);
                 await Task.Run(() => Directory.Delete(pkg.UnitypackagePath, true));
 
-                Application.Current.Dispatcher.Invoke(() => ExtractedUnitypackages.Remove(pkg));
+                Application.Current.Dispatcher.InvokeAsync(() => ExtractedUnitypackages.Remove(pkg));
             }
             catch (Exception ex)
             {
                 await BetterLogger.LogAsync($"Failed to delete {pkg.UnitypackagePath}: {ex.Message}", Importance.Error);
             }
-        }
     }
 
     private void ClearPreviewsFromCache(string directoryPath)
@@ -327,7 +308,7 @@ public partial class ExtractedContent
     {
         if (sender is Button btn && btn.Tag is string path && File.Exists(path))
         {
-            var codePath = GetVSCodeExecutablePath();
+            var codePath = GetVsCodeExecutablePath();
             if (string.IsNullOrEmpty(codePath)) return;
 
             Process.Start(new ProcessStartInfo(codePath, path) { UseShellExecute = true });

@@ -23,7 +23,7 @@ public class ExtractedUnitypackageModel : INotifyPropertyChanged
 
     private string unitypackageName = "No Name Available";
     private string unitypackagePath = "No Path Available";
-    private string unitypackageSize = "No Size Available";
+    private string? unitypackageSize = "No Size Available";
     private int unitypackageTotal3DObjectCount;
     private int unitypackageTotalAnimationCount;
     private int unitypackageTotalAssetCount;
@@ -164,7 +164,7 @@ public class ExtractedUnitypackageModel : INotifyPropertyChanged
         }
     }
 
-    public string UnitypackageSize
+    public string? UnitypackageSize
     {
         get => unitypackageSize;
         set

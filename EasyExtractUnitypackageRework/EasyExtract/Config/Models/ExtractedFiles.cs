@@ -7,7 +7,7 @@ public class ExtractedFiles : INotifyPropertyChanged
     private readonly string? _category = "No Category Available";
     private readonly string _fileName = "No Name Available";
     private readonly string _filePath = "No Path Available";
-    private readonly string _size = "No Size Available";
+    private readonly string? _size = "No Size Available";
     private string _extension = "No Extension Available";
     private DateTime _extractedDate = DateTime.Now;
 
@@ -98,7 +98,7 @@ public class ExtractedFiles : INotifyPropertyChanged
         }
     }
 
-    public string Size
+    public string? Size
     {
         get => _size;
         init

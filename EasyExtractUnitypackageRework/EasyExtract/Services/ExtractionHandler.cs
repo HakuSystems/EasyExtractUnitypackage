@@ -46,7 +46,7 @@ public class ExtractionHandler
             // Directly update properties to ensure no double counting
             var extractedPackage = new ExtractedUnitypackageModel
             {
-                UnitypackageName = unitypackage.FileName,
+                UnitypackageName = unitypackage.FileName ?? "Unknown name",
                 UnitypackagePath = targetFolder,
                 UnitypackageExtractedDate = DateTime.Now,
                 UnitypackageSize = new FileSizeConverter().Convert(
@@ -76,7 +76,7 @@ public class ExtractionHandler
             };
 
             // Batch UI update
-            Application.Current.Dispatcher.Invoke(() =>
+            Application.Current.Dispatcher.InvokeAsync(() =>
             {
                 ConfigHandler.Instance.Config.ExtractedUnitypackages.Add(extractedPackage);
                 ConfigHandler.Instance.Config.TotalExtracted =
@@ -97,7 +97,7 @@ public class ExtractionHandler
         }
     }
 
-    private async Task<bool> CheckForEncryptedDlls(string folder, ExtractionHelper helper)
+    private static async Task<bool> CheckForEncryptedDlls(string folder, ExtractionHelper helper)
     {
         var dllFiles = Directory.GetFiles(folder, "*.dll", SearchOption.AllDirectories);
         foreach (var dll in dllFiles)
@@ -108,7 +108,7 @@ public class ExtractionHandler
     }
 
 
-    private async Task<string> GetTempFolderPath(SearchEverythingModel unitypackage)
+    private static async Task<string> GetTempFolderPath(SearchEverythingModel unitypackage)
     {
         if (unitypackage.FileName != null)
         {
@@ -122,7 +122,7 @@ public class ExtractionHandler
         return string.Empty;
     }
 
-    private async Task<string> GetTargetFolderPath(SearchEverythingModel unitypackage)
+    private static async Task<string> GetTargetFolderPath(SearchEverythingModel unitypackage)
     {
         if (unitypackage.FileName != null)
         {
@@ -165,14 +165,14 @@ public class ExtractionHandler
     private static async Task ExtractAndWriteFiles(
         SearchEverythingModel unitypackage,
         string tempFolder,
-        IProgress<(int extracted, int total)> fileProgress = null)
+        IProgress<(int extracted, int total)>? fileProgress = null)
     {
         var extractedCount = 0;
 
         // Cache entries only once
         var entries = new List<IEntry>();
-        using (var inStream = File.OpenRead(unitypackage.FilePath))
-        using (var gzipStream = new GZipStream(inStream, CompressionMode.Decompress))
+        await using (var inStream = File.OpenRead(unitypackage.FilePath!))
+        await using (var gzipStream = new GZipStream(inStream, CompressionMode.Decompress))
         using (var reader = TarReader.Open(gzipStream))
         {
             while (reader.MoveToNextEntry())
@@ -186,7 +186,7 @@ public class ExtractionHandler
         var totalValidEntries = entries.Count;
 
         // Initialize UI progress only once
-        Application.Current.Dispatcher.Invoke(() =>
+        Application.Current.Dispatcher.InvokeAsync(() =>
         {
             ConfigHandler.Instance.Config.TotalFilesToExtract = totalValidEntries;
             ConfigHandler.Instance.Config.CurrentExtractedCount = 0;
@@ -195,8 +195,8 @@ public class ExtractionHandler
         // Perform extraction asynchronously
         await Task.Run(async () =>
         {
-            using var inStream = File.OpenRead(unitypackage.FilePath);
-            using var gzipStream = new GZipStream(inStream, CompressionMode.Decompress);
+            await using var inStream = File.OpenRead(unitypackage.FilePath!);
+            await using var gzipStream = new GZipStream(inStream, CompressionMode.Decompress);
             using var reader = TarReader.Open(gzipStream);
 
             while (reader.MoveToNextEntry())
@@ -205,7 +205,7 @@ public class ExtractionHandler
                 if (entry.IsEncrypted || entry.IsDirectory)
                     continue;
 
-                var filePath = Path.Combine(tempFolder, entry.Key);
+                var filePath = Path.Combine(tempFolder, entry.Key!);
                 Directory.CreateDirectory(Path.GetDirectoryName(filePath) ?? string.Empty);
 
                 try
@@ -222,11 +222,14 @@ public class ExtractionHandler
 
                     // Batch UI updates to reduce lag
                     if (extractedCount % 5 == 0 || extractedCount == totalValidEntries)
-                        Application.Current.Dispatcher.Invoke(() =>
+                    {
+                        var count = extractedCount;
+                        Application.Current.Dispatcher.InvokeAsync(() =>
                         {
-                            ConfigHandler.Instance.Config.CurrentExtractedCount = extractedCount;
+                            ConfigHandler.Instance.Config.CurrentExtractedCount = count;
                             ConfigHandler.Instance.Config.TotalFilesExtracted++;
                         });
+                    }
                     else
                         ConfigHandler.Instance.Config.TotalFilesExtracted++;
                 }
