@@ -189,7 +189,7 @@ public partial class BetterExtraction
             await BetterLogger.LogAsync("System requirements met after re-check.", Importance.Info);
             await Task.Run(() =>
             {
-                Everything.Everything_SetSearchW("endwith:.unitypackage");
+                Everything.Everything_SetSearchW("endwith:.unitypackage !C:\\$Recycle.Bin\\*");
                 Everything.Everything_SetRequestFlags(Everything.RequestFileName | Everything.RequestPath);
                 Everything.Everything_QueryW(true);
                 Task.Run(PopulateSearchResultsAsync);
