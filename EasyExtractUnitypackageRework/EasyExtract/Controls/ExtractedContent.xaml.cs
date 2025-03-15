@@ -271,55 +271,46 @@ public partial class ExtractedContent
     {
         var packagesToDelete = ExtractedUnitypackages.Where(pkg => pkg.PackageIsChecked).ToList();
 
-        foreach (var pkg in packagesToDelete)
+        if (packagesToDelete.Any())
         {
-            try
+            foreach (var pkg in packagesToDelete)
             {
-                Directory.Delete(pkg.UnitypackagePath, true);
-                ClearPreviewsFromCache(pkg.UnitypackagePath);
-                Current.Dispatcher.InvokeAsync(() => ExtractedUnitypackages.Remove(pkg));
-            }
-            catch (Exception ex)
-            {
-                await BetterLogger.LogAsync($"Error deleting package {pkg.UnitypackageName}: {ex.Message}",
-                    Importance.Error);
-            }
-
-            // If no packages selected, delete individual checked files
-            if (!packagesToDelete.Any())
-                foreach (var extractedPkg in ExtractedUnitypackages.ToList())
+                try
                 {
-                    var filesToDelete = extractedPkg.SubdirectoryItems.Where(file => file.IsChecked).ToList();
-
-                    foreach (var file in filesToDelete)
-                        try
-                        {
-                            File.Delete(file.FilePath);
-                            extractedPkg.SubdirectoryItems.Remove(file);
-                        }
-                        catch (Exception ex)
-                        {
-                            await BetterLogger.LogAsync($"Error deleting file {file.FileName}: {ex.Message}",
-                                Importance.Error);
-                        }
-
-                    await RecheckSecurityStatusAsync(extractedPkg);
+                    Directory.Delete(pkg.UnitypackagePath, true);
+                    ClearPreviewsFromCache(pkg.UnitypackagePath);
+                    await Current.Dispatcher.InvokeAsync(() => ExtractedUnitypackages.Remove(pkg));
                 }
+                catch (Exception ex)
+                {
+                    await BetterLogger.LogAsync($"Error deleting package {pkg.UnitypackageName}: {ex.Message}",
+                        Importance.Error);
+                }
+            }
+        }
+        else
+        {
+            foreach (var extractedPkg in ExtractedUnitypackages.ToList())
+            {
+                var filesToDelete = extractedPkg.SubdirectoryItems.Where(file => file.IsChecked).ToList();
 
-            // Update totals and save configuration
-            ConfigHandler.Instance.Config.TotalSizeBytes = ExtractedUnitypackages
-                .Sum(extractedPackage => new DirectoryInfo(extractedPackage.UnitypackagePath)
-                    .EnumerateFiles("*", SearchOption.AllDirectories)
-                    .Sum(file => file.Length));
+                foreach (var file in filesToDelete)
+                    try
+                    {
+                        File.Delete(file.FilePath);
+                        extractedPkg.SubdirectoryItems.Remove(file);
+                    }
+                    catch (Exception ex)
+                    {
+                        await BetterLogger.LogAsync($"Error deleting file {file.FileName}: {ex.Message}",
+                            Importance.Error);
+                    }
 
-            ConfigHandler.Instance.Config.ExtractedUnitypackages =
-                new ObservableCollection<ExtractedUnitypackageModel>(ExtractedUnitypackages);
-            ConfigHandler.Instance.OverrideConfig();
-
-            // Explicitly refresh UI
-            Current.Dispatcher.InvokeAsync(() => _extractedPackagesView.Refresh());
+                await RecheckSecurityStatusAsync(extractedPkg);
+            }
         }
 
+        UpdateConfigAndUI();
 
         async Task RecheckSecurityStatusAsync(ExtractedUnitypackageModel pkg)
         {
@@ -328,20 +319,18 @@ public partial class ExtractedContent
             pkg.LinkDetectionCount = 0;
 
             foreach (var file in pkg.SubdirectoryItems)
+            {
                 file.SecurityWarning = await GetSecurityWarningAsync(new FileInfo(file.FilePath), pkg);
+            }
 
-            pkg.DetailsSeverity = pkg.IsDangerousPackage
-                ? InfoBarSeverity.Warning
-                : InfoBarSeverity.Success;
+            pkg.DetailsSeverity = pkg.IsDangerousPackage ? InfoBarSeverity.Warning : InfoBarSeverity.Success;
 
-            // Notify UI changes explicitly
-            Current.Dispatcher.InvokeAsync(() =>
+            await Current.Dispatcher.InvokeAsync(() =>
             {
                 pkg.OnPropertyChanged(nameof(pkg.PackageSecuritySummary));
                 pkg.OnPropertyChanged(nameof(pkg.DetailsSeverity));
             });
         }
-
 
         void ClearPreviewsFromCache(string directoryPath)
         {
@@ -350,7 +339,29 @@ public partial class ExtractedContent
                 .ToList();
 
             foreach (var key in keysToRemove)
+            {
                 _previewCache.Remove(key);
+            }
+        }
+
+        void UpdateConfigAndUI()
+        {
+            try
+            {
+                ConfigHandler.Instance.Config.TotalSizeBytes = ExtractedUnitypackages
+                    .Sum(extractedPackage => new DirectoryInfo(extractedPackage.UnitypackagePath)
+                        .EnumerateFiles("*", SearchOption.AllDirectories)
+                        .Sum(file => file.Length));
+
+                ConfigHandler.Instance.Config.ExtractedUnitypackages =
+                    new ObservableCollection<ExtractedUnitypackageModel>(ExtractedUnitypackages);
+                ConfigHandler.Instance.OverrideConfig();
+                Current.Dispatcher.InvokeAsync(() => _extractedPackagesView.Refresh());
+            }
+            catch (Exception ex)
+            {
+                BetterLogger.LogAsync($"Error updating configuration: {ex.Message}", Importance.Error).Wait();
+            }
         }
     }
 
