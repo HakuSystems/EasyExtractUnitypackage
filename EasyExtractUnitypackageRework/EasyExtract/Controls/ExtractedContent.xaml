@@ -54,16 +54,18 @@
                                     <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                                         <ui:ToggleSwitch IsChecked="{Binding PackageIsChecked, Mode=TwoWay}"
                                                          Margin="5,0" />
-                                        <ui:TextBlock
-                                            FontTypography="Subtitle"
-                                            Margin="5,0"
-                                            Text="{Binding UnitypackageName}" />
-                                        <ui:TextBlock
-                                            FontTypography="Caption"
-                                            Foreground="Red"
-                                            Margin="10,0"
-                                            Text="{Binding PackageSecuritySummary}"
-                                            Visibility="{Binding IsDangerousPackage, Converter={StaticResource BoolToVisibilityConverter}}" />
+                                        <StackPanel Orientation="Vertical">
+                                            <ui:TextBlock
+                                                FontTypography="Subtitle"
+                                                Margin="5,0"
+                                                Text="{Binding UnitypackageName}" />
+                                            <ui:TextBlock
+                                                FontTypography="Caption"
+                                                Foreground="Red"
+                                                Margin="10,0"
+                                                Text="{Binding PackageSecuritySummary}"
+                                                Visibility="{Binding IsDangerousPackage, Converter={StaticResource BoolToVisibilityConverter}}" />
+                                        </StackPanel>
                                     </StackPanel>
 
                                     <HierarchicalDataTemplate.ItemTemplate>
