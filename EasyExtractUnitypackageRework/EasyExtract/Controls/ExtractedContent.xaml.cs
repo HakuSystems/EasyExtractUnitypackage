@@ -197,7 +197,7 @@ public partial class ExtractedContent
             var documentation = "# Allowed Links List\n" +
                                 "# Add links below (one per line). Lines starting with '#' are comments and ignored.\n" +
                                 "http://example.com\n" +
-                                "https://discord.com/api/webhooks";
+                                "https://hakusystems.de/";
             File.WriteAllText(linkFilePath, documentation);
         }
 
