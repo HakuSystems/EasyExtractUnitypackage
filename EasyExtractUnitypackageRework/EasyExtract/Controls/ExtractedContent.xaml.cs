@@ -272,9 +272,7 @@ public partial class ExtractedContent
         var packagesToDelete = ExtractedUnitypackages.Where(pkg => pkg.PackageIsChecked).ToList();
 
         if (packagesToDelete.Any())
-        {
             foreach (var pkg in packagesToDelete)
-            {
                 try
                 {
                     Directory.Delete(pkg.UnitypackagePath, true);
@@ -286,10 +284,7 @@ public partial class ExtractedContent
                     await BetterLogger.LogAsync($"Error deleting package {pkg.UnitypackageName}: {ex.Message}",
                         Importance.Error);
                 }
-            }
-        }
         else
-        {
             foreach (var extractedPkg in ExtractedUnitypackages.ToList())
             {
                 var filesToDelete = extractedPkg.SubdirectoryItems.Where(file => file.IsChecked).ToList();
@@ -308,7 +303,6 @@ public partial class ExtractedContent
 
                 await RecheckSecurityStatusAsync(extractedPkg);
             }
-        }
 
         UpdateConfigAndUI();
 
@@ -319,9 +313,7 @@ public partial class ExtractedContent
             pkg.LinkDetectionCount = 0;
 
             foreach (var file in pkg.SubdirectoryItems)
-            {
                 file.SecurityWarning = await GetSecurityWarningAsync(new FileInfo(file.FilePath), pkg);
-            }
 
             pkg.DetailsSeverity = pkg.IsDangerousPackage ? InfoBarSeverity.Warning : InfoBarSeverity.Success;
 
@@ -338,10 +330,7 @@ public partial class ExtractedContent
                 .Where(key => key.StartsWith(directoryPath, StringComparison.OrdinalIgnoreCase))
                 .ToList();
 
-            foreach (var key in keysToRemove)
-            {
-                _previewCache.Remove(key);
-            }
+            foreach (var key in keysToRemove) _previewCache.Remove(key);
         }
 
         void UpdateConfigAndUI()
@@ -369,8 +358,8 @@ public partial class ExtractedContent
     {
         var selected = ExtractedUnitypackages.FirstOrDefault(x => x.PackageIsChecked);
         if (selected != null)
-            Process.Start(
-                new ProcessStartInfo("explorer.exe", selected.UnitypackagePath) { UseShellExecute = true });
+            Process.Start(new ProcessStartInfo("explorer.exe", $"/select,\"{selected.UnitypackagePath}\"")
+                { UseShellExecute = true });
     }
 
     private void OpenFileInEditor_OnClick(object sender, RoutedEventArgs e)

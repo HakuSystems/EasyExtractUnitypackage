@@ -133,7 +133,7 @@
                     x:Name="DeleteExtractedButton" />
                 <ui:Button
                     Click="OpenExtractedDirectoryButton_OnClick"
-                    Content="Open Directory"
+                    Content="Open (Selected) Directory"
                     Margin="5,0"
                     x:Name="OpenExtractedDirectoryButton" />
             </StackPanel>
