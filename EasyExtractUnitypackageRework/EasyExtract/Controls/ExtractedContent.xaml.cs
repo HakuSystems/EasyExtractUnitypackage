@@ -44,23 +44,29 @@ public partial class ExtractedContent
         ExtractedUnitypackages.Clear();
         var path = ConfigHandler.Instance.Config.LastExtractedPath;
 
-        if (!Directory.Exists(path)) return;
+        if (string.IsNullOrWhiteSpace(path) || !Directory.Exists(path))
+            return;
 
-        var dirs = Directory.GetDirectories(path);
-        var tasks = dirs.Select(async dir =>
+        try
         {
-            var pkg = await CreateUnitypackageModelAsync(dir);
-            await AddSubItemsAsync(pkg, dir);
-            return pkg;
-        }).ToList();
+            var dirs = Directory.EnumerateDirectories(path);
+            var pkgs = await Task.WhenAll(dirs.Select(async dir =>
+            {
+                var pkg = await CreateUnitypackageModelAsync(dir);
+                await AddSubItemsAsync(pkg, dir);
+                return pkg;
+            }));
 
-        var pkgs = await Task.WhenAll(tasks);
-
-        Current.Dispatcher.InvokeAsync(() =>
+            await Current.Dispatcher.InvokeAsync(() =>
+            {
+                foreach (var pkg in pkgs)
+                    ExtractedUnitypackages.Add(pkg);
+            });
+        }
+        catch (Exception ex)
         {
-            foreach (var pkg in pkgs)
-                ExtractedUnitypackages.Add(pkg);
-        });
+            await BetterLogger.LogAsync($"Error updating extracted files: {ex.Message}", Importance.Error);
+        }
     }
 
 
