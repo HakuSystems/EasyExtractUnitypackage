@@ -10,11 +10,25 @@ public class ExtractedFiles : INotifyPropertyChanged
     private readonly string? _size = "No Size Available";
     private string _extension = "No Extension Available";
     private DateTime _extractedDate = DateTime.Now;
+    private bool _isChecked;
 
     private bool _isCodeFile;
     private ImageSource? _previewImage;
     private string _securityWarning = string.Empty;
     private string _symbolIcon = "No Symbol Icon Available";
+
+    public bool IsChecked
+    {
+        get => _isChecked;
+        set
+        {
+            if (_isChecked != value)
+            {
+                _isChecked = value;
+                OnPropertyChanged();
+            }
+        }
+    }
 
     public string SecurityWarning
     {

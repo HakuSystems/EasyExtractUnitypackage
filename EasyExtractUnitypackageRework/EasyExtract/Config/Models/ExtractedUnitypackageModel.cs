@@ -1,3 +1,4 @@
+using System.Collections.ObjectModel;
 using System.Windows.Media;
 using Wpf.Ui.Controls;
 
@@ -9,6 +10,7 @@ public class ExtractedUnitypackageModel : INotifyPropertyChanged
 
 
     private bool _isCategoryView = true;
+    private ObservableCollection<ExtractedFiles> _subdirectoryItems = new();
     private int base64DetectionCount;
     private InfoBarSeverity detailsSeverity = InfoBarSeverity.Informational;
 
@@ -184,24 +186,31 @@ public class ExtractedUnitypackageModel : INotifyPropertyChanged
         }
     }
 
-    public List<ExtractedFiles> SubdirectoryItems
+    public ObservableCollection<ExtractedFiles> SubdirectoryItems
     {
-        get => subdirectoryItems;
+        get => _subdirectoryItems;
         set
         {
-            subdirectoryItems = value;
-            OnPropertyChanged();
+            if (_subdirectoryItems != value)
+            {
+                _subdirectoryItems = value;
+                OnPropertyChanged();
+                OnPropertyChanged(nameof(SubdirectoryItemsGroupedByCategory));
+                OnPropertyChanged(nameof(CurrentStructure));
+            }
         }
     }
 
+    // Grouping logic stays unchanged
     public Dictionary<string, List<ExtractedFiles>> SubdirectoryItemsGroupedByCategory =>
         SubdirectoryItems
             .GroupBy(file => file.Category)
             .ToDictionary(group => group.Key, group => group.ToList());
 
+
     public event PropertyChangedEventHandler PropertyChanged;
 
-    protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null)
+    public virtual void OnPropertyChanged([CallerMemberName] string propertyName = null)
     {
         PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
     }

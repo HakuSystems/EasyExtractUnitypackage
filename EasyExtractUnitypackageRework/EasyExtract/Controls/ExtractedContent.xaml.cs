@@ -7,6 +7,7 @@ using EasyExtract.Services;
 using EasyExtract.Utilities;
 using EasyExtract.Views;
 using Wpf.Ui.Controls;
+using static System.Windows.Application;
 using Button = System.Windows.Controls.Button;
 
 namespace EasyExtract.Controls;
@@ -55,7 +56,7 @@ public partial class ExtractedContent
 
         var pkgs = await Task.WhenAll(tasks);
 
-        Application.Current.Dispatcher.InvokeAsync(() =>
+        Current.Dispatcher.InvokeAsync(() =>
         {
             foreach (var pkg in pkgs)
                 ExtractedUnitypackages.Add(pkg);
@@ -106,7 +107,7 @@ public partial class ExtractedContent
 
         var subItems = await Task.WhenAll(subItemTasks);
 
-        Application.Current.Dispatcher.InvokeAsync(() =>
+        Current.Dispatcher.InvokeAsync(() =>
         {
             foreach (var item in subItems)
                 pkg.SubdirectoryItems.Add(item);
@@ -268,40 +269,97 @@ public partial class ExtractedContent
 
     private async void DeleteExtractedButton_OnClick(object sender, RoutedEventArgs e)
     {
-        var packagesToDelete = ExtractedUnitypackages
-            .Where(x => x.PackageIsChecked)
-            .ToList();
+        var packagesToDelete = ExtractedUnitypackages.Where(pkg => pkg.PackageIsChecked).ToList();
 
         foreach (var pkg in packagesToDelete)
+        {
             try
             {
+                Directory.Delete(pkg.UnitypackagePath, true);
                 ClearPreviewsFromCache(pkg.UnitypackagePath);
-                await Task.Run(() => Directory.Delete(pkg.UnitypackagePath, true));
-
-                Application.Current.Dispatcher.InvokeAsync(() => ExtractedUnitypackages.Remove(pkg));
+                Current.Dispatcher.InvokeAsync(() => ExtractedUnitypackages.Remove(pkg));
             }
             catch (Exception ex)
             {
-                await BetterLogger.LogAsync($"Failed to delete {pkg.UnitypackagePath}: {ex.Message}", Importance.Error);
+                await BetterLogger.LogAsync($"Error deleting package {pkg.UnitypackageName}: {ex.Message}",
+                    Importance.Error);
             }
+
+            // If no packages selected, delete individual checked files
+            if (!packagesToDelete.Any())
+                foreach (var extractedPkg in ExtractedUnitypackages.ToList())
+                {
+                    var filesToDelete = extractedPkg.SubdirectoryItems.Where(file => file.IsChecked).ToList();
+
+                    foreach (var file in filesToDelete)
+                        try
+                        {
+                            File.Delete(file.FilePath);
+                            extractedPkg.SubdirectoryItems.Remove(file);
+                        }
+                        catch (Exception ex)
+                        {
+                            await BetterLogger.LogAsync($"Error deleting file {file.FileName}: {ex.Message}",
+                                Importance.Error);
+                        }
+
+                    await RecheckSecurityStatusAsync(extractedPkg);
+                }
+
+            // Update totals and save configuration
+            ConfigHandler.Instance.Config.TotalSizeBytes = ExtractedUnitypackages
+                .Sum(extractedPackage => new DirectoryInfo(extractedPackage.UnitypackagePath)
+                    .EnumerateFiles("*", SearchOption.AllDirectories)
+                    .Sum(file => file.Length));
+
+            ConfigHandler.Instance.Config.ExtractedUnitypackages =
+                new ObservableCollection<ExtractedUnitypackageModel>(ExtractedUnitypackages);
+            ConfigHandler.Instance.OverrideConfig();
+
+            // Explicitly refresh UI
+            Current.Dispatcher.InvokeAsync(() => _extractedPackagesView.Refresh());
+        }
+
+
+        async Task RecheckSecurityStatusAsync(ExtractedUnitypackageModel pkg)
+        {
+            pkg.HasEncryptedDll = false;
+            pkg.MalicousDiscordWebhookCount = 0;
+            pkg.LinkDetectionCount = 0;
+
+            foreach (var file in pkg.SubdirectoryItems)
+                file.SecurityWarning = await GetSecurityWarningAsync(new FileInfo(file.FilePath), pkg);
+
+            pkg.DetailsSeverity = pkg.IsDangerousPackage
+                ? InfoBarSeverity.Warning
+                : InfoBarSeverity.Success;
+
+            // Notify UI changes explicitly
+            Current.Dispatcher.InvokeAsync(() =>
+            {
+                pkg.OnPropertyChanged(nameof(pkg.PackageSecuritySummary));
+                pkg.OnPropertyChanged(nameof(pkg.DetailsSeverity));
+            });
+        }
+
+
+        void ClearPreviewsFromCache(string directoryPath)
+        {
+            var keysToRemove = _previewCache.Keys
+                .Where(key => key.StartsWith(directoryPath, StringComparison.OrdinalIgnoreCase))
+                .ToList();
+
+            foreach (var key in keysToRemove)
+                _previewCache.Remove(key);
+        }
     }
-
-    private void ClearPreviewsFromCache(string directoryPath)
-    {
-        var keysToRemove = _previewCache.Keys
-            .Where(key => key.StartsWith(directoryPath, StringComparison.OrdinalIgnoreCase))
-            .ToList();
-
-        foreach (var key in keysToRemove)
-            _previewCache.Remove(key);
-    }
-
 
     private void OpenExtractedDirectoryButton_OnClick(object sender, RoutedEventArgs e)
     {
         var selected = ExtractedUnitypackages.FirstOrDefault(x => x.PackageIsChecked);
         if (selected != null)
-            Process.Start(new ProcessStartInfo("explorer.exe", selected.UnitypackagePath) { UseShellExecute = true });
+            Process.Start(
+                new ProcessStartInfo("explorer.exe", selected.UnitypackagePath) { UseShellExecute = true });
     }
 
     private void OpenFileInEditor_OnClick(object sender, RoutedEventArgs e)
