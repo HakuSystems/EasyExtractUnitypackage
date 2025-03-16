@@ -1,7 +1,6 @@
 # Plans for the Future
 - **Cross-Platform Support:** Upgrade to Avalonia to make EasyExtractUnitypackage available on macOS and Linux (currently, only Windows is supported; work is underway).
 - **Adjustable UI Themes:** Further refine theme options (light, dark, etc) for a fully customizable user interface.
-- **Enhanced Data Insights:** Integrate even more data extracted from Unity packages to offer deeper analytics and reporting.
 
 # EasyExtractUnitypackage
 [Website](https://hakusystems.net/easyextractunitypackage)
