@@ -24,7 +24,6 @@
 - [Features](#features)
 - [Images](#images)
 - [Contact](#contact)
-- [Designer Wanted](#designer-wanted)
 - [Plans for the Future](#plans-for-the-future)
 
 ## Introduction
@@ -79,23 +78,4 @@
 ## Contact
 For queries, suggestions, or feedback, please reach out to us:
 - **Discord:** [EasyExtractUnitypackage Discord](https://discord.gg/Wn7XfhPCyD)
-
-## Designer Wanted
-We are currently seeking a talented UI/UX Designer to help enhance the user experience of EasyExtractUnitypackage. The application is built with WPF, and while we have a foundational design, we are looking for expertise to elevate the interface.
-
-### Requirements
-- Proven experience in UI/UX design, especially with WPF applications.
-- Proficiency with design tools such as Adobe XD, Illustrator, or Photoshop.
-- Ability to create intuitive, visually appealing interfaces.
-- Awareness of current design trends and best practices.
-- Excellent communication skills and a collaborative approach.
-
-### Responsibilities
-- Refine and improve the current UI design of EasyExtractUnitypackage.
-- Collaborate with our development team to implement design changes.
-- Conduct user research and usability testing to gather actionable feedback.
-- Develop wireframes, prototypes, and high-fidelity mockups.
-
-If you are interested and believe you have the skills to contribute, please contact us via our [Discord server](https://uploader.hakusystems.net/go/Discord%20-%20EasyExtractUnitypackage).
-
 ---
