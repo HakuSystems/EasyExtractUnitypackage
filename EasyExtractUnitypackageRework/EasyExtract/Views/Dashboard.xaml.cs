@@ -316,6 +316,9 @@ public partial class Dashboard : Window
 
     private void Dashboard_OnDragOver(object sender, DragEventArgs e)
     {
+        e.Effects = e.Data.GetDataPresent(DataFormats.FileDrop) ? DragDropEffects.Copy : DragDropEffects.None;
+
+        e.Handled = true;
         CancelPendingReset();
         UpdateDragDropText("Ready to drop", DragDropColors.DragOver);
     }

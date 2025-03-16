@@ -43,16 +43,18 @@
 
     <!--  Main container  -->
     <Grid
+        AllowDrop="True"
         HorizontalAlignment="Stretch"
         VerticalAlignment="Stretch"
         x:Name="DialogHelperGrid">
         <Border
+            AllowDrop="True"
             AutomationProperties.HelpText="Contains the primary UI elements of the application."
             AutomationProperties.Name="MainContentContainer"
             HorizontalAlignment="Stretch"
             VerticalAlignment="Stretch"
             x:Name="MainContentBorder">
-            <Grid x:Name="MainGrid">
+            <Grid AllowDrop="True" x:Name="MainGrid">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto" />
                     <RowDefinition Height="*" />
