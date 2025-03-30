@@ -30,8 +30,6 @@ public class ConfigModel : INotifyPropertyChanged
     private ObservableCollection<ExtractedUnitypackageModel> _extractedUnitypackages = new();
 
     private bool _firstRun;
-    private double _guiScale = 1.4;
-
 
     private ObservableCollection<HistoryModel> _history = new();
     private ObservableCollection<IgnoredPackageInventory> _ignoredUnityPackages = new();
@@ -147,19 +145,6 @@ public class ConfigModel : INotifyPropertyChanged
             if (_windowState != value)
             {
                 _windowState = value;
-                OnPropertyChanged();
-            }
-        }
-    }
-
-    public double GuiScale
-    {
-        get => _guiScale;
-        set
-        {
-            if (_guiScale != value)
-            {
-                _guiScale = value;
                 OnPropertyChanged();
             }
         }

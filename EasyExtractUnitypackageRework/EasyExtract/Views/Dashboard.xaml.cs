@@ -52,8 +52,6 @@ public partial class Dashboard : Window
         if (Enum.TryParse(config.WindowState, out WindowState state))
             WindowState = state;
 
-        DialogHelperGrid.LayoutTransform = new ScaleTransform(config.GuiScale, config.GuiScale);
-
         // Now continue with async logic
         var themeMode = config.ApplicationTheme switch
         {
