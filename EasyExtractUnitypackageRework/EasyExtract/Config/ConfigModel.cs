@@ -30,6 +30,7 @@ public class ConfigModel : INotifyPropertyChanged
     private ObservableCollection<ExtractedUnitypackageModel> _extractedUnitypackages = new();
 
     private bool _firstRun;
+    private double _guiScale = 1.4;
 
 
     private ObservableCollection<HistoryModel> _history = new();
@@ -79,6 +80,91 @@ public class ConfigModel : INotifyPropertyChanged
     private List<UnitypackageFileInfo> _unitypackageFiles = new();
     private UpdateModel _update = new();
     private bool _uwUModeActive;
+    private double _windowHeight = 650;
+    private double _windowLeft = 100;
+    private string _windowState = "Normal";
+
+    private double _windowTop = 100;
+    private double _windowWidth = 1000;
+
+    public double WindowTop
+    {
+        get => _windowTop;
+        set
+        {
+            if (_windowTop != value)
+            {
+                _windowTop = value;
+                OnPropertyChanged();
+            }
+        }
+    }
+
+    public double WindowLeft
+    {
+        get => _windowLeft;
+        set
+        {
+            if (_windowLeft != value)
+            {
+                _windowLeft = value;
+                OnPropertyChanged();
+            }
+        }
+    }
+
+    public double WindowWidth
+    {
+        get => _windowWidth;
+        set
+        {
+            if (_windowWidth != value)
+            {
+                _windowWidth = value;
+                OnPropertyChanged();
+            }
+        }
+    }
+
+    public double WindowHeight
+    {
+        get => _windowHeight;
+        set
+        {
+            if (_windowHeight != value)
+            {
+                _windowHeight = value;
+                OnPropertyChanged();
+            }
+        }
+    }
+
+    public string WindowState
+    {
+        get => _windowState;
+        set
+        {
+            if (_windowState != value)
+            {
+                _windowState = value;
+                OnPropertyChanged();
+            }
+        }
+    }
+
+    public double GuiScale
+    {
+        get => _guiScale;
+        set
+        {
+            if (_guiScale != value)
+            {
+                _guiScale = value;
+                OnPropertyChanged();
+            }
+        }
+    }
+
 
     public long TotalSizeBytes
     {

@@ -46,18 +46,28 @@ public partial class Dashboard : Window
 
     private async void Dashboard_OnLoaded(object sender, RoutedEventArgs e)
     {
-        var theme = ConfigHandler.Instance.Config.ApplicationTheme;
-        var themeMode = theme switch
+        var config = ConfigHandler.Instance.Config;
+
+        // Set window state and scale immediately
+        if (Enum.TryParse(config.WindowState, out WindowState state))
+            WindowState = state;
+
+        DialogHelperGrid.LayoutTransform = new ScaleTransform(config.GuiScale, config.GuiScale);
+
+        // Now continue with async logic
+        var themeMode = config.ApplicationTheme switch
         {
             AvailableThemes.System => ThemeMode.System,
             AvailableThemes.Dark => ThemeMode.Dark,
             AvailableThemes.Light => ThemeMode.Light,
             _ => ThemeMode.System
         };
+
         Application.Current.ThemeMode = themeMode;
         ThemeMode = themeMode;
-        await _backgroundManager.UpdateBackground(ConfigHandler.Instance.Config.CustomBackgroundImage.BackgroundPath);
-        await _backgroundManager.UpdateOpacity(ConfigHandler.Instance.Config.CustomBackgroundImage.BackgroundOpacity);
+
+        await _backgroundManager.UpdateBackground(config.CustomBackgroundImage.BackgroundPath);
+        await _backgroundManager.UpdateOpacity(config.CustomBackgroundImage.BackgroundOpacity);
 
         var updateAvailable = !await _updateHandler.IsUpToDateOrUpdate(false);
 
@@ -66,40 +76,42 @@ public partial class Dashboard : Window
             CheckForUpdatesDesc.Text = updateAvailable
                 ? "An update is available. Click here to update."
                 : "You are up to date.";
+
             if (!updateAvailable) return;
+
             CheckForUpdatesDesc.TextDecorations = TextDecorations.Underline;
             CheckForUpdatesDesc.Cursor = Cursors.Hand;
             CheckForUpdatesDesc.Foreground = new SolidColorBrush(Color.FromArgb(255, 255, 0, 0));
         });
 
-        if (ConfigHandler.Instance.Config.Update.AutoUpdate && updateAvailable)
+        if (config.Update.AutoUpdate && updateAvailable)
             if (await _updateHandler.IsUpToDateOrUpdate(true))
             {
                 await DialogHelper.ShowInfoDialogAsync(this, "Update available",
-                    "An update is available and will be installed automatically.\nbecause you have enabled automatic updates in the settings.\nPlease Dont Interact with the application until the update is installed. (the app will automatically restart)");
+                    "An update is available and will be installed automatically.\nPlease don't interact with the application until the update is installed. (The app will automatically restart.)");
                 CurrentlyUpdatingTextBlock.Visibility = Visibility.Visible;
             }
 
-        if (ConfigHandler.Instance.Config.FirstRun)
+        if (config.FirstRun)
         {
             NavView.Navigate(typeof(BetterSettings));
-            ConfigHandler.Instance.Config.FirstRun = false;
+            config.FirstRun = false;
         }
         else
         {
             NavView.Navigate(typeof(Controls.BetterExtraction));
         }
 
-        if (ConfigHandler.Instance.Config.UwUModeActive)
+        if (config.UwUModeActive)
         {
             NavView.Opacity = 0;
             await UwUAnimation();
-            Title = BetterUwUifyer.UwUify(ConfigHandler.Instance.Config.AppTitle);
+            Title = BetterUwUifyer.UwUify(config.AppTitle);
             BetterUwUifyer.ApplyUwUModeToVisualTree(this);
         }
         else
         {
-            Title = ConfigHandler.Instance.Config.AppTitle;
+            Title = config.AppTitle;
         }
     }
 
@@ -457,5 +469,18 @@ public partial class Dashboard : Window
     private void NavigateBackBtn_OnClick(object sender, RoutedEventArgs e)
     {
         NavView.GoBack();
+    }
+
+    private void Dashboard_OnClosing(object? sender, CancelEventArgs e)
+    {
+        var config = ConfigHandler.Instance.Config;
+
+        config.WindowTop = Top;
+        config.WindowLeft = Left;
+        config.WindowWidth = Width;
+        config.WindowHeight = Height;
+        config.WindowState = WindowState.ToString();
+
+        ConfigHandler.Instance.OverrideConfig();
     }
 }
