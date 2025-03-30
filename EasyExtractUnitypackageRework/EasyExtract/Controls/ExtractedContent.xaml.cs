@@ -42,7 +42,7 @@ public partial class ExtractedContent
     private async Task UpdateExtractedFilesAsync()
     {
         ExtractedUnitypackages.Clear();
-        var path = ConfigHandler.Instance.Config.LastExtractedPath;
+        var path = ConfigHandler.Instance.Config.DefaultOutputPath;
 
         if (string.IsNullOrWhiteSpace(path) || !Directory.Exists(path))
             return;

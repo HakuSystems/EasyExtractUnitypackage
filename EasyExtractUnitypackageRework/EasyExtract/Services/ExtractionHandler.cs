@@ -126,8 +126,7 @@ public class ExtractionHandler
     {
         if (unitypackage.FileName != null)
         {
-            var targetFolder = Path.Combine(ConfigHandler.Instance.Config.LastExtractedPath,
-                unitypackage.FileName);
+            var targetFolder = Path.Combine(ConfigHandler.Instance.Config.DefaultOutputPath, unitypackage.FileName);
             await DeleteIfDirectoryExists(targetFolder);
             await BetterLogger.LogAsync($"Target folder path set to: {targetFolder}",
                 Importance.Info);
@@ -136,6 +135,7 @@ public class ExtractionHandler
 
         return string.Empty;
     }
+
 
     private static async Task DeleteIfDirectoryExists(string directory)
     {

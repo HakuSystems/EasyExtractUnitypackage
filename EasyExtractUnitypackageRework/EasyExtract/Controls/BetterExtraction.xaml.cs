@@ -59,14 +59,10 @@ public partial class BetterExtraction
 
     private void UpdateViewExtractionButtonVisibility()
     {
-        var appDataFolder = Path.Combine(
-            Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
-            "EasyExtract");
+        var extractionFolder = ConfigHandler.Instance.Config.DefaultOutputPath;
 
-        if (!Directory.Exists(appDataFolder))
-            Directory.CreateDirectory(appDataFolder);
-
-        var extractionFolder = Path.Combine(appDataFolder, "Extracted");
+        if (!Directory.Exists(extractionFolder))
+            Directory.CreateDirectory(extractionFolder);
 
         var folderExists = Directory.Exists(extractionFolder) &&
                            Directory.EnumerateFileSystemEntries(extractionFolder).Any();

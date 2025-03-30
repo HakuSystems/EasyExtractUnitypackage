@@ -9,7 +9,7 @@ namespace EasyExtract.Controls;
 
 public partial class BetterDetails : UserControl
 {
-    private readonly string _extractionPath = ConfigHandler.Instance.Config.LastExtractedPath;
+    private readonly string _extractionPath = ConfigHandler.Instance.Config.DefaultOutputPath;
 
     public BetterDetails()
     {

@@ -50,6 +50,7 @@ public partial class BetterSettings
             CheckForUpdatesOnStartUpToggleSwitch.IsChecked = ConfigHandler.Instance.Config.Update.AutoUpdate;
             DiscordRpcToggleSwitch.IsChecked = ConfigHandler.Instance.Config.DiscordRpc;
             DefaultTempPathTextBox.Text = ConfigHandler.Instance.Config.DefaultTempPath;
+            DefaultOutputPathTextBox.Text = ConfigHandler.Instance.Config.DefaultOutputPath;
             BackgroundOpacitySlider.Value = ConfigHandler.Instance.Config.CustomBackgroundImage.BackgroundOpacity;
             await BetterLogger.LogAsync("UI updated to match config", Importance.Info);
         }
@@ -215,5 +216,28 @@ public partial class BetterSettings
         if (DynamicScalingComboBox.SelectedItem == null) return;
         var selectedMode = (DynamicScalingModes)DynamicScalingComboBox.SelectedItem;
         ConfigHandler.Instance.Config.DynamicScalingMode = selectedMode;
+    }
+
+    private async void DefaultOutputPathChangeButton_OnClick(object sender, RoutedEventArgs e)
+    {
+        var folderDialog = new OpenFolderDialog();
+        var result = folderDialog.ShowDialog();
+        if (result != true) return;
+
+        DefaultOutputPathTextBox.Text = folderDialog.FolderName;
+        ConfigHandler.Instance.Config.DefaultOutputPath = folderDialog.FolderName;
+
+        await BetterLogger.LogAsync($"Default output path set to: {folderDialog.FolderName}", Importance.Info);
+    }
+
+    private async void DefaultOutputPathResetButton_OnClick(object sender, RoutedEventArgs e)
+    {
+        ConfigHandler.Instance.Config.DefaultOutputPath =
+            Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "EasyExtract",
+                "Extracted");
+
+        DefaultOutputPathTextBox.Text = ConfigHandler.Instance.Config.DefaultOutputPath;
+
+        await BetterLogger.LogAsync("Default output path reset to default location", Importance.Info);
     }
 }

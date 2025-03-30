@@ -494,78 +494,98 @@
                                 x:Name="DiscordRpcToggleSwitch" />
                         </Grid>
                     </ui:Card>
-
                     <ui:Card
-                        AutomationProperties.HelpText="Set or reset the default path for temporary file extraction."
-                        AutomationProperties.Name="DefaultTempPathCard"
+                        AutomationProperties.HelpText="Configure default paths for extracted packages and temporary files."
+                        AutomationProperties.Name="ExtractionPathsCard"
                         Margin="0,0,0,12"
                         Padding="10"
-                        x:Name="DefaultTempPathCard">
+                        x:Name="ExtractionPathsCard">
                         <Grid>
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="Auto" />
                                 <ColumnDefinition Width="*" />
-                                <ColumnDefinition Width="Auto" />
                             </Grid.ColumnDefinitions>
-                            <Grid.RowDefinitions>
-                                <RowDefinition Height="Auto" />
-                                <RowDefinition Height="Auto" />
-                            </Grid.RowDefinitions>
+
                             <ui:Card
-                                Grid.RowSpan="2"
+                                Grid.Column="0"
                                 HorizontalAlignment="Left"
-                                Margin="5,0,5,0"
-                                VerticalAlignment="Stretch">
+                                Margin="5"
+                                VerticalAlignment="Top">
                                 <ui:SymbolIcon
                                     Foreground="{DynamicResource TextFillColorPrimaryBrush}"
                                     HorizontalAlignment="Center"
-                                    Symbol="Folder24"
+                                    Symbol="FolderZip24"
                                     VerticalAlignment="Center" />
                             </ui:Card>
-                            <StackPanel
-                                Grid.Column="1"
-                                Grid.Row="0"
-                                VerticalAlignment="Top">
+
+                            <StackPanel Grid.Column="1" VerticalAlignment="Top">
+
                                 <ui:TextBlock
                                     FontTypography="BodyStrong"
-                                    Text="Default Temp Path"
+                                    Text="Extraction Paths"
                                     TextWrapping="WrapWithOverflow" />
                                 <ui:TextBlock
                                     Appearance="Secondary"
                                     FontTypography="Caption"
+                                    Margin="0,0,0,10"
                                     Opacity="0.5"
-                                    Text="Change the default TEMP path for extracted files."
+                                    Text="Set or reset the default paths for extracted packages and temporary files."
                                     TextWrapping="WrapWithOverflow" />
-                            </StackPanel>
-                            <ui:Card
-                                Grid.Column="1"
-                                Grid.ColumnSpan="2"
-                                Grid.Row="1"
-                                Margin="0,5,0,0"
-                                Padding="5">
-                                <StackPanel Orientation="Horizontal">
-                                    <ui:TextBox
-                                        HorizontalAlignment="Stretch"
-                                        IsTextSelectionEnabled="True"
-                                        Margin="0,0,10,0"
-                                        PlaceholderText="Default Temp Path"
-                                        Text="{Binding DefaultTempPath, Mode=TwoWay}"
-                                        ToolTip="{Binding DefaultTempPath, Mode=OneWay}"
-                                        VerticalAlignment="Center"
-                                        x:Name="DefaultTempPathTextBox" />
-                                    <ui:Button
-                                        Click="DefaultTempPathChangeButton_OnClick"
-                                        Content="Change"
-                                        Icon="{ui:SymbolIcon Edit24}"
-                                        Margin="0,0,5,0"
-                                        x:Name="DefaultTempPathChangeButton" />
-                                    <ui:Button
-                                        Click="DefaultTempPathResetButton_OnClick"
-                                        Content="Reset"
-                                        Icon="{ui:SymbolIcon ArrowReset24}"
-                                        x:Name="DefaultTempPathResetButton" />
+
+                                <!--  Output Path Section  -->
+                                <StackPanel Margin="0,5,0,5">
+                                    <ui:TextBlock FontTypography="Caption" Text="Output Path" />
+                                    <StackPanel Margin="0,5,0,0" Orientation="Horizontal">
+                                        <ui:TextBox
+                                            HorizontalAlignment="Stretch"
+                                            Margin="0,0,10,0"
+                                            PlaceholderText="Default Output Path"
+                                            Text="{Binding DefaultOutputPath, Mode=TwoWay}"
+                                            ToolTip="{Binding DefaultOutputPath, Mode=OneWay}"
+                                            VerticalAlignment="Center"
+                                            x:Name="DefaultOutputPathTextBox" />
+                                        <ui:Button
+                                            Click="DefaultOutputPathChangeButton_OnClick"
+                                            Content="Change"
+                                            Icon="{ui:SymbolIcon Edit24}"
+                                            Margin="0,0,5,0"
+                                            x:Name="DefaultOutputPathChangeButton" />
+                                        <ui:Button
+                                            Click="DefaultOutputPathResetButton_OnClick"
+                                            Content="Reset"
+                                            Icon="{ui:SymbolIcon ArrowReset24}"
+                                            x:Name="DefaultOutputPathResetButton" />
+                                    </StackPanel>
                                 </StackPanel>
-                            </ui:Card>
+
+                                <!--  Temp Path Section  -->
+                                <StackPanel Margin="0,5,0,0">
+                                    <ui:TextBlock FontTypography="Caption" Text="Temporary Files Path" />
+                                    <StackPanel Margin="0,5,0,0" Orientation="Horizontal">
+                                        <ui:TextBox
+                                            HorizontalAlignment="Stretch"
+                                            Margin="0,0,10,0"
+                                            PlaceholderText="Default Temp Path"
+                                            Text="{Binding DefaultTempPath, Mode=TwoWay}"
+                                            ToolTip="{Binding DefaultTempPath, Mode=OneWay}"
+                                            VerticalAlignment="Center"
+                                            x:Name="DefaultTempPathTextBox" />
+                                        <ui:Button
+                                            Click="DefaultTempPathChangeButton_OnClick"
+                                            Content="Change"
+                                            Icon="{ui:SymbolIcon Edit24}"
+                                            Margin="0,0,5,0"
+                                            x:Name="DefaultTempPathChangeButton" />
+                                        <ui:Button
+                                            Click="DefaultTempPathResetButton_OnClick"
+                                            Content="Reset"
+                                            Icon="{ui:SymbolIcon ArrowReset24}"
+                                            x:Name="DefaultTempPathResetButton" />
+                                    </StackPanel>
+                                </StackPanel>
+
+                            </StackPanel>
+
                         </Grid>
                     </ui:Card>
                 </StackPanel>

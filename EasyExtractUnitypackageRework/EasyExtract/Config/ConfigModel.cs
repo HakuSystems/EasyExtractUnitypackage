@@ -19,6 +19,9 @@ public class ConfigModel : INotifyPropertyChanged
     private string _currentThemeTextContrast = "N/A";
     private BackgroundModel _custombackgroundImage = new();
 
+    private string _defaultOutputPath =
+        Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "EasyExtract", "Extracted");
+
     private string _defaultTempPath =
         Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "EasyExtract", "Temp");
 
@@ -35,9 +38,6 @@ public class ConfigModel : INotifyPropertyChanged
     private ObservableCollection<IgnoredPackageInventory> _ignoredUnityPackages = new();
 
     private bool _isLoading;
-
-    private string _lastExtractedPath =
-        Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "EasyExtract", "Extracted");
 
     private DateTime _lastExtractionTime;
 
@@ -84,6 +84,19 @@ public class ConfigModel : INotifyPropertyChanged
 
     private double _windowTop = 100;
     private double _windowWidth = 1000;
+
+    public string DefaultOutputPath
+    {
+        get => _defaultOutputPath;
+        set
+        {
+            if (_defaultOutputPath != value)
+            {
+                _defaultOutputPath = value;
+                OnPropertyChanged();
+            }
+        }
+    }
 
     public double WindowTop
     {
@@ -468,18 +481,6 @@ public class ConfigModel : INotifyPropertyChanged
         }
     }
 
-    public string LastExtractedPath
-    {
-        get => _lastExtractedPath;
-        set
-        {
-            if (_lastExtractedPath != value)
-            {
-                _lastExtractedPath = value;
-                OnPropertyChanged();
-            }
-        }
-    }
 
     public int TotalExtracted
     {
