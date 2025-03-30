@@ -1,7 +1,6 @@
 # Plans for the Future
 - **Cross-Platform Support:** Upgrade to Avalonia to make EasyExtractUnitypackage available on macOS and Linux (currently, only Windows is supported; work is underway).
 - **Adjustable UI Themes:** Further refine theme options (light, dark, etc) for a fully customizable user interface.
-- **Enhanced Data Insights:** Integrate even more data extracted from Unity packages to offer deeper analytics and reporting.
 
 # EasyExtractUnitypackage
 [Website](https://hakusystems.net/easyextractunitypackage)
@@ -25,7 +24,6 @@
 - [Features](#features)
 - [Images](#images)
 - [Contact](#contact)
-- [Designer Wanted](#designer-wanted)
 - [Plans for the Future](#plans-for-the-future)
 
 ## Introduction
@@ -56,47 +54,26 @@
 
 ## Images
 
-### Right-Click Extraction (V2.0.5.7 or above)
+### Right-Click Extraction
 ![Right-Click Extraction](https://github.com/HakuSystems/EasyExtractUnitypackage/assets/66133638/8f75d32a-1737-4b86-9f64-11390b60a618)
+### Settings Page
+![EasyExtract_c0fC0pib3G](https://github.com/user-attachments/assets/cb7edfd9-13d7-4b8c-8109-fe91b0a93080)
+### Details
+![EasyExtract_lo0wM6PcIS](https://github.com/user-attachments/assets/af48c734-4fe8-4adc-84e7-0232fd2d4d3d)
+### Dangerous link detection (Discord Webhook links or custom ones.) aswell as Encrypted DLLS detection
+![EasyExtract_I2fs0vbHy4](https://github.com/user-attachments/assets/1cce699b-77ec-4b6f-809c-853cab454f7c)
+![EasyExtract_tAcotLOz2g](https://github.com/user-attachments/assets/23cade49-8d3e-4c85-9cd0-4d440294ddee)
+### Overview of how long its Extracting
+![EasyExtract_nweP3Y9GIz](https://github.com/user-attachments/assets/b4064b64-a8a7-4254-8cde-167d8a1a88ab)
+### Queue!
+![EasyExtract_erFYiYvAsL](https://github.com/user-attachments/assets/4364afec-628e-4890-a7bc-8ee3f1891fe7)
+### System wide Unitypackage search (thanks to Everything)
+![EasyExtract_YXBcmSeCEs](https://github.com/user-attachments/assets/8b8e366c-e933-496e-b02c-a77657b3379d)
+### Neat UI!
+![EasyExtract_NZQvujsOMV](https://github.com/user-attachments/assets/d17b4012-aa7b-457c-8cef-bcd96a83f682)
 
-### Settings Interface
-![Settings](https://github.com/HakuSystems/EasyExtractUnitypackage/assets/66133638/dfa85198-0a1d-4e50-8104-084b66a58fa1)
-
-### Category-Based Management
-![Category Management](https://github.com/HakuSystems/EasyExtractUnitypackage/assets/66133638/f1f6f77a-fd76-4552-883e-a1c91a6d6f57)
-
-### Inside View
-![Inside View](https://github.com/HakuSystems/EasyExtractUnitypackage/assets/66133638/517cbcf7-81eb-4041-ba23-fe4dc8ccb284)
-
-### System-Wide Search Integration
-![Search Integration](https://github.com/HakuSystems/EasyExtractUnitypackage/assets/66133638/21e134d6-fd3a-4a40-9112-2a21b8d58b19)
-
-### Extraction History
-![History Feature](https://github.com/HakuSystems/EasyExtractUnitypackage/assets/66133638/e3247e91-a9c3-4514-ab1c-c5967f201327)
-
-### Analytics Overview
-![Analytics Overview](https://github.com/HakuSystems/EasyExtractUnitypackage/assets/66133638/72e9f877-ff32-4177-95ce-9bfb764b81e5)
 
 ## Contact
 For queries, suggestions, or feedback, please reach out to us:
 - **Discord:** [EasyExtractUnitypackage Discord](https://discord.gg/Wn7XfhPCyD)
-
-## Designer Wanted
-We are currently seeking a talented UI/UX Designer to help enhance the user experience of EasyExtractUnitypackage. The application is built with WPF, and while we have a foundational design, we are looking for expertise to elevate the interface.
-
-### Requirements
-- Proven experience in UI/UX design, especially with WPF applications.
-- Proficiency with design tools such as Adobe XD, Illustrator, or Photoshop.
-- Ability to create intuitive, visually appealing interfaces.
-- Awareness of current design trends and best practices.
-- Excellent communication skills and a collaborative approach.
-
-### Responsibilities
-- Refine and improve the current UI design of EasyExtractUnitypackage.
-- Collaborate with our development team to implement design changes.
-- Conduct user research and usability testing to gather actionable feedback.
-- Develop wireframes, prototypes, and high-fidelity mockups.
-
-If you are interested and believe you have the skills to contribute, please contact us via our [Discord server](https://uploader.hakusystems.net/go/Discord%20-%20EasyExtractUnitypackage).
-
 ---
