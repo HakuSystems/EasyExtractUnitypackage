@@ -247,13 +247,23 @@ public class ExtractionHandler
     {
         foreach (var directory in Directory.EnumerateDirectories(tempFolder))
         {
-            var targetFullPath = string.Empty;
-            var targetFullFile = string.Empty;
+            string targetFullPath = null;
+            string targetFullFile = null;
+
             try
             {
-                if (File.Exists(Path.Combine(directory, "pathname")))
+                var pathnameFile = Path.Combine(directory, "pathname");
+
+                if (File.Exists(pathnameFile))
                 {
-                    var hashPathName = await File.ReadAllTextAsync(Path.Combine(directory, "pathname"));
+                    var hashPathName = (await File.ReadAllTextAsync(pathnameFile)).Trim();
+
+                    if (string.IsNullOrWhiteSpace(hashPathName))
+                    {
+                        await BetterLogger.LogAsync($"Empty pathname file in {directory}. Skipping file move.",
+                            Importance.Warning);
+                        continue;
+                    }
 
                     // Clean Unicode and control characters
                     hashPathName = new string(hashPathName.Where(c =>
@@ -264,24 +274,35 @@ public class ExtractionHandler
                     if (hashPathName.EndsWith("00"))
                         hashPathName = hashPathName[..^2];
 
-                    // Normalize extension clearly
                     hashPathName = NormalizeFileExtension(hashPathName);
 
                     targetFullPath = Path.GetDirectoryName(Path.Combine(targetFolder, hashPathName));
                     targetFullFile = Path.Combine(targetFolder, hashPathName);
+
+                    if (string.IsNullOrWhiteSpace(targetFullPath) || string.IsNullOrWhiteSpace(targetFullFile))
+                    {
+                        await BetterLogger.LogAsync(
+                            $"Derived empty target path/file for {directory}. Skipping file move.", Importance.Warning);
+                        continue;
+                    }
+                }
+                else
+                {
+                    await BetterLogger.LogAsync($"Missing 'pathname' file in {directory}. Skipping file move.",
+                        Importance.Warning);
+                    continue;
                 }
 
-                if (!string.IsNullOrEmpty(targetFullPath))
-                {
-                    await MoveFileIfExists(directory, "asset", targetFullPath, targetFullFile);
-                    await MoveFileIfExists(directory, "asset.meta", targetFullPath, targetFullFile + ".meta");
-                    await MoveFileIfExists(directory, "preview.png", targetFullPath,
-                        targetFullFile + ".EASYEXTRACTPREVIEW.png");
-                }
+                // Proceed safely after validation
+                await MoveFileIfExists(directory, "asset", targetFullPath, targetFullFile);
+                await MoveFileIfExists(directory, "asset.meta", targetFullPath, targetFullFile + ".meta");
+                await MoveFileIfExists(directory, "preview.png", targetFullPath,
+                    targetFullFile + ".EASYEXTRACTPREVIEW.png");
             }
             catch (Exception ex)
             {
-                await BetterLogger.LogAsync($"Error moving file from {directory} to {targetFullFile}: {ex.Message}",
+                await BetterLogger.LogAsync(
+                    $"Error moving file from {directory} to {targetFullFile ?? "[unknown path]"}: {ex.Message}",
                     Importance.Error);
             }
         }
