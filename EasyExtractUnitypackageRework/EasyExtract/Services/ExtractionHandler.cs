@@ -231,7 +231,9 @@ public class ExtractionHandler
                         });
                     }
                     else
+                    {
                         ConfigHandler.Instance.Config.TotalFilesExtracted++;
+                    }
                 }
                 catch (Exception ex)
                 {
@@ -243,40 +245,43 @@ public class ExtractionHandler
 
     private static async Task MoveFilesFromTempToTargetFolder(string tempFolder, string targetFolder)
     {
-        foreach (var d in Directory.EnumerateDirectories(tempFolder))
+        foreach (var directory in Directory.EnumerateDirectories(tempFolder))
         {
             var targetFullPath = string.Empty;
             var targetFullFile = string.Empty;
             try
             {
-                if (File.Exists(Path.Combine(d, "pathname")))
+                if (File.Exists(Path.Combine(directory, "pathname")))
                 {
-                    var hashPathName = await File.ReadAllTextAsync(Path.Combine(d, "pathname"));
-                    if (hashPathName.Any(c =>
-                            char.GetUnicodeCategory(c) == UnicodeCategory.Format ||
-                            char.GetUnicodeCategory(c) == UnicodeCategory.Control))
-                        hashPathName = new string(hashPathName.Where(c =>
-                            char.GetUnicodeCategory(c) != UnicodeCategory.Format &&
-                            char.GetUnicodeCategory(c) != UnicodeCategory.Control).ToArray());
+                    var hashPathName = await File.ReadAllTextAsync(Path.Combine(directory, "pathname"));
 
-                    // remove additional 00 at the end of the file extension.
-                    if (hashPathName.EndsWith("00")) hashPathName = hashPathName.Substring(0, hashPathName.Length - 2);
+                    // Clean Unicode and control characters
+                    hashPathName = new string(hashPathName.Where(c =>
+                        char.GetUnicodeCategory(c) != UnicodeCategory.Format &&
+                        char.GetUnicodeCategory(c) != UnicodeCategory.Control).ToArray());
+
+                    // Remove trailing "00"
+                    if (hashPathName.EndsWith("00"))
+                        hashPathName = hashPathName[..^2];
+
+                    // Normalize extension clearly
+                    hashPathName = NormalizeFileExtension(hashPathName);
 
                     targetFullPath = Path.GetDirectoryName(Path.Combine(targetFolder, hashPathName));
                     targetFullFile = Path.Combine(targetFolder, hashPathName);
                 }
 
-                if (targetFullPath != null)
+                if (!string.IsNullOrEmpty(targetFullPath))
                 {
-                    await MoveFileIfExists(d, "asset", targetFullPath, targetFullFile);
-                    await MoveFileIfExists(d, "asset.meta", targetFullPath, targetFullFile + ".meta");
-                    await MoveFileIfExists(d, "preview.png", targetFullPath,
+                    await MoveFileIfExists(directory, "asset", targetFullPath, targetFullFile);
+                    await MoveFileIfExists(directory, "asset.meta", targetFullPath, targetFullFile + ".meta");
+                    await MoveFileIfExists(directory, "preview.png", targetFullPath,
                         targetFullFile + ".EASYEXTRACTPREVIEW.png");
                 }
             }
             catch (Exception ex)
             {
-                await BetterLogger.LogAsync($"Error while moving file from {d} to {targetFullFile}: {ex.Message}",
+                await BetterLogger.LogAsync($"Error moving file from {directory} to {targetFullFile}: {ex.Message}",
                     Importance.Error);
             }
         }
@@ -284,6 +289,26 @@ public class ExtractionHandler
         await BetterLogger.LogAsync($"Moved files from temporary folder to target folder: {targetFolder}",
             Importance.Info);
     }
+
+
+    // Credits oguzhan_sparklegames
+    private static string NormalizeFileExtension(string filename)
+    {
+        var lastDotIndex = filename.LastIndexOf('.');
+        if (lastDotIndex < 0)
+            return filename;
+
+        var nameWithoutExtension = filename[..lastDotIndex];
+        var extensionCandidate = filename[lastDotIndex..];
+
+        var matchedExtension = ExtractionHelper.ValidExtensions
+            .OrderByDescending(e => e.Length)
+            .FirstOrDefault(validExt => extensionCandidate.StartsWith(validExt, StringComparison.OrdinalIgnoreCase));
+
+        // If a valid extension clearly matches, use it, else leave filename unchanged
+        return matchedExtension != null ? nameWithoutExtension + matchedExtension : filename;
+    }
+
 
     private static async Task MoveFileIfExists(string directory, string fileName, string targetFullPath,
         string targetFullFile)

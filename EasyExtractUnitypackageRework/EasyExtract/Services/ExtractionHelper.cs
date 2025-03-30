@@ -4,6 +4,15 @@ namespace EasyExtract.Services;
 
 public record ExtractionHelper
 {
+    public static readonly HashSet<string> ValidExtensions =
+        new(StringComparer.OrdinalIgnoreCase) // Credits oguzhan_sparklegames
+        {
+            ".cs", ".shader", ".prefab", ".fbx", ".png", ".jpg", ".jpeg", ".tga", ".psd",
+            ".mp3", ".wav", ".ogg", ".anim", ".unity", ".mat", ".asset", ".controller",
+            ".ttf", ".otf", ".meta", ".json", ".xml", ".yaml",
+            ".blend", ".dll", ".txt", ".pdf", ".docx", ".xlsx", ".html", ".js", ".py"
+        };
+
     public static async Task<long> GetTotalSizeInBytesAsync(string directory)
     {
         var files = Directory.GetFiles(directory, "*.*", SearchOption.AllDirectories);
@@ -210,6 +219,7 @@ public record ExtractionHelper
 
         return category;
     }
+
 
     public static async Task<int> GetMalicousDiscordWebhookCount(string directory)
     {
