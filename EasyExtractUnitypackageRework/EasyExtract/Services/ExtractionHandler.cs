@@ -3,12 +3,15 @@ using System.IO.Compression;
 using EasyExtract.Config;
 using EasyExtract.Config.Models;
 using EasyExtract.Utilities;
+using Notification.Wpf;
 using SharpCompress.Readers.Tar;
 
 namespace EasyExtract.Services;
 
 public class ExtractionHandler
 {
+    private static readonly NotificationService NotificationService = new();
+
     public async Task ExtractUnitypackageFromContextMenu(string path)
     {
         var unitypackage = new SearchEverythingModel
@@ -19,6 +22,7 @@ public class ExtractionHandler
 
         await ExtractUnitypackage(unitypackage);
     }
+
 
     public async Task<bool> ExtractUnitypackage(
         SearchEverythingModel unitypackage,
@@ -85,6 +89,10 @@ public class ExtractionHandler
                 // Update TotalFilesExtracted just once clearly after extraction
                 ConfigHandler.Instance.Config.TotalFilesExtracted =
                     ConfigHandler.Instance.Config.ExtractedUnitypackages.Sum(pkg => pkg.UnitypackageTotalFileCount);
+                NotificationService.ShowNotification(
+                    "Successfully Extracted!",
+                    $"Unitypackage {unitypackage.FileName} has been successfully extracted to {targetFolder}",
+                    NotificationType.Success);
             });
 
             await BetterLogger.LogAsync($"Successfully extracted {unitypackage.FileName}", Importance.Info);
@@ -96,6 +104,7 @@ public class ExtractionHandler
             return false;
         }
     }
+
 
     private static async Task<bool> CheckForEncryptedDlls(string folder, ExtractionHelper helper)
     {

@@ -240,4 +240,24 @@ public partial class BetterSettings
 
         await BetterLogger.LogAsync("Default output path reset to default location", Importance.Info);
     }
+
+    private void SoundCardToggle_OnChecked(object sender, RoutedEventArgs e)
+    {
+        ConfigHandler.Instance.Config.EnableSound = SoundCardToggle.IsChecked ?? false;
+    }
+
+    private void SoundCardToggle_OnUnchecked(object sender, RoutedEventArgs e)
+    {
+        ConfigHandler.Instance.Config.EnableSound = SoundCardToggle.IsChecked ?? false;
+    }
+
+    private void SoundSlider_OnValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+    {
+        ConfigHandler.Instance.Config.SoundVolume = (float)e.NewValue;
+
+        if (SoundSlider.Value <= 0)
+            SoundCardToggle.IsChecked = false;
+        else if (SoundCardToggle.IsChecked == false)
+            SoundCardToggle.IsChecked = true;
+    }
 }

@@ -29,6 +29,7 @@ public class ConfigModel : INotifyPropertyChanged
 
 
     private DynamicScalingModes _dynamicScalingMode = DynamicScalingModes.Simple;
+    private bool _enableSound = true;
     private bool _extractedCategoryStructure = true;
     private ObservableCollection<ExtractedUnitypackageModel> _extractedUnitypackages = new();
 
@@ -46,6 +47,7 @@ public class ConfigModel : INotifyPropertyChanged
     private ObservableCollection<SearchEverythingModel> _searchEverything = new();
     private List<SearchEverythingModel> _searchEverythingResults = new();
     private string _secondaryColorHex = "#4D4D4D"; // Default Color from Colors.xaml
+    private float _soundVolume = 1f;
     private string _textColorHex = "#7fc5ff"; // Default Color from Colors.xaml
 
     private int _total3DObjects;
@@ -84,6 +86,32 @@ public class ConfigModel : INotifyPropertyChanged
 
     private double _windowTop = 100;
     private double _windowWidth = 1000;
+
+    public float SoundVolume
+    {
+        get => _soundVolume;
+        set
+        {
+            if (_soundVolume != value)
+            {
+                _soundVolume = value;
+                OnPropertyChanged();
+            }
+        }
+    }
+
+    public bool EnableSound
+    {
+        get => _enableSound;
+        set
+        {
+            if (_enableSound != value)
+            {
+                _enableSound = value;
+                OnPropertyChanged();
+            }
+        }
+    }
 
     public string DefaultOutputPath
     {

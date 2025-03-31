@@ -39,6 +39,75 @@
                     Margin="12"
                     Orientation="Vertical"
                     VerticalAlignment="Stretch">
+                    <ui:Card
+                        AutomationProperties.HelpText="Toggle Sound effects for the application."
+                        AutomationProperties.Name="SoundCard"
+                        Margin="0,0,0,12"
+                        Padding="10"
+                        x:Name="SoundCard">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <ui:Card
+                                HorizontalAlignment="Left"
+                                Margin="5"
+                                VerticalAlignment="Center">
+                                <ui:SymbolIcon
+                                    Foreground="{DynamicResource TextFillColorPrimaryBrush}"
+                                    HorizontalAlignment="Center"
+                                    Symbol="SoundWaveCircle24"
+                                    VerticalAlignment="Center" />
+                            </ui:Card>
+                            <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                <ui:TextBlock
+                                    FontTypography="BodyStrong"
+                                    Text="Enable Sound"
+                                    TextWrapping="WrapWithOverflow" />
+                                <ui:TextBlock
+                                    Appearance="Secondary"
+                                    FontTypography="Caption"
+                                    Opacity="0.5"
+                                    Text="When enabled, the application will play sound effects."
+                                    TextWrapping="WrapWithOverflow" />
+                            </StackPanel>
+
+                            <StackPanel
+                                Grid.Column="2"
+                                Orientation="Horizontal"
+                                VerticalAlignment="Center">
+                                <ui:TextBlock
+                                    FontTypography="Caption"
+                                    Margin="0,0,5,0"
+                                    Text="Volume"
+                                    VerticalAlignment="Center" />
+                                <ui:TextBlock
+                                    FontTypography="Caption"
+                                    Margin="5"
+                                    Text="{Binding SoundVolume, Converter={StaticResource VolumeToPercentageConverter}, ConverterParameter=Volume}"
+                                    VerticalAlignment="Center" />
+                                <Slider
+                                    LargeChange="0.1"
+                                    Margin="0,0,10,0"
+                                    Maximum="1"
+                                    Minimum="0"
+                                    SmallChange="0.01"
+                                    ToolTip="Set the volume of the sound effects"
+                                    Value="{Binding SoundVolume, Mode=TwoWay}"
+                                    ValueChanged="SoundSlider_OnValueChanged"
+                                    VerticalAlignment="Center"
+                                    x:Name="SoundSlider" />
+                                <ui:ToggleSwitch
+                                    Checked="SoundCardToggle_OnChecked"
+                                    IsChecked="{Binding EnableSound, Mode=TwoWay}"
+                                    Margin="5"
+                                    Unchecked="SoundCardToggle_OnUnchecked"
+                                    x:Name="SoundCardToggle" />
+                            </StackPanel>
+                        </Grid>
+                    </ui:Card>
 
                     <ui:Card
                         AutomationProperties.HelpText="Select dynamic scaling mode."

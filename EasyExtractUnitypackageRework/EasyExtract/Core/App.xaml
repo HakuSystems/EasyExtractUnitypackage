@@ -21,6 +21,7 @@
             <utilities:InverseBooleanConverter x:Key="InverseBooleanConverter" />
             <utilities:StringToVisibilityConverter x:Key="StringToVisibilityConverter" />
             <utilities:BoolToVisibilityConverter x:Key="BoolToVisibilityConverter" />
+            <utilities:VolumeToPercentageConverter x:Key="VolumeToPercentageConverter" />
         </ResourceDictionary>
     </Application.Resources>
 </Application>
