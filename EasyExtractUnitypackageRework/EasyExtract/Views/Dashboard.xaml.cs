@@ -6,6 +6,7 @@ using EasyExtract.Config;
 using EasyExtract.Config.Models;
 using EasyExtract.Controls;
 using EasyExtract.Services;
+using EasyExtract.Utilities;
 using SkiaSharp;
 using SkiaSharp.Views.Desktop;
 using Application = System.Windows.Application;
@@ -16,100 +17,113 @@ using TextBlock = Wpf.Ui.Controls.TextBlock;
 
 namespace EasyExtract.Views;
 
-public partial class Dashboard : Window
+public partial class Dashboard
 {
-    private static Dashboard? _instance;
+    private const Dashboard? InstanceDashboard = null;
     private readonly BackgroundManager _backgroundManager = BackgroundManager.Instance;
     private readonly FilterQueue _filterQueue = new();
 
     private readonly HashChecks _hashChecks = new();
+    private readonly Random _random = new();
 
     private readonly TimeSpan _resetDelayForDrop = TimeSpan.FromSeconds(3);
     private readonly UpdateHandler _updateHandler = new();
-    private readonly Random random = new();
-    private CancellationTokenSource _dragDropResetToken;
+    private CancellationTokenSource? _dragDropResetToken;
 
-    private DispatcherTimer? sparkleTimer;
+    private DispatcherTimer? _sparkleTimer;
 
-    public Dashboard()
+    public Dashboard(CancellationTokenSource? dragDropResetToken)
     {
+        _dragDropResetToken = dragDropResetToken;
         InitializeComponent();
-        if (_instance == null)
-            _instance = this;
         ThemeMode = ThemeMode.System;
     }
 
-    public static Dashboard Instance => _instance
+    public static Dashboard Instance => InstanceDashboard
                                         ?? throw new InvalidOperationException(
                                             "Dashboard has not yet been initialized.");
 
 
     private async void Dashboard_OnLoaded(object sender, RoutedEventArgs e)
     {
-        var config = ConfigHandler.Instance.Config;
-
-        // Set window state and scale immediately
-        if (Enum.TryParse(config.WindowState, out WindowState state))
-            WindowState = state;
-
-        // Now continue with async logic
-        var themeMode = config.ApplicationTheme switch
+        try
         {
-            AvailableThemes.System => ThemeMode.System,
-            AvailableThemes.Dark => ThemeMode.Dark,
-            AvailableThemes.Light => ThemeMode.Light,
-            _ => ThemeMode.System
-        };
+            var config = ConfigHandler.Instance.Config;
 
-        Application.Current.ThemeMode = themeMode;
-        ThemeMode = themeMode;
+            // Set window state and scale immediately
+            if (Enum.TryParse(config.WindowState, out WindowState state))
+                WindowState = state;
 
-        await _backgroundManager.UpdateBackground(config.CustomBackgroundImage.BackgroundPath);
-        await _backgroundManager.UpdateOpacity(config.CustomBackgroundImage.BackgroundOpacity);
+            // Now continue with async logic
+            var themeMode = config.ApplicationTheme switch
+            {
+                AvailableThemes.System => ThemeMode.System,
+                AvailableThemes.Dark => ThemeMode.Dark,
+                AvailableThemes.Light => ThemeMode.Light,
+                _ => ThemeMode.System
+            };
 
-        var updateAvailable = !await _updateHandler.IsUpToDateOrUpdate(false);
+            Application.Current.ThemeMode = themeMode;
+            ThemeMode = themeMode;
 
-        await Dispatcher.InvokeAsync(() =>
-        {
-            CheckForUpdatesDesc.Text = updateAvailable
-                ? "An update is available. Click here to update."
-                : "You are up to date.";
+            await _backgroundManager.UpdateBackground(config.CustomBackgroundImage.BackgroundPath);
+            await _backgroundManager.UpdateOpacity(config.CustomBackgroundImage.BackgroundOpacity);
 
-            if (!updateAvailable) return;
+            var updateAvailable = !await _updateHandler.IsUpToDateOrUpdate(false);
 
-            CheckForUpdatesDesc.TextDecorations = TextDecorations.Underline;
-            CheckForUpdatesDesc.Cursor = Cursors.Hand;
-            CheckForUpdatesDesc.Foreground = new SolidColorBrush(Color.FromArgb(255, 255, 0, 0));
-        });
+            await Dispatcher.InvokeAsync(() =>
+            {
+                CheckForUpdatesDesc.Text = updateAvailable
+                    ? "An update is available. Click here to update."
+                    : "You are up to date.";
 
-        if (config.Update.AutoUpdate && updateAvailable)
-            if (await _updateHandler.IsUpToDateOrUpdate(true))
+                if (!updateAvailable) return;
+
+                CheckForUpdatesDesc.TextDecorations = TextDecorations.Underline;
+                CheckForUpdatesDesc.Cursor = Cursors.Hand;
+                CheckForUpdatesDesc.Foreground = new SolidColorBrush(Color.FromArgb(255, 255, 0, 0));
+            });
+
+            if (config.Update.AutoUpdate && updateAvailable && await _updateHandler.IsUpToDateOrUpdate(true))
             {
                 await DialogHelper.ShowInfoDialogAsync(this, "Update available",
                     "An update is available and will be installed automatically.\nPlease don't interact with the application until the update is installed. (The app will automatically restart.)");
                 CurrentlyUpdatingTextBlock.Visibility = Visibility.Visible;
             }
 
-        if (config.FirstRun)
-        {
-            NavView.Navigate(typeof(BetterSettings));
-            config.FirstRun = false;
-        }
-        else
-        {
-            NavView.Navigate(typeof(Controls.BetterExtraction));
-        }
+            if (config.FirstRun)
+            {
+                NavView.Navigate(typeof(BetterSettings));
+                config.FirstRun = false;
+            }
+            else
+            {
+                NavView.Navigate(typeof(Controls.BetterExtraction));
+            }
 
-        if (config.UwUModeActive)
-        {
-            NavView.Opacity = 0;
-            await UwUAnimation();
-            Title = BetterUwUifyer.UwUify(config.AppTitle);
-            BetterUwUifyer.ApplyUwUModeToVisualTree(this);
+            if (config.UwUModeActive)
+            {
+                NavView.Opacity = 0;
+                await UwUAnimation();
+                Title = BetterUwUifyer.UwUify(config.AppTitle);
+                BetterUwUifyer.ApplyUwUModeToVisualTree(this);
+            }
+            else
+            {
+                Title = config.AppTitle;
+            }
         }
-        else
+        catch (Exception ex)
         {
-            Title = config.AppTitle;
+            await BetterLogger.LogAsync(ex.Message, Importance.Error);
+        }
+        finally
+        {
+            // Ensure that the background is set even if an error occurs
+            await _backgroundManager.UpdateBackground(
+                ConfigHandler.Instance.Config.CustomBackgroundImage.BackgroundPath);
+            await _backgroundManager.UpdateOpacity(
+                ConfigHandler.Instance.Config.CustomBackgroundImage.BackgroundOpacity);
         }
     }
 
@@ -182,15 +196,15 @@ public partial class Dashboard : Window
 
     private void StartSparkleRain()
     {
-        sparkleTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(200) };
-        sparkleTimer.Tick += (s, e) => SpawnSparkle();
-        sparkleTimer.Start();
+        _sparkleTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(200) };
+        _sparkleTimer.Tick += (_, _) => SpawnSparkle();
+        _sparkleTimer.Start();
     }
 
     private void StopSparkleRain()
     {
-        sparkleTimer?.Stop();
-        sparkleTimer = null;
+        _sparkleTimer?.Stop();
+        _sparkleTimer = null;
     }
 
     private void SpawnSparkle()
@@ -199,7 +213,7 @@ public partial class Dashboard : Window
         var sparkle = new TextBlock
         {
             Text = "✨",
-            FontSize = random.Next(10, 30),
+            FontSize = _random.Next(10, 30),
             Foreground = pastelForeground,
             Opacity = 0
         };
@@ -209,13 +223,13 @@ public partial class Dashboard : Window
 
         var translate = new TranslateTransform
         {
-            X = random.NextDouble() * MainGrid.ActualWidth,
-            Y = random.NextDouble() * MainGrid.ActualHeight
+            X = _random.NextDouble() * MainGrid.ActualWidth,
+            Y = _random.NextDouble() * MainGrid.ActualHeight
         };
         sparkle.RenderTransform = translate;
 
         var fallDistance = MainGrid.ActualHeight + sparkle.ActualHeight;
-        var fallDuration = TimeSpan.FromSeconds(random.NextDouble() * 2 + 3); // 3-5 seconds
+        var fallDuration = TimeSpan.FromSeconds(_random.NextDouble() * 2 + 3); // 3-5 seconds
         var fallAnimation = new DoubleAnimation
         {
             From = translate.Y,
@@ -224,7 +238,7 @@ public partial class Dashboard : Window
             EasingFunction = new SineEase { EasingMode = EasingMode.EaseIn }
         };
 
-        var driftDistance = random.NextDouble() * 1200 - 600; // Increase drift to make it more noticeable
+        var driftDistance = _random.NextDouble() * 1200 - 600; // Increase drift to make it more noticeable
         var driftAnimation = new DoubleAnimation
         {
             From = translate.X,
@@ -253,7 +267,7 @@ public partial class Dashboard : Window
         Storyboard.SetTargetProperty(driftAnimation, new PropertyPath(TranslateTransform.XProperty));
         Storyboard.SetTarget(opacityAnimation, sparkle);
         Storyboard.SetTargetProperty(opacityAnimation, new PropertyPath(OpacityProperty));
-        sb.Completed += (s, e) => MainGrid.Children.Remove(sparkle);
+        sb.Completed += (_, _) => MainGrid.Children.Remove(sparkle);
         sb.Begin();
     }
 
@@ -313,10 +327,6 @@ public partial class Dashboard : Window
         NavView.Navigate(typeof(BetterDetails));
     }
 
-    private void SettingsBtn_OnClick(object sender, RoutedEventArgs e)
-    {
-        NavView.Navigate(typeof(BetterSettings));
-    }
 
     private void Dashboard_OnDragLeave(object sender, DragEventArgs e)
     {
@@ -333,19 +343,19 @@ public partial class Dashboard : Window
         UpdateDragDropText("Ready to drop", DragDropColors.DragOver);
     }
 
-    private void Dashboard_OnDrop(object sender, DragEventArgs e)
+    private async void Dashboard_OnDrop(object sender, DragEventArgs e)
     {
         UpdateDragDropText("Added to queue!", DragDropColors.Dropped);
         ScheduleTextReset();
-        AddToQueue(e);
+        await AddToQueue(e);
     }
 
-    private async void AddToQueue(DragEventArgs dragEventArgs)
+    private async Task AddToQueue(DragEventArgs dragEventArgs)
     {
         if (!dragEventArgs.Data.GetDataPresent(DataFormats.FileDrop))
             return;
 
-        var droppedFiles = (string[])dragEventArgs.Data.GetData(DataFormats.FileDrop);
+        var droppedFiles = (string[]?)dragEventArgs.Data.GetData(DataFormats.FileDrop) ?? [];
 
         var unitypackageFiles = droppedFiles
             .Where(file => file.EndsWith(".unitypackage", StringComparison.OrdinalIgnoreCase))
@@ -443,24 +453,21 @@ public partial class Dashboard : Window
         float width = e.Info.Width;
         float height = e.Info.Height;
 
-        using var paint = new SKPaint
-        {
-            Shader = SKShader.CreateRadialGradient(
-                new SKPoint(width / 2, height), // Bottom-center position
-                height, // Larger radius to clearly fill
-                new[]
-                {
-                    SKColor.Parse(ConfigHandler.Instance.Config.PrimaryColorHex).WithAlpha(240),
-                    SKColor.Parse(ConfigHandler.Instance.Config.PrimaryColorHex).WithAlpha(0)
-                },
-                new[] { 0f, 1f },
-                SKShaderTileMode.Clamp),
-            MaskFilter = SKMaskFilter.CreateBlur(SKBlurStyle.Normal, 150),
-            BlendMode = SKBlendMode.SoftLight,
-            IsAntialias = true
-        };
+        using var paint = new SKPaint();
+        paint.Shader = SKShader.CreateRadialGradient(
+            new SKPoint(width / 2, height), // Bottom-center position
+            height, // Larger radius to clearly fill
+            [
+                SKColor.Parse(ConfigHandler.Instance.Config.PrimaryColorHex).WithAlpha(240),
+                SKColor.Parse(ConfigHandler.Instance.Config.PrimaryColorHex).WithAlpha(0)
+            ],
+            [0f, 1f],
+            SKShaderTileMode.Clamp);
+        paint.MaskFilter = SKMaskFilter.CreateBlur(SKBlurStyle.Normal, 150);
+        paint.BlendMode = SKBlendMode.SoftLight;
+        paint.IsAntialias = true;
 
-        // Clearly visible glow circle at bottom-center
+        // Clearly visible glow circle at the bottom-center
         canvas.DrawCircle(width / 2, height, height, paint);
     }
 
