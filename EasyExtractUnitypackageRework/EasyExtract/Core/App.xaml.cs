@@ -12,62 +12,72 @@ namespace EasyExtract.Core;
 /// </summary>
 public partial class App
 {
-    private ContrastCheckerService _contrastChecker;
-    private ThemeService _themeService;
-
     private async void App_OnStartup(object sender, StartupEventArgs e)
     {
-        DispatcherUnhandledException += Application_DispatcherUnhandledException;
-
-        await ConfigHandler.Instance.InitializeIfNeededAsync();
-        var config = ConfigHandler.Instance.Config;
-
-        _themeService = new ThemeService(config);
-        _contrastChecker = new ContrastCheckerService(config);
-        _contrastChecker.LoadColorsAndCheckContrast();
-
-        var requireAdmin = !Debugger.IsAttached &&
-                           config.ContextMenuToggle &&
-                           !IsRunningAsAdmin() &&
-                           !e.Args.Contains("--elevated");
-
-        if (requireAdmin)
+        try
         {
-            await KillAllProcesses(Process.GetCurrentProcess().ProcessName);
-            RunAsAdmin(e.Args);
-            return;
-        }
+            DispatcherUnhandledException += Application_DispatcherUnhandledException;
 
-        if (e.Args.Contains("--extract"))
-        {
-            var extractIndex = Array.IndexOf(e.Args, "--extract");
-            var elevatedIndex = Array.IndexOf(e.Args, "--elevated");
-            if (elevatedIndex > extractIndex)
+            await ConfigHandler.Instance.InitializeIfNeededAsync();
+            var config = ConfigHandler.Instance.Config;
+
+
+            var requireAdmin = !Debugger.IsAttached &&
+                               config.ContextMenuToggle &&
+                               !IsRunningAsAdmin() &&
+                               !e.Args.Contains("--elevated");
+
+            if (requireAdmin)
             {
-                var path = string.Join(" ",
-                    e.Args.Skip(extractIndex + 1).Take(elevatedIndex - extractIndex - 1));
-                await BetterLogger.LogAsync($"Extract argument detected. Path: {path}", Importance.Info);
-                var extractionHandler = new ExtractionHandler();
-                await extractionHandler.ExtractUnitypackageFromContextMenu(path);
-                Shutdown(); // Sauberer Exit
+                await KillAllProcesses(Process.GetCurrentProcess().ProcessName);
+                RunAsAdmin(e.Args);
                 return;
             }
+
+            if (e.Args.Contains("--extract"))
+            {
+                var extractIndex = Array.IndexOf(e.Args, "--extract");
+                var elevatedIndex = Array.IndexOf(e.Args, "--elevated");
+                if (elevatedIndex > extractIndex)
+                {
+                    var path = string.Join(" ",
+                        e.Args.Skip(extractIndex + 1).Take(elevatedIndex - extractIndex - 1));
+                    await BetterLogger.LogAsync($"Extract argument detected. Path: {path}", Importance.Info);
+                    var extractionHandler = new ExtractionHandler();
+                    await extractionHandler.ExtractUnitypackageFromContextMenu(path);
+                    Shutdown();
+                    return;
+                }
+            }
+
+            await RegistryHelper.DeleteContextMenuEntry();
+            if (config.ContextMenuToggle)
+                await RegistryHelper.RegisterContextMenuEntry();
+
+            var dashboard = new Dashboard(new CancellationTokenSource());
+            dashboard.InitializeComponent();
+            dashboard.Show();
         }
-
-        await RegistryHelper.DeleteContextMenuEntry();
-        if (config.ContextMenuToggle)
-            await RegistryHelper.RegisterContextMenuEntry();
-
-        var dashboard = new Dashboard();
-        dashboard.InitializeComponent();
-        dashboard.Show();
+        catch (Exception exc)
+        {
+            BetterLogger.LogAsync(exc.Message, Importance.Error).Wait();
+        }
     }
 
     private static async void Application_DispatcherUnhandledException(object sender,
         DispatcherUnhandledExceptionEventArgs e)
     {
-        await BetterLogger.LogAsync(e.Exception.Message, Importance.Error);
-        e.Handled = true;
+        try
+        {
+            await BetterLogger.LogAsync(e.Exception.Message, Importance.Error);
+            e.Handled = true;
+        }
+        catch (Exception ex)
+        {
+            if (ex.Message.Contains("has not yet been initialized"))
+                return;
+            BetterLogger.LogAsync(ex.Message, Importance.Error).Wait();
+        }
     }
 
     private static bool IsRunningAsAdmin()
