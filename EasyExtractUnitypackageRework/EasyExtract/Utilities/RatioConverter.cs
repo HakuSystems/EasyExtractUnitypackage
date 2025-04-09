@@ -7,9 +7,9 @@ namespace EasyExtract.Utilities;
 [ValueConversion(typeof(double), typeof(double))]
 public class RatioConverter : MarkupExtension, IValueConverter
 {
-    private static RatioConverter _instance;
+    private static readonly RatioConverter _instance = null!;
 
-    public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+    public object? Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
     {
         if (value == null || parameter is null)
             return null;
@@ -18,13 +18,13 @@ public class RatioConverter : MarkupExtension, IValueConverter
         throw new ArgumentException("Both value and parameter must be of type double.");
     }
 
-    public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+    public object ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture)
     {
         throw new NotSupportedException();
     }
 
     public override object ProvideValue(IServiceProvider serviceProvider)
     {
-        return _instance ?? (_instance = new RatioConverter());
+        return _instance;
     }
 }

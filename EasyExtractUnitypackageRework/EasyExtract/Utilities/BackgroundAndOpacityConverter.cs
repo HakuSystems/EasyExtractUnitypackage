@@ -24,14 +24,14 @@ public class BackgroundAndOpacityConverter : IMultiValueConverter
     public object[] ConvertBack(object value, Type[] targetTypes, object parameter, CultureInfo culture)
     {
         if (value is ImageBrush imageBrush)
-            return new object[]
-            {
+            return
+            [
                 imageBrush, imageBrush.Opacity
-            };
+            ];
 
-        return new[]
-        {
+        return
+        [
             Binding.DoNothing, Binding.DoNothing
-        };
+        ];
     }
 }

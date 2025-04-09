@@ -16,11 +16,11 @@ public static class CodeToImageConverter
             Font font;
             try
             {
-                font = new Font("SegoeFluentIcons", 30, FontStyle.Bold, GraphicsUnit.Pixel);
+                font = new Font("SegueFluentIcons", 30, FontStyle.Bold, GraphicsUnit.Pixel);
             }
             catch
             {
-                font = new Font("Segoe UI", 30, FontStyle.Bold, GraphicsUnit.Pixel);
+                font = new Font("Segue UI", 30, FontStyle.Bold, GraphicsUnit.Pixel);
             }
 
             using var brush = new SolidBrush(Color.White);

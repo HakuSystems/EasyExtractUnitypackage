@@ -5,7 +5,7 @@ namespace EasyExtract.Utilities;
 
 public class NumberFormatConverter : IValueConverter
 {
-    public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+    public object Convert(object? value, Type targetType, object? parameter, CultureInfo? culture)
     {
         if (targetType != typeof(string))
             return DependencyProperty.UnsetValue;
@@ -36,7 +36,7 @@ public class NumberFormatConverter : IValueConverter
         return number.ToString("#,0", nfi);
     }
 
-    public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+    public object ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture)
     {
         throw new NotImplementedException();
     }

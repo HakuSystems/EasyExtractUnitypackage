@@ -10,11 +10,14 @@ namespace EasyExtract.Utilities;
 /// </summary>
 public static class BetterLogger
 {
-    private static readonly object _lock = new();
+    private static readonly Lock _lock = new();
     private static readonly string _sessionStartTime = DateTime.Now.ToString("yyyyMMdd_HHmmss");
-    private static readonly string _applicationPath;
-    private static readonly string _logPath;
-    private static readonly string _currentLogFile;
+
+    private static readonly string ApplicationPath = Path.Combine(
+        Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "EasyExtract");
+
+    private static readonly string LogPath = Path.Combine(ApplicationPath, "Logs");
+    private static readonly string CurrentLogFile = Path.Combine(LogPath, $"Log_{_sessionStartTime}.txt");
 
     /// <summary>
     ///     Initializes static read-only fields, configures the Serilog logger,
@@ -22,13 +25,7 @@ public static class BetterLogger
     /// </summary>
     static BetterLogger()
     {
-        _applicationPath = Path.Combine(
-            Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "EasyExtract");
-
-        _logPath = Path.Combine(_applicationPath, "Logs");
-        Directory.CreateDirectory(_logPath);
-
-        _currentLogFile = Path.Combine(_logPath, $"Log_{_sessionStartTime}.txt");
+        Directory.CreateDirectory(LogPath);
 
         ConfigureLogger();
         CleanupOldLogFiles();
@@ -44,7 +41,7 @@ public static class BetterLogger
             .MinimumLevel.Debug()
             .WriteTo.Console() // Console logging (with colors)
             .WriteTo.File(
-                _currentLogFile,
+                CurrentLogFile,
                 LogEventLevel.Information,
                 rollingInterval: RollingInterval.Infinite,
                 shared: true)
@@ -57,23 +54,21 @@ public static class BetterLogger
     /// </summary>
     private static void CleanupOldLogFiles()
     {
-        if (!Directory.Exists(_logPath))
-            Directory.CreateDirectory(_logPath);
+        if (!Directory.Exists(LogPath))
+            Directory.CreateDirectory(LogPath);
 
-        var logFiles = Directory.GetFiles(_logPath);
-        var filesToDelete = logFiles
-            .Where(f => !f.Equals(_currentLogFile, StringComparison.OrdinalIgnoreCase));
+        var logFiles = Directory.GetFiles(LogPath)
+            .Where(f => !f.Equals(CurrentLogFile, StringComparison.OrdinalIgnoreCase) && FileNotBeingUsed(f));
 
-        foreach (var file in filesToDelete)
-            if (FileNotBeingUsed(file))
-                try
-                {
-                    File.Delete(file);
-                }
-                catch (Exception ex)
-                {
-                    Log.Warning("Could not delete old log file {FileName}. Reason: {Reason}", file, ex.Message);
-                }
+        foreach (var file in logFiles)
+            try
+            {
+                File.Delete(file);
+            }
+            catch (Exception ex)
+            {
+                Log.Warning(ex, "Could not delete old log file {FileName}. Reason: {Reason}", file, ex.Message);
+            }
     }
 
     /// <summary>
@@ -104,7 +99,7 @@ public static class BetterLogger
         var frames = stack.GetFrames();
 
         // If no frames are available, return fallback info.
-        if (frames == null || frames.Length == 0)
+        if (frames.Length == 0)
             return "UnknownFile at line 0";
 
         foreach (var frame in frames)
@@ -138,7 +133,7 @@ public static class BetterLogger
                 : firstLine;
         }
 
-        // Use the caller file + line number
+        // Use the caller file plus line number
         return $"CallSite: {GetCallSiteInfo()}";
     }
 
@@ -158,7 +153,7 @@ public static class BetterLogger
             _ => "37" // white
         };
 
-        // Color codes for stack trace & message
+        // Color codes for stack trace and message
         const string stackTraceColor = "35"; // magenta
         const string messageColor = "37"; // white
 
@@ -201,7 +196,7 @@ public static class BetterLogger
                     break;
                 case Importance.Error:
                     Log.Error(logEntryColored);
-                    DialogHelper.ShowErrorDialogAsync(null, "Error", message,
+                    _ = DialogHelper.ShowErrorDialogAsync(null, "Error", message,
                         "OK"); // it should also work without await
                     break;
                 case Importance.Debug:
