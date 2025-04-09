@@ -1,132 +1,132 @@
+using System.Collections.Immutable;
 using System.Text;
 
 namespace EasyExtract.Services;
 
 public record ExtractionHelper
 {
-    public static readonly HashSet<string> ValidExtensions =
-        new(StringComparer.OrdinalIgnoreCase) // Credits oguzhan_sparklegames
-        {
+    // Credits: oguzhan_sparklegames
+    public static readonly ImmutableHashSet<string> ValidExtensions =
+        ImmutableHashSet.Create(StringComparer.OrdinalIgnoreCase,
             ".cs", ".shader", ".prefab", ".fbx", ".png", ".jpg", ".jpeg", ".tga", ".psd",
             ".mp3", ".wav", ".ogg", ".anim", ".unity", ".mat", ".asset", ".controller",
             ".ttf", ".otf", ".meta", ".json", ".xml", ".yaml",
-            ".blend", ".dll", ".txt", ".pdf", ".docx", ".xlsx", ".html", ".js", ".py"
-        };
+            ".blend", ".dll", ".txt", ".pdf", ".docx", ".xlsx", ".html", ".js", ".py");
 
-    public static async Task<long> GetTotalSizeInBytesAsync(string directory)
+    public static Task<long> GetTotalSizeInBytesAsync(string directory)
     {
         var files = Directory.GetFiles(directory, "*.*", SearchOption.AllDirectories);
         var totalBytes = files.Sum(file => new FileInfo(file).Length);
-        return totalBytes;
+        return Task.FromResult(totalBytes);
     }
 
 
-    public static async Task<int> GetTotalFileCount(string directory)
+    public static Task<int> GetTotalFileCount(string directory)
     {
         var count = Directory.GetFiles(directory, "*.*", SearchOption.AllDirectories).Length;
-        return count;
+        return Task.FromResult(count);
     }
 
-    public static async Task<int> GetTotalFolderCount(string directory)
+    public static Task<int> GetTotalFolderCount(string directory)
     {
         var count = Directory.GetDirectories(directory, "*", SearchOption.AllDirectories).Length;
-        return count;
+        return Task.FromResult(count);
     }
 
-    public static async Task<int> GetTotalScriptCount(string directory)
+    public static Task<int> GetTotalScriptCount(string directory)
     {
         var count = Directory.GetFiles(directory, "*.cs", SearchOption.AllDirectories).Length;
-        return count;
+        return Task.FromResult(count);
     }
 
-    public static async Task<int> GetTotalShaderCount(string directory)
+    public static Task<int> GetTotalShaderCount(string directory)
     {
         var count = Directory.GetFiles(directory, "*.shader", SearchOption.AllDirectories).Length;
-        return count;
+        return Task.FromResult(count);
     }
 
-    public static async Task<int> GetTotalPrefabCount(string directory)
+    public static Task<int> GetTotalPrefabCount(string directory)
     {
         var count = Directory.GetFiles(directory, "*.prefab", SearchOption.AllDirectories).Length;
-        return count;
+        return Task.FromResult(count);
     }
 
-    public static async Task<int> GetTotal3DObjectCount(string directory)
+    public static Task<int> GetTotal3DObjectCount(string directory)
     {
         var count = Directory.GetFiles(directory, "*.fbx", SearchOption.AllDirectories).Length;
-        return count;
+        return Task.FromResult(count);
     }
 
-    public static async Task<int> GetTotalImageCount(string directory)
+    public static Task<int> GetTotalImageCount(string directory)
     {
         var count = Directory.GetFiles(directory, "*.png", SearchOption.AllDirectories).Length +
                     Directory.GetFiles(directory, "*.jpg", SearchOption.AllDirectories).Length +
                     Directory.GetFiles(directory, "*.jpeg", SearchOption.AllDirectories).Length +
                     Directory.GetFiles(directory, "*.tga", SearchOption.AllDirectories).Length +
                     Directory.GetFiles(directory, "*.psd", SearchOption.AllDirectories).Length;
-        return count;
+        return Task.FromResult(count);
     }
 
-    public static async Task<int> GetTotalAudioCount(string directory)
+    public static Task<int> GetTotalAudioCount(string directory)
     {
         var count = Directory.GetFiles(directory, "*.mp3", SearchOption.AllDirectories).Length +
                     Directory.GetFiles(directory, "*.wav", SearchOption.AllDirectories).Length +
                     Directory.GetFiles(directory, "*.ogg", SearchOption.AllDirectories).Length;
-        return count;
+        return Task.FromResult(count);
     }
 
-    public static async Task<int> GetTotalAnimationCount(string directory)
+    public static Task<int> GetTotalAnimationCount(string directory)
     {
         var count = Directory.GetFiles(directory, "*.anim", SearchOption.AllDirectories).Length;
-        return count;
+        return Task.FromResult(count);
     }
 
-    public static async Task<int> GetTotalSceneCount(string directory)
+    public static Task<int> GetTotalSceneCount(string directory)
     {
         var count = Directory.GetFiles(directory, "*.unity", SearchOption.AllDirectories).Length;
-        return count;
+        return Task.FromResult(count);
     }
 
-    public static async Task<int> GetTotalMaterialCount(string directory)
+    public static Task<int> GetTotalMaterialCount(string directory)
     {
         var count = Directory.GetFiles(directory, "*.mat", SearchOption.AllDirectories).Length;
-        return count;
+        return Task.FromResult(count);
     }
 
-    public static async Task<int> GetTotalAssetCount(string directory)
+    public static Task<int> GetTotalAssetCount(string directory)
     {
         var count = Directory.GetFiles(directory, "*.asset", SearchOption.AllDirectories).Length;
-        return count;
+        return Task.FromResult(count);
     }
 
-    public static async Task<int> GetTotalControllerCount(string directory)
+    public static Task<int> GetTotalControllerCount(string directory)
     {
         var count = Directory.GetFiles(directory, "*.controller", SearchOption.AllDirectories).Length;
-        return count;
+        return Task.FromResult(count);
     }
 
-    public static async Task<int> GetTotalFontCount(string directory)
+    public static Task<int> GetTotalFontCount(string directory)
     {
         var count = Directory.GetFiles(directory, "*.ttf", SearchOption.AllDirectories).Length +
                     Directory.GetFiles(directory, "*.otf", SearchOption.AllDirectories).Length;
-        return count;
+        return Task.FromResult(count);
     }
 
-    public static async Task<int> GetTotalConfigurationCount(string directory)
+    public static Task<int> GetTotalConfigurationCount(string directory)
     {
         var count = Directory.GetFiles(directory, "*.meta", SearchOption.AllDirectories).Length +
                     Directory.GetFiles(directory, "*.json", SearchOption.AllDirectories).Length +
                     Directory.GetFiles(directory, "*.xml", SearchOption.AllDirectories).Length +
                     Directory.GetFiles(directory, "*.yaml", SearchOption.AllDirectories).Length;
-        return count;
+        return Task.FromResult(count);
     }
 
-    public static async Task<int> GetTotalDataCount(string directory)
+    public static Task<int> GetTotalDataCount(string directory)
     {
         var count = Directory.GetFiles(directory, "*.json", SearchOption.AllDirectories).Length +
                     Directory.GetFiles(directory, "*.xml", SearchOption.AllDirectories).Length +
                     Directory.GetFiles(directory, "*.yaml", SearchOption.AllDirectories).Length;
-        return count;
+        return Task.FromResult(count);
     }
 
     /// <summary>
@@ -134,7 +134,7 @@ public record ExtractionHelper
     /// </summary>
     /// <param name="extension">The file extension.</param>
     /// <returns>The symbol icon.</returns>
-    public async Task<string> GetSymbolByExtension(string extension)
+    public static Task<string> GetSymbolByExtension(string extension)
     {
         var symbol = extension switch
         {
@@ -164,7 +164,7 @@ public record ExtractionHelper
             _ => Document24
         };
 
-        return symbol;
+        return Task.FromResult(symbol);
     }
 
     /// <summary>
@@ -172,7 +172,7 @@ public record ExtractionHelper
     /// </summary>
     /// <param name="extension">The file extension.</param>
     /// <returns>The category of the file.</returns>
-    public async Task<string?> GetCategoryByExtension(string extension)
+    public static Task<string> GetCategoryByExtension(string extension)
     {
         const string? img = "Image";
         const string? audio = "Audio";
@@ -217,7 +217,7 @@ public record ExtractionHelper
             _ => unknown
         };
 
-        return category;
+        return Task.FromResult(category);
     }
 
 
@@ -270,7 +270,7 @@ public record ExtractionHelper
     }
 
     // Encryption detection (dlls) START
-    public async Task<bool> IsEncryptedDll(string filePath)
+    public static async Task<bool> IsEncryptedDll(string filePath)
     {
         var fileBytes = await File.ReadAllBytesAsync(filePath);
 
@@ -303,7 +303,7 @@ public record ExtractionHelper
         return false;
     }
 
-    private double CalculateEntropy(byte[] data)
+    private static double CalculateEntropy(byte[] data)
     {
         var frequencies = new int[256];
         foreach (var b in data)
@@ -322,7 +322,7 @@ public record ExtractionHelper
         return entropy;
     }
 
-    private bool HasSuspiciousSectionNames(byte[] fileBytes, int peHeaderOffset)
+    private static bool HasSuspiciousSectionNames(byte[] fileBytes, int peHeaderOffset)
     {
         try
         {

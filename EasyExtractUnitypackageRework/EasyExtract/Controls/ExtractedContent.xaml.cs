@@ -15,7 +15,6 @@ namespace EasyExtract.Controls;
 public partial class ExtractedContent
 {
     private readonly ICollectionView _extractedPackagesView;
-    private readonly ExtractionHelper _extractionHelper = new();
 
 
     private readonly Dictionary<string, BitmapImage> _previewCache = new();
@@ -100,11 +99,11 @@ public partial class ExtractedContent
             {
                 FileName = file.Name,
                 FilePath = file.FullName,
-                Category = await _extractionHelper.GetCategoryByExtension(file.Extension),
+                Category = await ExtractionHelper.GetCategoryByExtension(file.Extension),
                 Extension = file.Extension,
                 Size = new FileSizeConverter().Convert(file.Length, null, null, CultureInfo.CurrentCulture).ToString(),
                 ExtractedDate = file.CreationTime,
-                SymbolIconImage = await _extractionHelper.GetSymbolByExtension(file.Extension),
+                SymbolIconImage = await ExtractionHelper.GetSymbolByExtension(file.Extension),
                 IsCodeFile = new[] { ".cs", ".json", ".shader", ".txt" }.Contains(file.Extension.ToLower()),
                 PreviewImage = previewTask.Result,
                 SecurityWarning = securityWarningTask.Result
@@ -137,9 +136,9 @@ public partial class ExtractedContent
     }
 
 
-    private async Task<string> GetSecurityWarningAsync(FileInfo file, ExtractedUnitypackageModel pkg)
+    private static async Task<string> GetSecurityWarningAsync(FileInfo file, ExtractedUnitypackageModel pkg)
     {
-        if (file.Extension.Equals(".dll") && await _extractionHelper.IsEncryptedDll(file.FullName))
+        if (file.Extension.Equals(".dll") && await ExtractionHelper.IsEncryptedDll(file.FullName))
         {
             pkg.HasEncryptedDll = true;
             return "Encrypted DLL detected!";
@@ -310,7 +309,7 @@ public partial class ExtractedContent
                 await RecheckSecurityStatusAsync(extractedPkg);
             }
 
-        UpdateConfigAndUI();
+        UpdateConfigAndUi();
 
         async Task RecheckSecurityStatusAsync(ExtractedUnitypackageModel pkg)
         {
@@ -339,7 +338,7 @@ public partial class ExtractedContent
             foreach (var key in keysToRemove) _previewCache.Remove(key);
         }
 
-        void UpdateConfigAndUI()
+        void UpdateConfigAndUi()
         {
             try
             {

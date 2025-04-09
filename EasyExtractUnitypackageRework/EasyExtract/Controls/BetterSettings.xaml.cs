@@ -19,8 +19,15 @@ public partial class BetterSettings
 
     private async void BetterSettings_OnLoaded(object sender, RoutedEventArgs e)
     {
-        Dashboard.Instance.NavigateBackBtn.Visibility = Visibility.Visible;
-        await ChangeUiToMatchConfigAsync();
+        try
+        {
+            Dashboard.Instance.NavigateBackBtn.Visibility = Visibility.Visible;
+            await ChangeUiToMatchConfigAsync();
+        }
+        catch (Exception ex)
+        {
+            await BetterLogger.LogAsync($"Exception in BetterSettings_OnLoaded: {ex.Message}", Importance.Error);
+        }
     }
 
     private async Task ChangeUiToMatchConfigAsync()
@@ -63,20 +70,35 @@ public partial class BetterSettings
 
     private async void UwUToggleSwitch_OnChecked(object sender, RoutedEventArgs e)
     {
-        await UwUToggleSwitchCheckUnCheck();
+        try
+        {
+            await UwUToggleSwitchCheckUnCheck();
+        }
+        catch (Exception ex)
+        {
+            await BetterLogger.LogAsync($"Exception in UwUToggleSwitch_OnChecked: {ex.Message}", Importance.Error);
+        }
     }
 
-    private async Task UwUToggleSwitchCheckUnCheck()
+    private Task UwUToggleSwitchCheckUnCheck()
     {
         ConfigHandler.Instance.Config.UwUModeActive = UwUToggleSwitch.IsChecked ?? false;
+        return Task.CompletedTask;
     }
 
     private async void UwUToggleSwitch_OnUnchecked(object sender, RoutedEventArgs e)
     {
-        await UwUToggleSwitchCheckUnCheck();
+        try
+        {
+            await UwUToggleSwitchCheckUnCheck();
+        }
+        catch (Exception ex)
+        {
+            await BetterLogger.LogAsync($"Exception in UwUToggleSwitch_OnUnchecked: {ex.Message}", Importance.Error);
+        }
     }
 
-    private async void BackgroundOpacitySlider_OnValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+    private void BackgroundOpacitySlider_OnValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
     {
         var currentBackground = _backgroundManager.CurrentBackground;
         ConfigHandler.Instance.Config.CustomBackgroundImage.BackgroundOpacity = (float)BackgroundOpacitySlider.Value;
@@ -84,31 +106,56 @@ public partial class BetterSettings
             currentBackground.ImageSource
                 .ToString(); // Save the current background path
         // since it's not saved in the config when changing opacity.
-        _backgroundManager.UpdateOpacity(ConfigHandler.Instance.Config.CustomBackgroundImage.BackgroundOpacity);
+        _ = _backgroundManager.UpdateOpacity(ConfigHandler.Instance.Config.CustomBackgroundImage.BackgroundOpacity);
     }
 
     private async void CheckForUpdatesOnStartUpToggleSwitch_OnChecked(object sender, RoutedEventArgs e)
     {
-        await CheckForUpdatesUpdateToggle();
+        try
+        {
+            await CheckForUpdatesUpdateToggle();
+        }
+        catch (Exception ex)
+        {
+            await BetterLogger.LogAsync($"Exception in CheckForUpdatesOnStartUpToggleSwitch_OnChecked: {ex.Message}",
+                Importance.Error);
+        }
     }
 
-    private async Task CheckForUpdatesUpdateToggle()
+    private Task CheckForUpdatesUpdateToggle()
     {
         ConfigHandler.Instance.Config.Update.AutoUpdate = CheckForUpdatesOnStartUpToggleSwitch.IsChecked ?? false;
+        return Task.CompletedTask;
     }
 
     private async void CheckForUpdatesOnStartUpToggleSwitch_OnUnchecked(object sender, RoutedEventArgs e)
     {
-        await CheckForUpdatesUpdateToggle();
+        try
+        {
+            await CheckForUpdatesUpdateToggle();
+        }
+        catch (Exception ex)
+        {
+            await BetterLogger.LogAsync($"Exception in CheckForUpdatesOnStartUpToggleSwitch_OnUnchecked: {ex.Message}",
+                Importance.Error);
+        }
     }
 
     private async void DiscordRpcToggleSwitch_OnChecked(object sender, RoutedEventArgs e)
     {
-        ConfigHandler.Instance.Config.DiscordRpc = DiscordRpcToggleSwitch.IsChecked ?? false;
-        await DiscordRpcManager.Instance.TryUpdatePresenceAsync("Settings");
+        try
+        {
+            ConfigHandler.Instance.Config.DiscordRpc = DiscordRpcToggleSwitch.IsChecked ?? false;
+            await DiscordRpcManager.Instance.TryUpdatePresenceAsync("Settings");
+        }
+        catch (Exception ex)
+        {
+            await BetterLogger.LogAsync($"Exception in DiscordRpcToggleSwitch_OnChecked: {ex.Message}",
+                Importance.Error);
+        }
     }
 
-    private async void DiscordRpcToggleSwitch_OnUnchecked(object sender, RoutedEventArgs e)
+    private void DiscordRpcToggleSwitch_OnUnchecked(object sender, RoutedEventArgs e)
     {
         ConfigHandler.Instance.Config.DiscordRpc = DiscordRpcToggleSwitch.IsChecked ?? false;
         DiscordRpcManager.Instance.Dispose();
@@ -116,14 +163,22 @@ public partial class BetterSettings
 
     private async void ThemeComboBox_OnSelectionChanged(object sender, SelectionChangedEventArgs e)
     {
-        if (ThemeComboBox.SelectedItem == null) return;
-        var selectedTheme = (AvailableThemes)ThemeComboBox.SelectedItem;
-        ConfigHandler.Instance.Config.ApplicationTheme = selectedTheme;
-        await BetterLogger.LogAsync($"Theme changed to: {selectedTheme}", Importance.Info);
+        try
+        {
+            if (ThemeComboBox.SelectedItem == null) return;
+            var selectedTheme = (AvailableThemes)ThemeComboBox.SelectedItem;
+            ConfigHandler.Instance.Config.ApplicationTheme = selectedTheme;
+            await BetterLogger.LogAsync($"Theme changed to: {selectedTheme}", Importance.Info);
+        }
+        catch (Exception ex)
+        {
+            await BetterLogger.LogAsync($"Exception in ThemeComboBox_OnSelectionChanged: {ex.Message}",
+                Importance.Error);
+        }
     }
 
 
-    private async void BackgroundChangeButton_OnClick(object sender, RoutedEventArgs e)
+    private void BackgroundChangeButton_OnClick(object sender, RoutedEventArgs e)
     {
         ConfigHandler.Instance.Config.CustomBackgroundImage.BackgroundPath = string.Empty;
         var openFileDialog = new OpenFileDialog
@@ -135,49 +190,81 @@ public partial class BetterSettings
         if (result != true) return;
         ConfigHandler.Instance.Config.CustomBackgroundImage.BackgroundPath = openFileDialog.FileName;
 
-        _backgroundManager.UpdateBackground(ConfigHandler.Instance.Config.CustomBackgroundImage.BackgroundPath);
-        _backgroundManager.UpdateOpacity(ConfigHandler.Instance.Config.CustomBackgroundImage.BackgroundOpacity);
+        _ = _backgroundManager.UpdateBackground(ConfigHandler.Instance.Config.CustomBackgroundImage.BackgroundPath);
+        _ = _backgroundManager.UpdateOpacity(ConfigHandler.Instance.Config.CustomBackgroundImage.BackgroundOpacity);
     }
 
-    private async void BackgroundResetButton_OnClick(object sender, RoutedEventArgs e)
+    private void BackgroundResetButton_OnClick(object sender, RoutedEventArgs e)
     {
         ConfigHandler.Instance.Config.CustomBackgroundImage.BackgroundPath = string.Empty;
-        _backgroundManager.ResetBackground();
+        _ = _backgroundManager.ResetBackground();
     }
 
     private async void DefaultTempPathChangeButton_OnClick(object sender, RoutedEventArgs e)
     {
-        var folderDialog = new OpenFolderDialog();
-        var result = folderDialog.ShowDialog();
-        if (result != true) return;
-        DefaultTempPathTextBox.Text = folderDialog.FolderName;
+        try
+        {
+            var folderDialog = new OpenFolderDialog();
+            var result = folderDialog.ShowDialog();
+            if (result != true) return;
+            DefaultTempPathTextBox.Text = folderDialog.FolderName;
 
-        ConfigHandler.Instance.Config.DefaultTempPath = folderDialog.FolderName;
-        await BetterLogger.LogAsync($"Default temp path set to: {folderDialog.FolderName}",
-            Importance.Info);
+            ConfigHandler.Instance.Config.DefaultTempPath = folderDialog.FolderName;
+            await BetterLogger.LogAsync($"Default temp path set to: {folderDialog.FolderName}",
+                Importance.Info);
+        }
+        catch (Exception ex)
+        {
+            await BetterLogger.LogAsync($"Exception in DefaultTempPathChangeButton_OnClick: {ex.Message}",
+                Importance.Error);
+        }
     }
 
     private async void DefaultTempPathResetButton_OnClick(object sender, RoutedEventArgs e)
     {
-        ConfigHandler.Instance.Config.DefaultTempPath =
-            Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "EasyExtract", "Temp");
-        DefaultTempPathTextBox.Text = ConfigHandler.Instance.Config.DefaultTempPath;
-        await BetterLogger.LogAsync("Default temp path reset", Importance.Info);
+        try
+        {
+            ConfigHandler.Instance.Config.DefaultTempPath =
+                Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "EasyExtract",
+                    "Temp");
+            DefaultTempPathTextBox.Text = ConfigHandler.Instance.Config.DefaultTempPath;
+            await BetterLogger.LogAsync("Default temp path reset", Importance.Info);
+        }
+        catch (Exception ex)
+        {
+            await BetterLogger.LogAsync($"Exception in DefaultTempPathResetButton_OnClick: {ex.Message}",
+                Importance.Error);
+        }
     }
 
     private async void ContextMenuSwitch_OnChecked(object sender, RoutedEventArgs e)
     {
-        await UpdateContextMenuToggleSettingAsync();
+        try
+        {
+            await UpdateContextMenuToggleSettingAsync();
+        }
+        catch (Exception ex)
+        {
+            await BetterLogger.LogAsync($"Exception in ContextMenuSwitch_OnChecked: {ex.Message}", Importance.Error);
+        }
     }
 
     private async void ContextMenuSwitch_OnUnchecked(object sender, RoutedEventArgs e)
     {
-        await UpdateContextMenuToggleSettingAsync();
+        try
+        {
+            await UpdateContextMenuToggleSettingAsync();
+        }
+        catch (Exception ex)
+        {
+            await BetterLogger.LogAsync($"Exception in ContextMenuSwitch_OnUnchecked: {ex.Message}", Importance.Error);
+        }
     }
 
-    private async Task UpdateContextMenuToggleSettingAsync()
+    private Task UpdateContextMenuToggleSettingAsync()
     {
         ConfigHandler.Instance.Config.ContextMenuToggle = ContextMenuSwitch.IsChecked ?? false;
+        return Task.CompletedTask;
     }
 
     private void BetterSettings_OnSizeChanged(object sender, SizeChangedEventArgs e)
@@ -211,7 +298,7 @@ public partial class BetterSettings
     }
 
 
-    private async void DynamicScalingComboBox_OnSelectionChanged(object sender, SelectionChangedEventArgs e)
+    private void DynamicScalingComboBox_OnSelectionChanged(object sender, SelectionChangedEventArgs e)
     {
         if (DynamicScalingComboBox.SelectedItem == null) return;
         var selectedMode = (DynamicScalingModes)DynamicScalingComboBox.SelectedItem;
@@ -220,25 +307,41 @@ public partial class BetterSettings
 
     private async void DefaultOutputPathChangeButton_OnClick(object sender, RoutedEventArgs e)
     {
-        var folderDialog = new OpenFolderDialog();
-        var result = folderDialog.ShowDialog();
-        if (result != true) return;
+        try
+        {
+            var folderDialog = new OpenFolderDialog();
+            var result = folderDialog.ShowDialog();
+            if (result != true) return;
 
-        DefaultOutputPathTextBox.Text = folderDialog.FolderName;
-        ConfigHandler.Instance.Config.DefaultOutputPath = folderDialog.FolderName;
+            DefaultOutputPathTextBox.Text = folderDialog.FolderName;
+            ConfigHandler.Instance.Config.DefaultOutputPath = folderDialog.FolderName;
 
-        await BetterLogger.LogAsync($"Default output path set to: {folderDialog.FolderName}", Importance.Info);
+            await BetterLogger.LogAsync($"Default output path set to: {folderDialog.FolderName}", Importance.Info);
+        }
+        catch (Exception ex)
+        {
+            await BetterLogger.LogAsync($"Exception in DefaultOutputPathChangeButton_OnClick: {ex.Message}",
+                Importance.Error);
+        }
     }
 
     private async void DefaultOutputPathResetButton_OnClick(object sender, RoutedEventArgs e)
     {
-        ConfigHandler.Instance.Config.DefaultOutputPath =
-            Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "EasyExtract",
-                "Extracted");
+        try
+        {
+            ConfigHandler.Instance.Config.DefaultOutputPath =
+                Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "EasyExtract",
+                    "Extracted");
 
-        DefaultOutputPathTextBox.Text = ConfigHandler.Instance.Config.DefaultOutputPath;
+            DefaultOutputPathTextBox.Text = ConfigHandler.Instance.Config.DefaultOutputPath;
 
-        await BetterLogger.LogAsync("Default output path reset to default location", Importance.Info);
+            await BetterLogger.LogAsync("Default output path reset to default location", Importance.Info);
+        }
+        catch (Exception ex)
+        {
+            await BetterLogger.LogAsync($"Exception in DefaultOutputPathResetButton_OnClick: {ex.Message}",
+                Importance.Error);
+        }
     }
 
     private void SoundCardToggle_OnChecked(object sender, RoutedEventArgs e)

@@ -4,7 +4,7 @@ using EasyExtract.Utilities;
 
 namespace EasyExtract.Services;
 
-public class EverythingValidation
+public static class EverythingValidation
 {
     private const string DllName = "Everything64.dll";
 
@@ -16,7 +16,7 @@ public class EverythingValidation
     /// <summary>
     ///     Checks all system requirements asynchronously.
     /// </summary>
-    public async Task<bool> AreSystemRequirementsMetAsync()
+    public static async Task<bool> AreSystemRequirementsMetAsync()
     {
         var stopwatch = Stopwatch.StartNew();
         await BetterLogger.LogAsync("Checking system requirements...", Importance.Info);
@@ -35,7 +35,7 @@ public class EverythingValidation
     /// <summary>
     ///     Returns a detailed status string listing any missing requirements.
     /// </summary>
-    public async Task<string> GetSystemRequirementsStatusAsync()
+    public static async Task<string> GetSystemRequirementsStatusAsync()
     {
         var status = new StringBuilder();
 
@@ -55,21 +55,21 @@ public class EverythingValidation
         return status.ToString();
     }
 
-    private async Task<bool> Is64BitOperatingSystemAsync()
+    private static async Task<bool> Is64BitOperatingSystemAsync()
     {
         var is64Bit = Environment.Is64BitOperatingSystem;
         await BetterLogger.LogAsync($"Is64BitOperatingSystem: {is64Bit}", Importance.Info);
         return is64Bit;
     }
 
-    private async Task<bool> IsProcessRunningAsync(string processName)
+    private static async Task<bool> IsProcessRunningAsync(string processName)
     {
         var isRunning = Process.GetProcessesByName(processName).Length > 0;
         await BetterLogger.LogAsync($"IsProcessRunning('{processName}'): {isRunning}", Importance.Info);
         return isRunning;
     }
 
-    private async Task<bool> EnsureDllExistsAsync()
+    private static async Task<bool> EnsureDllExistsAsync()
     {
         var dllPath = await GetDllPathAsync();
         if (File.Exists(dllPath))
@@ -94,7 +94,7 @@ public class EverythingValidation
         }
     }
 
-    private async Task DownloadDllAsync(string dllPath)
+    private static async Task DownloadDllAsync(string dllPath)
     {
         using var client = new HttpClient();
         using var response = await client.GetAsync(DownloadUrl);
@@ -103,7 +103,7 @@ public class EverythingValidation
         await response.Content.CopyToAsync(fs);
     }
 
-    private async Task<string> GetDllPathAsync()
+    private static async Task<string> GetDllPathAsync()
     {
         var appDataPath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
         var directory = Path.Combine(appDataPath, "EasyExtract", "ThirdParty");
@@ -113,7 +113,7 @@ public class EverythingValidation
         return dllPath;
     }
 
-    private async Task<bool> CopyDllIfNecessaryAsync()
+    private static async Task<bool> CopyDllIfNecessaryAsync()
     {
         var sourcePath = await GetDllPathAsync();
         var currentPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);

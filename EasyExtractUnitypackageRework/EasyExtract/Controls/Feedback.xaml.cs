@@ -1,8 +1,8 @@
 using System.Text;
-using System.Windows.Media;
 using EasyExtract.Config;
 using EasyExtract.Config.Models;
 using EasyExtract.Services;
+using EasyExtract.Utilities;
 using EasyExtract.Views;
 using Newtonsoft.Json;
 
@@ -16,46 +16,61 @@ public partial class Feedback
     }
 
     private static string SenderName =>
-        DiscordRpcManager.Instance.Client.CurrentUser != null
+        DiscordRpcManager.Instance.Client?.CurrentUser != null
             ? DiscordRpcManager.Instance.Client.CurrentUser.Username
             : "Anonymous";
 
     private async void Feedback_OnLoaded(object sender, RoutedEventArgs e)
     {
-        Dashboard.Instance.NavigateBackBtn.Visibility = Visibility.Visible;
+        try
+        {
+            Dashboard.Instance.NavigateBackBtn.Visibility = Visibility.Visible;
 
-        if (ConfigHandler.Instance.Config.UwUModeActive) BetterUwUifyer.ApplyUwUModeToVisualTree(this);
-        GetDiscordUsername();
-        await DiscordRpcManager.Instance.TryUpdatePresenceAsync("Feedback");
+            if (ConfigHandler.Instance.Config.UwUModeActive) BetterUwUifyer.ApplyUwUModeToVisualTree(this);
+            GetDiscordUsername();
+            await DiscordRpcManager.Instance.TryUpdatePresenceAsync("Feedback");
+        }
+        catch (Exception exception)
+        {
+            BetterLogger.LogAsync($"Error in Feedback Loaded: {exception.Message}", Importance.Error).Wait();
+        }
     }
 
     private void GetDiscordUsername()
     {
-        DiscordNameRequest.Text = DiscordRpcManager.Instance.Client.CurrentUser != null
+        DiscordNameRequest.Text = DiscordRpcManager.Instance.Client?.CurrentUser != null
             ? $"Sending Request as {DiscordRpcManager.Instance.Client.CurrentUser.Username}"
             : "Sending Request as Anonymous";
     }
 
     private async void SubmitFeedbackButton_OnClick(object sender, RoutedEventArgs e)
     {
-        if (string.IsNullOrWhiteSpace(FeedbackTextBox.Text))
+        try
         {
-            await DialogHelper.ShowErrorDialogAsync(Window.GetWindow(this), "Warning", "Please enter your feedback.",
-                "OK");
-            return;
-        }
+            if (string.IsNullOrWhiteSpace(FeedbackTextBox.Text))
+            {
+                await DialogHelper.ShowErrorDialogAsync(Window.GetWindow(this), "Warning",
+                    "Please enter your feedback.",
+                    "OK");
+                return;
+            }
 
-        if (FeedbackSelection.SelectedIndex.Equals(-1))
+            if (FeedbackSelection.SelectedIndex.Equals(-1))
+            {
+                await DialogHelper.ShowErrorDialogAsync(Window.GetWindow(this), "Warning",
+                    "Please select your satisfaction level.",
+                    "OK");
+                return;
+            }
+
+            await SendFeedback();
+            FeedbackTextBox.Text = string.Empty;
+            FeedbackSelection.SelectedIndex = -1; // Reset the selection
+        }
+        catch (Exception ex)
         {
-            await DialogHelper.ShowErrorDialogAsync(Window.GetWindow(this), "Warning",
-                "Please select your satisfaction level.",
-                "OK");
-            return;
+            BetterLogger.LogAsync($"Error in SubmitFeedbackButton_OnClick: {ex.Message}", Importance.Error).Wait();
         }
-
-        await SendFeedback();
-        FeedbackTextBox.Text = string.Empty;
-        FeedbackSelection.SelectedIndex = -1; // Reset the selection
     }
 
     private async Task SendFeedback()
@@ -112,37 +127,6 @@ public partial class Feedback
             {
                 await DialogHelper.ShowErrorDialogAsync(Window.GetWindow(this), "Error",
                     "An unexpected error occurred. Please check the logs for more information.", "OK");
-            }
-        }
-    }
-
-    private void Feedback_OnSizeChanged(object sender, SizeChangedEventArgs e)
-    {
-        switch (ConfigHandler.Instance.Config.DynamicScalingMode)
-        {
-            case DynamicScalingModes.Off:
-                break;
-
-            case DynamicScalingModes.Simple:
-            {
-                break;
-            }
-            case DynamicScalingModes.Experimental:
-            {
-                var scaleFactor = e.NewSize.Width / 800.0;
-
-                switch (scaleFactor)
-                {
-                    case < 0.5:
-                        scaleFactor = 0.5;
-                        break;
-                    case > 2.0:
-                        scaleFactor = 2.0;
-                        break;
-                }
-
-                MainGrid.LayoutTransform = new ScaleTransform(scaleFactor, scaleFactor);
-                break;
             }
         }
     }

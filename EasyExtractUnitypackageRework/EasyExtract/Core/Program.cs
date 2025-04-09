@@ -1,6 +1,6 @@
 namespace EasyExtract.Core;
 
-public class Program
+public static class Program
 {
     [STAThread]
     public static void Main(string[] args)

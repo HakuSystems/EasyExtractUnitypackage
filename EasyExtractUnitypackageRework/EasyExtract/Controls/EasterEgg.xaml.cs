@@ -16,12 +16,19 @@ public partial class EasterEgg
 
     private async void EasterEgg_OnLoaded(object sender, RoutedEventArgs e)
     {
-        Dashboard.Instance.NavigateBackBtn.Visibility = Visibility.Visible;
+        try
+        {
+            Dashboard.Instance.NavigateBackBtn.Visibility = Visibility.Visible;
 
-        if (ConfigHandler.Instance.Config.UwUModeActive) BetterUwUifyer.ApplyUwUModeToVisualTree(this);
-        await DiscordRpcManager.Instance.TryUpdatePresenceAsync("EasterEgg");
-        await BetterLogger.LogAsync("EasterEgg UserControl loaded",
-            Importance.Info); // Log successful load
+            if (ConfigHandler.Instance.Config.UwUModeActive) BetterUwUifyer.ApplyUwUModeToVisualTree(this);
+            await DiscordRpcManager.Instance.TryUpdatePresenceAsync("EasterEgg");
+            await BetterLogger.LogAsync("EasterEgg UserControl loaded",
+                Importance.Info); // Log successful load
+        }
+        catch (Exception ex)
+        {
+            BetterLogger.LogAsync($"Error in EasterEgg Loaded: {ex.Message}", Importance.Error).Wait();
+        }
     }
 
     private void EasterEgg_OnSizeChanged(object sender, SizeChangedEventArgs e)

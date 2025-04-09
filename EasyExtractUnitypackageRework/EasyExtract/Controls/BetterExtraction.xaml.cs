@@ -13,7 +13,6 @@ public partial class BetterExtraction
     private const string QueueFilesKey = "QueueFiles";
 
     private readonly FileProgress _currentFileProgress = new();
-    private bool _hasCheckedSystemRequirements;
 
     private int _recheckCount;
 
@@ -27,7 +26,6 @@ public partial class BetterExtraction
     }
 
     private LocateUnitypackage UnitypackageLocator { get; } = new();
-    private EverythingValidation EverythingValidation { get; } = new();
     private HashChecks HashChecks { get; } = new();
     private FilterQueue FilterQueue { get; } = new();
     private ExtractionHandler ExtractionHandler { get; } = new();
@@ -87,7 +85,7 @@ public partial class BetterExtraction
     {
         var cvs = Resources[resourceKey] as CollectionViewSource
                   ?? throw new InvalidOperationException($"Resource '{resourceKey}' not found.");
-        cvs.Filter += (sender, args) => { args.Accepted = filterPredicate(args.Item); };
+        cvs.Filter += (_, args) => { args.Accepted = filterPredicate(args.Item); };
     }
 
     private async void BetterExtraction_OnLoaded(object sender, RoutedEventArgs e)
@@ -100,14 +98,16 @@ public partial class BetterExtraction
         SetupFilter(QueueFilesKey, item => item is UnitypackageFileInfo file && file.IsInQueue);
 
         if (Resources["SearchResults"] is CollectionViewSource searchResults)
-            searchResults.Filter += (s, args) =>
+            searchResults.Filter += (_, args) =>
             {
                 if (args.Item is SearchEverythingModel model)
                 {
                     var searchText = SearchUnitypackageBoxInput.Text;
-                    args.Accepted = string.IsNullOrWhiteSpace(searchText) ||
-                                    model.FileName.IndexOf(searchText, StringComparison.InvariantCultureIgnoreCase) >=
-                                    0;
+                    if (model.FileName != null)
+                        args.Accepted = string.IsNullOrWhiteSpace(searchText) ||
+                                        model.FileName.IndexOf(searchText,
+                                            StringComparison.InvariantCultureIgnoreCase) >=
+                                        0;
                 }
                 else
                 {
@@ -133,7 +133,7 @@ public partial class BetterExtraction
             if (!File.Exists(path))
                 continue;
             if (ConfigHandler.Instance.Config.SearchEverythingResults.Exists(x =>
-                    x.FileName.Equals(name, StringComparison.InvariantCultureIgnoreCase)))
+                    x.FileName != null && x.FileName.Equals(name, StringComparison.InvariantCultureIgnoreCase)))
                 continue;
             var model = new SearchEverythingModel
             {
@@ -162,7 +162,7 @@ public partial class BetterExtraction
         var requirementsMet = await Task.Run(() => EverythingValidation.AreSystemRequirementsMetAsync());
         _systemRequirementsMet = requirementsMet;
 
-        Application.Current.Dispatcher.Invoke(() =>
+        Application.Current.Dispatcher.InvokeAsync(() =>
         {
             SearchUnitypackageBox.Visibility = requirementsMet ? Visibility.Visible : Visibility.Collapsed;
             SearchUnitypackageBoxExpanderError.Visibility = requirementsMet ? Visibility.Collapsed : Visibility.Visible;
@@ -173,7 +173,7 @@ public partial class BetterExtraction
             var statusMessage = await Task.Run(() => EverythingValidation.GetSystemRequirementsStatusAsync());
             statusMessage = forceCheck ? $"Re-check (attempt #{_recheckCount}): {statusMessage}" : statusMessage;
 
-            Application.Current.Dispatcher.Invoke(() => { SearchUnitypackageBoxFallback.Text = statusMessage; });
+            Application.Current.Dispatcher.InvokeAsync(() => { SearchUnitypackageBoxFallback.Text = statusMessage; });
 
             var logMessage = forceCheck
                 ? $"System requirements still not met after attempt #{_recheckCount}."
@@ -244,7 +244,7 @@ public partial class BetterExtraction
             var newUnitypackageModel = new UnitypackageFileInfo
             {
                 FileName = model.FileName,
-                FileHash = HashChecks.ComputeFileHash(new FileInfo(model.FilePath)),
+                FileHash = HashChecks.ComputeFileHash(new FileInfo(model.FilePath!)),
                 FileSize = model.FileSize,
                 FileDate = model.ModifiedTime,
                 FilePath = model.FilePath,
@@ -266,7 +266,7 @@ public partial class BetterExtraction
         QueueFilesExpander.IsExpanded = true;
     }
 
-    private async void StartExtractionFromQueue()
+    private async Task StartExtractionFromQueue()
     {
         BetterExtractionCard.Visibility = Visibility.Collapsed;
         CurrentlyExtractingCard.Visibility = Visibility.Visible;
@@ -281,7 +281,6 @@ public partial class BetterExtraction
             return;
         }
 
-        var overallStartTime = DateTime.Now;
         for (var processedFiles = 0; processedFiles < queuedFiles.Count; processedFiles++)
         {
             var file = queuedFiles[processedFiles];
@@ -303,7 +302,7 @@ public partial class BetterExtraction
             });
 
             var extractionTask = ExtractionHandler.ExtractUnitypackage(unitypackageModel, fileExtractionProgress);
-            await MonitorProgressAsync(extractionTask, overallStartTime, totalFiles, processedFiles);
+            await MonitorProgressAsync(extractionTask, totalFiles, processedFiles);
 
             if (await extractionTask)
                 ConfigHandler.Instance.Config.UnitypackageFiles.Remove(file);
@@ -337,14 +336,16 @@ public partial class BetterExtraction
             $"({_currentFileProgress.ExtractedCount} of {_currentFileProgress.TotalEntryCount} files)";
     }
 
-    private async Task MonitorProgressAsync(Task extractionTask, DateTime overallStartTime, int totalFiles,
+    private async Task MonitorProgressAsync(Task extractionTask, int totalFiles,
         int processedFiles)
     {
+        var stopwatch = Stopwatch.StartNew();
+
         while (!extractionTask.IsCompleted)
         {
-            var elapsed = DateTime.Now - overallStartTime;
+            var elapsed = stopwatch.Elapsed;
 
-            Application.Current.Dispatcher.Invoke(() =>
+            Application.Current.Dispatcher.InvokeAsync(() =>
             {
                 ExtractionElapsedText.Text = elapsed.ToString(@"hh\:mm\:ss");
 
@@ -364,12 +365,14 @@ public partial class BetterExtraction
 
             await Task.Delay(500); // Faster updates for smoother progress
         }
+
+        stopwatch.Stop();
     }
 
 
     private void StartExtractionButton_OnClick(object sender, RoutedEventArgs e)
     {
-        StartExtractionFromQueue();
+        _ = StartExtractionFromQueue();
         SyncFileCollections();
     }
 

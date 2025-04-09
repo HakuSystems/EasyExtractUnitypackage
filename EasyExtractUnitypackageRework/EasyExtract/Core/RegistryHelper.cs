@@ -59,7 +59,7 @@ public static class RegistryHelper
                     throw new InvalidOperationException("Failed to create registry key for command.");
 
                 var assemblyVersion = Assembly.GetExecutingAssembly().GetName().Version;
-                var versionComparison = assemblyVersion.CompareTo(new Version("2.0.6.3"));
+                var versionComparison = assemblyVersion!.CompareTo(new Version("2.0.6.3"));
 
                 var command = versionComparison > 0
                     ? $"\"{Assembly.GetExecutingAssembly().Location.Replace(".dll", ".exe")}\" {CommandSuffix} \"%1\""

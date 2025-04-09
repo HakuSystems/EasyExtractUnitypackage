@@ -19,8 +19,8 @@ public static class BetterUwUifyer
     private static readonly string[] Emojis = { "(ꈍᴗꈍ)", "^•ﻌ•^", "(◕‿◕)", "(✿◠‿◠)" };
     private static readonly string[] Interjections = { "*boops your nose*", "*screams*", "(・`ω´・)" };
 
-    public static Settings settings { get; set; } = new();
-    public static Random random { get; set; } = new();
+    public static Settings _settings { get; set; } = new();
+    public static Random _random { get; set; } = new();
 
 
     public static string UwUify(string input)
@@ -35,15 +35,15 @@ public static class BetterUwUifyer
         output = Regex.Replace(output, "[rl]", "w", RegexOptions.IgnoreCase);
         output = DuplicatePunctuation(output);
         output = Regex.Replace(output, @"\b(\w+)\b", match =>
-            match.Groups[1].Value.Length > 1 && random.NextDouble() < settings.StutterChance
+            match.Groups[1].Value.Length > 1 && _random.NextDouble() < _settings.StutterChance
                 ? match.Groups[1].Value[0] + "-" + match.Groups[1].Value
                 : match.Groups[1].Value);
         output = Regex.Replace(output, @"([.,!?])", match =>
-            random.NextDouble() < settings.EmojiInsertionChance
+            _random.NextDouble() < _settings.EmojiInsertionChance
                 ? match.Value + " " + GetRandomEmoji()
                 : match.Value);
         output = Regex.Replace(output, @"([.!?])\s+", match =>
-            random.NextDouble() < settings.InterjectionInsertionChance
+            _random.NextDouble() < _settings.InterjectionInsertionChance
                 ? match.Value + GetRandomInterjection() + " "
                 : match.Value);
         output = output.Replace(SpecialTokenPlaceholder.ToLower(), "EasyExtractUwUnitypackage");
@@ -64,22 +64,22 @@ public static class BetterUwUifyer
     private static string DuplicatePunctuation(string input)
     {
         return Regex.Replace(input, @"([.,!?])", match =>
-            random.NextDouble() < settings.DuplicatePunctuationChance
-                ? new string(match.Value[0], settings.DuplicatePunctuationAmount + 1)
+            _random.NextDouble() < _settings.DuplicatePunctuationChance
+                ? new string(match.Value[0], _settings.DuplicatePunctuationAmount + 1)
                 : match.Value);
     }
 
     private static string GetRandomEmoji()
     {
-        return Emojis[random.Next(Emojis.Length)];
+        return Emojis[_random.Next(Emojis.Length)];
     }
 
     private static string GetRandomInterjection()
     {
-        return Interjections[random.Next(Interjections.Length)];
+        return Interjections[_random.Next(Interjections.Length)];
     }
 
-    public static void ApplyUwUModeToVisualTree(DependencyObject parent)
+    public static void ApplyUwUModeToVisualTree(DependencyObject? parent)
     {
         if (parent == null)
             return;
@@ -108,10 +108,10 @@ public static class BetterUwUifyer
 
     public class Settings
     {
-        public int DuplicatePunctuationAmount = 2;
-        public float DuplicatePunctuationChance = 0.4f;
-        public float EmojiInsertionChance = 0.3f;
-        public float InterjectionInsertionChance = 0.2f;
-        public float StutterChance = 0.2f;
+        public readonly int DuplicatePunctuationAmount = 2;
+        public readonly float DuplicatePunctuationChance = 0.4f;
+        public readonly float EmojiInsertionChance = 0.3f;
+        public readonly float InterjectionInsertionChance = 0.2f;
+        public readonly float StutterChance = 0.2f;
     }
 }

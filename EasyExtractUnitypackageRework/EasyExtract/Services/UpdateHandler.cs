@@ -173,7 +173,7 @@ public class UpdateHandler
         }
     }
 
-    private async Task<Release?> GetLatestReleaseAsync()
+    private static async Task<Release?> GetLatestReleaseAsync()
     {
         try
         {
@@ -181,13 +181,13 @@ public class UpdateHandler
             var releases = await client.Repository.Release.GetAll(ConfigHandler.Instance.Config.Update.RepoOwner,
                 ConfigHandler.Instance.Config.Update.RepoName);
             var latestRelease = releases.FirstOrDefault();
-            if (latestRelease.ToString().Contains("API rate limit exceeded"))
+            if (latestRelease!.ToString()!.Contains("API rate limit exceeded"))
             {
                 await BetterLogger.LogAsync("API rate limit exceeded", Importance.Warning);
                 return null;
             }
 
-            await BetterLogger.LogAsync($"Fetched latest release: {latestRelease?.TagName}",
+            await BetterLogger.LogAsync($"Fetched latest release: {latestRelease.TagName}",
                 Importance.Info);
             return latestRelease;
         }

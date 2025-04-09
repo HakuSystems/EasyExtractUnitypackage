@@ -7,7 +7,7 @@ using Application = System.Windows.Application;
 
 namespace EasyExtract.Services;
 
-public class DiscordRpcManager : IDisposable
+public sealed class DiscordRpcManager : IDisposable
 {
     private static DiscordRpcManager? _instance;
     private readonly Timestamps _timestamps;
@@ -39,7 +39,7 @@ public class DiscordRpcManager : IDisposable
         }
     }
 
-    private bool IsDiscordEnabled()
+    private static bool IsDiscordEnabled()
     {
         try
         {
@@ -104,19 +104,17 @@ public class DiscordRpcManager : IDisposable
     public void Dispose()
     {
         Dispose(true);
-        GC.SuppressFinalize(this);
     }
 
-    protected virtual void Dispose(bool disposing)
+    private void Dispose(bool disposing)
     {
         if (!_disposed)
         {
-            if (disposing)
-                if (Client is { IsDisposed: false })
-                {
-                    Client.Dispose();
-                    BetterLogger.LogAsync("Disposed DiscordRpcClient", Importance.Info).Wait();
-                }
+            if (disposing && Client is { IsDisposed: false })
+            {
+                Client.Dispose();
+                BetterLogger.LogAsync("Disposed DiscordRpcClient", Importance.Info).Wait();
+            }
 
             Client = null!;
             _disposed = true;

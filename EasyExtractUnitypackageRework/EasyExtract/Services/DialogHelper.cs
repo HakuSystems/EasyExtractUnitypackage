@@ -48,7 +48,7 @@ public static class DialogHelper
             CloseButtonText = buttonText
         };
 
-        await _contentDialogService!.ShowAsync(contentDialog, default).ConfigureAwait(false);
+        await _contentDialogService!.ShowAsync(contentDialog, CancellationToken.None).ConfigureAwait(false);
     }
 
 
@@ -91,10 +91,10 @@ public static class DialogHelper
             CloseButtonText = buttonText
         };
 
-        await _contentDialogService!.ShowAsync(contentDialog, default).ConfigureAwait(false);
+        await _contentDialogService!.ShowAsync(contentDialog, CancellationToken.None).ConfigureAwait(false);
     }
 
-    private static Grid EnsureRootGrid(Window owner)
+    private static Grid EnsureRootGrid(Window? owner)
     {
         if (owner == null)
         {

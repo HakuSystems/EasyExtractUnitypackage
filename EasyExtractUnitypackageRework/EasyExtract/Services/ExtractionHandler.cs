@@ -26,7 +26,7 @@ public class ExtractionHandler
 
     public async Task<bool> ExtractUnitypackage(
         SearchEverythingModel unitypackage,
-        IProgress<(int extracted, int total)> fileProgress = null)
+        IProgress<(int extracted, int total)>? fileProgress = null)
     {
         try
         {
@@ -45,8 +45,6 @@ public class ExtractionHandler
             await MoveFilesFromTempToTargetFolder(tempFolder, targetFolder);
             Directory.Delete(tempFolder, true);
 
-            var extractionHelper = new ExtractionHelper();
-
             // Directly update properties to ensure no double counting
             var extractedPackage = new ExtractedUnitypackageModel
             {
@@ -54,8 +52,9 @@ public class ExtractionHandler
                 UnitypackagePath = targetFolder,
                 UnitypackageExtractedDate = DateTime.Now,
                 UnitypackageSize = new FileSizeConverter().Convert(
-                    await ExtractionHelper.GetTotalSizeInBytesAsync(targetFolder),
-                    typeof(string), null, CultureInfo.CurrentCulture)?.ToString(),
+                        await ExtractionHelper.GetTotalSizeInBytesAsync(targetFolder),
+                        typeof(string), null, CultureInfo.CurrentCulture)
+                    .ToString(),
 
                 UnitypackageTotalFolderCount = await ExtractionHelper.GetTotalFolderCount(targetFolder),
                 UnitypackageTotalFileCount = await ExtractionHelper.GetTotalFileCount(targetFolder),
@@ -74,7 +73,7 @@ public class ExtractionHandler
                 UnitypackageTotalFontCount = await ExtractionHelper.GetTotalFontCount(targetFolder),
                 UnitypackageTotalDataCount = await ExtractionHelper.GetTotalDataCount(targetFolder),
 
-                HasEncryptedDll = await CheckForEncryptedDlls(targetFolder, extractionHelper),
+                HasEncryptedDll = await CheckForEncryptedDlls(targetFolder),
                 MalicousDiscordWebhookCount = await ExtractionHelper.GetMalicousDiscordWebhookCount(targetFolder),
                 LinkDetectionCount = await ExtractionHelper.GetTotalLinkDetectionCount(targetFolder)
             };
@@ -106,11 +105,11 @@ public class ExtractionHandler
     }
 
 
-    private static async Task<bool> CheckForEncryptedDlls(string folder, ExtractionHelper helper)
+    private static async Task<bool> CheckForEncryptedDlls(string folder)
     {
         var dllFiles = Directory.GetFiles(folder, "*.dll", SearchOption.AllDirectories);
         foreach (var dll in dllFiles)
-            if (await helper.IsEncryptedDll(dll))
+            if (await ExtractionHelper.IsEncryptedDll(dll))
                 return true;
 
         return false;
@@ -256,8 +255,8 @@ public class ExtractionHandler
     {
         foreach (var directory in Directory.EnumerateDirectories(tempFolder))
         {
-            string targetFullPath = null;
-            string targetFullFile = null;
+            string? targetFullPath;
+            string? targetFullFile = null;
 
             try
             {
@@ -340,16 +339,16 @@ public class ExtractionHandler
     }
 
 
-    private static async Task MoveFileIfExists(string directory, string fileName, string targetFullPath,
-        string targetFullFile)
+    private static async Task MoveFileIfExists(string directory, string fileName, string? targetFullPath,
+        string? targetFullFile)
     {
         var sourceFilePath = Path.Combine(directory, fileName);
         if (!File.Exists(sourceFilePath)) return;
 
         try
         {
-            Directory.CreateDirectory(targetFullPath);
-            File.Move(sourceFilePath, targetFullFile, true);
+            if (targetFullPath != null) Directory.CreateDirectory(targetFullPath);
+            if (targetFullFile != null) File.Move(sourceFilePath, targetFullFile, true);
         }
         catch (IOException ioEx)
         {
