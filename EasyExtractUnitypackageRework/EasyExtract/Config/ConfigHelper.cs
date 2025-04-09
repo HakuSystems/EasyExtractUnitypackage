@@ -18,20 +18,14 @@ public class ConfigHandler
     private static readonly Lazy<ConfigHandler> _instance = new(() => new ConfigHandler());
 
     // Optional: Use AutoMapper to map from loaded Config to the in-memory Config
-    private static readonly IMapper _mapper;
+    private static readonly IMapper _mapper = new MapperConfiguration(cfg =>
+    {
+        // Map Config -> Config for easy property transfer if needed
+        cfg.CreateMap<ConfigModel, ConfigModel>();
+    }).CreateMapper();
 
     // We use BetterLogger for logging
     private bool _initialized;
-
-    static ConfigHandler()
-    {
-        var mapperConfig = new MapperConfiguration(cfg =>
-        {
-            // Map Config -> Config for easy property transfer if needed
-            cfg.CreateMap<ConfigModel, ConfigModel>();
-        });
-        _mapper = mapperConfig.CreateMapper();
-    }
 
     private ConfigHandler()
     {
@@ -48,7 +42,7 @@ public class ConfigHandler
     public ConfigModel Config { get; }
 
     /// <summary>
-    ///     Only initialize once; subsequent calls do nothing.
+    ///     Only initialize once; the following calls do nothing.
     /// </summary>
     public async Task InitializeIfNeededAsync()
     {
@@ -66,8 +60,8 @@ public class ConfigHandler
         {
             await BetterLogger.LogAsync($"No config file found. Creating a new one at {ConfigPath}...",
                 Importance.Warning);
-            Directory.CreateDirectory(Path.GetDirectoryName(ConfigPath));
-            await UpdateConfigAsync(); // Creates file with defaults
+            Directory.CreateDirectory(Path.GetDirectoryName(ConfigPath) ?? string.Empty);
+            await UpdateConfigAsync(); // Creates a file with defaults
         }
 
         await BetterLogger.LogAsync("ConfigHandler initialization completed.", Importance.Info);
@@ -176,7 +170,7 @@ public class ConfigHandler
     /// <summary>
     ///     Whenever a property on Config changes, automatically save it (if initialized).
     /// </summary>
-    private void Config_PropertyChanged(object sender, PropertyChangedEventArgs e)
+    private void Config_PropertyChanged(object? sender, PropertyChangedEventArgs e)
     {
         if (!_initialized) return;
         _ = UpdateConfigAsync(); // fire-and-forget

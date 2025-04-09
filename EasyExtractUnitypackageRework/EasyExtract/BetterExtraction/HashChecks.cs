@@ -3,9 +3,9 @@ using System.Text;
 
 namespace EasyExtract.BetterExtraction;
 
-public class HashChecks
+public static class HashChecks
 {
-    public string ComputeFileHash(FileInfo file)
+    public static string ComputeFileHash(FileInfo file)
     {
         using var stream = file.OpenRead();
         using var md5 = MD5.Create();

@@ -4,20 +4,36 @@ using EasyExtract.Config.Models;
 
 namespace EasyExtract.Config;
 
-public class ConfigModel : INotifyPropertyChanged
+public sealed class ConfigModel : INotifyPropertyChanged
 {
-    private string _accentColorHex = "#04d3be"; // Default Color from Colors.xaml
+    private readonly string _accentColorHex = "#04d3be"; // Default Color from Colors.xaml
+    private readonly string _appTitle = "EasyExtractUnitypackage";
+    private readonly string _backgroundColorHex = "#2b2b2b"; // Default Color from Colors.xaml
+    private readonly string _currentThemeComponentsContrast = "N/A";
+    private readonly string _currentThemeContrastRatio = "N/A";
+    private readonly string _currentThemeHeadlinesContrast = "N/A";
+    private readonly string _currentThemeTextContrast = "N/A";
+    private readonly BackgroundModel _customBackgroundImage = new();
+    private readonly bool _extractedCategoryStructure = true;
+
+    private readonly ObservableCollection<HistoryModel> _history = new();
+    private readonly ObservableCollection<IgnoredPackageInventory> _ignoredUnityPackages = new();
+
+    private readonly bool _isLoading;
+
+
+    private readonly string _primaryColorHex = "#2ca7f2"; // Default Color from Colors.xaml
+    private readonly ObservableCollection<SearchEverythingModel> _searchEverything = new();
+    private readonly List<SearchEverythingModel> _searchEverythingResults = new();
+    private readonly string _secondaryColorHex = "#4D4D4D"; // Default Color from Colors.xaml
+    private readonly string _textColorHex = "#7fc5ff"; // Default Color from Colors.xaml
+
+    private readonly int _totalEncryptedFiles;
+    private readonly UpdateModel _update = new();
     private AvailableThemes _applicationTheme = AvailableThemes.System;
-    private string _appTitle = "EasyExtractUnitypackage";
-    private string _backgroundColorHex = "#2b2b2b"; // Default Color from Colors.xaml
     private bool _contextMenuToggle = true;
 
     private int _currentExtractedCount;
-    private string _currentThemeComponentsContrast = "N/A";
-    private string _currentThemeContrastRatio = "N/A";
-    private string _currentThemeHeadlinesContrast = "N/A";
-    private string _currentThemeTextContrast = "N/A";
-    private BackgroundModel _custombackgroundImage = new();
 
     private string _defaultOutputPath =
         Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "EasyExtract", "Extracted");
@@ -30,25 +46,12 @@ public class ConfigModel : INotifyPropertyChanged
 
     private DynamicScalingModes _dynamicScalingMode = DynamicScalingModes.Simple;
     private bool _enableSound = true;
-    private bool _extractedCategoryStructure = true;
     private ObservableCollection<ExtractedUnitypackageModel> _extractedUnitypackages = new();
 
     private bool _firstRun;
 
-    private ObservableCollection<HistoryModel> _history = new();
-    private ObservableCollection<IgnoredPackageInventory> _ignoredUnityPackages = new();
-
-    private bool _isLoading;
-
     private DateTime _lastExtractionTime;
-
-
-    private string _primaryColorHex = "#2ca7f2"; // Default Color from Colors.xaml
-    private ObservableCollection<SearchEverythingModel> _searchEverything = new();
-    private List<SearchEverythingModel> _searchEverythingResults = new();
-    private string _secondaryColorHex = "#4D4D4D"; // Default Color from Colors.xaml
     private float _soundVolume = 1f;
-    private string _textColorHex = "#7fc5ff"; // Default Color from Colors.xaml
 
     private int _total3DObjects;
 
@@ -59,8 +62,6 @@ public class ConfigModel : INotifyPropertyChanged
     private int _totalConfigurations;
 
     private int _totalControllers;
-
-    private int _totalEncryptedFiles;
 
     private int _totalExtracted;
     private int _totalFilesExtracted;
@@ -78,7 +79,6 @@ public class ConfigModel : INotifyPropertyChanged
 
     private long _totalSizeBytes;
     private List<UnitypackageFileInfo> _unitypackageFiles = new();
-    private UpdateModel _update = new();
     private bool _uwUModeActive;
     private double _windowHeight = 650;
     private double _windowLeft = 100;
@@ -92,7 +92,7 @@ public class ConfigModel : INotifyPropertyChanged
         get => _soundVolume;
         set
         {
-            if (_soundVolume != value)
+            if (Math.Abs(_soundVolume - value) > 0.01f)
             {
                 _soundVolume = value;
                 OnPropertyChanged();
@@ -131,7 +131,7 @@ public class ConfigModel : INotifyPropertyChanged
         get => _windowTop;
         set
         {
-            if (_windowTop != value)
+            if (Math.Abs(_windowTop - value) > 0.01)
             {
                 _windowTop = value;
                 OnPropertyChanged();
@@ -144,7 +144,7 @@ public class ConfigModel : INotifyPropertyChanged
         get => _windowLeft;
         set
         {
-            if (_windowLeft != value)
+            if (Math.Abs(_windowLeft - value) > 0.01)
             {
                 _windowLeft = value;
                 OnPropertyChanged();
@@ -157,7 +157,7 @@ public class ConfigModel : INotifyPropertyChanged
         get => _windowWidth;
         set
         {
-            if (_windowWidth != value)
+            if (Math.Abs(_windowWidth - value) > 0.01)
             {
                 _windowWidth = value;
                 OnPropertyChanged();
@@ -170,7 +170,7 @@ public class ConfigModel : INotifyPropertyChanged
         get => _windowHeight;
         set
         {
-            if (_windowHeight != value)
+            if (Math.Abs(_windowHeight - value) > 0.01)
             {
                 _windowHeight = value;
                 OnPropertyChanged();
@@ -208,7 +208,7 @@ public class ConfigModel : INotifyPropertyChanged
     public bool IsLoading
     {
         get => _isLoading;
-        set
+        init
         {
             if (_isLoading != value)
             {
@@ -235,7 +235,7 @@ public class ConfigModel : INotifyPropertyChanged
     public List<SearchEverythingModel> SearchEverythingResults
     {
         get => _searchEverythingResults;
-        set
+        init
         {
             if (_searchEverythingResults != value)
             {
@@ -262,7 +262,7 @@ public class ConfigModel : INotifyPropertyChanged
     public string TextColorHex
     {
         get => _textColorHex;
-        set
+        init
         {
             if (_textColorHex != value)
             {
@@ -275,7 +275,7 @@ public class ConfigModel : INotifyPropertyChanged
     public string BackgroundColorHex
     {
         get => _backgroundColorHex;
-        set
+        init
         {
             if (_backgroundColorHex != value)
             {
@@ -288,7 +288,7 @@ public class ConfigModel : INotifyPropertyChanged
     public string PrimaryColorHex
     {
         get => _primaryColorHex;
-        set
+        init
         {
             if (_primaryColorHex != value)
             {
@@ -301,7 +301,7 @@ public class ConfigModel : INotifyPropertyChanged
     public string SecondaryColorHex
     {
         get => _secondaryColorHex;
-        set
+        init
         {
             if (_secondaryColorHex != value)
             {
@@ -314,7 +314,7 @@ public class ConfigModel : INotifyPropertyChanged
     public string AccentColorHex
     {
         get => _accentColorHex;
-        set
+        init
         {
             if (_accentColorHex != value)
             {
@@ -327,7 +327,7 @@ public class ConfigModel : INotifyPropertyChanged
     public string CurrentThemeContrastRatio
     {
         get => _currentThemeContrastRatio;
-        set
+        init
         {
             if (_currentThemeContrastRatio != value)
             {
@@ -340,7 +340,7 @@ public class ConfigModel : INotifyPropertyChanged
     public string CurrentThemeTextContrast
     {
         get => _currentThemeTextContrast;
-        set
+        init
         {
             if (_currentThemeTextContrast != value)
             {
@@ -353,7 +353,7 @@ public class ConfigModel : INotifyPropertyChanged
     public string CurrentThemeHeadlinesContrast
     {
         get => _currentThemeHeadlinesContrast;
-        set
+        init
         {
             if (_currentThemeHeadlinesContrast != value)
             {
@@ -366,7 +366,7 @@ public class ConfigModel : INotifyPropertyChanged
     public string CurrentThemeComponentsContrast
     {
         get => _currentThemeComponentsContrast;
-        set
+        init
         {
             if (_currentThemeComponentsContrast != value)
             {
@@ -393,7 +393,7 @@ public class ConfigModel : INotifyPropertyChanged
     public string AppTitle
     {
         get => _appTitle;
-        set
+        init
         {
             if (_appTitle != value)
             {
@@ -472,7 +472,7 @@ public class ConfigModel : INotifyPropertyChanged
     public UpdateModel Update
     {
         get => _update;
-        set
+        init
         {
             if (_update != value)
             {
@@ -485,7 +485,7 @@ public class ConfigModel : INotifyPropertyChanged
     public bool ExtractedCategoryStructure
     {
         get => _extractedCategoryStructure;
-        set
+        init
         {
             if (_extractedCategoryStructure != value)
             {
@@ -559,7 +559,7 @@ public class ConfigModel : INotifyPropertyChanged
     public ObservableCollection<HistoryModel> History
     {
         get => _history;
-        set
+        init
         {
             if (_history != value)
             {
@@ -572,7 +572,7 @@ public class ConfigModel : INotifyPropertyChanged
     public ObservableCollection<IgnoredPackageInventory> IgnoredUnityPackages
     {
         get => _ignoredUnityPackages;
-        set
+        init
         {
             if (_ignoredUnityPackages != value)
             {
@@ -585,7 +585,7 @@ public class ConfigModel : INotifyPropertyChanged
     public ObservableCollection<SearchEverythingModel> SearchEverything
     {
         get => _searchEverything;
-        set
+        init
         {
             if (_searchEverything != value)
             {
@@ -610,12 +610,12 @@ public class ConfigModel : INotifyPropertyChanged
 
     public BackgroundModel CustomBackgroundImage
     {
-        get => _custombackgroundImage;
-        set
+        get => _customBackgroundImage;
+        init
         {
-            if (_custombackgroundImage != value)
+            if (_customBackgroundImage != value)
             {
-                _custombackgroundImage = value;
+                _customBackgroundImage = value;
                 OnPropertyChanged();
             }
         }
@@ -728,7 +728,7 @@ public class ConfigModel : INotifyPropertyChanged
     public int TotalEncryptedFiles
     {
         get => _totalEncryptedFiles;
-        set
+        init
         {
             if (_totalEncryptedFiles != value)
             {
@@ -751,9 +751,9 @@ public class ConfigModel : INotifyPropertyChanged
         }
     }
 
-    public event PropertyChangedEventHandler PropertyChanged;
+    public event PropertyChangedEventHandler? PropertyChanged;
 
-    protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null)
+    private void OnPropertyChanged([CallerMemberName] string? propertyName = null)
     {
         PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
     }

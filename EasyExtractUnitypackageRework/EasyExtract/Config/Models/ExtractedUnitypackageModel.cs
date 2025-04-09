@@ -208,7 +208,7 @@ public class ExtractedUnitypackageModel : INotifyPropertyChanged
             .ToDictionary(group => group.Key, group => group.ToList());
 
 
-    public event PropertyChangedEventHandler PropertyChanged;
+    public event PropertyChangedEventHandler? PropertyChanged;
 
     public virtual void OnPropertyChanged([CallerMemberName] string propertyName = null)
     {

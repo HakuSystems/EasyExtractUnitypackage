@@ -11,9 +11,6 @@ public class LocateUnitypackage
         Multiselect = true
     };
 
-    private HashChecks HashChecks { get; } = new();
-    private FilterQueue FilterQueue { get; } = new();
-
     public async Task<List<UnitypackageFileInfo>?> LocateUnitypackageFilesAsync()
     {
         if (OpenUnitypackageDialog.ShowDialog() != true)

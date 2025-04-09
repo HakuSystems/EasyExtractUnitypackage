@@ -2,9 +2,9 @@
 
 namespace EasyExtract.BetterExtraction;
 
-public class FilterQueue
+public static class FilterQueue
 {
-    public void FilterDuplicates()
+    public static void FilterDuplicates()
     {
         var uniqueFiles = ConfigHandler.Instance.Config.UnitypackageFiles
             .GroupBy(file => new

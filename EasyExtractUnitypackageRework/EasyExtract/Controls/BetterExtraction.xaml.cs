@@ -26,8 +26,6 @@ public partial class BetterExtraction
     }
 
     private LocateUnitypackage UnitypackageLocator { get; } = new();
-    private HashChecks HashChecks { get; } = new();
-    private FilterQueue FilterQueue { get; } = new();
     private ExtractionHandler ExtractionHandler { get; } = new();
 
     private async void LocateUnitypackageButton_OnClick(object sender, RoutedEventArgs e)
@@ -139,7 +137,6 @@ public partial class BetterExtraction
             {
                 FileName = name,
                 FilePath = path,
-                Id = i,
                 FileSize = SearchEverythingFileChecks.GetFileSize(path),
                 ModifiedTime = SearchEverythingFileChecks.GetFileDateTime(i, false),
                 CreatedTime = SearchEverythingFileChecks.GetFileDateTime(i, true)

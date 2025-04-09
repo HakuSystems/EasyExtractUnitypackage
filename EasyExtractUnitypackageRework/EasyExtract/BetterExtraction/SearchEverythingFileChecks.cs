@@ -2,7 +2,7 @@
 
 namespace EasyExtract.BetterExtraction;
 
-public class SearchEverythingFileChecks
+public static class SearchEverythingFileChecks
 {
     public static string GetFileSize(string filePath)
     {

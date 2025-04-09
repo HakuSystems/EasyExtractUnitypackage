@@ -21,9 +21,7 @@ public partial class Dashboard
 {
     private static Dashboard? _instanceDashboard;
     private readonly BackgroundManager _backgroundManager = BackgroundManager.Instance;
-    private readonly FilterQueue _filterQueue = new();
 
-    private readonly HashChecks _hashChecks = new();
     private readonly Random _random = new();
 
     private readonly TimeSpan _resetDelayForDrop = TimeSpan.FromSeconds(3);
@@ -386,7 +384,7 @@ public partial class Dashboard
 
         var fileDetails = await Task.Run(() => unitypackageFiles.Select(file =>
         {
-            var hash = _hashChecks.ComputeFileHash(file);
+            var hash = HashChecks.ComputeFileHash(file);
             return new UnitypackageFileInfo
             {
                 FileName = file.Name,
@@ -400,7 +398,7 @@ public partial class Dashboard
         }).ToList());
 
         ConfigHandler.Instance.Config.UnitypackageFiles.AddRange(fileDetails);
-        _filterQueue.FilterDuplicates();
+        FilterQueue.FilterDuplicates();
     }
 
 
