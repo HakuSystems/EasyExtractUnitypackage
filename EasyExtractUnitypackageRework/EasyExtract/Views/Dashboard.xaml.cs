@@ -19,7 +19,7 @@ namespace EasyExtract.Views;
 
 public partial class Dashboard
 {
-    private const Dashboard? InstanceDashboard = null;
+    private static Dashboard? _instanceDashboard;
     private readonly BackgroundManager _backgroundManager = BackgroundManager.Instance;
     private readonly FilterQueue _filterQueue = new();
 
@@ -34,12 +34,13 @@ public partial class Dashboard
 
     public Dashboard(CancellationTokenSource? dragDropResetToken)
     {
+        _instanceDashboard = this;
         _dragDropResetToken = dragDropResetToken;
         InitializeComponent();
         ThemeMode = ThemeMode.System;
     }
 
-    public static Dashboard Instance => InstanceDashboard
+    public static Dashboard Instance => _instanceDashboard
                                         ?? throw new InvalidOperationException(
                                             "Dashboard has not yet been initialized.");
 
