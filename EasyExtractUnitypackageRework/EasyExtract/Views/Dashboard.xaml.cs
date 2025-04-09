@@ -315,11 +315,18 @@ public partial class Dashboard
 
     private async void CheckForUpdatesDesc_OnMouseDown(object sender, MouseButtonEventArgs e)
     {
-        var updateAvailable = !await _updateHandler.IsUpToDateOrUpdate(false);
-        if (updateAvailable)
+        try
         {
-            CurrentlyUpdatingTextBlock.Visibility = Visibility.Visible;
-            await _updateHandler.IsUpToDateOrUpdate(true);
+            var updateAvailable = !await _updateHandler.IsUpToDateOrUpdate(false);
+            if (updateAvailable)
+            {
+                CurrentlyUpdatingTextBlock.Visibility = Visibility.Visible;
+                await _updateHandler.IsUpToDateOrUpdate(true);
+            }
+        }
+        catch (Exception ex)
+        {
+            await BetterLogger.LogAsync(ex.Message, Importance.Error);
         }
     }
 
@@ -346,9 +353,16 @@ public partial class Dashboard
 
     private async void Dashboard_OnDrop(object sender, DragEventArgs e)
     {
-        UpdateDragDropText("Added to queue!", DragDropColors.Dropped);
-        ScheduleTextReset();
-        await AddToQueue(e);
+        try
+        {
+            UpdateDragDropText("Added to queue!", DragDropColors.Dropped);
+            ScheduleTextReset();
+            await AddToQueue(e);
+        }
+        catch (Exception exc)
+        {
+            await BetterLogger.LogAsync(exc.Message, Importance.Error);
+        }
     }
 
     private async Task AddToQueue(DragEventArgs dragEventArgs)
