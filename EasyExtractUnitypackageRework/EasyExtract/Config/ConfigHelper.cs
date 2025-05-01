@@ -24,8 +24,14 @@ public class ConfigHandler
         cfg.CreateMap<ConfigModel, ConfigModel>();
     }).CreateMapper();
 
+    private readonly TimeSpan _debounceDelay = TimeSpan.FromMilliseconds(500);
+
+    // Use a debounce mechanism to avoid too many saves
+    private readonly object _saveLock = new();
+
     // We use BetterLogger for logging
     private bool _initialized;
+    private bool _saveScheduled;
 
     private ConfigHandler()
     {
@@ -168,19 +174,43 @@ public class ConfigHandler
     }
 
     /// <summary>
-    ///     Whenever a property on Config changes, automatically save it (if initialized).
+    ///     Whenever a property on Config changes, automatically save it (if initialized) with debouncing.
     /// </summary>
     private void Config_PropertyChanged(object? sender, PropertyChangedEventArgs e)
     {
         if (!_initialized) return;
-        _ = UpdateConfigAsync(); // fire-and-forget
+
+        lock (_saveLock)
+        {
+            if (!_saveScheduled)
+            {
+                _saveScheduled = true;
+                Task.Delay(_debounceDelay).ContinueWith(async _ =>
+                {
+                    await UpdateConfigAsync();
+                    lock (_saveLock)
+                    {
+                        _saveScheduled = false;
+                    }
+                });
+            }
+        }
     }
 
     /// <summary>
     ///     Force an immediate save of the current Config to disk.
     /// </summary>
+    public async Task OverrideConfigAsync()
+    {
+        await UpdateConfigAsync();
+    }
+
+    /// <summary>
+    ///     Force an immediate save of the current Config to disk (non-async version).
+    /// </summary>
     public void OverrideConfig()
     {
-        _ = UpdateConfigAsync();
+        // For backward compatibility
+        Task.Run(async () => await OverrideConfigAsync()).ConfigureAwait(false);
     }
 }

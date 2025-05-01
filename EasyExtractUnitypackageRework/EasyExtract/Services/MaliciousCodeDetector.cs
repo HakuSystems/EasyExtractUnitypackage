@@ -9,7 +9,7 @@ public static class MaliciousCodeDetector
             RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
     private static readonly Regex LinkDetectionRegex = new(
-        @"https?:\/\/(?:www\.)?[-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_\+.~#?&//=]*)",
+        @"https?:\/\/(?:www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-z]{2,63}\b(?:[-a-zA-Z0-9@:%_\+.~#?&//=]*)",
         RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
     /// <summary>

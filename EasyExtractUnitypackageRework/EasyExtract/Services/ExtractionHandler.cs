@@ -118,30 +118,34 @@ public class ExtractionHandler
 
     private static async Task<string> GetTempFolderPath(SearchEverythingModel unitypackage)
     {
-        if (unitypackage.FileName != null)
+        if (string.IsNullOrEmpty(unitypackage.FileName))
         {
-            var tempFolder = Path.Combine(ConfigHandler.Instance.Config.DefaultTempPath, unitypackage.FileName);
-            await DeleteIfDirectoryExists(tempFolder);
-            await BetterLogger.LogAsync($"Temporary folder path set to: {tempFolder}",
-                Importance.Info);
-            return tempFolder;
+            await BetterLogger.LogAsync("Unitypackage filename is null or empty", Importance.Error);
+            return Path.Combine(ConfigHandler.Instance.Config.DefaultTempPath, "UnknownPackage_" + Guid.NewGuid());
         }
 
-        return string.Empty;
+        // Sanitize filename to avoid path issues
+        var sanitizedName = string.Join("_", unitypackage.FileName.Split(Path.GetInvalidFileNameChars()));
+        var tempFolder = Path.Combine(ConfigHandler.Instance.Config.DefaultTempPath, sanitizedName);
+        await DeleteIfDirectoryExists(tempFolder);
+        await BetterLogger.LogAsync($"Temporary folder path set to: {tempFolder}", Importance.Info);
+        return tempFolder;
     }
 
     private static async Task<string> GetTargetFolderPath(SearchEverythingModel unitypackage)
     {
-        if (unitypackage.FileName != null)
+        if (string.IsNullOrEmpty(unitypackage.FileName))
         {
-            var targetFolder = Path.Combine(ConfigHandler.Instance.Config.DefaultOutputPath, unitypackage.FileName);
-            await DeleteIfDirectoryExists(targetFolder);
-            await BetterLogger.LogAsync($"Target folder path set to: {targetFolder}",
-                Importance.Info);
-            return targetFolder;
+            await BetterLogger.LogAsync("Unitypackage filename is null or empty", Importance.Error);
+            return Path.Combine(ConfigHandler.Instance.Config.DefaultOutputPath, "UnknownPackage_" + Guid.NewGuid());
         }
 
-        return string.Empty;
+        // Sanitize filename to avoid path issues
+        var sanitizedName = string.Join("_", unitypackage.FileName.Split(Path.GetInvalidFileNameChars()));
+        var targetFolder = Path.Combine(ConfigHandler.Instance.Config.DefaultOutputPath, sanitizedName);
+        await DeleteIfDirectoryExists(targetFolder);
+        await BetterLogger.LogAsync($"Target folder path set to: {targetFolder}", Importance.Info);
+        return targetFolder;
     }
 
 
@@ -175,23 +179,32 @@ public class ExtractionHandler
         string tempFolder,
         IProgress<(int extracted, int total)>? fileProgress = null)
     {
-        var extractedCount = 0;
-
-        // Cache entries only once
-        var entries = new List<IEntry>();
-        await using (var inStream = File.OpenRead(unitypackage.FilePath!))
-        await using (var gzipStream = new GZipStream(inStream, CompressionMode.Decompress))
-        using (var reader = TarReader.Open(gzipStream))
+        if (string.IsNullOrEmpty(unitypackage.FilePath))
         {
-            while (reader.MoveToNextEntry())
-            {
-                var entry = reader.Entry;
-                if (!entry.IsEncrypted && !entry.IsDirectory)
-                    entries.Add(entry);
-            }
+            await BetterLogger.LogAsync("Unitypackage file path is null or empty", Importance.Error);
+            return;
         }
 
-        var totalValidEntries = entries.Count;
+        var extractedCount = 0;
+        var totalValidEntries = 0;
+
+        // First pass: count valid entries without storing them in memory
+        try
+        {
+            await using (var inStream = File.OpenRead(unitypackage.FilePath))
+            await using (var gzipStream = new GZipStream(inStream, CompressionMode.Decompress))
+            using (var reader = TarReader.Open(gzipStream))
+            {
+                while (reader.MoveToNextEntry())
+                    if (!reader.Entry.IsEncrypted && !reader.Entry.IsDirectory)
+                        totalValidEntries++;
+            }
+        }
+        catch (Exception ex)
+        {
+            await BetterLogger.LogAsync($"Error counting entries in unitypackage: {ex.Message}", Importance.Error);
+            return;
+        }
 
         // Initialize UI progress only once
         Application.Current.Dispatcher.InvokeAsync(() =>
@@ -200,55 +213,69 @@ public class ExtractionHandler
             ConfigHandler.Instance.Config.CurrentExtractedCount = 0;
         });
 
-        // Perform extraction asynchronously
-        await Task.Run(async () =>
+        if (totalValidEntries == 0)
         {
-            await using var inStream = File.OpenRead(unitypackage.FilePath!);
-            await using var gzipStream = new GZipStream(inStream, CompressionMode.Decompress);
-            using var reader = TarReader.Open(gzipStream);
+            await BetterLogger.LogAsync("No valid entries found in unitypackage", Importance.Warning);
+            return;
+        }
 
-            while (reader.MoveToNextEntry())
+        // Second pass: extract files
+        try
+        {
+            // Perform extraction asynchronously
+            await Task.Run(async () =>
             {
-                var entry = reader.Entry;
-                if (entry.IsEncrypted || entry.IsDirectory)
-                    continue;
+                await using var inStream = File.OpenRead(unitypackage.FilePath);
+                await using var gzipStream = new GZipStream(inStream, CompressionMode.Decompress);
+                using var reader = TarReader.Open(gzipStream);
 
-                var filePath = Path.Combine(tempFolder, entry.Key!);
-                Directory.CreateDirectory(Path.GetDirectoryName(filePath) ?? string.Empty);
-
-                try
+                while (reader.MoveToNextEntry())
                 {
-                    await using (var fileStream = File.Create(filePath))
+                    var entry = reader.Entry;
+                    if (entry.IsEncrypted || entry.IsDirectory)
+                        continue;
+
+                    var filePath = Path.Combine(tempFolder, entry.Key!);
+                    Directory.CreateDirectory(Path.GetDirectoryName(filePath) ?? string.Empty);
+
+                    try
                     {
-                        reader.WriteEntryTo(fileStream);
-                    }
-
-                    extractedCount++;
-
-                    // Update progress only after each file extraction
-                    fileProgress?.Report((extractedCount, totalValidEntries));
-
-                    // Batch UI updates to reduce lag
-                    if (extractedCount % 5 == 0 || extractedCount == totalValidEntries)
-                    {
-                        var count = extractedCount;
-                        Application.Current.Dispatcher.InvokeAsync(() =>
+                        await using (var fileStream = File.Create(filePath))
                         {
-                            ConfigHandler.Instance.Config.CurrentExtractedCount = count;
+                            reader.WriteEntryTo(fileStream);
+                        }
+
+                        extractedCount++;
+
+                        // Update progress only after each file extraction
+                        fileProgress?.Report((extractedCount, totalValidEntries));
+
+                        // Batch UI updates to reduce lag
+                        if (extractedCount % 5 == 0 || extractedCount == totalValidEntries)
+                        {
+                            var count = extractedCount;
+                            Application.Current.Dispatcher.InvokeAsync(() =>
+                            {
+                                ConfigHandler.Instance.Config.CurrentExtractedCount = count;
+                                ConfigHandler.Instance.Config.TotalFilesExtracted++;
+                            });
+                        }
+                        else
+                        {
                             ConfigHandler.Instance.Config.TotalFilesExtracted++;
-                        });
+                        }
                     }
-                    else
+                    catch (Exception ex)
                     {
-                        ConfigHandler.Instance.Config.TotalFilesExtracted++;
+                        await BetterLogger.LogAsync($"Failed to extract {entry.Key}: {ex.Message}", Importance.Error);
                     }
                 }
-                catch (Exception ex)
-                {
-                    await BetterLogger.LogAsync($"Failed to extract {entry.Key}: {ex.Message}", Importance.Error);
-                }
-            }
-        });
+            });
+        }
+        catch (Exception ex)
+        {
+            await BetterLogger.LogAsync($"Error during extraction: {ex.Message}", Importance.Error);
+        }
     }
 
     private static async Task MoveFilesFromTempToTargetFolder(string tempFolder, string targetFolder)
@@ -282,10 +309,34 @@ public class ExtractionHandler
                     if (hashPathName.EndsWith("00"))
                         hashPathName = hashPathName[..^2];
 
+                    // Normalize file extension
                     hashPathName = NormalizeFileExtension(hashPathName);
 
-                    targetFullPath = Path.GetDirectoryName(Path.Combine(targetFolder, hashPathName));
-                    targetFullFile = Path.Combine(targetFolder, hashPathName);
+                    // Replace any invalid path characters
+                    var sanitizedPath = string.Join("_", hashPathName.Split(Path.GetInvalidPathChars()));
+
+                    // Handle potential path traversal attempts
+                    if (sanitizedPath.Contains("..") || sanitizedPath.Contains("./") || sanitizedPath.Contains("/."))
+                    {
+                        sanitizedPath = sanitizedPath.Replace("..", "_").Replace("./", "_").Replace("/.", "_");
+                        await BetterLogger.LogAsync($"Suspicious path detected and sanitized: {hashPathName}",
+                            Importance.Warning);
+                    }
+
+                    try
+                    {
+                        targetFullPath = Path.GetDirectoryName(Path.Combine(targetFolder, sanitizedPath));
+                        targetFullFile = Path.Combine(targetFolder, sanitizedPath);
+                    }
+                    catch (Exception pathEx)
+                    {
+                        await BetterLogger.LogAsync($"Error creating path: {pathEx.Message}. Using fallback path.",
+                            Importance.Error);
+                        // Fallback to a safe path if there's still an issue
+                        var fallbackName = $"UnknownAsset_{Guid.NewGuid()}";
+                        targetFullPath = Path.Combine(targetFolder, "FallbackAssets");
+                        targetFullFile = Path.Combine(targetFullPath, fallbackName);
+                    }
 
                     if (string.IsNullOrWhiteSpace(targetFullPath) || string.IsNullOrWhiteSpace(targetFullFile))
                     {
@@ -344,29 +395,70 @@ public class ExtractionHandler
     {
         var sourceFilePath = Path.Combine(directory, fileName);
         if (!File.Exists(sourceFilePath)) return;
+        if (targetFullPath == null || targetFullFile == null) return;
 
-        try
+        const int maxRetries = 3;
+        const int delayMs = 100;
+
+        for (var attempt = 1; attempt <= maxRetries; attempt++)
         {
-            if (targetFullPath != null) Directory.CreateDirectory(targetFullPath);
-            if (targetFullFile != null) File.Move(sourceFilePath, targetFullFile, true);
-        }
-        catch (IOException ioEx)
-        {
-            await BetterLogger.LogAsync(
-                $"I/O error while moving file {sourceFilePath} to {targetFullFile}: {ioEx.Message}",
-                Importance.Error);
-        }
-        catch (UnauthorizedAccessException uaEx)
-        {
-            await BetterLogger.LogAsync(
-                $"Access denied while moving file {sourceFilePath} to {targetFullFile}: {uaEx.Message}",
-                Importance.Error);
-        }
-        catch (Exception ex)
-        {
-            await BetterLogger.LogAsync(
-                $"Unexpected error while moving file {sourceFilePath} to {targetFullFile}: {ex.Message}",
-                Importance.Error);
+            try
+            {
+                // Create directory if it doesn't exist
+                Directory.CreateDirectory(targetFullPath);
+
+                // Try to copy instead of move if this is a retry attempt
+                if (attempt > 1)
+                {
+                    await BetterLogger.LogAsync(
+                        $"Attempt {attempt}: Trying to copy instead of move {sourceFilePath} to {targetFullFile}",
+                        Importance.Warning);
+
+                    File.Copy(sourceFilePath, targetFullFile, true);
+
+                    // Try to delete the source file, but don't fail if we can't
+                    try
+                    {
+                        File.Delete(sourceFilePath);
+                    }
+                    catch
+                    {
+                        // Ignore deletion errors - at least we copied the file
+                    }
+                }
+                else
+                {
+                    // First attempt - try to move
+                    File.Move(sourceFilePath, targetFullFile, true);
+                }
+
+                // If we get here, the operation succeeded
+                return;
+            }
+            catch (IOException ioEx)
+            {
+                if (attempt == maxRetries)
+                    await BetterLogger.LogAsync(
+                        $"I/O error while moving file {sourceFilePath} to {targetFullFile} after {maxRetries} attempts: {ioEx.Message}",
+                        Importance.Error);
+                else
+                    // Wait before retrying
+                    await Task.Delay(delayMs * attempt);
+            }
+            catch (UnauthorizedAccessException uaEx)
+            {
+                await BetterLogger.LogAsync(
+                    $"Access denied while moving file {sourceFilePath} to {targetFullFile}: {uaEx.Message}",
+                    Importance.Error);
+                break; // Don't retry access issues
+            }
+            catch (Exception ex)
+            {
+                await BetterLogger.LogAsync(
+                    $"Unexpected error while moving file {sourceFilePath} to {targetFullFile}: {ex.Message}",
+                    Importance.Error);
+                break; // Don't retry unknown issues
+            }
         }
     }
 }
