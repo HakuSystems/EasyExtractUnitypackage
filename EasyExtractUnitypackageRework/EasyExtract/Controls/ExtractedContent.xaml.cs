@@ -180,7 +180,7 @@ public partial class ExtractedContent
         {
             previewImage = await GeneratePreviewImageAsync(file);
             if (previewImage != null)
-                await Task.Run(() => CodeToImageConverter.SaveImageToFile(previewImage, previewPath));
+                await CodeToImageConverter.SaveImageToFile(previewImage, previewPath);
         }
 
         if (previewImage != null)
@@ -309,7 +309,7 @@ public partial class ExtractedContent
                 await RecheckSecurityStatusAsync(extractedPkg);
             }
 
-        UpdateConfigAndUi();
+        await UpdateConfigAndUi();
 
         async Task RecheckSecurityStatusAsync(ExtractedUnitypackageModel pkg)
         {
@@ -338,7 +338,7 @@ public partial class ExtractedContent
             foreach (var key in keysToRemove) _previewCache.Remove(key);
         }
 
-        void UpdateConfigAndUi()
+        async Task UpdateConfigAndUi()
         {
             try
             {
@@ -354,7 +354,7 @@ public partial class ExtractedContent
             }
             catch (Exception ex)
             {
-                BetterLogger.LogAsync($"Error updating configuration: {ex.Message}", Importance.Error).Wait();
+                await BetterLogger.LogAsync($"Error updating configuration: {ex.Message}", Importance.Error);
             }
         }
     }

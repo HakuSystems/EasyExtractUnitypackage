@@ -30,7 +30,7 @@ public partial class App
             if (requireAdmin)
             {
                 await KillAllProcesses(Process.GetCurrentProcess().ProcessName);
-                RunAsAdmin(e.Args);
+                await RunAsAdmin(e.Args);
                 return;
             }
 
@@ -60,7 +60,7 @@ public partial class App
         }
         catch (Exception exc)
         {
-            BetterLogger.LogAsync(exc.Message, Importance.Error).Wait();
+            await BetterLogger.LogAsync(exc.Message, Importance.Error);
         }
     }
 
@@ -76,7 +76,7 @@ public partial class App
         {
             if (ex.Message.Contains("has not yet been initialized"))
                 return;
-            BetterLogger.LogAsync(ex.Message, Importance.Error).Wait();
+            await BetterLogger.LogAsync(ex.Message, Importance.Error);
         }
     }
 
@@ -86,7 +86,7 @@ public partial class App
             .IsInRole(WindowsBuiltInRole.Administrator);
     }
 
-    private static void RunAsAdmin(string[] args)
+    private static async Task RunAsAdmin(string[] args)
     {
         var processInfo = new ProcessStartInfo
         {
@@ -99,17 +99,17 @@ public partial class App
         try
         {
             Process.Start(processInfo);
-            BetterLogger.LogAsync("Exiting non-admin instance", Importance.Info).Wait();
+            await BetterLogger.LogAsync("Exiting non-admin instance", Importance.Info);
             Current.Shutdown();
         }
         catch (Win32Exception ex) when (ex.NativeErrorCode == 1223)
         {
-            BetterLogger.LogAsync("User declined elevation. Exiting application.", Importance.Info).Wait();
+            await BetterLogger.LogAsync("User declined elevation. Exiting application.", Importance.Info);
             Current.Shutdown();
         }
         catch (Exception ex)
         {
-            BetterLogger.LogAsync($"Error running as admin: {ex.Message}", Importance.Error).Wait();
+            await BetterLogger.LogAsync($"Error running as admin: {ex.Message}", Importance.Error);
             throw;
         }
     }

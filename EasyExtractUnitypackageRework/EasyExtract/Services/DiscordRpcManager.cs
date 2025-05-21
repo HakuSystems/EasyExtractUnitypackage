@@ -24,7 +24,7 @@ public sealed class DiscordRpcManager : IDisposable
 
     public async Task TryUpdatePresenceAsync(string state)
     {
-        if (!IsDiscordEnabled())
+        if (!await IsDiscordEnabled())
             return;
 
         await InitializeAsync();
@@ -39,7 +39,7 @@ public sealed class DiscordRpcManager : IDisposable
         }
     }
 
-    private static bool IsDiscordEnabled()
+    private static async Task<bool> IsDiscordEnabled()
     {
         try
         {
@@ -47,7 +47,7 @@ public sealed class DiscordRpcManager : IDisposable
         }
         catch (Exception ex)
         {
-            BetterLogger.LogAsync($"Error reading config: {ex.Message}", Importance.Error).Wait();
+            await BetterLogger.LogAsync($"Error reading config: {ex.Message}", Importance.Error);
             return false;
         }
     }
@@ -113,7 +113,7 @@ public sealed class DiscordRpcManager : IDisposable
             if (disposing && Client is { IsDisposed: false })
             {
                 Client.Dispose();
-                BetterLogger.LogAsync("Disposed DiscordRpcClient", Importance.Info).Wait();
+                BetterLogger.LogAsync("Disposed DiscordRpcClient", Importance.Info).ConfigureAwait(false);
             }
 
             Client = null!;

@@ -32,7 +32,7 @@ public partial class Feedback
         }
         catch (Exception exception)
         {
-            BetterLogger.LogAsync($"Error in Feedback Loaded: {exception.Message}", Importance.Error).Wait();
+            await BetterLogger.LogAsync($"Error in Feedback Loaded: {exception.Message}", Importance.Error);
         }
     }
 
@@ -69,7 +69,7 @@ public partial class Feedback
         }
         catch (Exception ex)
         {
-            BetterLogger.LogAsync($"Error in SubmitFeedbackButton_OnClick: {ex.Message}", Importance.Error).Wait();
+            await BetterLogger.LogAsync($"Error in SubmitFeedbackButton_OnClick: {ex.Message}", Importance.Error);
         }
     }
 

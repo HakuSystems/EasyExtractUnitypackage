@@ -10,7 +10,7 @@ public class SoundManager
     private AudioFileReader? _audioFileReader;
     private IWavePlayer? _waveOutDevice;
 
-    public void PlayAudio(string? audioFilePath)
+    public async Task PlayAudio(string? audioFilePath)
     {
         try
         {
@@ -18,7 +18,14 @@ public class SoundManager
 
             if (!ConfigHandler.Instance.Config.EnableSound) return;
 
-            var tempFilePath = GetSoundFilePath(audioFilePath);
+            var tempFilePath = await GetSoundFilePath(audioFilePath);
+
+            if (string.IsNullOrEmpty(tempFilePath))
+            {
+                await BetterLogger.LogAsync("Audio file path is null or empty after GetSoundFilePath.",
+                    Importance.Warning);
+                return;
+            }
 
             _waveOutDevice = new WaveOut();
             _audioFileReader = new AudioFileReader(tempFilePath);
@@ -39,20 +46,21 @@ public class SoundManager
         _ = DialogHelper.ShowInfoDialogAsync(null, "Audio Error", "Audio playback failed");
     }
 
-    private static string? GetSoundFilePath(string? audioFilePath)
+    private static async Task<string?> GetSoundFilePath(string? audioFilePath)
     {
         // If audioFilePath is not null, start with pack://, get resource from pack URI
-        if (audioFilePath != null && audioFilePath.StartsWith("pack://")) return GetResourceFromPackUri(audioFilePath);
+        if (audioFilePath != null && audioFilePath.StartsWith("pack://"))
+            return await GetResourceFromPackUri(audioFilePath);
 
         // If audioFilePath is a valid file, return it
         if (File.Exists(audioFilePath)) return audioFilePath;
 
         // If nothing is appropriate, throw an exception
-        BetterLogger.LogAsync($"Audio file not found: {audioFilePath}", Importance.Warning).Wait();
+        await BetterLogger.LogAsync($"Audio file not found: {audioFilePath}", Importance.Warning);
         throw new FileNotFoundException($"Audio file not found: {audioFilePath}");
     }
 
-    private static string? GetResourceFromPackUri(string? packUri)
+    private static async Task<string?> GetResourceFromPackUri(string? packUri)
     {
         if (packUri != null)
         {
@@ -60,7 +68,7 @@ public class SoundManager
             var streamResourceInfo = Application.GetResourceStream(uri);
             if (streamResourceInfo == null)
             {
-                BetterLogger.LogAsync($"Failed to find resource: {packUri}", Importance.Warning).Wait();
+                await BetterLogger.LogAsync($"Failed to find resource: {packUri}", Importance.Warning);
                 return null;
             }
 

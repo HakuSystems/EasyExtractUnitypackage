@@ -27,7 +27,7 @@ public partial class EasterEgg
         }
         catch (Exception ex)
         {
-            BetterLogger.LogAsync($"Error in EasterEgg Loaded: {ex.Message}", Importance.Error).Wait();
+            await BetterLogger.LogAsync($"Error in EasterEgg Loaded: {ex.Message}", Importance.Error);
         }
     }
 

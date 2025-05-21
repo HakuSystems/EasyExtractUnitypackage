@@ -48,7 +48,7 @@ public static class CodeToImageConverter
         }
     }
 
-    public static void SaveImageToFile(BitmapImage image, string path)
+    public static async Task SaveImageToFile(BitmapImage image, string path)
     {
         const int maxRetries = 5;
         const int delay = 200; // milliseconds
@@ -65,7 +65,7 @@ public static class CodeToImageConverter
             {
                 if (i == maxRetries - 1)
                     throw; // Re-throw if max retries reached
-                Task.Delay(delay).Wait();
+                await Task.Delay(delay);
             }
     }
 }
