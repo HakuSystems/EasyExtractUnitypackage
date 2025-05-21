@@ -338,6 +338,7 @@ public partial class Dashboard
     {
         UpdateDragDropText("Move your Unitypackage somewhere else to drop it", DragDropColors.DragLeave);
         ScheduleTextReset();
+        // _dragOverAnimation?.Stop(); // Commented out
     }
 
     private void Dashboard_OnDragOver(object sender, DragEventArgs e)
@@ -347,6 +348,45 @@ public partial class Dashboard
         e.Handled = true;
         CancelPendingReset();
         UpdateDragDropText("Ready to drop", DragDropColors.DragOver);
+
+        /* Commented out animation block
+        if (_dragOverAnimation == null)
+        {
+            // Ensure RenderTransform is set up correctly first
+            if (!(DragDropDetectionTxt.RenderTransform is TransformGroup tg &&
+                  tg.Children.Count > 0 &&
+                  tg.Children[0] is ScaleTransform))
+            {
+                var scaleTransform = new ScaleTransform(1, 1);
+                var transformGroup = new TransformGroup();
+                transformGroup.Children.Add(scaleTransform);
+                DragDropDetectionTxt.RenderTransform = transformGroup;
+                DragDropDetectionTxt.RenderTransformOrigin = new System.Windows.Point(0.5, 0.5);
+            }
+
+            var pulseAnimationX = new DoubleAnimation
+            {
+                From = 1,
+                To = 1.1,
+                Duration = TimeSpan.FromMilliseconds(300),
+                AutoReverse = true,
+                RepeatBehavior = RepeatBehavior.Forever,
+                EasingFunction = new SineEase { EasingMode = EasingMode.EaseInOut }
+            };
+            var pulseAnimationY = pulseAnimationX.Clone();
+
+            _dragOverAnimation = new Storyboard();
+            _dragOverAnimation.Children.Add(pulseAnimationX);
+            _dragOverAnimation.Children.Add(pulseAnimationY);
+
+            Storyboard.SetTarget(pulseAnimationX, DragDropDetectionTxt);
+            Storyboard.SetTargetProperty(pulseAnimationX, new PropertyPath("(UIElement.RenderTransform).(TransformGroup.Children)[0].(ScaleTransform.ScaleX)"));
+
+            Storyboard.SetTarget(pulseAnimationY, DragDropDetectionTxt);
+            Storyboard.SetTargetProperty(pulseAnimationY, new PropertyPath("(UIElement.RenderTransform).(TransformGroup.Children)[0].(ScaleTransform.ScaleY)"));
+        }
+        _dragOverAnimation.Begin();
+        */
     }
 
     private async void Dashboard_OnDrop(object sender, DragEventArgs e)
@@ -435,6 +475,7 @@ public partial class Dashboard
     private void ResetDragDropText()
     {
         UpdateDragDropText("Drag and Drop is Supported!", DragDropColors.DefaultText);
+        // _dragOverAnimation?.Stop(); // Commented out
     }
 
 

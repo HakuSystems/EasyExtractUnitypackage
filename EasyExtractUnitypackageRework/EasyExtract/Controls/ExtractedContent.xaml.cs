@@ -105,8 +105,8 @@ public partial class ExtractedContent
                 ExtractedDate = file.CreationTime,
                 SymbolIconImage = await ExtractionHelper.GetSymbolByExtension(file.Extension),
                 IsCodeFile = new[] { ".cs", ".json", ".shader", ".txt" }.Contains(file.Extension.ToLower()),
-                PreviewImage = previewTask.Result,
-                SecurityWarning = securityWarningTask.Result
+                PreviewImage = await previewTask.ConfigureAwait(false),
+                SecurityWarning = await securityWarningTask.ConfigureAwait(false)
             };
         });
 
