@@ -199,4 +199,8 @@
         <Folder Include="Fonts\"/>
     </ItemGroup>
 
+    <ItemGroup>
+        <Content Include="EasyExtract.sln"/>
+    </ItemGroup>
+
 </Project>
