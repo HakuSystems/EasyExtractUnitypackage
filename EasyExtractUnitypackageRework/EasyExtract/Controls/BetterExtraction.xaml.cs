@@ -22,8 +22,12 @@ public partial class BetterExtraction
     public BetterExtraction()
     {
         InitializeComponent();
+        Instance = this;
         DataContext = ConfigHandler.Instance.Config;
     }
+
+    //instance
+    public static BetterExtraction Instance { get; set; }
 
     private LocateUnitypackage UnitypackageLocator { get; } = new();
     private ExtractionHandler ExtractionHandler { get; } = new();
@@ -34,7 +38,7 @@ public partial class BetterExtraction
         if (result != null) SyncFileCollections();
     }
 
-    private void SyncFileCollections()
+    public void SyncFileCollections()
     {
         if (Resources[QueueFilesKey] is CollectionViewSource queueFiles)
             queueFiles.View.Refresh();

@@ -395,7 +395,7 @@ public partial class Dashboard
         {
             UpdateDragDropText("Added to queue!", DragDropColors.Dropped);
             ScheduleTextReset();
-            await AddToQueue(e);
+            await AddToQueue(e).ConfigureAwait(true);
         }
         catch (Exception exc)
         {
@@ -435,9 +435,12 @@ public partial class Dashboard
                 FileExtension = file.Extension,
                 IsInQueue = true
             };
-        }).ToList());
+        }).ToList()).ConfigureAwait(true);
 
         ConfigHandler.Instance.Config.UnitypackageFiles.AddRange(fileDetails);
+        //force update of the queue
+        await ConfigHandler.Instance.OverrideConfigAsync().ConfigureAwait(true);
+        Controls.BetterExtraction.Instance.SyncFileCollections();
         FilterQueue.FilterDuplicates();
     }
 
