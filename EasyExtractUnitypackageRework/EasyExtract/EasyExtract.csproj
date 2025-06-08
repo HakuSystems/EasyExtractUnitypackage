@@ -45,7 +45,7 @@
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
         <PackageReference Include="DiscordRichPresence">
-            <Version>1.2.1.24</Version>
+            <Version>1.3.0.28</Version>
         </PackageReference>
         <PackageReference Include="Fody">
             <Version>6.9.2</Version>
@@ -62,22 +62,22 @@
             <Version>5.1.0</Version>
         </PackageReference>
         <PackageReference Include="MaterialDesignThemes">
-            <Version>5.2.2-ci942</Version>
+            <Version>5.2.2-ci998</Version>
         </PackageReference>
         <PackageReference Include="Microsoft.Extensions.DependencyInjection">
-            <Version>10.0.0-preview.2.25163.2</Version>
+            <Version>10.0.0-preview.5.25277.114</Version>
         </PackageReference>
         <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions">
-            <Version>10.0.0-preview.2.25163.2</Version>
+            <Version>10.0.0-preview.5.25277.114</Version>
         </PackageReference>
         <PackageReference Include="Microsoft.Extensions.Logging">
-            <Version>10.0.0-preview.2.25163.2</Version>
+            <Version>10.0.0-preview.5.25277.114</Version>
         </PackageReference>
         <PackageReference Include="Microsoft.Extensions.Logging.Abstractions">
-            <Version>10.0.0-preview.2.25163.2</Version>
+            <Version>10.0.0-preview.5.25277.114</Version>
         </PackageReference>
         <PackageReference Include="Microsoft.Extensions.Options">
-            <Version>10.0.0-preview.2.25163.2</Version>
+            <Version>10.0.0-preview.5.25277.114</Version>
         </PackageReference>
         <PackageReference Include="Microsoft.NETCore.Platforms">
             <Version>8.0.0-preview.7.23375.6</Version>
@@ -98,22 +98,22 @@
             <Version>14.0.0</Version>
         </PackageReference>
         <PackageReference Include="Serilog">
-            <Version>4.2.1-dev-02352</Version>
+            <Version>4.3.1-dev-02373</Version>
         </PackageReference>
         <PackageReference Include="Serilog.Sinks.Console">
             <Version>6.0.1-dev-00953</Version>
         </PackageReference>
         <PackageReference Include="Serilog.Sinks.File">
-            <Version>7.0.0-dev-02301</Version>
+            <Version>7.0.0</Version>
         </PackageReference>
         <PackageReference Include="SharpCompress">
-            <Version>0.39.0</Version>
+            <Version>0.40.0</Version>
         </PackageReference>
         <PackageReference Include="SkiaSharp">
-            <Version>3.118.0-preview.2.3</Version>
+            <Version>3.119.0</Version>
         </PackageReference>
         <PackageReference Include="SkiaSharp.Views.WPF">
-            <Version>3.118.0-preview.2.3</Version>
+            <Version>3.119.0</Version>
         </PackageReference>
         <PackageReference Include="WPF-UI">
             <Version>4.0.2</Version>
