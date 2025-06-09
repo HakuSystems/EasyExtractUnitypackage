@@ -57,6 +57,17 @@ public partial class BetterSettings
             ThemeComboBox.ItemsSource = themes;
             context.Add("AvailableThemes", themes);
 
+            // Initialize logger configuration
+            EnableStackTraceToggle.IsChecked = ConfigHandler.Instance.Config.EnableStackTrace;
+            EnablePerformanceLoggingToggle.IsChecked = ConfigHandler.Instance.Config.EnablePerformanceLogging;
+            EnableMemoryTrackingToggle.IsChecked = ConfigHandler.Instance.Config.EnableMemoryTracking;
+            EnableAsyncLoggingToggle.IsChecked = ConfigHandler.Instance.Config.EnableAsyncLogging;
+
+            context.Add("EnableStackTrace", ConfigHandler.Instance.Config.EnableStackTrace);
+            context.Add("EnablePerformanceLogging", ConfigHandler.Instance.Config.EnablePerformanceLogging);
+            context.Add("EnableMemoryTracking", ConfigHandler.Instance.Config.EnableMemoryTracking);
+            context.Add("EnableAsyncLogging", ConfigHandler.Instance.Config.EnableAsyncLogging);
+
             CheckForUpdatesOnStartUpToggleSwitch.IsChecked = ConfigHandler.Instance.Config.Update.AutoUpdate;
             DiscordRpcToggleSwitch.IsChecked = ConfigHandler.Instance.Config.DiscordRpc;
             DefaultTempPathTextBox.Text = ConfigHandler.Instance.Config.DefaultTempPath;
@@ -388,5 +399,142 @@ public partial class BetterSettings
             SoundCardToggle.IsChecked = false;
         else if (SoundCardToggle.IsChecked == false)
             SoundCardToggle.IsChecked = true;
+    }
+
+    // Logger configuration event handlers
+    private void EnableStackTraceToggle_OnChecked(object sender, RoutedEventArgs e)
+    {
+        try
+        {
+            ConfigHandler.Instance.Config.EnableStackTrace = true;
+            BetterLogger.EnableStackTrace(true);
+            BetterLogger.Info("Stack trace logging enabled", "Settings");
+        }
+        catch (Exception ex)
+        {
+            BetterLogger.Exception(ex, "Failed to enable stack trace logging", "Settings");
+        }
+    }
+
+    private void EnableStackTraceToggle_OnUnchecked(object sender, RoutedEventArgs e)
+    {
+        try
+        {
+            ConfigHandler.Instance.Config.EnableStackTrace = false;
+            BetterLogger.EnableStackTrace(false);
+            BetterLogger.Info("Stack trace logging disabled", "Settings");
+        }
+        catch (Exception ex)
+        {
+            BetterLogger.Exception(ex, "Failed to disable stack trace logging", "Settings");
+        }
+    }
+
+    private void EnablePerformanceLoggingToggle_OnChecked(object sender, RoutedEventArgs e)
+    {
+        try
+        {
+            ConfigHandler.Instance.Config.EnablePerformanceLogging = true;
+            BetterLogger.EnablePerformanceLogging(true);
+            BetterLogger.Info("Performance logging enabled", "Settings");
+        }
+        catch (Exception ex)
+        {
+            BetterLogger.Exception(ex, "Failed to enable performance logging", "Settings");
+        }
+    }
+
+    private void EnablePerformanceLoggingToggle_OnUnchecked(object sender, RoutedEventArgs e)
+    {
+        try
+        {
+            ConfigHandler.Instance.Config.EnablePerformanceLogging = false;
+            BetterLogger.EnablePerformanceLogging(false);
+            BetterLogger.Info("Performance logging disabled", "Settings");
+        }
+        catch (Exception ex)
+        {
+            BetterLogger.Exception(ex, "Failed to disable performance logging", "Settings");
+        }
+    }
+
+    private void EnableMemoryTrackingToggle_OnChecked(object sender, RoutedEventArgs e)
+    {
+        try
+        {
+            ConfigHandler.Instance.Config.EnableMemoryTracking = true;
+            BetterLogger.EnableMemoryTracking(true);
+            BetterLogger.Info("Memory tracking enabled", "Settings");
+        }
+        catch (Exception ex)
+        {
+            BetterLogger.Exception(ex, "Failed to enable memory tracking", "Settings");
+        }
+    }
+
+    private void EnableMemoryTrackingToggle_OnUnchecked(object sender, RoutedEventArgs e)
+    {
+        try
+        {
+            ConfigHandler.Instance.Config.EnableMemoryTracking = false;
+            BetterLogger.EnableMemoryTracking(false);
+            BetterLogger.Info("Memory tracking disabled", "Settings");
+        }
+        catch (Exception ex)
+        {
+            BetterLogger.Exception(ex, "Failed to disable memory tracking", "Settings");
+        }
+    }
+
+    private void EnableAsyncLoggingToggle_OnChecked(object sender, RoutedEventArgs e)
+    {
+        try
+        {
+            ConfigHandler.Instance.Config.EnableAsyncLogging = true;
+            BetterLogger.EnableAsyncLogging(true);
+            BetterLogger.Info("Asynchronous logging enabled", "Settings");
+        }
+        catch (Exception ex)
+        {
+            BetterLogger.Exception(ex, "Failed to enable asynchronous logging", "Settings");
+        }
+    }
+
+    private void EnableAsyncLoggingToggle_OnUnchecked(object sender, RoutedEventArgs e)
+    {
+        try
+        {
+            ConfigHandler.Instance.Config.EnableAsyncLogging = false;
+            BetterLogger.EnableAsyncLogging(false);
+            BetterLogger.Info("Asynchronous logging disabled", "Settings");
+        }
+        catch (Exception ex)
+        {
+            BetterLogger.Exception(ex, "Failed to disable asynchronous logging", "Settings");
+        }
+    }
+
+    private void OpenLogFolderButton_OnClick(object sender, RoutedEventArgs e)
+    {
+        try
+        {
+            var logPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
+                "EasyExtract", "Logs");
+
+            if (!Directory.Exists(logPath)) Directory.CreateDirectory(logPath);
+
+            Process.Start(new ProcessStartInfo
+            {
+                FileName = logPath,
+                UseShellExecute = true,
+                Verb = "open"
+            });
+
+            BetterLogger.Info($"Opened log folder: {logPath}", "Settings");
+        }
+        catch (Exception ex)
+        {
+            BetterLogger.Exception(ex, "Failed to open log folder", "Settings");
+        }
     }
 }

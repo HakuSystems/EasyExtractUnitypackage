@@ -657,6 +657,176 @@
 
                         </Grid>
                     </ui:Card>
+
+                    <ui:Card
+                        AutomationProperties.HelpText="Configure logging settings including log level, stack traces, and performance monitoring."
+                        AutomationProperties.Name="LoggerConfigurationCard"
+                        Margin="0,0,0,12"
+                        Padding="10"
+                        x:Name="LoggerConfigurationCard">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                            </Grid.RowDefinitions>
+
+                            <ui:Card
+                                Grid.Column="0"
+                                Grid.RowSpan="2"
+                                HorizontalAlignment="Left"
+                                Margin="5"
+                                VerticalAlignment="Top">
+                                <ui:SymbolIcon
+                                    Foreground="{DynamicResource TextFillColorPrimaryBrush}"
+                                    HorizontalAlignment="Center"
+                                    Symbol="DocumentBulletList24"
+                                    VerticalAlignment="Center" />
+                            </ui:Card>
+
+                            <StackPanel Grid.Column="1" Grid.Row="0" VerticalAlignment="Top">
+                                <ui:TextBlock
+                                    FontTypography="BodyStrong"
+                                    Text="Logger Configuration"
+                                    TextWrapping="WrapWithOverflow" />
+                                <ui:TextBlock
+                                    Appearance="Secondary"
+                                    FontTypography="Caption"
+                                    Margin="0,0,0,10"
+                                    Opacity="0.5"
+                                    Text="Configure logging behavior and performance monitoring options."
+                                    TextWrapping="WrapWithOverflow" />
+                            </StackPanel>
+
+                            <ui:Card
+                                Grid.Column="1"
+                                Grid.Row="1"
+                                Margin="0,5,0,0"
+                                Padding="10">
+                                <StackPanel>
+                                    <!--  Stack Trace Toggle  -->
+                                    <Grid Margin="0,5,0,5">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="Auto" />
+                                        </Grid.ColumnDefinitions>
+                                        <StackPanel Grid.Column="0">
+                                            <ui:TextBlock
+                                                FontTypography="Caption"
+                                                Text="Enable Stack Traces" />
+                                            <ui:TextBlock
+                                                Appearance="Secondary"
+                                                FontSize="11"
+                                                Opacity="0.5"
+                                                Text="Include stack traces in warning and error logs"
+                                                TextWrapping="WrapWithOverflow" />
+                                        </StackPanel>
+                                        <ui:ToggleSwitch
+                                            Checked="EnableStackTraceToggle_OnChecked"
+                                            Grid.Column="1"
+                                            IsChecked="{Binding EnableStackTrace, Mode=TwoWay}"
+                                            Margin="10,0,0,0"
+                                            Unchecked="EnableStackTraceToggle_OnUnchecked"
+                                            VerticalAlignment="Center"
+                                            x:Name="EnableStackTraceToggle" />
+                                    </Grid>
+
+                                    <!--  Performance Logging Toggle  -->
+                                    <Grid Margin="0,5,0,5">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="Auto" />
+                                        </Grid.ColumnDefinitions>
+                                        <StackPanel Grid.Column="0">
+                                            <ui:TextBlock
+                                                FontTypography="Caption"
+                                                Text="Enable Performance Logging" />
+                                            <ui:TextBlock
+                                                Appearance="Secondary"
+                                                FontSize="11"
+                                                Opacity="0.5"
+                                                Text="Track and log performance metrics"
+                                                TextWrapping="WrapWithOverflow" />
+                                        </StackPanel>
+                                        <ui:ToggleSwitch
+                                            Checked="EnablePerformanceLoggingToggle_OnChecked"
+                                            Grid.Column="1"
+                                            IsChecked="{Binding EnablePerformanceLogging, Mode=TwoWay}"
+                                            Margin="10,0,0,0"
+                                            Unchecked="EnablePerformanceLoggingToggle_OnUnchecked"
+                                            VerticalAlignment="Center"
+                                            x:Name="EnablePerformanceLoggingToggle" />
+                                    </Grid>
+
+                                    <!--  Memory Tracking Toggle  -->
+                                    <Grid Margin="0,5,0,5">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="Auto" />
+                                        </Grid.ColumnDefinitions>
+                                        <StackPanel Grid.Column="0">
+                                            <ui:TextBlock
+                                                FontTypography="Caption"
+                                                Text="Enable Memory Tracking" />
+                                            <ui:TextBlock
+                                                Appearance="Secondary"
+                                                FontSize="11"
+                                                Opacity="0.5"
+                                                Text="Include memory usage information in logs"
+                                                TextWrapping="WrapWithOverflow" />
+                                        </StackPanel>
+                                        <ui:ToggleSwitch
+                                            Checked="EnableMemoryTrackingToggle_OnChecked"
+                                            Grid.Column="1"
+                                            IsChecked="{Binding EnableMemoryTracking, Mode=TwoWay}"
+                                            Margin="10,0,0,0"
+                                            Unchecked="EnableMemoryTrackingToggle_OnUnchecked"
+                                            VerticalAlignment="Center"
+                                            x:Name="EnableMemoryTrackingToggle" />
+                                    </Grid>
+
+                                    <!--  Async Logging Toggle  -->
+                                    <Grid Margin="0,5,0,0">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="Auto" />
+                                        </Grid.ColumnDefinitions>
+                                        <StackPanel Grid.Column="0">
+                                            <ui:TextBlock
+                                                FontTypography="Caption"
+                                                Text="Enable Asynchronous Logging" />
+                                            <ui:TextBlock
+                                                Appearance="Secondary"
+                                                FontSize="11"
+                                                Opacity="0.5"
+                                                Text="Process logs in background for better performance"
+                                                TextWrapping="WrapWithOverflow" />
+                                        </StackPanel>
+                                        <ui:ToggleSwitch
+                                            Checked="EnableAsyncLoggingToggle_OnChecked"
+                                            Grid.Column="1"
+                                            IsChecked="{Binding EnableAsyncLogging, Mode=TwoWay}"
+                                            Margin="10,0,0,0"
+                                            Unchecked="EnableAsyncLoggingToggle_OnUnchecked"
+                                            VerticalAlignment="Center"
+                                            x:Name="EnableAsyncLoggingToggle" />
+                                    </Grid>
+
+                                    <!--  Open Log Folder Button  -->
+                                    <ui:Button
+                                        Click="OpenLogFolderButton_OnClick"
+                                        Content="Open Log Folder"
+                                        Icon="{ui:SymbolIcon FolderOpen24}"
+                                        Margin="0,15,0,0"
+                                        x:Name="OpenLogFolderButton" />
+                                </StackPanel>
+                            </ui:Card>
+                        </Grid>
+                    </ui:Card>
+
                 </StackPanel>
             </Grid>
         </ui:PassiveScrollViewer>

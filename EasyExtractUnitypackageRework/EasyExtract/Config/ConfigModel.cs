@@ -45,7 +45,13 @@ public sealed class ConfigModel : INotifyPropertyChanged
 
 
     private DynamicScalingModes _dynamicScalingMode = DynamicScalingModes.Simple;
+    private bool _enableAsyncLogging = true;
+    private bool _enableMemoryTracking = true;
+    private bool _enablePerformanceLogging = true;
     private bool _enableSound = true;
+
+    // Logger configuration fields
+    private bool _enableStackTrace = true;
     private ObservableCollection<ExtractedUnitypackageModel> _extractedUnitypackages = new();
 
     private bool _firstRun;
@@ -746,6 +752,59 @@ public sealed class ConfigModel : INotifyPropertyChanged
             if (_totalAnimations != value)
             {
                 _totalAnimations = value;
+                OnPropertyChanged();
+            }
+        }
+    }
+
+    // Logger configuration properties
+    public bool EnableStackTrace
+    {
+        get => _enableStackTrace;
+        set
+        {
+            if (_enableStackTrace != value)
+            {
+                _enableStackTrace = value;
+                OnPropertyChanged();
+            }
+        }
+    }
+
+    public bool EnablePerformanceLogging
+    {
+        get => _enablePerformanceLogging;
+        set
+        {
+            if (_enablePerformanceLogging != value)
+            {
+                _enablePerformanceLogging = value;
+                OnPropertyChanged();
+            }
+        }
+    }
+
+    public bool EnableMemoryTracking
+    {
+        get => _enableMemoryTracking;
+        set
+        {
+            if (_enableMemoryTracking != value)
+            {
+                _enableMemoryTracking = value;
+                OnPropertyChanged();
+            }
+        }
+    }
+
+    public bool EnableAsyncLogging
+    {
+        get => _enableAsyncLogging;
+        set
+        {
+            if (_enableAsyncLogging != value)
+            {
+                _enableAsyncLogging = value;
                 OnPropertyChanged();
             }
         }

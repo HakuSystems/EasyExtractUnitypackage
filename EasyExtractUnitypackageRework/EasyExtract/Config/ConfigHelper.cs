@@ -69,6 +69,9 @@ public class ConfigHandler
                 new Dictionary<string, object> { ["ConfigPath"] = ConfigPath }, LogLevel.Warning, "Config");
             Directory.CreateDirectory(Path.GetDirectoryName(ConfigPath) ?? string.Empty);
             await UpdateConfigAsync(); // Creates a file with defaults
+
+            // Apply default logger settings for new config
+            ApplyLoggerSettings();
         }
 
         BetterLogger.LogWithContext("ConfigHandler initialization completed", new Dictionary<string, object>(),
@@ -167,11 +170,40 @@ public class ConfigHandler
         {
             // If using AutoMapper
             _mapper.Map(source, Config);
+
+            // Apply logger settings after loading config
+            ApplyLoggerSettings();
         }
         finally
         {
             // Re-attach event handler
             Config.PropertyChanged += Config_PropertyChanged;
+        }
+    }
+
+    /// <summary>
+    ///     Applies the logger settings from the configuration to the BetterLogger.
+    /// </summary>
+    private void ApplyLoggerSettings()
+    {
+        try
+        {
+            BetterLogger.EnableStackTrace(Config.EnableStackTrace);
+            BetterLogger.EnablePerformanceLogging(Config.EnablePerformanceLogging);
+            BetterLogger.EnableMemoryTracking(Config.EnableMemoryTracking);
+            BetterLogger.EnableAsyncLogging(Config.EnableAsyncLogging);
+
+            BetterLogger.LogWithContext("Logger settings applied from configuration", new Dictionary<string, object>
+            {
+                ["EnableStackTrace"] = Config.EnableStackTrace,
+                ["EnablePerformanceLogging"] = Config.EnablePerformanceLogging,
+                ["EnableMemoryTracking"] = Config.EnableMemoryTracking,
+                ["EnableAsyncLogging"] = Config.EnableAsyncLogging
+            }, LogLevel.Info, "Config");
+        }
+        catch (Exception ex)
+        {
+            BetterLogger.Exception(ex, "Failed to apply logger settings", "Config");
         }
     }
 
