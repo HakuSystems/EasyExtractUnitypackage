@@ -54,6 +54,7 @@ public partial class App
             if (config.ContextMenuToggle)
                 await RegistryHelper.RegisterContextMenuEntry();
 
+            config.Update.CurrentVersion = Assembly.GetExecutingAssembly().GetName().Version.ToString();
             var dashboard = new Dashboard(new CancellationTokenSource());
             dashboard.InitializeComponent();
             dashboard.Show();
