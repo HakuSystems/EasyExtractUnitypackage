@@ -2,7 +2,7 @@ using System.Windows.Media;
 using EasyExtract.Config;
 using EasyExtract.Config.Models;
 using EasyExtract.Services;
-using EasyExtract.Utilities;
+using EasyExtract.Utilities.Logger;
 using EasyExtract.Views;
 
 namespace EasyExtract.Controls;
@@ -26,22 +26,28 @@ public partial class BetterSettings
         }
         catch (Exception ex)
         {
-            await BetterLogger.LogAsync($"Exception in BetterSettings_OnLoaded: {ex.Message}", Importance.Error);
+            BetterLogger.Exception(ex, "Failed to load BetterSettings", "UI");
         }
     }
 
     private async Task ChangeUiToMatchConfigAsync()
     {
-        if (ConfigHandler.Instance.Config.UwUModeActive) BetterUwUifyer.ApplyUwUModeToVisualTree(this);
         try
         {
+            if (ConfigHandler.Instance.Config.UwUModeActive) BetterUwUifyer.ApplyUwUModeToVisualTree(this);
+
+            var context = new Dictionary<string, object>();
+
             var dynamicScalingMode = Enum.GetValues(typeof(DynamicScalingModes))
                 .Cast<DynamicScalingModes>()
                 .ToList();
             DynamicScalingComboBox.ItemsSource = dynamicScalingMode;
+            context.Add("DynamicScalingModes", dynamicScalingMode);
 
             ContextMenuSwitch.IsChecked = ConfigHandler.Instance.Config.ContextMenuToggle;
             UwUToggleSwitch.IsChecked = ConfigHandler.Instance.Config.UwUModeActive;
+            context.Add("ContextMenuEnabled", ConfigHandler.Instance.Config.ContextMenuToggle);
+            context.Add("UwUModeActive", ConfigHandler.Instance.Config.UwUModeActive);
 
             var themes = Enum.GetValues(typeof(AvailableThemes))
                 .Cast<AvailableThemes>()
@@ -49,22 +55,25 @@ public partial class BetterSettings
                 .ToList();
 
             ThemeComboBox.ItemsSource = themes;
-
-            foreach (var theme in themes)
-                await BetterLogger.LogAsync($"Available Theme: {theme}", Importance.Info);
-
+            context.Add("AvailableThemes", themes);
 
             CheckForUpdatesOnStartUpToggleSwitch.IsChecked = ConfigHandler.Instance.Config.Update.AutoUpdate;
             DiscordRpcToggleSwitch.IsChecked = ConfigHandler.Instance.Config.DiscordRpc;
             DefaultTempPathTextBox.Text = ConfigHandler.Instance.Config.DefaultTempPath;
             DefaultOutputPathTextBox.Text = ConfigHandler.Instance.Config.DefaultOutputPath;
             BackgroundOpacitySlider.Value = ConfigHandler.Instance.Config.CustomBackgroundImage.BackgroundOpacity;
-            await BetterLogger.LogAsync("UI updated to match config", Importance.Info);
+
+            context.Add("AutoUpdate", ConfigHandler.Instance.Config.Update.AutoUpdate);
+            context.Add("DiscordRpcEnabled", ConfigHandler.Instance.Config.DiscordRpc);
+            context.Add("TempPath", ConfigHandler.Instance.Config.DefaultTempPath);
+            context.Add("OutputPath", ConfigHandler.Instance.Config.DefaultOutputPath);
+            context.Add("BackgroundOpacity", ConfigHandler.Instance.Config.CustomBackgroundImage.BackgroundOpacity);
+
+            BetterLogger.LogWithContext("UI updated to match config", context, LogLevel.Info, "UI");
         }
         catch (Exception ex)
         {
-            await BetterLogger.LogAsync($"Exception in ChangeUiToMatchConfigAsync: {ex.Message}",
-                Importance.Error);
+            BetterLogger.Exception(ex, "Failed to update UI to match config", "UI");
         }
     }
 
@@ -76,7 +85,7 @@ public partial class BetterSettings
         }
         catch (Exception ex)
         {
-            await BetterLogger.LogAsync($"Exception in UwUToggleSwitch_OnChecked: {ex.Message}", Importance.Error);
+            BetterLogger.Exception(ex, "Failed to toggle UwU mode", "UI");
         }
     }
 
@@ -94,7 +103,7 @@ public partial class BetterSettings
         }
         catch (Exception ex)
         {
-            await BetterLogger.LogAsync($"Exception in UwUToggleSwitch_OnUnchecked: {ex.Message}", Importance.Error);
+            BetterLogger.Exception(ex, "Failed to toggle UwU mode", "UI");
         }
     }
 
@@ -117,8 +126,7 @@ public partial class BetterSettings
         }
         catch (Exception ex)
         {
-            await BetterLogger.LogAsync($"Exception in CheckForUpdatesOnStartUpToggleSwitch_OnChecked: {ex.Message}",
-                Importance.Error);
+            BetterLogger.Exception(ex, "Failed to update auto-update setting", "UI");
         }
     }
 
@@ -136,8 +144,7 @@ public partial class BetterSettings
         }
         catch (Exception ex)
         {
-            await BetterLogger.LogAsync($"Exception in CheckForUpdatesOnStartUpToggleSwitch_OnUnchecked: {ex.Message}",
-                Importance.Error);
+            BetterLogger.Exception(ex, "Failed to update auto-update setting", "UI");
         }
     }
 
@@ -150,8 +157,7 @@ public partial class BetterSettings
         }
         catch (Exception ex)
         {
-            await BetterLogger.LogAsync($"Exception in DiscordRpcToggleSwitch_OnChecked: {ex.Message}",
-                Importance.Error);
+            BetterLogger.Exception(ex, "Failed to update Discord RPC status", "UI");
         }
     }
 
@@ -168,12 +174,17 @@ public partial class BetterSettings
             if (ThemeComboBox.SelectedItem == null) return;
             var selectedTheme = (AvailableThemes)ThemeComboBox.SelectedItem;
             ConfigHandler.Instance.Config.ApplicationTheme = selectedTheme;
-            await BetterLogger.LogAsync($"Theme changed to: {selectedTheme}", Importance.Info);
+
+            var context = new Dictionary<string, object>
+            {
+                ["OldTheme"] = e.RemovedItems.Count > 0 ? e.RemovedItems[0] : null,
+                ["NewTheme"] = selectedTheme
+            };
+            BetterLogger.LogWithContext("Theme changed", context, LogLevel.Info, "UI");
         }
         catch (Exception ex)
         {
-            await BetterLogger.LogAsync($"Exception in ThemeComboBox_OnSelectionChanged: {ex.Message}",
-                Importance.Error);
+            BetterLogger.Exception(ex, "Failed to change theme", "UI");
         }
     }
 
@@ -210,13 +221,14 @@ public partial class BetterSettings
             DefaultTempPathTextBox.Text = folderDialog.FolderName;
 
             ConfigHandler.Instance.Config.DefaultTempPath = folderDialog.FolderName;
-            await BetterLogger.LogAsync($"Default temp path set to: {folderDialog.FolderName}",
-                Importance.Info);
+            BetterLogger.LogWithContext("Default temp path changed", new Dictionary<string, object>
+            {
+                ["NewPath"] = folderDialog.FolderName
+            }, LogLevel.Info, "Settings");
         }
         catch (Exception ex)
         {
-            await BetterLogger.LogAsync($"Exception in DefaultTempPathChangeButton_OnClick: {ex.Message}",
-                Importance.Error);
+            BetterLogger.Exception(ex, "Failed to change default temp path", "Settings");
         }
     }
 
@@ -228,12 +240,14 @@ public partial class BetterSettings
                 Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "EasyExtract",
                     "Temp");
             DefaultTempPathTextBox.Text = ConfigHandler.Instance.Config.DefaultTempPath;
-            await BetterLogger.LogAsync("Default temp path reset", Importance.Info);
+            BetterLogger.LogWithContext("Default temp path reset", new Dictionary<string, object>
+            {
+                ["DefaultTempPath"] = ConfigHandler.Instance.Config.DefaultTempPath
+            }, LogLevel.Info, "Settings");
         }
         catch (Exception ex)
         {
-            await BetterLogger.LogAsync($"Exception in DefaultTempPathResetButton_OnClick: {ex.Message}",
-                Importance.Error);
+            BetterLogger.Exception(ex, "Failed to reset default temp path", "Settings");
         }
     }
 
@@ -242,10 +256,14 @@ public partial class BetterSettings
         try
         {
             await UpdateContextMenuToggleSettingAsync();
+            BetterLogger.LogWithContext("Context menu enabled", new Dictionary<string, object>
+            {
+                ["Enabled"] = ContextMenuSwitch.IsChecked ?? false
+            }, LogLevel.Info, "Settings");
         }
         catch (Exception ex)
         {
-            await BetterLogger.LogAsync($"Exception in ContextMenuSwitch_OnChecked: {ex.Message}", Importance.Error);
+            BetterLogger.Exception(ex, "Failed to update context menu setting", "Settings");
         }
     }
 
@@ -254,10 +272,14 @@ public partial class BetterSettings
         try
         {
             await UpdateContextMenuToggleSettingAsync();
+            BetterLogger.LogWithContext("Context menu disabled", new Dictionary<string, object>
+            {
+                ["Enabled"] = ContextMenuSwitch.IsChecked ?? false
+            }, LogLevel.Info, "Settings");
         }
         catch (Exception ex)
         {
-            await BetterLogger.LogAsync($"Exception in ContextMenuSwitch_OnUnchecked: {ex.Message}", Importance.Error);
+            BetterLogger.Exception(ex, "Failed to update context menu setting", "Settings");
         }
     }
 
@@ -316,12 +338,14 @@ public partial class BetterSettings
             DefaultOutputPathTextBox.Text = folderDialog.FolderName;
             ConfigHandler.Instance.Config.DefaultOutputPath = folderDialog.FolderName;
 
-            await BetterLogger.LogAsync($"Default output path set to: {folderDialog.FolderName}", Importance.Info);
+            BetterLogger.LogWithContext("Default output path changed", new Dictionary<string, object>
+            {
+                ["NewPath"] = folderDialog.FolderName
+            }, LogLevel.Info, "Settings");
         }
         catch (Exception ex)
         {
-            await BetterLogger.LogAsync($"Exception in DefaultOutputPathChangeButton_OnClick: {ex.Message}",
-                Importance.Error);
+            BetterLogger.Exception(ex, "Failed to change default output path", "Settings");
         }
     }
 
@@ -335,12 +359,14 @@ public partial class BetterSettings
 
             DefaultOutputPathTextBox.Text = ConfigHandler.Instance.Config.DefaultOutputPath;
 
-            await BetterLogger.LogAsync("Default output path reset to default location", Importance.Info);
+            BetterLogger.LogWithContext("Default output path reset", new Dictionary<string, object>
+            {
+                ["DefaultPath"] = ConfigHandler.Instance.Config.DefaultOutputPath
+            }, LogLevel.Info, "Settings");
         }
         catch (Exception ex)
         {
-            await BetterLogger.LogAsync($"Exception in DefaultOutputPathResetButton_OnClick: {ex.Message}",
-                Importance.Error);
+            BetterLogger.Exception(ex, "Failed to reset default output path", "Settings");
         }
     }
 

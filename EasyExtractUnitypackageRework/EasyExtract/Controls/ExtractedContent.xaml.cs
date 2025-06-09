@@ -5,6 +5,7 @@ using EasyExtract.Config;
 using EasyExtract.Config.Models;
 using EasyExtract.Services;
 using EasyExtract.Utilities;
+using EasyExtract.Utilities.Logger;
 using EasyExtract.Views;
 using Wpf.Ui.Controls;
 using static System.Windows.Application;
@@ -48,6 +49,11 @@ public partial class ExtractedContent
 
         try
         {
+            var context = new Dictionary<string, object>
+            {
+                ["OutputPath"] = path
+            };
+
             var dirs = Directory.EnumerateDirectories(path);
             var pkgs = await Task.WhenAll(dirs.Select(async dir =>
             {
@@ -61,10 +67,13 @@ public partial class ExtractedContent
                 foreach (var pkg in pkgs)
                     ExtractedUnitypackages.Add(pkg);
             });
+
+            context["PackagesCount"] = pkgs.Length;
+            BetterLogger.LogWithContext("Successfully updated extracted files", context);
         }
         catch (Exception ex)
         {
-            await BetterLogger.LogAsync($"Error updating extracted files: {ex.Message}", Importance.Error);
+            BetterLogger.Exception(ex, "Error updating extracted files", "ExtractedContent");
         }
     }
 
@@ -240,7 +249,7 @@ public partial class ExtractedContent
         }
         catch (Exception ex)
         {
-            await BetterLogger.LogAsync($"Failed to load image '{filePath}': {ex.Message}", Importance.Error);
+            BetterLogger.Exception(ex, $"Failed to load image '{filePath}'", "ExtractedContent");
             return null;
         }
     }
@@ -286,8 +295,7 @@ public partial class ExtractedContent
                 }
                 catch (Exception ex)
                 {
-                    await BetterLogger.LogAsync($"Error deleting package {pkg.UnitypackageName}: {ex.Message}",
-                        Importance.Error);
+                    BetterLogger.Exception(ex, $"Error deleting package {pkg.UnitypackageName}");
                 }
         else
             foreach (var extractedPkg in ExtractedUnitypackages.ToList())
@@ -302,8 +310,7 @@ public partial class ExtractedContent
                     }
                     catch (Exception ex)
                     {
-                        await BetterLogger.LogAsync($"Error deleting file {file.FileName}: {ex.Message}",
-                            Importance.Error);
+                        BetterLogger.Exception(ex, $"Error deleting file {file.FileName}");
                     }
 
                 await RecheckSecurityStatusAsync(extractedPkg);
@@ -354,7 +361,7 @@ public partial class ExtractedContent
             }
             catch (Exception ex)
             {
-                await BetterLogger.LogAsync($"Error updating configuration: {ex.Message}", Importance.Error);
+                BetterLogger.Exception(ex, "Error updating configuration");
             }
         }
     }

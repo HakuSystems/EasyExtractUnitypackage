@@ -1,8 +1,7 @@
 using System.Text;
 using EasyExtract.Config;
-using EasyExtract.Config.Models;
 using EasyExtract.Services;
-using EasyExtract.Utilities;
+using EasyExtract.Utilities.Logger;
 using EasyExtract.Views;
 using Newtonsoft.Json;
 
@@ -32,7 +31,7 @@ public partial class Feedback
         }
         catch (Exception exception)
         {
-            await BetterLogger.LogAsync($"Error in Feedback Loaded: {exception.Message}", Importance.Error);
+            BetterLogger.Exception(exception, "Error in Feedback Loaded", "Feedback");
         }
     }
 
@@ -69,7 +68,7 @@ public partial class Feedback
         }
         catch (Exception ex)
         {
-            await BetterLogger.LogAsync($"Error in SubmitFeedbackButton_OnClick: {ex.Message}", Importance.Error);
+            BetterLogger.Exception(ex, "Error in SubmitFeedbackButton_OnClick", "Feedback");
         }
     }
 
@@ -118,13 +117,15 @@ public partial class Feedback
                     }
                 }
             }
-            catch (HttpRequestException)
+            catch (HttpRequestException ex)
             {
+                BetterLogger.Exception(ex, "Network error while submitting feedback", "Feedback");
                 await DialogHelper.ShowErrorDialogAsync(Window.GetWindow(this), "Error",
                     "Network error. Please check your internet connection and try again.", "OK");
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                BetterLogger.Exception(ex, "Unexpected error while submitting feedback", "Feedback");
                 await DialogHelper.ShowErrorDialogAsync(Window.GetWindow(this), "Error",
                     "An unexpected error occurred. Please check the logs for more information.", "OK");
             }

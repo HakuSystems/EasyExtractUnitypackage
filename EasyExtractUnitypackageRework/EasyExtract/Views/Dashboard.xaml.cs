@@ -6,7 +6,7 @@ using EasyExtract.Config;
 using EasyExtract.Config.Models;
 using EasyExtract.Controls;
 using EasyExtract.Services;
-using EasyExtract.Utilities;
+using EasyExtract.Utilities.Logger;
 using SkiaSharp;
 using SkiaSharp.Views.Desktop;
 using Application = System.Windows.Application;
@@ -114,7 +114,7 @@ public partial class Dashboard
         }
         catch (Exception ex)
         {
-            await BetterLogger.LogAsync(ex.Message, Importance.Error);
+            BetterLogger.Exception(ex, "Error during Dashboard initialization");
         }
         finally
         {
@@ -324,7 +324,7 @@ public partial class Dashboard
         }
         catch (Exception ex)
         {
-            await BetterLogger.LogAsync(ex.Message, Importance.Error);
+            BetterLogger.Exception(ex, "Error checking for updates");
         }
     }
 
@@ -399,7 +399,7 @@ public partial class Dashboard
         }
         catch (Exception exc)
         {
-            await BetterLogger.LogAsync(exc.Message, Importance.Error);
+            BetterLogger.Exception(exc, "Error during drag and drop operation");
         }
     }
 

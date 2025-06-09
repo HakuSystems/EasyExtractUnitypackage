@@ -1,6 +1,5 @@
 using AutoMapper;
-using EasyExtract.Config.Models;
-using EasyExtract.Utilities;
+using EasyExtract.Utilities.Logger;
 using Newtonsoft.Json;
 
 namespace EasyExtract.Config;
@@ -55,22 +54,25 @@ public class ConfigHandler
         if (_initialized) return;
         _initialized = true;
 
-        await BetterLogger.LogAsync("Initializing ConfigHandler...", Importance.Info);
+        BetterLogger.LogWithContext("Initializing ConfigHandler", new Dictionary<string, object>(), LogLevel.Info,
+            "Config");
 
         if (File.Exists(ConfigPath))
         {
-            await BetterLogger.LogAsync($"Config file found at {ConfigPath}. Reading config...", Importance.Info);
+            BetterLogger.LogWithContext("Reading existing config file",
+                new Dictionary<string, object> { ["ConfigPath"] = ConfigPath }, LogLevel.Info, "Config");
             await ReadConfigAsync();
         }
         else
         {
-            await BetterLogger.LogAsync($"No config file found. Creating a new one at {ConfigPath}...",
-                Importance.Warning);
+            BetterLogger.LogWithContext("Creating new config file",
+                new Dictionary<string, object> { ["ConfigPath"] = ConfigPath }, LogLevel.Warning, "Config");
             Directory.CreateDirectory(Path.GetDirectoryName(ConfigPath) ?? string.Empty);
             await UpdateConfigAsync(); // Creates a file with defaults
         }
 
-        await BetterLogger.LogAsync("ConfigHandler initialization completed.", Importance.Info);
+        BetterLogger.LogWithContext("ConfigHandler initialization completed", new Dictionary<string, object>(),
+            LogLevel.Info, "Config");
         await GenerateAllNecessaryFiles();
     }
 
@@ -112,19 +114,19 @@ public class ConfigHandler
 
             if (configFromFile != null)
             {
-                await BetterLogger.LogAsync("Config successfully deserialized. Updating in-memory Config...",
-                    Importance.Info);
+                BetterLogger.LogWithContext("Config deserialized successfully", new Dictionary<string, object>(),
+                    LogLevel.Info, "Config");
                 UpdateConfigProperties(configFromFile);
             }
             else
             {
-                await BetterLogger.LogAsync("Config file was empty or invalid. Using default config.",
-                    Importance.Warning);
+                BetterLogger.LogWithContext("Config file was empty or invalid", new Dictionary<string, object>(),
+                    LogLevel.Warning, "Config");
             }
         }
         catch (Exception ex)
         {
-            await BetterLogger.LogAsync($"Error reading config: {ex.Message}", Importance.Error, ex);
+            BetterLogger.Exception(ex, "Error reading config", "Config");
         }
         finally
         {
@@ -145,7 +147,7 @@ public class ConfigHandler
         }
         catch (Exception ex)
         {
-            await BetterLogger.LogAsync($"Error updating config: {ex.Message}", Importance.Error, ex);
+            BetterLogger.Exception(ex, "Error updating config", "Config");
         }
         finally
         {

@@ -1,9 +1,8 @@
 ﻿using System.Security.Principal;
 using EasyExtract.Config;
 using EasyExtract.Services;
-using EasyExtract.Utilities;
+using EasyExtract.Utilities.Logger;
 using EasyExtract.Views;
-using Importance = EasyExtract.Config.Models.Importance;
 
 namespace EasyExtract.Core;
 
@@ -42,7 +41,8 @@ public partial class App
                 {
                     var path = string.Join(" ",
                         e.Args.Skip(extractIndex + 1).Take(elevatedIndex - extractIndex - 1));
-                    await BetterLogger.LogAsync($"Extract argument detected. Path: {path}", Importance.Info);
+                    BetterLogger.LogWithContext("Extract argument detected",
+                        new Dictionary<string, object> { ["Path"] = path });
                     var extractionHandler = new ExtractionHandler();
                     await extractionHandler.ExtractUnitypackageFromContextMenu(path);
                     Shutdown();
@@ -60,7 +60,7 @@ public partial class App
         }
         catch (Exception exc)
         {
-            await BetterLogger.LogAsync(exc.Message, Importance.Error);
+            BetterLogger.Exception(exc);
         }
     }
 
@@ -69,14 +69,14 @@ public partial class App
     {
         try
         {
-            await BetterLogger.LogAsync(e.Exception.Message, Importance.Error);
+            BetterLogger.Exception(e.Exception);
             e.Handled = true;
         }
         catch (Exception ex)
         {
             if (ex.Message.Contains("has not yet been initialized"))
                 return;
-            await BetterLogger.LogAsync(ex.Message, Importance.Error);
+            BetterLogger.Exception(ex);
         }
     }
 
@@ -99,17 +99,17 @@ public partial class App
         try
         {
             Process.Start(processInfo);
-            await BetterLogger.LogAsync("Exiting non-admin instance", Importance.Info);
+            BetterLogger.LogWithContext("Exiting non-admin instance", new Dictionary<string, object>());
             Current.Shutdown();
         }
         catch (Win32Exception ex) when (ex.NativeErrorCode == 1223)
         {
-            await BetterLogger.LogAsync("User declined elevation. Exiting application.", Importance.Info);
+            BetterLogger.LogWithContext("User declined elevation", new Dictionary<string, object>());
             Current.Shutdown();
         }
         catch (Exception ex)
         {
-            await BetterLogger.LogAsync($"Error running as admin: {ex.Message}", Importance.Error);
+            BetterLogger.Exception(ex, "Error running as admin");
             throw;
         }
     }
@@ -124,14 +124,14 @@ public partial class App
             if (!process.HasExited)
                 try
                 {
-                    await BetterLogger.LogAsync($"Killing process {process.Id}", Importance.Info);
+                    BetterLogger.LogWithContext("Killing process",
+                        new Dictionary<string, object> { ["ProcessId"] = process.Id });
                     process.Kill();
                     await process.WaitForExitAsync();
                 }
                 catch (Exception ex)
                 {
-                    await BetterLogger.LogAsync($"Error killing process {process.Id}: {ex.Message}",
-                        Importance.Error);
+                    BetterLogger.Exception(ex, $"Error killing process {process.Id}");
                 }
         }
     }

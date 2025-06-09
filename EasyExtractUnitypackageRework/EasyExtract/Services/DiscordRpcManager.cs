@@ -1,8 +1,7 @@
 using DiscordRPC;
 using DiscordRPC.Exceptions;
 using EasyExtract.Config;
-using EasyExtract.Config.Models;
-using EasyExtract.Utilities;
+using EasyExtract.Utilities.Logger;
 using Application = System.Windows.Application;
 
 namespace EasyExtract.Services;
@@ -35,7 +34,7 @@ public sealed class DiscordRpcManager : IDisposable
         }
         catch (Exception ex)
         {
-            await BetterLogger.LogAsync($"Error updating Discord presence: {ex.Message}", Importance.Error);
+            BetterLogger.Exception(ex, "Error updating Discord presence", "Discord");
         }
     }
 
@@ -47,7 +46,7 @@ public sealed class DiscordRpcManager : IDisposable
         }
         catch (Exception ex)
         {
-            await BetterLogger.LogAsync($"Error reading config: {ex.Message}", Importance.Error);
+            BetterLogger.Exception(ex, "Error reading config", "Discord");
             return false;
         }
     }
@@ -58,10 +57,14 @@ public sealed class DiscordRpcManager : IDisposable
         {
             Client = new DiscordRpcClient("1103487584124010607");
             Client.Initialize();
-            Client.OnReady += (_, e) => Console.WriteLine($"Received Ready from user {e.User.Username}");
-            Client.OnError += (_, e) => Console.WriteLine($"Error! {e.Message}");
-            Client.OnClose += (_, e) => Console.WriteLine($"Close! {e}");
-            await BetterLogger.LogAsync("Discord RPC started", Importance.Info);
+            Client.OnReady += (_, e) => BetterLogger.LogWithContext("Discord RPC Ready",
+                new Dictionary<string, object> { { "Username", e.User.Username } }, LogLevel.Info, "Discord");
+            Client.OnError += (_, e) => BetterLogger.LogWithContext("Discord RPC Error",
+                new Dictionary<string, object> { { "Error", e.Message } }, LogLevel.Error, "Discord");
+            Client.OnClose += (_, e) => BetterLogger.LogWithContext("Discord RPC Closed",
+                new Dictionary<string, object> { { "Close", e.ToString() } }, LogLevel.Info, "Discord");
+            BetterLogger.LogWithContext("Discord RPC started",
+                new Dictionary<string, object> { { "ClientId", "1103487584124010607" } }, LogLevel.Info, "Discord");
         }
     }
 
@@ -79,7 +82,7 @@ public sealed class DiscordRpcManager : IDisposable
             catch (StringOutOfRangeException e)
             {
                 largeTextString = "Too many files extracted and/or unity packages";
-                await BetterLogger.LogAsync($"StringOutOfRangeException: {e.Message}", Importance.Warning);
+                BetterLogger.Exception(e, "String length exceeded maximum", "Discord");
             }
 
         Client?.SetPresence(new RichPresence
@@ -96,7 +99,9 @@ public sealed class DiscordRpcManager : IDisposable
             }
         });
 
-        await BetterLogger.LogAsync($"Updated Discord presence to state: {state}", Importance.Info);
+        BetterLogger.LogWithContext("Updated Discord presence",
+            new Dictionary<string, object> { { "State", state }, { "Stats", largeTextString } }, LogLevel.Info,
+            "Discord");
     }
 
     #region IDisposable Implementation
@@ -113,7 +118,8 @@ public sealed class DiscordRpcManager : IDisposable
             if (disposing && Client is { IsDisposed: false })
             {
                 Client.Dispose();
-                BetterLogger.LogAsync("Disposed DiscordRpcClient", Importance.Info).ConfigureAwait(false);
+                BetterLogger.LogWithContext("Disposed Discord RPC Client", new Dictionary<string, object>(),
+                    LogLevel.Info, "Discord");
             }
 
             Client = null!;

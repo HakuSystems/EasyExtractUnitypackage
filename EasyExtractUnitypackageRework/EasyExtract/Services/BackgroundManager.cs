@@ -1,8 +1,7 @@
 using System.Text;
 using System.Windows.Media;
 using EasyExtract.Config;
-using EasyExtract.Config.Models;
-using EasyExtract.Utilities;
+using EasyExtract.Utilities.Logger;
 
 namespace EasyExtract.Services;
 
@@ -34,8 +33,7 @@ public class BackgroundManager : INotifyPropertyChanged
         }
         catch (Exception ex)
         {
-            // Log or handle the error if the image cannot be loaded
-            _ = BetterLogger.LogAsync($"Error loading background from config: {ex.Message}", Importance.Warning);
+            BetterLogger.Exception(ex, "Error loading background from config", "Background");
         }
     }
 
@@ -80,7 +78,10 @@ public class BackgroundManager : INotifyPropertyChanged
             Stretch = Stretch.Fill
         };
         ConfigHandler.Instance.Config.CustomBackgroundImage.BackgroundPath = imagePath;
-        await BetterLogger.LogAsync($"Background updated with image: {imagePath}", Importance.Info);
+        BetterLogger.LogWithContext("Background updated", new Dictionary<string, object>
+        {
+            { "ImagePath", imagePath }
+        }, LogLevel.Info, "Background");
     }
 
     public async Task ResetBackground()
@@ -97,7 +98,10 @@ public class BackgroundManager : INotifyPropertyChanged
             };
             ConfigHandler.Instance.Config.CustomBackgroundImage.BackgroundPath = uri.ToString();
             await UpdateBackground(uri.ToString());
-            await BetterLogger.LogAsync("Background reset to default", Importance.Info);
+            BetterLogger.LogWithContext("Background reset", new Dictionary<string, object>
+            {
+                { "DefaultUri", uri.ToString() }
+            }, LogLevel.Info, "Background");
         }
         catch (Exception ex)
         {
@@ -106,7 +110,7 @@ public class BackgroundManager : INotifyPropertyChanged
                 Opacity = BackgroundOpacity,
                 Stretch = Stretch.Fill
             };
-            await BetterLogger.LogAsync($"Default background resource not found: {ex.Message}", Importance.Warning);
+            BetterLogger.Exception(ex, "Default background resource not found", "Background");
         }
     }
 
@@ -115,7 +119,10 @@ public class BackgroundManager : INotifyPropertyChanged
         BackgroundOpacity = opacity;
         _currentBackground.Opacity = opacity;
         ConfigHandler.Instance.Config.CustomBackgroundImage.BackgroundOpacity = opacity;
-        await BetterLogger.LogAsync($"Background opacity updated to: {opacity}", Importance.Info);
+        BetterLogger.LogWithContext("Background opacity updated", new Dictionary<string, object>
+        {
+            { "Opacity", opacity }
+        }, LogLevel.Info, "Background");
     }
 
     private void OnPropertyChanged(string propertyName)

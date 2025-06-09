@@ -1,9 +1,8 @@
 ﻿using System.Text;
 using System.Xml.Linq;
 using EasyExtract.Config;
-using EasyExtract.Config.Models;
 using EasyExtract.Services;
-using EasyExtract.Utilities;
+using EasyExtract.Utilities.Logger;
 using EasyExtract.Views;
 using Newtonsoft.Json;
 
@@ -29,7 +28,7 @@ public partial class BetterDetails
         }
         catch (Exception ex)
         {
-            await BetterLogger.LogAsync(ex.Message, Importance.Error);
+            BetterLogger.Exception(ex, "Error loading details", "UI");
         }
     }
 
@@ -41,13 +40,16 @@ public partial class BetterDetails
         }
         catch (Exception ex)
         {
-            await BetterLogger.LogAsync(ex.Message, Importance.Error);
+            BetterLogger.Exception(ex, "Error refreshing details", "UI");
         }
     }
 
     private async Task LoadDetailsAsync()
     {
+        using var scope = new LogScope("LoadDetails", "Details");
         var model = (ConfigModel)DataContext;
+
+        var context = new Dictionary<string, object>();
 
         model.TotalFolders = await ExtractionHelper.GetTotalFolderCount(_extractionPath);
         model.TotalFilesExtracted = await ExtractionHelper.GetTotalFileCount(_extractionPath);
@@ -63,12 +65,18 @@ public partial class BetterDetails
         model.TotalSizeBytes = await ExtractionHelper.GetTotalSizeInBytesAsync(_extractionPath);
         model.TotalExtracted = model.ExtractedUnitypackages.Count;
         model.LastExtractionTime = DateTime.Now;
+
+        context.Add("TotalFiles", model.TotalFilesExtracted);
+        context.Add("TotalSize", model.TotalSizeBytes);
+
+        BetterLogger.LogWithContext("Details loaded successfully", context, LogLevel.Info, "Details");
     }
 
     private async void ExportJsonButton_OnClick(object sender, RoutedEventArgs e)
     {
         try
         {
+            using var scope = new LogScope("ExportJson", "Export");
             var model = (ConfigModel)DataContext;
 
             var details = new
@@ -96,11 +104,15 @@ public partial class BetterDetails
             };
 
             if (saveFileDialog.ShowDialog() == true)
+            {
                 await File.WriteAllTextAsync(saveFileDialog.FileName, json);
+                BetterLogger.LogWithContext("JSON export completed",
+                    new Dictionary<string, object> { ["Path"] = saveFileDialog.FileName }, LogLevel.Info, "Export");
+            }
         }
         catch (Exception ex)
         {
-            await BetterLogger.LogAsync(ex.Message, Importance.Error);
+            BetterLogger.Exception(ex, "Error exporting JSON", "Export");
         }
     }
 
@@ -108,6 +120,7 @@ public partial class BetterDetails
     {
         try
         {
+            using var scope = new LogScope("ExportXml", "Export");
             var model = (ConfigModel)DataContext;
 
             var xDoc = new XDocument(
@@ -134,11 +147,15 @@ public partial class BetterDetails
             };
 
             if (saveFileDialog.ShowDialog() == true)
+            {
                 await File.WriteAllTextAsync(saveFileDialog.FileName, xDoc.ToString());
+                BetterLogger.LogWithContext("XML export completed",
+                    new Dictionary<string, object> { ["Path"] = saveFileDialog.FileName }, LogLevel.Info, "Export");
+            }
         }
         catch (Exception ex)
         {
-            await BetterLogger.LogAsync(ex.Message, Importance.Error);
+            BetterLogger.Exception(ex, "Error exporting XML", "Export");
         }
     }
 
@@ -147,6 +164,7 @@ public partial class BetterDetails
     {
         try
         {
+            using var scope = new LogScope("ExportCsv", "Export");
             var model = (ConfigModel)DataContext;
 
             var csvContent = new StringBuilder();
@@ -171,11 +189,15 @@ public partial class BetterDetails
             };
 
             if (saveFileDialog.ShowDialog() == true)
+            {
                 await File.WriteAllTextAsync(saveFileDialog.FileName, csvContent.ToString());
+                BetterLogger.LogWithContext("CSV export completed",
+                    new Dictionary<string, object> { ["Path"] = saveFileDialog.FileName }, LogLevel.Info, "Export");
+            }
         }
         catch (Exception ex)
         {
-            await BetterLogger.LogAsync(ex.Message, Importance.Error);
+            BetterLogger.Exception(ex, "Error exporting CSV", "Export");
         }
     }
 }

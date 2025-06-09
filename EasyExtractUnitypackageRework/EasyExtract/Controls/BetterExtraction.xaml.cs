@@ -3,7 +3,7 @@ using EasyExtract.BetterExtraction;
 using EasyExtract.Config;
 using EasyExtract.Config.Models;
 using EasyExtract.Services;
-using EasyExtract.Utilities;
+using EasyExtract.Utilities.Logger;
 using EasyExtract.Views;
 
 namespace EasyExtract.Controls;
@@ -179,11 +179,20 @@ public partial class BetterExtraction
             var logMessage = forceCheck
                 ? $"System requirements still not met after attempt #{_recheckCount}."
                 : "System requirements not met initially.";
-            await BetterLogger.LogAsync(logMessage, Importance.Warning);
+
+            BetterLogger.LogWithContext(logMessage, new Dictionary<string, object>
+            {
+                ["RecheckAttempt"] = _recheckCount,
+                ["StatusMessage"] = statusMessage
+            }, LogLevel.Warning, "SystemRequirements");
         }
         else if (forceCheck)
         {
-            await BetterLogger.LogAsync("System requirements met after re-check.", Importance.Info);
+            BetterLogger.LogWithContext("System requirements met after re-check.", new Dictionary<string, object>
+            {
+                ["RecheckAttempt"] = _recheckCount
+            }, LogLevel.Info, "SystemRequirements");
+
             await Task.Run(() =>
             {
                 Everything.Everything_SetSearchW("endwith:.unitypackage !C:\\$Recycle.Bin\\*");

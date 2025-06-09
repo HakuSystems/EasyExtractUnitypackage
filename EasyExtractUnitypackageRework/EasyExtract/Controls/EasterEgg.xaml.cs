@@ -2,7 +2,7 @@ using System.Windows.Media;
 using EasyExtract.Config;
 using EasyExtract.Config.Models;
 using EasyExtract.Services;
-using EasyExtract.Utilities;
+using EasyExtract.Utilities.Logger;
 using EasyExtract.Views;
 
 namespace EasyExtract.Controls;
@@ -22,43 +22,55 @@ public partial class EasterEgg
 
             if (ConfigHandler.Instance.Config.UwUModeActive) BetterUwUifyer.ApplyUwUModeToVisualTree(this);
             await DiscordRpcManager.Instance.TryUpdatePresenceAsync("EasterEgg");
-            await BetterLogger.LogAsync("EasterEgg UserControl loaded",
-                Importance.Info); // Log successful load
+            BetterLogger.Info("EasterEgg UserControl loaded", "UI"); // Log successful load
         }
         catch (Exception ex)
         {
-            await BetterLogger.LogAsync($"Error in EasterEgg Loaded: {ex.Message}", Importance.Error);
+            BetterLogger.Exception(ex, "Error in EasterEgg Loaded", "UI");
         }
     }
 
     private void EasterEgg_OnSizeChanged(object sender, SizeChangedEventArgs e)
     {
-        switch (ConfigHandler.Instance.Config.DynamicScalingMode)
+        try
         {
-            case DynamicScalingModes.Off:
-                break;
-
-            case DynamicScalingModes.Simple:
+            switch (ConfigHandler.Instance.Config.DynamicScalingMode)
             {
-                break;
-            }
-            case DynamicScalingModes.Experimental:
-            {
-                var scaleFactor = e.NewSize.Width / 800.0;
+                case DynamicScalingModes.Off:
+                    break;
 
-                switch (scaleFactor)
+                case DynamicScalingModes.Simple:
                 {
-                    case < 0.5:
-                        scaleFactor = 0.5;
-                        break;
-                    case > 2.0:
-                        scaleFactor = 2.0;
-                        break;
+                    break;
                 }
+                case DynamicScalingModes.Experimental:
+                {
+                    var scaleFactor = e.NewSize.Width / 800.0;
 
-                MainGrid.LayoutTransform = new ScaleTransform(scaleFactor, scaleFactor);
-                break;
+                    switch (scaleFactor)
+                    {
+                        case < 0.5:
+                            scaleFactor = 0.5;
+                            break;
+                        case > 2.0:
+                            scaleFactor = 2.0;
+                            break;
+                    }
+
+                    MainGrid.LayoutTransform = new ScaleTransform(scaleFactor, scaleFactor);
+                    BetterLogger.LogWithContext("EasterEgg scaled", new Dictionary<string, object>
+                    {
+                        { "ScaleFactor", scaleFactor },
+                        { "NewWidth", e.NewSize.Width },
+                        { "NewHeight", e.NewSize.Height }
+                    }, LogLevel.Debug, "UI");
+                    break;
+                }
             }
+        }
+        catch (Exception ex)
+        {
+            BetterLogger.Exception(ex, "Error in EasterEgg scaling", "UI");
         }
     }
 }

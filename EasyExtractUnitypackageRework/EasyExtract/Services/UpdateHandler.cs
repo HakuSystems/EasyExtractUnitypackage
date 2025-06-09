@@ -1,6 +1,5 @@
 using EasyExtract.Config;
-using EasyExtract.Config.Models;
-using EasyExtract.Utilities;
+using EasyExtract.Utilities.Logger;
 using Octokit;
 
 namespace EasyExtract.Services;
@@ -12,31 +11,31 @@ public class UpdateHandler
         var latestRelease = await GetLatestReleaseAsync();
         if (latestRelease == null)
         {
-            await BetterLogger.LogAsync("Failed to fetch the latest release", Importance.Warning);
+            BetterLogger.Info("Failed to fetch the latest release from GitHub. Update check aborted.",
+                "Updates");
             return false;
         }
 
         var latestVersion = latestRelease.TagName.TrimStart('v', 'V');
         var currentVersion = GetCurrentAssemblyVersion();
 
-        await BetterLogger.LogAsync($"Latest version found: {latestVersion}", Importance.Info);
-        await BetterLogger.LogAsync($"Current version: {currentVersion}", Importance.Info);
+        BetterLogger.Info($"Latest version found: {latestVersion}", "Updates");
+        BetterLogger.Info($"Current version: {currentVersion}", "Updates");
 
         if (Version.TryParse(latestVersion, out var latest) && Version.TryParse(currentVersion, out var current))
         {
-            await BetterLogger.LogAsync($"Parsed latest version: {latest}", Importance.Info);
-            await BetterLogger.LogAsync($"Parsed current version: {current}", Importance.Info);
+            BetterLogger.Debug($"Parsed latest version: {latest}", "Updates");
+            BetterLogger.Debug($"Parsed current version: {current}", "Updates");
 
             var isUpToDate = latest <= current;
-            await BetterLogger.LogAsync($"Is up to date: {isUpToDate}", Importance.Info);
+            BetterLogger.Info($"Is up to date: {isUpToDate}", "Updates");
 
             if (isUpToDate || !updateIfNeeded) return isUpToDate;
 
             var asset = latestRelease.Assets.FirstOrDefault(a => a.Name.EndsWith(".rar"));
             if (asset == null)
             {
-                await BetterLogger.LogAsync("No suitable asset found in the latest release",
-                    Importance.Warning);
+                BetterLogger.Warning("No suitable asset found in the latest release", "Updates");
                 return false;
             }
 
@@ -45,16 +44,15 @@ public class UpdateHandler
 
             if (string.IsNullOrEmpty(exePath))
             {
-                await BetterLogger.LogAsync("Executable not found after extraction",
-                    Importance.Warning);
+                BetterLogger.Warning("Executable not found after extraction", "Updates");
                 return false;
             }
 
-            await BetterLogger.LogAsync("Update package downloaded and extracted", Importance.Info);
+            BetterLogger.Info("Update package downloaded and extracted", "Updates");
             return await TryRunNewExecutable(latestRelease, exePath);
         }
 
-        await BetterLogger.LogAsync("Failed to parse version strings", Importance.Error);
+        BetterLogger.Error("Failed to parse version strings", "Updates");
         return false;
     }
 
@@ -81,7 +79,7 @@ public class UpdateHandler
         }
         catch (Exception ex)
         {
-            await BetterLogger.LogAsync($"Error starting new process: {ex.Message}", Importance.Error);
+            BetterLogger.Error($"Error starting new process: {ex.Message}", "Updates");
             return false;
         }
 
@@ -107,7 +105,7 @@ public class UpdateHandler
             await response.Content.CopyToAsync(fs);
         }
 
-        await BetterLogger.LogAsync($"Downloaded asset to: {filePath}", Importance.Info);
+        BetterLogger.Info($"Downloaded asset to: {filePath}", "Updates");
         return filePath;
     }
 
@@ -119,7 +117,7 @@ public class UpdateHandler
         foreach (var file in rarFiles) File.Delete(file);
         foreach (var file in extractedFiles) File.Delete(file);
 
-        await BetterLogger.LogAsync("Old files deleted", Importance.Info);
+        BetterLogger.Info("Old files deleted", "Updates");
     }
 
     private async Task<string?> ExtractRarAsync(string rarPath)
@@ -132,14 +130,13 @@ public class UpdateHandler
                 var entries = archive.Entries.Where(entry => !entry.IsDirectory).ToList();
                 if (!entries.Any())
                 {
-                    await BetterLogger.LogAsync($"No files found in RAR archive: {rarPath}",
-                        Importance.Warning);
+                    BetterLogger.Warning($"No files found in RAR archive: {rarPath}", "Updates");
                     return null;
                 }
 
                 foreach (var entry in entries)
                 {
-                    await BetterLogger.LogAsync($"Extracting entry: {entry.Key}", Importance.Info);
+                    BetterLogger.Info($"Extracting entry: {entry.Key}", "Updates");
                     entry.WriteToDirectory(tempDirectory,
                         new ExtractionOptions
                         {
@@ -152,23 +149,21 @@ public class UpdateHandler
             // Log the contents of the extraction directory
             var extractedFiles = Directory.GetFiles(tempDirectory, "*.*", SearchOption.AllDirectories);
             foreach (var file in extractedFiles)
-                await BetterLogger.LogAsync($"Extracted file: {file}", Importance.Info);
+                BetterLogger.Info($"Extracted file: {file}", "Updates");
 
             // Search for the executable in all subdirectories
             var exeFile = Directory.GetFiles(tempDirectory, "*.exe", SearchOption.AllDirectories).FirstOrDefault();
-            await BetterLogger.LogAsync($"RAR extracted, executable found: {exeFile}",
-                Importance.Info);
+            BetterLogger.Info($"RAR extracted, executable found: {exeFile}", "Updates");
             return exeFile;
         }
         catch (UnauthorizedAccessException ex)
         {
-            await BetterLogger.LogAsync($"Access to the path is denied: {ex.Message}",
-                Importance.Error);
+            BetterLogger.Error($"Access to the path is denied: {ex.Message}", "Updates");
             return null;
         }
         catch (Exception ex)
         {
-            await BetterLogger.LogAsync($"Error extracting RAR: {ex.Message}", Importance.Error);
+            BetterLogger.Error($"Error extracting RAR: {ex.Message}", "Updates");
             return null;
         }
     }
@@ -183,18 +178,16 @@ public class UpdateHandler
             var latestRelease = releases.FirstOrDefault();
             if (latestRelease!.ToString()!.Contains("API rate limit exceeded"))
             {
-                await BetterLogger.LogAsync("API rate limit exceeded", Importance.Warning);
+                BetterLogger.Warning("API rate limit exceeded", "Updates");
                 return null;
             }
 
-            await BetterLogger.LogAsync($"Fetched latest release: {latestRelease.TagName}",
-                Importance.Info);
+            BetterLogger.Info($"Fetched latest release: {latestRelease.TagName}", "Updates");
             return latestRelease;
         }
         catch (Exception ex)
         {
-            await BetterLogger.LogAsync($"Error fetching latest release: {ex.Message}",
-                Importance.Error);
+            BetterLogger.Error($"Error fetching latest release: {ex.Message}", "Updates");
             return null;
         }
     }

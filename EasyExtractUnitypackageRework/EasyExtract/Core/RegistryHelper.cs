@@ -1,6 +1,5 @@
 ﻿using System.Security;
-using EasyExtract.Config.Models;
-using EasyExtract.Utilities;
+using EasyExtract.Utilities.Logger;
 
 namespace EasyExtract.Core;
 
@@ -19,23 +18,39 @@ public static class RegistryHelper
                 if (key != null)
                 {
                     Registry.ClassesRoot.DeleteSubKeyTree(ContextMenuPath);
-                    await BetterLogger.LogAsync("Context menu entry deleted", Importance.Info);
+                    BetterLogger.LogWithContext("Context menu entry deleted", new Dictionary<string, object>
+                    {
+                        ["Path"] = ContextMenuPath,
+                        ["Operation"] = "Delete",
+                        ["Status"] = "Success"
+                    }, LogLevel.Info, "Registry");
                 }
                 else
                 {
-                    await BetterLogger.LogAsync("Context menu entry not found", Importance.Info);
+                    BetterLogger.LogWithContext("Context menu entry not found", new Dictionary<string, object>
+                    {
+                        ["Path"] = ContextMenuPath,
+                        ["Operation"] = "Delete",
+                        ["Status"] = "NotFound"
+                    }, LogLevel.Info, "Registry");
                 }
             }
         }
         catch (Exception ex) when (ex is ArgumentException or UnauthorizedAccessException or SecurityException
                                        or InvalidOperationException)
         {
-            await BetterLogger.LogAsync($"Registry deletion error: {ex.Message} - Path: {ContextMenuPath}",
-                Importance.Error);
+            BetterLogger.LogWithContext($"Registry deletion error: {ex.Message}", new Dictionary<string, object>
+            {
+                ["Path"] = ContextMenuPath,
+                ["Operation"] = "Delete",
+                ["Status"] = "Failed",
+                ["ErrorType"] = ex.GetType().Name,
+                ["ErrorMessage"] = ex.Message
+            }, LogLevel.Error, "Registry");
         }
         catch (Exception ex)
         {
-            await BetterLogger.LogAsync($"Unexpected error deleting registry key: {ex.Message}", Importance.Error);
+            BetterLogger.Exception(ex, "Unexpected error deleting registry key", "Registry");
         }
     }
 
@@ -51,7 +66,11 @@ public static class RegistryHelper
                 menuKey.SetValue("Icon", Assembly.GetExecutingAssembly().Location);
             }
 
-            await BetterLogger.LogAsync("Context menu entry registered", Importance.Info);
+            BetterLogger.LogWithContext("Context menu entry registered", new Dictionary<string, object>
+            {
+                ["Path"] = ContextMenuPath,
+                ["MenuText"] = MenuText
+            }, LogLevel.Info);
 
             using (var commandKey = Registry.ClassesRoot.CreateSubKey($"{ContextMenuPath}\\command"))
             {
@@ -68,16 +87,19 @@ public static class RegistryHelper
                 commandKey.SetValue("", command);
             }
 
-            await BetterLogger.LogAsync("Context menu command registered", Importance.Info);
+            BetterLogger.LogWithContext("Context menu command registered", new Dictionary<string, object>
+            {
+                ["Path"] = $"{ContextMenuPath}\\command"
+            });
         }
         catch (Exception ex) when (ex is UnauthorizedAccessException || ex is SecurityException ||
                                    ex is InvalidOperationException)
         {
-            await BetterLogger.LogAsync($"Registry operation error: {ex.Message}", Importance.Error);
+            BetterLogger.Exception(ex, "Registry operation error", "Registry");
         }
         catch (Exception ex)
         {
-            await BetterLogger.LogAsync($"Unexpected error registering context menu: {ex.Message}", Importance.Error);
+            BetterLogger.Exception(ex, "Unexpected error registering context menu", "Registry");
         }
     }
 }

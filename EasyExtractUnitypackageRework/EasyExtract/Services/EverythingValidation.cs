@@ -1,6 +1,5 @@
 using System.Text;
-using EasyExtract.Config.Models;
-using EasyExtract.Utilities;
+using EasyExtract.Utilities.Logger;
 
 namespace EasyExtract.Services;
 
@@ -18,18 +17,43 @@ public static class EverythingValidation
     /// </summary>
     public static async Task<bool> AreSystemRequirementsMetAsync()
     {
+        var context = new Dictionary<string, object>();
         var stopwatch = Stopwatch.StartNew();
-        await BetterLogger.LogAsync("Checking system requirements...", Importance.Info);
 
-        var requirementsMet = await Is64BitOperatingSystemAsync() &&
-                              await IsProcessRunningAsync(ProcessName) &&
-                              await EnsureDllExistsAsync() &&
-                              await CopyDllIfNecessaryAsync();
+        try
+        {
+            BetterLogger.LogWithContext("Checking system requirements...", context, LogLevel.Info,
+                "SystemRequirements");
 
-        stopwatch.Stop();
-        await BetterLogger.LogAsync($"System requirements checked in {stopwatch.ElapsedMilliseconds}ms.",
-            Importance.Info);
-        return requirementsMet;
+            var is64BitOs = await Is64BitOperatingSystemAsync();
+            context["Is64BitOS"] = is64BitOs;
+
+            var isProcessRunning = await IsProcessRunningAsync(ProcessName);
+            context["ProcessRunning"] = isProcessRunning;
+
+            var dllExists = await EnsureDllExistsAsync();
+            context["DllExists"] = dllExists;
+
+            var dllCopied = await CopyDllIfNecessaryAsync();
+            context["DllCopied"] = dllCopied;
+
+            var requirementsMet = is64BitOs && isProcessRunning && dllExists && dllCopied;
+            context["RequirementsMet"] = requirementsMet;
+
+            stopwatch.Stop();
+            context["DurationMs"] = stopwatch.ElapsedMilliseconds;
+            BetterLogger.LogWithContext($"System requirements checked in {stopwatch.ElapsedMilliseconds}ms.",
+                context, LogLevel.Info, "SystemRequirements");
+            return requirementsMet;
+        }
+        catch (Exception ex)
+        {
+            stopwatch.Stop();
+            context["DurationMs"] = stopwatch.ElapsedMilliseconds;
+            context["Error"] = ex.Message;
+            BetterLogger.Exception(ex, "Error checking system requirements", "SystemRequirements");
+            return false;
+        }
     }
 
     /// <summary>
@@ -38,43 +62,68 @@ public static class EverythingValidation
     public static async Task<string> GetSystemRequirementsStatusAsync()
     {
         var status = new StringBuilder();
+        var context = new Dictionary<string, object>();
 
-        if (!await Is64BitOperatingSystemAsync())
+        var is64BitOs = await Is64BitOperatingSystemAsync();
+        context["Is64BitOS"] = is64BitOs;
+        if (!is64BitOs)
             status.AppendLine("System requirement not met: Requires a 64-bit operating system.");
 
-        if (!await IsProcessRunningAsync(ProcessName))
+        var isProcessRunning = await IsProcessRunningAsync(ProcessName);
+        context["ProcessRunning"] = isProcessRunning;
+        if (!isProcessRunning)
             status.AppendLine("System requirement not met: 'SearchEverything' process isn't running. Please start it.");
 
-        if (!await EnsureDllExistsAsync())
+        var dllExists = await EnsureDllExistsAsync();
+        context["DllExists"] = dllExists;
+        if (!dllExists)
             status.AppendLine("System requirement not met: 'Everything DLL' is missing.");
 
-        if (!await CopyDllIfNecessaryAsync())
+        var dllCopied = await CopyDllIfNecessaryAsync();
+        context["DllCopied"] = dllCopied;
+        if (!dllCopied)
             status.AppendLine("System requirement not met: Unable to copy the required DLL.");
 
-        await BetterLogger.LogAsync("Checked system requirements status.", Importance.Info);
+        BetterLogger.LogWithContext("Checked system requirements status.", context, LogLevel.Info,
+            "SystemRequirements");
         return status.ToString();
     }
 
     private static async Task<bool> Is64BitOperatingSystemAsync()
     {
+        var context = new Dictionary<string, object>();
         var is64Bit = Environment.Is64BitOperatingSystem;
-        await BetterLogger.LogAsync($"Is64BitOperatingSystem: {is64Bit}", Importance.Info);
+        context["Is64BitOS"] = is64Bit;
+        BetterLogger.LogWithContext($"Is64BitOperatingSystem: {is64Bit}", context, LogLevel.Debug,
+            "SystemRequirements");
         return is64Bit;
     }
 
     private static async Task<bool> IsProcessRunningAsync(string processName)
     {
+        var context = new Dictionary<string, object>
+        {
+            ["ProcessName"] = processName
+        };
+
         var isRunning = Process.GetProcessesByName(processName).Length > 0;
-        await BetterLogger.LogAsync($"IsProcessRunning('{processName}'): {isRunning}", Importance.Info);
+        context["IsRunning"] = isRunning;
+
+        BetterLogger.LogWithContext($"IsProcessRunning('{processName}'): {isRunning}", context, LogLevel.Debug,
+            "SystemRequirements");
         return isRunning;
     }
 
     private static async Task<bool> EnsureDllExistsAsync()
     {
+        var context = new Dictionary<string, object>();
         var dllPath = await GetDllPathAsync();
+        context["DllPath"] = dllPath;
+
         if (File.Exists(dllPath))
         {
-            await BetterLogger.LogAsync($"DLL exists at path: {dllPath}", Importance.Info);
+            BetterLogger.LogWithContext($"DLL exists at path: {dllPath}", context, LogLevel.Debug,
+                "SystemRequirements");
             return true;
         }
 
@@ -83,13 +132,16 @@ public static class EverythingValidation
             var stopwatch = Stopwatch.StartNew();
             await DownloadDllAsync(dllPath);
             stopwatch.Stop();
-            await BetterLogger.LogAsync($"Everything64.dll downloaded in {stopwatch.ElapsedMilliseconds}ms.",
-                Importance.Info);
+
+            context["DownloadDurationMs"] = stopwatch.ElapsedMilliseconds;
+            BetterLogger.LogWithContext($"Everything64.dll downloaded in {stopwatch.ElapsedMilliseconds}ms.",
+                context, LogLevel.Info, "SystemRequirements");
             return true;
         }
         catch (Exception ex)
         {
-            await BetterLogger.LogAsync($"Failed to download Everything64.dll: {ex.Message}", Importance.Error);
+            context["Error"] = ex.Message;
+            BetterLogger.Exception(ex, "Failed to download Everything64.dll", "SystemRequirements");
             return false;
         }
     }
@@ -105,36 +157,49 @@ public static class EverythingValidation
 
     private static async Task<string> GetDllPathAsync()
     {
+        var context = new Dictionary<string, object>();
         var appDataPath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
         var directory = Path.Combine(appDataPath, "EasyExtract", "ThirdParty");
         Directory.CreateDirectory(directory);
         var dllPath = Path.Combine(directory, DllName);
-        await BetterLogger.LogAsync($"DLL path determined: {dllPath}", Importance.Info);
+
+        context["DllPath"] = dllPath;
+        BetterLogger.LogWithContext($"DLL path determined: {dllPath}", context, LogLevel.Debug, "SystemRequirements");
         return dllPath;
     }
 
     private static async Task<bool> CopyDllIfNecessaryAsync()
     {
+        var context = new Dictionary<string, object>();
         var sourcePath = await GetDllPathAsync();
         var currentPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+
+        context["SourcePath"] = sourcePath;
+        context["CurrentPath"] = currentPath;
+
         if (!string.IsNullOrEmpty(currentPath))
         {
             var destinationPath = Path.Combine(currentPath, DllName);
+            context["DestinationPath"] = destinationPath;
+
             if (File.Exists(destinationPath))
             {
-                await BetterLogger.LogAsync($"DLL already exists at destination: {destinationPath}", Importance.Info);
+                BetterLogger.LogWithContext($"DLL already exists at destination: {destinationPath}",
+                    context, LogLevel.Debug, "SystemRequirements");
                 return true;
             }
 
             try
             {
                 File.Copy(sourcePath, destinationPath, true);
-                await BetterLogger.LogAsync("Everything64.dll copied to destination.", Importance.Info);
+                BetterLogger.LogWithContext("Everything64.dll copied to destination.",
+                    context, LogLevel.Info, "SystemRequirements");
                 return true;
             }
             catch (Exception ex)
             {
-                await BetterLogger.LogAsync($"Failed to copy Everything64.dll: {ex.Message}", Importance.Error);
+                context["Error"] = ex.Message;
+                BetterLogger.Exception(ex, "Failed to copy Everything64.dll", "SystemRequirements");
                 return false;
             }
         }

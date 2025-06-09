@@ -1,6 +1,5 @@
 using EasyExtract.Config;
-using EasyExtract.Config.Models;
-using EasyExtract.Utilities;
+using EasyExtract.Utilities.Logger;
 using NAudio.Wave;
 
 namespace EasyExtract.Services;
@@ -22,8 +21,7 @@ public class SoundManager
 
             if (string.IsNullOrEmpty(tempFilePath))
             {
-                await BetterLogger.LogAsync("Audio file path is null or empty after GetSoundFilePath.",
-                    Importance.Warning);
+                BetterLogger.Warning("Audio file path is null or empty after GetSoundFilePath.", "Audio");
                 return;
             }
 
@@ -34,8 +32,9 @@ public class SoundManager
             _waveOutDevice.Init(_audioFileReader);
             _waveOutDevice.Play();
         }
-        catch (Exception)
+        catch (Exception ex)
         {
+            BetterLogger.Exception(ex, "Failed to play audio", "Audio");
             ResetAudio();
         }
     }
@@ -56,7 +55,7 @@ public class SoundManager
         if (File.Exists(audioFilePath)) return audioFilePath;
 
         // If nothing is appropriate, throw an exception
-        await BetterLogger.LogAsync($"Audio file not found: {audioFilePath}", Importance.Warning);
+        BetterLogger.Warning($"Audio file not found: {audioFilePath}", "Audio");
         throw new FileNotFoundException($"Audio file not found: {audioFilePath}");
     }
 
@@ -68,7 +67,7 @@ public class SoundManager
             var streamResourceInfo = Application.GetResourceStream(uri);
             if (streamResourceInfo == null)
             {
-                await BetterLogger.LogAsync($"Failed to find resource: {packUri}", Importance.Warning);
+                BetterLogger.Warning($"Failed to find resource: {packUri}", "Audio");
                 return null;
             }
 
