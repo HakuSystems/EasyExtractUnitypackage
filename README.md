@@ -22,7 +22,7 @@ The easiest and fastest way to extract your files on any operating system.
 
 1.  **Visit**: Go to **[https://easyextract.net/](https://easyextract.net/)**
 2.  **Drag & Drop**: Drag your `.unitypackage` file directly onto the webpage.
-3.  **Extract**: The tool will automatically process the file and prepare your download. Done!
+3.  **Extract**: The tool will automatically process the file and safes it on your local machine.
 
 ### 2. Windows Desktop App
 
