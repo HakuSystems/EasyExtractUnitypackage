@@ -1,44 +1,57 @@
-﻿# EasyExtractUnitypackage
+# EasyExtract.net
 
-![EasyExtractUnitypackage Interface](https://github.com/user-attachments/assets/d17b4012-aa7b-457c-8cef-bcd96a83f682)
+![EasyExtract.net Web and Desktop Interface](https://github.com/user-attachments/assets/d17b4012-aa7b-457c-8cef-bcd96a83f682) 
+*(Pictured: The Windows Desktop App)*
 
-## What is EasyExtractUnitypackage?
+## What is EasyExtract?
 
-EasyExtractUnitypackage is a simple tool that lets you extract files from Unity packages (.unitypackage) **without needing to have Unity installed**. It's perfect for:
+EasyExtract is a tool that lets you extract files from Unity packages (.unitypackage) **without needing to have Unity installed**. You can use our lightning-fast web tool right in your browser or download the feature-rich desktop application for Windows.
 
-- Quickly checking what's inside a Unity package
-- Extracting assets from Unity packages without opening Unity
-- Saving time when working with multiple Unity packages
+It's perfect for:
+- **Instantly** extracting packages on any OS using the web tool.
+- Quickly checking the contents of a `.unitypackage` file.
+- Extracting assets without launching the Unity Editor.
+- Power users who need offline access and shell integration with the Windows app.
 
 ## 🚀 Quick Start
 
-### Download and Install
+You have two ways to start extracting your packages.
 
-1. **Download**: Get the latest version from the [Releases page](https://github.com/HakuSystems/EasyExtractUnitypackage/releases)
-2. **Extract**: Unzip the downloaded file to any folder on your computer
-3. **Run**: Double-click the EasyExtractUnitypackage application to start
+### 1. Web Version (Recommended)
+The easiest and fastest way to extract your files on any operating system.
 
-### How to Use
+1.  **Visit**: Go to **[https://easyextract.net/](https://easyextract.net/)**
+2.  **Drag & Drop**: Drag your `.unitypackage` file directly onto the webpage.
+3.  **Extract**: The tool will automatically process the file and prepare your download. Done!
 
-It's super easy:
+### 2. Windows Desktop App
 
-1. **Open** the application
-2. **Drag and drop** your .unitypackage file into the window (or click to browse for the file)
-3. **Click "Extract"** and choose where to save the extracted files
-4. **Done!** Your files will be extracted to the location you chose
+1.  **Download**: Get the latest version from the [Releases page](https://github.com/HakuSystems/EasyExtractUnitypackage/releases).
+2.  **Extract**: Unzip the downloaded file to any folder on your computer.
+3.  **Run**: Double-click the `EasyExtractUnitypackage.exe` application to start.
 
 ## ✨ Features
 
-- **Simple Interface**: Easy to use with drag-and-drop support
-- **Right-Click Integration**: Extract packages directly from Windows Explorer
-- **Fast Extraction**: Quickly unpack Unity packages
-- **Safety Checks**: Detects potentially dangerous content in packages
-- **Multiple Packages**: Process several packages one after another
-- **Customizable Settings**: Change the look and feel of the application
+We offer two powerful versions to fit your needs.
+
+| Feature | Web Version | Windows App |
+| :--- | :---: | :---: |
+| **No Installation** | ✅ | ❌ |
+| **Cross-Platform (Windows, Mac, Linux)** | ✅ | ❌ |
+| **Drag & Drop Interface** | ✅ | ✅ |
+| **Fast Extraction** | ✅ | ✅ |
+| **Safety Checks** | ✅ | ✅ |
+| **Windows Right-Click Integration** | ❌ | ✅ |
+| **Offline Access** | ❌ | ✅ |
+| **Process Multiple Packages at Once** | ❌ | ✅ |
 
 ## 📸 Screenshots
 
-Here's what the app looks like in action:
+### Web Interface
+![chrome_d0Yup3hUqH](https://github.com/user-attachments/assets/a0020eac-6ada-4397-8d43-7795ec63d3fd)
+
+
+### Windows Application
 
 | Main Interface | Settings Page | Extraction Progress |
 |:---:|:---:|:---:|
@@ -46,13 +59,13 @@ Here's what the app looks like in action:
 
 ## 🔮 Coming Soon
 
-- **Cross-Platform Support**: Mac and Linux versions are in development
-- **More Theme Options**: Additional UI themes and customization options
+-   Performance improvements for both web and desktop.
+-   More customization options for the Windows app.
 
 ## 🤝 Get Help & Connect
 
-- **Discord**: Join our [Discord server](https://discord.gg/Wn7XfhPCyD) for help and updates
-- **GitHub**: Visit our [GitHub repository](https://github.com/HakuSystems/EasyExtractUnitypackage) for the latest code
+-   **Discord**: Join our [Discord server](https://discord.gg/Wn7XfhPCyD) for help and updates.
+-   **GitHub**: Visit our [GitHub repository](https://github.com/HakuSystems/EasyExtractUnitypackage) for the latest code.
 
 ## 📝 License
 
