@@ -102,7 +102,12 @@
                             gif:AnimationBehavior.RepeatBehavior="1x"
                             gif:AnimationBehavior.SourceUri="pack://application:,,,/EasyExtract;component/Resources/Gifs/LogoAnimation.gif"
                             x:Name="LogoImage" />
-
+                        <ui:HyperlinkButton Content="Check out our web version"
+                                            Icon="{ui:SymbolIcon Link24}"
+                                            Appearance="Secondary"
+                                            NavigateUri="https://easyextract.net/"
+                                            HorizontalAlignment="Center"
+                                            VerticalAlignment="Center" />
                         <ui:Card
                             Margin="10,10,10,5"
                             MouseEnter="DetailsCard_OnMouseEnter"
