@@ -8,7 +8,7 @@ public class UpdateHandler
 {
     public async Task<bool> IsUpToDateOrUpdate(bool updateIfNeeded)
     {
-        var latestRelease = await GetLatestReleaseAsync();
+        var latestRelease = await GetLatestReleaseAsync().ConfigureAwait(true);
         if (latestRelease == null)
         {
             BetterLogger.Info("Failed to fetch the latest release from GitHub. Update check aborted.",
@@ -39,8 +39,9 @@ public class UpdateHandler
                 return false;
             }
 
-            var rarPath = await DownloadAssetAsync(asset.BrowserDownloadUrl, latestRelease.TagName);
-            var exePath = await ExtractRarAsync(rarPath);
+            var rarPath = await DownloadAssetAsync(asset.BrowserDownloadUrl, latestRelease.TagName)
+                .ConfigureAwait(true);
+            var exePath = await ExtractRarAsync(rarPath).ConfigureAwait(true);
 
             if (string.IsNullOrEmpty(exePath))
             {
@@ -49,14 +50,14 @@ public class UpdateHandler
             }
 
             BetterLogger.Info("Update package downloaded and extracted", "Updates");
-            return await TryRunNewExecutable(latestRelease, exePath);
+            return await TryRunNewExecutableAsync(latestRelease, exePath).ConfigureAwait(true);
         }
 
         BetterLogger.Error("Failed to parse version strings", "Updates");
         return false;
     }
 
-    private async Task<bool> TryRunNewExecutable(Release latestRelease, string exePath)
+    private Task<bool> TryRunNewExecutableAsync(Release latestRelease, string exePath)
     {
         try
         {
@@ -80,10 +81,10 @@ public class UpdateHandler
         catch (Exception ex)
         {
             BetterLogger.Error($"Error starting new process: {ex.Message}", "Updates");
-            return false;
+            return Task.FromResult(false);
         }
 
-        return true;
+        return Task.FromResult(true);
     }
 
     private static async Task<string> DownloadAssetAsync(string url, string versionTag)
@@ -98,11 +99,11 @@ public class UpdateHandler
         Directory.CreateDirectory(tempDirectory);
         var filePath = Path.Combine(tempDirectory, fileName);
 
-        await DeleteOldFilesAsync(tempDirectory);
+        await DeleteOldFilesAsync(tempDirectory).ConfigureAwait(true);
 
         await using (var fs = new FileStream(filePath, FileMode.Create, FileAccess.Write, FileShare.None))
         {
-            await response.Content.CopyToAsync(fs);
+            await response.Content.CopyToAsync(fs).ConfigureAwait(true);
         }
 
         BetterLogger.Info($"Downloaded asset to: {filePath}", "Updates");
@@ -120,7 +121,7 @@ public class UpdateHandler
         BetterLogger.Info("Old files deleted", "Updates");
     }
 
-    private async Task<string?> ExtractRarAsync(string rarPath)
+    private Task<string?> ExtractRarAsync(string rarPath)
     {
         var tempDirectory = Path.Combine(Path.GetTempPath(), "EasyExtractUpdate");
         try
@@ -131,7 +132,7 @@ public class UpdateHandler
                 if (!entries.Any())
                 {
                     BetterLogger.Warning($"No files found in RAR archive: {rarPath}", "Updates");
-                    return null;
+                    return Task.FromResult<string?>(null);
                 }
 
                 foreach (var entry in entries)
@@ -154,17 +155,17 @@ public class UpdateHandler
             // Search for the executable in all subdirectories
             var exeFile = Directory.GetFiles(tempDirectory, "*.exe", SearchOption.AllDirectories).FirstOrDefault();
             BetterLogger.Info($"RAR extracted, executable found: {exeFile}", "Updates");
-            return exeFile;
+            return Task.FromResult(exeFile);
         }
         catch (UnauthorizedAccessException ex)
         {
             BetterLogger.Error($"Access to the path is denied: {ex.Message}", "Updates");
-            return null;
+            return Task.FromResult<string?>(null);
         }
         catch (Exception ex)
         {
             BetterLogger.Error($"Error extracting RAR: {ex.Message}", "Updates");
-            return null;
+            return Task.FromResult<string?>(null);
         }
     }
 
@@ -174,7 +175,7 @@ public class UpdateHandler
         {
             var client = new GitHubClient(new ProductHeaderValue("GitHubUpdater"));
             var releases = await client.Repository.Release.GetAll(ConfigHandler.Instance.Config.Update.RepoOwner,
-                ConfigHandler.Instance.Config.Update.RepoName);
+                ConfigHandler.Instance.Config.Update.RepoName).ConfigureAwait(true);
             var latestRelease = releases.FirstOrDefault();
             if (latestRelease!.ToString()!.Contains("API rate limit exceeded"))
             {
