@@ -29,7 +29,7 @@ public partial class App
             if (requireAdmin)
             {
                 await KillAllProcesses(Process.GetCurrentProcess().ProcessName);
-                await RunAsAdmin(e.Args);
+                await RunAsAdminAsync(e.Args);
                 return;
             }
 
@@ -87,7 +87,7 @@ public partial class App
             .IsInRole(WindowsBuiltInRole.Administrator);
     }
 
-    private static async Task RunAsAdmin(string[] args)
+    private static Task RunAsAdminAsync(string[] args)
     {
         var processInfo = new ProcessStartInfo
         {
@@ -113,6 +113,8 @@ public partial class App
             BetterLogger.Exception(ex, "Error running as admin");
             throw;
         }
+
+        return Task.CompletedTask;
     }
 
     private static async Task KillAllProcesses(string processName)

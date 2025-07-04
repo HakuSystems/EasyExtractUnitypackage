@@ -39,15 +39,18 @@ public static class RegistryHelper
         catch (Exception ex) when (ex is ArgumentException or UnauthorizedAccessException or SecurityException
                                        or InvalidOperationException)
         {
-            BetterLogger.LogWithContext($"Registry deletion error: {ex.Message}", new Dictionary<string, object>
-            {
-                ["Path"] = ContextMenuPath,
-                ["Operation"] = "Delete",
-                ["Status"] = "Failed",
-                ["ErrorType"] = ex.GetType().Name,
-                ["ErrorMessage"] = ex.Message
-            }, LogLevel.Error, "Registry");
+            if (!Debugger.IsAttached)
+                BetterLogger.LogWithContext($"Registry deletion error: {ex.Message}", new Dictionary<string, object>
+                {
+                    ["Path"] = ContextMenuPath,
+                    ["Operation"] = "Delete",
+                    ["Status"] = "Failed",
+                    ["ErrorType"] = ex.GetType().Name,
+                    ["ErrorMessage"] = ex.Message
+                }, LogLevel.Error, "Registry");
         }
+
+
         catch (Exception ex)
         {
             BetterLogger.Exception(ex, "Unexpected error deleting registry key", "Registry");
@@ -70,7 +73,7 @@ public static class RegistryHelper
             {
                 ["Path"] = ContextMenuPath,
                 ["MenuText"] = MenuText
-            }, LogLevel.Info);
+            });
 
             using (var commandKey = Registry.ClassesRoot.CreateSubKey($"{ContextMenuPath}\\command"))
             {
@@ -95,7 +98,8 @@ public static class RegistryHelper
         catch (Exception ex) when (ex is UnauthorizedAccessException || ex is SecurityException ||
                                    ex is InvalidOperationException)
         {
-            BetterLogger.Exception(ex, "Registry operation error", "Registry");
+            if (!Debugger.IsAttached)
+                BetterLogger.Exception(ex, "Registry operation error", "Registry");
         }
         catch (Exception ex)
         {
