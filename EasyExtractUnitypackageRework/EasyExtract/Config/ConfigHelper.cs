@@ -1,6 +1,8 @@
 using AutoMapper;
 using EasyExtract.Utilities.Logger;
+using Microsoft.Extensions.Logging.Abstractions;
 using Newtonsoft.Json;
+using LogLevel = EasyExtract.Utilities.Logger.LogLevel;
 
 namespace EasyExtract.Config;
 
@@ -21,7 +23,7 @@ public class ConfigHandler
     {
         // Map Config -> Config for easy property transfer if needed
         cfg.CreateMap<ConfigModel, ConfigModel>();
-    }).CreateMapper();
+    }, new NullLoggerFactory()).CreateMapper();
 
     private readonly TimeSpan _debounceDelay = TimeSpan.FromMilliseconds(500);
 
