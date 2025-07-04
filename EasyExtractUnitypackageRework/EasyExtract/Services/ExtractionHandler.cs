@@ -466,13 +466,12 @@ public class ExtractionHandler
         const int delayMs = 100;
 
         for (var attempt = 1; attempt <= maxRetries; attempt++)
-        {
             try
             {
                 // Create directory if it doesn't exist
                 Directory.CreateDirectory(targetFullPath);
 
-// Try to copy instead of move if this is a retry attempt
+                // Try to copy instead of move if this is a retry attempt
                 if (attempt > 1)
                 {
                     BetterLogger.LogWithContext($"Attempt {attempt}: Trying to copy instead of move",
@@ -540,6 +539,5 @@ public class ExtractionHandler
                     }, LogLevel.Error);
                 break;
             }
-        }
     }
 }

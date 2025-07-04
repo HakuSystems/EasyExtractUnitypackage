@@ -48,7 +48,8 @@
                         <RowDefinition Height="*" />
                     </Grid.RowDefinitions>
                     <ui:DynamicScrollViewer IsScrollingVertically="True" VerticalScrollBarVisibility="Auto">
-                        <TreeView SelectedItemChanged="ExtractedTreeView_OnSelectedItemChanged" x:Name="ExtractedTreeView">
+                        <TreeView SelectedItemChanged="ExtractedTreeView_OnSelectedItemChanged"
+                                  x:Name="ExtractedTreeView">
                             <TreeView.ItemTemplate>
                                 <HierarchicalDataTemplate ItemsSource="{Binding CurrentStructure}">
                                     <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
@@ -78,7 +79,8 @@
                                             <HierarchicalDataTemplate.ItemTemplate>
                                                 <DataTemplate>
                                                     <StackPanel Margin="40,2,0,2" Orientation="Horizontal">
-                                                        <ui:ToggleSwitch IsChecked="{Binding IsChecked, Mode=TwoWay}" Margin="5,0" />
+                                                        <ui:ToggleSwitch IsChecked="{Binding IsChecked, Mode=TwoWay}"
+                                                                         Margin="5,0" />
                                                         <ui:SymbolIcon
                                                             Height="25"
                                                             Margin="5,0"
