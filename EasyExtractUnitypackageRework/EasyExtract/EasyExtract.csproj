@@ -10,7 +10,7 @@
         <ApplicationManifest>Properties\app.manifest</ApplicationManifest>
         <DpiAwareness>PerMonitorV2</DpiAwareness>
         <DpiAware>true/pm</DpiAware>
-        <AssemblyVersion>2.0.6.8</AssemblyVersion>
+        <AssemblyVersion>2.0.7.0</AssemblyVersion>
         <LangVersion>default</LangVersion>
         <NoWarn>$(NoWarn);WPF0001</NoWarn>
         <Version>2.0.6.7</Version>
