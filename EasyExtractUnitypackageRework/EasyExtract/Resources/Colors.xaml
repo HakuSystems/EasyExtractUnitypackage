@@ -15,7 +15,7 @@
         color keys are overridden, the brush automatically updates.
         DONT CHANGE THE BRUSHES, CHANGE THE COLORS INSTEAD.
     -->
-    <SolidColorBrush Color="{DynamicResource TextColor}" x:Key="TextColorBrush" />
+    <SolidColorBrush Color="{DynamicResource TextColor}" x:Key="ETextColorBrush" />
     <SolidColorBrush Color="{DynamicResource BackgroundColor}" x:Key="BackgroundColorBrush" />
     <SolidColorBrush Color="{DynamicResource PrimaryColor}" x:Key="PrimaryBrush" />
     <SolidColorBrush Color="{DynamicResource SecondaryColor}" x:Key="SecondaryBrush" />

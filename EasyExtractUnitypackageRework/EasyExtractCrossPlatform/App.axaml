@@ -6,5 +6,14 @@
 
     <Application.Styles>
         <FluentTheme />
+        <StyleInclude Source="Styles/ButtonStyle.axaml" />
     </Application.Styles>
+
+    <Application.Resources>
+        <SolidColorBrush Color="#7fc5ff" x:Key="EasyTextColorBrush" />
+        <SolidColorBrush Color="#2b2b2b" x:Key="EasyBackgroundColorBrush" />
+        <SolidColorBrush Color="#2ca7f2" x:Key="EasyPrimaryBrush" />
+        <SolidColorBrush Color="#4D4D4D" x:Key="EasySecondaryBrush" />
+        <SolidColorBrush Color="#04d3be" x:Key="EasyAccentBrush" />
+    </Application.Resources>
 </Application>
