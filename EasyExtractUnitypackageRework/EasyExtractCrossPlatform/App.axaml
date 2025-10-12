@@ -2,18 +2,38 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              x:Class="EasyExtractCrossPlatform.App"
              RequestedThemeVariant="Default">
-    <!-- "Default" ThemeVariant follows system theme variant. "Dark" or "Light" are other available options. -->
-
     <Application.Styles>
         <FluentTheme />
         <StyleInclude Source="Styles/ButtonStyle.axaml" />
+        <StyleInclude Source="Styles/TextBlockStyle.axaml" />
     </Application.Styles>
 
     <Application.Resources>
-        <SolidColorBrush Color="#7fc5ff" x:Key="EasyTextColorBrush" />
-        <SolidColorBrush Color="#2b2b2b" x:Key="EasyBackgroundColorBrush" />
-        <SolidColorBrush Color="#2ca7f2" x:Key="EasyPrimaryBrush" />
-        <SolidColorBrush Color="#4D4D4D" x:Key="EasySecondaryBrush" />
-        <SolidColorBrush Color="#04d3be" x:Key="EasyAccentBrush" />
+        <LinearGradientBrush x:Key="EasyWindowBackgroundBrush"
+                             StartPoint="0,0"
+                             EndPoint="1,1">
+            <GradientStop Color="#091020" Offset="0" />
+            <GradientStop Color="#0F1E36" Offset="0.45" />
+            <GradientStop Color="#050912" Offset="1" />
+        </LinearGradientBrush>
+
+        <SolidColorBrush x:Key="EasyTextColorBrush" Color="#F4F7FF" />
+        <SolidColorBrush x:Key="EasyMutedBrush" Color="#90A7CA" />
+        <SolidColorBrush x:Key="EasyPrimaryBrush" Color="#6EA2FF" />
+        <SolidColorBrush x:Key="EasyAccentBrush" Color="#4EF2D5" />
+        <SolidColorBrush x:Key="EasyOnPrimaryBrush" Color="#031226" />
+
+        <LinearGradientBrush x:Key="EasyGlassGradientBrush"
+                             StartPoint="0,0"
+                             EndPoint="1,1">
+            <GradientStop Color="#40FFFFFF" Offset="0" />
+            <GradientStop Color="#30DFF4FF" Offset="0.6" />
+            <GradientStop Color="#30FFFFFF" Offset="1" />
+        </LinearGradientBrush>
+        <SolidColorBrush x:Key="EasyGlassBorderBrush" Color="#66FFFFFF" />
+        <SolidColorBrush x:Key="EasyGlassOverlayBrush" Color="#1A5A7BFF" />
+        <SolidColorBrush x:Key="EasyGlassMutedBrush" Color="#7FB8FF" />
+        <SolidColorBrush x:Key="EasySurfaceBrush" Color="#162036" />
+        <SolidColorBrush x:Key="EasyStrokeBrush" Color="#324364" />
     </Application.Resources>
 </Application>

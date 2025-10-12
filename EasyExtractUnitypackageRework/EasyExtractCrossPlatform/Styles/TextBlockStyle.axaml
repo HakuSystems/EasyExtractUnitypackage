@@ -1,13 +1,27 @@
 <Styles xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
     <Design.PreviewWith>
-        <Border Padding="20">
-            <!-- Add Controls for Previewer Here -->
-            <TextBlock Text="Test" />
+        <Border Padding="24" Background="#101828">
+            <StackPanel Spacing="12">
+                <TextBlock Text="Display" Classes="display" />
+                <TextBlock Text="Subtitle" Classes="subtle" />
+                <TextBlock Text="Body" />
+            </StackPanel>
         </Border>
     </Design.PreviewWith>
+
     <Style Selector="TextBlock">
         <Setter Property="Foreground" Value="{DynamicResource EasyTextColorBrush}" />
+        <Setter Property="TextWrapping" Value="Wrap" />
     </Style>
-    <!-- Add Styles Here -->
+
+    <Style Selector="TextBlock.subtle">
+        <Setter Property="Foreground" Value="{DynamicResource EasyMutedBrush}" />
+    </Style>
+
+    <Style Selector="TextBlock.display">
+        <Setter Property="FontSize" Value="36" />
+        <Setter Property="FontWeight" Value="Black" />
+        <Setter Property="Foreground" Value="{DynamicResource EasyTextColorBrush}" />
+    </Style>
 </Styles>
