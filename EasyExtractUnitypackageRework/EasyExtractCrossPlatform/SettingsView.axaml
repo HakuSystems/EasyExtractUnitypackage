@@ -1,0 +1,225 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:viewModels="using:EasyExtractCrossPlatform.ViewModels"
+             x:Class="EasyExtractCrossPlatform.SettingsView"
+             x:DataType="viewModels:SettingsViewModel"
+             Foreground="{DynamicResource EasyTextColorBrush}"
+             Background="{DynamicResource EasyWindowBackgroundBrush}">
+    <UserControl.Styles>
+        <Style Selector="Border.section">
+            <Setter Property="Background" Value="{DynamicResource EasyGlassGradientBrush}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource EasyGlassBorderBrush}" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="CornerRadius" Value="24" />
+            <Setter Property="Padding" Value="24" />
+            <Setter Property="Margin" Value="0,0,0,24" />
+            <Setter Property="BoxShadow" Value="0 18 42 0 #16000000" />
+        </Style>
+    </UserControl.Styles>
+
+    <Grid RowDefinitions="Auto,*">
+        <Border Padding="28"
+                Margin="32"
+                CornerRadius="28"
+                Background="{DynamicResource EasyGlassGradientBrush}"
+                BorderBrush="{DynamicResource EasyGlassBorderBrush}"
+                BorderThickness="1"
+                BoxShadow="0 32 68 0 #15000000">
+            <StackPanel>
+                <TextBlock Text="Settings" Classes="display" />
+                <TextBlock Text="Tune EasyExtract to match your workflow."
+                           Classes="subtle"
+                           Margin="0,6,0,0" />
+                <TextBlock Text="{Binding LoadErrorMessage}"
+                           Margin="0,12,0,0"
+                           Foreground="{DynamicResource EasyWarningBrush}" />
+            </StackPanel>
+        </Border>
+
+        <ScrollViewer Grid.Row="1" Margin="32,0,32,32">
+            <StackPanel>
+                <Border Classes="section">
+                    <StackPanel Spacing="18">
+                        <TextBlock Text="General" FontSize="20" FontWeight="SemiBold" />
+                        <TextBlock Text="Update the core behaviour of EasyExtract." Classes="subtle" />
+
+                        <StackPanel Spacing="10">
+                            <TextBlock Text="Application title" />
+                            <TextBox Text="{Binding Settings.AppTitle}" />
+                        </StackPanel>
+
+                        <StackPanel Spacing="10">
+                            <TextBlock Text="Default output path" />
+                            <Grid ColumnDefinitions="*,Auto">
+                                <TextBox x:Name="DefaultOutputPathBox"
+                                         Text="{Binding Settings.DefaultOutputPath}"
+                                         VerticalAlignment="Center" />
+                                <Button Grid.Column="1"
+                                        Content="Browse"
+                                        Margin="12,0,0,0"
+                                        Click="BrowseOutputPath_OnClick"
+                                        Width="120" />
+                            </Grid>
+                        </StackPanel>
+
+                        <StackPanel Spacing="10">
+                            <TextBlock Text="Temporary extraction path" />
+                            <Grid ColumnDefinitions="*,Auto">
+                                <TextBox x:Name="DefaultTempPathBox"
+                                         Text="{Binding Settings.DefaultTempPath}"
+                                         VerticalAlignment="Center" />
+                                <Button Grid.Column="1"
+                                        Content="Browse"
+                                        Margin="12,0,0,0"
+                                        Click="BrowseTempPath_OnClick"
+                                        Width="120" />
+                            </Grid>
+                        </StackPanel>
+
+                        <StackPanel Orientation="Horizontal" Spacing="18">
+                            <ToggleSwitch Content="Enable context menu integration"
+                                          IsChecked="{Binding Settings.ContextMenuToggle}" />
+                            <ToggleSwitch Content="Enable Discord Rich Presence"
+                                          IsChecked="{Binding Settings.DiscordRpc}" />
+                            <ToggleSwitch Content="Organize output into categories"
+                                          IsChecked="{Binding Settings.ExtractedCategoryStructure}" />
+                        </StackPanel>
+                    </StackPanel>
+                </Border>
+
+                <Border Classes="section">
+                    <StackPanel Spacing="18">
+                        <TextBlock Text="Audio" FontSize="20" FontWeight="SemiBold" />
+                        <TextBlock Text="Control sound cues while extracting packages." Classes="subtle" />
+
+                        <ToggleSwitch Content="Enable sound effects"
+                                      IsChecked="{Binding Settings.EnableSound}" />
+
+                        <StackPanel>
+                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Stretch" Margin="0,0,0,6">
+                                <TextBlock Text="Volume" />
+                                <TextBlock Text="{Binding Settings.SoundVolume, StringFormat='{}{0:P0}'}"
+                                           HorizontalAlignment="Right"
+                                           Margin="12,0,0,0" />
+                            </StackPanel>
+                            <Slider Minimum="0"
+                                    Maximum="1"
+                                    TickFrequency="0.05"
+                                    IsSnapToTickEnabled="True"
+                                    Value="{Binding Settings.SoundVolume}" />
+                        </StackPanel>
+                    </StackPanel>
+                </Border>
+
+                <Border Classes="section">
+                    <StackPanel Spacing="18">
+                        <TextBlock Text="Appearance" FontSize="20" FontWeight="SemiBold" />
+                        <TextBlock Text="Personalize layout and scaling." Classes="subtle" />
+
+                        <StackPanel Orientation="Horizontal" Spacing="18">
+                            <StackPanel Width="220">
+                                <TextBlock Text="Theme" />
+                                <ComboBox ItemsSource="{Binding ThemeOptions}"
+                                          SelectedIndex="{Binding Settings.ApplicationTheme}">
+                                    <ComboBox.ItemTemplate>
+                                        <DataTemplate>
+                                            <TextBlock Text="{Binding DisplayName}" />
+                                        </DataTemplate>
+                                    </ComboBox.ItemTemplate>
+                                </ComboBox>
+                            </StackPanel>
+                        </StackPanel>
+
+                        <StackPanel Spacing="12">
+                            <StackPanel>
+                                <TextBlock Text="Custom background image" />
+                                <TextBox Text="{Binding Settings.CustomBackgroundImage.BackgroundPath}" />
+                                <StackPanel Orientation="Horizontal" Spacing="12" VerticalAlignment="Center">
+                                    <TextBlock Text="Opacity" />
+                                    <Slider Width="240"
+                                            Minimum="0"
+                                            Maximum="1"
+                                            TickFrequency="0.05"
+                                            IsSnapToTickEnabled="True"
+                                            Value="{Binding Settings.CustomBackgroundImage.BackgroundOpacity}" />
+                                    <TextBlock
+                                        Text="{Binding Settings.CustomBackgroundImage.BackgroundOpacity, StringFormat='{}{0:F2}'}"
+                                        Width="50" />
+                                </StackPanel>
+                            </StackPanel>
+                        </StackPanel>
+                    </StackPanel>
+                </Border>
+
+                <Border Classes="section">
+                    <StackPanel Spacing="18">
+                        <TextBlock Text="Telemetry &amp; Diagnostics" FontSize="20" FontWeight="SemiBold" />
+                        <TextBlock Text="Toggle runtime diagnostics and logging hooks." Classes="subtle" />
+
+                        <StackPanel Orientation="Horizontal" Spacing="18">
+                            <ToggleSwitch Content="Enable stack trace capture"
+                                          IsChecked="{Binding Settings.EnableStackTrace}" />
+                            <ToggleSwitch Content="Enable performance logging"
+                                          IsChecked="{Binding Settings.EnablePerformanceLogging}" />
+                        </StackPanel>
+
+                        <StackPanel Orientation="Horizontal" Spacing="18">
+                            <ToggleSwitch Content="Track memory usage"
+                                          IsChecked="{Binding Settings.EnableMemoryTracking}" />
+                            <ToggleSwitch Content="Log asynchronously"
+                                          IsChecked="{Binding Settings.EnableAsyncLogging}" />
+                        </StackPanel>
+                    </StackPanel>
+                </Border>
+
+                <Border Classes="section">
+                    <StackPanel Spacing="18">
+                        <TextBlock Text="Updates" FontSize="20" FontWeight="SemiBold" />
+                        <TextBlock Text="Control how EasyExtract stays up to date." Classes="subtle" />
+
+                        <ToggleSwitch Content="Auto update"
+                                      IsChecked="{Binding Settings.Update.AutoUpdate}" />
+
+                        <Grid ColumnDefinitions="*,*">
+                            <StackPanel>
+                                <TextBlock Text="Repository owner" />
+                                <TextBox Text="{Binding Settings.Update.RepoOwner}" />
+                            </StackPanel>
+                            <StackPanel Grid.Column="1" Margin="18,0,0,0">
+                                <TextBlock Text="Repository name" />
+                                <TextBox Text="{Binding Settings.Update.RepoName}" />
+                            </StackPanel>
+                        </Grid>
+
+                        <StackPanel Width="220">
+                            <TextBlock Text="Current version" />
+                            <TextBox Text="{Binding Settings.Update.CurrentVersion}" />
+                        </StackPanel>
+                    </StackPanel>
+                </Border>
+
+                <Border Classes="section" Margin="0">
+                    <Grid ColumnDefinitions="*,Auto" VerticalAlignment="Center">
+                        <TextBlock x:Name="StatusTextBlock"
+                                   Classes="subtle"
+                                   VerticalAlignment="Center"
+                                   TextWrapping="Wrap" />
+                        <StackPanel Grid.Column="1"
+                                    Orientation="Horizontal"
+                                    HorizontalAlignment="Right"
+                                    Spacing="12"
+                                    Margin="16,0,0,0">
+                            <Button Content="Cancel"
+                                    Classes="ghost"
+                                    Width="140"
+                                    Click="CancelButton_OnClick" />
+                            <Button Content="Save changes"
+                                    Width="180"
+                                    Click="SaveButton_OnClick" />
+                        </StackPanel>
+                    </Grid>
+                </Border>
+            </StackPanel>
+        </ScrollViewer>
+    </Grid>
+</UserControl>

@@ -1,0 +1,320 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:md="clr-namespace:Markdown.Avalonia;assembly=Markdown.Avalonia"
+             xmlns:models="using:EasyExtractCrossPlatform.Models"
+             xmlns:viewModels="using:EasyExtractCrossPlatform.ViewModels"
+             x:Class="EasyExtractCrossPlatform.ReleaseNotesView"
+             x:DataType="viewModels:ReleaseNotesViewModel"
+             Background="{DynamicResource EasyWindowBackgroundBrush}"
+             Padding="32"
+             mc:Ignorable="d">
+    <UserControl.Styles>
+        <Style Selector="Border.card">
+            <Setter Property="Background" Value="{DynamicResource EasyGlassGradientBrush}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource EasyGlassBorderBrush}" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="CornerRadius" Value="24" />
+            <Setter Property="Padding" Value="24" />
+            <Setter Property="BoxShadow" Value="0 24 40 0 #11000000" />
+        </Style>
+
+        <Style Selector="Border.card.hero-card">
+            <Setter Property="CornerRadius" Value="28" />
+            <Setter Property="Padding" Value="32" />
+            <Setter Property="BoxShadow" Value="0 32 64 0 #15000000" />
+        </Style>
+
+        <Style Selector="Border.card.content-card">
+            <Setter Property="Padding" Value="28" />
+        </Style>
+
+        <Style Selector="Border.chip">
+            <Setter Property="Background" Value="{DynamicResource EasyGlassOverlayBrush}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource EasyGlassNeutralBorderBrush}" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="CornerRadius" Value="12" />
+            <Setter Property="Padding" Value="8,4" />
+            <Setter Property="Margin" Value="0,0,10,10" />
+        </Style>
+
+        <Style Selector="Border.chip.accent">
+            <Setter Property="Background" Value="{DynamicResource EasyAccentSoftBrush}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource EasyAccentBrush}" />
+        </Style>
+
+        <Style Selector="Border.commit-card">
+            <Setter Property="Background" Value="{DynamicResource EasyGlassOverlayBrush}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource EasyGlassNeutralBorderBrush}" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="CornerRadius" Value="20" />
+            <Setter Property="Padding" Value="20" />
+            <Setter Property="BoxShadow" Value="0 18 32 0 #12000000" />
+        </Style>
+
+        <Style Selector="TextBlock.meta">
+            <Setter Property="FontSize" Value="12" />
+            <Setter Property="Foreground" Value="{DynamicResource EasyMutedBrush}" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+        </Style>
+
+        <Style Selector="Button.small">
+            <Setter Property="MinHeight" Value="36" />
+            <Setter Property="Padding" Value="16,10" />
+        </Style>
+
+        <Style Selector="Button.ghost.small">
+            <Setter Property="Padding" Value="14,8" />
+        </Style>
+    </UserControl.Styles>
+
+    <UserControl.Resources>
+        <DataTemplate x:Key="CommitCardTemplate" x:DataType="models:GitCommitInfo">
+            <Border Classes="commit-card"
+                    Margin="0,0,0,18">
+                <StackPanel Spacing="16">
+                    <Border Classes="chip accent"
+                            HorizontalAlignment="Left">
+                        <TextBlock Text="{Binding CategoryDisplayName}"
+                                   Foreground="{DynamicResource EasyAccentBrush}"
+                                   FontSize="12"
+                                   FontWeight="SemiBold" />
+                    </Border>
+
+                    <md:MarkdownScrollViewer Markdown="{Binding TitleMarkdown}"
+                                             Margin="0"
+                                             IsHitTestVisible="False" />
+
+                    <StackPanel Orientation="Horizontal"
+                                Spacing="12">
+                        <TextBlock Text="{Binding AuthorName}"
+                                   Classes="meta" />
+                        <TextBlock Text="&#8226;"
+                                   Classes="meta" />
+                        <TextBlock Text="{Binding CommitDate, StringFormat='{}{0:dd MMM yyyy, HH:mm}'}"
+                                   Classes="meta" />
+                    </StackPanel>
+
+                    <Separator Opacity="0.2"
+                               IsVisible="{Binding HasDescription}" />
+
+                    <md:MarkdownScrollViewer Markdown="{Binding DescriptionMarkdown}"
+                                             IsVisible="{Binding HasDescription}"
+                                             Margin="0,4,0,0" />
+
+                    <StackPanel Orientation="Horizontal"
+                                HorizontalAlignment="Right"
+                                Margin="0,4,0,0">
+                        <Button Content="View on GitHub"
+                                Classes="ghost small"
+                                CommandParameter="{Binding CommitUrl}"
+                                Click="ViewCommit_OnClick"
+                                ToolTip.Tip="Open this commit in your browser" />
+                    </StackPanel>
+                </StackPanel>
+            </Border>
+        </DataTemplate>
+
+        <DataTemplate x:Key="CommitGroupTemplate" x:DataType="viewModels:CommitGroupViewModel">
+            <StackPanel Spacing="18"
+                        Margin="0,0,0,28">
+                <StackPanel Orientation="Horizontal"
+                            Spacing="12">
+                    <TextBlock Text="{Binding DisplayName}"
+                               FontSize="20"
+                               FontWeight="SemiBold"
+                               Foreground="{DynamicResource EasyTextColorBrush}" />
+                    <Border Classes="chip">
+                        <TextBlock Classes="meta">
+                            <TextBlock.Text>
+                                <Binding Path="Commits.Count"
+                                         StringFormat="Commits: {0}" />
+                            </TextBlock.Text>
+                        </TextBlock>
+                    </Border>
+                </StackPanel>
+
+                <ItemsControl ItemsSource="{Binding Commits}"
+                              ItemTemplate="{StaticResource CommitCardTemplate}">
+                    <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <StackPanel Spacing="16" />
+                        </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+                </ItemsControl>
+            </StackPanel>
+        </DataTemplate>
+    </UserControl.Resources>
+
+    <Grid RowDefinitions="Auto,*">
+        <Border Classes="card hero-card">
+            <Grid ColumnDefinitions="Auto,*"
+                  VerticalAlignment="Center">
+                <Border Width="68"
+                        Height="68"
+                        CornerRadius="28"
+                        Background="{DynamicResource EasyAccentSoftBrush}"
+                        BorderBrush="{DynamicResource EasyAccentBrush}"
+                        BorderThickness="1"
+                        BoxShadow="0 26 48 0 #14000000">
+                    <Grid>
+                        <Path Stretch="Uniform"
+                              Width="34"
+                              Height="34"
+                              Fill="{DynamicResource EasyAccentBrush}"
+                              Data="M12 2C10.9 2 10 2.9 10 4V6H7C5.9 6 5 6.9 5 8V21C5 22.1 5.9 23 7 23H19C20.1 23 21 22.1 21 21V9L15 3H12ZM14 4.5L19.5 10H14V4.5ZM7 8H12V11H19V21H7V8ZM9 13V15H17V13H9ZM9 17V19H14V17H9Z" />
+                    </Grid>
+                </Border>
+
+                <Grid Grid.Column="1"
+                      ColumnDefinitions="*,Auto"
+                      Margin="24,0,0,0">
+                    <StackPanel Spacing="12">
+                        <TextBlock Text="Release notes"
+                                   FontSize="30"
+                                   FontWeight="Black"
+                                   Foreground="{DynamicResource EasyTextColorBrush}" />
+                        <TextBlock Text="Latest commits from HakuSystems/EasyExtractUnitypackage"
+                                   Classes="subtle"
+                                   FontSize="14" />
+                        <WrapPanel>
+                            <Border Classes="chip">
+                                <TextBlock Classes="meta">
+                                    <TextBlock.Text>
+                                        <Binding Path="LastUpdated"
+                                                 StringFormat="Last updated: {0:dd MMM yyyy, HH:mm:ss}"
+                                                 TargetNullValue="Last updated: awaiting sync" />
+                                    </TextBlock.Text>
+                                </TextBlock>
+                            </Border>
+                            <Border Classes="chip"
+                                    IsVisible="{Binding HasCommits}">
+                                <TextBlock Classes="meta">
+                                    <TextBlock.Text>
+                                        <Binding Path="Commits.Count"
+                                                 StringFormat="Commits: {0}" />
+                                    </TextBlock.Text>
+                                </TextBlock>
+                            </Border>
+                            <Border Classes="chip"
+                                    IsVisible="{Binding HasCommits}">
+                                <TextBlock Classes="meta">
+                                    <TextBlock.Text>
+                                        <Binding Path="CommitGroups.Count"
+                                                 StringFormat="Groups: {0}" />
+                                    </TextBlock.Text>
+                                </TextBlock>
+                            </Border>
+                            <Border Classes="chip accent"
+                                    IsVisible="{Binding HasError}">
+                                <TextBlock Classes="meta"
+                                           Foreground="{DynamicResource EasyAccentBrush}">
+                                    Attention needed
+                                </TextBlock>
+                            </Border>
+                        </WrapPanel>
+                    </StackPanel>
+
+                    <StackPanel Grid.Column="1"
+                                Orientation="Horizontal"
+                                VerticalAlignment="Center"
+                                Spacing="12">
+                        <ProgressBar Width="140"
+                                     Height="4"
+                                     IsIndeterminate="True"
+                                     IsVisible="{Binding IsLoading}" />
+                        <Button Content="Refresh"
+                                Classes="small"
+                                Click="RefreshButton_OnClick"
+                                ToolTip.Tip="Fetch the newest commits" />
+                        <Button Content="Close"
+                                Classes="ghost small"
+                                Click="CloseButton_OnClick" />
+                    </StackPanel>
+                </Grid>
+            </Grid>
+        </Border>
+
+        <Border Grid.Row="1"
+                Classes="card content-card"
+                Margin="0,28,0,0">
+            <Grid RowDefinitions="Auto,Auto,*">
+                <StackPanel Spacing="4">
+                    <TextBlock Text="Latest grouped commits"
+                               FontSize="18"
+                               FontWeight="SemiBold" />
+                    <TextBlock Text="Commits are organised by their conventional commits category for quick scanning."
+                               Classes="subtle"
+                               FontSize="13" />
+                </StackPanel>
+
+                <Border Background="{DynamicResource EasyDangerOverlayBrush}"
+                        Margin="0,20,0,0"
+                        BorderBrush="{DynamicResource EasyDangerBorderBrush}"
+                        BorderThickness="1"
+                        CornerRadius="14"
+                        Padding="16"
+                        IsVisible="{Binding HasError}">
+                    <StackPanel Orientation="Horizontal"
+                                Spacing="12">
+                        <Border Width="28"
+                                Height="28"
+                                Background="{DynamicResource EasyDangerBorderBrush}"
+                                CornerRadius="10"
+                                Opacity="0.85">
+                            <TextBlock Text="!"
+                                       FontSize="16"
+                                       FontWeight="Bold"
+                                       HorizontalAlignment="Center"
+                                       VerticalAlignment="Center"
+                                       Foreground="{DynamicResource EasyWindowBackgroundBrush}" />
+                        </Border>
+                        <TextBlock Text="{Binding ErrorMessage}"
+                                   Foreground="{DynamicResource EasyDangerForegroundBrush}"
+                                   FontWeight="SemiBold"
+                                   TextWrapping="Wrap" />
+                    </StackPanel>
+                </Border>
+
+                <Grid Grid.Row="2"
+                      Margin="0,20,0,0">
+                    <ScrollViewer HorizontalScrollBarVisibility="Disabled"
+                                  IsVisible="{Binding HasCommits}">
+                        <ItemsControl ItemsSource="{Binding CommitGroups}"
+                                      ItemTemplate="{StaticResource CommitGroupTemplate}"
+                                      Margin="0,0,8,0" />
+                    </ScrollViewer>
+
+                    <Border Background="{DynamicResource EasyGlassOverlayBrush}"
+                            BorderBrush="{DynamicResource EasyGlassNeutralBorderBrush}"
+                            BorderThickness="1"
+                            CornerRadius="18"
+                            Padding="28"
+                            HorizontalAlignment="Center"
+                            VerticalAlignment="Center"
+                            Width="320"
+                            IsVisible="{Binding ShowEmptyState}">
+                        <StackPanel Spacing="12"
+                                    HorizontalAlignment="Center"
+                                    VerticalAlignment="Center">
+                            <TextBlock Text="No commits to display yet"
+                                       FontSize="18"
+                                       FontWeight="SemiBold"
+                                       HorizontalAlignment="Center" />
+                            <TextBlock
+                                Text="We will show release notes here once the latest GitHub commits are fetched."
+                                Classes="subtle"
+                                FontSize="13"
+                                TextAlignment="Center" />
+                            <Button Content="Refresh now"
+                                    Classes="ghost small"
+                                    Click="RefreshButton_OnClick"
+                                    HorizontalAlignment="Center" />
+                        </StackPanel>
+                    </Border>
+                </Grid>
+            </Grid>
+        </Border>
+    </Grid>
+</UserControl>

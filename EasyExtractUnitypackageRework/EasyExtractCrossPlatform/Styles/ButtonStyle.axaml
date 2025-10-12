@@ -1,7 +1,7 @@
 <Styles xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
     <Design.PreviewWith>
-        <Border Padding="24" Background="#101828">
+        <Border Padding="24" Background="{DynamicResource EasyWindowBackgroundBrush}">
             <StackPanel Spacing="12">
                 <Button Content="Primary Action" />
                 <Button Classes="ghost" Content="Secondary" />
@@ -34,7 +34,7 @@
 
     <Style Selector="Button:disabled">
         <Setter Property="Opacity" Value="0.4" />
-        <Setter Property="BorderBrush" Value="#28FFFFFF" />
+        <Setter Property="BorderBrush" Value="{DynamicResource EasyGlassDisabledBorderBrush}" />
     </Style>
 
     <Style Selector="Button.ghost">
@@ -47,7 +47,7 @@
 
     <Style Selector="Button.ghost:pointerover">
         <Setter Property="Foreground" Value="{DynamicResource EasyTextColorBrush}" />
-        <Setter Property="Background" Value="#1AFFFFFF" />
+        <Setter Property="Background" Value="{DynamicResource EasyGlassOverlayBrush}" />
         <Setter Property="BorderThickness" Value="0" />
     </Style>
 
