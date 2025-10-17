@@ -1,55 +1,67 @@
 # EasyExtract.net
 
-![EasyExtract.net Web and Desktop Interface](https://github.com/user-attachments/assets/d17b4012-aa7b-457c-8cef-bcd96a83f682) 
+![EasyExtract.net Web and Desktop Interface](https://github.com/user-attachments/assets/d17b4012-aa7b-457c-8cef-bcd96a83f682)
 *(Pictured: The Windows Desktop App)*
 
 ## What is EasyExtract?
 
-EasyExtract is a tool that lets you extract files from Unity packages (.unitypackage) **without needing to have Unity installed**. You can use our lightning-fast web tool right in your browser or download the feature-rich desktop application for Windows.
+EasyExtract lets you unpack Unity packages (`.unitypackage`) **without installing Unity**. You can unlock the paid web app for instant browser extractions or download the Windows desktop client for free today.
 
-It's perfect for:
-- **Instantly** extracting packages on any OS using the web tool.
-- Quickly checking the contents of a `.unitypackage` file.
-- Extracting assets without launching the Unity Editor.
-- Power users who need offline access and shell integration with the Windows app.
+It is ideal for:
+- Inspecting the contents of Unity packages before importing them into a project.
+- Quickly extracting assets without launching the Unity Editor.
+- Power users who want shell integration, batch jobs, or offline workflows on Windows.
 
-## 🚀 Quick Start
+---
 
-You have two ways to start extracting your packages.
+## Quick Start
 
-### 1. Web Version (Recommended)
-The easiest and fastest way to extract your files on any operating system.
+### 1. Web Version (Paid)
 
-1.  **Visit**: Go to **[https://easyextract.net/](https://easyextract.net/)**
-2.  **Drag & Drop**: Drag your `.unitypackage` file directly onto the webpage.
-3.  **Extract**: The tool will automatically process the file and safes it on your local machine.
+> NOTE: Requires a Gumroad license key. Keys are single-use. If your browser storage is cleared or you switch devices, the local unlock is removed—DM **Notlyze** on Discord and we will issue a replacement key.
 
-### 2. Windows Desktop App
+1. Visit [https://easyextract.net/](https://easyextract.net/).
+2. Purchase and verify your license when prompted.
+3. Drag and drop your `.unitypackage` files into the page.
+4. Choose extraction options and pick a destination folder.
+5. Extract and download the files directly to your machine.
 
-1.  **Download**: Get the latest version from the [Releases page](https://github.com/HakuSystems/EasyExtractUnitypackage/releases).
-2.  **Extract**: Unzip the downloaded file to any folder on your computer.
-3.  **Run**: Double-click the `EasyExtractUnitypackage.exe` application to start.
+### 2. Windows Desktop App (Currently Free)
 
-## ✨ Features
+1. Download the latest build from the [GitHub Releases page](https://github.com/HakuSystems/EasyExtractUnitypackage/releases).
+2. Unzip the archive to any folder.
+3. Launch `EasyExtractUnitypackage.exe` to begin extracting packages offline.
 
-We offer two powerful versions to fit your needs.
+---
 
-| Feature | Web Version | Windows App |
+## Pricing & Licensing
+
+- **Web app:** Paid through Gumroad. One key per purchase, enforced at activation time.
+- **Desktop app:** Free today. A paid Pro upgrade with deeper Windows integration is planned.
+- **Lost access?** Clearing cookies or moving to a new device removes the local unlock. Contact us on Discord (DM **Notlyze**) to receive a fresh key.
+
+---
+
+## Feature Comparison
+
+| Feature | Web Version (Paid) | Windows App (Free today) |
 | :--- | :---: | :---: |
-| **No Installation** | ✅ | ❌ |
-| **Cross-Platform (Windows, Mac, Linux)** | ✅ | ❌ |
-| **Drag & Drop Interface** | ✅ | ✅ |
-| **Fast Extraction** | ✅ | ✅ |
-| **Safety Checks** | ✅ | ✅ |
-| **Windows Right-Click Integration** | ❌ | ✅ |
-| **Offline Access** | ❌ | ✅ |
-| **Process Multiple Packages at Once** | ❌ | ✅ |
+| No installation | Yes | No |
+| Cross-platform | Yes | No |
+| Drag & drop | Yes | Yes |
+| Fast extraction | Yes | Yes |
+| Security scanning | Yes | Yes |
+| Windows right-click integration | No | Yes |
+| Offline access | No | Yes |
+| Batch processing | No | Yes |
+| Pricing | Gumroad license required | Free (Pro upgrade planned) |
 
-## 📸 Screenshots
+---
+
+## Screenshots
 
 ### Web Interface
 ![chrome_d0Yup3hUqH](https://github.com/user-attachments/assets/a0020eac-6ada-4397-8d43-7795ec63d3fd)
-
 
 ### Windows Application
 
@@ -57,20 +69,29 @@ We offer two powerful versions to fit your needs.
 |:---:|:---:|:---:|
 | ![User Interface](https://github.com/user-attachments/assets/d17b4012-aa7b-457c-8cef-bcd96a83f682) | ![Settings Page](https://github.com/user-attachments/assets/cb7edfd9-13d7-4b8c-8109-fe91b0a93080) | ![Extraction Progress](https://github.com/user-attachments/assets/b4064b64-a8a7-4254-8cde-167d8a1a88ab) |
 
-## 🔮 Coming Soon
+---
 
--   Performance improvements for both web and desktop.
--   More customization options for the Windows app.
+## Coming Soon
 
-## 🤝 Get Help & Connect
-
--   **Discord**: Join our [Discord server](https://discord.gg/Wn7XfhPCyD) for help and updates.
--   **GitHub**: Visit our [GitHub repository](https://github.com/HakuSystems/EasyExtractUnitypackage) for the latest code.
-
-## 📝 License
-
-This project is maintained by [HakuSystems](https://github.com/HakuSystems).
+- Performance improvements for both web and desktop builds.
+- Enhanced Windows-only tooling as part of the upcoming Pro upgrade.
+- Additional customization options for extraction workflows.
 
 ---
 
-⭐ If you find this tool helpful, please consider giving it a star on GitHub!
+## Get Help & Connect
+
+- **Discord:** [https://discord.gg/Wn7XfhPCyD](https://discord.gg/Wn7XfhPCyD)
+- **GitHub:** [https://github.com/HakuSystems/EasyExtractUnitypackage](https://github.com/HakuSystems/EasyExtractUnitypackage)
+
+---
+
+## License
+
+Maintained by [HakuSystems](https://github.com/HakuSystems).
+
+If you find EasyExtract helpful, please star the repository!
+
+
+
+
