@@ -6,6 +6,7 @@
         <FluentTheme />
         <StyleInclude Source="Styles/ButtonStyle.axaml" />
         <StyleInclude Source="Styles/TextBlockStyle.axaml" />
+        <StyleInclude Source="Styles/SearchBarStyle.axaml" />
     </Application.Styles>
 
     <Application.Resources>

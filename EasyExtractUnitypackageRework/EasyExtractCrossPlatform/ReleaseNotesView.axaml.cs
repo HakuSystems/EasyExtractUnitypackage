@@ -26,12 +26,12 @@ public partial class ReleaseNotesView : UserControl
 
     private async Task LoadReleaseNotesAsync()
     {
-        await _viewModel.LoadAsync(40);
+        await _viewModel.LoadAsync();
     }
 
     private async void RefreshButton_OnClick(object? sender, RoutedEventArgs e)
     {
-        await _viewModel.LoadAsync(40);
+        await _viewModel.LoadAsync();
     }
 
     private void CloseButton_OnClick(object? sender, RoutedEventArgs e)
@@ -39,7 +39,7 @@ public partial class ReleaseNotesView : UserControl
         CloseRequested?.Invoke(this, EventArgs.Empty);
     }
 
-    private void ViewCommit_OnClick(object? sender, RoutedEventArgs e)
+    private void OpenReleaseLinkButton_OnClick(object? sender, RoutedEventArgs e)
     {
         if (sender is not Button { CommandParameter: string url } || string.IsNullOrWhiteSpace(url))
             return;
@@ -56,7 +56,7 @@ public partial class ReleaseNotesView : UserControl
         }
         catch (Exception ex)
         {
-            Debug.WriteLine($"Failed to open commit link: {ex}");
+            Debug.WriteLine($"Failed to open release link: {ex}");
         }
     }
 }

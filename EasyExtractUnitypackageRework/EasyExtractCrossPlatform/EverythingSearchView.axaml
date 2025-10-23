@@ -1,0 +1,212 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:viewModels="using:EasyExtractCrossPlatform.ViewModels"
+             xmlns:models="using:EasyExtractCrossPlatform.Models"
+             xmlns:views="using:EasyExtractCrossPlatform"
+             x:Class="EasyExtractCrossPlatform.EverythingSearchView"
+             x:DataType="viewModels:EverythingSearchViewModel"
+             mc:Ignorable="d">
+    <UserControl.Styles>
+        <Style Selector="Border.search-card">
+            <Setter Property="Background" Value="{DynamicResource EasyGlassGradientBrush}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource EasyGlassBorderBrush}" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="CornerRadius" Value="20" />
+            <Setter Property="Padding" Value="20" />
+            <Setter Property="Margin" Value="0,8,0,0" />
+            <Setter Property="BoxShadow" Value="0 16 32 0 #12000000" />
+        </Style>
+
+        <Style Selector="Border.status">
+            <Setter Property="Background" Value="{DynamicResource EasyGlassOverlayBrush}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource EasyGlassNeutralBorderBrush}" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="CornerRadius" Value="14" />
+            <Setter Property="Padding" Value="14" />
+            <Setter Property="Margin" Value="0,16,0,0" />
+        </Style>
+
+        <Style Selector="Border.status.error">
+            <Setter Property="Background" Value="{DynamicResource EasyDangerOverlayBrush}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource EasyDangerBorderBrush}" />
+        </Style>
+
+        <Style Selector="Border.search-result-card">
+            <Setter Property="Background" Value="{DynamicResource EasyGlassOverlayFaintBrush}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource EasyGlassNeutralBorderBrush}" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="CornerRadius" Value="16" />
+            <Setter Property="Padding" Value="16" />
+            <Setter Property="Margin" Value="0,0,0,12" />
+        </Style>
+
+        <Style Selector="TextBlock.path">
+            <Setter Property="Foreground" Value="{DynamicResource EasyMutedBrush}" />
+            <Setter Property="FontSize" Value="12" />
+            <Setter Property="TextTrimming" Value="CharacterEllipsis" />
+        </Style>
+
+        <Style Selector="StackPanel.result-meta TextBlock">
+            <Setter Property="Foreground" Value="{DynamicResource EasyMutedBrush}" />
+            <Setter Property="FontSize" Value="12" />
+        </Style>
+
+        <Style Selector="Button.link">
+            <Setter Property="Padding" Value="10,6" />
+            <Setter Property="Margin" Value="6,0,0,0" />
+            <Setter Property="MinHeight" Value="32" />
+        </Style>
+    </UserControl.Styles>
+
+    <Grid RowDefinitions="Auto,Auto,Auto,*"
+          ColumnDefinitions="*">
+        <StackPanel Grid.Row="0" Orientation="Horizontal" Spacing="12" VerticalAlignment="Center">
+            <Border Width="36"
+                    Height="36"
+                    CornerRadius="18"
+                    Background="{DynamicResource EasyGlassOverlayBrush}"
+                    BorderBrush="{DynamicResource EasyGlassNeutralBorderBrush}"
+                    BorderThickness="1"
+                    HorizontalAlignment="Center"
+                    VerticalAlignment="Center">
+                <PathIcon
+                    Data="M15.5 14H14.71L14.43 13.73C15.41 12.59 16 11.11 16 9.5C16 5.91 13.09 3 9.5 3C5.91 3 3 5.91 3 9.5C3 13.09 5.91 16 9.5 16C11.11 16 12.59 15.41 13.73 14.43L14 14.71V15.5L18 19.49L19.49 18L15.5 14ZM9.5 14C7.01 14 5 11.99 5 9.5C5 7.01 7.01 5 9.5 5C11.99 5 14 7.01 14 9.5C14 11.99 11.99 14 9.5 14Z"
+                    Width="18"
+                    Height="18"
+                    Foreground="{DynamicResource EasyAccentBrush}" />
+            </Border>
+            <StackPanel Spacing="4">
+                <TextBlock Text="Search Unity packages"
+                           FontSize="20"
+                           FontWeight="SemiBold" />
+                <TextBlock Text="Powered by Everything - scoped to *.unitypackage files."
+                           Classes="subtle"
+                           FontSize="12" />
+            </StackPanel>
+        </StackPanel>
+
+        <Border Grid.Row="1"
+                Margin="0,18,0,0"
+                Classes="search-card">
+            <Grid ColumnDefinitions="*,Auto"
+                  VerticalAlignment="Center">
+                <TextBox Grid.Column="0"
+                         Text="{Binding SearchQuery, UpdateSourceTrigger=PropertyChanged}"
+                         Watermark="Filter .unitypackage names, e.g. player, XR, HDRP..."
+                         Classes="search-bar">
+                    <TextBox.KeyBindings>
+                        <KeyBinding Command="{Binding SearchCommand}" Gesture="Enter" />
+                    </TextBox.KeyBindings>
+                </TextBox>
+
+                <Button Grid.Column="1"
+                        Classes="ghost link"
+                        Margin="12,0,0,0"
+                        MinHeight="48"
+                        Content="Clear"
+                        Command="{Binding ClearCommand}"
+                        IsEnabled="{Binding HasResults}" />
+            </Grid>
+        </Border>
+
+        <StackPanel Grid.Row="2" Orientation="Horizontal" Spacing="12" Margin="0,14,0,0" VerticalAlignment="Center">
+            <ProgressBar Width="180"
+                         Height="6"
+                         IsIndeterminate="True"
+                         IsVisible="{Binding IsSearching}" />
+            <Border Classes="status"
+                    Classes.error="{Binding HasError}"
+                    IsVisible="{Binding ShowStatusMessage}">
+                <StackPanel Orientation="Horizontal" Spacing="10">
+                    <PathIcon
+                        Data="M12 2C6.48 2 2 6.48 2 12C2 17.52 6.48 22 12 22C17.52 22 22 17.52 22 12C22 6.48 17.52 2 12 2ZM13 17H11V15H13V17ZM13 13H11V7H13V13Z"
+                        Width="16"
+                        Height="16"
+                        Foreground="{DynamicResource EasyDangerBorderBrush}"
+                        IsVisible="{Binding HasError}" />
+                    <TextBlock Text="{Binding StatusMessage}"
+                               TextWrapping="Wrap"
+                               MaxWidth="420" />
+                </StackPanel>
+            </Border>
+        </StackPanel>
+
+        <ScrollViewer Grid.Row="3"
+                      Margin="0,18,0,0"
+                      VerticalScrollBarVisibility="Visible"
+                      HorizontalScrollBarVisibility="Disabled">
+            <ItemsControl ItemsSource="{Binding Results}">
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <StackPanel />
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate x:DataType="models:EverythingSearchResult">
+                        <Border Classes="search-result-card">
+                            <Grid Classes="search-result"
+                                  ColumnDefinitions="*,Auto"
+                                  RowDefinitions="Auto,Auto">
+                                <StackPanel Grid.Column="0" Grid.Row="0" Spacing="6">
+                                    <TextBlock Text="{Binding Name}"
+                                               FontSize="16"
+                                               FontWeight="SemiBold" />
+                                    <TextBlock Text="{Binding DirectoryPath}"
+                                               Classes="path" />
+                                </StackPanel>
+
+                                <StackPanel Grid.Column="0"
+                                            Grid.Row="1"
+                                            Orientation="Horizontal"
+                                            Spacing="16"
+                                            Classes="result-meta">
+                                    <StackPanel Orientation="Horizontal" Spacing="6">
+                                        <PathIcon
+                                            Data="M3 6H21V18C21 19.1 20.1 20 19 20H5C3.9 20 3 19.1 3 18V6ZM12 14L16.5 11.5L12 9L7.5 11.5L12 14Z"
+                                            Width="14"
+                                            Height="14"
+                                            Foreground="{DynamicResource EasyAccentBrush}" />
+                                        <TextBlock Text="{Binding KindLabel}" />
+                                    </StackPanel>
+                                    <StackPanel Orientation="Horizontal" Spacing="6">
+                                        <PathIcon
+                                            Data="M6 2H18C19.1 2 20 2.9 20 4V20C20 21.1 19.1 22 18 22H6C4.9 22 4 21.1 4 20V4C4 2.9 4.9 2 6 2ZM12 20C13.1 20 14 19.1 14 18C14 16.9 13.1 16 12 16C10.9 16 10 16.9 10 18C10 19.1 10.9 20 12 20ZM6 4V8H18V4H6Z"
+                                            Width="14"
+                                            Height="14"
+                                            Foreground="{DynamicResource EasyAccentBrush}" />
+                                        <TextBlock Text="{Binding SizeLabel}" />
+                                    </StackPanel>
+                                    <StackPanel Orientation="Horizontal" Spacing="6">
+                                        <PathIcon
+                                            Data="M12 8C10.34 8 9 9.34 9 11C9 12.66 10.34 14 12 14C13.66 14 15 12.66 15 11C15 9.34 13.66 8 12 8ZM12 2C17.52 2 22 6.48 22 12C22 17.52 17.52 22 12 22C6.48 22 2 17.52 2 12C2 6.48 6.48 2 12 2ZM12 20C16.41 20 20 16.41 20 12C20 7.59 16.41 4 12 4C7.59 4 4 7.59 4 12C4 16.41 7.59 20 12 20ZM12.5 7H11V12.25L15.25 14.67L16 13.4L12.5 11.5V7Z"
+                                            Width="14"
+                                            Height="14"
+                                            Foreground="{DynamicResource EasyAccentBrush}" />
+                                        <TextBlock Text="{Binding LastModifiedLabel}" />
+                                    </StackPanel>
+                                </StackPanel>
+
+                                <StackPanel Grid.Column="1"
+                                            Grid.Row="0"
+                                            Grid.RowSpan="2"
+                                            Orientation="Horizontal"
+                                            HorizontalAlignment="Right">
+                                    <Button Classes="ghost link"
+                                            Content="Add to extraction queue"
+                                            Command="{Binding ViewModel.OpenItemCommand, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=views:EverythingSearchView}}"
+                                            CommandParameter="{Binding .}" />
+                                    <Button Classes="ghost link"
+                                            Content="Open directory"
+                                            Command="{Binding ViewModel.RevealItemCommand, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=views:EverythingSearchView}}"
+                                            CommandParameter="{Binding .}" />
+                                </StackPanel>
+                            </Grid>
+                        </Border>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+        </ScrollViewer>
+    </Grid>
+</UserControl>

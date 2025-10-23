@@ -2,6 +2,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:views="using:EasyExtractCrossPlatform"
         Foreground="{DynamicResource EasyTextColorBrush}"
         Background="{DynamicResource EasyWindowBackgroundBrush}"
         mc:Ignorable="d"
@@ -160,11 +161,13 @@
                                 </Border>
 
                                 <StackPanel Spacing="6" HorizontalAlignment="Center">
-                                    <TextBlock Text="Drag &amp; drop files here"
+                                    <TextBlock x:Name="DropZonePrimaryTextBlock"
+                                               Text="Drag &amp; drop files here"
                                                FontSize="20"
                                                FontWeight="SemiBold"
                                                TextAlignment="Center" />
-                                    <TextBlock Text="Supports batch extraction and live progress updates."
+                                    <TextBlock x:Name="DropZoneSecondaryTextBlock"
+                                               Text="Supports batch extraction and live progress updates."
                                                Classes="subtle"
                                                TextAlignment="Center" />
                                 </StackPanel>
@@ -242,6 +245,14 @@
                 </Border>
 
                 <StackPanel Grid.Column="1" Spacing="28" Margin="28,0,0,0">
+                    <Border Padding="28"
+                            CornerRadius="24"
+                            Background="{DynamicResource EasyGlassGradientBrush}"
+                            BorderBrush="{DynamicResource EasyGlassBorderBrush}"
+                            BorderThickness="1"
+                            BoxShadow="0 26 50 0 #14000000">
+                        <views:EverythingSearchView />
+                    </Border>
                     <Border Padding="28"
                             CornerRadius="24"
                             Background="{DynamicResource EasyGlassGradientBrush}"
@@ -383,20 +394,44 @@
             </Border>
         </Grid>
         <Border x:Name="OverlayHost"
-                Background="#B3000000"
+                Background="#CC050505"
                 IsVisible="False"
-                IsHitTestVisible="{Binding IsVisible, RelativeSource={RelativeSource Self}}">
+                IsHitTestVisible="False"
+                Opacity="0">
+            <Border.Transitions>
+                <Transitions>
+                    <DoubleTransition Property="{x:Static Visual.OpacityProperty}"
+                                      Duration="0:0:0.24" />
+                </Transitions>
+            </Border.Transitions>
             <Grid>
-                <Border HorizontalAlignment="Center"
+                <Border x:Name="OverlayCard"
+                        HorizontalAlignment="Center"
                         VerticalAlignment="Center"
-                        MaxWidth="960"
-                        MaxHeight="720"
+                        MaxWidth="920"
+                        MaxHeight="680"
+                        Margin="32"
                         Background="{DynamicResource EasyWindowBackgroundBrush}"
                         BorderBrush="{DynamicResource EasyGlassBorderBrush}"
                         BorderThickness="1"
-                        CornerRadius="32"
+                        CornerRadius="36"
+                        ClipToBounds="True"
                         Padding="0"
-                        BoxShadow="0 48 96 0 #22000000">
+                        BoxShadow="0 48 120 0 #22000000"
+                        RenderTransformOrigin="0.5,0.5">
+                    <Border.RenderTransform>
+                        <ScaleTransform ScaleX="0.94"
+                                        ScaleY="0.94">
+                            <ScaleTransform.Transitions>
+                                <Transitions>
+                                    <DoubleTransition Property="{x:Static ScaleTransform.ScaleXProperty}"
+                                                      Duration="0:0:0.24" />
+                                    <DoubleTransition Property="{x:Static ScaleTransform.ScaleYProperty}"
+                                                      Duration="0:0:0.24" />
+                                </Transitions>
+                            </ScaleTransform.Transitions>
+                        </ScaleTransform>
+                    </Border.RenderTransform>
                     <ContentControl x:Name="OverlayContent" />
                 </Border>
             </Grid>

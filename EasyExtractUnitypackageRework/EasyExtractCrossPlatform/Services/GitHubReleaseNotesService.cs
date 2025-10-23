@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Net.Http;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using System.Threading;
 using System.Threading.Tasks;
 using EasyExtractCrossPlatform.Models;
@@ -21,106 +22,133 @@ public static class GitHubReleaseNotesService
         PropertyNameCaseInsensitive = true
     };
 
-    public static async Task<IReadOnlyList<GitCommitInfo>> GetRecentCommitsAsync(
-        int count = 30,
+    public static async Task<IReadOnlyList<GitReleaseInfo>> GetRecentReleasesAsync(
+        int count = 10,
         CancellationToken cancellationToken = default)
     {
         var perPage = Math.Clamp(count, 1, 100);
-        var endpoint = $"repos/{RepoOwner}/{RepoName}/commits?per_page={perPage}";
+        var (releases, _) = await FetchReleasesPageAsync(perPage, 1, cancellationToken).ConfigureAwait(false);
+        if (releases.Count > count)
+            releases.RemoveRange(count, releases.Count - count);
+
+        return releases;
+    }
+
+    public static async Task<IReadOnlyList<GitReleaseInfo>> GetAllReleasesAsync(
+        CancellationToken cancellationToken = default)
+    {
+        const int perPage = 100;
+        var page = 1;
+        var results = new List<GitReleaseInfo>();
+
+        while (true)
+        {
+            var (pageReleases, hasNextPage) =
+                await FetchReleasesPageAsync(perPage, page, cancellationToken).ConfigureAwait(false);
+
+            if (pageReleases.Count == 0)
+                break;
+
+            results.AddRange(pageReleases);
+
+            if (!hasNextPage)
+                break;
+
+            page++;
+        }
+
+        return results;
+    }
+
+    private static async Task<(List<GitReleaseInfo> Releases, bool HasNextPage)> FetchReleasesPageAsync(
+        int perPage,
+        int page,
+        CancellationToken cancellationToken)
+    {
+        var endpoint = $"repos/{RepoOwner}/{RepoName}/releases?per_page={perPage}&page={page}";
 
         using var response = await HttpClient.GetAsync(endpoint, cancellationToken).ConfigureAwait(false);
         if (!response.IsSuccessStatusCode)
         {
             var reason = $"{(int)response.StatusCode} {response.ReasonPhrase}".Trim();
-            throw new HttpRequestException($"GitHub responded with {reason} while requesting commits.");
+            throw new HttpRequestException($"GitHub responded with {reason} while requesting releases.");
         }
 
         await using var responseStream =
             await response.Content.ReadAsStreamAsync(cancellationToken).ConfigureAwait(false);
         var payload =
-            await JsonSerializer.DeserializeAsync<List<GitHubCommitDto>>(responseStream, JsonOptions, cancellationToken)
+            await JsonSerializer
+                .DeserializeAsync<List<GitHubReleaseDto>>(responseStream, JsonOptions, cancellationToken)
                 .ConfigureAwait(false);
 
-        if (payload is null || payload.Count == 0)
-            return Array.Empty<GitCommitInfo>();
+        var releases = BuildReleaseInfos(payload);
+        var hasNextPage = releases.Count > 0 && ResponseHasNextPage(response);
 
-        var result = new List<GitCommitInfo>(payload.Count);
-        foreach (var commit in payload)
+        return (releases, hasNextPage);
+    }
+
+    private static List<GitReleaseInfo> BuildReleaseInfos(List<GitHubReleaseDto>? payload)
+    {
+        if (payload is null || payload.Count == 0)
+            return new List<GitReleaseInfo>();
+
+        var results = new List<GitReleaseInfo>(payload.Count);
+        foreach (var release in payload)
         {
-            if (commit?.Commit is null || string.IsNullOrWhiteSpace(commit.Sha))
+            if (release is null || string.IsNullOrWhiteSpace(release.TagName) ||
+                string.IsNullOrWhiteSpace(release.HtmlUrl))
                 continue;
 
-            var message = commit.Commit.Message ?? string.Empty;
-            var normalizedMessage = NormalizeLineEndings(message).TrimEnd();
-            var (title, description) = ExtractTitleAndDescription(normalizedMessage, commit.Sha);
+            var assets = new List<GitReleaseAsset>();
+            if (release.Assets is { Count: > 0 })
+            {
+                foreach (var asset in release.Assets)
+                {
+                    if (asset?.BrowserDownloadUrl is null || string.IsNullOrWhiteSpace(asset.Name))
+                        continue;
 
-            var date = commit.Commit.Author?.Date ??
-                       commit.Commit.Committer?.Date ??
-                       DateTimeOffset.MinValue;
+                    assets.Add(new GitReleaseAsset(
+                        asset.Id,
+                        asset.Name,
+                        asset.Size,
+                        asset.BrowserDownloadUrl,
+                        asset.ContentType));
+                }
+            }
 
-            var author = commit.Commit.Author?.Name ??
-                         commit.Commit.Committer?.Name ??
-                         "Unknown author";
+            var authorName = release.Author?.Login ?? release.Author?.Name ?? "Unknown author";
 
-            var commitUrl = $"https://github.com/{RepoOwner}/{RepoName}/commit/{commit.Sha}";
-
-            result.Add(new GitCommitInfo(
-                commit.Sha,
-                title,
-                description,
-                author,
-                date,
-                commitUrl));
+            results.Add(new GitReleaseInfo(
+                release.Id,
+                release.Name,
+                release.TagName,
+                authorName,
+                release.PublishedAt,
+                release.Body,
+                release.HtmlUrl,
+                release.Draft,
+                release.Prerelease,
+                assets));
         }
 
-        return result;
+        return results;
     }
 
-    private static string NormalizeLineEndings(string value)
+    private static bool ResponseHasNextPage(HttpResponseMessage response)
     {
-        return value.Replace("\r\n", "\n")
-            .Replace('\r', '\n');
-    }
+        if (!response.Headers.TryGetValues("Link", out var linkValues))
+            return false;
 
-    private static (string Title, string? Description) ExtractTitleAndDescription(string message, string fallbackTitle)
-    {
-        if (string.IsNullOrWhiteSpace(message))
-            return (fallbackTitle, null);
-
-        var newlineIndex = message.IndexOf('\n');
-        if (newlineIndex < 0)
+        foreach (var linkValue in linkValues)
         {
-            var singleLineTitle = NormalizeCommitTitle(message);
-            return (string.IsNullOrWhiteSpace(singleLineTitle) ? fallbackTitle : singleLineTitle, null);
+            if (linkValue is null)
+                continue;
+
+            if (linkValue.Contains("rel=\"next\"", StringComparison.OrdinalIgnoreCase))
+                return true;
         }
 
-        var rawTitle = message[..newlineIndex];
-        var remainder = message[(newlineIndex + 1)..];
-
-        var normalizedTitle = NormalizeCommitTitle(rawTitle);
-        if (string.IsNullOrWhiteSpace(normalizedTitle))
-            normalizedTitle = fallbackTitle;
-
-        var description = remainder.Trim('\n');
-        if (string.IsNullOrWhiteSpace(description))
-            description = null;
-
-        return (normalizedTitle, description);
-    }
-
-    private static string NormalizeCommitTitle(string value)
-    {
-        if (string.IsNullOrWhiteSpace(value))
-            return string.Empty;
-
-        var trimmed = value.Trim();
-
-        if (trimmed.Length >= 4)
-            if ((trimmed.StartsWith("**") && trimmed.EndsWith("**")) ||
-                (trimmed.StartsWith("__") && trimmed.EndsWith("__")))
-                trimmed = trimmed[2..^2].Trim();
-
-        return trimmed;
+        return false;
     }
 
     private static HttpClient CreateClient()
@@ -128,7 +156,7 @@ public static class GitHubReleaseNotesService
         var client = new HttpClient
         {
             BaseAddress = BaseUri,
-            Timeout = TimeSpan.FromSeconds(15)
+            Timeout = TimeSpan.FromSeconds(20)
         };
 
         client.DefaultRequestHeaders.UserAgent.ParseAdd(
@@ -138,9 +166,32 @@ public static class GitHubReleaseNotesService
         return client;
     }
 
-    private sealed record GitHubCommitDto(string Sha, GitCommitDto Commit);
+    private sealed record GitHubReleaseDto(
+        [property: JsonPropertyName("id")] long Id,
+        [property: JsonPropertyName("name")] string? Name,
+        [property: JsonPropertyName("tag_name")]
+        string TagName,
+        [property: JsonPropertyName("html_url")]
+        string HtmlUrl,
+        [property: JsonPropertyName("body")] string? Body,
+        [property: JsonPropertyName("draft")] bool Draft,
+        [property: JsonPropertyName("prerelease")]
+        bool Prerelease,
+        [property: JsonPropertyName("published_at")]
+        DateTimeOffset? PublishedAt,
+        [property: JsonPropertyName("author")] GitHubAuthorDto? Author,
+        [property: JsonPropertyName("assets")] List<GitHubAssetDto>? Assets);
 
-    private sealed record GitCommitDto(GitCommitAuthorDto? Author, GitCommitAuthorDto? Committer, string? Message);
+    private sealed record GitHubAuthorDto(
+        [property: JsonPropertyName("login")] string? Login,
+        [property: JsonPropertyName("name")] string? Name);
 
-    private sealed record GitCommitAuthorDto(string? Name, DateTimeOffset? Date);
+    private sealed record GitHubAssetDto(
+        [property: JsonPropertyName("id")] long Id,
+        [property: JsonPropertyName("name")] string Name,
+        [property: JsonPropertyName("size")] long Size,
+        [property: JsonPropertyName("content_type")]
+        string? ContentType,
+        [property: JsonPropertyName("browser_download_url")]
+        string BrowserDownloadUrl);
 }

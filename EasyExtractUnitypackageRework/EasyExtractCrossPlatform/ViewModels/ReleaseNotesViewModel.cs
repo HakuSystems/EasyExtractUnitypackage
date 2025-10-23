@@ -13,21 +13,36 @@ using EasyExtractCrossPlatform.Services;
 
 namespace EasyExtractCrossPlatform.ViewModels;
 
-public class ReleaseNotesViewModel : INotifyPropertyChanged, IDisposable
+public sealed class ReleaseNotesViewModel : INotifyPropertyChanged, IDisposable
 {
     private string? _errorMessage;
+    private GitReleaseInfo? _featuredRelease;
     private bool _isLoading;
     private DateTimeOffset? _lastUpdated;
     private CancellationTokenSource? _loadingCts;
 
     public ReleaseNotesViewModel()
     {
-        Commits.CollectionChanged += HandleCommitsChanged;
+        AdditionalReleases.CollectionChanged += HandleAdditionalReleasesChanged;
     }
 
-    public ObservableCollection<GitCommitInfo> Commits { get; } = new();
+    public ObservableCollection<GitReleaseInfo> AdditionalReleases { get; } = new();
 
-    public ObservableCollection<CommitGroupViewModel> CommitGroups { get; } = new();
+    public GitReleaseInfo? FeaturedRelease
+    {
+        get => _featuredRelease;
+        private set
+        {
+            if (ReferenceEquals(value, _featuredRelease))
+                return;
+
+            _featuredRelease = value;
+            OnPropertyChanged();
+            OnPropertyChanged(nameof(HasFeaturedRelease));
+            OnPropertyChanged(nameof(HasReleases));
+            OnPropertyChanged(nameof(ShowEmptyState));
+        }
+    }
 
     public bool IsLoading
     {
@@ -68,26 +83,31 @@ public class ReleaseNotesViewModel : INotifyPropertyChanged, IDisposable
 
             _lastUpdated = value;
             OnPropertyChanged();
+            OnPropertyChanged(nameof(HasLastUpdated));
         }
     }
 
     public bool HasError => !string.IsNullOrWhiteSpace(ErrorMessage);
 
-    public bool HasCommits => Commits.Count > 0;
+    public bool HasFeaturedRelease => FeaturedRelease is not null;
 
-    public bool HasNoCommits => !HasCommits;
+    public bool HasAdditionalReleases => AdditionalReleases.Count > 0;
 
-    public bool ShowEmptyState => !HasCommits && !IsLoading && !HasError;
+    public bool HasReleases => HasFeaturedRelease || HasAdditionalReleases;
+
+    public bool ShowEmptyState => !HasReleases && !IsLoading && !HasError;
+
+    public bool HasLastUpdated => LastUpdated.HasValue;
 
     public void Dispose()
     {
         CancelLoading();
-        Commits.CollectionChanged -= HandleCommitsChanged;
+        AdditionalReleases.CollectionChanged -= HandleAdditionalReleasesChanged;
     }
 
     public event PropertyChangedEventHandler? PropertyChanged;
 
-    public async Task LoadAsync(int maxCommits = 30)
+    public async Task LoadAsync(int maxReleases = 0)
     {
         if (IsLoading)
             return;
@@ -102,18 +122,23 @@ public class ReleaseNotesViewModel : INotifyPropertyChanged, IDisposable
             IsLoading = true;
             ErrorMessage = null;
 
-            var commits = await GitHubReleaseNotesService.GetRecentCommitsAsync(maxCommits, cts.Token)
-                .ConfigureAwait(false);
+            IReadOnlyList<GitReleaseInfo> releases;
+            if (maxReleases > 0)
+                releases = await GitHubReleaseNotesService.GetRecentReleasesAsync(maxReleases, cts.Token)
+                    .ConfigureAwait(false);
+            else
+                releases = await GitHubReleaseNotesService.GetAllReleasesAsync(cts.Token)
+                    .ConfigureAwait(false);
 
             await Dispatcher.UIThread.InvokeAsync(() =>
             {
-                UpdateCommitCollections(commits);
+                UpdateReleaseCollections(releases);
                 LastUpdated = DateTimeOffset.Now;
             });
         }
         catch (OperationCanceledException) when (cts.IsCancellationRequested)
         {
-            // ignore cancellations triggered by the view model
+            // ignore user cancellations
         }
         catch (HttpRequestException httpEx)
         {
@@ -149,51 +174,30 @@ public class ReleaseNotesViewModel : INotifyPropertyChanged, IDisposable
         _loadingCts = null;
     }
 
-    private void OnPropertyChanged([CallerMemberName] string? propertyName = null)
+    private void UpdateReleaseCollections(IReadOnlyList<GitReleaseInfo> releases)
     {
-        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
-    }
+        FeaturedRelease = releases.Count > 0 ? releases[0] : null;
 
-    private void HandleCommitsChanged(object? sender, NotifyCollectionChangedEventArgs e)
-    {
-        OnPropertyChanged(nameof(HasCommits));
-        OnPropertyChanged(nameof(HasNoCommits));
+        AdditionalReleases.CollectionChanged -= HandleAdditionalReleasesChanged;
+        AdditionalReleases.Clear();
+        for (var i = 1; i < releases.Count; i++)
+            AdditionalReleases.Add(releases[i]);
+        AdditionalReleases.CollectionChanged += HandleAdditionalReleasesChanged;
+
+        OnPropertyChanged(nameof(HasAdditionalReleases));
+        OnPropertyChanged(nameof(HasReleases));
         OnPropertyChanged(nameof(ShowEmptyState));
     }
 
-    private void UpdateCommitCollections(IReadOnlyList<GitCommitInfo> commits)
+    private void HandleAdditionalReleasesChanged(object? sender, NotifyCollectionChangedEventArgs e)
     {
-        Commits.Clear();
-        CommitGroups.Clear();
+        OnPropertyChanged(nameof(HasAdditionalReleases));
+        OnPropertyChanged(nameof(HasReleases));
+        OnPropertyChanged(nameof(ShowEmptyState));
+    }
 
-        if (commits.Count == 0)
-            return;
-
-        var categoryOrder = new List<string>();
-        var groupedCommits = new Dictionary<string, List<GitCommitInfo>>();
-
-        foreach (var commit in commits)
-        {
-            Commits.Add(commit);
-
-            var key = commit.CategoryKey;
-            if (!groupedCommits.TryGetValue(key, out var list))
-            {
-                list = new List<GitCommitInfo>();
-                groupedCommits[key] = list;
-                categoryOrder.Add(key);
-            }
-
-            list.Add(commit);
-        }
-
-        foreach (var key in categoryOrder)
-        {
-            if (!groupedCommits.TryGetValue(key, out var list) || list.Count == 0)
-                continue;
-
-            var displayName = list[0].CategoryDisplayName;
-            CommitGroups.Add(new CommitGroupViewModel(key, displayName, list));
-        }
+    private void OnPropertyChanged([CallerMemberName] string? propertyName = null)
+    {
+        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
     }
 }

@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Avalonia.Controls;
 
 namespace EasyExtractCrossPlatform.Models;
 
@@ -45,6 +46,11 @@ public class AppSettings
     public bool EnablePerformanceLogging { get; set; } = true;
     public bool EnableMemoryTracking { get; set; } = true;
     public bool EnableAsyncLogging { get; set; } = true;
+    public double? WindowWidth { get; set; }
+    public double? WindowHeight { get; set; }
+    public int? WindowPositionX { get; set; }
+    public int? WindowPositionY { get; set; }
+    public WindowState WindowState { get; set; } = WindowState.Normal;
 }
 
 public class UpdateSettings
