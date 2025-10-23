@@ -70,7 +70,8 @@ It is ideal for:
 
 ### Web Interface
 
-![chrome_d0Yup3hUqH](https://github.com/user-attachments/assets/a0020eac-6ada-4397-8d43-7795ec63d3fd)
+<img width="1280" height="1062" alt="image" src="https://github.com/user-attachments/assets/2790f520-76e0-4a14-8660-16cc11148efc" />
+
 
 ### Windows Application
 
