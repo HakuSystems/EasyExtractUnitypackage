@@ -1,10 +1,15 @@
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
+using System.Runtime.CompilerServices;
+using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using Avalonia;
@@ -25,7 +30,13 @@ namespace EasyExtractCrossPlatform;
 public partial class MainWindow : Window
 {
     private const string UnityPackageExtension = ".unitypackage";
+    private const string UnknownVersionLabel = "Version unknown";
+
+    private const string GitHubLatestReleaseEndpoint =
+        "https://api.github.com/repos/HakuSystems/EasyExtractUnitypackage/releases/latest";
+
     private static readonly HttpClient BackgroundHttpClient = new();
+    private readonly Button? _checkUpdatesButton;
     private readonly IBrush _defaultBackgroundBrush;
     private readonly string _defaultDropPrimaryText = "Drag & drop files here";
     private readonly string _defaultDropSecondaryText = "Supports batch extraction and live progress updates.";
@@ -35,16 +46,26 @@ public partial class MainWindow : Window
     private readonly Border? _overlayCard;
     private readonly ContentControl? _overlayContent;
     private readonly Border? _overlayHost;
+    private readonly Control? _queueEmptyState;
+    private readonly ObservableCollection<QueueItemDisplay> _queueItems = new();
+    private readonly Dictionary<string, QueueItemDisplay> _queueItemsByPath = new(StringComparer.OrdinalIgnoreCase);
+    private readonly ItemsControl? _queueItemsControl;
+    private readonly ScrollViewer? _queueItemsScrollViewer;
+    private readonly TextBlock? _queueSummaryTextBlock;
     private readonly TextBlock? _versionTextBlock;
     private Control? _activeOverlayContent;
+    private object? _checkUpdatesButtonOriginalContent;
     private Bitmap? _currentBackgroundBitmap;
+    private string? _currentVersionDisplay;
     private IDisposable? _dropStatusReset;
     private IDisposable? _dropSuccessReset;
+    private bool _isCheckingForUpdates;
     private PixelPoint? _lastNormalPosition;
     private Size? _lastNormalSize;
     private CancellationTokenSource? _overlayAnimationCts;
     private ScaleTransform? _overlayCardScaleTransform;
     private AppSettings _settings = new();
+    private IDisposable? _versionStatusReset;
 
     public MainWindow()
     {
@@ -58,6 +79,9 @@ public partial class MainWindow : Window
         if (_dropZoneSecondaryTextBlock?.Text is { Length: > 0 } secondaryText)
             _defaultDropSecondaryText = secondaryText;
         _versionTextBlock = this.FindControl<TextBlock>("VersionTextBlock");
+        _checkUpdatesButton = this.FindControl<Button>("CheckUpdatesButton");
+        if (_checkUpdatesButton is not null)
+            _checkUpdatesButtonOriginalContent = _checkUpdatesButton.Content;
         _overlayHost = this.FindControl<Border>("OverlayHost");
         _overlayContent = this.FindControl<ContentControl>("OverlayContent");
         _overlayCard = this.FindControl<Border>("OverlayCard");
@@ -70,6 +94,14 @@ public partial class MainWindow : Window
             _overlayCardScaleTransform = new ScaleTransform(1, 1);
             _overlayCard.RenderTransform = _overlayCardScaleTransform;
         }
+
+        _queueItemsControl = this.FindControl<ItemsControl>("QueueItemsControl");
+        if (_queueItemsControl is not null)
+            _queueItemsControl.ItemsSource = _queueItems;
+        _queueEmptyState = this.FindControl<Control>("QueueEmptyState");
+        _queueSummaryTextBlock = this.FindControl<TextBlock>("QueueSummaryTextBlock");
+        _queueItemsScrollViewer = this.FindControl<ScrollViewer>("QueueItemsScrollViewer");
+        UpdateQueueVisualState();
 
         Closing += OnMainWindowClosing;
         PositionChanged += OnMainWindowPositionChanged;
@@ -365,6 +397,7 @@ public partial class MainWindow : Window
 
         var addedCount = 0;
         var alreadyQueuedCount = 0;
+        var newlyAddedPackages = new List<(UnityPackageFile Package, string NormalizedPath)>();
 
         var existingPaths = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
         foreach (var package in _settings.UnitypackageFiles)
@@ -409,7 +442,7 @@ public partial class MainWindow : Window
             }
 
             var fileInfo = new FileInfo(normalizedPath);
-            _settings.UnitypackageFiles.Add(new UnityPackageFile
+            var queueEntry = new UnityPackageFile
             {
                 FileName = fileInfo.Name,
                 FilePath = normalizedPath,
@@ -422,7 +455,10 @@ public partial class MainWindow : Window
                     : string.Empty,
                 IsInQueue = true,
                 IsExtracting = false
-            });
+            };
+
+            _settings.UnitypackageFiles.Add(queueEntry);
+            newlyAddedPackages.Add((queueEntry, normalizedPath));
 
             if (historySet.Add(normalizedPath))
                 _settings.History.Add(normalizedPath);
@@ -430,10 +466,111 @@ public partial class MainWindow : Window
             addedCount++;
         }
 
+        if (newlyAddedPackages.Count > 0)
+            foreach (var (package, normalizedPath) in newlyAddedPackages)
+                AddOrUpdateQueueDisplayItem(package, normalizedPath);
+
+        UpdateQueueVisualState();
+
         if (addedCount > 0)
             AppSettingsService.Save(_settings);
 
         return new QueueResult(addedCount, alreadyQueuedCount);
+    }
+
+    private void ReloadQueueFromSettings()
+    {
+        _queueItems.Clear();
+        _queueItemsByPath.Clear();
+
+        var queuedPackages = _settings.UnitypackageFiles;
+        if (queuedPackages is not null)
+            foreach (var package in queuedPackages)
+            {
+                if (package is null || !package.IsInQueue)
+                    continue;
+
+                AddOrUpdateQueueDisplayItem(package);
+            }
+
+        UpdateQueueVisualState();
+    }
+
+    private void AddOrUpdateQueueDisplayItem(UnityPackageFile package, string? normalizedPath = null)
+    {
+        if (package is null)
+            return;
+
+        var key = !string.IsNullOrWhiteSpace(normalizedPath)
+            ? normalizedPath!
+            : TryNormalizeFilePath(package.FilePath);
+
+        if (string.IsNullOrWhiteSpace(key))
+            return;
+
+        if (_queueItemsByPath.TryGetValue(key, out var existing))
+        {
+            existing.UpdateFrom(package);
+            return;
+        }
+
+        var display = new QueueItemDisplay(package, key);
+        _queueItems.Add(display);
+        _queueItemsByPath[key] = display;
+    }
+
+    private void UpdateQueueVisualState()
+    {
+        var itemCount = _queueItems.Count;
+
+        if (_queueSummaryTextBlock is not null)
+            _queueSummaryTextBlock.Text = itemCount switch
+            {
+                0 => "Queue is empty",
+                1 => "1 package queued",
+                _ => $"{itemCount} packages queued"
+            };
+
+        if (_queueEmptyState is not null)
+            _queueEmptyState.IsVisible = itemCount == 0;
+
+        if (_queueItemsScrollViewer is not null)
+            _queueItemsScrollViewer.IsVisible = itemCount > 0;
+    }
+
+    private static string TryNormalizeFilePath(string? path)
+    {
+        if (string.IsNullOrWhiteSpace(path))
+            return string.Empty;
+
+        try
+        {
+            return Path.GetFullPath(path);
+        }
+        catch
+        {
+            return path;
+        }
+    }
+
+    private static string FormatFileSize(long bytes)
+    {
+        if (bytes <= 0)
+            return "0 B";
+
+        var units = new[] { "B", "KB", "MB", "GB", "TB", "PB" };
+        var size = (double)bytes;
+        var unitIndex = 0;
+
+        while (size >= 1024 && unitIndex < units.Length - 1)
+        {
+            size /= 1024;
+            unitIndex++;
+        }
+
+        return unitIndex == 0
+            ? $"{bytes} {units[unitIndex]}"
+            : $"{size:0.##} {units[unitIndex]}";
     }
 
     private void SetDropZoneClass(string className, bool shouldApply)
@@ -487,15 +624,122 @@ public partial class MainWindow : Window
         _dropStatusReset = null;
     }
 
-    private async void DetailsBtn_OnClick(object? sender, RoutedEventArgs e)
+    private async void CheckUpdatesButton_OnClick(object? sender, RoutedEventArgs e)
     {
-        if (_overlayContent?.Content is ReleaseNotesView)
+        if (_isCheckingForUpdates)
             return;
 
-        var releaseNotesView = new ReleaseNotesView();
-        releaseNotesView.CloseRequested += OnReleaseNotesCloseRequested;
+        _isCheckingForUpdates = true;
 
-        await ShowOverlayAsync(releaseNotesView);
+        var button = _checkUpdatesButton ?? sender as Button;
+        if (button is not null)
+        {
+            _checkUpdatesButtonOriginalContent ??= button.Content;
+            button.IsEnabled = false;
+            button.Content = "Checking...";
+        }
+
+        SetVersionStatusMessage("Checking for updates...");
+
+        try
+        {
+            var latestReleaseTag = await GetLatestReleaseTagAsync();
+
+            if (string.IsNullOrWhiteSpace(latestReleaseTag))
+            {
+                SetVersionStatusMessage("No releases found", TimeSpan.FromSeconds(6));
+                ShowDropStatusMessage("No releases found", "Check again later.", TimeSpan.FromSeconds(4));
+                return;
+            }
+
+            var currentVersionText = GetCurrentVersionForComparison();
+            if (!TryParseVersion(currentVersionText, out var currentVersion))
+            {
+                SetVersionStatusMessage($"Latest release {latestReleaseTag}", TimeSpan.FromSeconds(6));
+                ShowDropStatusMessage(
+                    "Latest release fetched",
+                    $"Current version unknown. Latest is {latestReleaseTag}.",
+                    TimeSpan.FromSeconds(6));
+                return;
+            }
+
+            if (!TryParseVersion(latestReleaseTag, out var latestVersion))
+            {
+                SetVersionStatusMessage("Unable to parse latest version", TimeSpan.FromSeconds(6));
+                ShowDropStatusMessage(
+                    "Could not parse release version",
+                    "Visit the GitHub releases page to check manually.",
+                    TimeSpan.FromSeconds(6));
+                return;
+            }
+
+            if (latestVersion > currentVersion)
+            {
+                SetVersionStatusMessage($"Update available ({latestReleaseTag})");
+                ShowDropStatusMessage(
+                    "Update available!",
+                    $"Latest version is {latestReleaseTag}. Visit the GitHub releases page to download.",
+                    TimeSpan.FromSeconds(8));
+            }
+            else
+            {
+                SetVersionStatusMessage("Up to date", TimeSpan.FromSeconds(6));
+                ShowDropStatusMessage(
+                    "You're up to date",
+                    $"Version {currentVersionText} matches the latest release.",
+                    TimeSpan.FromSeconds(6));
+            }
+        }
+        catch (HttpRequestException httpEx)
+        {
+            SetVersionStatusMessage("Check failed", TimeSpan.FromSeconds(6));
+            ShowDropStatusMessage("Update check failed", httpEx.Message, TimeSpan.FromSeconds(6));
+        }
+        catch (TaskCanceledException)
+        {
+            SetVersionStatusMessage("Check timed out", TimeSpan.FromSeconds(6));
+            ShowDropStatusMessage("Update check timed out", "Please try again.", TimeSpan.FromSeconds(6));
+        }
+        catch (Exception ex)
+        {
+            SetVersionStatusMessage("Unexpected error", TimeSpan.FromSeconds(6));
+            ShowDropStatusMessage("Unexpected error", ex.Message, TimeSpan.FromSeconds(6));
+        }
+        finally
+        {
+            if (button is not null)
+            {
+                if (_checkUpdatesButtonOriginalContent is not null)
+                    button.Content = _checkUpdatesButtonOriginalContent;
+                button.IsEnabled = true;
+            }
+
+            _isCheckingForUpdates = false;
+        }
+    }
+
+    private static async Task<string?> GetLatestReleaseTagAsync(CancellationToken cancellationToken = default)
+    {
+        using var request = new HttpRequestMessage(HttpMethod.Get, GitHubLatestReleaseEndpoint);
+        request.Headers.UserAgent.ParseAdd(
+            "EasyExtractCrossPlatform/2.0 (+https://github.com/HakuSystems/EasyExtractUnitypackage)");
+        request.Headers.Accept.ParseAdd("application/vnd.github+json");
+
+        using var response = await BackgroundHttpClient.SendAsync(request, cancellationToken).ConfigureAwait(false);
+        if (!response.IsSuccessStatusCode)
+        {
+            var reason = $"{(int)response.StatusCode} {response.ReasonPhrase}".Trim();
+            throw new HttpRequestException($"GitHub responded with {reason} while checking for updates.");
+        }
+
+        await using var stream = await response.Content.ReadAsStreamAsync(cancellationToken).ConfigureAwait(false);
+        using var document = await JsonDocument.ParseAsync(stream, cancellationToken: cancellationToken)
+            .ConfigureAwait(false);
+
+        if (document.RootElement.TryGetProperty("tag_name", out var tagProperty))
+            return tagProperty.GetString();
+
+        return null;
     }
 
     private async void SettingsButton_OnClick(object? sender, RoutedEventArgs e)
@@ -508,12 +752,6 @@ public partial class MainWindow : Window
         settingsView.Cancelled += OnSettingsCancelled;
 
         await ShowOverlayAsync(settingsView);
-    }
-
-    private async void OnReleaseNotesCloseRequested(object? sender, EventArgs e)
-    {
-        if (sender is ReleaseNotesView releaseNotesView)
-            await CloseOverlayAsync(releaseNotesView);
     }
 
     private async void OnSettingsSaved(object? sender, AppSettings settings)
@@ -570,9 +808,6 @@ public partial class MainWindow : Window
     {
         switch (control)
         {
-            case ReleaseNotesView releaseNotesView:
-                releaseNotesView.CloseRequested -= OnReleaseNotesCloseRequested;
-                break;
             case SettingsView settingsView:
                 settingsView.SettingsSaved -= OnSettingsSaved;
                 settingsView.Cancelled -= OnSettingsCancelled;
@@ -808,6 +1043,7 @@ public partial class MainWindow : Window
         if (!string.IsNullOrWhiteSpace(settings.AppTitle))
             Title = settings.AppTitle;
 
+        ReloadQueueFromSettings();
         ApplyTheme(settings.ApplicationTheme);
         _ = ApplyCustomBackgroundAsync(settings);
     }
@@ -925,10 +1161,26 @@ public partial class MainWindow : Window
         if (_versionTextBlock is null)
             return;
 
-        var version = VersionProvider.GetApplicationVersion();
+        CancelVersionStatusReset();
 
-        if (!string.IsNullOrWhiteSpace(version))
-            _versionTextBlock.Text = $"Version {version}";
+        var version = VersionProvider.GetApplicationVersion();
+        if (string.IsNullOrWhiteSpace(version))
+            version = _settings.Update?.CurrentVersion;
+
+        version = version?.Trim();
+
+        if (string.IsNullOrWhiteSpace(version))
+        {
+            _currentVersionDisplay = null;
+            _versionTextBlock.Text = UnknownVersionLabel;
+            return;
+        }
+
+        _currentVersionDisplay = version;
+        if (_settings.Update is null)
+            _settings.Update = new UpdateSettings();
+        _settings.Update.CurrentVersion = version;
+        _versionTextBlock.Text = $"Version {version}";
     }
 
     protected override void OnClosed(EventArgs e)
@@ -938,6 +1190,107 @@ public partial class MainWindow : Window
         _currentBackgroundBitmap = null;
     }
 
+    private void CancelVersionStatusReset()
+    {
+        if (_versionStatusReset is null)
+            return;
+
+        _versionStatusReset.Dispose();
+        _versionStatusReset = null;
+    }
+
+    private void SetVersionStatusMessage(string? status, TimeSpan? resetAfter = null)
+    {
+        if (_versionTextBlock is null)
+            return;
+
+        string label;
+        if (string.IsNullOrWhiteSpace(_currentVersionDisplay))
+        {
+            label = UnknownVersionLabel;
+            _versionTextBlock.Text = string.IsNullOrWhiteSpace(status)
+                ? label
+                : $"{label} - {status}";
+        }
+        else
+        {
+            label = $"Version {_currentVersionDisplay}";
+            _versionTextBlock.Text = string.IsNullOrWhiteSpace(status)
+                ? label
+                : $"{label} - {status}";
+        }
+
+        CancelVersionStatusReset();
+
+        if (resetAfter is { } duration && duration > TimeSpan.Zero)
+            _versionStatusReset = DispatcherTimer.RunOnce(() =>
+            {
+                if (_versionTextBlock is null)
+                    return;
+
+                if (string.IsNullOrWhiteSpace(_currentVersionDisplay))
+                    _versionTextBlock.Text = UnknownVersionLabel;
+                else
+                    _versionTextBlock.Text = $"Version {_currentVersionDisplay}";
+
+                _versionStatusReset = null;
+            }, duration);
+    }
+
+    private string? GetCurrentVersionForComparison()
+    {
+        if (!string.IsNullOrWhiteSpace(_currentVersionDisplay))
+            return _currentVersionDisplay;
+
+        var settingsVersion = _settings.Update?.CurrentVersion;
+        if (!string.IsNullOrWhiteSpace(settingsVersion))
+            return settingsVersion.Trim();
+
+        var assemblyVersion = VersionProvider.GetApplicationVersion();
+        return string.IsNullOrWhiteSpace(assemblyVersion) ? null : assemblyVersion.Trim();
+    }
+
+    private static bool TryParseVersion(string? value, [NotNullWhen(true)] out Version? result)
+    {
+        result = null;
+        if (string.IsNullOrWhiteSpace(value))
+            return false;
+
+        var normalized = value.Trim();
+
+        if (normalized.StartsWith("version", StringComparison.OrdinalIgnoreCase))
+            normalized = normalized[7..].Trim();
+
+        if (normalized.StartsWith("v", StringComparison.OrdinalIgnoreCase))
+            normalized = normalized[1..].Trim();
+
+        var separatorIndex = normalized.IndexOfAny(new[] { ' ', '-', '+', '_' });
+        if (separatorIndex > 0)
+            normalized = normalized[..separatorIndex].Trim();
+
+        var length = 0;
+        while (length < normalized.Length)
+        {
+            var c = normalized[length];
+            if ((c >= '0' && c <= '9') || c == '.')
+            {
+                length++;
+                continue;
+            }
+
+            break;
+        }
+
+        if (length <= 0)
+            return false;
+
+        normalized = normalized[..length].Trim('.');
+        if (string.IsNullOrWhiteSpace(normalized))
+            return false;
+
+        return Version.TryParse(normalized, out result);
+    }
+
     private IBrush ResolveDefaultBackgroundBrush()
     {
         if (Application.Current?.Resources.TryGetValue("EasyWindowBackgroundBrush", out var resource) == true &&
@@ -945,6 +1298,96 @@ public partial class MainWindow : Window
             return brush;
 
         return Background ?? new SolidColorBrush(Colors.Black);
+    }
+
+    private sealed class QueueItemDisplay : INotifyPropertyChanged
+    {
+        private bool _isExtracting;
+
+        public QueueItemDisplay(UnityPackageFile source, string normalizedPath)
+        {
+            NormalizedPath = normalizedPath;
+            FilePath = string.IsNullOrWhiteSpace(source.FilePath) ? normalizedPath : source.FilePath;
+            FileName = string.IsNullOrWhiteSpace(source.FileName)
+                ? Path.GetFileName(FilePath)
+                : source.FileName;
+            FileSizeBytes = ParseFileSize(source.FileSize);
+            LastUpdated = ParseLastUpdated(source.FileDate);
+            UpdateFrom(source);
+        }
+
+        public string NormalizedPath { get; }
+
+        public string FilePath { get; }
+
+        public string FileName { get; }
+
+        public long FileSizeBytes { get; }
+
+        public DateTimeOffset? LastUpdated { get; }
+
+        public string SizeText => FormatFileSize(FileSizeBytes);
+
+        public string StatusText => IsExtracting ? "Extracting..." : "Queued";
+
+        public string LocationText => string.IsNullOrWhiteSpace(FilePath)
+            ? "Location unavailable"
+            : Path.GetDirectoryName(FilePath) is { Length: > 0 } directory
+                ? directory
+                : FilePath;
+
+        public bool IsExtracting
+        {
+            get => _isExtracting;
+            private set
+            {
+                if (_isExtracting == value)
+                    return;
+
+                _isExtracting = value;
+                OnPropertyChanged();
+                OnPropertyChanged(nameof(StatusText));
+            }
+        }
+
+        public event PropertyChangedEventHandler? PropertyChanged;
+
+        public void UpdateFrom(UnityPackageFile source)
+        {
+            IsExtracting = source.IsExtracting;
+        }
+
+        private void OnPropertyChanged([CallerMemberName] string? propertyName = null)
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        }
+
+        private static long ParseFileSize(string? input)
+        {
+            if (long.TryParse(input, NumberStyles.Integer, CultureInfo.InvariantCulture, out var value) && value >= 0)
+                return value;
+
+            return 0;
+        }
+
+        private static DateTimeOffset? ParseLastUpdated(string? input)
+        {
+            if (string.IsNullOrWhiteSpace(input))
+                return null;
+
+            if (DateTimeOffset.TryParse(
+                    input,
+                    CultureInfo.InvariantCulture,
+                    DateTimeStyles.AssumeUniversal | DateTimeStyles.AdjustToUniversal,
+                    out var result))
+                return result;
+
+            if (DateTimeOffset.TryParse(input, CultureInfo.CurrentCulture, DateTimeStyles.AssumeUniversal,
+                    out var fallback))
+                return fallback;
+
+            return null;
+        }
     }
 
     private readonly record struct QueueResult(int AddedCount, int AlreadyQueuedCount);

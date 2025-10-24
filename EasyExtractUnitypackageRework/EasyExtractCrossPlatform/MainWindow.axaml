@@ -106,13 +106,17 @@
                                                    FontWeight="SemiBold" />
                                     </StackPanel>
                                 </Border>
-                                <Button x:Name="DetailsBtn"
+                                <Button x:Name="CheckUpdatesButton"
                                         Classes="ghost"
-                                        Click="DetailsBtn_OnClick">
+                                        Click="CheckUpdatesButton_OnClick">
                                     <Button.Content>
-                                        <StackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
-                                            <TextBlock Text="Release notes" />
-                                            <PathIcon Data="M8 6V18L18 12L8 6Z" Width="16" Height="16" />
+                                        <StackPanel Orientation="Horizontal"
+                                                    Spacing="8"
+                                                    VerticalAlignment="Center">
+                                            <PathIcon Data="M12 4A8 8 0 1 0 20 12H18A6 6 0 1 1 12 6V9L16 5L12 1V4Z"
+                                                      Width="16"
+                                                      Height="16" />
+                                            <TextBlock Text="Check for updates" />
                                         </StackPanel>
                                     </Button.Content>
                                 </Button>
@@ -273,6 +277,96 @@
                                         Background="{DynamicResource EasyGlassOverlayBrush}"
                                         BorderBrush="{DynamicResource EasyGlassNeutralBorderBrush}"
                                         BorderThickness="1">
+                                    <PathIcon
+                                        Data="M5 4H19C20.1046 4 21 4.89543 21 6V18C21 19.1046 20.1046 20 19 20H5C3.89543 20 3 19.1046 3 18V6C3 4.89543 3.89543 4 5 4Z M7 8H17V10H7V8Z M7 12H17V14H7V12Z M7 16H14V18H7V16Z"
+                                        Width="20"
+                                        Height="20"
+                                        Foreground="{DynamicResource EasyAccentBrush}"
+                                        VerticalAlignment="Center" />
+                                </Border>
+                                <StackPanel>
+                                    <TextBlock Text="Extraction queue"
+                                               FontWeight="SemiBold"
+                                               FontSize="18" />
+                                    <TextBlock x:Name="QueueSummaryTextBlock"
+                                               Text="Queue is empty"
+                                               Classes="subtle" />
+                                </StackPanel>
+                            </StackPanel>
+
+                            <StackPanel x:Name="QueueEmptyState"
+                                        Spacing="6"
+                                        HorizontalAlignment="Center"
+                                        VerticalAlignment="Center">
+                                <TextBlock Text="No packages in queue yet."
+                                           FontWeight="SemiBold"
+                                           TextAlignment="Center" />
+                                <TextBlock
+                                    Text="Drop .unitypackage files or add them from search to populate the queue."
+                                    Classes="subtle"
+                                    TextAlignment="Center"
+                                    MaxWidth="320" />
+                            </StackPanel>
+
+                            <ScrollViewer x:Name="QueueItemsScrollViewer"
+                                          MaxHeight="320"
+                                          IsVisible="False"
+                                          HorizontalScrollBarVisibility="Disabled"
+                                          VerticalScrollBarVisibility="Auto">
+                                <ItemsControl x:Name="QueueItemsControl">
+                                    <ItemsControl.ItemsPanel>
+                                        <ItemsPanelTemplate>
+                                            <StackPanel Spacing="12" />
+                                        </ItemsPanelTemplate>
+                                    </ItemsControl.ItemsPanel>
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate x:CompileBindings="False">
+                                            <Border CornerRadius="18"
+                                                    Background="{DynamicResource EasyGlassOverlayFaintBrush}"
+                                                    BorderBrush="{DynamicResource EasyGlassNeutralBorderBrush}"
+                                                    BorderThickness="1"
+                                                    Padding="16">
+                                                <Grid ColumnDefinitions="*,Auto">
+                                                    <StackPanel Spacing="4">
+                                                        <TextBlock Text="{Binding FileName}"
+                                                                   FontWeight="SemiBold"
+                                                                   TextTrimming="CharacterEllipsis" />
+                                                        <TextBlock Text="{Binding LocationText}"
+                                                                   Classes="subtle"
+                                                                   TextTrimming="CharacterEllipsis"
+                                                                   ToolTip.Tip="{Binding FilePath}" />
+                                                    </StackPanel>
+                                                    <StackPanel Grid.Column="1"
+                                                                Margin="16,0,0,0"
+                                                                Spacing="4"
+                                                                HorizontalAlignment="Right">
+                                                        <TextBlock Text="{Binding SizeText}"
+                                                                   FontWeight="SemiBold"
+                                                                   HorizontalAlignment="Right" />
+                                                        <TextBlock Text="{Binding StatusText}"
+                                                                   Classes="subtle"
+                                                                   HorizontalAlignment="Right" />
+                                                    </StackPanel>
+                                                </Grid>
+                                            </Border>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                            </ScrollViewer>
+                        </StackPanel>
+                    </Border>
+                    <Border Padding="28"
+                            CornerRadius="24"
+                            Background="{DynamicResource EasyGlassGradientBrush}"
+                            BorderBrush="{DynamicResource EasyGlassBorderBrush}"
+                            BorderThickness="1"
+                            BoxShadow="0 26 50 0 #14000000">
+                        <StackPanel Spacing="18">
+                            <StackPanel Orientation="Horizontal" Spacing="12" VerticalAlignment="Center">
+                                <Border Width="36" Height="36" CornerRadius="18"
+                                        Background="{DynamicResource EasyGlassOverlayBrush}"
+                                        BorderBrush="{DynamicResource EasyGlassNeutralBorderBrush}"
+                                        BorderThickness="1">
                                     <Image Source="avares://EasyExtractCrossPlatform/Assets/AppBadge.png"
                                            Stretch="Uniform"
                                            Margin="6" />
@@ -316,35 +410,6 @@
                         </StackPanel>
                     </Border>
 
-                    <Border Padding="28"
-                            CornerRadius="24"
-                            Background="{DynamicResource EasyGlassGradientBrush}"
-                            BorderBrush="{DynamicResource EasyGlassBorderBrush}"
-                            BorderThickness="1"
-                            BoxShadow="0 24 48 0 #14000000">
-                        <StackPanel Spacing="12">
-                            <StackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
-                                <PathIcon
-                                    Data="M12 2C8.13401 2 5 5.13401 5 9C5 11.0864 5.82107 13.0592 7.28948 14.5355L12 22L16.7105 14.5355C18.1789 13.0592 19 11.0864 19 9C19 5.13401 15.866 2 12 2ZM12 5.5C13.933 5.5 15.5 7.067 15.5 9C15.5 10.933 13.933 12.5 12 12.5C10.067 12.5 8.5 10.933 8.5 9C8.5 7.067 10.067 5.5 12 5.5Z"
-                                    Width="20"
-                                    Height="20"
-                                    Foreground="{DynamicResource EasyAccentBrush}"
-                                    VerticalAlignment="Center" />
-                                <TextBlock Text="Release channel"
-                                           FontWeight="SemiBold"
-                                           FontSize="18" />
-                            </StackPanel>
-                            <TextBlock Text="You're running the latest build."
-                                       Classes="subtle" />
-                            <Separator Margin="0,4" />
-                            <TextBlock Text="Credits to Jan-Fcloud for Some ideas"
-                                       Classes="subtle"
-                                       Opacity="0.6" />
-                            <TextBlock Text="Credits to DigitalAzure for the logo"
-                                       Classes="subtle"
-                                       Opacity="0.6" />
-                        </StackPanel>
-                    </Border>
                 </StackPanel>
             </Grid>
 
