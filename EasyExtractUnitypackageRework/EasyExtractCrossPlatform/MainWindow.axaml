@@ -80,48 +80,51 @@
                                Margin="12" />
                     </Border>
 
-                    <StackPanel Grid.Row="0"
-                                Grid.Column="1"
-                                Spacing="12"
-                                VerticalAlignment="Top"
-                                Margin="24,0,0,0">
-                        <TextBlock Text="EasyExtract"
-                                   Classes="display" />
-                        <TextBlock Text="Extract Unity Packages Without Unity"
-                                   Classes="subtle"
-                                   HorizontalAlignment="Left"
-                                   MaxWidth="480" />
-                        <StackPanel Orientation="Horizontal" Spacing="12">
-                            <Border Padding="12,6"
-                                    Background="{DynamicResource EasyGlassOverlayStrongBrush}"
-                                    CornerRadius="12">
-                                <StackPanel Orientation="Horizontal" Spacing="8">
-                                    <Ellipse Width="10" Height="10" Fill="{DynamicResource EasyAccentBrush}"
-                                             VerticalAlignment="Center" />
-                                    <TextBlock x:Name="VersionTextBlock"
-                                               Text="Version 0.0.0.0"
-                                               VerticalAlignment="Center"
-                                               FontWeight="SemiBold" />
-                                </StackPanel>
-                            </Border>
-                            <Button x:Name="DetailsBtn"
-                                    Classes="ghost"
-                                    Click="DetailsBtn_OnClick">
-                                <Button.Content>
-                                    <StackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
-                                        <TextBlock Text="Release notes" />
-                                        <PathIcon Data="M8 6V18L18 12L8 6Z" Width="16" Height="16" />
+                    <Grid Grid.Column="1"
+                          Grid.RowSpan="2"
+                          ColumnDefinitions="*,Auto">
+                        <StackPanel Grid.Column="0"
+                                    Spacing="12"
+                                    VerticalAlignment="Top"
+                                    Margin="24,0,0,0">
+                            <TextBlock Text="EasyExtract"
+                                       Classes="display" />
+                            <TextBlock Text="Extract Unity Packages Without Unity"
+                                       Classes="subtle"
+                                       HorizontalAlignment="Left"
+                                       MaxWidth="480" />
+                            <StackPanel Orientation="Horizontal" Spacing="12">
+                                <Border Padding="12,6"
+                                        Background="{DynamicResource EasyGlassOverlayStrongBrush}"
+                                        CornerRadius="12">
+                                    <StackPanel Orientation="Horizontal" Spacing="8">
+                                        <Ellipse Width="10" Height="10" Fill="{DynamicResource EasyAccentBrush}"
+                                                 VerticalAlignment="Center" />
+                                        <TextBlock x:Name="VersionTextBlock"
+                                                   Text="Version 0.0.0.0"
+                                                   VerticalAlignment="Center"
+                                                   FontWeight="SemiBold" />
                                     </StackPanel>
-                                </Button.Content>
-                            </Button>
+                                </Border>
+                                <Button x:Name="DetailsBtn"
+                                        Classes="ghost"
+                                        Click="DetailsBtn_OnClick">
+                                    <Button.Content>
+                                        <StackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                                            <TextBlock Text="Release notes" />
+                                            <PathIcon Data="M8 6V18L18 12L8 6Z" Width="16" Height="16" />
+                                        </StackPanel>
+                                    </Button.Content>
+                                </Button>
+                            </StackPanel>
                         </StackPanel>
-                    </StackPanel>
-                    <views:EverythingSearchView Grid.Row="1"
-                                                Grid.Column="1"
-                                                Margin="0,24,0,0"
-                                                HorizontalAlignment="Left"
-                                                MaxWidth="640"
-                                                Classes="compact" />
+                        <views:EverythingSearchView Grid.Column="1"
+                                                    Margin="32,0,0,0"
+                                                    HorizontalAlignment="Right"
+                                                    VerticalAlignment="Top"
+                                                    MaxWidth="640"
+                                                    Classes="compact" />
+                    </Grid>
                 </Grid>
             </Border>
 

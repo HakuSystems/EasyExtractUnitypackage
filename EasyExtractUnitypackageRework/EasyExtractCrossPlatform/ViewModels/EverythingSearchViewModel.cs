@@ -24,7 +24,7 @@ public sealed class EverythingSearchViewModel : INotifyPropertyChanged, IDisposa
     private readonly IEverythingSearchService _searchService;
     private CancellationTokenSource? _activeSearchCts;
     private bool _hasError;
-    private bool _isEverythingAvailable = true;
+    private bool _isEverythingAvailable;
     private bool _isSearching;
     private string _searchQuery = string.Empty;
     private string? _statusMessage = DefaultStatus;
@@ -116,11 +116,14 @@ public sealed class EverythingSearchViewModel : INotifyPropertyChanged, IDisposa
 
             _isEverythingAvailable = value;
             OnPropertyChanged();
+            OnPropertyChanged(nameof(ShowUnavailableNotice));
             SearchCommand.RaiseCanExecuteChanged();
             if (!value)
                 _autoSearchTimer.Stop();
         }
     }
+
+    public bool ShowUnavailableNotice => !IsEverythingAvailable;
 
     public bool HasResults => Results.Count > 0;
 
