@@ -188,7 +188,8 @@
                                     <TextBlock Text="Start a new extraction"
                                                FontSize="26"
                                                FontWeight="Bold"
-                                               VerticalAlignment="Center" />
+                                               VerticalAlignment="Center"
+                                               HorizontalAlignment="Center" />
                                 </StackPanel>
 
                                 <Border x:Name="SearchRevealHost"
@@ -270,11 +271,6 @@
                                     </Grid>
                                 </Border>
                             </Grid>
-
-                            <TextBlock Grid.Row="1"
-                                       Text="Drag &amp; drop a .unitypackage or choose a source to begin."
-                                       Margin="0,8,0,0"
-                                       Classes="subtle" />
                         </Grid>
 
                         <Grid>
@@ -315,7 +311,9 @@
                                     <StackPanel Orientation="Horizontal"
                                                 Spacing="10"
                                                 HorizontalAlignment="Center">
-                                        <Button Width="160">
+                                        <Button x:Name="StartExtractionButton"
+                                                Width="160"
+                                                Click="StartExtractionButton_OnClick">
                                             <Button.Content>
                                                 <StackPanel Orientation="Horizontal" Spacing="8"
                                                             HorizontalAlignment="Center">
@@ -325,12 +323,14 @@
                                                         Height="18"
                                                         Foreground="{DynamicResource EasyAccentBrush}"
                                                         VerticalAlignment="Center" />
-                                                    <TextBlock Text="Browse files"
+                                                    <TextBlock Text="Start extraction"
                                                                VerticalAlignment="Center" />
                                                 </StackPanel>
                                             </Button.Content>
                                         </Button>
-                                        <Button Classes="ghost">
+                                        <Button x:Name="BatchExtractionButton"
+                                                Classes="ghost"
+                                                Click="BatchExtractionButton_OnClick">
                                             <Button.Content>
                                                 <StackPanel Orientation="Horizontal" Spacing="8"
                                                             VerticalAlignment="Center">
@@ -340,7 +340,7 @@
                                                         Height="18"
                                                         Foreground="{DynamicResource EasyAccentBrush}"
                                                         VerticalAlignment="Center" />
-                                                    <TextBlock Text="Add folder"
+                                                    <TextBlock Text="Batch extraction"
                                                                VerticalAlignment="Center" />
                                                 </StackPanel>
                                             </Button.Content>
@@ -365,40 +365,6 @@
                                                             VerticalAlignment="Stretch" />
                             </Border>
                         </Grid>
-
-                        <StackPanel Spacing="12">
-                            <StackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
-                                <PathIcon
-                                    Data="M12 2C7.02944 2 3 6.02944 3 11C3 14.2816 4.83517 17.1716 7.5 18.7386V20.5C7.5 21.0523 7.94772 21.5 8.5 21.5H15.5C16.0523 21.5 16.5 21.0523 16.5 20.5V18.7386C19.1648 17.1716 21 14.2816 21 11C21 6.02944 16.9706 2 12 2ZM13 18.5H11V12.5H13V18.5ZM13 10.5H11V8.5H13V10.5Z"
-                                    Width="20"
-                                    Height="20"
-                                    Foreground="{DynamicResource EasyAccentBrush}"
-                                    VerticalAlignment="Center" />
-                                <TextBlock Text="Helpful tips"
-                                           FontWeight="SemiBold" />
-                            </StackPanel>
-                            <StackPanel Spacing="10">
-                                <StackPanel Orientation="Horizontal" Spacing="12">
-                                    <PathIcon Data="M20 6L9 17L4 12L5.41 10.59L9 14.17L18.59 4.58L20 6Z"
-                                              Width="16"
-                                              Height="16"
-                                              Foreground="{DynamicResource EasyAccentBrush}"
-                                              VerticalAlignment="Center" />
-                                    <TextBlock Text="Outputs mirror the original package structure for quick audits."
-                                               Classes="subtle" />
-                                </StackPanel>
-                                <StackPanel Orientation="Horizontal" Spacing="12">
-                                    <PathIcon
-                                        Data="M12 5C7 5 2.73 8.11 1 12C2.73 15.89 7 19 12 19C17 19 21.27 15.89 23 12C21.27 8.11 17 5 12 5ZM12 17C9.23858 17 7 14.7614 7 12C7 9.23858 9.23858 7 12 7C14.7614 7 17 9.23858 17 12C17 14.7614 14.7614 17 12 17ZM12 9.5C10.6193 9.5 9.5 10.6193 9.5 12C9.5 13.3807 10.6193 14.5 12 14.5C13.3807 14.5 14.5 13.3807 14.5 12C14.5 10.6193 13.3807 9.5 12 9.5Z"
-                                        Width="16"
-                                        Height="16"
-                                        Foreground="{DynamicResource EasyAccentBrush}"
-                                        VerticalAlignment="Center" />
-                                    <TextBlock Text="Keep the window visible to watch real-time progress overlays."
-                                               Classes="subtle" />
-                                </StackPanel>
-                            </StackPanel>
-                        </StackPanel>
                     </StackPanel>
                 </Border>
 
@@ -432,14 +398,20 @@
                                                Text="Queue is empty"
                                                Classes="subtle" />
                                 </StackPanel>
-                                <Button Grid.Column="2"
-                                        x:Name="ClearQueueButton"
-                                        Classes="ghost"
-                                        Margin="12,0,0,0"
-                                        Click="ClearQueueButton_OnClick"
-                                        ToolTip.Tip="Remove every package from the queue."
-                                        HorizontalAlignment="Right"
-                                        Content="Clear queue" />
+                                <StackPanel Grid.Column="2"
+                                            Orientation="Horizontal"
+                                            Spacing="8"
+                                            HorizontalAlignment="Right">
+                                    <Button x:Name="ProcessQueueButton"
+                                            Click="ProcessQueueButton_OnClick"
+                                            ToolTip.Tip="Extract every package currently queued."
+                                            Content="Extract queue" />
+                                    <Button x:Name="ClearQueueButton"
+                                            Classes="ghost"
+                                            Click="ClearQueueButton_OnClick"
+                                            ToolTip.Tip="Remove every package from the queue."
+                                            Content="Clear queue" />
+                                </StackPanel>
                             </Grid>
 
                             <StackPanel x:Name="QueueEmptyState"
@@ -501,6 +473,150 @@
                                     </ItemsControl.ItemTemplate>
                                 </ItemsControl>
                             </ScrollViewer>
+                        </StackPanel>
+                    </Border>
+                    <Border x:Name="ExtractionDashboard"
+                            Padding="28"
+                            CornerRadius="24"
+                            Background="{DynamicResource EasyGlassGradientBrush}"
+                            BorderBrush="{DynamicResource EasyAccentSoftBrush}"
+                            BorderThickness="1"
+                            BoxShadow="0 26 60 0 #18000000"
+                            Opacity="0"
+                            IsVisible="False">
+                        <Border.Transitions>
+                            <Transitions>
+                                <DoubleTransition Property="Opacity"
+                                                  Duration="0:0:0.25"
+                                                  Easing="0.2,0.8,0.2,1" />
+                            </Transitions>
+                        </Border.Transitions>
+                        <Border.RenderTransform>
+                            <ScaleTransform ScaleX="0.98" ScaleY="0.98">
+                                <ScaleTransform.Transitions>
+                                    <Transitions>
+                                        <DoubleTransition Property="{x:Static ScaleTransform.ScaleXProperty}"
+                                                          Duration="0:0:0.25"
+                                                          Easing="0.2,0.8,0.2,1" />
+                                        <DoubleTransition Property="{x:Static ScaleTransform.ScaleYProperty}"
+                                                          Duration="0:0:0.25"
+                                                          Easing="0.2,0.8,0.2,1" />
+                                    </Transitions>
+                                </ScaleTransform.Transitions>
+                            </ScaleTransform>
+                        </Border.RenderTransform>
+                        <StackPanel Spacing="18">
+                            <Grid ColumnDefinitions="Auto,*,Auto" VerticalAlignment="Center">
+                                <Border Grid.Column="0"
+                                        Width="40" Height="40" CornerRadius="20"
+                                        Background="{DynamicResource EasyGlassOverlayStrongBrush}"
+                                        BorderBrush="{DynamicResource EasyAccentBrush}"
+                                        BorderThickness="1">
+                                    <PathIcon
+                                        Data="M12 2C6.477 2 2 6.477 2 12C2 17.523 6.477 22 12 22C17.523 22 22 17.523 22 12H19.5C19.5 16.1421 16.1421 19.5 12 19.5C7.85786 19.5 4.5 16.1421 4.5 12C4.5 7.85786 7.85786 4.5 12 4.5C14.0196 4.5 15.8645 5.28121 17.1905 6.60998L14.5 9.25H22V2L19.1757 4.82426C17.4006 3.04502 14.8484 2 12 2Z"
+                                        Width="20"
+                                        Height="20"
+                                        Foreground="{DynamicResource EasyAccentBrush}"
+                                        HorizontalAlignment="Center"
+                                        VerticalAlignment="Center" />
+                                </Border>
+                                <StackPanel Grid.Column="1" Margin="12,0,0,0">
+                                    <TextBlock Text="Extraction in progress"
+                                               FontSize="18"
+                                               FontWeight="SemiBold" />
+                                    <TextBlock x:Name="ExtractionDashboardSubtitle"
+                                               Text="Preparing package..."
+                                               Classes="subtle" />
+                                </StackPanel>
+                                <Border Grid.Column="2"
+                                        Margin="12,0,0,0"
+                                        HorizontalAlignment="Right"
+                                        VerticalAlignment="Center"
+                                        Padding="10,4"
+                                        CornerRadius="12"
+                                        Background="{DynamicResource EasyGlassOverlayStrongBrush}"
+                                        BorderBrush="{DynamicResource EasyAccentSoftBrush}"
+                                        BorderThickness="1">
+                                    <TextBlock x:Name="ExtractionDashboardQueueCount"
+                                               Text="Queue: 0"
+                                               FontWeight="SemiBold"
+                                               Foreground="{DynamicResource EasyAccentBrush}" />
+                                </Border>
+                            </Grid>
+
+                            <Grid ColumnDefinitions="*,Auto" RowDefinitions="Auto,Auto">
+                                <ProgressBar x:Name="ExtractionDashboardProgressBar"
+                                             Grid.ColumnSpan="2"
+                                             Height="12"
+                                             Classes="accent"
+                                             IsIndeterminate="True" />
+                                <TextBlock Grid.Row="1"
+                                           Text="Current package"
+                                           Classes="subtle"
+                                           Margin="0,12,0,0" />
+                                <TextBlock x:Name="ExtractionDashboardPackageText"
+                                           Grid.Row="1"
+                                           Grid.Column="1"
+                                           Text="—"
+                                           Margin="12,12,0,0"
+                                           FontWeight="SemiBold"
+                                           TextTrimming="CharacterEllipsis" />
+                            </Grid>
+
+                            <StackPanel Spacing="12">
+                                <Grid ColumnDefinitions="Auto,*" RowDefinitions="Auto,Auto">
+                                    <TextBlock Text="Asset"
+                                               Classes="subtle" />
+                                    <TextBlock x:Name="ExtractionDashboardAssetText"
+                                               Grid.Column="1"
+                                               Text="Waiting..."
+                                               Margin="12,0,0,0"
+                                               TextTrimming="CharacterEllipsis" />
+                                    <TextBlock Grid.Row="1"
+                                               Text="Output"
+                                               Classes="subtle"
+                                               Margin="0,8,0,0" />
+                                    <TextBlock x:Name="ExtractionDashboardOutputText"
+                                               Grid.Row="1"
+                                               Grid.Column="1"
+                                               Text="—"
+                                               Margin="12,8,0,0"
+                                               TextTrimming="CharacterEllipsis" />
+                                </Grid>
+                                <Border CornerRadius="18"
+                                        BorderThickness="1"
+                                        BorderBrush="{DynamicResource EasyGlassNeutralBorderBrush}"
+                                        Background="{DynamicResource EasyGlassOverlayFaintBrush}"
+                                        Padding="16">
+                                    <Grid ColumnDefinitions="*,*,*">
+                                        <StackPanel Margin="0,0,16,0">
+                                            <TextBlock Text="Assets extracted"
+                                                       Classes="subtle" />
+                                            <TextBlock x:Name="ExtractionDashboardAssetCount"
+                                                       Text="0"
+                                                       FontSize="22"
+                                                       FontWeight="SemiBold" />
+                                        </StackPanel>
+                                        <StackPanel Margin="0,0,16,0">
+                                            <TextBlock Text="Elapsed time"
+                                                       Classes="subtle" />
+                                            <TextBlock x:Name="ExtractionDashboardElapsed"
+                                                       Text="0s"
+                                                       FontSize="22"
+                                                       FontWeight="SemiBold" />
+                                        </StackPanel>
+                                        <StackPanel>
+                                            <TextBlock Text="Next up"
+                                                       Classes="subtle" />
+                                            <TextBlock x:Name="ExtractionDashboardNextPackage"
+                                                       Text="All caught up"
+                                                       FontSize="22"
+                                                       FontWeight="SemiBold"
+                                                       TextTrimming="CharacterEllipsis" />
+                                        </StackPanel>
+                                    </Grid>
+                                </Border>
+                            </StackPanel>
                         </StackPanel>
                     </Border>
                     <Border Padding="28"
