@@ -15,6 +15,7 @@ public class AppSettings
     public List<string> SearchEverythingResults { get; set; } = new();
     public List<UnityPackageFile> UnitypackageFiles { get; set; } = new();
     public string AppTitle { get; set; } = "EasyExtractUnitypackage";
+    public string LicenseTier { get; set; } = "Free";
     public int ApplicationTheme { get; set; }
     public bool UwUModeActive { get; set; }
     public bool ContextMenuToggle { get; set; } = true;

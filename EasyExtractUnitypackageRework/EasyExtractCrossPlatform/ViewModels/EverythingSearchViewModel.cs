@@ -73,6 +73,7 @@ public sealed class EverythingSearchViewModel : INotifyPropertyChanged, IDisposa
 
             _searchQuery = value ?? string.Empty;
             OnPropertyChanged();
+            OnPropertyChanged(nameof(IsInteractionActive));
             SearchCommand.RaiseCanExecuteChanged();
             ClearCommand.RaiseCanExecuteChanged();
             ScheduleAutoSearch();
@@ -89,6 +90,7 @@ public sealed class EverythingSearchViewModel : INotifyPropertyChanged, IDisposa
 
             _isSearching = value;
             OnPropertyChanged();
+            OnPropertyChanged(nameof(IsInteractionActive));
             SearchCommand.RaiseCanExecuteChanged();
         }
     }
@@ -126,6 +128,8 @@ public sealed class EverythingSearchViewModel : INotifyPropertyChanged, IDisposa
     public bool ShowUnavailableNotice => !IsEverythingAvailable;
 
     public bool HasResults => Results.Count > 0;
+
+    public bool IsInteractionActive => IsSearching || HasResults || !string.IsNullOrWhiteSpace(SearchQuery);
 
     public string? StatusMessage
     {
@@ -332,6 +336,7 @@ public sealed class EverythingSearchViewModel : INotifyPropertyChanged, IDisposa
         Results.Clear();
         HasError = false;
         StatusMessage = DefaultStatus;
+        OnPropertyChanged(nameof(IsInteractionActive));
     }
 
     private void CancelActiveSearch()
@@ -346,6 +351,7 @@ public sealed class EverythingSearchViewModel : INotifyPropertyChanged, IDisposa
     private void HandleResultsChanged(object? sender, NotifyCollectionChangedEventArgs e)
     {
         OnPropertyChanged(nameof(HasResults));
+        OnPropertyChanged(nameof(IsInteractionActive));
         ClearCommand.RaiseCanExecuteChanged();
     }
 

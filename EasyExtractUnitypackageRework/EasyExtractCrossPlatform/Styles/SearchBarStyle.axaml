@@ -143,4 +143,9 @@
         <Setter Property="Background" Value="{DynamicResource EasyAccentStrongBrush}" />
         <Setter Property="BorderBrush" Value="{DynamicResource EasyAccentBrush}" />
     </Style>
+
+    <Style Selector="TextBox.search-bar-small">
+        <Setter Property="MinHeight" Value="44" />
+        <Setter Property="FontSize" Value="15" />
+    </Style>
 </Styles>

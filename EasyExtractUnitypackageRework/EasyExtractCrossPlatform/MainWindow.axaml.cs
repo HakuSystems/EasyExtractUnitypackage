@@ -24,6 +24,7 @@ using Avalonia.Threading;
 using EasyExtractCrossPlatform.Models;
 using EasyExtractCrossPlatform.Services;
 using EasyExtractCrossPlatform.Utilities;
+using EasyExtractCrossPlatform.ViewModels;
 
 namespace EasyExtractCrossPlatform;
 
@@ -35,14 +36,20 @@ public partial class MainWindow : Window
     private const string GitHubLatestReleaseEndpoint =
         "https://api.github.com/repos/HakuSystems/EasyExtractUnitypackage/releases/latest";
 
+    private const string ProUpgradeInfoUrl = "https://github.com/HakuSystems/EasyExtractUnitypackage#readme";
+
     private static readonly HttpClient BackgroundHttpClient = new();
     private readonly Button? _checkUpdatesButton;
+    private readonly Button? _clearQueueButton;
     private readonly IBrush _defaultBackgroundBrush;
     private readonly string _defaultDropPrimaryText = "Drag & drop files here";
     private readonly string _defaultDropSecondaryText = "Supports batch extraction and live progress updates.";
     private readonly Border? _dropZoneBorder;
     private readonly TextBlock? _dropZonePrimaryTextBlock;
     private readonly TextBlock? _dropZoneSecondaryTextBlock;
+    private readonly EverythingSearchView? _everythingSearchView;
+    private readonly Border? _licenseTierBadge;
+    private readonly TextBlock? _licenseTierTextBlock;
     private readonly Border? _overlayCard;
     private readonly ContentControl? _overlayContent;
     private readonly Border? _overlayHost;
@@ -52,6 +59,12 @@ public partial class MainWindow : Window
     private readonly ItemsControl? _queueItemsControl;
     private readonly ScrollViewer? _queueItemsScrollViewer;
     private readonly TextBlock? _queueSummaryTextBlock;
+    private readonly Border? _searchHintContainer;
+    private readonly Border? _searchIconBorder;
+    private readonly Border? _searchResultsBorder;
+    private readonly Border? _searchRevealHost;
+    private readonly TextBox? _unityPackageSearchBox;
+    private readonly Button? _upgradeButton;
     private readonly TextBlock? _versionTextBlock;
     private Control? _activeOverlayContent;
     private object? _checkUpdatesButtonOriginalContent;
@@ -60,6 +73,7 @@ public partial class MainWindow : Window
     private IDisposable? _dropStatusReset;
     private IDisposable? _dropSuccessReset;
     private bool _isCheckingForUpdates;
+    private bool _isSearchHover;
     private PixelPoint? _lastNormalPosition;
     private Size? _lastNormalSize;
     private CancellationTokenSource? _overlayAnimationCts;
@@ -79,6 +93,38 @@ public partial class MainWindow : Window
         if (_dropZoneSecondaryTextBlock?.Text is { Length: > 0 } secondaryText)
             _defaultDropSecondaryText = secondaryText;
         _versionTextBlock = this.FindControl<TextBlock>("VersionTextBlock");
+        _licenseTierBadge = this.FindControl<Border>("LicenseTierBadge");
+        _licenseTierTextBlock = this.FindControl<TextBlock>("LicenseTierTextBlock");
+        _upgradeButton = this.FindControl<Button>("UpgradeButton");
+        _everythingSearchView = this.FindControl<EverythingSearchView>("EverythingSearch");
+        _searchResultsBorder = this.FindControl<Border>("SearchResultsBorder");
+        _searchRevealHost = this.FindControl<Border>("SearchRevealHost");
+        _searchIconBorder = this.FindControl<Border>("SearchIconBorder");
+        _searchHintContainer = this.FindControl<Border>("SearchHintContainer");
+        _unityPackageSearchBox = this.FindControl<TextBox>("UnityPackageSearchBox");
+        if (_everythingSearchView?.ViewModel is { } searchViewModel)
+        {
+            SearchViewModel = searchViewModel;
+            SearchViewModel.PropertyChanged += OnSearchViewModelPropertyChanged;
+            if (_unityPackageSearchBox is not null)
+            {
+                _unityPackageSearchBox.DataContext = SearchViewModel;
+                _unityPackageSearchBox.KeyBindings.Clear();
+                _unityPackageSearchBox.KeyBindings.Add(new KeyBinding
+                {
+                    Gesture = new KeyGesture(Key.Enter),
+                    Command = SearchViewModel.SearchCommand
+                });
+                _unityPackageSearchBox.KeyBindings.Add(new KeyBinding
+                {
+                    Gesture = new KeyGesture(Key.Escape),
+                    Command = SearchViewModel.ClearCommand
+                });
+            }
+        }
+
+        UpdateSearchUiState();
+
         _checkUpdatesButton = this.FindControl<Button>("CheckUpdatesButton");
         if (_checkUpdatesButton is not null)
             _checkUpdatesButtonOriginalContent = _checkUpdatesButton.Content;
@@ -100,6 +146,7 @@ public partial class MainWindow : Window
             _queueItemsControl.ItemsSource = _queueItems;
         _queueEmptyState = this.FindControl<Control>("QueueEmptyState");
         _queueSummaryTextBlock = this.FindControl<TextBlock>("QueueSummaryTextBlock");
+        _clearQueueButton = this.FindControl<Button>("ClearQueueButton");
         _queueItemsScrollViewer = this.FindControl<ScrollViewer>("QueueItemsScrollViewer");
         UpdateQueueVisualState();
 
@@ -110,6 +157,8 @@ public partial class MainWindow : Window
         LoadSettings();
         SetVersionText();
     }
+
+    public EverythingSearchViewModel? SearchViewModel { get; }
 
     private void DropZoneBorder_OnDragEnter(object? sender, DragEventArgs e)
     {
@@ -212,6 +261,70 @@ public partial class MainWindow : Window
         e.Handled = true;
     }
 
+    private void SearchRevealHost_OnPointerEntered(object? sender, PointerEventArgs e)
+    {
+        _isSearchHover = true;
+        if (_searchIconBorder is not null)
+            _searchIconBorder.IsVisible = false;
+
+        if (_searchHintContainer is not null)
+            _searchHintContainer.Opacity = 1;
+
+        if (_unityPackageSearchBox is null)
+            return;
+
+        Dispatcher.UIThread.Post(() => _unityPackageSearchBox.Focus());
+    }
+
+    private void SearchRevealHost_OnPointerExited(object? sender, PointerEventArgs e)
+    {
+        _isSearchHover = false;
+
+        if (_searchRevealHost is not null && _searchRevealHost.IsPointerOver)
+            return;
+
+        if (SearchViewModel?.IsInteractionActive == true)
+            return;
+
+        if (_searchIconBorder is not null)
+            _searchIconBorder.IsVisible = true;
+
+        if (_searchHintContainer is not null)
+            _searchHintContainer.Opacity = 0;
+
+        UpdateSearchUiState();
+    }
+
+    private void OnSearchViewModelPropertyChanged(object? sender, PropertyChangedEventArgs e)
+    {
+        if (e.PropertyName == nameof(EverythingSearchViewModel.IsInteractionActive))
+            Dispatcher.UIThread.Post(UpdateSearchUiState);
+    }
+
+    private void UpdateSearchUiState()
+    {
+        var isActive = SearchViewModel?.IsInteractionActive ?? false;
+
+        if (_dropZoneBorder is not null)
+            _dropZoneBorder.IsVisible = !isActive;
+
+        if (_searchResultsBorder is not null)
+        {
+            _searchResultsBorder.IsVisible = isActive;
+            _searchResultsBorder.IsHitTestVisible = isActive;
+            _searchResultsBorder.Opacity = isActive ? 1 : 0;
+        }
+
+        if (_searchIconBorder is not null)
+            _searchIconBorder.IsVisible = !isActive && !_isSearchHover;
+
+        if (_searchRevealHost is not null)
+            _searchRevealHost.Classes.Set("search-active", isActive);
+
+        if (_searchHintContainer is not null)
+            _searchHintContainer.Opacity = isActive || _isSearchHover ? 1 : 0;
+    }
+
     public void QueueUnityPackageFromSearch(string packagePath)
     {
         if (string.IsNullOrWhiteSpace(packagePath))
@@ -258,6 +371,12 @@ public partial class MainWindow : Window
                 ex.Message,
                 TimeSpan.FromSeconds(3));
         }
+    }
+
+    private void ClearQueueButton_OnClick(object? sender, RoutedEventArgs e)
+    {
+        e.Handled = true;
+        ClearQueue();
     }
 
     private void UpdateDragVisualState(DragEventArgs e)
@@ -478,6 +597,37 @@ public partial class MainWindow : Window
         return new QueueResult(addedCount, alreadyQueuedCount);
     }
 
+    private void ClearQueue()
+    {
+        var modified = false;
+
+        if (_settings.UnitypackageFiles is { Count: > 0 })
+        {
+            _settings.UnitypackageFiles.Clear();
+            modified = true;
+        }
+
+        if (_queueItems.Count > 0)
+        {
+            _queueItems.Clear();
+            modified = true;
+        }
+
+        if (_queueItemsByPath.Count > 0)
+            _queueItemsByPath.Clear();
+
+        UpdateQueueVisualState();
+
+        if (!modified)
+            return;
+
+        ShowDropStatusMessage(
+            "Queue cleared",
+            "Drop or search for .unitypackage files to add new items.",
+            TimeSpan.FromSeconds(3));
+        AppSettingsService.Save(_settings);
+    }
+
     private void ReloadQueueFromSettings()
     {
         _queueItems.Clear();
@@ -536,6 +686,9 @@ public partial class MainWindow : Window
 
         if (_queueItemsScrollViewer is not null)
             _queueItemsScrollViewer.IsVisible = itemCount > 0;
+
+        if (_clearQueueButton is not null)
+            _clearQueueButton.IsEnabled = itemCount > 0;
     }
 
     private static string TryNormalizeFilePath(string? path)
@@ -1019,6 +1172,9 @@ public partial class MainWindow : Window
     private void OnMainWindowClosing(object? sender, WindowClosingEventArgs e)
     {
         SaveWindowPlacement();
+        if (SearchViewModel is not null)
+            SearchViewModel.PropertyChanged -= OnSearchViewModelPropertyChanged;
+
         AppSettingsService.Save(_settings);
     }
 
@@ -1043,9 +1199,66 @@ public partial class MainWindow : Window
         if (!string.IsNullOrWhiteSpace(settings.AppTitle))
             Title = settings.AppTitle;
 
+        UpdateLicenseTierDisplay(settings);
         ReloadQueueFromSettings();
         ApplyTheme(settings.ApplicationTheme);
         _ = ApplyCustomBackgroundAsync(settings);
+    }
+
+    private void UpdateLicenseTierDisplay(AppSettings? settings = null)
+    {
+        if (_licenseTierTextBlock is null)
+            return;
+
+        settings ??= _settings;
+        var tier = settings?.LicenseTier;
+        var normalizedTier = string.IsNullOrWhiteSpace(tier) ? "Free" : tier.Trim();
+        var isPro = string.Equals(normalizedTier, "Pro", StringComparison.OrdinalIgnoreCase);
+
+        _licenseTierTextBlock.Text = isPro ? "Pro Version" : "Free Version";
+
+        if (_licenseTierBadge is not null)
+            _licenseTierBadge.Classes.Set("pro-tier", isPro);
+
+        if (_upgradeButton is not null)
+        {
+            if (isPro)
+            {
+                _upgradeButton.Content = "Pro features unlocked";
+                _upgradeButton.IsEnabled = false;
+                ToolTip.SetTip(_upgradeButton, "Premium features are already enabled");
+            }
+            else
+            {
+                _upgradeButton.Content = "Upgrade to Pro";
+                _upgradeButton.IsEnabled = true;
+                ToolTip.SetTip(_upgradeButton, "Unlock upcoming premium features");
+            }
+        }
+    }
+
+    private void UpgradeButton_OnClick(object? sender, RoutedEventArgs e)
+    {
+        if (_upgradeButton?.IsEnabled == false)
+            return;
+
+        e.Handled = true;
+
+        try
+        {
+            Process.Start(new ProcessStartInfo(ProUpgradeInfoUrl) { UseShellExecute = true });
+            ShowDropStatusMessage(
+                "Opening upgrade details",
+                "We launched your browser with information about EasyExtract Pro.",
+                TimeSpan.FromSeconds(5));
+        }
+        catch (Exception ex)
+        {
+            ShowDropStatusMessage(
+                "Couldn't open upgrade page",
+                ex.Message,
+                TimeSpan.FromSeconds(6));
+        }
     }
 
     private async Task ApplyCustomBackgroundAsync(AppSettings settings)

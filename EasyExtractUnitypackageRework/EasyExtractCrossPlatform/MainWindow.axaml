@@ -54,6 +54,11 @@
             <Setter Property="BorderThickness" Value="2" />
             <Setter Property="Opacity" Value="1" />
         </Style>
+
+        <Style Selector="Border#LicenseTierBadge.pro-tier">
+            <Setter Property="Background" Value="{DynamicResource EasyAccentStrongBrush}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource EasyAccentBrush}" />
+        </Style>
     </Window.Styles>
 
     <Grid>
@@ -65,70 +70,97 @@
                     BorderBrush="{DynamicResource EasyGlassBorderBrush}"
                     BorderThickness="1"
                     BoxShadow="0 40 80 0 #12000000">
-                <Grid ColumnDefinitions="Auto,*"
-                      RowDefinitions="Auto,Auto"
+                <Grid ColumnDefinitions="Auto,*,Auto"
                       VerticalAlignment="Top">
-                    <Border Grid.RowSpan="2"
-                            Width="128" Height="128" CornerRadius="32"
+                    <Border Grid.Column="0"
+                            Width="128"
+                            Height="128"
+                            CornerRadius="32"
                             Background="{DynamicResource EasyGlassOverlayBrush}"
-                            HorizontalAlignment="Right"
+                            HorizontalAlignment="Left"
                             VerticalAlignment="Top"
                             BorderBrush="{DynamicResource EasyGlassNeutralBorderBrush}"
-                            BorderThickness="1">
+                            BorderThickness="1"
+                            Margin="0,0,24,0">
                         <Image Source="avares://EasyExtractCrossPlatform/Assets/AppLogo.png"
                                Stretch="Uniform"
                                Margin="12" />
                     </Border>
 
-                    <Grid Grid.Column="1"
-                          Grid.RowSpan="2"
-                          ColumnDefinitions="*,Auto">
-                        <StackPanel Grid.Column="0"
-                                    Spacing="12"
-                                    VerticalAlignment="Top"
-                                    Margin="24,0,0,0">
-                            <TextBlock Text="EasyExtract"
-                                       Classes="display" />
-                            <TextBlock Text="Extract Unity Packages Without Unity"
-                                       Classes="subtle"
-                                       HorizontalAlignment="Left"
-                                       MaxWidth="480" />
-                            <StackPanel Orientation="Horizontal" Spacing="12">
-                                <Border Padding="12,6"
-                                        Background="{DynamicResource EasyGlassOverlayStrongBrush}"
-                                        CornerRadius="12">
-                                    <StackPanel Orientation="Horizontal" Spacing="8">
-                                        <Ellipse Width="10" Height="10" Fill="{DynamicResource EasyAccentBrush}"
-                                                 VerticalAlignment="Center" />
-                                        <TextBlock x:Name="VersionTextBlock"
-                                                   Text="Version 0.0.0.0"
-                                                   VerticalAlignment="Center"
-                                                   FontWeight="SemiBold" />
+                    <StackPanel Grid.Column="1"
+                                Spacing="12"
+                                VerticalAlignment="Top">
+                        <TextBlock Text="EasyExtract"
+                                   Classes="display" />
+                        <TextBlock Text="Extract Unity Packages Without Unity"
+                                   Classes="subtle"
+                                   HorizontalAlignment="Left"
+                                   MaxWidth="480" />
+                        <StackPanel Orientation="Horizontal"
+                                    Spacing="12">
+                            <Border Padding="12,6"
+                                    Background="{DynamicResource EasyGlassOverlayStrongBrush}"
+                                    CornerRadius="12">
+                                <StackPanel Orientation="Horizontal"
+                                            Spacing="8">
+                                    <Ellipse Width="10"
+                                             Height="10"
+                                             Fill="{DynamicResource EasyAccentBrush}"
+                                             VerticalAlignment="Center" />
+                                    <TextBlock x:Name="VersionTextBlock"
+                                               Text="Version 0.0.0.0"
+                                               VerticalAlignment="Center"
+                                               FontWeight="SemiBold" />
+                                </StackPanel>
+                            </Border>
+                            <Button x:Name="CheckUpdatesButton"
+                                    Classes="ghost"
+                                    Click="CheckUpdatesButton_OnClick">
+                                <Button.Content>
+                                    <StackPanel Orientation="Horizontal"
+                                                Spacing="8"
+                                                VerticalAlignment="Center">
+                                        <PathIcon Data="M12 4A8 8 0 1 0 20 12H18A6 6 0 1 1 12 6V9L16 5L12 1V4Z"
+                                                  Width="16"
+                                                  Height="16" />
+                                        <TextBlock Text="Check for updates" />
                                     </StackPanel>
-                                </Border>
-                                <Button x:Name="CheckUpdatesButton"
-                                        Classes="ghost"
-                                        Click="CheckUpdatesButton_OnClick">
-                                    <Button.Content>
-                                        <StackPanel Orientation="Horizontal"
-                                                    Spacing="8"
-                                                    VerticalAlignment="Center">
-                                            <PathIcon Data="M12 4A8 8 0 1 0 20 12H18A6 6 0 1 1 12 6V9L16 5L12 1V4Z"
-                                                      Width="16"
-                                                      Height="16" />
-                                            <TextBlock Text="Check for updates" />
-                                        </StackPanel>
-                                    </Button.Content>
-                                </Button>
-                            </StackPanel>
+                                </Button.Content>
+                            </Button>
                         </StackPanel>
-                        <views:EverythingSearchView Grid.Column="1"
-                                                    Margin="32,0,0,0"
-                                                    HorizontalAlignment="Right"
-                                                    VerticalAlignment="Top"
-                                                    MaxWidth="640"
-                                                    Classes="compact" />
-                    </Grid>
+                    </StackPanel>
+                    <StackPanel Grid.Column="2"
+                                HorizontalAlignment="Right"
+                                VerticalAlignment="Top"
+                                Margin="24,0,0,0"
+                                Spacing="12">
+                        <Border x:Name="LicenseTierBadge"
+                                Padding="14,6"
+                                Background="{DynamicResource EasyGlassOverlayStrongBrush}"
+                                BorderBrush="{DynamicResource EasyGlassNeutralBorderBrush}"
+                                BorderThickness="1"
+                                CornerRadius="12">
+                            <TextBlock x:Name="LicenseTierTextBlock"
+                                       Text="Free Version"
+                                       FontWeight="SemiBold"
+                                       TextAlignment="Right" />
+                        </Border>
+                        <Button x:Name="UpgradeButton"
+                                Classes="ghost"
+                                HorizontalAlignment="Right"
+                                Content="Upgrade to Pro"
+                                Click="UpgradeButton_OnClick"
+                                ToolTip.Tip="Unlock upcoming premium features" />
+                        <StackPanel Spacing="4"
+                                    HorizontalAlignment="Right">
+                            <TextBlock Text="Credits to DigitalAzure for the Logo Design"
+                                       Classes="subtle"
+                                       TextAlignment="Right" />
+                            <TextBlock Text="Credits to Jan-Fcloud for some ideas"
+                                       Classes="subtle"
+                                       TextAlignment="Right" />
+                        </StackPanel>
+                    </StackPanel>
                 </Grid>
             </Border>
 
@@ -141,92 +173,198 @@
                         BorderThickness="1"
                         BoxShadow="0 30 60 0 #14000000">
                     <StackPanel Spacing="28">
-                        <StackPanel Spacing="8">
-                            <StackPanel Orientation="Horizontal" Spacing="10" VerticalAlignment="Center">
-                                <PathIcon
-                                    Data="M12 3C7.58172 3 4 6.58172 4 11V21H20V11C20 6.58172 16.4183 3 12 3ZM13 17H11V13H9L12 9L15 13H13V17Z"
-                                    Width="28"
-                                    Height="28"
-                                    Foreground="{DynamicResource EasyAccentBrush}"
-                                    VerticalAlignment="Center" />
-                                <TextBlock Text="Start a new extraction"
-                                           FontSize="26"
-                                           FontWeight="Bold"
-                                           VerticalAlignment="Center" />
-                            </StackPanel>
-                            <TextBlock Text="Drag &amp; drop a .unitypackage or choose a source to begin."
-                                       Classes="subtle" />
-                        </StackPanel>
-
-                        <Border x:Name="DropZoneBorder"
-                                Classes="drop-zone"
-                                DragDrop.AllowDrop="True"
-                                DragDrop.DragEnter="DropZoneBorder_OnDragEnter"
-                                DragDrop.DragLeave="DropZoneBorder_OnDragLeave"
-                                DragDrop.Drop="DropZoneBorder_OnDrop"
-                                DragDrop.DragOver="DropZoneBorder_OnDragOver">
-                            <StackPanel Spacing="22" HorizontalAlignment="Center">
-                                <Border Width="88" Height="88"
-                                        CornerRadius="28"
-                                        Background="{DynamicResource EasyGlassOverlayFaintBrush}"
-                                        BorderBrush="{DynamicResource EasyGlassNeutralBorderBrush}"
-                                        BorderThickness="1"
-                                        HorizontalAlignment="Center">
-                                    <PathIcon Data="M21 20V18H3V20H21Z M12 2L4 10H9V17H15V10H20L12 2Z"
-                                              Width="34"
-                                              Height="34"
-                                              Foreground="{DynamicResource EasyAccentBrush}"
-                                              HorizontalAlignment="Center"
-                                              VerticalAlignment="Center" />
-                                </Border>
-
-                                <StackPanel Spacing="6" HorizontalAlignment="Center">
-                                    <TextBlock x:Name="DropZonePrimaryTextBlock"
-                                               Text="Drag &amp; drop files here"
-                                               FontSize="20"
-                                               FontWeight="SemiBold"
-                                               TextAlignment="Center" />
-                                    <TextBlock x:Name="DropZoneSecondaryTextBlock"
-                                               Text="Supports batch extraction and live progress updates."
-                                               Classes="subtle"
-                                               TextAlignment="Center" />
-                                </StackPanel>
-
+                        <Grid RowDefinitions="Auto,Auto">
+                            <Grid ColumnDefinitions="Auto,*" HorizontalAlignment="Right"
+                                  VerticalAlignment="Center">
                                 <StackPanel Orientation="Horizontal"
                                             Spacing="10"
-                                            HorizontalAlignment="Center">
-                                    <Button Width="160">
-                                        <Button.Content>
-                                            <StackPanel Orientation="Horizontal" Spacing="8"
-                                                        HorizontalAlignment="Center">
-                                                <PathIcon
-                                                    Data="M3 6H8L10 8H20C21.1046 8 22 8.89543 22 10V18C22 19.1046 21.1046 20 20 20H4C2.89543 20 2 19.1046 2 18V7C2 6.44772 2.44772 6 3 6Z"
-                                                    Width="18"
-                                                    Height="18"
-                                                    Foreground="{DynamicResource EasyAccentBrush}"
-                                                    VerticalAlignment="Center" />
-                                                <TextBlock Text="Browse files"
-                                                           VerticalAlignment="Center" />
-                                            </StackPanel>
-                                        </Button.Content>
-                                    </Button>
-                                    <Button Classes="ghost">
-                                        <Button.Content>
-                                            <StackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
-                                                <PathIcon
-                                                    Data="M3 6H8L10 8H20C21.1046 8 22 8.89543 22 10V18C22 19.1046 21.1046 20 20 20H4C2.89543 20 2 19.1046 2 18V7C2 6.44772 2.44772 6 3 6Z M16 11V13H19V15H16V18H14V15H11V13H14V11H16Z"
-                                                    Width="18"
-                                                    Height="18"
-                                                    Foreground="{DynamicResource EasyAccentBrush}"
-                                                    VerticalAlignment="Center" />
-                                                <TextBlock Text="Add folder"
-                                                           VerticalAlignment="Center" />
-                                            </StackPanel>
-                                        </Button.Content>
-                                    </Button>
+                                            VerticalAlignment="Center">
+                                    <PathIcon
+                                        Data="M12 3C7.58172 3 4 6.58172 4 11V21H20V11C20 6.58172 16.4183 3 12 3ZM13 17H11V13H9L12 9L15 13H13V17Z"
+                                        Width="28"
+                                        Height="28"
+                                        Foreground="{DynamicResource EasyAccentBrush}"
+                                        VerticalAlignment="Center" />
+                                    <TextBlock Text="Start a new extraction"
+                                               FontSize="26"
+                                               FontWeight="Bold"
+                                               VerticalAlignment="Center" />
                                 </StackPanel>
-                            </StackPanel>
-                        </Border>
+
+                                <Border x:Name="SearchRevealHost"
+                                        Grid.Column="1"
+                                        Margin="24,0,0,0"
+                                        HorizontalAlignment="Right"
+                                        VerticalAlignment="Center"
+                                        Padding="0"
+                                        PointerEntered="SearchRevealHost_OnPointerEntered"
+                                        PointerExited="SearchRevealHost_OnPointerExited">
+                                    <Border.Styles>
+                                        <Style Selector="Border#SearchRevealHost TextBox.search-bar">
+                                            <Setter Property="Width" Value="0" />
+                                            <Setter Property="Opacity" Value="0" />
+                                            <Setter Property="MinWidth" Value="0" />
+                                            <Setter Property="IsHitTestVisible" Value="False" />
+                                            <Setter Property="Margin" Value="8,0,0,0" />
+                                        </Style>
+                                        <Style Selector="Border#SearchRevealHost:pointerover TextBox.search-bar">
+                                            <Setter Property="Width" Value="280" />
+                                            <Setter Property="Opacity" Value="1" />
+                                            <Setter Property="IsHitTestVisible" Value="True" />
+                                        </Style>
+                                        <Style Selector="Border#SearchRevealHost.search-active TextBox.search-bar">
+                                            <Setter Property="Width" Value="280" />
+                                            <Setter Property="Opacity" Value="1" />
+                                            <Setter Property="IsHitTestVisible" Value="True" />
+                                        </Style>
+                                    </Border.Styles>
+                                    <Grid ColumnDefinitions="Auto,Auto">
+                                        <StackPanel Spacing="8" HorizontalAlignment="Right">
+                                            <Border x:Name="SearchHintContainer"
+                                                    Background="{DynamicResource EasyGlassOverlayStrongBrush}"
+                                                    BorderBrush="{DynamicResource EasyAccentSoftBrush}"
+                                                    BorderThickness="1"
+                                                    CornerRadius="16"
+                                                    Padding="10,6"
+                                                    HorizontalAlignment="Right"
+                                                    Opacity="0"
+                                                    IsHitTestVisible="False">
+                                                <Border.Transitions>
+                                                    <Transitions>
+                                                        <DoubleTransition Property="Opacity"
+                                                                          Duration="0:0:0.18"
+                                                                          Easing="0,0.55,0.45,1" />
+                                                    </Transitions>
+                                                </Border.Transitions>
+                                                <TextBlock Text="Search your device for *.unitypackage files"
+                                                           Classes="subtle"
+                                                           HorizontalAlignment="Right" />
+                                            </Border>
+                                            <Grid ColumnDefinitions="Auto,*" HorizontalAlignment="Right"
+                                                  VerticalAlignment="Center">
+                                                <Border x:Name="SearchIconBorder"
+                                                        Width="36"
+                                                        Height="36"
+                                                        CornerRadius="18"
+                                                        Background="{DynamicResource EasyGlassOverlayStrongBrush}"
+                                                        BorderBrush="{DynamicResource EasyGlassNeutralBorderBrush}"
+                                                        BorderThickness="1"
+                                                        HorizontalAlignment="Center"
+                                                        VerticalAlignment="Center">
+                                                    <PathIcon
+                                                        Data="M15.5 14H14.71L14.43 13.73C15.41 12.59 16 11.11 16 9.5C16 5.91 13.09 3 9.5 3C5.91 3 3 5.91 3 9.5C3 13.09 5.91 16 9.5 16C11.11 16 12.59 15.41 13.73 14.43L14 14.71V15.5L18 19.49L19.49 18L15.5 14ZM9.5 14C7.01 14 5 11.99 5 9.5C5 7.01 7.01 5 9.5 5C11.99 5 14 7.01 14 9.5C14 11.99 11.99 14 9.5 14Z"
+                                                        Width="20"
+                                                        Height="20"
+                                                        Foreground="{DynamicResource EasyAccentBrush}"
+                                                        HorizontalAlignment="Center"
+                                                        VerticalAlignment="Center" />
+                                                </Border>
+                                                <TextBox x:Name="UnityPackageSearchBox"
+                                                         Grid.Column="1"
+                                                         Margin="12,0,0,0"
+                                                         Text="{Binding SearchQuery, UpdateSourceTrigger=PropertyChanged}"
+                                                         Classes="search-bar search-bar-small"
+                                                         x:CompileBindings="False" />
+                                            </Grid>
+                                        </StackPanel>
+                                    </Grid>
+                                </Border>
+                            </Grid>
+
+                            <TextBlock Grid.Row="1"
+                                       Text="Drag &amp; drop a .unitypackage or choose a source to begin."
+                                       Margin="0,8,0,0"
+                                       Classes="subtle" />
+                        </Grid>
+
+                        <Grid>
+                            <Border x:Name="DropZoneBorder"
+                                    Classes="drop-zone"
+                                    DragDrop.AllowDrop="True"
+                                    DragDrop.DragEnter="DropZoneBorder_OnDragEnter"
+                                    DragDrop.DragLeave="DropZoneBorder_OnDragLeave"
+                                    DragDrop.Drop="DropZoneBorder_OnDrop"
+                                    DragDrop.DragOver="DropZoneBorder_OnDragOver">
+                                <StackPanel Spacing="22" HorizontalAlignment="Center">
+                                    <Border Width="88" Height="88"
+                                            CornerRadius="28"
+                                            Background="{DynamicResource EasyGlassOverlayFaintBrush}"
+                                            BorderBrush="{DynamicResource EasyGlassNeutralBorderBrush}"
+                                            BorderThickness="1"
+                                            HorizontalAlignment="Center">
+                                        <PathIcon Data="M21 20V18H3V20H21Z M12 2L4 10H9V17H15V10H20L12 2Z"
+                                                  Width="34"
+                                                  Height="34"
+                                                  Foreground="{DynamicResource EasyAccentBrush}"
+                                                  HorizontalAlignment="Center"
+                                                  VerticalAlignment="Center" />
+                                    </Border>
+
+                                    <StackPanel Spacing="6" HorizontalAlignment="Center">
+                                        <TextBlock x:Name="DropZonePrimaryTextBlock"
+                                                   Text="Drag &amp; drop files here"
+                                                   FontSize="20"
+                                                   FontWeight="SemiBold"
+                                                   TextAlignment="Center" />
+                                        <TextBlock x:Name="DropZoneSecondaryTextBlock"
+                                                   Text="Supports batch extraction and live progress updates."
+                                                   Classes="subtle"
+                                                   TextAlignment="Center" />
+                                    </StackPanel>
+
+                                    <StackPanel Orientation="Horizontal"
+                                                Spacing="10"
+                                                HorizontalAlignment="Center">
+                                        <Button Width="160">
+                                            <Button.Content>
+                                                <StackPanel Orientation="Horizontal" Spacing="8"
+                                                            HorizontalAlignment="Center">
+                                                    <PathIcon
+                                                        Data="M3 6H8L10 8H20C21.1046 8 22 8.89543 22 10V18C22 19.1046 21.1046 20 20 20H4C2.89543 20 2 19.1046 2 18V7C2 6.44772 2.44772 6 3 6Z"
+                                                        Width="18"
+                                                        Height="18"
+                                                        Foreground="{DynamicResource EasyAccentBrush}"
+                                                        VerticalAlignment="Center" />
+                                                    <TextBlock Text="Browse files"
+                                                               VerticalAlignment="Center" />
+                                                </StackPanel>
+                                            </Button.Content>
+                                        </Button>
+                                        <Button Classes="ghost">
+                                            <Button.Content>
+                                                <StackPanel Orientation="Horizontal" Spacing="8"
+                                                            VerticalAlignment="Center">
+                                                    <PathIcon
+                                                        Data="M3 6H8L10 8H20C21.1046 8 22 8.89543 22 10V18C22 19.1046 21.1046 20 20 20H4C2.89543 20 2 19.1046 2 18V7C2 6.44772 2.44772 6 3 6Z M16 11V13H19V15H16V18H14V15H11V13H14V11H16Z"
+                                                        Width="18"
+                                                        Height="18"
+                                                        Foreground="{DynamicResource EasyAccentBrush}"
+                                                        VerticalAlignment="Center" />
+                                                    <TextBlock Text="Add folder"
+                                                               VerticalAlignment="Center" />
+                                                </StackPanel>
+                                            </Button.Content>
+                                        </Button>
+                                    </StackPanel>
+                                </StackPanel>
+                            </Border>
+
+                            <Border x:Name="SearchResultsBorder"
+                                    Margin="0"
+                                    Padding="24"
+                                    Background="{DynamicResource EasyGlassOverlayStrongBrush}"
+                                    BorderBrush="{DynamicResource EasyGlassNeutralBorderBrush}"
+                                    BorderThickness="1"
+                                    CornerRadius="24"
+                                    Opacity="0"
+                                    IsVisible="False"
+                                    IsHitTestVisible="False">
+                                <views:EverythingSearchView x:Name="EverythingSearch"
+                                                            Classes="compact minimal"
+                                                            HorizontalAlignment="Stretch"
+                                                            VerticalAlignment="Stretch" />
+                            </Border>
+                        </Grid>
 
                         <StackPanel Spacing="12">
                             <StackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
@@ -272,8 +410,10 @@
                             BorderThickness="1"
                             BoxShadow="0 26 50 0 #14000000">
                         <StackPanel Spacing="18">
-                            <StackPanel Orientation="Horizontal" Spacing="12" VerticalAlignment="Center">
-                                <Border Width="36" Height="36" CornerRadius="18"
+                            <Grid ColumnDefinitions="Auto,*,Auto" VerticalAlignment="Center">
+                                <Border Grid.Column="0"
+                                        Width="36" Height="36" CornerRadius="18"
+                                        Margin="0,0,12,0"
                                         Background="{DynamicResource EasyGlassOverlayBrush}"
                                         BorderBrush="{DynamicResource EasyGlassNeutralBorderBrush}"
                                         BorderThickness="1">
@@ -284,7 +424,7 @@
                                         Foreground="{DynamicResource EasyAccentBrush}"
                                         VerticalAlignment="Center" />
                                 </Border>
-                                <StackPanel>
+                                <StackPanel Grid.Column="1">
                                     <TextBlock Text="Extraction queue"
                                                FontWeight="SemiBold"
                                                FontSize="18" />
@@ -292,7 +432,15 @@
                                                Text="Queue is empty"
                                                Classes="subtle" />
                                 </StackPanel>
-                            </StackPanel>
+                                <Button Grid.Column="2"
+                                        x:Name="ClearQueueButton"
+                                        Classes="ghost"
+                                        Margin="12,0,0,0"
+                                        Click="ClearQueueButton_OnClick"
+                                        ToolTip.Tip="Remove every package from the queue."
+                                        HorizontalAlignment="Right"
+                                        Content="Clear queue" />
+                            </Grid>
 
                             <StackPanel x:Name="QueueEmptyState"
                                         Spacing="6"

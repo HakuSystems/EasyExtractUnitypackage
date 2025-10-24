@@ -59,11 +59,6 @@
             <Setter Property="MinHeight" Value="36" />
         </Style>
 
-        <Style Selector="StackPanel#HeaderPanel">
-            <Setter Property="Spacing" Value="8" />
-            <Setter Property="Margin" Value="0" />
-        </Style>
-
         <Style Selector="StackPanel#StatusPanel">
             <Setter Property="Margin" Value="0,10,0,0" />
         </Style>
@@ -80,27 +75,10 @@
             <Setter Property="Padding" Value="0" />
         </Style>
 
-        <Style Selector="views|EverythingSearchView.compact StackPanel#HeaderPanel">
-            <Setter Property="Margin" Value="0" />
-            <Setter Property="Spacing" Value="10" />
-        </Style>
-
-        <Style Selector="views|EverythingSearchView.compact TextBlock.search-title">
-            <Setter Property="FontSize" Value="18" />
-        </Style>
-
-        <Style Selector="views|EverythingSearchView.compact TextBlock.search-subtitle">
-            <Setter Property="FontSize" Value="11" />
-        </Style>
-
         <Style Selector="views|EverythingSearchView.compact Border.search-card">
             <Setter Property="CornerRadius" Value="18" />
             <Setter Property="Padding" Value="18" />
             <Setter Property="BoxShadow" Value="0 14 28 0 #14000000" />
-        </Style>
-
-        <Style Selector="views|EverythingSearchView.compact TextBox.search-bar">
-            <Setter Property="MinHeight" Value="40" />
         </Style>
 
         <Style Selector="views|EverythingSearchView.compact Button.link">
@@ -124,33 +102,28 @@
             <Setter Property="Margin" Value="0,10,0,0" />
             <Setter Property="MaxHeight" Value="220" />
         </Style>
+
+        <Style Selector="views|EverythingSearchView.minimal Border.search-card">
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="Padding" Value="0" />
+            <Setter Property="BoxShadow" Value="0 0 0 0 #00000000" />
+        </Style>
+
+        <Style Selector="views|EverythingSearchView.minimal ScrollViewer#ResultsScrollViewer">
+            <Setter Property="Margin" Value="0" />
+            <Setter Property="Padding" Value="0" />
+        </Style>
+
+        <Style Selector="views|EverythingSearchView.minimal StackPanel#StatusPanel">
+            <Setter Property="Margin" Value="0" />
+        </Style>
     </UserControl.Styles>
 
     <Grid>
         <Border Classes="search-card"
                 IsVisible="{Binding IsEverythingAvailable}">
             <StackPanel Spacing="12">
-                <StackPanel x:Name="HeaderPanel"
-                            IsVisible="{Binding IsEverythingAvailable}">
-                    <TextBlock Classes="search-title"
-                               Text="Search Unity packages"
-                               FontSize="20"
-                               FontWeight="SemiBold" />
-                    <TextBlock Classes="search-subtitle subtle"
-                               Text="Powered by Everything - scoped to *.unitypackage files."
-                               FontSize="12" />
-                </StackPanel>
-
-                <TextBox Text="{Binding SearchQuery, UpdateSourceTrigger=PropertyChanged}"
-                         Watermark="Search .unitypackage names"
-                         Classes="search-bar"
-                         IsVisible="{Binding IsEverythingAvailable}">
-                    <TextBox.KeyBindings>
-                        <KeyBinding Command="{Binding SearchCommand}" Gesture="Enter" />
-                        <KeyBinding Command="{Binding ClearCommand}" Gesture="Escape" />
-                    </TextBox.KeyBindings>
-                </TextBox>
-
                 <StackPanel x:Name="StatusPanel"
                             Orientation="Horizontal"
                             Spacing="10"
