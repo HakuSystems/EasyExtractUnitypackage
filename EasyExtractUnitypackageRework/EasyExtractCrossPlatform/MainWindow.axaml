@@ -6,8 +6,8 @@
         Foreground="{DynamicResource EasyTextColorBrush}"
         Background="{DynamicResource EasyWindowBackgroundBrush}"
         mc:Ignorable="d"
-        d:DesignWidth="1120"
-        d:DesignHeight="680"
+        d:DesignWidth="1800"
+        d:DesignHeight="1180"
         x:Class="EasyExtractCrossPlatform.MainWindow"
         Title="EasyExtract"
         TransparencyLevelHint="AcrylicBlur">
@@ -66,10 +66,13 @@
                     BorderThickness="1"
                     BoxShadow="0 40 80 0 #12000000">
                 <Grid ColumnDefinitions="Auto,*"
-                      VerticalAlignment="Center">
-                    <Border Width="128" Height="128" CornerRadius="32"
+                      RowDefinitions="Auto,Auto"
+                      VerticalAlignment="Top">
+                    <Border Grid.RowSpan="2"
+                            Width="128" Height="128" CornerRadius="32"
                             Background="{DynamicResource EasyGlassOverlayBrush}"
                             HorizontalAlignment="Right"
+                            VerticalAlignment="Top"
                             BorderBrush="{DynamicResource EasyGlassNeutralBorderBrush}"
                             BorderThickness="1">
                         <Image Source="avares://EasyExtractCrossPlatform/Assets/AppLogo.png"
@@ -77,7 +80,11 @@
                                Margin="12" />
                     </Border>
 
-                    <StackPanel Grid.Column="1" Spacing="12" VerticalAlignment="Center" Margin="24,0,0,0">
+                    <StackPanel Grid.Row="0"
+                                Grid.Column="1"
+                                Spacing="12"
+                                VerticalAlignment="Top"
+                                Margin="24,0,0,0">
                         <TextBlock Text="EasyExtract"
                                    Classes="display" />
                         <TextBlock Text="Extract Unity Packages Without Unity"
@@ -109,6 +116,12 @@
                             </Button>
                         </StackPanel>
                     </StackPanel>
+                    <views:EverythingSearchView Grid.Row="1"
+                                                Grid.Column="1"
+                                                Margin="0,24,0,0"
+                                                HorizontalAlignment="Left"
+                                                MaxWidth="640"
+                                                Classes="compact" />
                 </Grid>
             </Border>
 
@@ -245,14 +258,6 @@
                 </Border>
 
                 <StackPanel Grid.Column="1" Spacing="28" Margin="28,0,0,0">
-                    <Border Padding="28"
-                            CornerRadius="24"
-                            Background="{DynamicResource EasyGlassGradientBrush}"
-                            BorderBrush="{DynamicResource EasyGlassBorderBrush}"
-                            BorderThickness="1"
-                            BoxShadow="0 26 50 0 #14000000">
-                        <views:EverythingSearchView />
-                    </Border>
                     <Border Padding="28"
                             CornerRadius="24"
                             Background="{DynamicResource EasyGlassGradientBrush}"

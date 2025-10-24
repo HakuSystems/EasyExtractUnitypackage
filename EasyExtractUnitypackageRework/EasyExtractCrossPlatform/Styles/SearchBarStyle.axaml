@@ -1,5 +1,7 @@
 <Styles xmlns="https://github.com/avaloniaui"
-        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:utils="clr-namespace:EasyExtractCrossPlatform.Utilities"
+        x:CompileBindings="False">
     <Design.PreviewWith>
         <Border Padding="32"
                 Background="{DynamicResource EasyWindowBackgroundBrush}">
@@ -17,38 +19,51 @@
         </Border>
     </Design.PreviewWith>
 
+    <Styles.Resources>
+        <utils:StringIsNullOrWhiteSpaceConverter x:Key="SearchBarWatermarkVisibilityConverter" />
+    </Styles.Resources>
+
     <Style Selector="TextBox.search-bar">
         <Setter Property="Foreground" Value="{DynamicResource EasyTextColorBrush}" />
         <Setter Property="CaretBrush" Value="{DynamicResource EasyAccentBrush}" />
-        <Setter Property="Background" Value="{DynamicResource EasyGlassOverlayBrush}" />
+        <Setter Property="Background" Value="{DynamicResource EasyGlassGradientBrush}" />
         <Setter Property="BorderBrush" Value="{DynamicResource EasyGlassBorderBrush}" />
         <Setter Property="BorderThickness" Value="1" />
-        <Setter Property="CornerRadius" Value="20" />
-        <Setter Property="Padding" Value="0,12,18,12" />
-        <Setter Property="MinHeight" Value="48" />
+        <Setter Property="CornerRadius" Value="26" />
+        <Setter Property="Padding" Value="0" />
+        <Setter Property="MinHeight" Value="54" />
         <Setter Property="FontSize" Value="16" />
         <Setter Property="HorizontalContentAlignment" Value="Stretch" />
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="TextBox">
                     <Border x:Name="border"
+                            Padding="6"
                             Background="{TemplateBinding Background}"
                             BorderBrush="{TemplateBinding BorderBrush}"
                             BorderThickness="{TemplateBinding BorderThickness}"
                             CornerRadius="{TemplateBinding CornerRadius}">
-                        <Grid ColumnDefinitions="Auto,*">
-                            <Grid Width="48"
-                                  Margin="8,0,0,0"
-                                  HorizontalAlignment="Left"
-                                  VerticalAlignment="Center">
+                        <Grid ColumnDefinitions="Auto,*,Auto"
+                              VerticalAlignment="Center">
+                            <Border Width="42"
+                                    Height="42"
+                                    CornerRadius="21"
+                                    Margin="6,0,0,0"
+                                    Background="{DynamicResource EasyGlassOverlayStrongBrush}"
+                                    BorderBrush="{DynamicResource EasyGlassNeutralBorderBrush}"
+                                    BorderThickness="1"
+                                    HorizontalAlignment="Center"
+                                    VerticalAlignment="Center">
                                 <PathIcon Classes="search-icon"
                                           Width="20"
                                           Height="20"
                                           HorizontalAlignment="Center"
                                           VerticalAlignment="Center"
                                           Data="M15.5 14H14.71L14.43 13.73C15.41 12.59 16 11.11 16 9.5C16 5.91 13.09 3 9.5 3C5.91 3 3 5.91 3 9.5C3 13.09 5.91 16 9.5 16C11.11 16 12.59 15.41 13.73 14.43L14 14.71V15.5L18 19.49L19.49 18L15.5 14ZM9.5 14C7.01 14 5 11.99 5 9.5C5 7.01 7.01 5 9.5 5C11.99 5 14 7.01 14 9.5C14 11.99 11.99 14 9.5 14Z" />
-                            </Grid>
-                            <Grid Grid.Column="1" Margin="{TemplateBinding Padding}">
+                            </Border>
+                            <Grid Grid.Column="1"
+                                  Margin="12,0"
+                                  VerticalAlignment="Center">
                                 <ScrollViewer x:Name="PART_ContentHost"
                                               HorizontalScrollBarVisibility="Hidden"
                                               VerticalScrollBarVisibility="Disabled">
@@ -61,9 +76,24 @@
                                                 Margin="0"
                                                 HorizontalAlignment="Left"
                                                 VerticalAlignment="Center"
+                                                IsVisible="{Binding Text, RelativeSource={RelativeSource TemplatedParent}, Converter={StaticResource SearchBarWatermarkVisibilityConverter}}"
                                                 Content="{TemplateBinding Watermark}"
                                                 FontSize="{TemplateBinding FontSize}" />
                             </Grid>
+                            <Button Grid.Column="2"
+                                    Width="42"
+                                    Height="42"
+                                    Margin="0,0,6,0"
+                                    Classes="search-clear"
+                                    HorizontalAlignment="Center"
+                                    VerticalAlignment="Center"
+                                    Command="{Binding DataContext.ClearCommand, RelativeSource={RelativeSource TemplatedParent}}"
+                                    IsVisible="{Binding Text, RelativeSource={RelativeSource TemplatedParent}, Converter={StaticResource SearchBarWatermarkVisibilityConverter}, ConverterParameter=Invert}">
+                                <ToolTip.Tip>Clear (Esc)</ToolTip.Tip>
+                                <PathIcon Width="18"
+                                          Height="18"
+                                          Data="M18.3 5.71L16.59 4L12 8.59L7.41 4L5.7 5.71L10.29 10.3L5.7 14.89L7.41 16.6L12 12.01L16.59 16.6L18.3 14.89L13.71 10.3L18.3 5.71Z" />
+                            </Button>
                         </Grid>
                     </Border>
                 </ControlTemplate>
@@ -87,11 +117,30 @@
     </Style>
 
     <Style Selector="TextBox.search-bar PathIcon.search-icon">
-        <Setter Property="Foreground" Value="{DynamicResource EasyMutedBrush}" />
+        <Setter Property="Foreground" Value="{DynamicResource EasyAccentBrush}" />
     </Style>
 
     <Style
         Selector="TextBox.search-bar:pointerover PathIcon.search-icon, TextBox.search-bar:focus PathIcon.search-icon">
         <Setter Property="Foreground" Value="{DynamicResource EasyAccentBrush}" />
+    </Style>
+
+    <Style Selector="Button.search-clear">
+        <Setter Property="Background" Value="{DynamicResource EasyGlassOverlayFaintBrush}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource EasyGlassNeutralBorderBrush}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="CornerRadius" Value="21" />
+        <Setter Property="Padding" Value="0" />
+        <Setter Property="Focusable" Value="False" />
+    </Style>
+
+    <Style Selector="Button.search-clear:pointerover">
+        <Setter Property="Background" Value="{DynamicResource EasyGlassOverlayStrongBrush}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource EasyAccentSoftBrush}" />
+    </Style>
+
+    <Style Selector="Button.search-clear:pressed">
+        <Setter Property="Background" Value="{DynamicResource EasyAccentStrongBrush}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource EasyAccentBrush}" />
     </Style>
 </Styles>

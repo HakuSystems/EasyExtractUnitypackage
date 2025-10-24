@@ -39,7 +39,7 @@ public partial class SettingsView : UserControl
         if (folder?.TryGetLocalPath() is { } localPath && !string.IsNullOrWhiteSpace(localPath))
         {
             _viewModel.Settings.DefaultOutputPath = localPath;
-            _defaultOutputPathBox?.SetCurrentValue(TextBox.TextProperty, localPath);
+            UpdateTextBoxText(_defaultOutputPathBox, localPath);
         }
     }
 
@@ -49,7 +49,7 @@ public partial class SettingsView : UserControl
         if (folder?.TryGetLocalPath() is { } localPath && !string.IsNullOrWhiteSpace(localPath))
         {
             _viewModel.Settings.DefaultTempPath = localPath;
-            _defaultTempPathBox?.SetCurrentValue(TextBox.TextProperty, localPath);
+            UpdateTextBoxText(_defaultTempPathBox, localPath);
         }
     }
 
@@ -106,5 +106,22 @@ public partial class SettingsView : UserControl
         {
             _statusTextBlock.ClearValue(TextBlock.ForegroundProperty);
         }
+    }
+
+    private static void UpdateTextBoxText(TextBox? textBox, string? value)
+    {
+        if (textBox is null)
+            return;
+
+        var normalized = value ?? string.Empty;
+        textBox.SetCurrentValue(TextBox.TextProperty, normalized);
+
+        var caretIndex = normalized.Length;
+        if (textBox.SelectionStart != caretIndex)
+            textBox.SelectionStart = caretIndex;
+        if (textBox.SelectionEnd != caretIndex)
+            textBox.SelectionEnd = caretIndex;
+        if (textBox.CaretIndex != caretIndex)
+            textBox.CaretIndex = caretIndex;
     }
 }

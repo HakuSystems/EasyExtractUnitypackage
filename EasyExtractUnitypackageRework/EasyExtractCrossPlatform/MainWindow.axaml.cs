@@ -5,7 +5,6 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
-using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 using Avalonia;
@@ -15,9 +14,11 @@ using Avalonia.Interactivity;
 using Avalonia.Media;
 using Avalonia.Media.Imaging;
 using Avalonia.Platform.Storage;
+using Avalonia.Styling;
 using Avalonia.Threading;
 using EasyExtractCrossPlatform.Models;
 using EasyExtractCrossPlatform.Services;
+using EasyExtractCrossPlatform.Utilities;
 
 namespace EasyExtractCrossPlatform;
 
@@ -26,6 +27,8 @@ public partial class MainWindow : Window
     private const string UnityPackageExtension = ".unitypackage";
     private static readonly HttpClient BackgroundHttpClient = new();
     private readonly IBrush _defaultBackgroundBrush;
+    private readonly string _defaultDropPrimaryText = "Drag & drop files here";
+    private readonly string _defaultDropSecondaryText = "Supports batch extraction and live progress updates.";
     private readonly Border? _dropZoneBorder;
     private readonly TextBlock? _dropZonePrimaryTextBlock;
     private readonly TextBlock? _dropZoneSecondaryTextBlock;
@@ -35,8 +38,6 @@ public partial class MainWindow : Window
     private readonly TextBlock? _versionTextBlock;
     private Control? _activeOverlayContent;
     private Bitmap? _currentBackgroundBitmap;
-    private readonly string _defaultDropPrimaryText = "Drag & drop files here";
-    private readonly string _defaultDropSecondaryText = "Supports batch extraction and live progress updates.";
     private IDisposable? _dropStatusReset;
     private IDisposable? _dropSuccessReset;
     private PixelPoint? _lastNormalPosition;
@@ -807,6 +808,7 @@ public partial class MainWindow : Window
         if (!string.IsNullOrWhiteSpace(settings.AppTitle))
             Title = settings.AppTitle;
 
+        ApplyTheme(settings.ApplicationTheme);
         _ = ApplyCustomBackgroundAsync(settings);
     }
 
@@ -814,6 +816,12 @@ public partial class MainWindow : Window
     {
         var backgroundSettings = settings.CustomBackgroundImage;
         if (backgroundSettings is null)
+        {
+            await Dispatcher.UIThread.InvokeAsync(() => SetBackgroundBrush(_defaultBackgroundBrush, null));
+            return;
+        }
+
+        if (!backgroundSettings.IsEnabled)
         {
             await Dispatcher.UIThread.InvokeAsync(() => SetBackgroundBrush(_defaultBackgroundBrush, null));
             return;
@@ -860,6 +868,22 @@ public partial class MainWindow : Window
             previousBitmap?.Dispose();
     }
 
+    private void ApplyTheme(int themeIndex)
+    {
+        var targetVariant = themeIndex switch
+        {
+            1 => ThemeVariant.Light,
+            2 => ThemeVariant.Dark,
+            _ => ThemeVariant.Default
+        };
+
+        if (Application.Current is { } app && app.RequestedThemeVariant != targetVariant)
+            app.RequestedThemeVariant = targetVariant;
+
+        if (RequestedThemeVariant != targetVariant)
+            RequestedThemeVariant = targetVariant;
+    }
+
     private static async Task<Bitmap?> LoadBackgroundBitmapAsync(string path)
     {
         try
@@ -901,9 +925,7 @@ public partial class MainWindow : Window
         if (_versionTextBlock is null)
             return;
 
-        var version = !string.IsNullOrWhiteSpace(_settings?.Update.CurrentVersion)
-            ? _settings.Update.CurrentVersion
-            : GetApplicationVersion();
+        var version = VersionProvider.GetApplicationVersion();
 
         if (!string.IsNullOrWhiteSpace(version))
             _versionTextBlock.Text = $"Version {version}";
@@ -923,19 +945,6 @@ public partial class MainWindow : Window
             return brush;
 
         return Background ?? new SolidColorBrush(Colors.Black);
-    }
-
-    private static string? GetApplicationVersion()
-    {
-        var assembly = Assembly.GetEntryAssembly() ?? Assembly.GetExecutingAssembly();
-        var informationalVersion = assembly
-            .GetCustomAttribute<AssemblyInformationalVersionAttribute>()
-            ?.InformationalVersion;
-
-        if (!string.IsNullOrWhiteSpace(informationalVersion))
-            return informationalVersion;
-
-        return assembly.GetName().Version?.ToString();
     }
 
     private readonly record struct QueueResult(int AddedCount, int AlreadyQueuedCount);

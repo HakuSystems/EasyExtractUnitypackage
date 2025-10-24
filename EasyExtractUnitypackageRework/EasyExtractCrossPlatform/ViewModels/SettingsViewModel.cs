@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using EasyExtractCrossPlatform.Models;
 using EasyExtractCrossPlatform.Services;
+using EasyExtractCrossPlatform.Utilities;
 
 namespace EasyExtractCrossPlatform.ViewModels;
 
@@ -10,6 +11,10 @@ public class SettingsViewModel
     {
         Settings = settings;
         LoadErrorMessage = loadError;
+        var version = VersionProvider.GetApplicationVersion();
+        CurrentVersion = string.IsNullOrWhiteSpace(version)
+            ? settings.Update.CurrentVersion
+            : version;
 
         ThemeOptions = new List<SelectionOption>
         {
@@ -24,6 +29,12 @@ public class SettingsViewModel
     public IReadOnlyList<SelectionOption> ThemeOptions { get; }
 
     public string? LoadErrorMessage { get; }
+
+    public string RepositoryOwner => Settings.Update.RepoOwner ?? string.Empty;
+
+    public string RepositoryName => Settings.Update.RepoName ?? string.Empty;
+
+    public string CurrentVersion { get; }
 
     public static SettingsViewModel CreateFromStorage()
     {

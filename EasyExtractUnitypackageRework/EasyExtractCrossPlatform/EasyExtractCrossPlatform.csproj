@@ -10,6 +10,9 @@
         <ApplicationIcon>Smallicon.ico</ApplicationIcon>
         <AssemblyVersion>2.0.7.1</AssemblyVersion>
         <FileVersion>2.0.7.1</FileVersion>
+        <Version>2.0.7.1</Version>
+        <IncludeSourceRevisionInInformationalVersion>false</IncludeSourceRevisionInInformationalVersion>
+        <AssemblyInformationalVersion>2.0.7.1</AssemblyInformationalVersion>
     </PropertyGroup>
 
     <ItemGroup>

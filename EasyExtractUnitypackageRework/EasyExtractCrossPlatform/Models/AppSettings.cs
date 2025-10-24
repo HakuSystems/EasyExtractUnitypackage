@@ -78,5 +78,6 @@ public class CustomBackgroundImageSettings
     public string BackgroundPath { get; set; } =
         "https://raw.githubusercontent.com/HakuSystems/GraphicsStuff/main/EasyExtractUnitypackage_Background 8K.png";
 
+    public bool IsEnabled { get; set; } = true;
     public double BackgroundOpacity { get; set; } = 0.2;
 }

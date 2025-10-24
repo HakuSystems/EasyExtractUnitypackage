@@ -221,138 +221,138 @@
         </DataTemplate>
     </UserControl.Resources>
 
-    <Grid RowDefinitions="Auto,Auto,*"
-          MaxWidth="760"
-          HorizontalAlignment="Center">
-        <Border Grid.Row="0"
-                Classes="card hero-card">
-            <Grid RowDefinitions="Auto,Auto,*">
-                <Grid ColumnDefinitions="*,Auto"
-                      VerticalAlignment="Center">
-                    <StackPanel Spacing="6">
-                        <TextBlock Text="GitHub Releases"
-                                   FontSize="20"
-                                   FontWeight="SemiBold" />
-                        <TextBlock Text="Latest release data pulled directly from GitHub."
-                                   Classes="subtle"
-                                   FontSize="13" />
-                    </StackPanel>
+    <ScrollViewer HorizontalScrollBarVisibility="Disabled"
+                  VerticalScrollBarVisibility="Auto">
+        <Grid RowDefinitions="Auto,Auto,*"
+              MaxWidth="760"
+              HorizontalAlignment="Center">
+            <Border Grid.Row="0"
+                    Classes="card hero-card">
+                <Grid RowDefinitions="Auto,Auto,*">
+                    <Grid ColumnDefinitions="*,Auto"
+                          VerticalAlignment="Center">
+                        <StackPanel Spacing="6">
+                            <TextBlock Text="GitHub Releases"
+                                       FontSize="20"
+                                       FontWeight="SemiBold" />
+                            <TextBlock Text="Latest release data pulled directly from GitHub."
+                                       Classes="subtle"
+                                       FontSize="13" />
+                        </StackPanel>
 
-                    <WrapPanel Grid.Column="1"
-                               HorizontalAlignment="Right"
-                               VerticalAlignment="Center">
-                        <TextBlock Text="{Binding LastUpdated, StringFormat='Last updated {0:G}'}"
-                                   Classes="meta"
-                                   Margin="0,0,12,6"
-                                   IsVisible="{Binding HasLastUpdated}" />
-                        <ProgressBar Width="140"
-                                     Height="4"
-                                     Margin="0,0,12,6"
-                                     IsIndeterminate="True"
-                                     IsVisible="{Binding IsLoading}" />
-                        <Button Content="Refresh"
-                                Classes="small"
-                                Margin="0,0,12,6"
-                                Click="RefreshButton_OnClick"
-                                ToolTip.Tip="Fetch the newest releases" />
-                        <Button Content="Close"
-                                Classes="ghost small"
-                                Margin="0,0,0,6"
-                                Click="CloseButton_OnClick" />
-                    </WrapPanel>
+                        <WrapPanel Grid.Column="1"
+                                   HorizontalAlignment="Right"
+                                   VerticalAlignment="Center">
+                            <TextBlock Text="{Binding LastUpdated, StringFormat='Last updated {0:G}'}"
+                                       Classes="meta"
+                                       Margin="0,0,12,6"
+                                       IsVisible="{Binding HasLastUpdated}" />
+                            <ProgressBar Width="140"
+                                         Height="4"
+                                         Margin="0,0,12,6"
+                                         IsIndeterminate="True"
+                                         IsVisible="{Binding IsLoading}" />
+                            <Button Content="Refresh"
+                                    Classes="small"
+                                    Margin="0,0,12,6"
+                                    Click="RefreshButton_OnClick"
+                                    ToolTip.Tip="Fetch the newest releases" />
+                            <Button Content="Close"
+                                    Classes="ghost small"
+                                    Margin="0,0,0,6"
+                                    Click="CloseButton_OnClick" />
+                        </WrapPanel>
+                    </Grid>
+
+                    <Separator Grid.Row="1"
+                               Margin="0,24,0,24" />
+
+                    <ContentControl Grid.Row="2"
+                                    Content="{Binding FeaturedRelease}"
+                                    ContentTemplate="{StaticResource FeaturedReleaseTemplate}"
+                                    IsVisible="{Binding HasFeaturedRelease}" />
+
+                    <Border Grid.Row="2"
+                            Background="{DynamicResource EasyGlassOverlayBrush}"
+                            BorderBrush="{DynamicResource EasyGlassNeutralBorderBrush}"
+                            BorderThickness="1"
+                            CornerRadius="18"
+                            Padding="28"
+                            HorizontalAlignment="Center"
+                            VerticalAlignment="Center"
+                            Width="320"
+                            IsVisible="{Binding ShowEmptyState}">
+                        <StackPanel Spacing="12"
+                                    HorizontalAlignment="Center"
+                                    VerticalAlignment="Center">
+                            <TextBlock Text="No releases to display yet"
+                                       FontSize="18"
+                                       FontWeight="SemiBold"
+                                       HorizontalAlignment="Center" />
+                            <TextBlock
+                                Text="We will show release notes here once the latest GitHub releases are fetched."
+                                Classes="subtle"
+                                FontSize="13"
+                                TextAlignment="Center" />
+                            <Button Content="Refresh now"
+                                    Classes="ghost small"
+                                    Click="RefreshButton_OnClick"
+                                    HorizontalAlignment="Center" />
+                        </StackPanel>
+                    </Border>
+
+                    <Border Grid.Row="2"
+                            Background="{DynamicResource EasyDangerOverlayBrush}"
+                            Margin="0"
+                            BorderBrush="{DynamicResource EasyDangerBorderBrush}"
+                            BorderThickness="1"
+                            CornerRadius="14"
+                            Padding="20"
+                            HorizontalAlignment="Stretch"
+                            VerticalAlignment="Top"
+                            IsVisible="{Binding HasError}">
+                        <StackPanel Orientation="Horizontal"
+                                    Spacing="12">
+                            <Border Width="28"
+                                    Height="28"
+                                    Background="{DynamicResource EasyDangerBorderBrush}"
+                                    CornerRadius="10"
+                                    Opacity="0.85">
+                                <TextBlock Text="!"
+                                           FontSize="16"
+                                           FontWeight="Bold"
+                                           HorizontalAlignment="Center"
+                                           VerticalAlignment="Center"
+                                           Foreground="{DynamicResource EasyWindowBackgroundBrush}" />
+                            </Border>
+                            <TextBlock Text="{Binding ErrorMessage}"
+                                       Foreground="{DynamicResource EasyDangerForegroundBrush}"
+                                       FontWeight="SemiBold"
+                                       TextWrapping="Wrap" />
+                        </StackPanel>
+                    </Border>
                 </Grid>
+            </Border>
 
-                <Separator Grid.Row="1"
-                           Margin="0,24,0,24" />
+            <Border Grid.Row="1"
+                    Classes="card content-card"
+                    Margin="0,28,0,0"
+                    IsVisible="{Binding HasAdditionalReleases}">
+                <StackPanel Spacing="12">
+                    <TextBlock Text="Previous releases"
+                               FontSize="18"
+                               FontWeight="SemiBold" />
+                    <TextBlock Text="Browse older releases and open them on GitHub."
+                               Classes="subtle"
+                               FontSize="13" />
+                </StackPanel>
+            </Border>
 
-                <ContentControl Grid.Row="2"
-                                Content="{Binding FeaturedRelease}"
-                                ContentTemplate="{StaticResource FeaturedReleaseTemplate}"
-                                IsVisible="{Binding HasFeaturedRelease}" />
-
-                <Border Grid.Row="2"
-                        Background="{DynamicResource EasyGlassOverlayBrush}"
-                        BorderBrush="{DynamicResource EasyGlassNeutralBorderBrush}"
-                        BorderThickness="1"
-                        CornerRadius="18"
-                        Padding="28"
-                        HorizontalAlignment="Center"
-                        VerticalAlignment="Center"
-                        Width="320"
-                        IsVisible="{Binding ShowEmptyState}">
-                    <StackPanel Spacing="12"
-                                HorizontalAlignment="Center"
-                                VerticalAlignment="Center">
-                        <TextBlock Text="No releases to display yet"
-                                   FontSize="18"
-                                   FontWeight="SemiBold"
-                                   HorizontalAlignment="Center" />
-                        <TextBlock Text="We will show release notes here once the latest GitHub releases are fetched."
-                                   Classes="subtle"
-                                   FontSize="13"
-                                   TextAlignment="Center" />
-                        <Button Content="Refresh now"
-                                Classes="ghost small"
-                                Click="RefreshButton_OnClick"
-                                HorizontalAlignment="Center" />
-                    </StackPanel>
-                </Border>
-
-                <Border Grid.Row="2"
-                        Background="{DynamicResource EasyDangerOverlayBrush}"
-                        Margin="0"
-                        BorderBrush="{DynamicResource EasyDangerBorderBrush}"
-                        BorderThickness="1"
-                        CornerRadius="14"
-                        Padding="20"
-                        HorizontalAlignment="Stretch"
-                        VerticalAlignment="Top"
-                        IsVisible="{Binding HasError}">
-                    <StackPanel Orientation="Horizontal"
-                                Spacing="12">
-                        <Border Width="28"
-                                Height="28"
-                                Background="{DynamicResource EasyDangerBorderBrush}"
-                                CornerRadius="10"
-                                Opacity="0.85">
-                            <TextBlock Text="!"
-                                       FontSize="16"
-                                       FontWeight="Bold"
-                                       HorizontalAlignment="Center"
-                                       VerticalAlignment="Center"
-                                       Foreground="{DynamicResource EasyWindowBackgroundBrush}" />
-                        </Border>
-                        <TextBlock Text="{Binding ErrorMessage}"
-                                   Foreground="{DynamicResource EasyDangerForegroundBrush}"
-                                   FontWeight="SemiBold"
-                                   TextWrapping="Wrap" />
-                    </StackPanel>
-                </Border>
-            </Grid>
-        </Border>
-
-        <Border Grid.Row="1"
-                Classes="card content-card"
-                Margin="0,28,0,0"
-                IsVisible="{Binding HasAdditionalReleases}">
-            <StackPanel Spacing="12">
-                <TextBlock Text="Previous releases"
-                           FontSize="18"
-                           FontWeight="SemiBold" />
-                <TextBlock Text="Browse older releases and open them on GitHub."
-                           Classes="subtle"
-                           FontSize="13" />
-            </StackPanel>
-        </Border>
-
-        <ScrollViewer Grid.Row="2"
-                      Margin="0,12,0,0"
-                      HorizontalScrollBarVisibility="Disabled"
-                      VerticalScrollBarVisibility="Auto"
-                      IsVisible="{Binding HasAdditionalReleases}">
-            <ItemsControl ItemsSource="{Binding AdditionalReleases}"
+            <ItemsControl Grid.Row="2"
+                          Margin="0,12,0,0"
+                          ItemsSource="{Binding AdditionalReleases}"
                           ItemTemplate="{StaticResource AdditionalReleaseTemplate}"
-                          Margin="0,0,8,0" />
-        </ScrollViewer>
-    </Grid>
+                          IsVisible="{Binding HasAdditionalReleases}" />
+        </Grid>
+    </ScrollViewer>
 </UserControl>

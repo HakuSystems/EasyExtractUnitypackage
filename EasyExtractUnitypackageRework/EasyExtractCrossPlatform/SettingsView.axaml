@@ -45,7 +45,9 @@
 
                         <StackPanel Spacing="10">
                             <TextBlock Text="Application title" />
-                            <TextBox Text="{Binding Settings.AppTitle}" />
+                            <TextBox Text="{Binding Settings.AppTitle}"
+                                     IsReadOnly="True"
+                                     IsTabStop="False" />
                         </StackPanel>
 
                         <StackPanel Spacing="10">
@@ -133,18 +135,25 @@
                         <StackPanel Spacing="12">
                             <StackPanel>
                                 <TextBlock Text="Custom background image" />
-                                <TextBox Text="{Binding Settings.CustomBackgroundImage.BackgroundPath}" />
+                                <ToggleSwitch x:Name="CustomBackgroundToggle"
+                                              Content="Enable custom background"
+                                              IsChecked="{Binding Settings.CustomBackgroundImage.IsEnabled}" />
+                                <TextBox Text="{Binding Settings.CustomBackgroundImage.BackgroundPath}"
+                                         IsEnabled="{Binding IsChecked, ElementName=CustomBackgroundToggle}" />
                                 <StackPanel Orientation="Horizontal" Spacing="12" VerticalAlignment="Center">
                                     <TextBlock Text="Opacity" />
-                                    <Slider Width="240"
+                                    <Slider x:Name="BackgroundOpacitySlider"
+                                            Width="240"
                                             Minimum="0"
                                             Maximum="1"
                                             TickFrequency="0.05"
                                             IsSnapToTickEnabled="True"
-                                            Value="{Binding Settings.CustomBackgroundImage.BackgroundOpacity}" />
+                                            Value="{Binding Settings.CustomBackgroundImage.BackgroundOpacity}"
+                                            IsEnabled="{Binding IsChecked, ElementName=CustomBackgroundToggle}" />
                                     <TextBlock
-                                        Text="{Binding Settings.CustomBackgroundImage.BackgroundOpacity, StringFormat='{}{0:F2}'}"
-                                        Width="50" />
+                                        Text="{Binding Value, ElementName=BackgroundOpacitySlider, StringFormat='{}{0:F2}'}"
+                                        Width="50"
+                                        TextAlignment="Right" />
                                 </StackPanel>
                             </StackPanel>
                         </StackPanel>
@@ -180,20 +189,19 @@
                         <ToggleSwitch Content="Auto update"
                                       IsChecked="{Binding Settings.Update.AutoUpdate}" />
 
-                        <Grid ColumnDefinitions="*,*">
-                            <StackPanel>
-                                <TextBlock Text="Repository owner" />
-                                <TextBox Text="{Binding Settings.Update.RepoOwner}" />
+                        <StackPanel Spacing="8">
+                            <StackPanel Spacing="4">
+                                <TextBlock Text="Repository owner" Classes="subtle" />
+                                <TextBlock Text="{Binding RepositoryOwner}" />
                             </StackPanel>
-                            <StackPanel Grid.Column="1" Margin="18,0,0,0">
-                                <TextBlock Text="Repository name" />
-                                <TextBox Text="{Binding Settings.Update.RepoName}" />
+                            <StackPanel Spacing="4">
+                                <TextBlock Text="Repository name" Classes="subtle" />
+                                <TextBlock Text="{Binding RepositoryName}" />
                             </StackPanel>
-                        </Grid>
-
-                        <StackPanel Width="220">
-                            <TextBlock Text="Current version" />
-                            <TextBox Text="{Binding Settings.Update.CurrentVersion}" />
+                            <StackPanel Spacing="4">
+                                <TextBlock Text="Current version" Classes="subtle" />
+                                <TextBlock Text="{Binding CurrentVersion}" />
+                            </StackPanel>
                         </StackPanel>
                     </StackPanel>
                 </Border>

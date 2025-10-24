@@ -11,6 +11,8 @@ namespace EasyExtractCrossPlatform.Services;
 
 public interface IEverythingSearchService
 {
+    int LastExcludedResultCount { get; }
+
     Task<IReadOnlyList<EverythingSearchResult>> SearchAsync(string query, int maxResults,
         CancellationToken cancellationToken);
 
@@ -29,7 +31,19 @@ public sealed class EverythingSearchService : IEverythingSearchService
 
     private const int DefaultMaxResults = 200;
 
+    private static readonly string[] ExcludedSearchScopes =
+    {
+        @"!""C:\$RECYCLE.BIN\""",
+        @"!""E:\$RECYCLE.BIN\"""
+    };
+
+    private static readonly string[] ExcludedPathFragments =
+    {
+        @"\$RECYCLE.BIN\"
+    };
+
     private readonly SemaphoreSlim _queryGate = new(1, 1);
+    private int _lastExcludedResultCount;
 
     public async Task<IReadOnlyList<EverythingSearchResult>> SearchAsync(
         string query,
@@ -49,11 +63,14 @@ public sealed class EverythingSearchService : IEverythingSearchService
             await _queryGate.WaitAsync(cancellationToken).ConfigureAwait(false);
             entered = true;
 
-            return await Task.Run(() =>
+            var execution = await Task.Run(() =>
             {
                 cancellationToken.ThrowIfCancellationRequested();
                 return ExecuteSearchInternal(query, maxResults, cancellationToken);
             }, cancellationToken).ConfigureAwait(false);
+
+            Volatile.Write(ref _lastExcludedResultCount, execution.FilteredCount);
+            return execution.Results;
         }
         catch (DllNotFoundException ex)
         {
@@ -69,6 +86,8 @@ public sealed class EverythingSearchService : IEverythingSearchService
                 _queryGate.Release();
         }
     }
+
+    public int LastExcludedResultCount => Volatile.Read(ref _lastExcludedResultCount);
 
     public async Task<bool> IsAvailableAsync(CancellationToken cancellationToken)
     {
@@ -101,7 +120,7 @@ public sealed class EverythingSearchService : IEverythingSearchService
         }
     }
 
-    private static IReadOnlyList<EverythingSearchResult> ExecuteSearchInternal(
+    private static (List<EverythingSearchResult> Results, int FilteredCount) ExecuteSearchInternal(
         string query,
         int maxResults,
         CancellationToken cancellationToken)
@@ -114,10 +133,15 @@ public sealed class EverythingSearchService : IEverythingSearchService
             EverythingNative.SetMatchCase(false);
             EverythingNative.SetMatchWholeWord(false);
             var trimmedQuery = query.Trim();
-            var unityFilter = "ext:unitypackage";
-            var composedQuery = string.IsNullOrWhiteSpace(trimmedQuery)
-                ? unityFilter
-                : $"{trimmedQuery} {unityFilter}";
+            var queryParts = new List<string>();
+
+            if (!string.IsNullOrWhiteSpace(trimmedQuery))
+                queryParts.Add(trimmedQuery);
+
+            queryParts.Add("ext:unitypackage");
+            queryParts.AddRange(ExcludedSearchScopes);
+
+            var composedQuery = string.Join(' ', queryParts);
 
             EverythingNative.SetSearch(composedQuery);
             EverythingNative.SetMax((uint)(maxResults > 0 ? maxResults : DefaultMaxResults));
@@ -133,6 +157,7 @@ public sealed class EverythingSearchService : IEverythingSearchService
             }
 
             var results = new List<EverythingSearchResult>();
+            var excludedCount = 0;
             var totalResults = Math.Min(EverythingNative.GetNumResults(), (uint)maxResults);
             var pathBuffer = new StringBuilder(1024);
 
@@ -159,6 +184,12 @@ public sealed class EverythingSearchService : IEverythingSearchService
                     ? DateTimeOffset.FromFileTime(fileTime)
                     : null;
 
+                if (ShouldExcludeResult(fullPath, size))
+                {
+                    excludedCount++;
+                    continue;
+                }
+
                 results.Add(new EverythingSearchResult(
                     name ?? fullPath,
                     fullPath,
@@ -168,7 +199,7 @@ public sealed class EverythingSearchService : IEverythingSearchService
                     modified));
             }
 
-            return results;
+            return (results, excludedCount);
         }
         catch (ExternalException ex)
         {
@@ -178,6 +209,42 @@ public sealed class EverythingSearchService : IEverythingSearchService
         {
             EverythingNative.Reset();
         }
+    }
+
+    private static bool ShouldExcludeResult(string fullPath, long? sizeBytes)
+    {
+        if (string.IsNullOrWhiteSpace(fullPath))
+            return true;
+
+        if (IsInExcludedLocation(fullPath))
+            return true;
+
+        if (sizeBytes is <= 0)
+            return true;
+
+        try
+        {
+            var fileInfo = new FileInfo(fullPath);
+            if (!fileInfo.Exists || fileInfo.Length <= 0)
+                return true;
+        }
+        catch (Exception)
+        {
+            return true;
+        }
+
+        return false;
+    }
+
+    private static bool IsInExcludedLocation(string fullPath)
+    {
+        var normalized = fullPath.Replace('/', '\\');
+
+        foreach (var fragment in ExcludedPathFragments)
+            if (normalized.IndexOf(fragment, StringComparison.OrdinalIgnoreCase) >= 0)
+                return true;
+
+        return false;
     }
 }
 

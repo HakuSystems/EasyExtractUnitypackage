@@ -17,7 +17,7 @@ namespace EasyExtractCrossPlatform.ViewModels;
 public sealed class EverythingSearchViewModel : INotifyPropertyChanged, IDisposable
 {
     private const int DefaultMaxResults = 200;
-    private const string DefaultStatus = "Search .unitypackage files indexed by Everything.";
+    private const string DefaultStatus = "";
     private static readonly TimeSpan AutoSearchInterval = TimeSpan.FromMilliseconds(250);
     private readonly DispatcherTimer _autoSearchTimer;
 
@@ -50,7 +50,7 @@ public sealed class EverythingSearchViewModel : INotifyPropertyChanged, IDisposa
         SearchCommand = new AsyncRelayCommand(_ => ExecuteSearchAsync(), _ => !IsSearching && IsEverythingAvailable);
         OpenItemCommand = new RelayCommand(HandleAddToQueue);
         RevealItemCommand = new RelayCommand(HandleOpenDirectory);
-        ClearCommand = new RelayCommand(ClearResults, _ => HasResults);
+        ClearCommand = new RelayCommand(ClearResults, _ => HasResults || !string.IsNullOrWhiteSpace(SearchQuery));
     }
 
     public ObservableCollection<EverythingSearchResult> Results { get; } = new();
@@ -74,6 +74,7 @@ public sealed class EverythingSearchViewModel : INotifyPropertyChanged, IDisposa
             _searchQuery = value ?? string.Empty;
             OnPropertyChanged();
             SearchCommand.RaiseCanExecuteChanged();
+            ClearCommand.RaiseCanExecuteChanged();
             ScheduleAutoSearch();
         }
     }
@@ -217,9 +218,15 @@ public sealed class EverythingSearchViewModel : INotifyPropertyChanged, IDisposa
             foreach (var result in results)
                 Results.Add(result);
 
-            StatusMessage = Results.Count > 0
-                ? $"Showing {Results.Count} result(s)."
-                : "No files or folders matched your search.";
+            var excludedCount = _searchService.LastExcludedResultCount;
+            if (Results.Count > 0)
+                StatusMessage = excludedCount > 0
+                    ? $"Showing {Results.Count} result(s). Skipped {excludedCount} from recycle bins or unreadable files."
+                    : $"Showing {Results.Count} result(s).";
+            else
+                StatusMessage = excludedCount > 0
+                    ? "Only recycle-bin or unreadable entries were found."
+                    : "No files or folders matched your search.";
         }
         catch (OperationCanceledException) when (cts.IsCancellationRequested)
         {
@@ -313,6 +320,12 @@ public sealed class EverythingSearchViewModel : INotifyPropertyChanged, IDisposa
     {
         CancelActiveSearch();
         _autoSearchTimer.Stop();
+        if (!string.IsNullOrEmpty(SearchQuery))
+        {
+            SearchQuery = string.Empty;
+            _autoSearchTimer.Stop();
+        }
+
         Results.Clear();
         HasError = false;
         StatusMessage = DefaultStatus;

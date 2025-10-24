@@ -2,6 +2,7 @@ using System;
 using System.IO;
 using System.Text.Json;
 using EasyExtractCrossPlatform.Models;
+using EasyExtractCrossPlatform.Utilities;
 
 namespace EasyExtractCrossPlatform.Services;
 
@@ -33,8 +34,9 @@ public static class AppSettingsService
             }
 
             using var stream = File.OpenRead(SettingsFilePath);
-            var settings = JsonSerializer.Deserialize<AppSettings>(stream, SerializerOptions);
-            return settings ?? CreateDefault();
+            var settings = JsonSerializer.Deserialize<AppSettings>(stream, SerializerOptions) ?? CreateDefault();
+            UpdateStoredVersion(settings);
+            return settings;
         }
         catch (Exception ex)
         {
@@ -68,6 +70,19 @@ public static class AppSettingsService
             LastExtractionTime = DateTimeOffset.Now
         };
 
+        UpdateStoredVersion(defaults);
         return defaults;
+    }
+
+    private static void UpdateStoredVersion(AppSettings settings)
+    {
+        var version = VersionProvider.GetApplicationVersion();
+        if (string.IsNullOrWhiteSpace(version))
+            return;
+
+        if (settings.Update is null)
+            settings.Update = new UpdateSettings();
+
+        settings.Update.CurrentVersion = version;
     }
 }
