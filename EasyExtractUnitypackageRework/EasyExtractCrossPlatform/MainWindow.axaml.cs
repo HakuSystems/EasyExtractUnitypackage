@@ -46,6 +46,7 @@ public partial class MainWindow : Window
     private readonly string _defaultDropPrimaryText = "Drag & drop files here";
     private readonly string _defaultDropSecondaryText = "Supports batch extraction and live progress updates.";
     private readonly Border? _dropZoneBorder;
+    private readonly Grid? _dropZoneHostGrid;
     private readonly TextBlock? _dropZonePrimaryTextBlock;
     private readonly TextBlock? _dropZoneSecondaryTextBlock;
     private readonly EverythingSearchView? _everythingSearchView;
@@ -66,6 +67,7 @@ public partial class MainWindow : Window
     private readonly Border? _overlayCard;
     private readonly ContentControl? _overlayContent;
     private readonly Border? _overlayHost;
+    private readonly IUnityPackagePreviewService _previewService = new UnityPackagePreviewService();
     private readonly Button? _processQueueButton;
     private readonly Control? _queueEmptyState;
     private readonly ObservableCollection<QueueItemDisplay> _queueItems = new();
@@ -78,6 +80,7 @@ public partial class MainWindow : Window
     private readonly Border? _searchResultsBorder;
     private readonly Border? _searchRevealHost;
     private readonly Button? _startExtractionButton;
+    private readonly Grid? _startExtractionHeaderGrid;
     private readonly TextBox? _unityPackageSearchBox;
     private readonly Button? _upgradeButton;
     private readonly TextBlock? _versionTextBlock;
@@ -87,6 +90,7 @@ public partial class MainWindow : Window
     private string? _currentVersionDisplay;
     private IDisposable? _dropStatusReset;
     private IDisposable? _dropSuccessReset;
+    private IDisposable? _dropZoneVisibilityReset;
     private CancellationTokenSource? _extractionCts;
     private IDisposable? _extractionDashboardHideReset;
     private Stopwatch? _extractionStopwatch;
@@ -105,12 +109,14 @@ public partial class MainWindow : Window
         InitializeComponent();
         _defaultBackgroundBrush = ResolveDefaultBackgroundBrush();
         _dropZoneBorder = this.FindControl<Border>("DropZoneBorder");
+        _dropZoneHostGrid = this.FindControl<Grid>("DropZoneHostGrid");
         _dropZonePrimaryTextBlock = this.FindControl<TextBlock>("DropZonePrimaryTextBlock");
         _dropZoneSecondaryTextBlock = this.FindControl<TextBlock>("DropZoneSecondaryTextBlock");
         if (_dropZonePrimaryTextBlock?.Text is { Length: > 0 } primaryText)
             _defaultDropPrimaryText = primaryText;
         if (_dropZoneSecondaryTextBlock?.Text is { Length: > 0 } secondaryText)
             _defaultDropSecondaryText = secondaryText;
+        _startExtractionHeaderGrid = this.FindControl<Grid>("StartExtractionHeaderGrid");
         _versionTextBlock = this.FindControl<TextBlock>("VersionTextBlock");
         _licenseTierBadge = this.FindControl<Border>("LicenseTierBadge");
         _licenseTierTextBlock = this.FindControl<TextBlock>("LicenseTierTextBlock");
@@ -314,6 +320,50 @@ public partial class MainWindow : Window
     private async void ProcessQueueButton_OnClick(object? sender, RoutedEventArgs e)
     {
         await RunQueueExtractionAsync();
+    }
+
+    private async void PreviewQueueItemButton_OnClick(object? sender, RoutedEventArgs e)
+    {
+        if (sender is not Button { DataContext: QueueItemDisplay display })
+            return;
+
+        var sourcePath = !string.IsNullOrWhiteSpace(display.FilePath)
+            ? display.FilePath
+            : display.NormalizedPath;
+
+        var packagePath = TryNormalizeFilePath(sourcePath);
+        if (string.IsNullOrWhiteSpace(packagePath) || !File.Exists(packagePath))
+        {
+            ShowDropStatusMessage(
+                "Preview unavailable",
+                "The selected package could not be found on disk.",
+                TimeSpan.FromSeconds(4));
+            return;
+        }
+
+        await OpenPackagePreviewAsync(packagePath);
+    }
+
+    private async Task OpenPackagePreviewAsync(string packagePath)
+    {
+        try
+        {
+            var previewWindow = new UnityPackagePreviewWindow
+            {
+                DataContext = new UnityPackagePreviewViewModel(_previewService, packagePath)
+            };
+
+            previewWindow.WindowStartupLocation = WindowStartupLocation.CenterOwner;
+            await previewWindow.ShowDialog(this);
+        }
+        catch (Exception ex)
+        {
+            Debug.WriteLine($"Failed to open preview window: {ex}");
+            ShowDropStatusMessage(
+                "Preview failed",
+                "Unable to open the package preview window.",
+                TimeSpan.FromSeconds(4));
+        }
     }
 
     private async Task RunSingleExtractionPickerAsync()
@@ -726,25 +776,64 @@ public partial class MainWindow : Window
     private void UpdateSearchUiState()
     {
         var isActive = SearchViewModel?.IsInteractionActive ?? false;
+        var isDropZoneSectionVisible = _dropZoneHostGrid?.IsVisible ?? true;
 
         if (_dropZoneBorder is not null)
-            _dropZoneBorder.IsVisible = !isActive;
+            _dropZoneBorder.IsVisible = isDropZoneSectionVisible && !isActive;
 
         if (_searchResultsBorder is not null)
         {
-            _searchResultsBorder.IsVisible = isActive;
-            _searchResultsBorder.IsHitTestVisible = isActive;
-            _searchResultsBorder.Opacity = isActive ? 1 : 0;
+            var shouldShowResults = isDropZoneSectionVisible && isActive;
+            _searchResultsBorder.IsVisible = shouldShowResults;
+            _searchResultsBorder.IsHitTestVisible = shouldShowResults;
+            _searchResultsBorder.Opacity = shouldShowResults ? 1 : 0;
         }
 
         if (_searchIconBorder is not null)
-            _searchIconBorder.IsVisible = !isActive && !_isSearchHover;
+            _searchIconBorder.IsVisible = isDropZoneSectionVisible && !isActive && !_isSearchHover;
 
         if (_searchRevealHost is not null)
             _searchRevealHost.Classes.Set("search-active", isActive);
 
         if (_searchHintContainer is not null)
-            _searchHintContainer.Opacity = isActive || _isSearchHover ? 1 : 0;
+            _searchHintContainer.Opacity = isDropZoneSectionVisible && (isActive || _isSearchHover)
+                ? 1
+                : 0;
+    }
+
+    private void SetDropZoneSectionVisibility(bool isVisible)
+    {
+        if (_startExtractionHeaderGrid is not null)
+            _startExtractionHeaderGrid.IsVisible = isVisible;
+
+        if (_dropZoneHostGrid is not null)
+            _dropZoneHostGrid.IsVisible = isVisible;
+
+        if (_searchRevealHost is not null)
+            _searchRevealHost.IsHitTestVisible = isVisible;
+
+        if (!isVisible)
+        {
+            if (_dropZoneBorder is not null)
+                _dropZoneBorder.IsVisible = false;
+
+            if (_searchResultsBorder is not null)
+            {
+                _searchResultsBorder.IsVisible = false;
+                _searchResultsBorder.IsHitTestVisible = false;
+                _searchResultsBorder.Opacity = 0;
+            }
+
+            if (_searchIconBorder is not null)
+                _searchIconBorder.IsVisible = false;
+
+            if (_searchHintContainer is not null)
+                _searchHintContainer.Opacity = 0;
+        }
+        else
+        {
+            UpdateSearchUiState();
+        }
     }
 
     public void QueueUnityPackageFromSearch(string packagePath)
@@ -1146,6 +1235,10 @@ public partial class MainWindow : Window
         if (_extractionDashboard is null)
             return;
 
+        _dropZoneVisibilityReset?.Dispose();
+        _dropZoneVisibilityReset = null;
+        SetDropZoneSectionVisibility(false);
+
         _extractionDashboardHideReset?.Dispose();
         _extractionDashboardHideReset = null;
 
@@ -1251,20 +1344,35 @@ public partial class MainWindow : Window
         _extractionStopwatch?.Stop();
         _extractionElapsedTimer.Stop();
 
+        _dropZoneVisibilityReset?.Dispose();
+        _dropZoneVisibilityReset = null;
+
         if (_extractionDashboard is null)
+        {
+            SetDropZoneSectionVisibility(true);
             return;
+        }
 
         _extractionDashboardHideReset?.Dispose();
         _extractionDashboardHideReset = DispatcherTimer.RunOnce(() =>
         {
             if (_extractionDashboard is null)
+            {
+                SetDropZoneSectionVisibility(true);
                 return;
+            }
 
             _extractionDashboard.Opacity = 0;
-            _extractionDashboardHideReset = DispatcherTimer.RunOnce(() =>
+            _dropZoneVisibilityReset?.Dispose();
+            _dropZoneVisibilityReset = DispatcherTimer.RunOnce(() =>
             {
                 if (_extractionDashboard is not null)
                     _extractionDashboard.IsVisible = false;
+
+                SetDropZoneSectionVisibility(true);
+
+                _dropZoneVisibilityReset?.Dispose();
+                _dropZoneVisibilityReset = null;
 
                 _extractionDashboardHideReset?.Dispose();
                 _extractionDashboardHideReset = null;

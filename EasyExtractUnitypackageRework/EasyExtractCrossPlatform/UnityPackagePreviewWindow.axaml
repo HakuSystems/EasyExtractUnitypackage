@@ -1,0 +1,443 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:vm="using:EasyExtractCrossPlatform.ViewModels"
+        xmlns:util="using:EasyExtractCrossPlatform.Utilities"
+        xmlns:controls="using:EasyExtractCrossPlatform.Controls"
+        mc:Ignorable="d"
+        x:CompileBindings="False"
+        x:Class="EasyExtractCrossPlatform.UnityPackagePreviewWindow"
+        Title="{Binding WindowTitle, FallbackValue='Package Preview'}"
+        Width="1024"
+        Height="640"
+        MinWidth="860"
+        MinHeight="520"
+        TransparencyLevelHint="AcrylicBlur"
+        Background="{DynamicResource EasyWindowBackgroundBrush}"
+        Foreground="{DynamicResource EasyTextColorBrush}">
+    <Window.Resources>
+        <util:BooleanNegationConverter x:Key="BooleanNegationConverter" />
+    </Window.Resources>
+
+    <Window.Styles>
+        <Style Selector="Border.preview-card">
+            <Setter Property="Background" Value="{DynamicResource EasyGlassGradientBrush}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource EasyGlassBorderBrush}" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="CornerRadius" Value="24" />
+            <Setter Property="Padding" Value="24" />
+        </Style>
+    </Window.Styles>
+
+    <Grid Margin="28" RowDefinitions="Auto,Auto,*,Auto">
+        <StackPanel Grid.Row="0" Spacing="8">
+            <TextBlock Text="{Binding PackageName, FallbackValue='Unity Package'}"
+                       FontSize="26"
+                       FontWeight="Bold"
+                       TextTrimming="CharacterEllipsis" />
+            <TextBlock Text="{Binding PackagePath}"
+                       Classes="subtle"
+                       TextWrapping="Wrap"
+                       MaxLines="2"
+                       TextTrimming="CharacterEllipsis" />
+        </StackPanel>
+
+        <Grid Grid.Row="1"
+              ColumnDefinitions="*,*,*,*">
+            <Border Classes="preview-card"
+                    Margin="0,0,18,0">
+                <StackPanel Spacing="4">
+                    <TextBlock Text="Assets"
+                               Classes="subtle" />
+                    <TextBlock Text="{Binding AssetCount}"
+                               FontSize="20"
+                               FontWeight="SemiBold" />
+                </StackPanel>
+            </Border>
+            <Border Classes="preview-card"
+                    Grid.Column="1"
+                    Margin="0,0,18,0">
+                <StackPanel Spacing="4">
+                    <TextBlock Text="Asset size"
+                               Classes="subtle" />
+                    <TextBlock Text="{Binding TotalAssetSizeText, FallbackValue='0 B'}"
+                               FontSize="20"
+                               FontWeight="SemiBold"
+                               TextTrimming="CharacterEllipsis" />
+                </StackPanel>
+            </Border>
+            <Border Classes="preview-card"
+                    Grid.Column="2"
+                    Margin="0,0,18,0">
+                <StackPanel Spacing="4">
+                    <TextBlock Text="Package size"
+                               Classes="subtle" />
+                    <TextBlock Text="{Binding PackageSizeText, FallbackValue='0 B'}"
+                               FontSize="20"
+                               FontWeight="SemiBold"
+                               TextTrimming="CharacterEllipsis" />
+                </StackPanel>
+            </Border>
+            <Border Classes="preview-card"
+                    Grid.Column="3">
+                <StackPanel Spacing="4">
+                    <TextBlock Text="Last modified"
+                               Classes="subtle" />
+                    <TextBlock Text="{Binding PackageModifiedText, FallbackValue='-'}"
+                               FontSize="20"
+                               FontWeight="SemiBold"
+                               TextTrimming="CharacterEllipsis" />
+                </StackPanel>
+            </Border>
+        </Grid>
+
+        <Grid Grid.Row="2"
+              ColumnDefinitions="2*,*">
+            <Border Classes="preview-card">
+                <Grid RowDefinitions="Auto,*">
+                    <StackPanel Grid.Row="0"
+                                Orientation="Horizontal"
+                                Spacing="12"
+                                Margin="0,0,0,16">
+                        <TextBlock Text="Category"
+                                   Classes="subtle"
+                                   VerticalAlignment="Center" />
+                        <ComboBox ItemsSource="{Binding Categories}"
+                                  SelectedItem="{Binding SelectedCategory}"
+                                  MinWidth="180"
+                                  HorizontalAlignment="Left" />
+                        <TextBlock Text="{Binding AssetCount, StringFormat='{}{0} assets'}"
+                                   Classes="subtle"
+                                   VerticalAlignment="Center"
+                                   Margin="12,0,0,0" />
+                    </StackPanel>
+
+                    <Grid Grid.Row="1">
+                        <ListBox ItemsSource="{Binding VisibleNodes}"
+                                 SelectedItem="{Binding SelectedTreeNode, Mode=TwoWay}"
+                                 Background="Transparent"
+                                 BorderThickness="0"
+                                 ScrollViewer.VerticalScrollBarVisibility="Auto"
+                                 ScrollViewer.HorizontalScrollBarVisibility="Auto"
+                                 IsVisible="{Binding IsTreeViewVisible}">
+                            <ListBox.ItemTemplate>
+                                <DataTemplate x:DataType="vm:UnityPackageAssetTreeNode">
+                                    <Grid ColumnDefinitions="Auto,Auto,*,Auto"
+                                          Margin="0,2">
+                                        <Border Width="{Binding Indent}" />
+                                        <Button Grid.Column="1"
+                                                Content="{Binding Icon}"
+                                                Command="{Binding DataContext.NodeToggleCommand, RelativeSource={RelativeSource AncestorType=ListBox}}"
+                                                CommandParameter="{Binding}"
+                                                IsEnabled="{Binding IsFolder}"
+                                                IsVisible="{Binding IsFolder}"
+                                                Width="24"
+                                                Classes="ghost" />
+                                        <TextBlock Grid.Column="2"
+                                                   Text="{Binding Name}"
+                                                   FontWeight="SemiBold"
+                                                   Margin="6,0,0,0" />
+                                        <TextBlock Grid.Column="3"
+                                                   Text="{Binding SizeText}"
+                                                   FontWeight="SemiBold"
+                                                   HorizontalAlignment="Right"
+                                                   IsVisible="{Binding IsFolder, Converter={StaticResource BooleanNegationConverter}}" />
+                                    </Grid>
+                                </DataTemplate>
+                            </ListBox.ItemTemplate>
+                        </ListBox>
+
+                        <ScrollViewer VerticalScrollBarVisibility="Auto"
+                                      IsVisible="{Binding IsListViewVisible}">
+                            <ListBox ItemsSource="{Binding Assets}"
+                                     SelectedItem="{Binding SelectedAsset, Mode=TwoWay}">
+                                <ListBox.ItemTemplate>
+                                    <DataTemplate x:DataType="vm:UnityPackageAssetPreviewItem">
+                                        <Border Background="{DynamicResource EasyGlassOverlayFaintBrush}"
+                                                BorderBrush="{DynamicResource EasyGlassNeutralBorderBrush}"
+                                                BorderThickness="1"
+                                                CornerRadius="18"
+                                                Padding="16"
+                                                Margin="0,0,0,12">
+                                            <Grid ColumnDefinitions="*,Auto">
+                                                <StackPanel Spacing="6">
+                                                    <TextBlock Text="{Binding FileName}"
+                                                               FontWeight="SemiBold"
+                                                               TextTrimming="CharacterEllipsis" />
+                                                    <TextBlock Text="{Binding RelativePath}"
+                                                               Classes="subtle"
+                                                               TextTrimming="CharacterEllipsis"
+                                                               ToolTip.Tip="{Binding RelativePath}" />
+                                                </StackPanel>
+                                                <StackPanel Grid.Column="1"
+                                                            HorizontalAlignment="Right"
+                                                            Spacing="6"
+                                                            Margin="18,0,0,0">
+                                                    <Border Background="{DynamicResource EasyGlassOverlayBrush}"
+                                                            BorderBrush="{DynamicResource EasyGlassNeutralBorderBrush}"
+                                                            BorderThickness="1"
+                                                            CornerRadius="12"
+                                                            Padding="6,2"
+                                                            HorizontalAlignment="Right"
+                                                            IsVisible="{Binding HasPreview}">
+                                                        <TextBlock Text="Preview"
+                                                                   FontSize="12"
+                                                                   FontWeight="SemiBold" />
+                                                    </Border>
+                                                    <TextBlock Text="{Binding Category}"
+                                                               HorizontalAlignment="Right"
+                                                               Classes="subtle" />
+                                                    <TextBlock Text="{Binding SizeText}"
+                                                               FontWeight="SemiBold"
+                                                               HorizontalAlignment="Right" />
+                                                </StackPanel>
+                                            </Grid>
+                                        </Border>
+                                    </DataTemplate>
+                                </ListBox.ItemTemplate>
+                            </ListBox>
+                        </ScrollViewer>
+
+                        <TextBlock Text="No assets match the current filter."
+                                   HorizontalAlignment="Center"
+                                   VerticalAlignment="Center"
+                                   IsVisible="{Binding ShowEmptyState}"
+                                   Classes="subtle" />
+                    </Grid>
+                </Grid>
+            </Border>
+
+            <Border Grid.Column="1"
+                    Classes="preview-card"
+                    Margin="24,0,0,0">
+                <Grid RowDefinitions="Auto,Auto,*">
+                    <StackPanel Spacing="4">
+                        <TextBlock Text="Selected asset"
+                                   Classes="subtle" />
+                        <TextBlock Text="{Binding SelectedAssetPath, FallbackValue='Select an asset to inspect'}"
+                                   TextWrapping="Wrap"
+                                   MaxLines="3"
+                                   TextTrimming="CharacterEllipsis" />
+                    </StackPanel>
+
+                    <Grid Grid.Row="1"
+                          ColumnDefinitions="*,*"
+                          Margin="0,18,0,0">
+                        <StackPanel Spacing="4">
+                            <TextBlock Text="Category"
+                                       Classes="subtle" />
+                            <TextBlock Text="{Binding SelectedAssetCategory, FallbackValue='-'}"
+                                       FontWeight="SemiBold" />
+                        </StackPanel>
+                        <StackPanel Grid.Column="1"
+                                    Spacing="4"
+                                    Margin="16,0,0,0">
+                            <TextBlock Text="Size"
+                                       Classes="subtle" />
+                            <TextBlock Text="{Binding SelectedAssetSizeText, FallbackValue='-'}"
+                                       FontWeight="SemiBold" />
+                        </StackPanel>
+                    </Grid>
+
+                    <Grid Grid.Row="2"
+                          RowDefinitions="*,Auto"
+                          Margin="0,18,0,0">
+                        <TabControl Grid.Row="0"
+                                    SelectedIndex="{Binding PreviewTabIndex}"
+                                    MinHeight="320">
+                            <TabItem Header="Image"
+                                     IsVisible="{Binding HasImagePreview}">
+                                <Border Background="{DynamicResource EasyGlassOverlayBrush}"
+                                        BorderBrush="{DynamicResource EasyGlassNeutralBorderBrush}"
+                                        BorderThickness="1"
+                                        CornerRadius="16"
+                                        Padding="12"
+                                        HorizontalAlignment="Stretch"
+                                        VerticalAlignment="Stretch">
+                                    <ScrollViewer HorizontalScrollBarVisibility="Disabled"
+                                                  VerticalScrollBarVisibility="Auto">
+                                        <Image Source="{Binding ImagePreview}"
+                                               Stretch="Uniform"
+                                               HorizontalAlignment="Center"
+                                               VerticalAlignment="Center" />
+                                    </ScrollViewer>
+                                </Border>
+                            </TabItem>
+                            <TabItem Header="Preview"
+                                     IsVisible="{Binding HasFallbackPreview}">
+                                <Border Background="{DynamicResource EasyGlassOverlayBrush}"
+                                        BorderBrush="{DynamicResource EasyGlassNeutralBorderBrush}"
+                                        BorderThickness="1"
+                                        CornerRadius="16"
+                                        Padding="12"
+                                        HorizontalAlignment="Stretch"
+                                        VerticalAlignment="Stretch">
+                                    <ScrollViewer HorizontalScrollBarVisibility="Disabled"
+                                                  VerticalScrollBarVisibility="Auto">
+                                        <Image Source="{Binding FallbackPreviewImage}"
+                                               Stretch="Uniform"
+                                               HorizontalAlignment="Center"
+                                               VerticalAlignment="Center" />
+                                    </ScrollViewer>
+                                </Border>
+                            </TabItem>
+                            <TabItem Header="Text"
+                                     IsVisible="{Binding HasTextPreview}">
+                                <Border Background="{DynamicResource EasyGlassOverlayBrush}"
+                                        BorderBrush="{DynamicResource EasyGlassNeutralBorderBrush}"
+                                        BorderThickness="1"
+                                        CornerRadius="16"
+                                        Padding="12"
+                                        HorizontalAlignment="Stretch"
+                                        VerticalAlignment="Stretch">
+                                    <ScrollViewer HorizontalScrollBarVisibility="Auto"
+                                                  VerticalScrollBarVisibility="Auto">
+                                        <TextBlock Text="{Binding TextPreview}"
+                                                   FontFamily="Consolas"
+                                                   FontSize="14"
+                                                   TextWrapping="Wrap" />
+                                    </ScrollViewer>
+                                </Border>
+                            </TabItem>
+                            <TabItem Header="Audio"
+                                     IsVisible="{Binding HasAudioPreview}">
+                                <Border Background="{DynamicResource EasyGlassOverlayBrush}"
+                                        BorderBrush="{DynamicResource EasyGlassNeutralBorderBrush}"
+                                        BorderThickness="1"
+                                        CornerRadius="16"
+                                        Padding="16">
+                                    <StackPanel Spacing="12">
+                                        <TextBlock Text="{Binding AudioStatusText}"
+                                                   FontWeight="SemiBold" />
+                                        <ProgressBar Minimum="0"
+                                                     Maximum="1"
+                                                     Height="6"
+                                                     Value="{Binding AudioProgress}" />
+                                        <StackPanel Orientation="Horizontal"
+                                                    Spacing="6">
+                                            <TextBlock Text="{Binding AudioPositionText}"
+                                                       FontFamily="Consolas" />
+                                            <TextBlock Text="/" />
+                                            <TextBlock Text="{Binding AudioDurationText}"
+                                                       FontFamily="Consolas" />
+                                        </StackPanel>
+                                        <StackPanel Orientation="Horizontal"
+                                                    Spacing="12">
+                                            <Button Content="Play / Pause"
+                                                    Command="{Binding PlayAudioPreviewCommand}" />
+                                            <Button Content="Stop"
+                                                    Command="{Binding StopAudioPreviewCommand}" />
+                                        </StackPanel>
+                                    </StackPanel>
+                                </Border>
+                            </TabItem>
+                            <TabItem Header="3D Model"
+                                     IsVisible="{Binding HasModelPreview}">
+                                <Border Background="{DynamicResource EasyGlassOverlayBrush}"
+                                        BorderBrush="{DynamicResource EasyGlassNeutralBorderBrush}"
+                                        BorderThickness="1"
+                                        CornerRadius="16"
+                                        Padding="8">
+                                    <controls:ModelPreviewControl Model="{Binding ModelPreview}"
+                                                                  HorizontalAlignment="Stretch"
+                                                                  VerticalAlignment="Stretch" />
+                                </Border>
+                            </TabItem>
+                        </TabControl>
+
+                        <StackPanel Grid.Row="1"
+                                    Margin="0,12,0,0"
+                                    Spacing="6">
+                            <TextBlock Text="Preview not available for this asset."
+                                       HorizontalAlignment="Center"
+                                       Classes="subtle"
+                                       IsVisible="{Binding HasAnyPreview, Converter={StaticResource BooleanNegationConverter}}" />
+                            <TextBlock Text="Text preview truncated for large files."
+                                       HorizontalAlignment="Center"
+                                       Classes="subtle"
+                                       IsVisible="{Binding IsTextPreviewTruncated}" />
+                            <TextBlock Text="Only a portion of this asset was loaded for preview."
+                                       HorizontalAlignment="Center"
+                                       Classes="subtle"
+                                       IsVisible="{Binding IsAssetDataTruncated}" />
+                            <TextBlock Text="3D preview currently supports OBJ meshes."
+                                       HorizontalAlignment="Center"
+                                       Classes="subtle"
+                                       IsVisible="{Binding ShowUnsupportedModelMessage}" />
+                            <TextBlock Text="Audio preview supports WAV, MP3, and AIFF assets."
+                                       HorizontalAlignment="Center"
+                                       Classes="subtle"
+                                       IsVisible="{Binding ShowUnsupportedAudioMessage}" />
+                        </StackPanel>
+                    </Grid>
+                </Grid>
+            </Border>
+        </Grid>
+
+        <Grid Grid.Row="3"
+              ColumnDefinitions="*,Auto">
+            <TextBlock Text="{Binding StatusMessage}"
+                       Classes="subtle"
+                       VerticalAlignment="Center"
+                       TextWrapping="Wrap" />
+            <Button Grid.Column="1"
+                    Content="Close"
+                    Width="120"
+                    HorizontalAlignment="Right"
+                    IsDefault="True"
+                    Margin="16,0,0,0"
+                    Click="CloseButton_OnClick" />
+        </Grid>
+
+        <Border Grid.RowSpan="4"
+                Background="#88000000"
+                CornerRadius="24"
+                IsVisible="{Binding IsLoading}">
+            <Border Background="{DynamicResource EasyGlassOverlayStrongBrush}"
+                    BorderBrush="{DynamicResource EasyGlassNeutralBorderBrush}"
+                    BorderThickness="1"
+                    CornerRadius="24"
+                    Padding="32"
+                    HorizontalAlignment="Center"
+                    VerticalAlignment="Center">
+                <StackPanel Spacing="16">
+                    <ProgressBar Width="220"
+                                 IsIndeterminate="True"
+                                 Height="6" />
+                    <TextBlock Text="Scanning package..."
+                               FontWeight="SemiBold"
+                               HorizontalAlignment="Center" />
+                </StackPanel>
+            </Border>
+        </Border>
+
+        <Border Grid.RowSpan="4"
+                Background="#88000000"
+                CornerRadius="24"
+                IsVisible="{Binding HasError}">
+            <Border Background="{DynamicResource EasyDangerOverlayBrush}"
+                    BorderBrush="{DynamicResource EasyDangerBorderBrush}"
+                    BorderThickness="1"
+                    CornerRadius="24"
+                    Padding="32"
+                    HorizontalAlignment="Center"
+                    VerticalAlignment="Center">
+                <StackPanel Spacing="16">
+                    <TextBlock Text="Unable to load this package."
+                               FontWeight="Bold"
+                               FontSize="18"
+                               TextAlignment="Center" />
+                    <TextBlock Text="{Binding StatusMessage}"
+                               TextAlignment="Center"
+                               TextWrapping="Wrap"
+                               MaxWidth="360" />
+                    <Button Content="Close"
+                            Width="120"
+                            HorizontalAlignment="Center"
+                            Click="CloseButton_OnClick" />
+                </StackPanel>
+            </Border>
+        </Border>
+    </Grid>
+</Window>
