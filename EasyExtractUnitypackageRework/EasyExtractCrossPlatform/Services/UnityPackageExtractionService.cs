@@ -5,9 +5,11 @@ using System.Formats.Tar;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
+using System.Security.Cryptography;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using EasyExtractCrossPlatform.Utilities;
 
 namespace EasyExtractCrossPlatform.Services;
 
@@ -74,7 +76,82 @@ public sealed class UnityPackageExtractionService : IUnityPackageExtractionServi
 
         var extractedFiles = new List<string>();
         var assetStates = new Dictionary<string, UnityPackageAssetState>(StringComparer.OrdinalIgnoreCase);
+        var pendingWrites = new List<PendingAssetWrite>();
+        var queuedStates = new HashSet<UnityPackageAssetState>();
+        var extractionRequired = false;
         var extractedCount = 0;
+
+        void WriteAndTrack(
+            UnityPackageAssetState state,
+            string targetPath,
+            string? metaPath,
+            string? previewPath,
+            AssetWritePlan plan)
+        {
+            var writtenFiles = WriteAssetToDisk(
+                state,
+                targetPath,
+                metaPath,
+                previewPath,
+                plan,
+                cancellationToken);
+            if (writtenFiles.Count > 0)
+            {
+                extractedCount++;
+                extractedFiles.AddRange(writtenFiles);
+                progress?.Report(new UnityPackageExtractionProgress(state.RelativePath, extractedCount));
+            }
+
+            state.MarkAsCompleted();
+            queuedStates.Remove(state);
+        }
+
+        void FlushPendingWrites()
+        {
+            foreach (var pending in pendingWrites)
+                WriteAndTrack(
+                    pending.State,
+                    pending.TargetPath,
+                    pending.MetaPath,
+                    pending.PreviewPath,
+                    pending.Plan);
+
+            pendingWrites.Clear();
+            queuedStates.Clear();
+        }
+
+        void HandleReadyState(UnityPackageAssetState state)
+        {
+            if (!TryGetAssetPaths(
+                    state,
+                    outputDirectory,
+                    options.OrganizeByCategories,
+                    out var targetPath,
+                    out var metaPath,
+                    out var previewPath))
+                return;
+
+            var plan = CreateAssetWritePlan(state, targetPath, metaPath, previewPath);
+
+            if (!plan.RequiresWrite)
+            {
+                state.MarkAsCompleted();
+                queuedStates.Remove(state);
+                return;
+            }
+
+            if (!extractionRequired)
+            {
+                extractionRequired = true;
+                pendingWrites.Add(new PendingAssetWrite(state, targetPath, metaPath, previewPath, plan));
+                queuedStates.Add(state);
+                FlushPendingWrites();
+            }
+            else
+            {
+                WriteAndTrack(state, targetPath, metaPath, previewPath, plan);
+            }
+        }
 
         TarEntry? entry;
         while ((entry = tarReader.GetNextEntry()) is not null)
@@ -123,46 +200,36 @@ public sealed class UnityPackageExtractionService : IUnityPackageExtractionServi
                     continue;
             }
 
-            if (state.CanWriteToDisk)
-            {
-                var writtenFiles = WriteAssetToDisk(
-                    state,
-                    outputDirectory,
-                    options.OrganizeByCategories,
-                    cancellationToken);
-
-                if (writtenFiles.Count > 0)
-                {
-                    extractedCount++;
-                    extractedFiles.AddRange(writtenFiles);
-                    progress?.Report(new UnityPackageExtractionProgress(state.RelativePath, extractedCount));
-                }
-
-                state.MarkAsCompleted();
-            }
+            if (state.CanWriteToDisk && !queuedStates.Contains(state))
+                HandleReadyState(state);
         }
 
         // Emit remaining entries that might have been waiting for path or asset information.
         foreach (var (_, state) in assetStates)
         {
-            if (!state.CanWriteToDisk)
+            if (!state.CanWriteToDisk || queuedStates.Contains(state))
                 continue;
 
-            var writtenFiles = WriteAssetToDisk(
-                state,
-                outputDirectory,
-                options.OrganizeByCategories,
-                cancellationToken);
-
-            if (writtenFiles.Count > 0)
-            {
-                extractedCount++;
-                extractedFiles.AddRange(writtenFiles);
-                progress?.Report(new UnityPackageExtractionProgress(state.RelativePath, extractedCount));
-            }
-
-            state.MarkAsCompleted();
+            HandleReadyState(state);
         }
+
+        if (!extractionRequired)
+        {
+            foreach (var pending in pendingWrites)
+                pending.State.MarkAsCompleted();
+
+            pendingWrites.Clear();
+            queuedStates.Clear();
+
+            return new UnityPackageExtractionResult(
+                packagePath,
+                outputDirectory,
+                0,
+                extractedFiles.ToImmutableArray());
+        }
+
+        if (pendingWrites.Count > 0)
+            FlushPendingWrites();
 
         return new UnityPackageExtractionResult(
             packagePath,
@@ -177,45 +244,157 @@ public sealed class UnityPackageExtractionService : IUnityPackageExtractionServi
         bool organizeByCategories,
         CancellationToken cancellationToken)
     {
-        if (!state.CanWriteToDisk || state.RelativePath is null)
+        if (!TryGetAssetPaths(
+                state,
+                outputDirectory,
+                organizeByCategories,
+                out var targetPath,
+                out var metaPath,
+                out var previewPath))
             return Array.Empty<string>();
+
+        var plan = CreateAssetWritePlan(state, targetPath, metaPath, previewPath);
+        if (!plan.RequiresWrite)
+            return Array.Empty<string>();
+
+        return WriteAssetToDisk(state, targetPath, metaPath, previewPath, plan, cancellationToken);
+    }
+
+    private static bool TryGetAssetPaths(
+        UnityPackageAssetState state,
+        string outputDirectory,
+        bool organizeByCategories,
+        out string targetPath,
+        out string? metaPath,
+        out string? previewPath)
+    {
+        targetPath = string.Empty;
+        metaPath = null;
+        previewPath = null;
+
+        if (state.RelativePath is null || state.AssetData is not { Length: > 0 })
+            return false;
 
         var sanitizedPath = organizeByCategories
             ? state.RelativePath
             : Path.GetFileName(state.RelativePath);
 
-        if (string.IsNullOrWhiteSpace(sanitizedPath) || state.AssetData is null)
-            return Array.Empty<string>();
+        if (string.IsNullOrWhiteSpace(sanitizedPath))
+            return false;
 
         sanitizedPath = NormalizeRelativePath(sanitizedPath);
         if (string.IsNullOrWhiteSpace(sanitizedPath))
+            return false;
+
+        targetPath = Path.Combine(outputDirectory, sanitizedPath);
+        metaPath = state.MetaData is { Length: > 0 } ? $"{targetPath}.meta" : null;
+        previewPath = state.PreviewData is { Length: > 0 } ? $"{targetPath}.preview.png" : null;
+        return true;
+    }
+
+    private static AssetWritePlan CreateAssetWritePlan(
+        UnityPackageAssetState state,
+        string targetPath,
+        string? metaPath,
+        string? previewPath)
+    {
+        var writeAsset = state.AssetData is { Length: > 0 } && NeedsWrite(targetPath, state.AssetData);
+        var writeMeta = metaPath is not null &&
+                        state.MetaData is { Length: > 0 } &&
+                        NeedsWrite(metaPath, state.MetaData);
+        var writePreview = previewPath is not null &&
+                           state.PreviewData is { Length: > 0 } &&
+                           NeedsWrite(previewPath, state.PreviewData);
+
+        return new AssetWritePlan(writeAsset, writeMeta, writePreview);
+    }
+
+    private static IReadOnlyList<string> WriteAssetToDisk(
+        UnityPackageAssetState state,
+        string targetPath,
+        string? metaPath,
+        string? previewPath,
+        AssetWritePlan plan,
+        CancellationToken cancellationToken)
+    {
+        if (!plan.RequiresWrite)
             return Array.Empty<string>();
 
-        var targetPath = Path.Combine(outputDirectory, sanitizedPath);
+        var writtenFiles = new List<string>();
         var directory = Path.GetDirectoryName(targetPath);
-        if (!string.IsNullOrWhiteSpace(directory))
-            Directory.CreateDirectory(directory);
+        var directoryEnsured = false;
 
-        cancellationToken.ThrowIfCancellationRequested();
-        File.WriteAllBytes(targetPath, state.AssetData);
-
-        var writtenFiles = new List<string> { targetPath };
-
-        if (state.MetaData is { Length: > 0 })
+        void EnsureDirectory()
         {
-            var metaPath = $"{targetPath}.meta";
+            if (directoryEnsured)
+                return;
+
+            if (!string.IsNullOrWhiteSpace(directory))
+                Directory.CreateDirectory(directory);
+
+            directoryEnsured = true;
+        }
+
+        if (plan.WriteAsset && state.AssetData is { Length: > 0 })
+        {
+            EnsureDirectory();
+            cancellationToken.ThrowIfCancellationRequested();
+            File.WriteAllBytes(targetPath, state.AssetData);
+            writtenFiles.Add(targetPath);
+        }
+
+        if (plan.WriteMeta && metaPath is not null && state.MetaData is { Length: > 0 })
+        {
+            EnsureDirectory();
+            cancellationToken.ThrowIfCancellationRequested();
             File.WriteAllBytes(metaPath, state.MetaData);
             writtenFiles.Add(metaPath);
         }
 
-        if (state.PreviewData is { Length: > 0 })
+        if (plan.WritePreview && previewPath is not null && state.PreviewData is { Length: > 0 })
         {
-            var previewPath = $"{targetPath}.preview.png";
+            EnsureDirectory();
+            cancellationToken.ThrowIfCancellationRequested();
             File.WriteAllBytes(previewPath, state.PreviewData);
             writtenFiles.Add(previewPath);
         }
 
         return writtenFiles;
+    }
+
+    private static bool NeedsWrite(string path, byte[] data)
+    {
+        if (!File.Exists(path))
+            return true;
+
+        return !ContentMatches(path, data);
+    }
+
+    private static bool ContentMatches(string path, byte[] data)
+    {
+        try
+        {
+            var fileInfo = new FileInfo(path);
+            if (!fileInfo.Exists || fileInfo.Length != data.Length)
+                return false;
+
+            using var stream = File.Open(path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
+            var fileHash = SHA256.HashData(stream);
+            var dataHash = SHA256.HashData(data);
+            return CryptographicOperations.FixedTimeEquals(fileHash, dataHash);
+        }
+        catch (IOException)
+        {
+            return false;
+        }
+        catch (UnauthorizedAccessException)
+        {
+            return false;
+        }
+        catch (CryptographicException)
+        {
+            return false;
+        }
     }
 
     private static (string AssetKey, string ComponentName) SplitEntryName(string entryName)
@@ -260,13 +439,26 @@ public sealed class UnityPackageExtractionService : IUnityPackageExtractionServi
             if (string.IsNullOrWhiteSpace(filtered))
                 continue;
 
-            cleanedSegments.Add(filtered);
+            var normalizedSegment = FileExtensionNormalizer.Normalize(filtered);
+            cleanedSegments.Add(normalizedSegment);
         }
 
         return cleanedSegments.Count == 0
             ? string.Empty
             : Path.Combine(cleanedSegments.ToArray());
     }
+
+    private readonly record struct AssetWritePlan(bool WriteAsset, bool WriteMeta, bool WritePreview)
+    {
+        public bool RequiresWrite => WriteAsset || WriteMeta || WritePreview;
+    }
+
+    private sealed record PendingAssetWrite(
+        UnityPackageAssetState State,
+        string TargetPath,
+        string? MetaPath,
+        string? PreviewPath,
+        AssetWritePlan Plan);
 
     private sealed class UnityPackageAssetState
     {

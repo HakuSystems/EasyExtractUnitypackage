@@ -8,6 +8,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using EasyExtractCrossPlatform.Models;
+using EasyExtractCrossPlatform.Utilities;
 
 namespace EasyExtractCrossPlatform.Services;
 
@@ -205,7 +206,8 @@ public sealed class UnityPackagePreviewService : IUnityPackagePreviewService
             if (string.IsNullOrWhiteSpace(filtered))
                 continue;
 
-            cleanedSegments.Add(filtered);
+            var normalizedSegment = FileExtensionNormalizer.Normalize(filtered);
+            cleanedSegments.Add(normalizedSegment);
         }
 
         return cleanedSegments.Count == 0
