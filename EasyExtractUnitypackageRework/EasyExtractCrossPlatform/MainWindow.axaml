@@ -10,7 +10,8 @@
         d:DesignHeight="1180"
         x:Class="EasyExtractCrossPlatform.MainWindow"
         Title="EasyExtract"
-        TransparencyLevelHint="AcrylicBlur">
+        TransparencyLevelHint="AcrylicBlur"
+        TransparencyBackgroundFallback="{DynamicResource EasyWindowBackgroundBrush}">
     <Window.Styles>
         <Style Selector="Border.drop-zone">
             <Setter Property="CornerRadius" Value="24" />
@@ -655,7 +656,8 @@
                             <Grid RowDefinitions="Auto,Auto,Auto" ColumnDefinitions="*,Auto">
                                 <TextBlock Text="Packages completed"
                                            Classes="subtle" />
-                                <TextBlock Grid.Column="1"
+                                <TextBlock x:Name="ExtractionOverviewPackagesCompletedText"
+                                           Grid.Column="1"
                                            Text="0"
                                            FontSize="26"
                                            FontWeight="Bold"
@@ -665,7 +667,8 @@
                                            Classes="subtle"
                                            Margin="0,16,0,0"
                                            Text="Assets extracted" />
-                                <TextBlock Grid.Row="1"
+                                <TextBlock x:Name="ExtractionOverviewAssetsExtractedText"
+                                           Grid.Row="1"
                                            Grid.Column="1"
                                            Margin="0,16,0,0"
                                            Text="0"
@@ -677,7 +680,8 @@
                                            Classes="subtle"
                                            Margin="0,16,0,0"
                                            Text="Last extraction" />
-                                <TextBlock Grid.Row="2"
+                                <TextBlock x:Name="ExtractionOverviewLastExtractionText"
+                                           Grid.Row="2"
                                            Grid.Column="1"
                                            Margin="0,16,0,0"
                                            Text="Not started"

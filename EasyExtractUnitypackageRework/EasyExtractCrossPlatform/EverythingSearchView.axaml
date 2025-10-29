@@ -48,7 +48,7 @@
             <Setter Property="TextTrimming" Value="CharacterEllipsis" />
         </Style>
 
-        <Style Selector="StackPanel.result-meta TextBlock">
+        <Style Selector="WrapPanel.result-meta TextBlock">
             <Setter Property="Foreground" Value="{DynamicResource EasyMutedBrush}" />
             <Setter Property="FontSize" Value="12" />
         </Style>
@@ -59,11 +59,11 @@
             <Setter Property="MinHeight" Value="36" />
         </Style>
 
-        <Style Selector="StackPanel#StatusPanel">
+        <Style Selector="WrapPanel#StatusPanel">
             <Setter Property="Margin" Value="0,10,0,0" />
         </Style>
 
-        <Style Selector="StackPanel#StatusPanel > ProgressBar">
+        <Style Selector="WrapPanel#StatusPanel > ProgressBar">
             <Setter Property="Width" Value="160" />
         </Style>
 
@@ -85,11 +85,11 @@
             <Setter Property="MinHeight" Value="42" />
         </Style>
 
-        <Style Selector="views|EverythingSearchView.compact StackPanel#StatusPanel">
+        <Style Selector="views|EverythingSearchView.compact WrapPanel#StatusPanel">
             <Setter Property="Margin" Value="0,8,0,0" />
         </Style>
 
-        <Style Selector="views|EverythingSearchView.compact StackPanel#StatusPanel > ProgressBar">
+        <Style Selector="views|EverythingSearchView.compact WrapPanel#StatusPanel > ProgressBar">
             <Setter Property="Width" Value="140" />
         </Style>
 
@@ -115,7 +115,7 @@
             <Setter Property="Padding" Value="0" />
         </Style>
 
-        <Style Selector="views|EverythingSearchView.minimal StackPanel#StatusPanel">
+        <Style Selector="views|EverythingSearchView.minimal WrapPanel#StatusPanel">
             <Setter Property="Margin" Value="0" />
         </Style>
     </UserControl.Styles>
@@ -124,15 +124,16 @@
         <Border Classes="search-card"
                 IsVisible="{Binding IsEverythingAvailable}">
             <StackPanel Spacing="12">
-                <StackPanel x:Name="StatusPanel"
-                            Orientation="Horizontal"
-                            Spacing="10"
-                            VerticalAlignment="Center">
+                <WrapPanel x:Name="StatusPanel"
+                           VerticalAlignment="Center">
                     <ProgressBar Height="6"
+                                 Margin="0,0,10,10"
+                                 Minimum="0"
                                  IsIndeterminate="True"
                                  IsVisible="{Binding IsSearching}" />
                     <Border Classes="status"
                             Classes.error="{Binding HasError}"
+                            Margin="0,0,0,10"
                             IsVisible="{Binding ShowStatusMessage}">
                         <StackPanel Orientation="Horizontal" Spacing="10">
                             <PathIcon
@@ -146,7 +147,7 @@
                                        MaxWidth="420" />
                         </StackPanel>
                     </Border>
-                </StackPanel>
+                </WrapPanel>
 
                 <ScrollViewer x:Name="ResultsScrollViewer"
                               VerticalScrollBarVisibility="Visible"
@@ -172,12 +173,12 @@
                                                        Classes="path" />
                                         </StackPanel>
 
-                                        <StackPanel Grid.Column="0"
-                                                    Grid.Row="1"
-                                                    Orientation="Horizontal"
-                                                    Spacing="16"
-                                                    Classes="result-meta">
-                                            <StackPanel Orientation="Horizontal" Spacing="6">
+                                        <WrapPanel Grid.Column="0"
+                                                   Grid.Row="1"
+                                                   Classes="result-meta">
+                                            <StackPanel Orientation="Horizontal"
+                                                        Spacing="6"
+                                                        Margin="0,0,16,8">
                                                 <PathIcon
                                                     Data="M3 6H21V18C21 19.1 20.1 20 19 20H5C3.9 20 3 19.1 3 18V6ZM12 14L16.5 11.5L12 9L7.5 11.5L12 14Z"
                                                     Width="14"
@@ -185,7 +186,9 @@
                                                     Foreground="{DynamicResource EasyAccentBrush}" />
                                                 <TextBlock Text="{Binding KindLabel}" />
                                             </StackPanel>
-                                            <StackPanel Orientation="Horizontal" Spacing="6">
+                                            <StackPanel Orientation="Horizontal"
+                                                        Spacing="6"
+                                                        Margin="0,0,16,8">
                                                 <PathIcon
                                                     Data="M6 2H18C19.1 2 20 2.9 20 4V20C20 21.1 19.1 22 18 22H6C4.9 22 4 21.1 4 20V4C4 2.9 4.9 2 6 2ZM12 20C13.1 20 14 19.1 14 18C14 16.9 13.1 16 12 16C10.9 16 10 16.9 10 18C10 19.1 10.9 20 12 20ZM6 4V8H18V4H6Z"
                                                     Width="14"
@@ -193,7 +196,9 @@
                                                     Foreground="{DynamicResource EasyAccentBrush}" />
                                                 <TextBlock Text="{Binding SizeLabel}" />
                                             </StackPanel>
-                                            <StackPanel Orientation="Horizontal" Spacing="6">
+                                            <StackPanel Orientation="Horizontal"
+                                                        Spacing="6"
+                                                        Margin="0,0,16,8">
                                                 <PathIcon
                                                     Data="M12 8C10.34 8 9 9.34 9 11C9 12.66 10.34 14 12 14C13.66 14 15 12.66 15 11C15 9.34 13.66 8 12 8ZM12 2C17.52 2 22 6.48 22 12C22 17.52 17.52 22 12 22C6.48 22 2 17.52 2 12C2 6.48 6.48 2 12 2ZM12 20C16.41 20 20 16.41 20 12C20 7.59 16.41 4 12 4C7.59 4 4 7.59 4 12C4 16.41 7.59 20 12 20ZM12.5 7H11V12.25L15.25 14.67L16 13.4L12.5 11.5V7Z"
                                                     Width="14"
@@ -201,22 +206,23 @@
                                                     Foreground="{DynamicResource EasyAccentBrush}" />
                                                 <TextBlock Text="{Binding LastModifiedLabel}" />
                                             </StackPanel>
-                                        </StackPanel>
+                                        </WrapPanel>
 
-                                        <StackPanel Grid.Column="1"
-                                                    Grid.Row="0"
-                                                    Grid.RowSpan="2"
-                                                    Orientation="Horizontal"
-                                                    HorizontalAlignment="Right">
+                                        <WrapPanel Grid.Column="1"
+                                                   Grid.Row="0"
+                                                   Grid.RowSpan="2"
+                                                   HorizontalAlignment="Right">
                                             <Button Classes="ghost link"
+                                                    Margin="0,0,12,8"
                                                     Content="Add to extraction queue"
                                                     Command="{Binding ViewModel.OpenItemCommand, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=views:EverythingSearchView}}"
                                                     CommandParameter="{Binding .}" />
                                             <Button Classes="ghost link"
+                                                    Margin="0,0,0,8"
                                                     Content="Open directory"
                                                     Command="{Binding ViewModel.RevealItemCommand, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=views:EverythingSearchView}}"
                                                     CommandParameter="{Binding .}" />
-                                        </StackPanel>
+                                        </WrapPanel>
                                     </Grid>
                                 </Border>
                             </DataTemplate>

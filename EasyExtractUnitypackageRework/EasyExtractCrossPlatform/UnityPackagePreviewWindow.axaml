@@ -14,6 +14,7 @@
         MinWidth="860"
         MinHeight="520"
         TransparencyLevelHint="AcrylicBlur"
+        TransparencyBackgroundFallback="{DynamicResource EasyWindowBackgroundBrush}"
         Background="{DynamicResource EasyWindowBackgroundBrush}"
         Foreground="{DynamicResource EasyTextColorBrush}">
     <Window.Resources>
@@ -76,7 +77,8 @@
         </StackPanel>
 
         <Grid Grid.Row="1"
-              ColumnDefinitions="*,*,*,*">
+              ColumnDefinitions="*,*,*,*"
+              Margin="0,16,0,20">
             <Border Classes="preview-card"
                     Margin="0,0,18,0">
                 <StackPanel Spacing="4">
@@ -125,37 +127,44 @@
         </Grid>
 
         <Grid Grid.Row="2"
-              ColumnDefinitions="2*,*">
+              ColumnDefinitions="2*,*"
+              Margin="0,0,0,24">
             <Border Classes="preview-card">
                 <Grid RowDefinitions="Auto,*">
-                    <StackPanel Grid.Row="0"
-                                Orientation="Horizontal"
-                                Spacing="12"
-                                Margin="0,0,0,16">
-                        <TextBlock Text="Category"
-                                   Classes="subtle"
-                                   VerticalAlignment="Center" />
-                        <ComboBox ItemsSource="{Binding Categories}"
-                                  SelectedItem="{Binding SelectedCategory}"
-                                  MinWidth="180"
-                                  HorizontalAlignment="Left" />
-                        <TextBlock Text="{Binding AssetCount, StringFormat='{}{0} assets'}"
+                    <Grid Grid.Row="0"
+                          ColumnDefinitions="Auto,*,Auto,2*"
+                          Margin="0,0,0,16">
+                        <TextBlock Grid.Column="0"
+                                   Text="Category"
                                    Classes="subtle"
                                    VerticalAlignment="Center"
-                                   Margin="12,0,0,0" />
-                        <TextBox Classes="search-bar search-bar-small"
+                                   Margin="0,0,12,0" />
+                        <ComboBox Grid.Column="1"
+                                  ItemsSource="{Binding Categories}"
+                                  SelectedItem="{Binding SelectedCategory}"
+                                  MinWidth="150"
+                                  HorizontalAlignment="Stretch"
+                                  VerticalAlignment="Center" />
+                        <TextBlock Grid.Column="2"
+                                   Text="{Binding AssetCount, StringFormat='{}{0} assets'}"
+                                   Classes="subtle"
+                                   VerticalAlignment="Center"
+                                   HorizontalAlignment="Right"
+                                   Margin="12,0,12,0" />
+                        <TextBox Grid.Column="3"
+                                 Classes="search-bar search-bar-small"
                                  Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}"
                                  Watermark="Search assets"
-                                 MinWidth="260"
-                                 HorizontalAlignment="Left"
+                                 MinWidth="220"
+                                 HorizontalAlignment="Stretch"
                                  VerticalAlignment="Center"
-                                 Margin="24,0,0,0">
+                                 Margin="12,0,0,0">
                             <TextBox.KeyBindings>
                                 <KeyBinding Gesture="Escape"
                                             Command="{Binding ClearCommand}" />
                             </TextBox.KeyBindings>
                         </TextBox>
-                    </StackPanel>
+                    </Grid>
 
                     <Grid Grid.Row="1">
                         <ScrollViewer VerticalScrollBarVisibility="Auto"

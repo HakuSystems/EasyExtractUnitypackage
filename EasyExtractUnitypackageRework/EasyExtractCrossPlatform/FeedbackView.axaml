@@ -41,19 +41,19 @@
                            Classes="subtle"
                            TextWrapping="Wrap" />
 
-                <StackPanel Orientation="Horizontal"
-                            HorizontalAlignment="Right"
-                            Spacing="12">
+                <WrapPanel HorizontalAlignment="Right">
                     <Button x:Name="CancelButton"
                             Classes="ghost"
+                            Margin="0,0,12,8"
                             Width="140"
                             Content="Close"
                             Click="CancelButton_OnClick" />
                     <Button x:Name="SendButton"
+                            Margin="0,0,0,8"
                             Width="180"
                             Content="Send feedback"
                             Click="SendButton_OnClick" />
-                </StackPanel>
+                </WrapPanel>
             </StackPanel>
         </Border>
     </Grid>

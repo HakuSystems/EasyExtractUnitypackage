@@ -61,6 +61,9 @@ public partial class MainWindow : Window
     private readonly TextBlock? _extractionDashboardQueueCount;
     private readonly TextBlock? _extractionDashboardSubtitle;
     private readonly DispatcherTimer _extractionElapsedTimer;
+    private readonly TextBlock? _extractionOverviewAssetsExtractedText;
+    private readonly TextBlock? _extractionOverviewLastExtractionText;
+    private readonly TextBlock? _extractionOverviewPackagesCompletedText;
     private readonly IUnityPackageExtractionService _extractionService = new UnityPackageExtractionService();
     private readonly Border? _licenseTierBadge;
     private readonly TextBlock? _licenseTierTextBlock;
@@ -93,8 +96,15 @@ public partial class MainWindow : Window
     private IDisposable? _dropZoneVisibilityReset;
     private CancellationTokenSource? _extractionCts;
     private IDisposable? _extractionDashboardHideReset;
+    private int _extractionOverviewAssetBaseline;
+    private int _extractionOverviewCurrentPackageAssets;
+    private int _extractionOverviewPackageBaseline;
+    private int _extractionOverviewSessionAssets;
+    private int _extractionOverviewSessionPackages;
+    private DateTimeOffset? _extractionOverviewStartTime;
     private Stopwatch? _extractionStopwatch;
     private bool _isCheckingForUpdates;
+    private bool _isExtractionOverviewLive;
     private bool _isExtractionRunning;
     private bool _isSearchHover;
     private PixelPoint? _lastNormalPosition;
@@ -163,6 +173,12 @@ public partial class MainWindow : Window
         _extractionDashboardAssetCount = this.FindControl<TextBlock>("ExtractionDashboardAssetCount");
         _extractionDashboardElapsed = this.FindControl<TextBlock>("ExtractionDashboardElapsed");
         _extractionDashboardNextPackage = this.FindControl<TextBlock>("ExtractionDashboardNextPackage");
+        _extractionOverviewPackagesCompletedText =
+            this.FindControl<TextBlock>("ExtractionOverviewPackagesCompletedText");
+        _extractionOverviewAssetsExtractedText =
+            this.FindControl<TextBlock>("ExtractionOverviewAssetsExtractedText");
+        _extractionOverviewLastExtractionText =
+            this.FindControl<TextBlock>("ExtractionOverviewLastExtractionText");
         _checkUpdatesButton = this.FindControl<Button>("CheckUpdatesButton");
         if (_checkUpdatesButton is not null)
             _checkUpdatesButtonOriginalContent = _checkUpdatesButton.Content;
@@ -485,6 +501,7 @@ public partial class MainWindow : Window
         _isExtractionRunning = true;
         _extractionCts = new CancellationTokenSource();
         UpdateExtractionButtonsState();
+        BeginExtractionOverviewSession();
         PrepareExtractionDashboard(validItems);
 
         try
@@ -503,7 +520,7 @@ public partial class MainWindow : Window
                     await Dispatcher.UIThread.InvokeAsync(() =>
                     {
                         UpdateExtractionDashboardQueueBadge(Math.Max(0, validItems.Count - index - 1));
-                        UpdateExtractionDashboardSubtitle("Waiting for next package…");
+                        UpdateExtractionDashboardSubtitle("Waiting for next package...");
                         UpdateExtractionDashboardNextPackageText(ResolveNextPackageName(validItems, index));
                     });
 
@@ -599,6 +616,7 @@ public partial class MainWindow : Window
         finally
         {
             FinishExtractionDashboard(TimeSpan.FromSeconds(2));
+            EndExtractionOverviewSession();
             _isExtractionRunning = false;
             _extractionCts?.Dispose();
             _extractionCts = null;
@@ -622,6 +640,7 @@ public partial class MainWindow : Window
         UnityPackageExtractionResult result,
         UnityPackageFile? queueEntry)
     {
+        OnExtractionOverviewPackageCompleted(result.AssetsExtracted);
         UpdateExtractionStatistics(packagePath, result);
 
         if (queueEntry is not null)
@@ -680,21 +699,28 @@ public partial class MainWindow : Window
                 !string.Equals(existing, packagePath, StringComparison.OrdinalIgnoreCase)))
             _settings.ExtractedUnitypackages.Add(packagePath);
 
-        if (_settings.UnitypackageFiles is not null)
-            foreach (var entry in _settings.UnitypackageFiles)
+        var normalizedPackagePath = TryNormalizeFilePath(packagePath);
+
+        if (_settings.UnitypackageFiles is { Count: > 0 })
+        {
+            for (var index = _settings.UnitypackageFiles.Count - 1; index >= 0; index--)
             {
+                var entry = _settings.UnitypackageFiles[index];
                 if (entry is null)
                     continue;
 
-                if (string.Equals(TryNormalizeFilePath(entry.FilePath), TryNormalizeFilePath(packagePath),
-                        StringComparison.OrdinalIgnoreCase))
+                var entryPath = TryNormalizeFilePath(entry.FilePath);
+                if (string.Equals(entryPath, normalizedPackagePath, StringComparison.OrdinalIgnoreCase) ||
+                    string.Equals(entry.FilePath, packagePath, StringComparison.OrdinalIgnoreCase))
                 {
-                    entry.IsInQueue = false;
-                    entry.IsExtracting = false;
+                    _settings.UnitypackageFiles.RemoveAt(index);
                 }
             }
+        }
 
         AppSettingsService.Save(_settings);
+        if (!_isExtractionOverviewLive)
+            UpdateExtractionOverviewDisplay();
     }
 
     private UnityPackageExtractionOptions BuildExtractionOptions()
@@ -1245,9 +1271,9 @@ public partial class MainWindow : Window
         _extractionDashboard.IsVisible = true;
         _extractionDashboard.Opacity = 1;
 
-        UpdateExtractionDashboardSubtitle("Preparing package…");
+        UpdateExtractionDashboardSubtitle("Preparing package...");
         UpdateExtractionDashboardPackageText(items.Count > 0 ? Path.GetFileName(items[0].Path) : "—");
-        UpdateExtractionDashboardAsset("Waiting…");
+        UpdateExtractionDashboardAsset("Waiting...");
         UpdateExtractionDashboardOutput("—");
         UpdateExtractionDashboardAssetCount(0);
         UpdateExtractionDashboardElapsedText("0s");
@@ -1272,9 +1298,10 @@ public partial class MainWindow : Window
         IReadOnlyList<ExtractionItem> items,
         int currentIndex)
     {
-        UpdateExtractionDashboardSubtitle("Extracting assets…");
+        OnExtractionOverviewPackageStarted();
+        UpdateExtractionDashboardSubtitle("Extracting assets...");
         UpdateExtractionDashboardPackageText(Path.GetFileName(packagePath));
-        UpdateExtractionDashboardAsset("Starting…");
+        UpdateExtractionDashboardAsset("Starting...");
         UpdateExtractionDashboardOutput(outputDirectory);
         UpdateExtractionDashboardAssetCount(0);
         UpdateExtractionDashboardElapsedText("0s");
@@ -1298,6 +1325,7 @@ public partial class MainWindow : Window
     private void UpdateExtractionDashboardProgress(string? assetPath, int assetsExtracted)
     {
         UpdateExtractionDashboardAssetCount(Math.Max(0, assetsExtracted));
+        UpdateExtractionOverviewProgress(assetsExtracted);
         if (!string.IsNullOrWhiteSpace(assetPath))
             UpdateExtractionDashboardAsset(assetPath);
     }
@@ -1458,6 +1486,164 @@ public partial class MainWindow : Window
         UpdateExtractionDashboardElapsedText(FormatElapsed(_extractionStopwatch.Elapsed));
     }
 
+    private void BeginExtractionOverviewSession()
+    {
+        if (!Dispatcher.UIThread.CheckAccess())
+        {
+            Dispatcher.UIThread.Post(BeginExtractionOverviewSession);
+            return;
+        }
+
+        _extractionOverviewPackageBaseline = Math.Max(0, _settings.TotalExtracted);
+        _extractionOverviewAssetBaseline = Math.Max(0, _settings.TotalFilesExtracted);
+        _extractionOverviewSessionPackages = 0;
+        _extractionOverviewSessionAssets = 0;
+        _extractionOverviewCurrentPackageAssets = 0;
+        _extractionOverviewStartTime = DateTimeOffset.Now;
+        _isExtractionOverviewLive = true;
+        UpdateExtractionOverviewStatusInProgress();
+        UpdateExtractionOverviewLiveCounts();
+    }
+
+    private void OnExtractionOverviewPackageStarted()
+    {
+        if (!_isExtractionOverviewLive)
+            return;
+
+        if (!Dispatcher.UIThread.CheckAccess())
+        {
+            Dispatcher.UIThread.Post(OnExtractionOverviewPackageStarted);
+            return;
+        }
+
+        _extractionOverviewCurrentPackageAssets = 0;
+        UpdateExtractionOverviewLiveCounts();
+    }
+
+    private void UpdateExtractionOverviewProgress(int assetsExtracted)
+    {
+        if (!_isExtractionOverviewLive)
+            return;
+
+        if (!Dispatcher.UIThread.CheckAccess())
+        {
+            Dispatcher.UIThread.Post(() => UpdateExtractionOverviewProgress(assetsExtracted));
+            return;
+        }
+
+        var sanitized = Math.Max(0, assetsExtracted);
+        if (sanitized <= _extractionOverviewCurrentPackageAssets)
+            return;
+
+        var delta = sanitized - _extractionOverviewCurrentPackageAssets;
+        _extractionOverviewCurrentPackageAssets = sanitized;
+        _extractionOverviewSessionAssets += delta;
+        UpdateExtractionOverviewLiveCounts();
+    }
+
+    private void OnExtractionOverviewPackageCompleted(int assetsExtracted)
+    {
+        if (!_isExtractionOverviewLive)
+            return;
+
+        if (!Dispatcher.UIThread.CheckAccess())
+        {
+            Dispatcher.UIThread.Post(() => OnExtractionOverviewPackageCompleted(assetsExtracted));
+            return;
+        }
+
+        var sanitized = Math.Max(0, assetsExtracted);
+        if (sanitized > _extractionOverviewCurrentPackageAssets)
+        {
+            _extractionOverviewSessionAssets += sanitized - _extractionOverviewCurrentPackageAssets;
+            _extractionOverviewCurrentPackageAssets = sanitized;
+        }
+
+        _extractionOverviewSessionPackages++;
+        UpdateExtractionOverviewLiveCounts();
+    }
+
+    private void UpdateExtractionOverviewLiveCounts()
+    {
+        if (!_isExtractionOverviewLive)
+            return;
+
+        var packages = _extractionOverviewPackageBaseline + _extractionOverviewSessionPackages;
+        var assets = _extractionOverviewAssetBaseline + _extractionOverviewSessionAssets;
+        UpdateExtractionOverviewCounts(packages, assets);
+    }
+
+    private void UpdateExtractionOverviewCounts(int packages, int assets)
+    {
+        if (!Dispatcher.UIThread.CheckAccess())
+        {
+            Dispatcher.UIThread.Post(() => UpdateExtractionOverviewCounts(packages, assets));
+            return;
+        }
+
+        if (_extractionOverviewPackagesCompletedText is not null)
+            _extractionOverviewPackagesCompletedText.Text = packages.ToString("N0", CultureInfo.CurrentCulture);
+
+        if (_extractionOverviewAssetsExtractedText is not null)
+            _extractionOverviewAssetsExtractedText.Text = assets.ToString("N0", CultureInfo.CurrentCulture);
+    }
+
+    private void UpdateExtractionOverviewStatus(string text)
+    {
+        if (!Dispatcher.UIThread.CheckAccess())
+        {
+            Dispatcher.UIThread.Post(() => UpdateExtractionOverviewStatus(text));
+            return;
+        }
+
+        if (_extractionOverviewLastExtractionText is not null)
+            _extractionOverviewLastExtractionText.Text = text;
+    }
+
+    private void UpdateExtractionOverviewStatusInProgress()
+    {
+        var statusText = _extractionOverviewStartTime.HasValue
+            ? $"Started at {_extractionOverviewStartTime.Value.ToLocalTime().ToString("g", CultureInfo.CurrentCulture)}"
+            : "In progress�";
+
+        UpdateExtractionOverviewStatus(statusText);
+    }
+
+    private void UpdateExtractionOverviewDisplay()
+    {
+        if (!Dispatcher.UIThread.CheckAccess())
+        {
+            Dispatcher.UIThread.Post(UpdateExtractionOverviewDisplay);
+            return;
+        }
+
+        var packages = Math.Max(0, _settings.TotalExtracted);
+        var assets = Math.Max(0, _settings.TotalFilesExtracted);
+        UpdateExtractionOverviewCounts(packages, assets);
+
+        if (_extractionOverviewLastExtractionText is null)
+            return;
+
+        _extractionOverviewLastExtractionText.Text = _settings.LastExtractionTime.HasValue
+            ? _settings.LastExtractionTime.Value.ToLocalTime().ToString("g", CultureInfo.CurrentCulture)
+            : "Not started";
+    }
+
+    private void EndExtractionOverviewSession()
+    {
+        if (!Dispatcher.UIThread.CheckAccess())
+        {
+            Dispatcher.UIThread.Post(EndExtractionOverviewSession);
+            return;
+        }
+
+        _isExtractionOverviewLive = false;
+        _extractionOverviewSessionPackages = 0;
+        _extractionOverviewSessionAssets = 0;
+        _extractionOverviewCurrentPackageAssets = 0;
+        _extractionOverviewStartTime = null;
+        UpdateExtractionOverviewDisplay();
+    }
 
     private static string? TryResolveLocalPath(IStorageFile storageFile)
     {
@@ -2026,6 +2212,7 @@ public partial class MainWindow : Window
         ReloadQueueFromSettings();
         ApplyTheme(settings.ApplicationTheme);
         _ = ApplyCustomBackgroundAsync(settings);
+        UpdateExtractionOverviewDisplay();
     }
 
     private void UpdateLicenseTierDisplay(AppSettings? settings = null)
