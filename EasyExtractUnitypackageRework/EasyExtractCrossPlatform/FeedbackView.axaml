@@ -1,0 +1,60 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             x:Class="EasyExtractCrossPlatform.FeedbackView"
+             Foreground="{DynamicResource EasyTextColorBrush}"
+             Background="{DynamicResource EasyWindowBackgroundBrush}">
+    <Grid RowDefinitions="Auto,*">
+        <Border Padding="32"
+                Background="{DynamicResource EasyGlassGradientBrush}"
+                BorderBrush="{DynamicResource EasyGlassBorderBrush}"
+                BorderThickness="1"
+                CornerRadius="32"
+                Margin="24,24,24,12"
+                BoxShadow="0 36 72 0 #16000000">
+            <StackPanel Spacing="8">
+                <TextBlock Text="We'd love your feedback" Classes="display" />
+                <TextBlock Text="Share ideas, bugs, or feature requests. Your message goes straight to the developer."
+                           Classes="subtle" />
+                <TextBlock x:Name="VersionLabel"
+                           Classes="subtle"
+                           Text="Version unknown" />
+            </StackPanel>
+        </Border>
+
+        <Border Grid.Row="1"
+                Margin="24,0,24,24"
+                Padding="28"
+                CornerRadius="28"
+                Background="{DynamicResource EasyGlassGradientBrush}"
+                BorderBrush="{DynamicResource EasyGlassBorderBrush}"
+                BorderThickness="1"
+                BoxShadow="0 32 68 0 #15000000">
+            <StackPanel Spacing="18">
+                <TextBox x:Name="FeedbackTextBox"
+                         AcceptsReturn="True"
+                         TextWrapping="Wrap"
+                         MinHeight="180"
+                         Watermark="Tell us what’s going on..."
+                         ScrollViewer.VerticalScrollBarVisibility="Auto" />
+
+                <TextBlock x:Name="StatusTextBlock"
+                           Classes="subtle"
+                           TextWrapping="Wrap" />
+
+                <StackPanel Orientation="Horizontal"
+                            HorizontalAlignment="Right"
+                            Spacing="12">
+                    <Button x:Name="CancelButton"
+                            Classes="ghost"
+                            Width="140"
+                            Content="Close"
+                            Click="CancelButton_OnClick" />
+                    <Button x:Name="SendButton"
+                            Width="180"
+                            Content="Send feedback"
+                            Click="SendButton_OnClick" />
+                </StackPanel>
+            </StackPanel>
+        </Border>
+    </Grid>
+</UserControl>
