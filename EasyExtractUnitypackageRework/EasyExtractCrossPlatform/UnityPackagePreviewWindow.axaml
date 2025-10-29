@@ -18,6 +18,9 @@
         Foreground="{DynamicResource EasyTextColorBrush}">
     <Window.Resources>
         <util:BooleanNegationConverter x:Key="BooleanNegationConverter" />
+        <util:BooleanToBrushConverter x:Key="TreeRowSelectionBrushConverter"
+                                      TrueBrush="{StaticResource EasyGlassOverlayBrush}"
+                                      FalseBrush="Transparent" />
     </Window.Resources>
 
     <Window.Styles>
@@ -27,6 +30,35 @@
             <Setter Property="BorderThickness" Value="1" />
             <Setter Property="CornerRadius" Value="24" />
             <Setter Property="Padding" Value="24" />
+        </Style>
+        <Style Selector="Button.tree-row-button">
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="BorderBrush" Value="Transparent" />
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="Padding" Value="6,4" />
+            <Setter Property="CornerRadius" Value="6" />
+            <Setter Property="HorizontalAlignment" Value="Stretch" />
+            <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+            <Setter Property="Cursor" Value="Hand" />
+        </Style>
+        <Style Selector="Button.tree-row-button:pointerover">
+            <Setter Property="Background" Value="{DynamicResource EasyGlassOverlayFaintBrush}" />
+        </Style>
+        <Style Selector="Button.icon-button">
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="BorderBrush" Value="Transparent" />
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="Padding" Value="0" />
+            <Setter Property="Width" Value="28" />
+            <Setter Property="Height" Value="28" />
+            <Setter Property="HorizontalAlignment" Value="Center" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+            <Setter Property="Cursor" Value="Hand" />
+        </Style>
+        <Style Selector="Button.icon-button:pointerover">
+            <Setter Property="Background" Value="{DynamicResource EasyGlassOverlayFaintBrush}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource EasyGlassNeutralBorderBrush}" />
+            <Setter Property="BorderThickness" Value="1" />
         </Style>
     </Window.Styles>
 
@@ -111,42 +143,113 @@
                                    Classes="subtle"
                                    VerticalAlignment="Center"
                                    Margin="12,0,0,0" />
+                        <TextBox Classes="search-bar search-bar-small"
+                                 Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}"
+                                 Watermark="Search assets"
+                                 MinWidth="260"
+                                 HorizontalAlignment="Left"
+                                 VerticalAlignment="Center"
+                                 Margin="24,0,0,0">
+                            <TextBox.KeyBindings>
+                                <KeyBinding Gesture="Escape"
+                                            Command="{Binding ClearCommand}" />
+                            </TextBox.KeyBindings>
+                        </TextBox>
                     </StackPanel>
 
                     <Grid Grid.Row="1">
-                        <ListBox ItemsSource="{Binding VisibleNodes}"
-                                 SelectedItem="{Binding SelectedTreeNode, Mode=TwoWay}"
-                                 Background="Transparent"
-                                 BorderThickness="0"
-                                 ScrollViewer.VerticalScrollBarVisibility="Auto"
-                                 ScrollViewer.HorizontalScrollBarVisibility="Auto"
-                                 IsVisible="{Binding IsTreeViewVisible}">
-                            <ListBox.ItemTemplate>
-                                <DataTemplate x:DataType="vm:UnityPackageAssetTreeNode">
-                                    <Grid ColumnDefinitions="Auto,Auto,*,Auto"
-                                          Margin="0,2">
-                                        <Border Width="{Binding Indent}" />
-                                        <Button Grid.Column="1"
-                                                Content="{Binding Icon}"
-                                                Command="{Binding DataContext.NodeToggleCommand, RelativeSource={RelativeSource AncestorType=ListBox}}"
-                                                CommandParameter="{Binding}"
-                                                IsEnabled="{Binding IsFolder}"
-                                                IsVisible="{Binding IsFolder}"
-                                                Width="24"
-                                                Classes="ghost" />
-                                        <TextBlock Grid.Column="2"
-                                                   Text="{Binding Name}"
-                                                   FontWeight="SemiBold"
-                                                   Margin="6,0,0,0" />
-                                        <TextBlock Grid.Column="3"
-                                                   Text="{Binding SizeText}"
-                                                   FontWeight="SemiBold"
-                                                   HorizontalAlignment="Right"
-                                                   IsVisible="{Binding IsFolder, Converter={StaticResource BooleanNegationConverter}}" />
-                                    </Grid>
-                                </DataTemplate>
-                            </ListBox.ItemTemplate>
-                        </ListBox>
+                        <ScrollViewer VerticalScrollBarVisibility="Auto"
+                                      HorizontalScrollBarVisibility="Auto"
+                                      IsVisible="{Binding IsTreeViewVisible}">
+                            <ItemsControl ItemsSource="{Binding RootNodes}"
+                                          HorizontalAlignment="Stretch">
+                                <ItemsControl.Resources>
+                                    <DataTemplate x:Key="AssetTreeTemplate"
+                                                  DataType="vm:UnityPackageAssetTreeNode">
+                                        <StackPanel Spacing="4">
+                                            <Grid ColumnDefinitions="Auto,Auto,*,Auto"
+                                                  Margin="0,2">
+                                                <Button Grid.Column="0"
+                                                        Classes="icon-button"
+                                                        Command="{Binding DataContext.NodeToggleCommand, RelativeSource={RelativeSource AncestorType=Window}}"
+                                                        CommandParameter="{Binding}"
+                                                        IsEnabled="{Binding CanToggle}"
+                                                        IsVisible="{Binding CanToggle}"
+                                                        ToolTip.Tip="Expand or collapse">
+                                                    <Path Data="{Binding ToggleIconGeometry}"
+                                                          Stroke="{DynamicResource EasyMutedBrush}"
+                                                          StrokeThickness="1.8"
+                                                          StrokeJoin="Round"
+                                                          StrokeLineCap="Round"
+                                                          HorizontalAlignment="Center"
+                                                          VerticalAlignment="Center" />
+                                                </Button>
+                                                <Button Grid.Column="1"
+                                                        Classes="icon-button"
+                                                        Command="{Binding DataContext.CollapseAllFoldersCommand, RelativeSource={RelativeSource AncestorType=Window}}"
+                                                        CommandParameter="{Binding}"
+                                                        IsVisible="{Binding ShowCollapseDescendants}"
+                                                        ToolTip.Tip="Collapse all child folders">
+                                                    <Path Data="{Binding CollapseDescendantsIcon}"
+                                                          Stroke="{DynamicResource EasyMutedBrush}"
+                                                          StrokeThickness="1.6"
+                                                          StrokeJoin="Round"
+                                                          StrokeLineCap="Round"
+                                                          HorizontalAlignment="Center"
+                                                          VerticalAlignment="Center" />
+                                                </Button>
+                                                <Button Grid.Column="2"
+                                                        Grid.ColumnSpan="2"
+                                                        Classes="tree-row-button"
+                                                        Background="{Binding IsSelected, Converter={StaticResource TreeRowSelectionBrushConverter}}"
+                                                        Command="{Binding DataContext.SelectTreeNodeCommand, RelativeSource={RelativeSource AncestorType=Window}}"
+                                                        CommandParameter="{Binding}"
+                                                        HorizontalAlignment="Stretch"
+                                                        HorizontalContentAlignment="Stretch"
+                                                        Margin="4,0,0,0">
+                                                    <Grid ColumnDefinitions="Auto,*,Auto"
+                                                          VerticalAlignment="Center">
+                                                        <Path Grid.Column="0"
+                                                              Data="{Binding IconGeometry}"
+                                                              Fill="{DynamicResource EasyGlassOverlayFaintBrush}"
+                                                              Stroke="{DynamicResource EasyMutedBrush}"
+                                                              StrokeThickness="1.6"
+                                                              StrokeJoin="Round"
+                                                              StrokeLineCap="Round"
+                                                              Width="24"
+                                                              Height="20"
+                                                              Stretch="Uniform"
+                                                              HorizontalAlignment="Center"
+                                                              VerticalAlignment="Center" />
+                                                        <TextBlock Grid.Column="1"
+                                                                   Text="{Binding Name}"
+                                                                   FontWeight="SemiBold"
+                                                                   Margin="8,0,0,0"
+                                                                   VerticalAlignment="Center"
+                                                                   TextTrimming="CharacterEllipsis" />
+                                                        <TextBlock Grid.Column="2"
+                                                                   Text="{Binding SizeText}"
+                                                                   FontWeight="SemiBold"
+                                                                   VerticalAlignment="Center"
+                                                                   HorizontalAlignment="Right"
+                                                                   Margin="12,0,0,0"
+                                                                   IsVisible="{Binding IsFolder, Converter={StaticResource BooleanNegationConverter}}" />
+                                                    </Grid>
+                                                </Button>
+                                            </Grid>
+                                            <ItemsControl ItemsSource="{Binding Children}"
+                                                          ItemTemplate="{StaticResource AssetTreeTemplate}"
+                                                          Margin="24,0,0,0"
+                                                          HorizontalAlignment="Stretch"
+                                                          IsVisible="{Binding IsExpanded}" />
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </ItemsControl.Resources>
+                                <ItemsControl.ItemTemplate>
+                                    <StaticResource ResourceKey="AssetTreeTemplate" />
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </ScrollViewer>
 
                         <ScrollViewer VerticalScrollBarVisibility="Auto"
                                       IsVisible="{Binding IsListViewVisible}">
@@ -160,8 +263,23 @@
                                                 CornerRadius="18"
                                                 Padding="16"
                                                 Margin="0,0,0,12">
-                                            <Grid ColumnDefinitions="*,Auto">
-                                                <StackPanel Spacing="6">
+                                            <Grid ColumnDefinitions="Auto,*,Auto"
+                                                  VerticalAlignment="Center">
+                                                <Path Grid.Column="0"
+                                                      Data="{Binding IconGeometry}"
+                                                      Fill="{DynamicResource EasyGlassOverlayFaintBrush}"
+                                                      Stroke="{DynamicResource EasyMutedBrush}"
+                                                      StrokeThickness="1.6"
+                                                      StrokeJoin="Round"
+                                                      StrokeLineCap="Round"
+                                                      Width="32"
+                                                      Height="28"
+                                                      Stretch="Uniform"
+                                                      HorizontalAlignment="Center"
+                                                      VerticalAlignment="Center" />
+                                                <StackPanel Grid.Column="1"
+                                                            Margin="16,0,0,0"
+                                                            Spacing="6">
                                                     <TextBlock Text="{Binding FileName}"
                                                                FontWeight="SemiBold"
                                                                TextTrimming="CharacterEllipsis" />
@@ -170,10 +288,10 @@
                                                                TextTrimming="CharacterEllipsis"
                                                                ToolTip.Tip="{Binding RelativePath}" />
                                                 </StackPanel>
-                                                <StackPanel Grid.Column="1"
+                                                <StackPanel Grid.Column="2"
                                                             HorizontalAlignment="Right"
-                                                            Spacing="6"
-                                                            Margin="18,0,0,0">
+                                                            Margin="16,0,0,0"
+                                                            Spacing="6">
                                                     <Border Background="{DynamicResource EasyGlassOverlayBrush}"
                                                             BorderBrush="{DynamicResource EasyGlassNeutralBorderBrush}"
                                                             BorderThickness="1"
@@ -185,12 +303,12 @@
                                                                    FontSize="12"
                                                                    FontWeight="SemiBold" />
                                                     </Border>
-                                                    <TextBlock Text="{Binding Category}"
-                                                               HorizontalAlignment="Right"
-                                                               Classes="subtle" />
                                                     <TextBlock Text="{Binding SizeText}"
                                                                FontWeight="SemiBold"
                                                                HorizontalAlignment="Right" />
+                                                    <TextBlock Text="{Binding Category}"
+                                                               HorizontalAlignment="Right"
+                                                               Classes="subtle" />
                                                 </StackPanel>
                                             </Grid>
                                         </Border>

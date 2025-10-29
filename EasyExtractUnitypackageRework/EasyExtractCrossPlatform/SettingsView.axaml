@@ -205,7 +205,6 @@
                         </StackPanel>
                     </StackPanel>
                 </Border>
-
                 <Border Classes="section" Margin="0">
                     <Grid ColumnDefinitions="*,Auto" VerticalAlignment="Center">
                         <TextBlock x:Name="StatusTextBlock"

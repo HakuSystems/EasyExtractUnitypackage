@@ -1697,6 +1697,18 @@ public partial class MainWindow : Window
         await ShowOverlayAsync(settingsView);
     }
 
+    private async void FeedbackButton_OnClick(object? sender, RoutedEventArgs e)
+    {
+        if (_overlayContent?.Content is FeedbackView)
+            return;
+
+        var feedbackView = new FeedbackView(GetCurrentVersionForComparison());
+        feedbackView.CloseRequested += OnFeedbackCloseRequested;
+        feedbackView.FeedbackSent += OnFeedbackSent;
+
+        await ShowOverlayAsync(feedbackView);
+    }
+
     private async void OnSettingsSaved(object? sender, AppSettings settings)
     {
         if (sender is not SettingsView settingsView)
@@ -1755,7 +1767,26 @@ public partial class MainWindow : Window
                 settingsView.SettingsSaved -= OnSettingsSaved;
                 settingsView.Cancelled -= OnSettingsCancelled;
                 break;
+            case FeedbackView feedbackView:
+                feedbackView.CloseRequested -= OnFeedbackCloseRequested;
+                feedbackView.FeedbackSent -= OnFeedbackSent;
+                break;
         }
+    }
+
+    private async void OnFeedbackCloseRequested(object? sender, EventArgs e)
+    {
+        if (sender is FeedbackView feedbackView)
+            await CloseOverlayAsync(feedbackView);
+    }
+
+    private async void OnFeedbackSent(object? sender, EventArgs e)
+    {
+        if (sender is not FeedbackView feedbackView)
+            return;
+
+        await CloseOverlayAsync(feedbackView);
+        ShowDropStatusMessage("Feedback sent", "Thanks for helping us improve EasyExtract.", TimeSpan.FromSeconds(4));
     }
 
     private async Task RunOverlayAnimationAsync(bool showing)
@@ -2120,6 +2151,9 @@ public partial class MainWindow : Window
 
         if (Application.Current is { } app && app.RequestedThemeVariant != targetVariant)
             app.RequestedThemeVariant = targetVariant;
+
+        if (Application.Current is App easyApp)
+            easyApp.ApplyThemeResources(targetVariant);
 
         if (RequestedThemeVariant != targetVariant)
             RequestedThemeVariant = targetVariant;

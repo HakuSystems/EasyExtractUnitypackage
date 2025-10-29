@@ -245,9 +245,9 @@
                                             <Grid ColumnDefinitions="Auto,*" HorizontalAlignment="Right"
                                                   VerticalAlignment="Center">
                                                 <Border x:Name="SearchIconBorder"
-                                                        Width="36"
-                                                        Height="36"
-                                                        CornerRadius="18"
+                                                        Width="44"
+                                                        Height="44"
+                                                        CornerRadius="22"
                                                         Background="{DynamicResource EasyGlassOverlayStrongBrush}"
                                                         BorderBrush="{DynamicResource EasyGlassNeutralBorderBrush}"
                                                         BorderThickness="1"
@@ -698,7 +698,9 @@
                     BoxShadow="0 20 40 0 #12000000">
                 <Grid ColumnDefinitions="Auto,*,Auto" VerticalAlignment="Center">
                     <StackPanel Orientation="Horizontal" Spacing="12" VerticalAlignment="Center">
-                        <Button Classes="ghost" ToolTip.Tip="Send feedback">
+                        <Button Classes="ghost"
+                                ToolTip.Tip="Send feedback"
+                                Click="FeedbackButton_OnClick">
                             <Button.Content>
                                 <StackPanel Orientation="Horizontal" Spacing="6">
                                     <PathIcon

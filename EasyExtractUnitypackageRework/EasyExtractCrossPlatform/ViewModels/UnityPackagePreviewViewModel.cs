@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
@@ -6,11 +6,17 @@ using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using Avalonia;
+using Avalonia.Media;
 using Avalonia.Media.Imaging;
+using Avalonia.Platform;
 using Avalonia.Threading;
+using Docnet.Core;
+using Docnet.Core.Models;
 using EasyExtractCrossPlatform.Models;
 using EasyExtractCrossPlatform.Services;
 using EasyExtractCrossPlatform.Utilities;
@@ -20,6 +26,7 @@ namespace EasyExtractCrossPlatform.ViewModels;
 public sealed class UnityPackagePreviewViewModel : INotifyPropertyChanged, IDisposable
 {
     private const string AllCategory = "All assets";
+    private static readonly PageDimensions PdfPreviewDimensions = new(2.0d);
     private readonly List<UnityPackageAssetPreviewItem> _allAssets = new();
     private readonly CancellationTokenSource _disposeCts = new();
     private readonly IUnityPackagePreviewService _previewService;
@@ -44,6 +51,7 @@ public sealed class UnityPackagePreviewViewModel : INotifyPropertyChanged, IDisp
     private string _packageSizeText = string.Empty;
     private int _previewTabIndex;
     private Bitmap? _primaryImagePreview;
+    private string _searchText = string.Empty;
     private UnityPackageAssetPreviewItem? _selectedAsset;
     private string _selectedCategory = AllCategory;
     private UnityPackageAssetTreeNode? _selectedTreeNode;
@@ -67,6 +75,17 @@ public sealed class UnityPackagePreviewViewModel : INotifyPropertyChanged, IDisp
             if (parameter is UnityPackageAssetTreeNode node)
                 ToggleNode(node);
         });
+        SelectTreeNodeCommand = new RelayCommand(parameter =>
+        {
+            if (parameter is UnityPackageAssetTreeNode node)
+                SelectTreeNode(node);
+        });
+        CollapseAllFoldersCommand = new RelayCommand(parameter =>
+        {
+            if (parameter is UnityPackageAssetTreeNode node)
+                CollapseDescendants(node, true);
+        });
+        ClearCommand = new RelayCommand(_ => SearchText = string.Empty, _ => IsSearchActive);
     }
 
     public ObservableCollection<UnityPackageAssetPreviewItem> Assets { get; } = new();
@@ -75,7 +94,9 @@ public sealed class UnityPackagePreviewViewModel : INotifyPropertyChanged, IDisp
 
     public ObservableCollection<UnityPackageAssetTreeNode> RootNodes { get; } = new();
 
-    public ObservableCollection<UnityPackageAssetTreeNode> VisibleNodes { get; } = new();
+    public RelayCommand ClearCommand { get; }
+
+    public RelayCommand SelectTreeNodeCommand { get; }
 
     public string SelectedCategory
     {
@@ -99,6 +120,27 @@ public sealed class UnityPackagePreviewViewModel : INotifyPropertyChanged, IDisp
             ApplyCategoryFilter();
         }
     }
+
+    public string SearchText
+    {
+        get => _searchText;
+        set
+        {
+            var normalized = value ?? string.Empty;
+            if (string.Equals(_searchText, normalized, StringComparison.Ordinal))
+                return;
+
+            _searchText = normalized;
+            OnPropertyChanged(nameof(SearchText));
+            OnPropertyChanged(nameof(IsSearchActive));
+            OnPropertyChanged(nameof(IsTreeViewVisible));
+            OnPropertyChanged(nameof(IsListViewVisible));
+            ClearCommand?.RaiseCanExecuteChanged();
+            ApplyCategoryFilter();
+        }
+    }
+
+    public bool IsSearchActive => !string.IsNullOrWhiteSpace(_searchText);
 
     public bool HasMultipleCategories => Categories.Count > 1;
 
@@ -318,7 +360,14 @@ public sealed class UnityPackagePreviewViewModel : INotifyPropertyChanged, IDisp
             if (ReferenceEquals(_selectedTreeNode, value))
                 return;
 
+            if (_selectedTreeNode is not null)
+                _selectedTreeNode.IsSelected = false;
+
             _selectedTreeNode = value;
+
+            if (_selectedTreeNode is not null)
+                _selectedTreeNode.IsSelected = true;
+
             OnPropertyChanged(nameof(SelectedTreeNode));
 
             if (_selectedTreeNode?.Asset is not null)
@@ -330,7 +379,8 @@ public sealed class UnityPackagePreviewViewModel : INotifyPropertyChanged, IDisp
         }
     }
 
-    public bool IsTreeViewVisible => string.Equals(SelectedCategory, AllCategory, StringComparison.OrdinalIgnoreCase);
+    public bool IsTreeViewVisible =>
+        string.Equals(SelectedCategory, AllCategory, StringComparison.OrdinalIgnoreCase) && !IsSearchActive;
 
     public bool IsListViewVisible => !IsTreeViewVisible;
 
@@ -361,6 +411,8 @@ public sealed class UnityPackagePreviewViewModel : INotifyPropertyChanged, IDisp
     public RelayCommand StopAudioPreviewCommand { get; }
 
     public RelayCommand NodeToggleCommand { get; }
+
+    public RelayCommand CollapseAllFoldersCommand { get; }
 
     public int AssetCount => Assets.Count;
 
@@ -516,21 +568,31 @@ public sealed class UnityPackagePreviewViewModel : INotifyPropertyChanged, IDisp
     {
         var comparer = StringComparer.OrdinalIgnoreCase;
         var normalizedSelection = NormalizeCategory(_selectedCategory);
+        var hasSearch = IsSearchActive;
+        var query = hasSearch ? SearchText.Trim() : string.Empty;
 
         var isAllCategory = normalizedSelection == AllCategory;
-        var filtered = isAllCategory
-            ? _allAssets
-            : _allAssets.Where(asset => comparer.Equals(asset.Category, normalizedSelection));
+        IEnumerable<UnityPackageAssetPreviewItem> filtered = _allAssets;
+
+        if (!isAllCategory)
+            filtered = filtered.Where(asset => comparer.Equals(asset.Category, normalizedSelection));
+
+        if (hasSearch)
+            filtered = filtered.Where(asset => MatchesSearch(asset, query));
+
+        var filteredList = filtered.ToList();
 
         var previousSelection = _selectedAsset;
 
         Assets.Clear();
-        foreach (var item in filtered)
+        foreach (var item in filteredList)
             Assets.Add(item);
 
         UpdateCollectionsState();
 
-        if (isAllCategory)
+        var shouldShowTree = isAllCategory && !hasSearch;
+
+        if (shouldShowTree)
         {
             RebuildTreeNodes();
             UpdateTreeSelectionFromAsset(previousSelection);
@@ -542,7 +604,6 @@ public sealed class UnityPackagePreviewViewModel : INotifyPropertyChanged, IDisp
             _suppressTreeSelectionSync = true;
             SelectedTreeNode = null;
             _suppressTreeSelectionSync = false;
-            VisibleNodes.Clear();
         }
 
         if (Assets.Count == 0)
@@ -561,17 +622,22 @@ public sealed class UnityPackagePreviewViewModel : INotifyPropertyChanged, IDisp
         }
 
         SelectedAsset = Assets[0];
-        if (isAllCategory)
+        if (shouldShowTree)
             UpdateTreeSelectionFromAsset(SelectedAsset);
     }
 
     private void RebuildTreeNodes()
     {
+        var previousSelection = _selectedTreeNode;
+
         RootNodes.Clear();
         _treeNodesByPath.Clear();
 
         if (_allAssets.Count == 0)
+        {
+            SynchronizeTreeSelection(null);
             return;
+        }
 
         foreach (var asset in _allAssets)
         {
@@ -610,10 +676,10 @@ public sealed class UnityPackagePreviewViewModel : INotifyPropertyChanged, IDisp
             if (root.IsFolder)
                 root.IsExpanded = true;
 
-        RefreshVisibleNodes();
+        SynchronizeTreeSelection(previousSelection);
     }
 
-    private void ToggleNode(UnityPackageAssetTreeNode node)
+    private void ToggleNode(UnityPackageAssetTreeNode? node)
     {
         if (node is null)
             return;
@@ -624,14 +690,7 @@ public sealed class UnityPackagePreviewViewModel : INotifyPropertyChanged, IDisp
             node.IsExpanded = !node.IsExpanded;
 
             if (wasExpanded && !node.IsExpanded)
-            {
-                _suppressTreeSelectionSync = true;
-                _selectedTreeNode = node;
-                OnPropertyChanged(nameof(SelectedTreeNode));
-                _suppressTreeSelectionSync = false;
-            }
-
-            RefreshVisibleNodes();
+                SelectedTreeNode = node;
         }
         else if (node.Asset is not null)
         {
@@ -639,53 +698,80 @@ public sealed class UnityPackagePreviewViewModel : INotifyPropertyChanged, IDisp
         }
     }
 
-    private void RefreshVisibleNodes()
+    private void SelectTreeNode(UnityPackageAssetTreeNode? node)
     {
-        if (!IsTreeViewVisible)
-        {
-            VisibleNodes.Clear();
+        if (node is null)
             return;
-        }
 
-        var currentNode = _selectedTreeNode;
-        var selectedAsset = currentNode is { IsFolder: true }
-            ? null
-            : currentNode?.Asset ?? _selectedAsset;
+        SelectedTreeNode = node;
+    }
 
-        VisibleNodes.Clear();
-        foreach (var root in RootNodes)
-            AppendVisibleNodes(root, 0);
+    private void CollapseDescendants(UnityPackageAssetTreeNode node, bool includeSelf)
+    {
+        if (node is null || !node.IsFolder)
+            return;
 
-        if (currentNode is not null &&
-            _treeNodesByPath.TryGetValue(currentNode.FullPath, out var mapped) &&
-            VisibleNodes.Contains(mapped))
+        CollapseRecursive(node, includeSelf);
+
+        if (_selectedTreeNode is not null &&
+            !ReferenceEquals(_selectedTreeNode, node) &&
+            IsDescendantOf(_selectedTreeNode, node))
         {
             _suppressTreeSelectionSync = true;
-            _selectedTreeNode = mapped;
-            OnPropertyChanged(nameof(SelectedTreeNode));
-            _suppressTreeSelectionSync = false;
-        }
-        else if (selectedAsset is not null)
-        {
-            UpdateTreeSelectionFromAsset(selectedAsset);
-        }
-        else
-        {
-            _suppressTreeSelectionSync = true;
-            _selectedTreeNode = null;
-            OnPropertyChanged(nameof(SelectedTreeNode));
+            SelectedTreeNode = node;
             _suppressTreeSelectionSync = false;
         }
     }
 
-    private void AppendVisibleNodes(UnityPackageAssetTreeNode node, int level)
+    private static void CollapseRecursive(UnityPackageAssetTreeNode node, bool includeSelf)
     {
-        node.Level = level;
-        VisibleNodes.Add(node);
+        foreach (var child in node.Children)
+            if (child.IsFolder)
+                CollapseRecursive(child, true);
 
-        if (node.IsFolder && node.IsExpanded)
-            foreach (var child in node.Children)
-                AppendVisibleNodes(child, level + 1);
+        if (includeSelf)
+            node.IsExpanded = false;
+    }
+
+    private static bool IsDescendantOf(UnityPackageAssetTreeNode? candidate, UnityPackageAssetTreeNode ancestor)
+    {
+        var current = candidate?.Parent;
+        while (current is not null)
+        {
+            if (ReferenceEquals(current, ancestor))
+                return true;
+
+            current = current.Parent;
+        }
+
+        return false;
+    }
+
+    private void SynchronizeTreeSelection(UnityPackageAssetTreeNode? previousNode)
+    {
+        if (!IsTreeViewVisible || _treeNodesByPath.Count == 0)
+        {
+            SelectedTreeNode = null;
+            return;
+        }
+
+        if (previousNode is not null &&
+            _treeNodesByPath.TryGetValue(previousNode.FullPath, out var mapped))
+        {
+            SelectedTreeNode = mapped;
+            return;
+        }
+
+        if (_selectedAsset is not null)
+        {
+            UpdateTreeSelectionFromAsset(_selectedAsset);
+
+            if (_selectedTreeNode is not null &&
+                _treeNodesByPath.ContainsKey(_selectedTreeNode.FullPath))
+                return;
+        }
+
+        SelectedTreeNode = null;
     }
 
     private UnityPackageAssetTreeNode? EnsureFolderNode(IReadOnlyList<string> segments)
@@ -750,8 +836,7 @@ public sealed class UnityPackagePreviewViewModel : INotifyPropertyChanged, IDisp
         if (asset is null)
         {
             _suppressTreeSelectionSync = true;
-            _selectedTreeNode = null;
-            OnPropertyChanged(nameof(SelectedTreeNode));
+            SelectedTreeNode = null;
             _suppressTreeSelectionSync = false;
             return;
         }
@@ -766,8 +851,7 @@ public sealed class UnityPackagePreviewViewModel : INotifyPropertyChanged, IDisp
             return;
 
         _suppressTreeSelectionSync = true;
-        _selectedTreeNode = node;
-        OnPropertyChanged(nameof(SelectedTreeNode));
+        SelectedTreeNode = node;
         _suppressTreeSelectionSync = false;
     }
 
@@ -851,20 +935,82 @@ public sealed class UnityPackagePreviewViewModel : INotifyPropertyChanged, IDisp
         if (_primaryImagePreview is not null)
             return;
 
-        if (!IsImageExtension(asset.Extension))
-            return;
-
         if (asset.AssetData is not { Length: > 0 } || asset.IsAssetDataTruncated)
             return;
 
+        if (IsImageExtension(asset.Extension))
+        {
+            try
+            {
+                using var memoryStream = new MemoryStream(asset.AssetData);
+                _primaryImagePreview = new Bitmap(memoryStream);
+            }
+            catch
+            {
+                DisposeBitmap(ref _primaryImagePreview);
+            }
+
+            return;
+        }
+
+        if (!IsPdfExtension(asset.Extension))
+            return;
+
+        _primaryImagePreview = TryCreatePdfBitmap(asset.AssetData);
+        if (_primaryImagePreview is null)
+            DisposeBitmap(ref _primaryImagePreview);
+    }
+
+    private static Bitmap? TryCreatePdfBitmap(byte[] pdfData)
+    {
+        if (pdfData.Length == 0)
+            return null;
+
         try
         {
-            using var memoryStream = new MemoryStream(asset.AssetData);
-            _primaryImagePreview = new Bitmap(memoryStream);
+            using var document = DocLib.Instance.GetDocReader(pdfData, PdfPreviewDimensions);
+            var pageCount = document.GetPageCount();
+            if (pageCount <= 0)
+                return null;
+
+            using var page = document.GetPageReader(0);
+            var width = page.GetPageWidth();
+            var height = page.GetPageHeight();
+            if (width <= 0 || height <= 0)
+                return null;
+
+            var pixelData = page.GetImage(RenderFlags.RenderAnnotations);
+            if (pixelData is null || pixelData.Length == 0)
+                return null;
+
+            var bitmap = new WriteableBitmap(
+                new PixelSize(width, height),
+                new Vector(96, 96),
+                PixelFormat.Bgra8888,
+                AlphaFormat.Premul);
+
+            using (var buffer = bitmap.Lock())
+            {
+                var srcStride = width * 4;
+                var dstStride = buffer.RowBytes;
+                var rows = Math.Min(height, buffer.Size.Height);
+
+                if (srcStride == dstStride)
+                    Marshal.Copy(pixelData, 0, buffer.Address, srcStride * rows);
+                else
+                    for (var row = 0; row < rows; row++)
+                    {
+                        var srcOffset = row * srcStride;
+                        var destPtr = buffer.Address + row * dstStride;
+                        Marshal.Copy(pixelData, srcOffset, destPtr, Math.Min(srcStride, dstStride));
+                    }
+            }
+
+            return bitmap;
         }
         catch
         {
-            DisposeBitmap(ref _primaryImagePreview);
+            return null;
         }
     }
 
@@ -1078,6 +1224,23 @@ public sealed class UnityPackagePreviewViewModel : INotifyPropertyChanged, IDisp
             : trimmed;
     }
 
+    private static bool MatchesSearch(UnityPackageAssetPreviewItem asset, string query)
+    {
+        if (string.IsNullOrWhiteSpace(query))
+            return true;
+
+        var comparison = StringComparison.OrdinalIgnoreCase;
+
+        if (!string.IsNullOrEmpty(asset.RelativePath) && asset.RelativePath.Contains(query, comparison))
+            return true;
+        if (!string.IsNullOrEmpty(asset.FileName) && asset.FileName.Contains(query, comparison))
+            return true;
+        if (!string.IsNullOrEmpty(asset.Directory) && asset.Directory.Contains(query, comparison))
+            return true;
+
+        return false;
+    }
+
     private int DetermineDefaultPreviewTabIndex()
     {
         if (HasImagePreview)
@@ -1104,6 +1267,11 @@ public sealed class UnityPackagePreviewViewModel : INotifyPropertyChanged, IDisp
         return UnityPackageAssetPreviewItem.TextureExtensions.Contains(extension, StringComparer.OrdinalIgnoreCase);
     }
 
+    private static bool IsPdfExtension(string extension)
+    {
+        return UnityPackageAssetPreviewItem.PdfExtensions.Contains(extension, StringComparer.OrdinalIgnoreCase);
+    }
+
     private static bool IsModelExtension(string extension)
     {
         return UnityPackageAssetPreviewItem.ModelExtensions.Contains(extension, StringComparer.OrdinalIgnoreCase);
@@ -1113,7 +1281,9 @@ public sealed class UnityPackagePreviewViewModel : INotifyPropertyChanged, IDisp
     {
         return extension switch
         {
-            ".cs" or ".js" or ".boo" or ".shader" or ".cginc" or ".compute" or ".hlsl" or ".glsl" or ".txt" or ".json"
+            ".cs" or ".js" or ".boo" or ".shader" or ".cg" or ".cginc" or ".compute" or ".hlsl" or ".glsl"
+                or ".shadergraph"
+                or ".shadersubgraph" or ".txt" or ".json"
                 or ".xml" or ".yaml" or ".yml" or ".asmdef" or ".prefab" or ".mat" or ".anim" or ".controller"
                 or ".overridecontroller" or ".mask" or ".meta" or ".uxml" or ".uss" => true,
             _ => false
@@ -1239,14 +1409,23 @@ public sealed class UnityPackageAssetPreviewItem
 {
     internal static readonly string[] TextureExtensions =
     {
-        ".png", ".jpg", ".jpeg", ".tga", ".tif", ".tiff", ".psd", ".bmp", ".gif", ".hdr", ".exr"
+        ".png", ".jpg", ".jpeg", ".tga", ".tif", ".tiff", ".psd", ".bmp", ".dds", ".gif", ".hdr", ".exr"
     };
+
+    internal static readonly string[] PdfExtensions = { ".pdf" };
 
     internal static readonly string[] ModelExtensions = { ".fbx", ".obj", ".dae", ".blend", ".3ds" };
     internal static readonly string[] AudioExtensions = { ".wav", ".mp3", ".ogg", ".aiff", ".aif", ".flac" };
+    private static readonly string[] PluginExtensions = { ".dll" };
     private static readonly string[] ScriptExtensions = { ".cs", ".js", ".boo" };
     private static readonly string[] AnimationExtensions = { ".anim", ".controller", ".overridecontroller", ".mask" };
-    private static readonly string[] MaterialExtensions = { ".mat", ".shader", ".cginc", ".compute" };
+
+    private static readonly string[] ShaderExtensions =
+    {
+        ".shader", ".cg", ".cginc", ".compute", ".shadergraph", ".shadersubgraph", ".hlsl", ".glsl"
+    };
+
+    private static readonly string[] MaterialExtensions = { ".mat" };
 
     public UnityPackageAssetPreviewItem(UnityPackagePreviewAsset asset)
     {
@@ -1291,13 +1470,16 @@ public sealed class UnityPackageAssetPreviewItem
 
     public string SizeText { get; }
 
+    public Geometry IconGeometry => UnityAssetIconProvider.GetAssetIcon(Category);
+
     private static string ResolveCategory(UnityPackagePreviewAsset asset, string extension)
     {
         if (string.IsNullOrWhiteSpace(extension))
             if (IsLikelyFolder(asset))
                 return "Folder";
 
-        if (TextureExtensions.Contains(extension, StringComparer.OrdinalIgnoreCase))
+        if (TextureExtensions.Contains(extension, StringComparer.OrdinalIgnoreCase) ||
+            PdfExtensions.Contains(extension, StringComparer.OrdinalIgnoreCase))
             return "Texture";
 
         if (ModelExtensions.Contains(extension, StringComparer.OrdinalIgnoreCase))
@@ -1306,11 +1488,17 @@ public sealed class UnityPackageAssetPreviewItem
         if (AudioExtensions.Contains(extension, StringComparer.OrdinalIgnoreCase))
             return "Audio";
 
+        if (PluginExtensions.Contains(extension, StringComparer.OrdinalIgnoreCase))
+            return "DLL";
+
         if (ScriptExtensions.Contains(extension, StringComparer.OrdinalIgnoreCase))
             return "Script";
 
         if (AnimationExtensions.Contains(extension, StringComparer.OrdinalIgnoreCase))
             return "Animation";
+
+        if (ShaderExtensions.Contains(extension, StringComparer.OrdinalIgnoreCase))
+            return "Shader";
 
         if (MaterialExtensions.Contains(extension, StringComparer.OrdinalIgnoreCase))
             return "Material";
@@ -1360,7 +1548,7 @@ public sealed class UnityPackageAssetPreviewItem
 public sealed class UnityPackageAssetTreeNode : INotifyPropertyChanged
 {
     private bool _isExpanded;
-    private int _level;
+    private bool _isSelected;
 
     public UnityPackageAssetTreeNode(string name, string fullPath, bool isFolder, UnityPackageAssetPreviewItem? asset,
         UnityPackageAssetTreeNode? parent)
@@ -1371,7 +1559,13 @@ public sealed class UnityPackageAssetTreeNode : INotifyPropertyChanged
         Asset = asset;
         Parent = parent;
         Children = new ObservableCollection<UnityPackageAssetTreeNode>();
-        Children.CollectionChanged += (_, _) => OnPropertyChanged(nameof(HasChildren));
+        Children.CollectionChanged += (_, _) =>
+        {
+            OnPropertyChanged(nameof(HasChildren));
+            OnPropertyChanged(nameof(HasFolderChildren));
+            OnPropertyChanged(nameof(ShowCollapseDescendants));
+            OnPropertyChanged(nameof(CanToggle));
+        };
     }
 
     public string Name { get; }
@@ -1388,6 +1582,10 @@ public sealed class UnityPackageAssetTreeNode : INotifyPropertyChanged
 
     public bool HasChildren => Children.Count > 0;
 
+    public bool HasFolderChildren => Children.Any(child => child.IsFolder);
+
+    public bool CanToggle => IsFolder && HasChildren;
+
     public bool IsExpanded
     {
         get => _isExpanded;
@@ -1397,28 +1595,34 @@ public sealed class UnityPackageAssetTreeNode : INotifyPropertyChanged
                 return;
             _isExpanded = value;
             OnPropertyChanged(nameof(IsExpanded));
-            OnPropertyChanged(nameof(Icon));
+            OnPropertyChanged(nameof(IconGeometry));
+            OnPropertyChanged(nameof(ToggleIconGeometry));
         }
     }
 
     public string? SizeText => Asset?.SizeText;
 
-    public int Level
+    public bool IsSelected
     {
-        get => _level;
+        get => _isSelected;
         set
         {
-            if (_level == value)
+            if (_isSelected == value)
                 return;
-            _level = value;
-            OnPropertyChanged(nameof(Level));
-            OnPropertyChanged(nameof(Indent));
+            _isSelected = value;
+            OnPropertyChanged(nameof(IsSelected));
         }
     }
 
-    public double Indent => Level * 18.0;
+    public Geometry IconGeometry => IsFolder
+        ? UnityAssetIconProvider.GetFolderIcon(IsExpanded)
+        : UnityAssetIconProvider.GetAssetIcon(Asset);
 
-    public string Icon => IsFolder ? IsExpanded ? "▼" : "▶" : string.Empty;
+    public Geometry ToggleIconGeometry => UnityAssetIconProvider.GetChevron(IsExpanded);
+
+    public Geometry CollapseDescendantsIcon => UnityAssetIconProvider.CollapseAll;
+
+    public bool ShowCollapseDescendants => IsFolder && HasFolderChildren;
 
     public event PropertyChangedEventHandler? PropertyChanged;
 
