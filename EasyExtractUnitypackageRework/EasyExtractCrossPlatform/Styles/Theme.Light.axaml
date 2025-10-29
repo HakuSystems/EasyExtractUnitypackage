@@ -1,0 +1,42 @@
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <LinearGradientBrush x:Key="EasyWindowBackgroundBrush"
+                         StartPoint="0,0"
+                         EndPoint="1,1">
+        <GradientStop Color="#F6F8FF" Offset="0" />
+        <GradientStop Color="#ECF1FB" Offset="0.55" />
+        <GradientStop Color="#E2E9F7" Offset="1" />
+    </LinearGradientBrush>
+
+    <SolidColorBrush x:Key="EasyTextColorBrush" Color="#1C2738" />
+    <SolidColorBrush x:Key="EasyMutedBrush" Color="#5C6D88" />
+    <SolidColorBrush x:Key="EasyPrimaryBrush" Color="#2F6EF6" />
+    <SolidColorBrush x:Key="EasyAccentBrush" Color="#09B39D" />
+    <SolidColorBrush x:Key="EasyOnPrimaryBrush" Color="#182840" />
+    <SolidColorBrush x:Key="EasySurfaceBrush" Color="#FFFFFFFF" />
+    <SolidColorBrush x:Key="EasyStrokeBrush" Color="#CCD6EA" />
+
+    <LinearGradientBrush x:Key="EasyGlassGradientBrush"
+                         StartPoint="0,0"
+                         EndPoint="1,1">
+        <GradientStop Color="#FFFFFFFF" Offset="0" />
+        <GradientStop Color="#F4F7FE" Offset="0.55" />
+        <GradientStop Color="#EAF0FB" Offset="1" />
+    </LinearGradientBrush>
+
+    <SolidColorBrush x:Key="EasyGlassBorderBrush" Color="#26000000" />
+    <SolidColorBrush x:Key="EasyGlassNeutralBorderBrush" Color="#14000000" />
+    <SolidColorBrush x:Key="EasyGlassDisabledBorderBrush" Color="#0A000000" />
+    <SolidColorBrush x:Key="EasyGlassOverlayFaintBrush" Color="#08000000" />
+    <SolidColorBrush x:Key="EasyGlassOverlayBrush" Color="#12000000" />
+    <SolidColorBrush x:Key="EasyGlassOverlayStrongBrush" Color="#1F000000" />
+    <SolidColorBrush x:Key="EasyGlassMutedBrush" Color="#7688A5" />
+
+    <SolidColorBrush x:Key="EasyAccentSoftBrush" Color="#2209B39D" />
+    <SolidColorBrush x:Key="EasyAccentStrongBrush" Color="#3309B39D" />
+
+    <SolidColorBrush x:Key="EasyWarningBrush" Color="#FFB15E00" />
+    <SolidColorBrush x:Key="EasyDangerOverlayBrush" Color="#19D12F45" />
+    <SolidColorBrush x:Key="EasyDangerBorderBrush" Color="#FFD12F45" />
+    <SolidColorBrush x:Key="EasyDangerForegroundBrush" Color="#FFB11F36" />
+</ResourceDictionary>
