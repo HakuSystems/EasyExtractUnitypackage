@@ -28,6 +28,7 @@ public sealed class UnityPackagePreviewViewModel : INotifyPropertyChanged, IDisp
     private const string AllCategory = "All assets";
     private static readonly PageDimensions PdfPreviewDimensions = new(2.0d);
     private readonly List<UnityPackageAssetPreviewItem> _allAssets = new();
+    private readonly HashSet<string> _directoriesToPrune = new(StringComparer.OrdinalIgnoreCase);
     private readonly CancellationTokenSource _disposeCts = new();
     private readonly IUnityPackagePreviewService _previewService;
 
@@ -517,6 +518,10 @@ public sealed class UnityPackagePreviewViewModel : INotifyPropertyChanged, IDisp
         PackageModifiedText = preview.LastModifiedUtc?.ToLocalTime().ToString("g");
 
         _allAssets.Clear();
+        _directoriesToPrune.Clear();
+        if (preview.DirectoriesToPrune.Count > 0)
+            _directoriesToPrune.UnionWith(preview.DirectoriesToPrune);
+
         foreach (var asset in preview.Assets)
             _allAssets.Add(new UnityPackageAssetPreviewItem(asset));
 
@@ -669,6 +674,9 @@ public sealed class UnityPackagePreviewViewModel : INotifyPropertyChanged, IDisp
             AddNodeToParent(fileNode, parent);
             _treeNodesByPath[normalizedPath] = fileNode;
         }
+
+        if (_directoriesToPrune.Count > 0)
+            PruneCorruptedFolders(RootNodes);
 
         SortNodes(RootNodes);
 
@@ -826,6 +834,25 @@ public sealed class UnityPackagePreviewViewModel : INotifyPropertyChanged, IDisp
         foreach (var node in nodes)
             if (node.Children.Count > 0)
                 SortNodes(node.Children);
+    }
+
+    private void PruneCorruptedFolders(ObservableCollection<UnityPackageAssetTreeNode> nodes)
+    {
+        for (var i = nodes.Count - 1; i >= 0; i--)
+        {
+            var node = nodes[i];
+            if (node.Children.Count > 0)
+                PruneCorruptedFolders(node.Children);
+
+            if (!node.IsFolder || node.Children.Count > 0 || node.Asset is not null)
+                continue;
+
+            if (!_directoriesToPrune.Contains(node.FullPath))
+                continue;
+
+            nodes.RemoveAt(i);
+            _treeNodesByPath.Remove(node.FullPath);
+        }
     }
 
     private void UpdateTreeSelectionFromAsset(UnityPackageAssetPreviewItem? asset)

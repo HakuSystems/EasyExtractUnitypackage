@@ -160,6 +160,9 @@
                             <TextBlock Text="Credits to Jan-Fcloud for some ideas"
                                        Classes="subtle"
                                        TextAlignment="Right" />
+                            <TextBlock Text="Credits to Sparkle Games - Oğuzhan for Bug reports"
+                                       Classes="subtle"
+                                       TextAlignment="Right" />
                         </StackPanel>
                     </StackPanel>
                 </Grid>

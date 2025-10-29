@@ -24,6 +24,9 @@ public sealed class UnityPackagePreviewService : IUnityPackagePreviewService
     private const long MaxEmbeddedAssetBytes = 8 * 1024 * 1024; // 8 MB
     private static readonly HashSet<char> InvalidFileNameCharacters = Path.GetInvalidFileNameChars().ToHashSet();
 
+    private static readonly PathSegmentNormalization[] EmptySegmentNormalizations =
+        Array.Empty<PathSegmentNormalization>();
+
     public async Task<UnityPackagePreviewResult> LoadPreviewAsync(
         string packagePath,
         CancellationToken cancellationToken = default)
@@ -75,7 +78,9 @@ public sealed class UnityPackagePreviewService : IUnityPackagePreviewService
                     {
                         entry.DataStream.CopyTo(buffer);
                         var path = Encoding.UTF8.GetString(buffer.ToArray());
-                        state.RelativePath = NormalizeRelativePath(path);
+                        var normalization = NormalizeRelativePath(path);
+                        state.RelativePath = normalization.NormalizedPath;
+                        state.PathNormalization = normalization;
                     }
 
                     break;
@@ -125,6 +130,7 @@ public sealed class UnityPackagePreviewService : IUnityPackagePreviewService
         }
 
         var assets = new List<UnityPackagePreviewAsset>(assetStates.Count);
+        var directoriesToPrune = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
         long totalAssetSize = 0;
 
         foreach (var state in assetStates.Values)
@@ -133,6 +139,8 @@ public sealed class UnityPackagePreviewService : IUnityPackagePreviewService
 
             if (string.IsNullOrWhiteSpace(state.RelativePath))
                 continue;
+
+            TrackCorruptedDirectories(state, directoriesToPrune);
 
             var assetSize = state.AssetSizeBytes;
             totalAssetSize += assetSize;
@@ -161,7 +169,8 @@ public sealed class UnityPackagePreviewService : IUnityPackagePreviewService
             packageSizeBytes,
             lastModifiedUtc,
             totalAssetSize,
-            assets);
+            assets,
+            directoriesToPrune);
     }
 
     private static (string AssetKey, string ComponentName) SplitEntryName(string entryName)
@@ -176,10 +185,10 @@ public sealed class UnityPackagePreviewService : IUnityPackagePreviewService
         return (key, remainder.ToLowerInvariant());
     }
 
-    private static string NormalizeRelativePath(string? input)
+    private static PathNormalizationResult NormalizeRelativePath(string? input)
     {
         if (string.IsNullOrWhiteSpace(input))
-            return string.Empty;
+            return new PathNormalizationResult(string.Empty, string.Empty, EmptySegmentNormalizations);
 
         var sanitized = input.Replace('\\', '/')
             .Replace("\r", string.Empty, StringComparison.Ordinal)
@@ -187,10 +196,14 @@ public sealed class UnityPackagePreviewService : IUnityPackagePreviewService
             .Trim();
 
         if (string.IsNullOrWhiteSpace(sanitized))
-            return string.Empty;
+            return new PathNormalizationResult(string.Empty, string.Empty, EmptySegmentNormalizations);
 
         var segments = sanitized.Split('/', StringSplitOptions.RemoveEmptyEntries);
-        var cleanedSegments = new List<string>(segments.Length);
+        if (segments.Length == 0)
+            return new PathNormalizationResult(string.Empty, string.Empty, EmptySegmentNormalizations);
+
+        var originalSegments = new List<string>(segments.Length);
+        var normalizedSegments = new List<string>(segments.Length);
 
         foreach (var segment in segments)
         {
@@ -206,18 +219,62 @@ public sealed class UnityPackagePreviewService : IUnityPackagePreviewService
             if (string.IsNullOrWhiteSpace(filtered))
                 continue;
 
+            originalSegments.Add(filtered);
             var normalizedSegment = FileExtensionNormalizer.Normalize(filtered);
-            cleanedSegments.Add(normalizedSegment);
+            normalizedSegments.Add(normalizedSegment);
         }
 
-        return cleanedSegments.Count == 0
-            ? string.Empty
-            : Path.Combine(cleanedSegments.ToArray());
+        if (originalSegments.Count == 0)
+            return new PathNormalizationResult(string.Empty, string.Empty, EmptySegmentNormalizations);
+
+        var segmentPairs = new PathSegmentNormalization[originalSegments.Count];
+        for (var i = 0; i < segmentPairs.Length; i++)
+            segmentPairs[i] = new PathSegmentNormalization(originalSegments[i], normalizedSegments[i]);
+
+        var originalPath = Path.Combine(originalSegments.ToArray());
+        var normalizedPath = Path.Combine(normalizedSegments.ToArray());
+
+        return new PathNormalizationResult(normalizedPath, originalPath, segmentPairs);
     }
+
+    private static void TrackCorruptedDirectories(
+        UnityPackageAssetPreviewState state,
+        HashSet<string> directoriesToPrune)
+    {
+        if (state.PathNormalization is null)
+            return;
+
+        var normalization = state.PathNormalization.Value;
+        var segments = normalization.Segments;
+        if (segments.Count == 0)
+            return;
+
+        var builder = new StringBuilder();
+        for (var i = 0; i < segments.Count - 1; i++)
+        {
+            if (builder.Length > 0)
+                builder.Append('/');
+
+            builder.Append(segments[i].Normalized);
+
+            if (string.Equals(segments[i].Original, segments[i].Normalized, StringComparison.Ordinal))
+                continue;
+
+            directoriesToPrune.Add(builder.ToString());
+        }
+    }
+
+    private readonly record struct PathSegmentNormalization(string Original, string Normalized);
+
+    private readonly record struct PathNormalizationResult(
+        string NormalizedPath,
+        string OriginalPath,
+        IReadOnlyList<PathSegmentNormalization> Segments);
 
     private sealed class UnityPackageAssetPreviewState
     {
         public string? RelativePath { get; set; }
+        public PathNormalizationResult? PathNormalization { get; set; }
         public long AssetSizeBytes { get; set; }
         public bool HasMetaFile { get; set; }
         public byte[]? PreviewImageData { get; set; }

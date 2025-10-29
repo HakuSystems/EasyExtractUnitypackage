@@ -9,7 +9,8 @@ public sealed record UnityPackagePreviewResult(
     long PackageSizeBytes,
     DateTimeOffset? LastModifiedUtc,
     long TotalAssetSizeBytes,
-    IReadOnlyList<UnityPackagePreviewAsset> Assets);
+    IReadOnlyList<UnityPackagePreviewAsset> Assets,
+    IReadOnlyCollection<string> DirectoriesToPrune);
 
 public sealed record UnityPackagePreviewAsset(
     string RelativePath,

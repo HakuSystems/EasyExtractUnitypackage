@@ -40,6 +40,9 @@ public sealed class UnityPackageExtractionService : IUnityPackageExtractionServi
     private static readonly HashSet<char> InvalidFileNameCharacters =
         Path.GetInvalidFileNameChars().ToHashSet();
 
+    private static readonly PathSegmentNormalization[] EmptySegmentNormalizations =
+        Array.Empty<PathSegmentNormalization>();
+
     public async Task<UnityPackageExtractionResult> ExtractAsync(
         string packagePath,
         string outputDirectory,
@@ -78,6 +81,7 @@ public sealed class UnityPackageExtractionService : IUnityPackageExtractionServi
         var assetStates = new Dictionary<string, UnityPackageAssetState>(StringComparer.OrdinalIgnoreCase);
         var pendingWrites = new List<PendingAssetWrite>();
         var queuedStates = new HashSet<UnityPackageAssetState>();
+        var directoriesToCleanup = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
         var extractionRequired = false;
         var extractedCount = 0;
 
@@ -126,6 +130,7 @@ public sealed class UnityPackageExtractionService : IUnityPackageExtractionServi
                     state,
                     outputDirectory,
                     options.OrganizeByCategories,
+                    directoriesToCleanup,
                     out var targetPath,
                     out var metaPath,
                     out var previewPath))
@@ -185,7 +190,10 @@ public sealed class UnityPackageExtractionService : IUnityPackageExtractionServi
             switch (componentName)
             {
                 case "pathname":
-                    state.RelativePath = NormalizeRelativePath(Encoding.UTF8.GetString(data));
+                    var normalization = NormalizeRelativePath(Encoding.UTF8.GetString(data));
+                    state.RelativePath = normalization.NormalizedPath;
+                    state.OriginalRelativePath = normalization.OriginalPath;
+                    state.PathNormalizations = normalization.Segments;
                     break;
                 case "asset":
                     state.AssetData = data;
@@ -220,6 +228,7 @@ public sealed class UnityPackageExtractionService : IUnityPackageExtractionServi
 
             pendingWrites.Clear();
             queuedStates.Clear();
+            CleanupCorruptedDirectories(directoriesToCleanup);
 
             return new UnityPackageExtractionResult(
                 packagePath,
@@ -231,6 +240,8 @@ public sealed class UnityPackageExtractionService : IUnityPackageExtractionServi
         if (pendingWrites.Count > 0)
             FlushPendingWrites();
 
+        CleanupCorruptedDirectories(directoriesToCleanup);
+
         return new UnityPackageExtractionResult(
             packagePath,
             outputDirectory,
@@ -238,32 +249,11 @@ public sealed class UnityPackageExtractionService : IUnityPackageExtractionServi
             extractedFiles.ToImmutableArray());
     }
 
-    private static IReadOnlyList<string> WriteAssetToDisk(
-        UnityPackageAssetState state,
-        string outputDirectory,
-        bool organizeByCategories,
-        CancellationToken cancellationToken)
-    {
-        if (!TryGetAssetPaths(
-                state,
-                outputDirectory,
-                organizeByCategories,
-                out var targetPath,
-                out var metaPath,
-                out var previewPath))
-            return Array.Empty<string>();
-
-        var plan = CreateAssetWritePlan(state, targetPath, metaPath, previewPath);
-        if (!plan.RequiresWrite)
-            return Array.Empty<string>();
-
-        return WriteAssetToDisk(state, targetPath, metaPath, previewPath, plan, cancellationToken);
-    }
-
     private static bool TryGetAssetPaths(
         UnityPackageAssetState state,
         string outputDirectory,
         bool organizeByCategories,
+        HashSet<string> directoriesToCleanup,
         out string targetPath,
         out string? metaPath,
         out string? previewPath)
@@ -282,14 +272,75 @@ public sealed class UnityPackageExtractionService : IUnityPackageExtractionServi
         if (string.IsNullOrWhiteSpace(sanitizedPath))
             return false;
 
-        sanitizedPath = NormalizeRelativePath(sanitizedPath);
-        if (string.IsNullOrWhiteSpace(sanitizedPath))
-            return false;
-
         targetPath = Path.Combine(outputDirectory, sanitizedPath);
         metaPath = state.MetaData is { Length: > 0 } ? $"{targetPath}.meta" : null;
         previewPath = state.PreviewData is { Length: > 0 } ? $"{targetPath}.preview.png" : null;
+        TrackCorruptedDirectories(outputDirectory, state, directoriesToCleanup);
         return true;
+    }
+
+    private static void TrackCorruptedDirectories(
+        string outputDirectory,
+        UnityPackageAssetState state,
+        HashSet<string> directoriesToCleanup)
+    {
+        if (directoriesToCleanup is null)
+            return;
+
+        var normalizations = state.PathNormalizations;
+        if (normalizations is null || normalizations.Count <= 1)
+            return;
+
+        string? originalAccumulated = null;
+        for (var i = 0; i < normalizations.Count - 1; i++)
+        {
+            var normalization = normalizations[i];
+            var originalSegment = normalization.Original;
+
+            if (string.IsNullOrWhiteSpace(originalSegment))
+                continue;
+
+            originalAccumulated = originalAccumulated is null
+                ? originalSegment
+                : Path.Combine(originalAccumulated, originalSegment);
+
+            if (string.Equals(
+                    normalization.Original,
+                    normalization.Normalized,
+                    StringComparison.Ordinal))
+                continue;
+
+            if (string.IsNullOrWhiteSpace(originalAccumulated))
+                continue;
+
+            var candidate = Path.Combine(outputDirectory, originalAccumulated);
+            directoriesToCleanup.Add(candidate);
+        }
+    }
+
+    private static void CleanupCorruptedDirectories(HashSet<string> directoriesToCleanup)
+    {
+        if (directoriesToCleanup.Count == 0)
+            return;
+
+        foreach (var directory in directoriesToCleanup
+                     .OrderByDescending(path => path.Length))
+            try
+            {
+                if (!Directory.Exists(directory))
+                    continue;
+
+                if (Directory.EnumerateFileSystemEntries(directory).Any())
+                    continue;
+
+                Directory.Delete(directory);
+            }
+            catch (IOException)
+            {
+            }
+            catch (UnauthorizedAccessException)
+            {
+            }
     }
 
     private static AssetWritePlan CreateAssetWritePlan(
@@ -409,10 +460,10 @@ public sealed class UnityPackageExtractionService : IUnityPackageExtractionServi
         return (key, remainder.ToLowerInvariant());
     }
 
-    private static string NormalizeRelativePath(string? input)
+    private static PathNormalizationResult NormalizeRelativePath(string? input)
     {
         if (string.IsNullOrWhiteSpace(input))
-            return string.Empty;
+            return new PathNormalizationResult(string.Empty, string.Empty, EmptySegmentNormalizations);
 
         var sanitized = input.Replace('\\', '/')
             .Replace("\r", string.Empty, StringComparison.Ordinal)
@@ -420,10 +471,14 @@ public sealed class UnityPackageExtractionService : IUnityPackageExtractionServi
             .Trim();
 
         if (string.IsNullOrWhiteSpace(sanitized))
-            return string.Empty;
+            return new PathNormalizationResult(string.Empty, string.Empty, EmptySegmentNormalizations);
 
         var segments = sanitized.Split('/', StringSplitOptions.RemoveEmptyEntries);
-        var cleanedSegments = new List<string>();
+        if (segments.Length == 0)
+            return new PathNormalizationResult(string.Empty, string.Empty, EmptySegmentNormalizations);
+
+        var originalSegments = new List<string>(segments.Length);
+        var normalizedSegments = new List<string>(segments.Length);
 
         foreach (var segment in segments)
         {
@@ -439,14 +494,30 @@ public sealed class UnityPackageExtractionService : IUnityPackageExtractionServi
             if (string.IsNullOrWhiteSpace(filtered))
                 continue;
 
+            originalSegments.Add(filtered);
             var normalizedSegment = FileExtensionNormalizer.Normalize(filtered);
-            cleanedSegments.Add(normalizedSegment);
+            normalizedSegments.Add(normalizedSegment);
         }
 
-        return cleanedSegments.Count == 0
-            ? string.Empty
-            : Path.Combine(cleanedSegments.ToArray());
+        if (originalSegments.Count == 0)
+            return new PathNormalizationResult(string.Empty, string.Empty, EmptySegmentNormalizations);
+
+        var segmentPairs = new PathSegmentNormalization[originalSegments.Count];
+        for (var i = 0; i < segmentPairs.Length; i++)
+            segmentPairs[i] = new PathSegmentNormalization(originalSegments[i], normalizedSegments[i]);
+
+        var originalPath = Path.Combine(originalSegments.ToArray());
+        var normalizedPath = Path.Combine(normalizedSegments.ToArray());
+
+        return new PathNormalizationResult(normalizedPath, originalPath, segmentPairs);
     }
+
+    private readonly record struct PathSegmentNormalization(string Original, string Normalized);
+
+    private readonly record struct PathNormalizationResult(
+        string NormalizedPath,
+        string OriginalPath,
+        IReadOnlyList<PathSegmentNormalization> Segments);
 
     private readonly record struct AssetWritePlan(bool WriteAsset, bool WriteMeta, bool WritePreview)
     {
@@ -463,6 +534,8 @@ public sealed class UnityPackageExtractionService : IUnityPackageExtractionServi
     private sealed class UnityPackageAssetState
     {
         public string? RelativePath { get; set; }
+        public string? OriginalRelativePath { get; set; }
+        public IReadOnlyList<PathSegmentNormalization>? PathNormalizations { get; set; }
         public byte[]? AssetData { get; set; }
         public byte[]? MetaData { get; set; }
         public byte[]? PreviewData { get; set; }
@@ -475,6 +548,9 @@ public sealed class UnityPackageExtractionService : IUnityPackageExtractionServi
 
         public void MarkAsCompleted()
         {
+            RelativePath = null;
+            OriginalRelativePath = null;
+            PathNormalizations = null;
             AssetData = null;
             MetaData = null;
             PreviewData = null;
