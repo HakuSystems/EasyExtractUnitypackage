@@ -1,22 +1,41 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
+using NAudio.Vorbis;
 using NAudio.Wave;
 
 namespace EasyExtractCrossPlatform.Utilities;
 
 public sealed class AudioPreviewSession : IDisposable
 {
-    private readonly byte[] _data;
+    private const string TempFilePrefix = "EasyExtractAudioPreview";
+
+    private static readonly HashSet<string> KnownAudioExtensions = new(StringComparer.OrdinalIgnoreCase)
+    {
+        ".wav", ".wave", ".mp3", ".mp2", ".aiff", ".aif", ".aiffc", ".ogg", ".oga", ".flac", ".m4a", ".aac", ".wma",
+        ".opus", ".caf", ".au", ".mka", ".mpa"
+    };
+
+    private static readonly HashSet<string> StreamCapableExtensions = new(StringComparer.OrdinalIgnoreCase)
+    {
+        ".wav", ".wave", ".mp3", ".aiff", ".aif", ".ogg", ".oga"
+    };
+
+    private readonly byte[]? _data;
     private readonly string _extension;
+    private readonly string? _filePath;
+    private readonly bool _ownsTempFile;
     private bool _manualStopRequested;
     private WaveStream? _reader;
-    private MemoryStream? _stream;
+    private Stream? _stream;
     private IWavePlayer? _waveOut;
 
-    private AudioPreviewSession(byte[] data, string extension)
+    private AudioPreviewSession(byte[]? data, string extension, string? filePath, bool ownsTempFile)
     {
-        _data = data ?? throw new ArgumentNullException(nameof(data));
-        _extension = extension ?? string.Empty;
+        _data = data;
+        _extension = extension;
+        _filePath = filePath;
+        _ownsTempFile = ownsTempFile;
     }
 
     public bool IsPlaying => _waveOut?.PlaybackState == PlaybackState.Playing;
@@ -28,6 +47,8 @@ public sealed class AudioPreviewSession : IDisposable
     public TimeSpan CurrentTime => _reader?.CurrentTime ?? TimeSpan.Zero;
 
     public TimeSpan TotalTime => _reader?.TotalTime ?? TimeSpan.Zero;
+
+    public static IReadOnlyCollection<string> KnownExtensions => KnownAudioExtensions;
 
     public void Dispose()
     {
@@ -43,60 +64,48 @@ public sealed class AudioPreviewSession : IDisposable
 
         _stream?.Dispose();
         _stream = null;
+
+        if (_ownsTempFile && !string.IsNullOrWhiteSpace(_filePath))
+            TryDeleteFile(_filePath);
     }
 
     public event EventHandler<AudioPlaybackStoppedEventArgs>? PlaybackStopped;
 
-    public static bool SupportsExtension(string extension)
+    public static bool Supports(string? extension, bool hasFile)
     {
-        if (string.IsNullOrWhiteSpace(extension))
-            return false;
-
-        return extension.Equals(".wav", StringComparison.OrdinalIgnoreCase)
-               || extension.Equals(".mp3", StringComparison.OrdinalIgnoreCase)
-               || extension.Equals(".aiff", StringComparison.OrdinalIgnoreCase)
-               || extension.Equals(".aif", StringComparison.OrdinalIgnoreCase);
+        var normalized = NormalizeExtension(extension);
+        return SupportsInternal(normalized, hasFile);
     }
 
-    public static AudioPreviewSession? TryCreate(byte[] data, string extension)
+    public static AudioPreviewSession? TryCreate(byte[]? data, string extension, string? filePath = null)
     {
-        if (!SupportsExtension(extension))
+        var normalizedExtension = NormalizeExtension(extension);
+        var hasFile = !string.IsNullOrWhiteSpace(filePath);
+        var hasData = data is { Length: > 0 };
+
+        if (!hasFile && !hasData)
             return null;
 
-        var session = new AudioPreviewSession(data, extension);
+        if (!SupportsInternal(normalizedExtension, hasFile))
+            return null;
+
+        var ownsTempFile = false;
+        var buffer = hasFile ? null : data;
+        var effectiveFilePath = filePath;
+
+        if (!hasFile && hasData && RequiresFilePlayback(normalizedExtension))
+        {
+            effectiveFilePath = WriteToTemporaryFile(data!, normalizedExtension);
+            if (effectiveFilePath is null)
+                return null;
+
+            ownsTempFile = true;
+            buffer = null;
+            hasFile = true;
+        }
+
+        var session = new AudioPreviewSession(buffer, normalizedExtension, effectiveFilePath, ownsTempFile);
         return session.Initialize() ? session : null;
-    }
-
-    private bool Initialize()
-    {
-        try
-        {
-            _stream = new MemoryStream(_data, false);
-            _reader = CreateReader(_stream, _extension);
-            if (_reader is null)
-                return false;
-
-            _waveOut = new WaveOutEvent { DesiredLatency = 120 };
-            _waveOut.Init(_reader);
-            _waveOut.PlaybackStopped += OnPlaybackStopped;
-            return true;
-        }
-        catch
-        {
-            Dispose();
-            return false;
-        }
-    }
-
-    private static WaveStream? CreateReader(Stream source, string extension)
-    {
-        return extension.ToLowerInvariant() switch
-        {
-            ".wav" => new WaveFileReader(source),
-            ".mp3" => new Mp3FileReader(source),
-            ".aiff" or ".aif" => new AiffFileReader(source),
-            _ => null
-        };
     }
 
     public void Play()
@@ -129,6 +138,136 @@ public sealed class AudioPreviewSession : IDisposable
     public void Rewind()
     {
         RewindInternal();
+    }
+
+    private static bool SupportsInternal(string normalizedExtension, bool hasFile)
+    {
+        if (hasFile)
+            return true;
+
+        return !string.IsNullOrEmpty(normalizedExtension) && KnownAudioExtensions.Contains(normalizedExtension);
+    }
+
+    private bool Initialize()
+    {
+        try
+        {
+            _reader = CreateReader();
+            if (_reader is null)
+                return false;
+
+            _waveOut = new WaveOutEvent { DesiredLatency = 120 };
+            _waveOut.Init(_reader);
+            _waveOut.PlaybackStopped += OnPlaybackStopped;
+            return true;
+        }
+        catch
+        {
+            Dispose();
+            return false;
+        }
+    }
+
+    private WaveStream? CreateReader()
+    {
+        if (!string.IsNullOrWhiteSpace(_filePath))
+            return CreateReaderFromFile(_filePath!, _extension);
+
+        if (_data is null)
+            return null;
+
+        _stream = new MemoryStream(_data, false);
+        return CreateReaderFromStream(_stream, _extension);
+    }
+
+    private static WaveStream? CreateReaderFromStream(Stream source, string extension)
+    {
+        try
+        {
+            return extension switch
+            {
+                ".wav" or ".wave" => new WaveFileReader(source),
+                ".mp3" => new Mp3FileReader(source),
+                ".aiff" or ".aif" or ".aiffc" => new AiffFileReader(source),
+                ".ogg" or ".oga" => new VorbisWaveReader(source),
+                _ => null
+            };
+        }
+        catch
+        {
+            return null;
+        }
+    }
+
+    private static WaveStream? CreateReaderFromFile(string filePath, string extension)
+    {
+        try
+        {
+            return extension switch
+            {
+                ".wav" or ".wave" => new WaveFileReader(filePath),
+                ".mp3" => new Mp3FileReader(filePath),
+                ".aiff" or ".aif" or ".aiffc" => new AiffFileReader(filePath),
+                ".ogg" or ".oga" => new VorbisWaveReader(filePath),
+                _ => new AudioFileReader(filePath)
+            };
+        }
+        catch
+        {
+            try
+            {
+                return new AudioFileReader(filePath);
+            }
+            catch
+            {
+                return null;
+            }
+        }
+    }
+
+    private static bool RequiresFilePlayback(string extension)
+    {
+        return string.IsNullOrEmpty(extension) || !StreamCapableExtensions.Contains(extension);
+    }
+
+    private static string NormalizeExtension(string? extension)
+    {
+        if (string.IsNullOrWhiteSpace(extension))
+            return string.Empty;
+
+        var trimmed = extension.Trim();
+        if (!trimmed.StartsWith(".", StringComparison.Ordinal))
+            trimmed = "." + trimmed;
+
+        return trimmed.ToLowerInvariant();
+    }
+
+    private static string? WriteToTemporaryFile(byte[] data, string extension)
+    {
+        try
+        {
+            var safeExtension = string.IsNullOrEmpty(extension) ? ".audio" : extension;
+            var path = Path.Combine(Path.GetTempPath(), $"{TempFilePrefix}_{Guid.NewGuid():N}{safeExtension}");
+            File.WriteAllBytes(path, data);
+            return path;
+        }
+        catch
+        {
+            return null;
+        }
+    }
+
+    private static void TryDeleteFile(string path)
+    {
+        try
+        {
+            if (File.Exists(path))
+                File.Delete(path);
+        }
+        catch
+        {
+            // Ignore cleanup failures; OS can remove temp files later.
+        }
     }
 
     private void RewindInternal()

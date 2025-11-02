@@ -10,7 +10,8 @@ public sealed record UnityPackagePreviewResult(
     DateTimeOffset? LastModifiedUtc,
     long TotalAssetSizeBytes,
     IReadOnlyList<UnityPackagePreviewAsset> Assets,
-    IReadOnlyCollection<string> DirectoriesToPrune);
+    IReadOnlyCollection<string> DirectoriesToPrune,
+    string? TemporaryExtractionRoot);
 
 public sealed record UnityPackagePreviewAsset(
     string RelativePath,
@@ -18,4 +19,5 @@ public sealed record UnityPackagePreviewAsset(
     bool HasMetaFile,
     byte[]? PreviewImageData,
     byte[]? AssetData,
-    bool IsAssetDataTruncated);
+    bool IsAssetDataTruncated,
+    string? AssetFilePath);

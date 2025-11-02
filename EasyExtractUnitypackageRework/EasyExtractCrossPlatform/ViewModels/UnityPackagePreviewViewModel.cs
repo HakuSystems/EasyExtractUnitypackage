@@ -1097,13 +1097,16 @@ public sealed class UnityPackagePreviewViewModel : INotifyPropertyChanged, IDisp
     {
         ResetAudioPreview();
 
-        if (asset.AssetData is not { Length: > 0 } || asset.IsAssetDataTruncated)
+        var hasData = asset.AssetData is { Length: > 0 };
+        var hasFile = !string.IsNullOrWhiteSpace(asset.AssetFilePath);
+
+        if (!hasData && !hasFile)
             return;
 
-        if (!AudioPreviewSession.SupportsExtension(asset.Extension))
+        if (!AudioPreviewSession.Supports(asset.Extension, hasFile))
             return;
 
-        var session = AudioPreviewSession.TryCreate(asset.AssetData, asset.Extension);
+        var session = AudioPreviewSession.TryCreate(asset.AssetData, asset.Extension, asset.AssetFilePath);
         if (session is null)
         {
             AudioStatusText = "Audio preview unsupported";
@@ -1467,6 +1470,7 @@ public sealed class UnityPackageAssetPreviewItem
         PreviewImageData = asset.PreviewImageData;
         AssetData = asset.AssetData;
         IsAssetDataTruncated = asset.IsAssetDataTruncated;
+        AssetFilePath = asset.AssetFilePath;
 
         Extension = Path.GetExtension(RelativePath)?.ToLowerInvariant() ?? string.Empty;
         Category = ResolveCategory(asset, Extension);
@@ -1486,6 +1490,8 @@ public sealed class UnityPackageAssetPreviewItem
     public byte[]? PreviewImageData { get; }
 
     public byte[]? AssetData { get; }
+
+    public string? AssetFilePath { get; }
 
     public bool IsAssetDataTruncated { get; }
 

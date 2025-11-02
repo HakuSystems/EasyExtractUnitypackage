@@ -22,7 +22,14 @@ public interface IUnityPackagePreviewService
 public sealed class UnityPackagePreviewService : IUnityPackagePreviewService
 {
     private const long MaxEmbeddedAssetBytes = 8 * 1024 * 1024; // 8 MB
+    private const string TemporaryExtractionFolderPrefix = "EasyExtractPreviewAudio";
     private static readonly HashSet<char> InvalidFileNameCharacters = Path.GetInvalidFileNameChars().ToHashSet();
+
+    private static readonly HashSet<string> AudioExtensions = new(StringComparer.OrdinalIgnoreCase)
+    {
+        ".wav", ".wave", ".mp3", ".aiff", ".aif", ".ogg", ".oga", ".flac", ".m4a", ".aac", ".wma", ".opus", ".caf",
+        ".au"
+    };
 
     private static readonly PathSegmentNormalization[] EmptySegmentNormalizations =
         Array.Empty<PathSegmentNormalization>();
@@ -67,7 +74,7 @@ public sealed class UnityPackagePreviewService : IUnityPackagePreviewService
 
             if (!assetStates.TryGetValue(assetKey, out var state))
             {
-                state = new UnityPackageAssetPreviewState();
+                state = new UnityPackageAssetPreviewState(assetKey);
                 assetStates[assetKey] = state;
             }
 
@@ -86,6 +93,8 @@ public sealed class UnityPackagePreviewService : IUnityPackagePreviewService
                     break;
                 case "asset" when entry.DataStream is not null:
                     state.AssetSizeBytes = Math.Max(0, entry.Length);
+                    state.AssetFilePath = null;
+                    state.NeedsAssetExtraction = false;
                     if (entry.Length >= 0 && entry.Length <= MaxEmbeddedAssetBytes)
                     {
                         using var assetBuffer = new MemoryStream();
@@ -101,17 +110,20 @@ public sealed class UnityPackagePreviewService : IUnityPackagePreviewService
                         {
                             state.AssetData = assetBuffer.ToArray();
                             state.IsAssetDataTruncated = false;
+                            state.NeedsAssetExtraction = false;
                         }
                         else
                         {
                             state.AssetData = null;
                             state.IsAssetDataTruncated = true;
+                            state.NeedsAssetExtraction = true;
                         }
                     }
                     else
                     {
                         state.AssetData = null;
                         state.IsAssetDataTruncated = true;
+                        state.NeedsAssetExtraction = true;
                     }
 
                     break;
@@ -128,6 +140,8 @@ public sealed class UnityPackagePreviewService : IUnityPackagePreviewService
                     break;
             }
         }
+
+        var extractionRoot = ExtractLargeAudioAssets(packagePath, assetStates, cancellationToken);
 
         var assets = new List<UnityPackagePreviewAsset>(assetStates.Count);
         var directoriesToPrune = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
@@ -151,7 +165,8 @@ public sealed class UnityPackagePreviewService : IUnityPackagePreviewService
                 state.HasMetaFile,
                 state.PreviewImageData,
                 state.AssetData,
-                state.IsAssetDataTruncated));
+                state.IsAssetDataTruncated,
+                state.AssetFilePath));
         }
 
         assets.Sort(static (left, right) =>
@@ -170,7 +185,113 @@ public sealed class UnityPackagePreviewService : IUnityPackagePreviewService
             lastModifiedUtc,
             totalAssetSize,
             assets,
-            directoriesToPrune);
+            directoriesToPrune,
+            extractionRoot);
+    }
+
+    private static string? ExtractLargeAudioAssets(
+        string packagePath,
+        IDictionary<string, UnityPackageAssetPreviewState> assetStates,
+        CancellationToken cancellationToken)
+    {
+        var candidates = assetStates.Values
+            .Where(state =>
+                state.NeedsAssetExtraction &&
+                !string.IsNullOrWhiteSpace(state.RelativePath) &&
+                IsAudioExtension(Path.GetExtension(state.RelativePath)))
+            .ToDictionary(state => state.AssetKey, state => state, StringComparer.OrdinalIgnoreCase);
+
+        if (candidates.Count == 0)
+            return null;
+
+        string? extractionRoot = null;
+
+        using var packageStream = File.OpenRead(packagePath);
+        using var gzipStream = new GZipStream(packageStream, CompressionMode.Decompress);
+        using var tarReader = new TarReader(gzipStream);
+
+        TarEntry? entry;
+        while ((entry = tarReader.GetNextEntry()) is not null && candidates.Count > 0)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+
+            if (entry.EntryType == TarEntryType.Directory)
+                continue;
+
+            var entryName = entry.Name ?? string.Empty;
+            if (string.IsNullOrWhiteSpace(entryName))
+                continue;
+
+            var (assetKey, componentName) = SplitEntryName(entryName);
+            if (string.IsNullOrWhiteSpace(assetKey) || !string.Equals(componentName, "asset", StringComparison.Ordinal))
+                continue;
+
+            if (!candidates.TryGetValue(assetKey, out var state))
+                continue;
+
+            if (entry.DataStream is null)
+                continue;
+
+            extractionRoot ??= CreateExtractionRoot();
+
+            var extension = Path.GetExtension(state.RelativePath ?? string.Empty);
+            if (string.IsNullOrWhiteSpace(extension))
+                extension = ".audio";
+
+            var safeName = SanitizeFileName(state.AssetKey);
+            if (string.IsNullOrWhiteSpace(safeName))
+                safeName = Guid.NewGuid().ToString("N");
+
+            var targetPath = Path.Combine(extractionRoot, $"{safeName}{extension}");
+            Directory.CreateDirectory(extractionRoot);
+
+            using (var output = File.Create(targetPath))
+            {
+                entry.DataStream.CopyTo(output);
+            }
+
+            state.AssetFilePath = targetPath;
+            state.IsAssetDataTruncated = false;
+            state.NeedsAssetExtraction = false;
+
+            candidates.Remove(assetKey);
+        }
+
+        if (candidates.Count > 0 && extractionRoot is not null && Directory.Exists(extractionRoot))
+            try
+            {
+                Directory.Delete(extractionRoot, true);
+                extractionRoot = null;
+            }
+            catch
+            {
+                // Ignore cleanup failure; remaining assets will continue to report truncated data.
+            }
+
+        return extractionRoot;
+    }
+
+    private static string CreateExtractionRoot()
+    {
+        var root = Path.Combine(Path.GetTempPath(), $"{TemporaryExtractionFolderPrefix}_{Guid.NewGuid():N}");
+        return root;
+    }
+
+    private static string SanitizeFileName(string? input)
+    {
+        if (string.IsNullOrWhiteSpace(input))
+            return string.Empty;
+
+        var filtered = new string(input.Where(c => !InvalidFileNameCharacters.Contains(c)).ToArray());
+        return filtered.Trim();
+    }
+
+    private static bool IsAudioExtension(string? extension)
+    {
+        if (string.IsNullOrWhiteSpace(extension))
+            return false;
+
+        return AudioExtensions.Contains(extension);
     }
 
     private static (string AssetKey, string ComponentName) SplitEntryName(string entryName)
@@ -273,6 +394,12 @@ public sealed class UnityPackagePreviewService : IUnityPackagePreviewService
 
     private sealed class UnityPackageAssetPreviewState
     {
+        public UnityPackageAssetPreviewState(string assetKey)
+        {
+            AssetKey = assetKey;
+        }
+
+        public string AssetKey { get; }
         public string? RelativePath { get; set; }
         public PathNormalizationResult? PathNormalization { get; set; }
         public long AssetSizeBytes { get; set; }
@@ -280,5 +407,7 @@ public sealed class UnityPackagePreviewService : IUnityPackagePreviewService
         public byte[]? PreviewImageData { get; set; }
         public byte[]? AssetData { get; set; }
         public bool IsAssetDataTruncated { get; set; }
+        public bool NeedsAssetExtraction { get; set; }
+        public string? AssetFilePath { get; set; }
     }
 }
