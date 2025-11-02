@@ -1,11 +1,19 @@
-<UserControl xmlns="https://github.com/avaloniaui"
-             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:viewModels="using:EasyExtractCrossPlatform.ViewModels"
-             x:Class="EasyExtractCrossPlatform.SettingsView"
-             x:DataType="viewModels:SettingsViewModel"
-             Foreground="{DynamicResource EasyTextColorBrush}"
-             Background="{DynamicResource EasyWindowBackgroundBrush}">
-    <UserControl.Styles>
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:viewModels="using:EasyExtractCrossPlatform.ViewModels"
+        x:Class="EasyExtractCrossPlatform.SettingsWindow"
+        x:DataType="viewModels:SettingsViewModel"
+        Title="EasyExtract Settings"
+        Width="880"
+        Height="720"
+        MinWidth="760"
+        MinHeight="560"
+        WindowStartupLocation="CenterOwner"
+        TransparencyLevelHint="AcrylicBlur"
+        TransparencyBackgroundFallback="{DynamicResource EasyWindowBackgroundBrush}"
+        Background="{DynamicResource EasyWindowBackgroundBrush}"
+        Foreground="{DynamicResource EasyTextColorBrush}">
+    <Window.Styles>
         <Style Selector="Border.section">
             <Setter Property="Background" Value="{DynamicResource EasyGlassGradientBrush}" />
             <Setter Property="BorderBrush" Value="{DynamicResource EasyGlassBorderBrush}" />
@@ -15,7 +23,7 @@
             <Setter Property="Margin" Value="0,0,0,24" />
             <Setter Property="BoxShadow" Value="0 18 42 0 #16000000" />
         </Style>
-    </UserControl.Styles>
+    </Window.Styles>
 
     <Grid RowDefinitions="Auto,*">
         <Border Padding="28"
@@ -79,13 +87,16 @@
                         </StackPanel>
 
                         <WrapPanel>
-                            <ToggleSwitch Content="Enable context menu integration"
+                            <ToggleSwitch x:Name="ContextMenuToggle"
+                                          Content="Enable context menu integration"
                                           Margin="0,0,18,12"
                                           IsChecked="{Binding Settings.ContextMenuToggle}" />
-                            <ToggleSwitch Content="Enable Discord Rich Presence"
+                            <ToggleSwitch x:Name="DiscordRpcToggle"
+                                          Content="Enable Discord Rich Presence"
                                           Margin="0,0,18,12"
                                           IsChecked="{Binding Settings.DiscordRpc}" />
-                            <ToggleSwitch Content="Organize output into categories"
+                            <ToggleSwitch x:Name="CategoryStructureToggle"
+                                          Content="Organize output into categories"
                                           Margin="0,0,0,12"
                                           IsChecked="{Binding Settings.ExtractedCategoryStructure}" />
                         </WrapPanel>
@@ -97,7 +108,8 @@
                         <TextBlock Text="Audio" FontSize="20" FontWeight="SemiBold" />
                         <TextBlock Text="Control sound cues while extracting packages." Classes="subtle" />
 
-                        <ToggleSwitch Content="Enable sound effects"
+                        <ToggleSwitch x:Name="SoundToggle"
+                                      Content="Enable sound effects"
                                       IsChecked="{Binding Settings.EnableSound}" />
 
                         <StackPanel>
@@ -109,7 +121,8 @@
                                            HorizontalAlignment="Right"
                                            Margin="12,0,0,0" />
                             </Grid>
-                            <Slider Minimum="0"
+                            <Slider x:Name="SoundVolumeSlider"
+                                    Minimum="0"
                                     Maximum="1"
                                     TickFrequency="0.05"
                                     IsSnapToTickEnabled="True"
@@ -126,7 +139,8 @@
                         <StackPanel Orientation="Horizontal" Spacing="18">
                             <StackPanel Width="220">
                                 <TextBlock Text="Theme" />
-                                <ComboBox ItemsSource="{Binding ThemeOptions}"
+                                <ComboBox x:Name="ThemeComboBox"
+                                          ItemsSource="{Binding ThemeOptions}"
                                           SelectedIndex="{Binding Settings.ApplicationTheme}">
                                     <ComboBox.ItemTemplate>
                                         <DataTemplate>
@@ -143,7 +157,8 @@
                                 <ToggleSwitch x:Name="CustomBackgroundToggle"
                                               Content="Enable custom background"
                                               IsChecked="{Binding Settings.CustomBackgroundImage.IsEnabled}" />
-                                <TextBox Text="{Binding Settings.CustomBackgroundImage.BackgroundPath}"
+                                <TextBox x:Name="BackgroundPathBox"
+                                         Text="{Binding Settings.CustomBackgroundImage.BackgroundPath}"
                                          IsEnabled="{Binding IsChecked, ElementName=CustomBackgroundToggle}" />
                                 <StackPanel Orientation="Horizontal" Spacing="12" VerticalAlignment="Center">
                                     <TextBlock Text="Opacity" />
@@ -171,19 +186,23 @@
                         <TextBlock Text="Toggle runtime diagnostics and logging hooks." Classes="subtle" />
 
                         <WrapPanel>
-                            <ToggleSwitch Content="Enable stack trace capture"
+                            <ToggleSwitch x:Name="StackTraceToggle"
+                                          Content="Enable stack trace capture"
                                           Margin="0,0,18,12"
                                           IsChecked="{Binding Settings.EnableStackTrace}" />
-                            <ToggleSwitch Content="Enable performance logging"
+                            <ToggleSwitch x:Name="PerformanceLoggingToggle"
+                                          Content="Enable performance logging"
                                           Margin="0,0,0,12"
                                           IsChecked="{Binding Settings.EnablePerformanceLogging}" />
                         </WrapPanel>
 
                         <WrapPanel>
-                            <ToggleSwitch Content="Track memory usage"
+                            <ToggleSwitch x:Name="MemoryTrackingToggle"
+                                          Content="Track memory usage"
                                           Margin="0,0,18,12"
                                           IsChecked="{Binding Settings.EnableMemoryTracking}" />
-                            <ToggleSwitch Content="Log asynchronously"
+                            <ToggleSwitch x:Name="AsyncLoggingToggle"
+                                          Content="Log asynchronously"
                                           Margin="0,0,0,12"
                                           IsChecked="{Binding Settings.EnableAsyncLogging}" />
                         </WrapPanel>
@@ -195,7 +214,8 @@
                         <TextBlock Text="Updates" FontSize="20" FontWeight="SemiBold" />
                         <TextBlock Text="Control how EasyExtract stays up to date." Classes="subtle" />
 
-                        <ToggleSwitch Content="Auto update"
+                        <ToggleSwitch x:Name="AutoUpdateToggle"
+                                      Content="Auto update"
                                       IsChecked="{Binding Settings.Update.AutoUpdate}" />
 
                         <StackPanel Spacing="8">
@@ -223,19 +243,14 @@
                         <WrapPanel Grid.Column="1"
                                    HorizontalAlignment="Right"
                                    Margin="16,0,0,0">
-                            <Button Content="Cancel"
-                                    Classes="ghost"
-                                    Margin="0,0,12,8"
-                                    Width="140"
-                                    Click="CancelButton_OnClick" />
-                            <Button Content="Save changes"
+                            <Button Content="Close"
                                     Margin="0,0,0,8"
                                     Width="180"
-                                    Click="SaveButton_OnClick" />
+                                    Click="CancelButton_OnClick" />
                         </WrapPanel>
                     </Grid>
                 </Border>
             </StackPanel>
         </ScrollViewer>
     </Grid>
-</UserControl>
+</Window>

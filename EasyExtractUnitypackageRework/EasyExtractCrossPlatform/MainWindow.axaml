@@ -402,7 +402,7 @@
                                 </ScaleTransform>
                             </Border.RenderTransform>
                             <StackPanel Spacing="18">
-                                <Grid ColumnDefinitions="Auto,*,Auto" VerticalAlignment="Center">
+                                <Grid ColumnDefinitions="Auto,*,Auto,Auto" VerticalAlignment="Center">
                                     <Border Grid.Column="0"
                                             Width="40" Height="40" CornerRadius="20"
                                             Background="{DynamicResource EasyGlassOverlayStrongBrush}"
@@ -438,6 +438,31 @@
                                                    FontWeight="SemiBold"
                                                    Foreground="{DynamicResource EasyAccentBrush}" />
                                     </Border>
+                                    <Button x:Name="CancelExtractionButton"
+                                            Grid.Column="3"
+                                            Margin="12,0,0,0"
+                                            HorizontalAlignment="Right"
+                                            VerticalAlignment="Center"
+                                            Classes="ghost"
+                                            IsVisible="False"
+                                            IsEnabled="False"
+                                            Click="CancelExtractionButton_OnClick">
+                                        <Button.Content>
+                                            <StackPanel Orientation="Horizontal"
+                                                        Spacing="6"
+                                                        HorizontalAlignment="Center">
+                                                <PathIcon
+                                                    Data="M6 6H18V18H6Z"
+                                                    Width="18"
+                                                    Height="18"
+                                                    Foreground="{DynamicResource EasyDangerForegroundBrush}"
+                                                    VerticalAlignment="Center" />
+                                                <TextBlock Text="Stop"
+                                                           VerticalAlignment="Center"
+                                                           Foreground="{DynamicResource EasyDangerForegroundBrush}" />
+                                            </StackPanel>
+                                        </Button.Content>
+                                    </Button>
                                 </Grid>
 
                                 <Grid ColumnDefinitions="*,Auto" RowDefinitions="Auto,Auto">

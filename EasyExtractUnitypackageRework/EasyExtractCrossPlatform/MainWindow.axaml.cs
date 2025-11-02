@@ -40,6 +40,7 @@ public partial class MainWindow : Window
 
     private static readonly HttpClient BackgroundHttpClient = new();
     private readonly Button? _batchExtractionButton;
+    private readonly Button? _cancelExtractionButton;
     private readonly Button? _checkUpdatesButton;
     private readonly Button? _clearQueueButton;
     private readonly IBrush _defaultBackgroundBrush;
@@ -103,7 +104,9 @@ public partial class MainWindow : Window
     private int _extractionOverviewSessionPackages;
     private DateTimeOffset? _extractionOverviewStartTime;
     private Stopwatch? _extractionStopwatch;
+    private FeedbackWindow? _feedbackWindow;
     private bool _isCheckingForUpdates;
+    private bool _isExtractionCancelling;
     private bool _isExtractionOverviewLive;
     private bool _isExtractionRunning;
     private bool _isSearchHover;
@@ -113,6 +116,7 @@ public partial class MainWindow : Window
     private CancellationTokenSource? _overlayAnimationCts;
     private ScaleTransform? _overlayCardScaleTransform;
     private AppSettings _settings = new();
+    private SettingsWindow? _settingsWindow;
     private IDisposable? _versionStatusReset;
 
     public MainWindow()
@@ -162,6 +166,7 @@ public partial class MainWindow : Window
         UpdateSearchUiState();
 
         _startExtractionButton = this.FindControl<Button>("StartExtractionButton");
+        _cancelExtractionButton = this.FindControl<Button>("CancelExtractionButton");
         _batchExtractionButton = this.FindControl<Button>("BatchExtractionButton");
         _processQueueButton = this.FindControl<Button>("ProcessQueueButton");
         _extractionDashboard = this.FindControl<Border>("ExtractionDashboard");
@@ -335,6 +340,30 @@ public partial class MainWindow : Window
         await RunBatchExtractionPickerAsync();
     }
 
+    private void CancelExtractionButton_OnClick(object? sender, RoutedEventArgs e)
+    {
+        if (!_isExtractionRunning || _extractionCts is null)
+            return;
+
+        if (_isExtractionCancelling)
+            return;
+
+        _isExtractionCancelling = true;
+        _extractionCts.Cancel();
+
+        UpdateExtractionDashboardSubtitle("Cancelling extraction...");
+        UpdateExtractionDashboardAsset("Stopping current operation...");
+        if (_extractionDashboardProgressBar is not null)
+        {
+            _extractionDashboardProgressBar.IsIndeterminate = true;
+            _extractionDashboardProgressBar.Value = 0;
+        }
+
+        ShowDropStatusMessage("Cancelling extraction", "Stopping the current operation...", TimeSpan.Zero);
+
+        UpdateExtractionButtonsState();
+    }
+
     private async void ProcessQueueButton_OnClick(object? sender, RoutedEventArgs e)
     {
         await RunQueueExtractionAsync();
@@ -501,6 +530,7 @@ public partial class MainWindow : Window
         }
 
         _isExtractionRunning = true;
+        _isExtractionCancelling = false;
         _extractionCts = new CancellationTokenSource();
         UpdateExtractionButtonsState();
         BeginExtractionOverviewSession();
@@ -617,6 +647,7 @@ public partial class MainWindow : Window
         }
         finally
         {
+            _isExtractionCancelling = false;
             FinishExtractionDashboard(TimeSpan.FromSeconds(2));
             EndExtractionOverviewSession();
             _isExtractionRunning = false;
@@ -1266,6 +1297,12 @@ public partial class MainWindow : Window
 
         if (_clearQueueButton is not null)
             _clearQueueButton.IsEnabled = hasQueueItems && !_isExtractionRunning;
+
+        if (_cancelExtractionButton is not null)
+        {
+            _cancelExtractionButton.IsVisible = _isExtractionRunning;
+            _cancelExtractionButton.IsEnabled = _isExtractionRunning && !_isExtractionCancelling;
+        }
     }
 
     private void PrepareExtractionDashboard(IReadOnlyList<ExtractionItem> items)
@@ -1911,46 +1948,81 @@ public partial class MainWindow : Window
         return null;
     }
 
-    private async void SettingsButton_OnClick(object? sender, RoutedEventArgs e)
+    private void SettingsButton_OnClick(object? sender, RoutedEventArgs e)
     {
-        if (_overlayContent?.Content is SettingsView)
+        if (_settingsWindow is { IsVisible: true })
+        {
+            _settingsWindow.Activate();
             return;
+        }
 
-        var settingsView = new SettingsView();
-        settingsView.SettingsSaved += OnSettingsSaved;
-        settingsView.Cancelled += OnSettingsCancelled;
+        var window = new SettingsWindow();
+        window.SettingsSaved += OnSettingsWindowSaved;
+        window.Closed += OnSettingsWindowClosed;
 
-        await ShowOverlayAsync(settingsView);
+        _settingsWindow = window;
+        window.Show(this);
+        QueueDiscordPresenceUpdate("Settings", "Tuning preferences");
     }
 
-    private async void FeedbackButton_OnClick(object? sender, RoutedEventArgs e)
+    private void FeedbackButton_OnClick(object? sender, RoutedEventArgs e)
     {
-        if (_overlayContent?.Content is FeedbackView)
+        if (_feedbackWindow is { IsVisible: true })
+        {
+            _feedbackWindow.Activate();
             return;
+        }
 
-        var feedbackView = new FeedbackView(GetCurrentVersionForComparison());
-        feedbackView.CloseRequested += OnFeedbackCloseRequested;
-        feedbackView.FeedbackSent += OnFeedbackSent;
+        var window = new FeedbackWindow(GetCurrentVersionForComparison());
+        window.FeedbackSent += OnFeedbackWindowSent;
+        window.Closed += OnFeedbackWindowClosed;
 
-        await ShowOverlayAsync(feedbackView);
+        _feedbackWindow = window;
+        window.Show(this);
+        QueueDiscordPresenceUpdate("Feedback", "Drafting feedback");
     }
 
-    private async void OnSettingsSaved(object? sender, AppSettings settings)
+    private void OnSettingsWindowSaved(object? sender, AppSettings settings)
     {
-        if (sender is not SettingsView settingsView)
+        if (sender is not SettingsWindow)
             return;
 
         _settings = settings;
         ApplySettings(_settings);
         SetVersionText();
-
-        await CloseOverlayAsync(settingsView);
     }
 
-    private async void OnSettingsCancelled(object? sender, EventArgs e)
+    private void OnSettingsWindowClosed(object? sender, EventArgs e)
     {
-        if (sender is SettingsView settingsView)
-            await CloseOverlayAsync(settingsView);
+        if (sender is not SettingsWindow window)
+            return;
+
+        window.SettingsSaved -= OnSettingsWindowSaved;
+        window.Closed -= OnSettingsWindowClosed;
+
+        if (ReferenceEquals(_settingsWindow, window))
+            _settingsWindow = null;
+
+        RestorePresenceAfterOverlay();
+    }
+
+    private void OnFeedbackWindowSent(object? sender, EventArgs e)
+    {
+        ShowDropStatusMessage("Feedback sent", "Thanks for helping us improve EasyExtract.", TimeSpan.FromSeconds(4));
+    }
+
+    private void OnFeedbackWindowClosed(object? sender, EventArgs e)
+    {
+        if (sender is not FeedbackWindow window)
+            return;
+
+        window.FeedbackSent -= OnFeedbackWindowSent;
+        window.Closed -= OnFeedbackWindowClosed;
+
+        if (ReferenceEquals(_feedbackWindow, window))
+            _feedbackWindow = null;
+
+        RestorePresenceAfterOverlay();
     }
 
     private async Task ShowOverlayAsync(Control view)
@@ -1991,32 +2063,6 @@ public partial class MainWindow : Window
 
     private void DetachOverlayHandlers(Control control)
     {
-        switch (control)
-        {
-            case SettingsView settingsView:
-                settingsView.SettingsSaved -= OnSettingsSaved;
-                settingsView.Cancelled -= OnSettingsCancelled;
-                break;
-            case FeedbackView feedbackView:
-                feedbackView.CloseRequested -= OnFeedbackCloseRequested;
-                feedbackView.FeedbackSent -= OnFeedbackSent;
-                break;
-        }
-    }
-
-    private async void OnFeedbackCloseRequested(object? sender, EventArgs e)
-    {
-        if (sender is FeedbackView feedbackView)
-            await CloseOverlayAsync(feedbackView);
-    }
-
-    private async void OnFeedbackSent(object? sender, EventArgs e)
-    {
-        if (sender is not FeedbackView feedbackView)
-            return;
-
-        await CloseOverlayAsync(feedbackView);
-        ShowDropStatusMessage("Feedback sent", "Thanks for helping us improve EasyExtract.", TimeSpan.FromSeconds(4));
     }
 
     private async Task RunOverlayAnimationAsync(bool showing)
@@ -2308,22 +2354,12 @@ public partial class MainWindow : Window
 
     private static string ResolveOverlayPresenceState(Control view)
     {
-        return view switch
-        {
-            SettingsView => "Settings",
-            FeedbackView => "Feedback",
-            _ => view.GetType().Name
-        };
+        return view.GetType().Name;
     }
 
     private static string ResolveOverlayPresenceDetail(Control view)
     {
-        return view switch
-        {
-            SettingsView => "Tuning preferences",
-            FeedbackView => "Drafting feedback",
-            _ => "Exploring EasyExtract"
-        };
+        return "Exploring EasyExtract";
     }
 
     private int GetActiveQueueCount()

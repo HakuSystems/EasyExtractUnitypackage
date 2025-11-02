@@ -7,7 +7,7 @@ using EasyExtractCrossPlatform.Services;
 
 namespace EasyExtractCrossPlatform;
 
-public partial class FeedbackView : UserControl
+public partial class FeedbackWindow : Window
 {
     private readonly string? _appVersion;
     private readonly TextBox? _feedbackTextBox;
@@ -16,7 +16,7 @@ public partial class FeedbackView : UserControl
     private readonly TextBlock? _versionLabel;
     private bool _isSending;
 
-    public FeedbackView(string? appVersion)
+    public FeedbackWindow(string? appVersion)
     {
         InitializeComponent();
 
@@ -32,15 +32,14 @@ public partial class FeedbackView : UserControl
                 ? "Version: unknown"
                 : $"Version: {_appVersion}";
 
-        Loaded += OnLoaded;
+        Opened += OnOpened;
     }
 
-    public event EventHandler? CloseRequested;
     public event EventHandler? FeedbackSent;
 
-    private async void OnLoaded(object? sender, RoutedEventArgs e)
+    private async void OnOpened(object? sender, EventArgs e)
     {
-        Loaded -= OnLoaded;
+        Opened -= OnOpened;
         await Task.Yield();
         _feedbackTextBox?.Focus();
     }
@@ -69,6 +68,7 @@ public partial class FeedbackView : UserControl
             _feedbackTextBox?.Clear();
             ShowStatus("Feedback sent. Thank you!");
             FeedbackSent?.Invoke(this, EventArgs.Empty);
+            Close();
         }
         catch (Exception ex)
         {
@@ -80,11 +80,6 @@ public partial class FeedbackView : UserControl
             if (_sendButton is not null)
                 _sendButton.IsEnabled = true;
         }
-    }
-
-    private void CancelButton_OnClick(object? sender, RoutedEventArgs e)
-    {
-        CloseRequested?.Invoke(this, EventArgs.Empty);
     }
 
     private void ShowStatus(string message, bool isError = false, bool isPending = false)

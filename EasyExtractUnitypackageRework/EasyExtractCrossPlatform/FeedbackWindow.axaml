@@ -1,8 +1,16 @@
-<UserControl xmlns="https://github.com/avaloniaui"
-             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             x:Class="EasyExtractCrossPlatform.FeedbackView"
-             Foreground="{DynamicResource EasyTextColorBrush}"
-             Background="{DynamicResource EasyWindowBackgroundBrush}">
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        x:Class="EasyExtractCrossPlatform.FeedbackWindow"
+        Title="Send Feedback"
+        Width="640"
+        Height="520"
+        MinWidth="560"
+        MinHeight="440"
+        WindowStartupLocation="CenterOwner"
+        TransparencyLevelHint="AcrylicBlur"
+        TransparencyBackgroundFallback="{DynamicResource EasyWindowBackgroundBrush}"
+        Foreground="{DynamicResource EasyTextColorBrush}"
+        Background="{DynamicResource EasyWindowBackgroundBrush}">
     <Grid RowDefinitions="Auto,*">
         <Border Padding="32"
                 Background="{DynamicResource EasyGlassGradientBrush}"
@@ -34,7 +42,7 @@
                          AcceptsReturn="True"
                          TextWrapping="Wrap"
                          MinHeight="180"
-                         Watermark="Tell us what’s going on..."
+                         Watermark="Tell us what's going on..."
                          ScrollViewer.VerticalScrollBarVisibility="Auto" />
 
                 <TextBlock x:Name="StatusTextBlock"
@@ -42,12 +50,6 @@
                            TextWrapping="Wrap" />
 
                 <WrapPanel HorizontalAlignment="Right">
-                    <Button x:Name="CancelButton"
-                            Classes="ghost"
-                            Margin="0,0,12,8"
-                            Width="140"
-                            Content="Close"
-                            Click="CancelButton_OnClick" />
                     <Button x:Name="SendButton"
                             Margin="0,0,0,8"
                             Width="180"
@@ -57,4 +59,4 @@
             </StackPanel>
         </Border>
     </Grid>
-</UserControl>
+</Window>
