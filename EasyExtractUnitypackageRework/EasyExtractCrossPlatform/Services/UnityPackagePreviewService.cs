@@ -25,12 +25,6 @@ public sealed class UnityPackagePreviewService : IUnityPackagePreviewService
     private const string TemporaryExtractionFolderPrefix = "EasyExtractPreviewAudio";
     private static readonly HashSet<char> InvalidFileNameCharacters = Path.GetInvalidFileNameChars().ToHashSet();
 
-    private static readonly HashSet<string> AudioExtensions = new(StringComparer.OrdinalIgnoreCase)
-    {
-        ".wav", ".wave", ".mp3", ".aiff", ".aif", ".ogg", ".oga", ".flac", ".m4a", ".aac", ".wma", ".opus", ".caf",
-        ".au"
-    };
-
     private static readonly PathSegmentNormalization[] EmptySegmentNormalizations =
         Array.Empty<PathSegmentNormalization>();
 
@@ -52,7 +46,7 @@ public sealed class UnityPackagePreviewService : IUnityPackagePreviewService
     {
         using var packageStream = File.OpenRead(packagePath);
         using var gzipStream = new GZipStream(packageStream, CompressionMode.Decompress);
-        using var tarReader = new TarReader(gzipStream, false);
+        using var tarReader = new TarReader(gzipStream);
 
         var assetStates = new Dictionary<string, UnityPackageAssetPreviewState>(StringComparer.OrdinalIgnoreCase);
 
@@ -288,10 +282,7 @@ public sealed class UnityPackagePreviewService : IUnityPackagePreviewService
 
     private static bool IsAudioExtension(string? extension)
     {
-        if (string.IsNullOrWhiteSpace(extension))
-            return false;
-
-        return AudioExtensions.Contains(extension);
+        return UnityAssetClassification.IsAudioExtension(extension);
     }
 
     private static (string AssetKey, string ComponentName) SplitEntryName(string entryName)

@@ -43,6 +43,13 @@ public sealed class UnityPackageExtractionService : IUnityPackageExtractionServi
     private static readonly PathSegmentNormalization[] EmptySegmentNormalizations =
         Array.Empty<PathSegmentNormalization>();
 
+    private static readonly string[] RootSegmentsToTrim =
+    {
+        "Assets",
+        "ProjectSettings",
+        "Packages"
+    };
+
     public async Task<UnityPackageExtractionResult> ExtractAsync(
         string packagePath,
         string outputDirectory,
@@ -265,9 +272,7 @@ public sealed class UnityPackageExtractionService : IUnityPackageExtractionServi
         if (state.RelativePath is null || state.AssetData is not { Length: > 0 })
             return false;
 
-        var sanitizedPath = organizeByCategories
-            ? state.RelativePath
-            : Path.GetFileName(state.RelativePath);
+        var sanitizedPath = ResolveOutputRelativePath(state, organizeByCategories);
 
         if (string.IsNullOrWhiteSpace(sanitizedPath))
             return false;
@@ -277,6 +282,63 @@ public sealed class UnityPackageExtractionService : IUnityPackageExtractionServi
         previewPath = state.PreviewData is { Length: > 0 } ? $"{targetPath}.preview.png" : null;
         TrackCorruptedDirectories(outputDirectory, state, directoriesToCleanup);
         return true;
+    }
+
+    private static string? ResolveOutputRelativePath(
+        UnityPackageAssetState state,
+        bool organizeByCategories)
+    {
+        var relativePath = state.RelativePath;
+        if (string.IsNullOrWhiteSpace(relativePath))
+            return null;
+
+        if (!organizeByCategories)
+            return Path.GetFileName(relativePath);
+
+        var assetSize = state.AssetData?.LongLength ?? 0L;
+        var category = UnityAssetClassification.ResolveCategory(
+            state.OriginalRelativePath ?? relativePath,
+            assetSize,
+            state.AssetData);
+        var categorySegment = SanitizePathSegment(category);
+
+        var normalizedSegments = state.PathNormalizations?
+            .Select(segment => segment.Normalized)
+            .Where(segment => !string.IsNullOrWhiteSpace(segment))
+            .ToList();
+
+        if (normalizedSegments is { Count: > 0 })
+            while (normalizedSegments.Count > 1 &&
+                   RootSegmentsToTrim.Contains(normalizedSegments[0], StringComparer.OrdinalIgnoreCase))
+                normalizedSegments.RemoveAt(0);
+
+        string? pathWithinCategory = null;
+        if (normalizedSegments is { Count: > 0 })
+            pathWithinCategory = Path.Combine(normalizedSegments.ToArray());
+
+        if (string.IsNullOrWhiteSpace(pathWithinCategory))
+            pathWithinCategory = Path.GetFileName(relativePath);
+
+        if (string.IsNullOrWhiteSpace(pathWithinCategory))
+            return categorySegment;
+
+        return Path.Combine(categorySegment, pathWithinCategory);
+    }
+
+    private static string SanitizePathSegment(string? segment)
+    {
+        if (string.IsNullOrWhiteSpace(segment))
+            return "Other";
+
+        var filtered = segment
+            .Where(static c =>
+                c != Path.DirectorySeparatorChar &&
+                c != Path.AltDirectorySeparatorChar)
+            .Where(c => !InvalidFileNameCharacters.Contains(c))
+            .ToArray();
+
+        var sanitized = new string(filtered).Trim();
+        return string.IsNullOrWhiteSpace(sanitized) ? "Other" : sanitized;
     }
 
     private static void TrackCorruptedDirectories(

@@ -37,26 +37,30 @@
                 BorderBrush="{DynamicResource EasyGlassBorderBrush}"
                 BorderThickness="1"
                 BoxShadow="0 32 68 0 #15000000">
-            <StackPanel Spacing="18">
+            <Grid RowDefinitions="Auto,Auto">
                 <TextBox x:Name="FeedbackTextBox"
+                         Grid.Row="0"
                          AcceptsReturn="True"
                          TextWrapping="Wrap"
                          MinHeight="180"
                          Watermark="Tell us what's going on..."
                          ScrollViewer.VerticalScrollBarVisibility="Auto" />
 
-                <TextBlock x:Name="StatusTextBlock"
-                           Classes="subtle"
-                           TextWrapping="Wrap" />
+                <Grid Grid.Row="1"
+                      ColumnDefinitions="*,Auto"
+                      Margin="0,18,0,0">
+                    <TextBlock x:Name="StatusTextBlock"
+                               Classes="subtle"
+                               TextWrapping="Wrap" />
 
-                <WrapPanel HorizontalAlignment="Right">
                     <Button x:Name="SendButton"
-                            Margin="0,0,0,8"
+                            Grid.Column="1"
+                            Margin="18,0,0,0"
                             Width="180"
                             Content="Send feedback"
                             Click="SendButton_OnClick" />
-                </WrapPanel>
-            </StackPanel>
+                </Grid>
+            </Grid>
         </Border>
     </Grid>
 </Window>

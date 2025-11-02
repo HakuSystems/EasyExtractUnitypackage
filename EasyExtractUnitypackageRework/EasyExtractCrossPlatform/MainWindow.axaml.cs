@@ -9,7 +9,6 @@ using System.IO;
 using System.Linq;
 using System.Net.Http;
 using System.Runtime.CompilerServices;
-using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using Avalonia;
@@ -32,9 +31,6 @@ public partial class MainWindow : Window
 {
     private const string UnityPackageExtension = ".unitypackage";
     private const string UnknownVersionLabel = "Version unknown";
-
-    private const string GitHubLatestReleaseEndpoint =
-        "https://api.github.com/repos/HakuSystems/EasyExtractUnitypackage/releases/latest";
 
     private const string ProUpgradeInfoUrl = "https://github.com/HakuSystems/EasyExtractUnitypackage#readme";
 
@@ -87,9 +83,11 @@ public partial class MainWindow : Window
     private readonly Grid? _startExtractionHeaderGrid;
     private readonly string[] _startupArguments;
     private readonly TextBox? _unityPackageSearchBox;
+    private readonly IUpdateService _updateService = UpdateService.Instance;
     private readonly Button? _upgradeButton;
     private readonly TextBlock? _versionTextBlock;
     private Control? _activeOverlayContent;
+    private UpdateManifest? _activeUpdateManifest;
     private object? _checkUpdatesButtonOriginalContent;
     private Bitmap? _currentBackgroundBitmap;
     private string? _currentVersionDisplay;
@@ -111,12 +109,17 @@ public partial class MainWindow : Window
     private bool _isExtractionOverviewLive;
     private bool _isExtractionRunning;
     private bool _isSearchHover;
+    private bool _isUpdateDownloadInProgress;
     private bool _lastDiscordPresenceEnabled;
     private PixelPoint? _lastNormalPosition;
     private Size? _lastNormalSize;
+    private double? _lastUpdatePercentage;
+    private UpdatePhase? _lastUpdatePhase;
+    private DateTime _lastUpdateUiRefresh = DateTime.MinValue;
     private CancellationTokenSource? _overlayAnimationCts;
     private ScaleTransform? _overlayCardScaleTransform;
     private List<string>? _pendingStartupExtractions;
+    private UpdateManifest? _pendingUpdateManifest;
     private AppSettings _settings = new();
     private SettingsWindow? _settingsWindow;
     private IDisposable? _versionStatusReset;
@@ -231,6 +234,7 @@ public partial class MainWindow : Window
         SetVersionText();
         QueueDiscordPresenceUpdate("Dashboard");
         InitializeStartupExtractionTargets();
+        QueueAutomaticUpdateCheck();
     }
 
     public EverythingSearchViewModel? SearchViewModel { get; }
@@ -661,6 +665,7 @@ public partial class MainWindow : Window
             _extractionCts = null;
             UpdateExtractionButtonsState();
             RestorePresenceAfterOverlay();
+            TryLaunchPendingUpdateAfterExtraction();
         }
     }
 
@@ -742,7 +747,6 @@ public partial class MainWindow : Window
         var normalizedPackagePath = TryNormalizeFilePath(packagePath);
 
         if (_settings.UnitypackageFiles is { Count: > 0 })
-        {
             for (var index = _settings.UnitypackageFiles.Count - 1; index >= 0; index--)
             {
                 var entry = _settings.UnitypackageFiles[index];
@@ -752,11 +756,8 @@ public partial class MainWindow : Window
                 var entryPath = TryNormalizeFilePath(entry.FilePath);
                 if (string.Equals(entryPath, normalizedPackagePath, StringComparison.OrdinalIgnoreCase) ||
                     string.Equals(entry.FilePath, packagePath, StringComparison.OrdinalIgnoreCase))
-                {
                     _settings.UnitypackageFiles.RemoveAt(index);
-                }
             }
-        }
 
         AppSettingsService.Save(_settings);
         if (!_isExtractionOverviewLive)
@@ -1443,11 +1444,11 @@ public partial class MainWindow : Window
 
         QueueDiscordPresenceUpdate(
             statusText,
-            detailsOverride: detailOverride,
-            currentPackage: success ? null : fileName,
-            nextPackage: nextPackage,
-            extractionActive: remaining > 0,
-            queueCountOverride: remaining);
+            detailOverride,
+            success ? null : fileName,
+            nextPackage,
+            remaining > 0,
+            remaining);
     }
 
     private void FinishExtractionDashboard(TimeSpan delay)
@@ -1838,8 +1839,17 @@ public partial class MainWindow : Window
 
     private async void CheckUpdatesButton_OnClick(object? sender, RoutedEventArgs e)
     {
-        if (_isCheckingForUpdates)
+        if (_isCheckingForUpdates || _isUpdateDownloadInProgress)
             return;
+
+        if (_isExtractionRunning)
+        {
+            ShowDropStatusMessage(
+                "Extraction in progress",
+                "Finish the current extraction before installing an update.",
+                TimeSpan.FromSeconds(6));
+            return;
+        }
 
         _isCheckingForUpdates = true;
 
@@ -1851,107 +1861,299 @@ public partial class MainWindow : Window
             button.Content = "Checking...";
         }
 
-        SetVersionStatusMessage("Checking for updates...");
+        await Dispatcher.UIThread.InvokeAsync(() => SetVersionStatusMessage("Checking for updates..."));
+
+        using var cts = new CancellationTokenSource(TimeSpan.FromMinutes(2));
 
         try
         {
-            var latestReleaseTag = await GetLatestReleaseTagAsync();
+            var currentVersion = ResolveCurrentVersionForUpdates();
+            var settings = _settings.Update ?? new UpdateSettings();
+            var result = await _updateService
+                .CheckForUpdatesAsync(settings, currentVersion, cts.Token)
+                .ConfigureAwait(false);
 
-            if (string.IsNullOrWhiteSpace(latestReleaseTag))
+            if (!result.IsUpdateAvailable || result.Manifest is null)
             {
-                SetVersionStatusMessage("No releases found", TimeSpan.FromSeconds(6));
-                ShowDropStatusMessage("No releases found", "Check again later.", TimeSpan.FromSeconds(4));
+                var message = string.IsNullOrWhiteSpace(result.Message) ? "You're up to date" : result.Message!;
+                await Dispatcher.UIThread.InvokeAsync(() =>
+                {
+                    SetVersionStatusMessage(message, TimeSpan.FromSeconds(6));
+                    ShowDropStatusMessage("No updates available", message, TimeSpan.FromSeconds(6));
+                });
                 return;
             }
 
-            var currentVersionText = GetCurrentVersionForComparison();
-            if (!TryParseVersion(currentVersionText, out var currentVersion))
-            {
-                SetVersionStatusMessage($"Latest release {latestReleaseTag}", TimeSpan.FromSeconds(6));
-                ShowDropStatusMessage(
-                    "Latest release fetched",
-                    $"Current version unknown. Latest is {latestReleaseTag}.",
-                    TimeSpan.FromSeconds(6));
-                return;
-            }
-
-            if (!TryParseVersion(latestReleaseTag, out var latestVersion))
-            {
-                SetVersionStatusMessage("Unable to parse latest version", TimeSpan.FromSeconds(6));
-                ShowDropStatusMessage(
-                    "Could not parse release version",
-                    "Visit the GitHub releases page to check manually.",
-                    TimeSpan.FromSeconds(6));
-                return;
-            }
-
-            if (latestVersion > currentVersion)
-            {
-                SetVersionStatusMessage($"Update available ({latestReleaseTag})");
-                ShowDropStatusMessage(
-                    "Update available!",
-                    $"Latest version is {latestReleaseTag}. Visit the GitHub releases page to download.",
-                    TimeSpan.FromSeconds(8));
-            }
-            else
-            {
-                SetVersionStatusMessage("Up to date", TimeSpan.FromSeconds(6));
-                ShowDropStatusMessage(
-                    "You're up to date",
-                    $"Version {currentVersionText} matches the latest release.",
-                    TimeSpan.FromSeconds(6));
-            }
+            await HandleUpdateAvailabilityAsync(result.Manifest, false, cts.Token)
+                .ConfigureAwait(false);
         }
-        catch (HttpRequestException httpEx)
+        catch (OperationCanceledException)
         {
-            SetVersionStatusMessage("Check failed", TimeSpan.FromSeconds(6));
-            ShowDropStatusMessage("Update check failed", httpEx.Message, TimeSpan.FromSeconds(6));
-        }
-        catch (TaskCanceledException)
-        {
-            SetVersionStatusMessage("Check timed out", TimeSpan.FromSeconds(6));
-            ShowDropStatusMessage("Update check timed out", "Please try again.", TimeSpan.FromSeconds(6));
+            await Dispatcher.UIThread.InvokeAsync(() =>
+            {
+                SetVersionStatusMessage("Update check cancelled", TimeSpan.FromSeconds(6));
+                ShowDropStatusMessage("Update check cancelled", "Try again in a moment.", TimeSpan.FromSeconds(6));
+            });
         }
         catch (Exception ex)
         {
-            SetVersionStatusMessage("Unexpected error", TimeSpan.FromSeconds(6));
-            ShowDropStatusMessage("Unexpected error", ex.Message, TimeSpan.FromSeconds(6));
+            await Dispatcher.UIThread.InvokeAsync(() =>
+            {
+                SetVersionStatusMessage("Update check failed", TimeSpan.FromSeconds(6));
+                ShowDropStatusMessage("Update check failed", ex.Message, TimeSpan.FromSeconds(8));
+            });
         }
         finally
         {
             if (button is not null)
-            {
-                if (_checkUpdatesButtonOriginalContent is not null)
-                    button.Content = _checkUpdatesButtonOriginalContent;
-                button.IsEnabled = true;
-            }
+                await Dispatcher.UIThread.InvokeAsync(() =>
+                {
+                    if (_checkUpdatesButtonOriginalContent is not null)
+                        button.Content = _checkUpdatesButtonOriginalContent;
+                    button.IsEnabled = true;
+                });
 
             _isCheckingForUpdates = false;
         }
     }
 
-    private static async Task<string?> GetLatestReleaseTagAsync(CancellationToken cancellationToken = default)
+    private Version? ResolveCurrentVersionForUpdates()
     {
-        using var request = new HttpRequestMessage(HttpMethod.Get, GitHubLatestReleaseEndpoint);
-        request.Headers.UserAgent.ParseAdd(
-            "EasyExtractCrossPlatform/2.0 (+https://github.com/HakuSystems/EasyExtractUnitypackage)");
-        request.Headers.Accept.ParseAdd("application/vnd.github+json");
+        var currentVersionText = GetCurrentVersionForComparison();
+        return TryParseVersion(currentVersionText, out var version) ? version : null;
+    }
 
-        using var response = await BackgroundHttpClient.SendAsync(request, cancellationToken).ConfigureAwait(false);
-        if (!response.IsSuccessStatusCode)
+    private async Task HandleUpdateAvailabilityAsync(
+        UpdateManifest manifest,
+        bool isAutomatic,
+        CancellationToken cancellationToken)
+    {
+        if (_isUpdateDownloadInProgress)
         {
-            var reason = $"{(int)response.StatusCode} {response.ReasonPhrase}".Trim();
-            throw new HttpRequestException($"GitHub responded with {reason} while checking for updates.");
+            _pendingUpdateManifest = manifest;
+            return;
         }
 
-        await using var stream = await response.Content.ReadAsStreamAsync(cancellationToken).ConfigureAwait(false);
-        using var document = await JsonDocument.ParseAsync(stream, cancellationToken: cancellationToken)
+        if (_isExtractionRunning)
+        {
+            _pendingUpdateManifest = manifest;
+            if (!isAutomatic)
+                await Dispatcher.UIThread.InvokeAsync(() =>
+                    ShowDropStatusMessage(
+                        "Extraction still running",
+                        "Update will start automatically when extraction finishes.",
+                        TimeSpan.FromSeconds(6)));
+
+            return;
+        }
+
+        _isUpdateDownloadInProgress = true;
+        _activeUpdateManifest = manifest;
+        _pendingUpdateManifest = null;
+
+        var progress = new Progress<UpdateProgress>(update => ReportUpdateProgress(manifest, update));
+
+        var preparationResult = await _updateService
+            .DownloadAndPrepareUpdateAsync(manifest, progress, cancellationToken)
             .ConfigureAwait(false);
 
-        if (document.RootElement.TryGetProperty("tag_name", out var tagProperty))
-            return tagProperty.GetString();
+        if (!preparationResult.Success || preparationResult.Preparation is null)
+        {
+            ResetUpdateProgressState();
+            await Dispatcher.UIThread.InvokeAsync(() =>
+            {
+                SetVersionStatusMessage("Update failed", TimeSpan.FromSeconds(6));
+                var detail = preparationResult.ErrorMessage ?? "Update could not be prepared.";
+                ShowDropStatusMessage("Update failed", detail, TimeSpan.FromSeconds(8));
+            });
+            return;
+        }
 
-        return null;
+        await Dispatcher.UIThread.InvokeAsync(() =>
+        {
+            var status = isAutomatic
+                ? $"Installing update {manifest.Version}"
+                : $"Ready to install update {manifest.Version}";
+            SetVersionStatusMessage(status, TimeSpan.FromSeconds(6));
+
+            var detail = isAutomatic
+                ? "EasyExtract will restart automatically to finish installing."
+                : "EasyExtract will restart to finish installing.";
+            ShowDropStatusMessage(status, detail, TimeSpan.FromSeconds(6));
+        });
+
+        try
+        {
+            await Task.Delay(TimeSpan.FromSeconds(1), cancellationToken).ConfigureAwait(false);
+        }
+        catch (OperationCanceledException)
+        {
+            ResetUpdateProgressState();
+            throw;
+        }
+
+        var launchSucceeded = _updateService.TryLaunchPreparedUpdate(preparationResult.Preparation);
+        if (!launchSucceeded)
+        {
+            ResetUpdateProgressState();
+            await Dispatcher.UIThread.InvokeAsync(() =>
+            {
+                SetVersionStatusMessage("Update failed", TimeSpan.FromSeconds(6));
+                ShowDropStatusMessage("Update failed", "Installer could not be started.", TimeSpan.FromSeconds(8));
+            });
+            return;
+        }
+
+        await Dispatcher.UIThread.InvokeAsync(() =>
+        {
+            SetVersionStatusMessage("Restarting to finish update");
+            Close();
+        });
+    }
+
+    private void ReportUpdateProgress(UpdateManifest manifest, UpdateProgress progress)
+    {
+        var now = DateTime.UtcNow;
+        var phaseChanged = _lastUpdatePhase != progress.Phase;
+        var percentChanged = progress.Percentage.HasValue &&
+                             (!_lastUpdatePercentage.HasValue ||
+                              Math.Abs(progress.Percentage.Value - _lastUpdatePercentage.Value) >= 0.01);
+        var intervalElapsed = now - _lastUpdateUiRefresh > TimeSpan.FromMilliseconds(500);
+
+        if (!phaseChanged && !percentChanged && !intervalElapsed)
+            return;
+
+        _lastUpdatePhase = progress.Phase;
+        _lastUpdatePercentage = progress.Percentage;
+        _lastUpdateUiRefresh = now;
+
+        var statusText = BuildUpdateStatusText(progress);
+        var announcePhase = phaseChanged;
+
+        Dispatcher.UIThread.Post(() =>
+        {
+            SetVersionStatusMessage(statusText);
+
+            if (!announcePhase)
+                return;
+
+            var phaseMessage = progress.Phase switch
+            {
+                UpdatePhase.Downloading => $"Downloading version {manifest.Version}",
+                UpdatePhase.Extracting => $"Extracting version {manifest.Version}",
+                UpdatePhase.Preparing => $"Preparing version {manifest.Version}",
+                UpdatePhase.WaitingForRestart => $"Ready to install version {manifest.Version}",
+                UpdatePhase.Completed => $"Version {manifest.Version} ready",
+                _ => $"Updating to version {manifest.Version}"
+            };
+
+            ShowDropStatusMessage(phaseMessage, manifest.ReleaseName ?? $"Tag {manifest.TagName}",
+                TimeSpan.FromSeconds(4));
+        });
+    }
+
+    private static string BuildUpdateStatusText(UpdateProgress progress)
+    {
+        var phaseText = progress.Phase switch
+        {
+            UpdatePhase.Downloading => "Downloading update",
+            UpdatePhase.Extracting => "Extracting update",
+            UpdatePhase.Preparing => "Preparing update",
+            UpdatePhase.WaitingForRestart => "Update ready",
+            UpdatePhase.Completed => "Update ready",
+            _ => "Updating"
+        };
+
+        if (progress.Percentage is { } percent)
+            phaseText = $"{phaseText} {percent.ToString("P0", CultureInfo.CurrentCulture)}";
+
+        return phaseText;
+    }
+
+    private void ResetUpdateProgressState()
+    {
+        _isUpdateDownloadInProgress = false;
+        _activeUpdateManifest = null;
+        _lastUpdatePhase = null;
+        _lastUpdatePercentage = null;
+        _lastUpdateUiRefresh = DateTime.MinValue;
+    }
+
+    private void QueueAutomaticUpdateCheck()
+    {
+        if (_settings.Update?.AutoUpdate != true)
+            return;
+
+        Task.Run(async () =>
+        {
+            try
+            {
+                await Task.Delay(TimeSpan.FromSeconds(8)).ConfigureAwait(false);
+                await PerformAutomaticUpdateCheckAsync().ConfigureAwait(false);
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"Automatic update task failed: {ex}");
+            }
+        });
+    }
+
+    private async Task PerformAutomaticUpdateCheckAsync()
+    {
+        if (_isCheckingForUpdates || _isUpdateDownloadInProgress)
+            return;
+
+        using var cts = new CancellationTokenSource(TimeSpan.FromMinutes(2));
+
+        try
+        {
+            _isCheckingForUpdates = true;
+            var currentVersion = ResolveCurrentVersionForUpdates();
+            var settings = _settings.Update ?? new UpdateSettings();
+
+            var result = await _updateService
+                .CheckForUpdatesAsync(settings, currentVersion, cts.Token)
+                .ConfigureAwait(false);
+
+            if (!result.IsUpdateAvailable || result.Manifest is null)
+                return;
+
+            await HandleUpdateAvailabilityAsync(result.Manifest, true, cts.Token).ConfigureAwait(false);
+        }
+        catch (OperationCanceledException)
+        {
+            // The check was cancelled or timed out; ignore silently.
+        }
+        catch (Exception ex)
+        {
+            Debug.WriteLine($"Automatic update check encountered an error: {ex}");
+        }
+        finally
+        {
+            _isCheckingForUpdates = false;
+        }
+    }
+
+    private void TryLaunchPendingUpdateAfterExtraction()
+    {
+        if (_pendingUpdateManifest is null || _isUpdateDownloadInProgress)
+            return;
+
+        var manifest = _pendingUpdateManifest;
+        _pendingUpdateManifest = null;
+
+        _ = Task.Run(async () =>
+        {
+            try
+            {
+                await HandleUpdateAvailabilityAsync(manifest, true, CancellationToken.None)
+                    .ConfigureAwait(false);
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"Failed to resume pending update: {ex}");
+            }
+        });
     }
 
     private void SettingsButton_OnClick(object? sender, RoutedEventArgs e)

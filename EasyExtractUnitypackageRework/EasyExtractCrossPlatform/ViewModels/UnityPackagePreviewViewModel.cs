@@ -1294,17 +1294,17 @@ public sealed class UnityPackagePreviewViewModel : INotifyPropertyChanged, IDisp
 
     private static bool IsImageExtension(string extension)
     {
-        return UnityPackageAssetPreviewItem.TextureExtensions.Contains(extension, StringComparer.OrdinalIgnoreCase);
+        return UnityAssetClassification.IsTextureExtension(extension);
     }
 
     private static bool IsPdfExtension(string extension)
     {
-        return UnityPackageAssetPreviewItem.PdfExtensions.Contains(extension, StringComparer.OrdinalIgnoreCase);
+        return UnityAssetClassification.IsPdfExtension(extension);
     }
 
     private static bool IsModelExtension(string extension)
     {
-        return UnityPackageAssetPreviewItem.ModelExtensions.Contains(extension, StringComparer.OrdinalIgnoreCase);
+        return UnityAssetClassification.IsModelExtension(extension);
     }
 
     private static bool IsTextExtension(string extension)
@@ -1437,26 +1437,6 @@ public sealed class UnityPackagePreviewViewModel : INotifyPropertyChanged, IDisp
 
 public sealed class UnityPackageAssetPreviewItem
 {
-    internal static readonly string[] TextureExtensions =
-    {
-        ".png", ".jpg", ".jpeg", ".tga", ".tif", ".tiff", ".psd", ".bmp", ".dds", ".gif", ".hdr", ".exr"
-    };
-
-    internal static readonly string[] PdfExtensions = { ".pdf" };
-
-    internal static readonly string[] ModelExtensions = { ".fbx", ".obj", ".dae", ".blend", ".3ds" };
-    internal static readonly string[] AudioExtensions = { ".wav", ".mp3", ".ogg", ".aiff", ".aif", ".flac" };
-    private static readonly string[] PluginExtensions = { ".dll" };
-    private static readonly string[] ScriptExtensions = { ".cs", ".js", ".boo" };
-    private static readonly string[] AnimationExtensions = { ".anim", ".controller", ".overridecontroller", ".mask" };
-
-    private static readonly string[] ShaderExtensions =
-    {
-        ".shader", ".cg", ".cginc", ".compute", ".shadergraph", ".shadersubgraph", ".hlsl", ".glsl"
-    };
-
-    private static readonly string[] MaterialExtensions = { ".mat" };
-
     public UnityPackageAssetPreviewItem(UnityPackagePreviewAsset asset)
     {
         if (asset is null)
@@ -1473,7 +1453,10 @@ public sealed class UnityPackageAssetPreviewItem
         AssetFilePath = asset.AssetFilePath;
 
         Extension = Path.GetExtension(RelativePath)?.ToLowerInvariant() ?? string.Empty;
-        Category = ResolveCategory(asset, Extension);
+        Category = UnityAssetClassification.ResolveCategory(
+            asset.RelativePath,
+            asset.AssetSizeBytes,
+            asset.AssetData);
         SizeText = FormatFileSize(AssetSizeBytes);
     }
 
@@ -1504,57 +1487,6 @@ public sealed class UnityPackageAssetPreviewItem
     public string SizeText { get; }
 
     public Geometry IconGeometry => UnityAssetIconProvider.GetAssetIcon(Category);
-
-    private static string ResolveCategory(UnityPackagePreviewAsset asset, string extension)
-    {
-        if (string.IsNullOrWhiteSpace(extension))
-            if (IsLikelyFolder(asset))
-                return "Folder";
-
-        if (TextureExtensions.Contains(extension, StringComparer.OrdinalIgnoreCase) ||
-            PdfExtensions.Contains(extension, StringComparer.OrdinalIgnoreCase))
-            return "Texture";
-
-        if (ModelExtensions.Contains(extension, StringComparer.OrdinalIgnoreCase))
-            return "3D Model";
-
-        if (AudioExtensions.Contains(extension, StringComparer.OrdinalIgnoreCase))
-            return "Audio";
-
-        if (PluginExtensions.Contains(extension, StringComparer.OrdinalIgnoreCase))
-            return "DLL";
-
-        if (ScriptExtensions.Contains(extension, StringComparer.OrdinalIgnoreCase))
-            return "Script";
-
-        if (AnimationExtensions.Contains(extension, StringComparer.OrdinalIgnoreCase))
-            return "Animation";
-
-        if (ShaderExtensions.Contains(extension, StringComparer.OrdinalIgnoreCase))
-            return "Shader";
-
-        if (MaterialExtensions.Contains(extension, StringComparer.OrdinalIgnoreCase))
-            return "Material";
-
-        return extension.Equals(".prefab", StringComparison.OrdinalIgnoreCase)
-            ? "Prefab"
-            : "Other";
-    }
-
-    private static bool IsLikelyFolder(UnityPackagePreviewAsset asset)
-    {
-        if (asset.AssetData is { Length: > 0 } || asset.AssetSizeBytes > 0)
-            return false;
-
-        if (string.IsNullOrWhiteSpace(asset.RelativePath))
-            return true;
-
-        var name = Path.GetFileName(asset.RelativePath);
-        if (string.IsNullOrWhiteSpace(name))
-            return true;
-
-        return !name.Contains('.', StringComparison.Ordinal);
-    }
 
     [SuppressMessage("Globalization", "CA1305:Specify IFormatProvider")]
     private static string FormatFileSize(long bytes)
