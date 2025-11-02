@@ -833,3 +833,4 @@ FodyWeavers.xml.bak
 *.vsp
 *.vspx
 *.sap
+/EasyExtract.csproj
