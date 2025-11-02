@@ -107,6 +107,7 @@ public partial class MainWindow : Window
     private bool _isExtractionOverviewLive;
     private bool _isExtractionRunning;
     private bool _isSearchHover;
+    private bool _lastDiscordPresenceEnabled;
     private PixelPoint? _lastNormalPosition;
     private Size? _lastNormalSize;
     private CancellationTokenSource? _overlayAnimationCts;
@@ -218,6 +219,7 @@ public partial class MainWindow : Window
 
         LoadSettings();
         SetVersionText();
+        QueueDiscordPresenceUpdate("Dashboard");
     }
 
     public EverythingSearchViewModel? SearchViewModel { get; }
@@ -621,6 +623,7 @@ public partial class MainWindow : Window
             _extractionCts?.Dispose();
             _extractionCts = null;
             UpdateExtractionButtonsState();
+            RestorePresenceAfterOverlay();
         }
     }
 
@@ -1237,6 +1240,15 @@ public partial class MainWindow : Window
             _queueItemsScrollViewer.IsVisible = itemCount > 0;
 
         UpdateExtractionButtonsState();
+
+        if (_isExtractionRunning)
+            return;
+
+        var nextPackage = itemCount > 0 ? GetNextQueuedPackageName() : null;
+        QueueDiscordPresenceUpdate(
+            itemCount > 0 ? "Queue ready" : "Dashboard",
+            nextPackage: nextPackage,
+            queueCountOverride: itemCount);
     }
 
     private void UpdateExtractionButtonsState()
@@ -1298,15 +1310,25 @@ public partial class MainWindow : Window
         IReadOnlyList<ExtractionItem> items,
         int currentIndex)
     {
+        var fileName = Path.GetFileName(packagePath);
+        var nextPackage = ResolveNextPackageName(items, currentIndex);
+        var remaining = Math.Max(0, items.Count - currentIndex - 1);
+
         OnExtractionOverviewPackageStarted();
         UpdateExtractionDashboardSubtitle("Extracting assets...");
-        UpdateExtractionDashboardPackageText(Path.GetFileName(packagePath));
+        UpdateExtractionDashboardPackageText(fileName);
         UpdateExtractionDashboardAsset("Starting...");
         UpdateExtractionDashboardOutput(outputDirectory);
         UpdateExtractionDashboardAssetCount(0);
         UpdateExtractionDashboardElapsedText("0s");
-        UpdateExtractionDashboardNextPackageText(ResolveNextPackageName(items, currentIndex));
-        UpdateExtractionDashboardQueueBadge(Math.Max(0, items.Count - currentIndex - 1));
+        UpdateExtractionDashboardNextPackageText(nextPackage);
+        UpdateExtractionDashboardQueueBadge(remaining);
+        QueueDiscordPresenceUpdate(
+            $"Extracting {fileName}",
+            currentPackage: fileName,
+            nextPackage: nextPackage,
+            extractionActive: true,
+            queueCountOverride: remaining);
 
         if (_extractionDashboardProgressBar is not null)
         {
@@ -1338,14 +1360,16 @@ public partial class MainWindow : Window
         int remaining = 0,
         string? nextPackage = null)
     {
+        var fileName = Path.GetFileName(packagePath);
+
         _extractionStopwatch?.Stop();
         _extractionElapsedTimer.Stop();
 
         var statusText = success
-            ? $"Completed {Path.GetFileName(packagePath)}"
+            ? $"Completed {fileName}"
             : isCancelled
-                ? $"Cancelled {Path.GetFileName(packagePath)}"
-                : $"Failed {Path.GetFileName(packagePath)}";
+                ? $"Cancelled {fileName}"
+                : $"Failed {fileName}";
         UpdateExtractionDashboardSubtitle(statusText);
 
         if (_extractionDashboardAssetText is not null)
@@ -1365,6 +1389,22 @@ public partial class MainWindow : Window
             _extractionDashboardProgressBar.Maximum = 1;
             _extractionDashboardProgressBar.Value = success ? 1 : 0;
         }
+
+        var detailOverride = success
+            ? remaining > 0
+                ? $"Moving to next package - {remaining} remaining"
+                : "All assets extracted"
+            : isCancelled
+                ? "Extraction cancelled by user"
+                : "Extraction failed - Check notifications";
+
+        QueueDiscordPresenceUpdate(
+            statusText,
+            detailsOverride: detailOverride,
+            currentPackage: success ? null : fileName,
+            nextPackage: nextPackage,
+            extractionActive: remaining > 0,
+            queueCountOverride: remaining);
     }
 
     private void FinishExtractionDashboard(TimeSpan delay)
@@ -1924,6 +1964,9 @@ public partial class MainWindow : Window
         _activeOverlayContent = view;
         _overlayContent.Content = view;
         await RunOverlayAnimationAsync(true);
+        QueueDiscordPresenceUpdate(
+            ResolveOverlayPresenceState(view),
+            ResolveOverlayPresenceDetail(view));
     }
 
     private async Task CloseOverlayAsync(Control? requestingView = null)
@@ -1943,6 +1986,7 @@ public partial class MainWindow : Window
 
         _overlayContent.Content = null;
         _activeOverlayContent = null;
+        RestorePresenceAfterOverlay();
     }
 
     private void DetachOverlayHandlers(Control control)
@@ -2213,6 +2257,169 @@ public partial class MainWindow : Window
         ApplyTheme(settings.ApplicationTheme);
         _ = ApplyCustomBackgroundAsync(settings);
         UpdateExtractionOverviewDisplay();
+        QueueDiscordPresenceUpdate("Dashboard", settingsOverride: settings);
+    }
+
+    private void QueueDiscordPresenceUpdate(
+        string state,
+        string? detailsOverride = null,
+        string? currentPackage = null,
+        string? nextPackage = null,
+        bool extractionActive = false,
+        int? queueCountOverride = null,
+        AppSettings? settingsOverride = null)
+    {
+        var targetSettings = settingsOverride ?? _settings;
+        if (targetSettings is null)
+            return;
+
+        if (!targetSettings.DiscordRpc)
+        {
+            if (_lastDiscordPresenceEnabled)
+            {
+                _ = DiscordRpcService.Instance.UpdatePresenceAsync(targetSettings, DiscordPresenceContext.Disabled());
+                _lastDiscordPresenceEnabled = false;
+            }
+
+            return;
+        }
+
+        _lastDiscordPresenceEnabled = true;
+
+        var queueCount = Math.Max(0, queueCountOverride ?? GetActiveQueueCount());
+        var normalizedState = string.IsNullOrWhiteSpace(state) ? "Dashboard" : state.Trim();
+        var normalizedCurrentPackage = NormalizePackageLabel(currentPackage);
+        var normalizedNextPackage = NormalizePackageLabel(nextPackage);
+        var details = string.IsNullOrWhiteSpace(detailsOverride)
+            ? BuildPresenceDetails(normalizedState, queueCount, extractionActive, normalizedCurrentPackage,
+                normalizedNextPackage)
+            : detailsOverride.Trim();
+
+        var context = new DiscordPresenceContext(
+            normalizedState,
+            details,
+            normalizedCurrentPackage,
+            normalizedNextPackage,
+            queueCount,
+            extractionActive);
+
+        _ = DiscordRpcService.Instance.UpdatePresenceAsync(targetSettings, context);
+    }
+
+    private static string ResolveOverlayPresenceState(Control view)
+    {
+        return view switch
+        {
+            SettingsView => "Settings",
+            FeedbackView => "Feedback",
+            _ => view.GetType().Name
+        };
+    }
+
+    private static string ResolveOverlayPresenceDetail(Control view)
+    {
+        return view switch
+        {
+            SettingsView => "Tuning preferences",
+            FeedbackView => "Drafting feedback",
+            _ => "Exploring EasyExtract"
+        };
+    }
+
+    private int GetActiveQueueCount()
+    {
+        if (_queueItems.Count == 0)
+            return 0;
+
+        var queued = _queueItems.Count(display => !display.IsExtracting);
+        return Math.Max(0, queued);
+    }
+
+    private string? GetNextQueuedPackageName()
+    {
+        var next = _queueItems.FirstOrDefault(display => !display.IsExtracting);
+        if (next is not null)
+            return next.FileName;
+
+        return _queueItems.FirstOrDefault()?.FileName;
+    }
+
+    private static string BuildPresenceDetails(
+        string state,
+        int queueCount,
+        bool extractionActive,
+        string? currentPackage,
+        string? nextPackage)
+    {
+        if (extractionActive)
+        {
+            if (!string.IsNullOrWhiteSpace(currentPackage))
+                return queueCount > 0
+                    ? $"Extracting {currentPackage} - {queueCount} remaining"
+                    : $"Finishing {currentPackage}";
+
+            return queueCount > 0
+                ? $"Processing extraction queue - {queueCount} remaining"
+                : "Processing extraction queue";
+        }
+
+        if (string.Equals(state, "Settings", StringComparison.OrdinalIgnoreCase))
+            return "Tuning EasyExtract preferences";
+
+        if (string.Equals(state, "Feedback", StringComparison.OrdinalIgnoreCase))
+            return "Sharing feedback with the team";
+
+        if (queueCount > 0)
+        {
+            if (!string.IsNullOrWhiteSpace(nextPackage) &&
+                !string.Equals(nextPackage, "All caught up", StringComparison.OrdinalIgnoreCase))
+                return $"Queue ready - Next: {nextPackage}";
+
+            return queueCount == 1
+                ? "1 package queued"
+                : $"{queueCount} packages queued";
+        }
+
+        return string.Equals(state, "Dashboard", StringComparison.OrdinalIgnoreCase)
+            ? "Ready to extract Unitypackages"
+            : "Exploring EasyExtract";
+    }
+
+    private void RestorePresenceAfterOverlay()
+    {
+        if (_isExtractionRunning)
+        {
+            var currentPackage = NormalizePackageLabel(_extractionDashboardPackageText?.Text);
+            var nextPackage = NormalizePackageLabel(_extractionDashboardNextPackage?.Text);
+            var remaining = Math.Max(0, GetActiveQueueCount());
+
+            QueueDiscordPresenceUpdate(
+                string.IsNullOrWhiteSpace(currentPackage) ? "Extraction in progress" : $"Extracting {currentPackage}",
+                currentPackage: currentPackage,
+                nextPackage: nextPackage,
+                extractionActive: true,
+                queueCountOverride: remaining);
+            return;
+        }
+
+        var queueCount = GetActiveQueueCount();
+        var nextQueued = queueCount > 0 ? GetNextQueuedPackageName() : null;
+        QueueDiscordPresenceUpdate(
+            queueCount > 0 ? "Queue ready" : "Dashboard",
+            nextPackage: nextQueued,
+            queueCountOverride: queueCount);
+    }
+
+    private static string? NormalizePackageLabel(string? value)
+    {
+        if (string.IsNullOrWhiteSpace(value))
+            return null;
+
+        var trimmed = value.Trim();
+        if (trimmed == "-" || string.Equals(trimmed, "All caught up", StringComparison.OrdinalIgnoreCase))
+            return null;
+
+        return trimmed;
     }
 
     private void UpdateLicenseTierDisplay(AppSettings? settings = null)
@@ -2412,6 +2619,7 @@ public partial class MainWindow : Window
     protected override void OnClosed(EventArgs e)
     {
         base.OnClosed(e);
+        DiscordRpcService.Instance.Dispose();
         _currentBackgroundBitmap?.Dispose();
         _currentBackgroundBitmap = null;
     }

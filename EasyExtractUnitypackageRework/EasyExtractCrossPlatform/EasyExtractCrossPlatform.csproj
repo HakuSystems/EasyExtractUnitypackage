@@ -20,6 +20,7 @@
         <PackageReference Include="Avalonia.Desktop" Version="11.2.1"/>
         <PackageReference Include="Avalonia.Themes.Fluent" Version="11.2.1"/>
         <PackageReference Include="Avalonia.Fonts.Inter" Version="11.2.1"/>
+        <PackageReference Include="DiscordRichPresence" Version="1.6.1.70"/>
         <PackageReference Include="Markdown.Avalonia" Version="11.0.3-a1"/>
         <PackageReference Include="NAudio" Version="2.2.1"/>
         <PackageReference Include="Docnet.Core" Version="2.3.1"/>
