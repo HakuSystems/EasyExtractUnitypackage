@@ -502,19 +502,11 @@
             </Border>
         </Grid>
 
-        <Grid Grid.Row="3"
-              ColumnDefinitions="*,Auto">
+        <Grid Grid.Row="3">
             <TextBlock Text="{Binding StatusMessage}"
                        Classes="subtle"
                        VerticalAlignment="Center"
                        TextWrapping="Wrap" />
-            <Button Grid.Column="1"
-                    Content="Close"
-                    Width="120"
-                    HorizontalAlignment="Right"
-                    IsDefault="True"
-                    Margin="16,0,0,0"
-                    Click="CloseButton_OnClick" />
         </Grid>
 
         <Border Grid.RowSpan="4"
@@ -559,10 +551,6 @@
                                TextAlignment="Center"
                                TextWrapping="Wrap"
                                MaxWidth="360" />
-                    <Button Content="Close"
-                            Width="120"
-                            HorizontalAlignment="Center"
-                            Click="CloseButton_OnClick" />
                 </StackPanel>
             </Border>
         </Border>

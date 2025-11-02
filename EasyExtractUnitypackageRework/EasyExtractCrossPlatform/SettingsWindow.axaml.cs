@@ -183,11 +183,6 @@ public partial class SettingsWindow : Window
         }
     }
 
-    private void CancelButton_OnClick(object? sender, RoutedEventArgs e)
-    {
-        Close();
-    }
-
     private async Task<IStorageFolder?> PickSingleFolderAsync()
     {
         var storageProvider = GetStorageProvider();

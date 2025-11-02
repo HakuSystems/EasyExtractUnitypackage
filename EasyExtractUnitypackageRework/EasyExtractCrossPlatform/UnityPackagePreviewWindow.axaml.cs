@@ -1,7 +1,6 @@
 using System;
 using System.Diagnostics;
 using Avalonia.Controls;
-using Avalonia.Interactivity;
 using EasyExtractCrossPlatform.ViewModels;
 
 namespace EasyExtractCrossPlatform;
@@ -37,10 +36,5 @@ public partial class UnityPackagePreviewWindow : Window
 
         Opened -= OnOpened;
         Closed -= OnClosed;
-    }
-
-    private void CloseButton_OnClick(object? sender, RoutedEventArgs e)
-    {
-        Close();
     }
 }
