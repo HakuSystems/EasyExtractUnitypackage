@@ -6,6 +6,8 @@ namespace EasyExtractCrossPlatform.Models;
 
 public class AppSettings
 {
+    public const string DefaultAppTitle = "EasyExtractUnitypackage";
+
     public double SoundVolume { get; set; } = 1.0;
     public bool EnableSound { get; set; } = true;
     public string DefaultOutputPath { get; set; } = string.Empty;
@@ -14,7 +16,7 @@ public class AppSettings
     public DateTimeOffset? LastExtractionTime { get; set; }
     public List<string> SearchEverythingResults { get; set; } = new();
     public List<UnityPackageFile> UnitypackageFiles { get; set; } = new();
-    public string AppTitle { get; set; } = "EasyExtractUnitypackage";
+    public string AppTitle { get; set; } = DefaultAppTitle;
     public string LicenseTier { get; set; } = "Free";
     public int ApplicationTheme { get; set; }
     public bool UwUModeActive { get; set; }

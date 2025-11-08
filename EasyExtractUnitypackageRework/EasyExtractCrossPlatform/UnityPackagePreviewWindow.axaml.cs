@@ -1,6 +1,7 @@
 using System;
 using System.Diagnostics;
 using Avalonia.Controls;
+using EasyExtractCrossPlatform.Utilities;
 using EasyExtractCrossPlatform.ViewModels;
 
 namespace EasyExtractCrossPlatform;
@@ -10,6 +11,7 @@ public partial class UnityPackagePreviewWindow : Window
     public UnityPackagePreviewWindow()
     {
         InitializeComponent();
+        LinuxUiHelper.ApplyWindowTweaks(this);
         Opened += OnOpened;
         Closed += OnClosed;
     }

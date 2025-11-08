@@ -10,6 +10,7 @@ using Avalonia.Platform.Storage;
 using Avalonia.Threading;
 using EasyExtractCrossPlatform.Models;
 using EasyExtractCrossPlatform.Services;
+using EasyExtractCrossPlatform.Utilities;
 using EasyExtractCrossPlatform.ViewModels;
 
 namespace EasyExtractCrossPlatform;
@@ -29,6 +30,7 @@ public partial class SettingsWindow : Window
     public SettingsWindow()
     {
         InitializeComponent();
+        LinuxUiHelper.ApplyWindowTweaks(this);
 
         _viewModel = SettingsViewModel.CreateFromStorage();
         DataContext = _viewModel;

@@ -4,6 +4,7 @@ using System.IO;
 using System.Runtime.Versioning;
 using System.Security;
 using System.Text;
+using Avalonia.Platform;
 using Microsoft.Win32;
 
 namespace EasyExtractCrossPlatform.Services;
@@ -16,6 +17,11 @@ public static class ContextMenuIntegrationService
     private const string MenuText = "Extract with EasyExtract";
     private const string MenuKeyName = "EasyExtract";
     private const string CommandArgument = "--extract";
+    private const string LinuxDesktopEntryFileName = "easyextract-unitypackage.desktop";
+    private const string LinuxActionFileName = "easyextract.desktop";
+    private const string LinuxNemoActionFileName = "easyextract.nemo_action";
+    private const string LinuxMimeFileName = "easyextract-unitypackage.xml";
+    private const string LinuxIconFileName = "easyextract.png";
 
     public static void UpdateContextMenuIntegration(bool enable)
     {
@@ -156,10 +162,13 @@ public static class ContextMenuIntegrationService
 
         try
         {
-            RegisterLinuxDesktopEntry(homeDirectory, executablePath);
-            RegisterLinuxFileManagerAction(homeDirectory, executablePath);
-            RegisterLinuxNemoAction(homeDirectory, executablePath);
-            RegisterLinuxMimeType(homeDirectory);
+            var xdgDataHome = GetXdgDataHome(homeDirectory);
+            var iconReference = EnsureLinuxIconInstalled(homeDirectory, xdgDataHome);
+            RegisterLinuxDesktopEntry(homeDirectory, xdgDataHome, executablePath, iconReference);
+            RegisterLinuxFileManagerAction(homeDirectory, xdgDataHome, executablePath, iconReference);
+            RegisterLinuxNemoAction(homeDirectory, xdgDataHome, executablePath, iconReference);
+            RegisterLinuxMimeType(homeDirectory, xdgDataHome);
+            RefreshLinuxCaches(xdgDataHome);
         }
         catch (Exception ex)
         {
@@ -167,12 +176,13 @@ public static class ContextMenuIntegrationService
         }
     }
 
-    private static void RegisterLinuxDesktopEntry(string homeDirectory, string executablePath)
+    private static void RegisterLinuxDesktopEntry(string homeDirectory, string xdgDataHome, string executablePath,
+        string iconReference)
     {
-        var applicationsDirectory = Path.Combine(homeDirectory, ".local", "share", "applications");
+        var applicationsDirectory = Path.Combine(xdgDataHome, "applications");
         Directory.CreateDirectory(applicationsDirectory);
 
-        var desktopFilePath = Path.Combine(applicationsDirectory, "easyextract-unitypackage.desktop");
+        var desktopFilePath = Path.Combine(applicationsDirectory, LinuxDesktopEntryFileName);
         var desktopContent = new StringBuilder()
             .AppendLine("[Desktop Entry]")
             .AppendLine("Type=Application")
@@ -181,26 +191,29 @@ public static class ContextMenuIntegrationService
             .AppendLine($"Exec=\"{executablePath}\" {CommandArgument} %F")
             .AppendLine("NoDisplay=false")
             .AppendLine("Terminal=false")
-            .AppendLine("Icon=utilities-archive")
+            .AppendLine($"Icon={iconReference}")
             .AppendLine("MimeType=application/x-unitypackage;")
             .ToString();
 
         File.WriteAllText(desktopFilePath, desktopContent);
-
-        TryStartProcess("update-desktop-database", applicationsDirectory, applicationsDirectory);
+        EnsureLinuxFileMode(desktopFilePath,
+            UnixFileMode.UserRead | UnixFileMode.UserWrite | UnixFileMode.UserExecute |
+            UnixFileMode.GroupRead | UnixFileMode.GroupExecute |
+            UnixFileMode.OtherRead);
     }
 
-    private static void RegisterLinuxFileManagerAction(string homeDirectory, string executablePath)
+    private static void RegisterLinuxFileManagerAction(string homeDirectory, string xdgDataHome, string executablePath,
+        string iconReference)
     {
-        var actionsDirectory = Path.Combine(homeDirectory, ".local", "share", "file-manager", "actions");
+        var actionsDirectory = Path.Combine(xdgDataHome, "file-manager", "actions");
         Directory.CreateDirectory(actionsDirectory);
 
-        var actionFilePath = Path.Combine(actionsDirectory, "easyextract.desktop");
+        var actionFilePath = Path.Combine(actionsDirectory, LinuxActionFileName);
         var actionContent = new StringBuilder()
             .AppendLine("[Desktop Entry]")
             .AppendLine("Type=Action")
             .AppendLine($"Name={MenuText}")
-            .AppendLine("Icon=utilities-archive")
+            .AppendLine($"Icon={iconReference}")
             .AppendLine("Profiles=unitypackage;")
             .AppendLine()
             .AppendLine("[X-Action-Profile unitypackage]")
@@ -209,34 +222,43 @@ public static class ContextMenuIntegrationService
             .ToString();
 
         File.WriteAllText(actionFilePath, actionContent);
+        EnsureLinuxFileMode(actionFilePath,
+            UnixFileMode.UserRead | UnixFileMode.UserWrite | UnixFileMode.UserExecute |
+            UnixFileMode.GroupRead | UnixFileMode.GroupExecute |
+            UnixFileMode.OtherRead);
     }
 
-    private static void RegisterLinuxNemoAction(string homeDirectory, string executablePath)
+    private static void RegisterLinuxNemoAction(string homeDirectory, string xdgDataHome, string executablePath,
+        string iconReference)
     {
-        var nemoDirectory = Path.Combine(homeDirectory, ".local", "share", "nemo", "actions");
+        var nemoDirectory = Path.Combine(xdgDataHome, "nemo", "actions");
         Directory.CreateDirectory(nemoDirectory);
 
-        var nemoFilePath = Path.Combine(nemoDirectory, "easyextract.nemo_action");
+        var nemoFilePath = Path.Combine(nemoDirectory, LinuxNemoActionFileName);
         var nemoContent = new StringBuilder()
             .AppendLine("[Nemo Action]")
             .AppendLine($"Name={MenuText}")
             .AppendLine("Comment=Extract Unity packages with EasyExtract")
             .AppendLine($"Exec=\"{executablePath}\" {CommandArgument} \"%F\"")
-            .AppendLine("Icon-Name=utilities-archive")
+            .AppendLine($"Icon-Name={iconReference}")
             .AppendLine("Selection=s")
             .AppendLine("Extensions=unitypackage")
             .AppendLine("EscapeSpaces=true")
             .ToString();
 
         File.WriteAllText(nemoFilePath, nemoContent);
+        EnsureLinuxFileMode(nemoFilePath,
+            UnixFileMode.UserRead | UnixFileMode.UserWrite | UnixFileMode.UserExecute |
+            UnixFileMode.GroupRead | UnixFileMode.GroupExecute |
+            UnixFileMode.OtherRead);
     }
 
-    private static void RegisterLinuxMimeType(string homeDirectory)
+    private static void RegisterLinuxMimeType(string homeDirectory, string xdgDataHome)
     {
-        var mimePackagesDirectory = Path.Combine(homeDirectory, ".local", "share", "mime", "packages");
+        var mimePackagesDirectory = Path.Combine(xdgDataHome, "mime", "packages");
         Directory.CreateDirectory(mimePackagesDirectory);
 
-        var mimeFilePath = Path.Combine(mimePackagesDirectory, "easyextract-unitypackage.xml");
+        var mimeFilePath = Path.Combine(mimePackagesDirectory, LinuxMimeFileName);
         var mimeContent = """
                           <?xml version="1.0" encoding="UTF-8"?>
                           <mime-info xmlns="http://www.freedesktop.org/standards/shared-mime-info">
@@ -248,9 +270,138 @@ public static class ContextMenuIntegrationService
                           """;
 
         File.WriteAllText(mimeFilePath, mimeContent);
+        EnsureLinuxFileMode(mimeFilePath,
+            UnixFileMode.UserRead | UnixFileMode.UserWrite |
+            UnixFileMode.GroupRead | UnixFileMode.OtherRead);
+    }
 
-        var mimeDirectory = Path.Combine(homeDirectory, ".local", "share", "mime");
-        TryStartProcess("update-mime-database", mimeDirectory, mimeDirectory);
+    private static string GetXdgDataHome(string homeDirectory)
+    {
+        var xdgDataHome = Environment.GetEnvironmentVariable("XDG_DATA_HOME");
+        if (!string.IsNullOrWhiteSpace(xdgDataHome))
+            try
+            {
+                return Path.GetFullPath(xdgDataHome);
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"Failed to resolve XDG_DATA_HOME '{xdgDataHome}': {ex}");
+            }
+
+        return Path.Combine(homeDirectory, ".local", "share");
+    }
+
+    private static string EnsureLinuxIconInstalled(string homeDirectory, string xdgDataHome)
+    {
+        try
+        {
+            var iconsDirectory = Path.Combine(xdgDataHome, "icons", "hicolor", "256x256", "apps");
+            Directory.CreateDirectory(iconsDirectory);
+
+            var iconPath = Path.Combine(iconsDirectory, LinuxIconFileName);
+            using var iconStream = TryLoadIconAsset();
+            if (iconStream is null)
+                return "utilities-archive";
+
+            using (var fileStream = File.Create(iconPath))
+            {
+                iconStream.CopyTo(fileStream);
+            }
+
+            EnsureLinuxFileMode(iconPath,
+                UnixFileMode.UserRead | UnixFileMode.UserWrite |
+                UnixFileMode.GroupRead | UnixFileMode.OtherRead);
+
+            return Path.GetFileNameWithoutExtension(iconPath);
+        }
+        catch (Exception ex)
+        {
+            Debug.WriteLine($"Failed to install Linux icon: {ex}");
+            return "utilities-archive";
+        }
+    }
+
+    private static MemoryStream? TryLoadIconAsset()
+    {
+        try
+        {
+            var assetUri = new Uri("avares://EasyExtractCrossPlatform/Assets/AppLogo.png");
+            if (AssetLoader.Exists(assetUri))
+            {
+                using var assetStream = AssetLoader.Open(assetUri);
+                var buffer = new MemoryStream();
+                assetStream.CopyTo(buffer);
+                buffer.Position = 0;
+                return buffer;
+            }
+        }
+        catch (Exception ex)
+        {
+            Debug.WriteLine($"Failed to load icon via Avalonia asset loader: {ex}");
+        }
+
+        try
+        {
+            var baseDirectory = AppContext.BaseDirectory;
+            if (!string.IsNullOrWhiteSpace(baseDirectory))
+            {
+                var diskIconPath = Path.Combine(baseDirectory, "Assets", "AppLogo.png");
+                if (File.Exists(diskIconPath))
+                    return new MemoryStream(File.ReadAllBytes(diskIconPath));
+            }
+        }
+        catch (Exception ex)
+        {
+            Debug.WriteLine($"Failed to load icon from disk: {ex}");
+        }
+
+        return null;
+    }
+
+    private static void RefreshLinuxCaches(string xdgDataHome)
+    {
+        try
+        {
+            var applicationsDirectory = Path.Combine(xdgDataHome, "applications");
+            if (Directory.Exists(applicationsDirectory))
+                TryStartProcess("update-desktop-database", QuoteArgument(applicationsDirectory), applicationsDirectory);
+
+            var mimeDirectory = Path.Combine(xdgDataHome, "mime");
+            if (Directory.Exists(mimeDirectory))
+                TryStartProcess("update-mime-database", QuoteArgument(mimeDirectory), mimeDirectory);
+
+            var iconsDirectory = Path.Combine(xdgDataHome, "icons", "hicolor");
+            if (Directory.Exists(iconsDirectory))
+                TryStartProcess("gtk-update-icon-cache", $"-f {QuoteArgument(iconsDirectory)}", iconsDirectory);
+        }
+        catch (Exception ex)
+        {
+            Debug.WriteLine($"Failed to refresh Linux caches: {ex}");
+        }
+    }
+
+    private static string QuoteArgument(string? value)
+    {
+        if (string.IsNullOrWhiteSpace(value))
+            return string.Empty;
+
+        return $"\"{value}\"";
+    }
+
+    private static void EnsureLinuxFileMode(string path, UnixFileMode mode)
+    {
+        if (!OperatingSystem.IsLinux())
+            return;
+
+        try
+        {
+            if (!string.IsNullOrWhiteSpace(path) && File.Exists(path))
+                File.SetUnixFileMode(path, mode);
+        }
+        catch (Exception ex)
+        {
+            Debug.WriteLine($"Failed to set file mode on '{path}': {ex}");
+        }
     }
 
     private static void TryRemoveLinuxIntegration()
@@ -259,24 +410,20 @@ public static class ContextMenuIntegrationService
         if (string.IsNullOrWhiteSpace(homeDirectory))
             return;
 
-        var desktopFilePath = Path.Combine(homeDirectory, ".local", "share", "applications",
-            "easyextract-unitypackage.desktop");
-        var actionFilePath = Path.Combine(homeDirectory, ".local", "share", "file-manager", "actions",
-            "easyextract.desktop");
-        var nemoFilePath = Path.Combine(homeDirectory, ".local", "share", "nemo", "actions", "easyextract.nemo_action");
-        var mimeFilePath = Path.Combine(homeDirectory, ".local", "share", "mime", "packages",
-            "easyextract-unitypackage.xml");
+        var xdgDataHome = GetXdgDataHome(homeDirectory);
+        var desktopFilePath = Path.Combine(xdgDataHome, "applications", LinuxDesktopEntryFileName);
+        var actionFilePath = Path.Combine(xdgDataHome, "file-manager", "actions", LinuxActionFileName);
+        var nemoFilePath = Path.Combine(xdgDataHome, "nemo", "actions", LinuxNemoActionFileName);
+        var mimeFilePath = Path.Combine(xdgDataHome, "mime", "packages", LinuxMimeFileName);
+        var iconPath = Path.Combine(xdgDataHome, "icons", "hicolor", "256x256", "apps", LinuxIconFileName);
 
         DeleteFileIfExists(desktopFilePath);
         DeleteFileIfExists(actionFilePath);
         DeleteFileIfExists(nemoFilePath);
         DeleteFileIfExists(mimeFilePath);
+        DeleteFileIfExists(iconPath);
 
-        var applicationsDirectory = Path.Combine(homeDirectory, ".local", "share", "applications");
-        var mimeDirectory = Path.Combine(homeDirectory, ".local", "share", "mime");
-
-        TryStartProcess("update-desktop-database", applicationsDirectory, applicationsDirectory);
-        TryStartProcess("update-mime-database", mimeDirectory, mimeDirectory);
+        RefreshLinuxCaches(xdgDataHome);
     }
 
     #endregion
@@ -500,6 +647,14 @@ public static class ContextMenuIntegrationService
     {
         try
         {
+            if ((OperatingSystem.IsLinux() || OperatingSystem.IsMacOS()) &&
+                !Path.IsPathRooted(fileName) &&
+                !IsUnixCommandAvailable(fileName))
+            {
+                Debug.WriteLine($"Skipping execution of '{fileName}' because it was not found on PATH.");
+                return;
+            }
+
             var startInfo = new ProcessStartInfo
             {
                 FileName = fileName,
@@ -516,6 +671,40 @@ public static class ContextMenuIntegrationService
         {
             Debug.WriteLine($"Failed to execute '{fileName} {arguments}': {ex}");
         }
+    }
+
+    private static bool IsUnixCommandAvailable(string command)
+    {
+        if (string.IsNullOrWhiteSpace(command))
+            return false;
+
+        try
+        {
+            if (Path.IsPathRooted(command))
+                return File.Exists(command);
+
+            var pathValue = Environment.GetEnvironmentVariable("PATH");
+            if (string.IsNullOrWhiteSpace(pathValue))
+                return false;
+
+            var segments = pathValue.Split(Path.PathSeparator, StringSplitOptions.RemoveEmptyEntries);
+            foreach (var segment in segments)
+            {
+                var trimmed = segment.Trim();
+                if (string.IsNullOrWhiteSpace(trimmed))
+                    continue;
+
+                var candidate = Path.Combine(trimmed, command);
+                if (File.Exists(candidate))
+                    return true;
+            }
+        }
+        catch (Exception ex)
+        {
+            Debug.WriteLine($"Failed to probe PATH for '{command}': {ex}");
+        }
+
+        return false;
     }
 
     private static void DeleteFileIfExists(string? path)

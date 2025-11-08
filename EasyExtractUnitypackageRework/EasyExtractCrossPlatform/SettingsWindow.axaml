@@ -53,9 +53,7 @@
 
                         <StackPanel Spacing="10">
                             <TextBlock Text="Application title" />
-                            <TextBox Text="{Binding Settings.AppTitle}"
-                                     IsReadOnly="True"
-                                     IsTabStop="False" />
+                            <TextBlock Text="{Binding Settings.AppTitle}" />
                         </StackPanel>
 
                         <StackPanel Spacing="10">

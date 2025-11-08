@@ -35,6 +35,7 @@ public static class AppSettingsService
 
             using var stream = File.OpenRead(SettingsFilePath);
             var settings = JsonSerializer.Deserialize<AppSettings>(stream, SerializerOptions) ?? CreateDefault();
+            settings.AppTitle = AppSettings.DefaultAppTitle;
             UpdateStoredVersion(settings);
             return settings;
         }
@@ -47,6 +48,7 @@ public static class AppSettingsService
 
     public static void Save(AppSettings settings)
     {
+        settings.AppTitle = AppSettings.DefaultAppTitle;
         Directory.CreateDirectory(SettingsDirectory);
         var json = JsonSerializer.Serialize(settings, SerializerOptions);
         File.WriteAllText(SettingsFilePath, json);

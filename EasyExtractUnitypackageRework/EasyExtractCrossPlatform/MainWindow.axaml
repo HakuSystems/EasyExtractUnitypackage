@@ -15,7 +15,7 @@
     <Window.Styles>
         <Style Selector="Border.drop-zone">
             <Setter Property="CornerRadius" Value="24" />
-            <Setter Property="Background" Value="{DynamicResource EasyGlassOverlayBrush}" />
+            <Setter Property="Background" Value="{DynamicResource EasySurfaceBrush}" />
             <Setter Property="BorderBrush" Value="{DynamicResource EasyGlassNeutralBorderBrush}" />
             <Setter Property="BorderThickness" Value="1" />
             <Setter Property="Padding" Value="36" />

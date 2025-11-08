@@ -12,25 +12,25 @@
     <SolidColorBrush x:Key="EasyMutedBrush" Color="#90A7CA" />
     <SolidColorBrush x:Key="EasyPrimaryBrush" Color="#6EA2FF" />
     <SolidColorBrush x:Key="EasyAccentBrush" Color="#4EF2D5" />
-    <SolidColorBrush x:Key="EasyOnPrimaryBrush" Color="#031226" />
-    <SolidColorBrush x:Key="EasySurfaceBrush" Color="#162036" />
-    <SolidColorBrush x:Key="EasyStrokeBrush" Color="#324364" />
+    <SolidColorBrush x:Key="EasyOnPrimaryBrush" Color="#F4F7FF" />
+    <SolidColorBrush x:Key="EasySurfaceBrush" Color="#212E47" />
+    <SolidColorBrush x:Key="EasyStrokeBrush" Color="#36486A" />
 
     <LinearGradientBrush x:Key="EasyGlassGradientBrush"
                          StartPoint="0,0"
                          EndPoint="1,1">
-        <GradientStop Color="#30FFFFFF" Offset="0" />
-        <GradientStop Color="#14FFFFFF" Offset="0.55" />
-        <GradientStop Color="#26FFFFFF" Offset="1" />
+        <GradientStop Color="#2A3957" Offset="0" />
+        <GradientStop Color="#22324F" Offset="0.55" />
+        <GradientStop Color="#1C2841" Offset="1" />
     </LinearGradientBrush>
 
-    <SolidColorBrush x:Key="EasyGlassBorderBrush" Color="#66FFFFFF" />
-    <SolidColorBrush x:Key="EasyGlassNeutralBorderBrush" Color="#33FFFFFF" />
-    <SolidColorBrush x:Key="EasyGlassDisabledBorderBrush" Color="#28FFFFFF" />
-    <SolidColorBrush x:Key="EasyGlassOverlayFaintBrush" Color="#12FFFFFF" />
-    <SolidColorBrush x:Key="EasyGlassOverlayBrush" Color="#1AFFFFFF" />
-    <SolidColorBrush x:Key="EasyGlassOverlayStrongBrush" Color="#26FFFFFF" />
-    <SolidColorBrush x:Key="EasyGlassMutedBrush" Color="#7FB8FF" />
+    <SolidColorBrush x:Key="EasyGlassBorderBrush" Color="#45608C" />
+    <SolidColorBrush x:Key="EasyGlassNeutralBorderBrush" Color="#36486A" />
+    <SolidColorBrush x:Key="EasyGlassDisabledBorderBrush" Color="#2B384F" />
+    <SolidColorBrush x:Key="EasyGlassOverlayFaintBrush" Color="#33263A56" />
+    <SolidColorBrush x:Key="EasyGlassOverlayBrush" Color="#4C2D4362" />
+    <SolidColorBrush x:Key="EasyGlassOverlayStrongBrush" Color="#66314A70" />
+    <SolidColorBrush x:Key="EasyGlassMutedBrush" Color="#99B1E0" />
 
     <SolidColorBrush x:Key="EasyAccentSoftBrush" Color="#224EF2D5" />
     <SolidColorBrush x:Key="EasyAccentStrongBrush" Color="#334EF2D5" />

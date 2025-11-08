@@ -4,6 +4,7 @@ using Avalonia.Controls;
 using Avalonia.Interactivity;
 using Avalonia.Media;
 using EasyExtractCrossPlatform.Services;
+using EasyExtractCrossPlatform.Utilities;
 
 namespace EasyExtractCrossPlatform;
 
@@ -19,6 +20,7 @@ public partial class FeedbackWindow : Window
     public FeedbackWindow(string? appVersion)
     {
         InitializeComponent();
+        LinuxUiHelper.ApplyWindowTweaks(this);
 
         _appVersion = string.IsNullOrWhiteSpace(appVersion) ? null : appVersion.Trim();
 
