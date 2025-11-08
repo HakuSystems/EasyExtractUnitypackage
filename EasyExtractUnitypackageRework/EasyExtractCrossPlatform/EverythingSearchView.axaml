@@ -1,5 +1,6 @@
 <UserControl xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:loc="using:EasyExtractCrossPlatform.Localization"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:viewModels="using:EasyExtractCrossPlatform.ViewModels"
@@ -214,12 +215,12 @@
                                                    HorizontalAlignment="Right">
                                             <Button Classes="ghost link"
                                                     Margin="0,0,12,8"
-                                                    Content="Add to extraction queue"
+                                                    Content="{loc:Loc EverythingSearchView_AddToExtractionQueue}"
                                                     Command="{Binding ViewModel.OpenItemCommand, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=views:EverythingSearchView}}"
                                                     CommandParameter="{Binding .}" />
                                             <Button Classes="ghost link"
                                                     Margin="0,0,0,8"
-                                                    Content="Open directory"
+                                                    Content="{loc:Loc EverythingSearchView_OpenDirectory}"
                                                     Command="{Binding ViewModel.RevealItemCommand, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=views:EverythingSearchView}}"
                                                     CommandParameter="{Binding .}" />
                                         </WrapPanel>

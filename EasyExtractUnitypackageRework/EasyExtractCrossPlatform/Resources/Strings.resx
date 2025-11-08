@@ -1,0 +1,446 @@
+<?xml version='1.0' encoding='utf-8'?>
+<root xmlns:msdata="urn:schemas-microsoft-com:xml-msdata" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+    <xsd:schema id="root">
+        <xsd:import namespace="http://www.w3.org/XML/1998/namespace"/>
+        <xsd:element name="root" msdata:IsDataSet="true">
+            <xsd:complexType>
+                <xsd:choice maxOccurs="unbounded">
+                    <xsd:element name="metadata">
+                        <xsd:complexType>
+                            <xsd:sequence>
+                                <xsd:element name="value" type="xsd:string" minOccurs="0"/>
+                            </xsd:sequence>
+                            <xsd:attribute name="name" use="required" type="xsd:string"/>
+                            <xsd:attribute name="type" type="xsd:string"/>
+                            <xsd:attribute name="mimetype" type="xsd:string"/>
+                            <xsd:attribute ref="xml:space"/>
+                        </xsd:complexType>
+                    </xsd:element>
+                    <xsd:element name="assembly">
+                        <xsd:complexType>
+                            <xsd:attribute name="alias" type="xsd:string"/>
+                            <xsd:attribute name="name" type="xsd:string"/>
+                        </xsd:complexType>
+                    </xsd:element>
+                    <xsd:element name="data">
+                        <xsd:complexType>
+                            <xsd:sequence>
+                                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1"/>
+                                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2"/>
+                            </xsd:sequence>
+                            <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1"/>
+                            <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3"/>
+                            <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4"/>
+                            <xsd:attribute ref="xml:space"/>
+                        </xsd:complexType>
+                    </xsd:element>
+                    <xsd:element name="resheader">
+                        <xsd:complexType>
+                            <xsd:sequence>
+                                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1"/>
+                            </xsd:sequence>
+                            <xsd:attribute name="name" type="xsd:string" use="required"/>
+                        </xsd:complexType>
+                    </xsd:element>
+                </xsd:choice>
+            </xsd:complexType>
+        </xsd:element>
+    </xsd:schema>
+    <resheader name="resmimetype">
+        <value>text/microsoft-resx</value>
+    </resheader>
+    <resheader name="version">
+        <value>2.0</value>
+    </resheader>
+    <resheader name="reader">
+        <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral,
+            PublicKeyToken=b77a5c561934e089
+        </value>
+    </resheader>
+    <resheader name="writer">
+        <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral,
+            PublicKeyToken=b77a5c561934e089
+        </value>
+    </resheader>
+    <data name="FeedbackWindow_Description" xml:space="preserve">
+    <value>Share ideas, bugs, or feature requests. Your message goes straight to the developer.</value>
+  </data>
+    <data name="FeedbackWindow_Header" xml:space="preserve">
+    <value>We'd love your feedback</value>
+  </data>
+    <data name="FeedbackWindow_SendButton" xml:space="preserve">
+    <value>Send feedback</value>
+  </data>
+    <data name="FeedbackWindow_Status_Empty" xml:space="preserve">
+    <value>Please enter a message before sending.</value>
+  </data>
+    <data name="FeedbackWindow_Status_Failed" xml:space="preserve">
+    <value>Failed to send feedback: {0}</value>
+  </data>
+    <data name="FeedbackWindow_Status_Sending" xml:space="preserve">
+    <value>Sending feedback...</value>
+  </data>
+    <data name="FeedbackWindow_Status_Sent" xml:space="preserve">
+    <value>Feedback sent. Thank you!</value>
+  </data>
+    <data name="FeedbackWindow_Title" xml:space="preserve">
+    <value>Send Feedback</value>
+  </data>
+    <data name="FeedbackWindow_VersionLabelFormat" xml:space="preserve">
+    <value>Version: {0}</value>
+  </data>
+    <data name="FeedbackWindow_VersionLabelUnknown" xml:space="preserve">
+    <value>Version: unknown</value>
+  </data>
+    <data name="FeedbackWindow_Watermark" xml:space="preserve">
+    <value>Tell us what's going on...</value>
+  </data>
+    <data name="SettingsWindow_AppTitleLabel" xml:space="preserve">
+    <value>Application title</value>
+  </data>
+    <data name="SettingsWindow_AppearanceDescription" xml:space="preserve">
+    <value>Personalize layout and scaling.</value>
+  </data>
+    <data name="SettingsWindow_AppearanceTitle" xml:space="preserve">
+    <value>Appearance</value>
+  </data>
+    <data name="SettingsWindow_AsyncLoggingToggle" xml:space="preserve">
+    <value>Log asynchronously</value>
+  </data>
+    <data name="SettingsWindow_AudioDescription" xml:space="preserve">
+    <value>Control sound cues while extracting packages.</value>
+  </data>
+    <data name="SettingsWindow_AudioTitle" xml:space="preserve">
+    <value>Audio</value>
+  </data>
+    <data name="SettingsWindow_AutoUpdateToggle" xml:space="preserve">
+    <value>Auto update</value>
+  </data>
+    <data name="SettingsWindow_BackgroundTitle" xml:space="preserve">
+    <value>Custom background image</value>
+  </data>
+    <data name="SettingsWindow_BackgroundToggle" xml:space="preserve">
+    <value>Enable custom background</value>
+  </data>
+    <data name="SettingsWindow_Browse" xml:space="preserve">
+    <value>Browse</value>
+  </data>
+    <data name="SettingsWindow_CategoryStructureToggle" xml:space="preserve">
+    <value>Organize output into categories</value>
+  </data>
+    <data name="SettingsWindow_ContextMenuToggle" xml:space="preserve">
+    <value>Enable context menu integration</value>
+  </data>
+    <data name="SettingsWindow_CurrentVersionLabel" xml:space="preserve">
+    <value>Current version</value>
+  </data>
+    <data name="SettingsWindow_DiagnosticsDescription" xml:space="preserve">
+    <value>Toggle runtime diagnostics and logging hooks.</value>
+  </data>
+    <data name="SettingsWindow_DiagnosticsTitle" xml:space="preserve">
+    <value>Telemetry &amp; Diagnostics</value>
+  </data>
+    <data name="SettingsWindow_DiscordToggle" xml:space="preserve">
+    <value>Enable Discord Rich Presence</value>
+  </data>
+    <data name="SettingsWindow_GeneralDescription" xml:space="preserve">
+    <value>Update the core behaviour of EasyExtract.</value>
+  </data>
+    <data name="SettingsWindow_GeneralTitle" xml:space="preserve">
+    <value>General</value>
+  </data>
+    <data name="SettingsWindow_Header" xml:space="preserve">
+    <value>Settings</value>
+  </data>
+    <data name="SettingsWindow_MemoryToggle" xml:space="preserve">
+    <value>Track memory usage</value>
+  </data>
+    <data name="SettingsWindow_OpenLogFolder" xml:space="preserve">
+    <value>Open Log Folder</value>
+  </data>
+    <data name="SettingsWindow_OpenLogFolderTooltip" xml:space="preserve">
+    <value>Open the folder that stores EasyExtract log files.</value>
+  </data>
+    <data name="SettingsWindow_OpacityLabel" xml:space="preserve">
+    <value>Opacity</value>
+  </data>
+    <data name="SettingsWindow_OutputPathLabel" xml:space="preserve">
+    <value>Default output path</value>
+  </data>
+    <data name="SettingsWindow_PerformanceToggle" xml:space="preserve">
+    <value>Enable performance logging</value>
+  </data>
+    <data name="SettingsWindow_RepositoryNameLabel" xml:space="preserve">
+    <value>Repository name</value>
+  </data>
+    <data name="SettingsWindow_RepositoryOwnerLabel" xml:space="preserve">
+    <value>Repository owner</value>
+  </data>
+    <data name="SettingsWindow_SoundToggle" xml:space="preserve">
+    <value>Enable sound effects</value>
+  </data>
+    <data name="SettingsWindow_Status_AutoSaveReady" xml:space="preserve">
+    <value>Changes are saved automatically.</value>
+  </data>
+    <data name="SettingsWindow_Status_SaveFailed" xml:space="preserve">
+    <value>Failed to save settings: {0}</value>
+  </data>
+    <data name="SettingsWindow_Status_Saved" xml:space="preserve">
+    <value>Settings saved successfully.</value>
+  </data>
+    <data name="SettingsWindow_StackTraceToggle" xml:space="preserve">
+    <value>Enable stack trace capture</value>
+  </data>
+    <data name="SettingsWindow_Subheader" xml:space="preserve">
+    <value>Tune EasyExtract to match your workflow.</value>
+  </data>
+    <data name="SettingsWindow_TempPathLabel" xml:space="preserve">
+    <value>Temporary extraction path</value>
+  </data>
+    <data name="SettingsWindow_ThemeDark" xml:space="preserve">
+    <value>Dark</value>
+  </data>
+    <data name="SettingsWindow_ThemeFollowSystem" xml:space="preserve">
+    <value>Follow system</value>
+  </data>
+    <data name="SettingsWindow_ThemeLabel" xml:space="preserve">
+    <value>Theme</value>
+  </data>
+    <data name="SettingsWindow_ThemeLight" xml:space="preserve">
+    <value>Light</value>
+  </data>
+    <data name="SettingsWindow_Title" xml:space="preserve">
+    <value>EasyExtract Settings</value>
+  </data>
+    <data name="SettingsWindow_UpdatesDescription" xml:space="preserve">
+    <value>Control how EasyExtract stays up to date.</value>
+  </data>
+    <data name="SettingsWindow_UpdatesTitle" xml:space="preserve">
+    <value>Updates</value>
+  </data>
+    <data name="SettingsWindow_VolumeLabel" xml:space="preserve">
+    <value>Volume</value>
+  </data>
+    <data name="MainWindow_Easyextract" xml:space="preserve">
+    <value>EasyExtract</value>
+  </data>
+    <data name="MainWindow_ExtractUnityPackagesWithoutUnity" xml:space="preserve">
+    <value>Extract Unity Packages Without Unity</value>
+  </data>
+    <data name="MainWindow_Version0000" xml:space="preserve">
+    <value>Version 0.0.0.0</value>
+  </data>
+    <data name="MainWindow_CheckForUpdates" xml:space="preserve">
+    <value>Check for updates</value>
+  </data>
+    <data name="MainWindow_FreeVersion" xml:space="preserve">
+    <value>Free Version</value>
+  </data>
+    <data name="MainWindow_UpgradeToPro" xml:space="preserve">
+    <value>Upgrade to Pro</value>
+  </data>
+    <data name="MainWindow_UnlockUpcomingPremiumFeatures" xml:space="preserve">
+    <value>Unlock upcoming premium features</value>
+  </data>
+    <data name="MainWindow_CreditsToDigitalazureForTheLogo" xml:space="preserve">
+    <value>Credits to DigitalAzure for the Logo Design</value>
+  </data>
+    <data name="MainWindow_CreditsToJanFcloudForSome" xml:space="preserve">
+    <value>Credits to Jan-Fcloud for some ideas</value>
+  </data>
+    <data name="MainWindow_CreditsToSparkleGamesOUzhan" xml:space="preserve">
+    <value>Credits to Sparkle Games - Oğuzhan for Bug reports</value>
+  </data>
+    <data name="MainWindow_StartANewExtraction" xml:space="preserve">
+    <value>Start a new extraction</value>
+  </data>
+    <data name="MainWindow_SearchYourDeviceForUnitypackageFiles" xml:space="preserve">
+    <value>Search your device for *.unitypackage files</value>
+  </data>
+    <data name="MainWindow_DragAmpDropFilesHere" xml:space="preserve">
+    <value>Drag &amp; drop files here</value>
+  </data>
+    <data name="MainWindow_SupportsBatchExtractionAndLiveProgress" xml:space="preserve">
+    <value>Supports batch extraction and live progress updates.</value>
+  </data>
+    <data name="MainWindow_StartExtraction" xml:space="preserve">
+    <value>Start extraction</value>
+  </data>
+    <data name="MainWindow_BatchExtraction" xml:space="preserve">
+    <value>Batch extraction</value>
+  </data>
+    <data name="MainWindow_ExtractionInProgress" xml:space="preserve">
+    <value>Extraction in progress</value>
+  </data>
+    <data name="MainWindow_PreparingPackage" xml:space="preserve">
+    <value>Preparing package...</value>
+  </data>
+    <data name="MainWindow_Queue0" xml:space="preserve">
+    <value>Queue: 0</value>
+  </data>
+    <data name="MainWindow_Stop" xml:space="preserve">
+    <value>Stop</value>
+  </data>
+    <data name="MainWindow_CurrentPackage" xml:space="preserve">
+    <value>Current package</value>
+  </data>
+    <data name="MainWindow_Asset" xml:space="preserve">
+    <value>Asset</value>
+  </data>
+    <data name="MainWindow_Waiting" xml:space="preserve">
+    <value>Waiting...</value>
+  </data>
+    <data name="MainWindow_Output" xml:space="preserve">
+    <value>Output</value>
+  </data>
+    <data name="MainWindow_AssetsExtracted" xml:space="preserve">
+    <value>Assets extracted</value>
+  </data>
+    <data name="MainWindow_ElapsedTime" xml:space="preserve">
+    <value>Elapsed time</value>
+  </data>
+    <data name="MainWindow_0s" xml:space="preserve">
+    <value>0s</value>
+  </data>
+    <data name="MainWindow_NextUp" xml:space="preserve">
+    <value>Next up</value>
+  </data>
+    <data name="MainWindow_AllCaughtUp" xml:space="preserve">
+    <value>All caught up</value>
+  </data>
+    <data name="MainWindow_ExtractionQueue" xml:space="preserve">
+    <value>Extraction queue</value>
+  </data>
+    <data name="MainWindow_QueueIsEmpty" xml:space="preserve">
+    <value>Queue is empty</value>
+  </data>
+    <data name="MainWindow_ExtractEveryPackageCurrentlyQueued" xml:space="preserve">
+    <value>Extract every package currently queued.</value>
+  </data>
+    <data name="MainWindow_ExtractQueue" xml:space="preserve">
+    <value>Extract queue</value>
+  </data>
+    <data name="MainWindow_RemoveEveryPackageFromTheQueue" xml:space="preserve">
+    <value>Remove every package from the queue.</value>
+  </data>
+    <data name="MainWindow_ClearQueue" xml:space="preserve">
+    <value>Clear queue</value>
+  </data>
+    <data name="MainWindow_NoPackagesInQueueYet" xml:space="preserve">
+    <value>No packages in queue yet.</value>
+  </data>
+    <data name="MainWindow_DropUnitypackageFilesOrAddThem" xml:space="preserve">
+    <value>Drop .unitypackage files or add them from search to populate the queue.</value>
+  </data>
+    <data name="MainWindow_Preview" xml:space="preserve">
+    <value>Preview</value>
+  </data>
+    <data name="MainWindow_InspectThePackageWithoutExtracting" xml:space="preserve">
+    <value>Inspect the package without extracting</value>
+  </data>
+    <data name="MainWindow_ExtractionOverview" xml:space="preserve">
+    <value>Extraction overview</value>
+  </data>
+    <data name="MainWindow_PackagesCompleted" xml:space="preserve">
+    <value>Packages completed</value>
+  </data>
+    <data name="MainWindow_LastExtraction" xml:space="preserve">
+    <value>Last extraction</value>
+  </data>
+    <data name="MainWindow_NotStarted" xml:space="preserve">
+    <value>Not started</value>
+  </data>
+    <data name="MainWindow_SendFeedback" xml:space="preserve">
+    <value>Send feedback</value>
+  </data>
+    <data name="MainWindow_Feedback" xml:space="preserve">
+    <value>Feedback</value>
+  </data>
+    <data name="MainWindow_MadeByHakusystems" xml:space="preserve">
+    <value>Made by HakuSystems</value>
+  </data>
+    <data name="MainWindow_OpenSettings" xml:space="preserve">
+    <value>Open settings</value>
+  </data>
+    <data name="EverythingSearchView_AddToExtractionQueue" xml:space="preserve">
+    <value>Add to extraction queue</value>
+  </data>
+    <data name="EverythingSearchView_OpenDirectory" xml:space="preserve">
+    <value>Open directory</value>
+  </data>
+    <data name="UnityPackagePreviewWindow_Assets" xml:space="preserve">
+    <value>Assets</value>
+  </data>
+    <data name="UnityPackagePreviewWindow_AssetSize" xml:space="preserve">
+    <value>Asset size</value>
+  </data>
+    <data name="UnityPackagePreviewWindow_PackageSize" xml:space="preserve">
+    <value>Package size</value>
+  </data>
+    <data name="UnityPackagePreviewWindow_LastModified" xml:space="preserve">
+    <value>Last modified</value>
+  </data>
+    <data name="UnityPackagePreviewWindow_Category" xml:space="preserve">
+    <value>Category</value>
+  </data>
+    <data name="UnityPackagePreviewWindow_SearchAssets" xml:space="preserve">
+    <value>Search assets</value>
+  </data>
+    <data name="UnityPackagePreviewWindow_ExpandOrCollapse" xml:space="preserve">
+    <value>Expand or collapse</value>
+  </data>
+    <data name="UnityPackagePreviewWindow_CollapseAllChildFolders" xml:space="preserve">
+    <value>Collapse all child folders</value>
+  </data>
+    <data name="UnityPackagePreviewWindow_Preview" xml:space="preserve">
+    <value>Preview</value>
+  </data>
+    <data name="UnityPackagePreviewWindow_NoAssetsMatchTheCurrentFilter" xml:space="preserve">
+    <value>No assets match the current filter.</value>
+  </data>
+    <data name="UnityPackagePreviewWindow_SelectedAsset" xml:space="preserve">
+    <value>Selected asset</value>
+  </data>
+    <data name="UnityPackagePreviewWindow_Size" xml:space="preserve">
+    <value>Size</value>
+  </data>
+    <data name="UnityPackagePreviewWindow_Image" xml:space="preserve">
+    <value>Image</value>
+  </data>
+    <data name="UnityPackagePreviewWindow_Text" xml:space="preserve">
+    <value>Text</value>
+  </data>
+    <data name="UnityPackagePreviewWindow_Audio" xml:space="preserve">
+    <value>Audio</value>
+  </data>
+    <data name="UnityPackagePreviewWindow_PlayPause" xml:space="preserve">
+    <value>Play / Pause</value>
+  </data>
+    <data name="UnityPackagePreviewWindow_Stop" xml:space="preserve">
+    <value>Stop</value>
+  </data>
+    <data name="UnityPackagePreviewWindow_3DModel" xml:space="preserve">
+    <value>3D Model</value>
+  </data>
+    <data name="UnityPackagePreviewWindow_PreviewNotAvailableForThisAsset" xml:space="preserve">
+    <value>Preview not available for this asset.</value>
+  </data>
+    <data name="UnityPackagePreviewWindow_TextPreviewTruncatedForLargeFiles" xml:space="preserve">
+    <value>Text preview truncated for large files.</value>
+  </data>
+    <data name="UnityPackagePreviewWindow_OnlyAPortionOfThisAsset" xml:space="preserve">
+    <value>Only a portion of this asset was loaded for preview.</value>
+  </data>
+    <data name="UnityPackagePreviewWindow_3DPreviewCurrentlySupportsOBJMeshes" xml:space="preserve">
+    <value>3D preview currently supports OBJ meshes.</value>
+  </data>
+    <data name="UnityPackagePreviewWindow_AudioPreviewSupportsWAVMP3And" xml:space="preserve">
+    <value>Audio preview supports WAV, MP3, and AIFF assets.</value>
+  </data>
+    <data name="UnityPackagePreviewWindow_ScanningPackage" xml:space="preserve">
+    <value>Scanning package...</value>
+  </data>
+    <data name="UnityPackagePreviewWindow_UnableToLoadThisPackage" xml:space="preserve">
+    <value>Unable to load this package.</value>
+  </data>
+</root>

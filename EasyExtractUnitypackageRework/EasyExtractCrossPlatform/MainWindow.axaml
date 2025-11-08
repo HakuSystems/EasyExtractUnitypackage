@@ -3,13 +3,14 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:views="using:EasyExtractCrossPlatform"
+        xmlns:loc="using:EasyExtractCrossPlatform.Localization"
         Foreground="{DynamicResource EasyTextColorBrush}"
         Background="{DynamicResource EasyWindowBackgroundBrush}"
         mc:Ignorable="d"
         d:DesignWidth="1800"
         d:DesignHeight="1180"
         x:Class="EasyExtractCrossPlatform.MainWindow"
-        Title="EasyExtract"
+        Title="{loc:Loc MainWindow_Easyextract}"
         TransparencyLevelHint="AcrylicBlur"
         TransparencyBackgroundFallback="{DynamicResource EasyWindowBackgroundBrush}">
     <Window.Styles>
@@ -91,9 +92,9 @@
                     <StackPanel Grid.Column="1"
                                 Spacing="12"
                                 VerticalAlignment="Top">
-                        <TextBlock Text="EasyExtract"
+                        <TextBlock Text="{loc:Loc MainWindow_Easyextract}"
                                    Classes="display" />
-                        <TextBlock Text="Extract Unity Packages Without Unity"
+                        <TextBlock Text="{loc:Loc MainWindow_ExtractUnityPackagesWithoutUnity}"
                                    Classes="subtle"
                                    HorizontalAlignment="Left"
                                    MaxWidth="480" />
@@ -109,7 +110,7 @@
                                              Fill="{DynamicResource EasyAccentBrush}"
                                              VerticalAlignment="Center" />
                                     <TextBlock x:Name="VersionTextBlock"
-                                               Text="Version 0.0.0.0"
+                                               Text="{loc:Loc MainWindow_Version0000}"
                                                VerticalAlignment="Center"
                                                FontWeight="SemiBold" />
                                 </StackPanel>
@@ -124,7 +125,7 @@
                                         <PathIcon Data="M12 4A8 8 0 1 0 20 12H18A6 6 0 1 1 12 6V9L16 5L12 1V4Z"
                                                   Width="16"
                                                   Height="16" />
-                                        <TextBlock Text="Check for updates" />
+                                        <TextBlock Text="{loc:Loc MainWindow_CheckForUpdates}" />
                                     </StackPanel>
                                 </Button.Content>
                             </Button>
@@ -142,25 +143,25 @@
                                 BorderThickness="1"
                                 CornerRadius="12">
                             <TextBlock x:Name="LicenseTierTextBlock"
-                                       Text="Free Version"
+                                       Text="{loc:Loc MainWindow_FreeVersion}"
                                        FontWeight="SemiBold"
                                        TextAlignment="Right" />
                         </Border>
                         <Button x:Name="UpgradeButton"
                                 Classes="ghost"
                                 HorizontalAlignment="Right"
-                                Content="Upgrade to Pro"
+                                Content="{loc:Loc MainWindow_UpgradeToPro}"
                                 Click="UpgradeButton_OnClick"
-                                ToolTip.Tip="Unlock upcoming premium features" />
+                                ToolTip.Tip="{loc:Loc MainWindow_UnlockUpcomingPremiumFeatures}" />
                         <StackPanel Spacing="4"
                                     HorizontalAlignment="Right">
-                            <TextBlock Text="Credits to DigitalAzure for the Logo Design"
+                            <TextBlock Text="{loc:Loc MainWindow_CreditsToDigitalazureForTheLogo}"
                                        Classes="subtle"
                                        TextAlignment="Right" />
-                            <TextBlock Text="Credits to Jan-Fcloud for some ideas"
+                            <TextBlock Text="{loc:Loc MainWindow_CreditsToJanFcloudForSome}"
                                        Classes="subtle"
                                        TextAlignment="Right" />
-                            <TextBlock Text="Credits to Sparkle Games - Oğuzhan for Bug reports"
+                            <TextBlock Text="{loc:Loc MainWindow_CreditsToSparkleGamesOUzhan}"
                                        Classes="subtle"
                                        TextAlignment="Right" />
                         </StackPanel>
@@ -190,7 +191,7 @@
                                         Height="28"
                                         Foreground="{DynamicResource EasyAccentBrush}"
                                         VerticalAlignment="Center" />
-                                    <TextBlock Text="Start a new extraction"
+                                    <TextBlock Text="{loc:Loc MainWindow_StartANewExtraction}"
                                                FontSize="26"
                                                FontWeight="Bold"
                                                VerticalAlignment="Center"
@@ -242,9 +243,10 @@
                                                                           Easing="0,0.55,0.45,1" />
                                                     </Transitions>
                                                 </Border.Transitions>
-                                                <TextBlock Text="Search your device for *.unitypackage files"
-                                                           Classes="subtle"
-                                                           HorizontalAlignment="Right" />
+                                                <TextBlock
+                                                    Text="{loc:Loc MainWindow_SearchYourDeviceForUnitypackageFiles}"
+                                                    Classes="subtle"
+                                                    HorizontalAlignment="Right" />
                                             </Border>
                                             <Grid ColumnDefinitions="Auto,*" HorizontalAlignment="Right"
                                                   VerticalAlignment="Center">
@@ -303,12 +305,12 @@
 
                                     <StackPanel Spacing="6" HorizontalAlignment="Center">
                                         <TextBlock x:Name="DropZonePrimaryTextBlock"
-                                                   Text="Drag &amp; drop files here"
+                                                   Text="{loc:Loc MainWindow_DragAmpDropFilesHere}"
                                                    FontSize="20"
                                                    FontWeight="SemiBold"
                                                    TextAlignment="Center" />
                                         <TextBlock x:Name="DropZoneSecondaryTextBlock"
-                                                   Text="Supports batch extraction and live progress updates."
+                                                   Text="{loc:Loc MainWindow_SupportsBatchExtractionAndLiveProgress}"
                                                    Classes="subtle"
                                                    TextAlignment="Center" />
                                     </StackPanel>
@@ -328,7 +330,7 @@
                                                         Height="18"
                                                         Foreground="{DynamicResource EasyAccentBrush}"
                                                         VerticalAlignment="Center" />
-                                                    <TextBlock Text="Start extraction"
+                                                    <TextBlock Text="{loc:Loc MainWindow_StartExtraction}"
                                                                VerticalAlignment="Center" />
                                                 </StackPanel>
                                             </Button.Content>
@@ -345,7 +347,7 @@
                                                         Height="18"
                                                         Foreground="{DynamicResource EasyAccentBrush}"
                                                         VerticalAlignment="Center" />
-                                                    <TextBlock Text="Batch extraction"
+                                                    <TextBlock Text="{loc:Loc MainWindow_BatchExtraction}"
                                                                VerticalAlignment="Center" />
                                                 </StackPanel>
                                             </Button.Content>
@@ -417,11 +419,11 @@
                                             VerticalAlignment="Center" />
                                     </Border>
                                     <StackPanel Grid.Column="1" Margin="12,0,0,0">
-                                        <TextBlock Text="Extraction in progress"
+                                        <TextBlock Text="{loc:Loc MainWindow_ExtractionInProgress}"
                                                    FontSize="18"
                                                    FontWeight="SemiBold" />
                                         <TextBlock x:Name="ExtractionDashboardSubtitle"
-                                                   Text="Preparing package..."
+                                                   Text="{loc:Loc MainWindow_PreparingPackage}"
                                                    Classes="subtle" />
                                     </StackPanel>
                                     <Border Grid.Column="2"
@@ -434,7 +436,7 @@
                                             BorderBrush="{DynamicResource EasyAccentSoftBrush}"
                                             BorderThickness="1">
                                         <TextBlock x:Name="ExtractionDashboardQueueCount"
-                                                   Text="Queue: 0"
+                                                   Text="{loc:Loc MainWindow_Queue0}"
                                                    FontWeight="SemiBold"
                                                    Foreground="{DynamicResource EasyAccentBrush}" />
                                     </Border>
@@ -457,7 +459,7 @@
                                                     Height="18"
                                                     Foreground="{DynamicResource EasyDangerForegroundBrush}"
                                                     VerticalAlignment="Center" />
-                                                <TextBlock Text="Stop"
+                                                <TextBlock Text="{loc:Loc MainWindow_Stop}"
                                                            VerticalAlignment="Center"
                                                            Foreground="{DynamicResource EasyDangerForegroundBrush}" />
                                             </StackPanel>
@@ -472,7 +474,7 @@
                                                  Classes="accent"
                                                  IsIndeterminate="True" />
                                     <TextBlock Grid.Row="1"
-                                               Text="Current package"
+                                               Text="{loc:Loc MainWindow_CurrentPackage}"
                                                Classes="subtle"
                                                Margin="0,12,0,0" />
                                     <TextBlock x:Name="ExtractionDashboardPackageText"
@@ -486,15 +488,15 @@
 
                                 <StackPanel Spacing="12">
                                     <Grid ColumnDefinitions="Auto,*" RowDefinitions="Auto,Auto">
-                                        <TextBlock Text="Asset"
+                                        <TextBlock Text="{loc:Loc MainWindow_Asset}"
                                                    Classes="subtle" />
                                         <TextBlock x:Name="ExtractionDashboardAssetText"
                                                    Grid.Column="1"
-                                                   Text="Waiting..."
+                                                   Text="{loc:Loc MainWindow_Waiting}"
                                                    Margin="12,0,0,0"
                                                    TextTrimming="CharacterEllipsis" />
                                         <TextBlock Grid.Row="1"
-                                                   Text="Output"
+                                                   Text="{loc:Loc MainWindow_Output}"
                                                    Classes="subtle"
                                                    Margin="0,8,0,0" />
                                         <TextBlock x:Name="ExtractionDashboardOutputText"
@@ -512,7 +514,7 @@
                                         <Grid ColumnDefinitions="*,*,*">
                                             <StackPanel Grid.Column="0"
                                                         Margin="0,0,16,0">
-                                                <TextBlock Text="Assets extracted"
+                                                <TextBlock Text="{loc:Loc MainWindow_AssetsExtracted}"
                                                            Classes="subtle" />
                                                 <TextBlock x:Name="ExtractionDashboardAssetCount"
                                                            Text="0"
@@ -521,18 +523,18 @@
                                             </StackPanel>
                                             <StackPanel Grid.Column="1"
                                                         Margin="0,0,16,0">
-                                                <TextBlock Text="Elapsed time"
+                                                <TextBlock Text="{loc:Loc MainWindow_ElapsedTime}"
                                                            Classes="subtle" />
                                                 <TextBlock x:Name="ExtractionDashboardElapsed"
-                                                           Text="0s"
+                                                           Text="{loc:Loc MainWindow_0s}"
                                                            FontSize="22"
                                                            FontWeight="SemiBold" />
                                             </StackPanel>
                                             <StackPanel Grid.Column="2">
-                                                <TextBlock Text="Next up"
+                                                <TextBlock Text="{loc:Loc MainWindow_NextUp}"
                                                            Classes="subtle" />
                                                 <TextBlock x:Name="ExtractionDashboardNextPackage"
-                                                           Text="All caught up"
+                                                           Text="{loc:Loc MainWindow_AllCaughtUp}"
                                                            FontSize="22"
                                                            FontWeight="SemiBold"
                                                            TextTrimming="CharacterEllipsis" />
@@ -568,11 +570,11 @@
                                         VerticalAlignment="Center" />
                                 </Border>
                                 <StackPanel Grid.Column="1">
-                                    <TextBlock Text="Extraction queue"
+                                    <TextBlock Text="{loc:Loc MainWindow_ExtractionQueue}"
                                                FontWeight="SemiBold"
                                                FontSize="18" />
                                     <TextBlock x:Name="QueueSummaryTextBlock"
-                                               Text="Queue is empty"
+                                               Text="{loc:Loc MainWindow_QueueIsEmpty}"
                                                Classes="subtle" />
                                 </StackPanel>
                                 <StackPanel Grid.Column="2"
@@ -581,13 +583,13 @@
                                             HorizontalAlignment="Right">
                                     <Button x:Name="ProcessQueueButton"
                                             Click="ProcessQueueButton_OnClick"
-                                            ToolTip.Tip="Extract every package currently queued."
-                                            Content="Extract queue" />
+                                            ToolTip.Tip="{loc:Loc MainWindow_ExtractEveryPackageCurrentlyQueued}"
+                                            Content="{loc:Loc MainWindow_ExtractQueue}" />
                                     <Button x:Name="ClearQueueButton"
                                             Classes="ghost"
                                             Click="ClearQueueButton_OnClick"
-                                            ToolTip.Tip="Remove every package from the queue."
-                                            Content="Clear queue" />
+                                            ToolTip.Tip="{loc:Loc MainWindow_RemoveEveryPackageFromTheQueue}"
+                                            Content="{loc:Loc MainWindow_ClearQueue}" />
                                 </StackPanel>
                             </Grid>
 
@@ -595,11 +597,11 @@
                                         Spacing="6"
                                         HorizontalAlignment="Center"
                                         VerticalAlignment="Center">
-                                <TextBlock Text="No packages in queue yet."
+                                <TextBlock Text="{loc:Loc MainWindow_NoPackagesInQueueYet}"
                                            FontWeight="SemiBold"
                                            TextAlignment="Center" />
                                 <TextBlock
-                                    Text="Drop .unitypackage files or add them from search to populate the queue."
+                                    Text="{loc:Loc MainWindow_DropUnitypackageFilesOrAddThem}"
                                     Classes="subtle"
                                     TextAlignment="Center"
                                     MaxWidth="320" />
@@ -645,13 +647,13 @@
                                                                    HorizontalAlignment="Right" />
                                                     </StackPanel>
                                                     <Button Grid.Column="2"
-                                                            Content="Preview"
+                                                            Content="{loc:Loc MainWindow_Preview}"
                                                             Classes="ghost"
                                                             Margin="16,0,0,0"
                                                             Click="PreviewQueueItemButton_OnClick"
                                                             HorizontalAlignment="Right"
                                                             VerticalAlignment="Center"
-                                                            ToolTip.Tip="Inspect the package without extracting" />
+                                                            ToolTip.Tip="{loc:Loc MainWindow_InspectThePackageWithoutExtracting}" />
                                                 </Grid>
                                             </Border>
                                         </DataTemplate>
@@ -676,13 +678,13 @@
                                            Stretch="Uniform"
                                            Margin="6" />
                                 </Border>
-                                <TextBlock Text="Extraction overview"
+                                <TextBlock Text="{loc:Loc MainWindow_ExtractionOverview}"
                                            FontWeight="SemiBold"
                                            FontSize="18" />
                             </StackPanel>
                             <Separator Margin="0,4" />
                             <Grid RowDefinitions="Auto,Auto,Auto" ColumnDefinitions="*,Auto">
-                                <TextBlock Text="Packages completed"
+                                <TextBlock Text="{loc:Loc MainWindow_PackagesCompleted}"
                                            Classes="subtle" />
                                 <TextBlock x:Name="ExtractionOverviewPackagesCompletedText"
                                            Grid.Column="1"
@@ -694,7 +696,7 @@
                                 <TextBlock Grid.Row="1"
                                            Classes="subtle"
                                            Margin="0,16,0,0"
-                                           Text="Assets extracted" />
+                                           Text="{loc:Loc MainWindow_AssetsExtracted}" />
                                 <TextBlock x:Name="ExtractionOverviewAssetsExtractedText"
                                            Grid.Row="1"
                                            Grid.Column="1"
@@ -707,12 +709,12 @@
                                 <TextBlock Grid.Row="2"
                                            Classes="subtle"
                                            Margin="0,16,0,0"
-                                           Text="Last extraction" />
+                                           Text="{loc:Loc MainWindow_LastExtraction}" />
                                 <TextBlock x:Name="ExtractionOverviewLastExtractionText"
                                            Grid.Row="2"
                                            Grid.Column="1"
                                            Margin="0,16,0,0"
-                                           Text="Not started"
+                                           Text="{loc:Loc MainWindow_NotStarted}"
                                            FontWeight="SemiBold" />
                             </Grid>
                         </StackPanel>
@@ -731,14 +733,14 @@
                 <Grid ColumnDefinitions="Auto,*,Auto" VerticalAlignment="Center">
                     <StackPanel Orientation="Horizontal" Spacing="12" VerticalAlignment="Center">
                         <Button Classes="ghost"
-                                ToolTip.Tip="Send feedback"
+                                ToolTip.Tip="{loc:Loc MainWindow_SendFeedback}"
                                 Click="FeedbackButton_OnClick">
                             <Button.Content>
                                 <StackPanel Orientation="Horizontal" Spacing="6">
                                     <PathIcon
                                         Data="M10.75,14 C11.9926407,14 13,15.0073593 13,16.25 L13,17.7519766 L12.9921156,17.8604403 C12.6813607,19.9866441 10.7715225,21.0090369 7.5667905,21.0090369 C4.37361228,21.0090369 2.43330141,19.9983408 2.01446278,17.8965776 L2,17.75 L2,16.25 C2,15.0073593 3.00735931,14 4.25,14 L10.75,14 Z M10.75,15.5 L4.25,15.5 C3.83578644,15.5 3.5,15.8357864 3.5,16.25 L3.5,17.670373 C3.77979024,18.870787 5.05062598,19.5090369 7.5667905,19.5090369 C10.082858,19.5090369 11.2966388,18.8777026 11.5,17.6931543 L11.5,16.25 C11.5,15.8357864 11.1642136,15.5 10.75,15.5 Z M7.5,6 C9.43299662,6 11,7.56700338 11,9.5 C11,11.4329966 9.43299662,13 7.5,13 C5.56700338,13 4,11.4329966 4,9.5 C4,7.56700338 5.56700338,6 7.5,6 Z M19.75,2 C20.9926407,2 22,3.00735931 22,4.25 L22,7.75 C22,8.99264069 20.9926407,10 19.75,10 L18.2951017,10 L16.1285541,12.1414295 C15.637473,12.6266415 14.846031,12.6218837 14.360819,12.1308026 C14.1296416,11.8968289 14,11.5811661 14,11.2526232 L13.9993676,9.98619781 C12.8746845,9.86154927 12,8.90792139 12,7.75 L12,4.25 C12,3.00735931 13.0073593,2 14.25,2 L19.75,2 Z M7.5,7.5 C6.3954305,7.5 5.5,8.3954305 5.5,9.5 C5.5,10.6045695 6.3954305,11.5 7.5,11.5 C8.6045695,11.5 9.5,10.6045695 9.5,9.5 C9.5,8.3954305 8.6045695,7.5 7.5,7.5 Z M19.75,3.5 L14.25,3.5 C13.8357864,3.5 13.5,3.83578644 13.5,4.25 L13.5,7.75 C13.5,8.16421356 13.8357864,8.5 14.25,8.5 L16,8.5 L16,10.5 L18.2512219,8.25634766 L19.75,8.25 C20.1642136,8.25 20.5,7.91421356 20.5,7.5 L20.5,4.25 C20.5,3.83578644 20.1642136,3.5 19.75,3.5 Z"
                                         Width="18" Height="18" />
-                                    <TextBlock Text="Feedback" />
+                                    <TextBlock Text="{loc:Loc MainWindow_Feedback}" />
                                 </StackPanel>
                             </Button.Content>
                         </Button>
@@ -755,7 +757,7 @@
                             Height="18"
                             Foreground="{DynamicResource EasyAccentBrush}"
                             VerticalAlignment="Center" />
-                        <TextBlock Text="Made by HakuSystems"
+                        <TextBlock Text="{loc:Loc MainWindow_MadeByHakusystems}"
                                    VerticalAlignment="Center" />
                     </StackPanel>
 
@@ -764,7 +766,7 @@
                                 Spacing="12"
                                 HorizontalAlignment="Right">
                         <Button Classes="ghost"
-                                ToolTip.Tip="Open settings"
+                                ToolTip.Tip="{loc:Loc MainWindow_OpenSettings}"
                                 Click="SettingsButton_OnClick">
                             <Button.Content>
                                 <PathIcon

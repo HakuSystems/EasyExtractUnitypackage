@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Threading.Tasks;
 using Avalonia;
+using EasyExtractCrossPlatform.Services;
 
 namespace EasyExtractCrossPlatform;
 
@@ -11,6 +13,12 @@ internal class Program
     [STAThread]
     public static void Main(string[] args)
     {
+        LoggingService.Initialize();
+        LoggingService.LogInformation("EasyExtract starting up.");
+
+        AppDomain.CurrentDomain.UnhandledException += OnUnhandledException;
+        TaskScheduler.UnobservedTaskException += OnUnobservedTaskException;
+
         BuildAvaloniaApp()
             .StartWithClassicDesktopLifetime(args);
     }
@@ -22,5 +30,19 @@ internal class Program
             .UsePlatformDetect()
             .WithInterFont()
             .LogToTrace();
+    }
+
+    private static void OnUnhandledException(object? sender, UnhandledExceptionEventArgs eventArgs)
+    {
+        if (eventArgs.ExceptionObject is Exception exception)
+            LoggingService.LogError("Unhandled exception", exception);
+        else
+            LoggingService.LogError($"Unhandled exception: {eventArgs.ExceptionObject}");
+    }
+
+    private static void OnUnobservedTaskException(object? sender, UnobservedTaskExceptionEventArgs eventArgs)
+    {
+        LoggingService.LogError("Unobserved task exception", eventArgs.Exception);
+        eventArgs.SetObserved();
     }
 }

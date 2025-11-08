@@ -1,5 +1,6 @@
 <Window xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:loc="using:EasyExtractCrossPlatform.Localization"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:vm="using:EasyExtractCrossPlatform.ViewModels"
@@ -82,7 +83,7 @@
             <Border Classes="preview-card"
                     Margin="0,0,18,0">
                 <StackPanel Spacing="4">
-                    <TextBlock Text="Assets"
+                    <TextBlock Text="{loc:Loc UnityPackagePreviewWindow_Assets}"
                                Classes="subtle" />
                     <TextBlock Text="{Binding AssetCount}"
                                FontSize="20"
@@ -93,7 +94,7 @@
                     Grid.Column="1"
                     Margin="0,0,18,0">
                 <StackPanel Spacing="4">
-                    <TextBlock Text="Asset size"
+                    <TextBlock Text="{loc:Loc UnityPackagePreviewWindow_AssetSize}"
                                Classes="subtle" />
                     <TextBlock Text="{Binding TotalAssetSizeText, FallbackValue='0 B'}"
                                FontSize="20"
@@ -105,7 +106,7 @@
                     Grid.Column="2"
                     Margin="0,0,18,0">
                 <StackPanel Spacing="4">
-                    <TextBlock Text="Package size"
+                    <TextBlock Text="{loc:Loc UnityPackagePreviewWindow_PackageSize}"
                                Classes="subtle" />
                     <TextBlock Text="{Binding PackageSizeText, FallbackValue='0 B'}"
                                FontSize="20"
@@ -116,7 +117,7 @@
             <Border Classes="preview-card"
                     Grid.Column="3">
                 <StackPanel Spacing="4">
-                    <TextBlock Text="Last modified"
+                    <TextBlock Text="{loc:Loc UnityPackagePreviewWindow_LastModified}"
                                Classes="subtle" />
                     <TextBlock Text="{Binding PackageModifiedText, FallbackValue='-'}"
                                FontSize="20"
@@ -135,7 +136,7 @@
                           ColumnDefinitions="Auto,*,Auto,2*"
                           Margin="0,0,0,16">
                         <TextBlock Grid.Column="0"
-                                   Text="Category"
+                                   Text="{loc:Loc UnityPackagePreviewWindow_Category}"
                                    Classes="subtle"
                                    VerticalAlignment="Center"
                                    Margin="0,0,12,0" />
@@ -154,7 +155,7 @@
                         <TextBox Grid.Column="3"
                                  Classes="search-bar search-bar-small"
                                  Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}"
-                                 Watermark="Search assets"
+                                 Watermark="{loc:Loc UnityPackagePreviewWindow_SearchAssets}"
                                  MinWidth="220"
                                  HorizontalAlignment="Stretch"
                                  VerticalAlignment="Center"
@@ -184,7 +185,7 @@
                                                         CommandParameter="{Binding}"
                                                         IsEnabled="{Binding CanToggle}"
                                                         IsVisible="{Binding CanToggle}"
-                                                        ToolTip.Tip="Expand or collapse">
+                                                        ToolTip.Tip="{loc:Loc UnityPackagePreviewWindow_ExpandOrCollapse}">
                                                     <Path Data="{Binding ToggleIconGeometry}"
                                                           Stroke="{DynamicResource EasyMutedBrush}"
                                                           StrokeThickness="1.8"
@@ -198,7 +199,7 @@
                                                         Command="{Binding DataContext.CollapseAllFoldersCommand, RelativeSource={RelativeSource AncestorType=Window}}"
                                                         CommandParameter="{Binding}"
                                                         IsVisible="{Binding ShowCollapseDescendants}"
-                                                        ToolTip.Tip="Collapse all child folders">
+                                                        ToolTip.Tip="{loc:Loc UnityPackagePreviewWindow_CollapseAllChildFolders}">
                                                     <Path Data="{Binding CollapseDescendantsIcon}"
                                                           Stroke="{DynamicResource EasyMutedBrush}"
                                                           StrokeThickness="1.6"
@@ -308,7 +309,7 @@
                                                             Padding="6,2"
                                                             HorizontalAlignment="Right"
                                                             IsVisible="{Binding HasPreview}">
-                                                        <TextBlock Text="Preview"
+                                                        <TextBlock Text="{loc:Loc UnityPackagePreviewWindow_Preview}"
                                                                    FontSize="12"
                                                                    FontWeight="SemiBold" />
                                                     </Border>
@@ -326,7 +327,7 @@
                             </ListBox>
                         </ScrollViewer>
 
-                        <TextBlock Text="No assets match the current filter."
+                        <TextBlock Text="{loc:Loc UnityPackagePreviewWindow_NoAssetsMatchTheCurrentFilter}"
                                    HorizontalAlignment="Center"
                                    VerticalAlignment="Center"
                                    IsVisible="{Binding ShowEmptyState}"
@@ -340,7 +341,7 @@
                     Margin="24,0,0,0">
                 <Grid RowDefinitions="Auto,Auto,*">
                     <StackPanel Spacing="4">
-                        <TextBlock Text="Selected asset"
+                        <TextBlock Text="{loc:Loc UnityPackagePreviewWindow_SelectedAsset}"
                                    Classes="subtle" />
                         <TextBlock Text="{Binding SelectedAssetPath, FallbackValue='Select an asset to inspect'}"
                                    TextWrapping="Wrap"
@@ -352,7 +353,7 @@
                           ColumnDefinitions="*,*"
                           Margin="0,18,0,0">
                         <StackPanel Spacing="4">
-                            <TextBlock Text="Category"
+                            <TextBlock Text="{loc:Loc UnityPackagePreviewWindow_Category}"
                                        Classes="subtle" />
                             <TextBlock Text="{Binding SelectedAssetCategory, FallbackValue='-'}"
                                        FontWeight="SemiBold" />
@@ -360,7 +361,7 @@
                         <StackPanel Grid.Column="1"
                                     Spacing="4"
                                     Margin="16,0,0,0">
-                            <TextBlock Text="Size"
+                            <TextBlock Text="{loc:Loc UnityPackagePreviewWindow_Size}"
                                        Classes="subtle" />
                             <TextBlock Text="{Binding SelectedAssetSizeText, FallbackValue='-'}"
                                        FontWeight="SemiBold" />
@@ -373,7 +374,7 @@
                         <TabControl Grid.Row="0"
                                     SelectedIndex="{Binding PreviewTabIndex}"
                                     MinHeight="320">
-                            <TabItem Header="Image"
+                            <TabItem Header="{loc:Loc UnityPackagePreviewWindow_Image}"
                                      IsVisible="{Binding HasImagePreview}">
                                 <Border Background="{DynamicResource EasyGlassOverlayBrush}"
                                         BorderBrush="{DynamicResource EasyGlassNeutralBorderBrush}"
@@ -391,7 +392,7 @@
                                     </ScrollViewer>
                                 </Border>
                             </TabItem>
-                            <TabItem Header="Preview"
+                            <TabItem Header="{loc:Loc UnityPackagePreviewWindow_Preview}"
                                      IsVisible="{Binding HasFallbackPreview}">
                                 <Border Background="{DynamicResource EasyGlassOverlayBrush}"
                                         BorderBrush="{DynamicResource EasyGlassNeutralBorderBrush}"
@@ -409,7 +410,7 @@
                                     </ScrollViewer>
                                 </Border>
                             </TabItem>
-                            <TabItem Header="Text"
+                            <TabItem Header="{loc:Loc UnityPackagePreviewWindow_Text}"
                                      IsVisible="{Binding HasTextPreview}">
                                 <Border Background="{DynamicResource EasyGlassOverlayBrush}"
                                         BorderBrush="{DynamicResource EasyGlassNeutralBorderBrush}"
@@ -427,7 +428,7 @@
                                     </ScrollViewer>
                                 </Border>
                             </TabItem>
-                            <TabItem Header="Audio"
+                            <TabItem Header="{loc:Loc UnityPackagePreviewWindow_Audio}"
                                      IsVisible="{Binding HasAudioPreview}">
                                 <Border Background="{DynamicResource EasyGlassOverlayBrush}"
                                         BorderBrush="{DynamicResource EasyGlassNeutralBorderBrush}"
@@ -451,15 +452,15 @@
                                         </StackPanel>
                                         <StackPanel Orientation="Horizontal"
                                                     Spacing="12">
-                                            <Button Content="Play / Pause"
+                                            <Button Content="{loc:Loc UnityPackagePreviewWindow_PlayPause}"
                                                     Command="{Binding PlayAudioPreviewCommand}" />
-                                            <Button Content="Stop"
+                                            <Button Content="{loc:Loc UnityPackagePreviewWindow_Stop}"
                                                     Command="{Binding StopAudioPreviewCommand}" />
                                         </StackPanel>
                                     </StackPanel>
                                 </Border>
                             </TabItem>
-                            <TabItem Header="3D Model"
+                            <TabItem Header="{loc:Loc UnityPackagePreviewWindow_3DModel}"
                                      IsVisible="{Binding HasModelPreview}">
                                 <Border Background="{DynamicResource EasyGlassOverlayBrush}"
                                         BorderBrush="{DynamicResource EasyGlassNeutralBorderBrush}"
@@ -476,23 +477,23 @@
                         <StackPanel Grid.Row="1"
                                     Margin="0,12,0,0"
                                     Spacing="6">
-                            <TextBlock Text="Preview not available for this asset."
+                            <TextBlock Text="{loc:Loc UnityPackagePreviewWindow_PreviewNotAvailableForThisAsset}"
                                        HorizontalAlignment="Center"
                                        Classes="subtle"
                                        IsVisible="{Binding HasAnyPreview, Converter={StaticResource BooleanNegationConverter}}" />
-                            <TextBlock Text="Text preview truncated for large files."
+                            <TextBlock Text="{loc:Loc UnityPackagePreviewWindow_TextPreviewTruncatedForLargeFiles}"
                                        HorizontalAlignment="Center"
                                        Classes="subtle"
                                        IsVisible="{Binding IsTextPreviewTruncated}" />
-                            <TextBlock Text="Only a portion of this asset was loaded for preview."
+                            <TextBlock Text="{loc:Loc UnityPackagePreviewWindow_OnlyAPortionOfThisAsset}"
                                        HorizontalAlignment="Center"
                                        Classes="subtle"
                                        IsVisible="{Binding IsAssetDataTruncated}" />
-                            <TextBlock Text="3D preview currently supports OBJ meshes."
+                            <TextBlock Text="{loc:Loc UnityPackagePreviewWindow_3DPreviewCurrentlySupportsOBJMeshes}"
                                        HorizontalAlignment="Center"
                                        Classes="subtle"
                                        IsVisible="{Binding ShowUnsupportedModelMessage}" />
-                            <TextBlock Text="Audio preview supports WAV, MP3, and AIFF assets."
+                            <TextBlock Text="{loc:Loc UnityPackagePreviewWindow_AudioPreviewSupportsWAVMP3And}"
                                        HorizontalAlignment="Center"
                                        Classes="subtle"
                                        IsVisible="{Binding ShowUnsupportedAudioMessage}" />
@@ -524,7 +525,7 @@
                     <ProgressBar Width="220"
                                  IsIndeterminate="True"
                                  Height="6" />
-                    <TextBlock Text="Scanning package..."
+                    <TextBlock Text="{loc:Loc UnityPackagePreviewWindow_ScanningPackage}"
                                FontWeight="SemiBold"
                                HorizontalAlignment="Center" />
                 </StackPanel>
@@ -543,7 +544,7 @@
                     HorizontalAlignment="Center"
                     VerticalAlignment="Center">
                 <StackPanel Spacing="16">
-                    <TextBlock Text="Unable to load this package."
+                    <TextBlock Text="{loc:Loc UnityPackagePreviewWindow_UnableToLoadThisPackage}"
                                FontWeight="Bold"
                                FontSize="18"
                                TextAlignment="Center" />

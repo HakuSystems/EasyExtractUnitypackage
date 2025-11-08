@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 using Avalonia.Controls;
 using Avalonia.Interactivity;
 using Avalonia.Media;
+using EasyExtractCrossPlatform.Localization;
 using EasyExtractCrossPlatform.Services;
 using EasyExtractCrossPlatform.Utilities;
 
@@ -31,8 +32,8 @@ public partial class FeedbackWindow : Window
 
         if (_versionLabel is not null)
             _versionLabel.Text = _appVersion is null
-                ? "Version: unknown"
-                : $"Version: {_appVersion}";
+                ? LocalizationManager.Instance.GetString("FeedbackWindow_VersionLabelUnknown")
+                : LocalizationManager.Instance.GetString("FeedbackWindow_VersionLabelFormat", _appVersion);
 
         Opened += OnOpened;
     }
@@ -54,7 +55,7 @@ public partial class FeedbackWindow : Window
         var message = _feedbackTextBox?.Text ?? string.Empty;
         if (string.IsNullOrWhiteSpace(message))
         {
-            ShowStatus("Please enter a message before sending.", true);
+            ShowStatus(LocalizationManager.Instance.GetString("FeedbackWindow_Status_Empty"), true);
             return;
         }
 
@@ -62,19 +63,19 @@ public partial class FeedbackWindow : Window
         if (_sendButton is not null)
             _sendButton.IsEnabled = false;
 
-        ShowStatus("Sending feedback...", isPending: true);
+        ShowStatus(LocalizationManager.Instance.GetString("FeedbackWindow_Status_Sending"), isPending: true);
 
         try
         {
             await FeedbackService.SendFeedbackAsync(message, _appVersion).ConfigureAwait(true);
             _feedbackTextBox?.Clear();
-            ShowStatus("Feedback sent. Thank you!");
+            ShowStatus(LocalizationManager.Instance.GetString("FeedbackWindow_Status_Sent"));
             FeedbackSent?.Invoke(this, EventArgs.Empty);
             Close();
         }
         catch (Exception ex)
         {
-            ShowStatus($"Failed to send feedback: {ex.Message}", true);
+            ShowStatus(LocalizationManager.Instance.GetString("FeedbackWindow_Status_Failed", ex.Message), true);
         }
         finally
         {

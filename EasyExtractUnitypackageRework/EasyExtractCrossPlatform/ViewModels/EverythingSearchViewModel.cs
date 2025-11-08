@@ -30,7 +30,7 @@ public sealed class EverythingSearchViewModel : INotifyPropertyChanged, IDisposa
     private string? _statusMessage = DefaultStatus;
 
     public EverythingSearchViewModel()
-        : this(new EverythingSearchService())
+        : this(CreateDefaultSearchService())
     {
     }
 
@@ -160,32 +160,46 @@ public sealed class EverythingSearchViewModel : INotifyPropertyChanged, IDisposa
 
     public async Task InitializeAsync(CancellationToken cancellationToken = default)
     {
-        if (!OperatingSystem.IsWindows())
-        {
-            IsEverythingAvailable = false;
-            HasError = true;
-            StatusMessage = "Everything search is only available on Windows.";
-            return;
-        }
-
         try
         {
+            LoggingService.LogInformation("Initializing EverythingSearchViewModel.");
             var available = await _searchService.IsAvailableAsync(cancellationToken).ConfigureAwait(true);
             IsEverythingAvailable = available;
             HasError = !available;
-            StatusMessage = available
-                ? DefaultStatus
-                : "Everything is not running. Launch the Everything desktop app to enable .unitypackage search.";
+
+            var hint = _searchService.AvailabilityHint;
+            if (available)
+            {
+                HasError = false;
+                StatusMessage = string.IsNullOrWhiteSpace(hint) ? DefaultStatus : hint;
+                LoggingService.LogInformation("Search backend is available.");
+            }
+            else
+            {
+                StatusMessage = string.IsNullOrWhiteSpace(hint)
+                    ? "Search backend is not available on this platform."
+                    : hint;
+                LoggingService.LogInformation("Search backend is unavailable.");
+            }
         }
         catch (EverythingSearchException ex)
         {
             IsEverythingAvailable = false;
             HasError = true;
             StatusMessage = ex.Message;
+            LoggingService.LogError("Search initialization failed with EverythingSearchException.", ex);
+        }
+        catch (InvalidOperationException ex)
+        {
+            IsEverythingAvailable = false;
+            HasError = true;
+            StatusMessage = ex.Message;
+            LoggingService.LogError("Search initialization failed with InvalidOperationException.", ex);
         }
         catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
         {
             // Ignore initialization cancellation.
+            LoggingService.LogInformation("Search initialization cancelled.");
         }
     }
 
@@ -196,8 +210,11 @@ public sealed class EverythingSearchViewModel : INotifyPropertyChanged, IDisposa
         _autoSearchTimer.Stop();
 
         var query = SearchQuery.Trim();
+        LoggingService.LogInformation($"Executing Everything search from view model. Query='{query}'.");
+
         if (query.Length == 0)
         {
+            LoggingService.LogInformation("Search query was empty; clearing results.");
             CancelActiveSearch();
             Results.Clear();
             HasError = false;
@@ -208,6 +225,7 @@ public sealed class EverythingSearchViewModel : INotifyPropertyChanged, IDisposa
         CancelActiveSearch();
         var cts = new CancellationTokenSource();
         _activeSearchCts = cts;
+        var stopwatch = Stopwatch.StartNew();
 
         try
         {
@@ -234,6 +252,10 @@ public sealed class EverythingSearchViewModel : INotifyPropertyChanged, IDisposa
                 StatusMessage = excludedCount > 0
                     ? "Only recycle-bin or unreadable entries were found."
                     : "No files or folders matched your search.";
+
+            stopwatch.Stop();
+            LoggingService.LogInformation(
+                $"Search completed in {stopwatch.Elapsed.TotalMilliseconds:F0} ms. Results={Results.Count}, excluded={excludedCount}.");
         }
         catch (OperationCanceledException) when (cts.IsCancellationRequested)
         {
@@ -246,6 +268,8 @@ public sealed class EverythingSearchViewModel : INotifyPropertyChanged, IDisposa
                 Results.Clear();
                 HasError = true;
                 StatusMessage = ex.Message;
+                stopwatch.Stop();
+                LoggingService.LogError("Search failed with EverythingSearchException.", ex);
             }
         }
         catch (Exception ex)
@@ -255,10 +279,13 @@ public sealed class EverythingSearchViewModel : INotifyPropertyChanged, IDisposa
                 Results.Clear();
                 HasError = true;
                 StatusMessage = $"Search failed: {ex.Message}";
+                stopwatch.Stop();
+                LoggingService.LogError("Unexpected exception during search.", ex);
             }
         }
         finally
         {
+            stopwatch.Stop();
             if (_activeSearchCts == cts)
             {
                 _activeSearchCts.Dispose();
@@ -268,11 +295,24 @@ public sealed class EverythingSearchViewModel : INotifyPropertyChanged, IDisposa
         }
     }
 
+    private static IEverythingSearchService CreateDefaultSearchService()
+    {
+        if (OperatingSystem.IsWindows())
+            return new EverythingSearchService();
+        if (OperatingSystem.IsMacOS())
+            return new SpotlightSearchService();
+        if (OperatingSystem.IsLinux())
+            return new LinuxSearchService();
+
+        return new UnsupportedSearchService(Environment.OSVersion.Platform.ToString());
+    }
+
     private void HandleAddToQueue(object? parameter)
     {
         if (parameter is not EverythingSearchResult result)
             return;
 
+        LoggingService.LogInformation($"Queueing package '{result.FullPath}'.");
         try
         {
             if (string.IsNullOrWhiteSpace(result.FullPath) || !File.Exists(result.FullPath))
@@ -285,11 +325,13 @@ public sealed class EverythingSearchViewModel : INotifyPropertyChanged, IDisposa
 
             HasError = false;
             StatusMessage = $"Queued {result.Name}.";
+            LoggingService.LogInformation($"Package '{result.FullPath}' queued successfully.");
         }
         catch (Exception ex)
         {
             HasError = true;
             StatusMessage = $"Unable to queue {result.Name}: {ex.Message}";
+            LoggingService.LogError($"Failed to queue package '{result.FullPath}'.", ex);
         }
     }
 
@@ -298,6 +340,7 @@ public sealed class EverythingSearchViewModel : INotifyPropertyChanged, IDisposa
         if (parameter is not EverythingSearchResult result)
             return;
 
+        LoggingService.LogInformation($"Opening directory for '{result.FullPath}'.");
         try
         {
             var directory = result.IsFolder
@@ -315,16 +358,19 @@ public sealed class EverythingSearchViewModel : INotifyPropertyChanged, IDisposa
 
             HasError = false;
             StatusMessage = $"Opened directory for {result.Name}.";
+            LoggingService.LogInformation($"Directory opened for '{result.FullPath}'.");
         }
         catch (Exception ex)
         {
             HasError = true;
             StatusMessage = $"Unable to open directory for {result.Name}: {ex.Message}";
+            LoggingService.LogError($"Failed to open directory for '{result.FullPath}'.", ex);
         }
     }
 
     private void ClearResults(object? _)
     {
+        LoggingService.LogInformation("Clearing search results.");
         CancelActiveSearch();
         _autoSearchTimer.Stop();
         if (!string.IsNullOrEmpty(SearchQuery))

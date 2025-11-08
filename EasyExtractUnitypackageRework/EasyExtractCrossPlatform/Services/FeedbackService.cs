@@ -30,27 +30,43 @@ public static class FeedbackService
             ? "unknown"
             : version.Trim();
 
-        var payload = new
+        LoggingService.LogInformation(
+            $"Sending feedback payload (length={trimmedFeedback.Length}, version={versionLabel}).");
+
+        try
         {
-            content = $"**New feedback (v {versionLabel})**{Environment.NewLine}{trimmedFeedback}",
-            allowed_mentions = new
+            var payload = new
             {
-                parse = Array.Empty<string>()
+                content = $"**New feedback (v {versionLabel})**{Environment.NewLine}{trimmedFeedback}",
+                allowed_mentions = new
+                {
+                    parse = Array.Empty<string>()
+                }
+            };
+
+            var json = JsonSerializer.Serialize(payload);
+            using var request = new HttpRequestMessage(HttpMethod.Post, WebhookUrl)
+            {
+                Content = new StringContent(json, Encoding.UTF8, "application/json")
+            };
+
+            using var response = await HttpClient.SendAsync(request, cancellationToken).ConfigureAwait(false);
+
+            if (!response.IsSuccessStatusCode)
+            {
+                var body = await response.Content.ReadAsStringAsync(cancellationToken).ConfigureAwait(false);
+                var message =
+                    $"Discord webhook responded with status {(int)response.StatusCode}: {body}";
+                LoggingService.LogError(message);
+                throw new HttpRequestException(message);
             }
-        };
 
-        var json = JsonSerializer.Serialize(payload);
-        using var request = new HttpRequestMessage(HttpMethod.Post, WebhookUrl)
+            LoggingService.LogInformation("Feedback sent successfully.");
+        }
+        catch (Exception ex)
         {
-            Content = new StringContent(json, Encoding.UTF8, "application/json")
-        };
-
-        using var response = await HttpClient.SendAsync(request, cancellationToken).ConfigureAwait(false);
-
-        if (!response.IsSuccessStatusCode)
-        {
-            var body = await response.Content.ReadAsStringAsync(cancellationToken).ConfigureAwait(false);
-            throw new HttpRequestException($"Discord webhook responded with status {(int)response.StatusCode}: {body}");
+            LoggingService.LogError("Failed to send feedback to Discord webhook.", ex);
+            throw;
         }
     }
 }

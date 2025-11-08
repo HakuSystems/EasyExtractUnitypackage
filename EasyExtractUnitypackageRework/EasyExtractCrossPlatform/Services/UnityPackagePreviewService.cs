@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Formats.Tar;
 using System.IO;
 using System.IO.Compression;
@@ -37,13 +38,36 @@ public sealed class UnityPackagePreviewService : IUnityPackagePreviewService
         if (!File.Exists(packagePath))
             throw new FileNotFoundException("Unitypackage file was not found.", packagePath);
 
-        return await Task.Run(() => LoadPreviewInternal(packagePath, cancellationToken), cancellationToken)
-            .ConfigureAwait(false);
+        LoggingService.LogInformation($"Loading preview for '{packagePath}'.");
+        var stopwatch = Stopwatch.StartNew();
+
+        try
+        {
+            var result = await Task.Run(() => LoadPreviewInternal(packagePath, cancellationToken), cancellationToken)
+                .ConfigureAwait(false);
+
+            stopwatch.Stop();
+            LoggingService.LogInformation(
+                $"Preview loaded for '{packagePath}' in {stopwatch.Elapsed.TotalMilliseconds:F0} ms. AssetCount={result.Assets.Count}.");
+            return result;
+        }
+        catch (Exception ex) when (ex is not OperationCanceledException)
+        {
+            stopwatch.Stop();
+            LoggingService.LogError($"Failed to load preview for '{packagePath}'.", ex);
+            throw;
+        }
+        finally
+        {
+            stopwatch.Stop();
+        }
     }
 
     private static UnityPackagePreviewResult LoadPreviewInternal(string packagePath,
         CancellationToken cancellationToken)
     {
+        LoggingService.LogInformation($"Parsing unitypackage for preview: '{packagePath}'.");
+
         using var packageStream = File.OpenRead(packagePath);
         using var gzipStream = new GZipStream(packageStream, CompressionMode.Decompress);
         using var tarReader = new TarReader(gzipStream);
@@ -136,6 +160,8 @@ public sealed class UnityPackagePreviewService : IUnityPackagePreviewService
         }
 
         var extractionRoot = ExtractLargeAudioAssets(packagePath, assetStates, cancellationToken);
+        if (!string.IsNullOrWhiteSpace(extractionRoot))
+            LoggingService.LogInformation($"Extracted large audio assets to temporary directory '{extractionRoot}'.");
 
         var assets = new List<UnityPackagePreviewAsset>(assetStates.Count);
         var directoriesToPrune = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
@@ -171,6 +197,9 @@ public sealed class UnityPackagePreviewService : IUnityPackagePreviewService
         DateTimeOffset? lastModifiedUtc = fileInfo.Exists
             ? new DateTimeOffset(fileInfo.LastWriteTimeUtc)
             : null;
+
+        LoggingService.LogInformation(
+            $"Preview data assembled for '{packagePath}'. Assets={assets.Count}, totalAssetSize={totalAssetSize}, directoriesToPrune={directoriesToPrune.Count}.");
 
         return new UnityPackagePreviewResult(
             packagePath,

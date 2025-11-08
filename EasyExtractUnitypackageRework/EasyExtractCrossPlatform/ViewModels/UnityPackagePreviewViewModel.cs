@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
@@ -450,6 +451,7 @@ public sealed class UnityPackagePreviewViewModel : INotifyPropertyChanged, IDisp
     public Task EnsureLoadedAsync()
     {
         ThrowIfDisposed();
+        LoggingService.LogInformation($"EnsureLoadedAsync invoked for '{PackagePath}'.");
         return _loadTask ??= LoadInternalAsync();
     }
 
@@ -457,6 +459,8 @@ public sealed class UnityPackagePreviewViewModel : INotifyPropertyChanged, IDisp
     {
         using var loadCts = CancellationTokenSource.CreateLinkedTokenSource(_disposeCts.Token);
         var cancellationToken = loadCts.Token;
+        LoggingService.LogInformation($"Loading package preview for '{PackagePath}'.");
+        var stopwatch = Stopwatch.StartNew();
 
         try
         {
@@ -472,6 +476,9 @@ public sealed class UnityPackagePreviewViewModel : INotifyPropertyChanged, IDisp
             var preview = await _previewService.LoadPreviewAsync(PackagePath, cancellationToken)
                 .ConfigureAwait(false);
 
+            LoggingService.LogInformation(
+                $"Preview service returned {preview.Assets.Count} assets (totalSize={preview.TotalAssetSizeBytes}) for '{PackagePath}'.");
+
             await Dispatcher.UIThread.InvokeAsync(
                 () => ApplyPreview(preview),
                 DispatcherPriority.Background,
@@ -484,6 +491,7 @@ public sealed class UnityPackagePreviewViewModel : INotifyPropertyChanged, IDisp
         catch (OperationCanceledException)
         {
             // No-op: the window was closed.
+            LoggingService.LogInformation($"Preview loading cancelled for '{PackagePath}'.");
         }
         catch (Exception ex)
         {
@@ -497,9 +505,14 @@ public sealed class UnityPackagePreviewViewModel : INotifyPropertyChanged, IDisp
                     StatusMessage = $"Failed to load preview: {ex.Message}";
                 },
                 DispatcherPriority.Background);
+            LoggingService.LogError($"Failed to load package preview for '{PackagePath}'.", ex);
         }
         finally
         {
+            stopwatch.Stop();
+            LoggingService.LogInformation(
+                $"Preview loading finished for '{PackagePath}' in {stopwatch.Elapsed.TotalMilliseconds:F0} ms.");
+
             await Dispatcher.UIThread.InvokeAsync(
                 () =>
                 {
@@ -527,6 +540,8 @@ public sealed class UnityPackagePreviewViewModel : INotifyPropertyChanged, IDisp
 
         RefreshCategories();
         ApplyCategoryFilter();
+        LoggingService.LogInformation(
+            $"Preview applied for '{PackagePath}'. AssetCount={_allAssets.Count}, Categories={Categories.Count}, DirectoriesToPrune={_directoriesToPrune.Count}.");
     }
 
     private void UpdateCollectionsState()
@@ -594,6 +609,9 @@ public sealed class UnityPackagePreviewViewModel : INotifyPropertyChanged, IDisp
             Assets.Add(item);
 
         UpdateCollectionsState();
+
+        LoggingService.LogInformation(
+            $"Category filter applied. Selection='{normalizedSelection}', Search='{query}', ResultCount={Assets.Count}.");
 
         var shouldShowTree = isAllCategory && !hasSearch;
 
@@ -911,6 +929,10 @@ public sealed class UnityPackagePreviewViewModel : INotifyPropertyChanged, IDisp
 
     private void UpdateSelectedPreviewContent()
     {
+        var asset = SelectedAsset;
+        var assetLabel = asset?.RelativePath ?? asset?.FileName ?? "<none>";
+        LoggingService.LogInformation($"Updating preview content for '{assetLabel}'.");
+
         DisposeBitmap(ref _primaryImagePreview);
         DisposeBitmap(ref _fallbackPreviewImage);
         ResetAudioPreview();
@@ -922,7 +944,6 @@ public sealed class UnityPackagePreviewViewModel : INotifyPropertyChanged, IDisp
         AudioDurationText = FormatTime(TimeSpan.Zero);
         AudioProgress = 0;
 
-        var asset = SelectedAsset;
         if (asset is not null)
         {
             TryCreatePrimaryImagePreview(asset);
@@ -931,6 +952,9 @@ public sealed class UnityPackagePreviewViewModel : INotifyPropertyChanged, IDisp
             TryCreateAudioPreview(asset);
             TryCreateModelPreview(asset);
         }
+
+        LoggingService.LogInformation(
+            $"Preview state for '{assetLabel}': HasImage={_primaryImagePreview is not null}, HasFallback={_fallbackPreviewImage is not null}, HasText={TextPreview is not null}, HasAudio={_audioPreviewSession is not null}, HasModel={ModelPreview is not null}.");
 
         RaisePreviewPropertyChanges();
         PreviewTabIndex = DetermineDefaultPreviewTabIndex();
@@ -971,10 +995,12 @@ public sealed class UnityPackagePreviewViewModel : INotifyPropertyChanged, IDisp
             {
                 using var memoryStream = new MemoryStream(asset.AssetData);
                 _primaryImagePreview = new Bitmap(memoryStream);
+                LoggingService.LogInformation($"Primary image preview created for '{asset.RelativePath}'.");
             }
             catch
             {
                 DisposeBitmap(ref _primaryImagePreview);
+                LoggingService.LogError($"Failed to create primary image preview for '{asset.RelativePath}'.");
             }
 
             return;
@@ -985,7 +1011,14 @@ public sealed class UnityPackagePreviewViewModel : INotifyPropertyChanged, IDisp
 
         _primaryImagePreview = TryCreatePdfBitmap(asset.AssetData);
         if (_primaryImagePreview is null)
+        {
             DisposeBitmap(ref _primaryImagePreview);
+            LoggingService.LogError($"Failed to render PDF preview for '{asset.RelativePath}'.");
+        }
+        else
+        {
+            LoggingService.LogInformation($"PDF preview generated for '{asset.RelativePath}'.");
+        }
     }
 
     private static Bitmap? TryCreatePdfBitmap(byte[] pdfData)
@@ -1053,10 +1086,12 @@ public sealed class UnityPackagePreviewViewModel : INotifyPropertyChanged, IDisp
         {
             using var memoryStream = new MemoryStream(asset.PreviewImageData);
             _fallbackPreviewImage = new Bitmap(memoryStream);
+            LoggingService.LogInformation($"Fallback preview image created for '{asset.RelativePath}'.");
         }
         catch
         {
             DisposeBitmap(ref _fallbackPreviewImage);
+            LoggingService.LogError($"Failed to create fallback preview for '{asset.RelativePath}'.");
         }
     }
 
@@ -1091,6 +1126,8 @@ public sealed class UnityPackagePreviewViewModel : INotifyPropertyChanged, IDisp
             text = $"// Encoding: {usedEncoding.EncodingName}{Environment.NewLine}{text}";
 
         TextPreview = text;
+        LoggingService.LogInformation(
+            $"Generated text preview for '{asset.RelativePath}' (length={text.Length}).");
     }
 
     private void TryCreateAudioPreview(UnityPackageAssetPreviewItem asset)
@@ -1110,6 +1147,7 @@ public sealed class UnityPackagePreviewViewModel : INotifyPropertyChanged, IDisp
         if (session is null)
         {
             AudioStatusText = "Audio preview unsupported";
+            LoggingService.LogInformation($"Audio preview unsupported for '{asset.RelativePath}'.");
             return;
         }
 
@@ -1119,6 +1157,8 @@ public sealed class UnityPackagePreviewViewModel : INotifyPropertyChanged, IDisp
         AudioPositionText = FormatTime(TimeSpan.Zero);
         AudioStatusText = "Ready";
         AudioProgress = 0;
+        LoggingService.LogInformation(
+            $"Audio preview ready for '{asset.RelativePath}'. Duration={session.TotalTime}.");
     }
 
     private void TryCreateModelPreview(UnityPackageAssetPreviewItem asset)
@@ -1130,9 +1170,17 @@ public sealed class UnityPackagePreviewViewModel : INotifyPropertyChanged, IDisp
             return;
 
         if (string.Equals(asset.Extension, ".obj", StringComparison.OrdinalIgnoreCase))
+        {
             ModelPreview = ObjModelParser.TryParse(asset.AssetData);
+            LoggingService.LogInformation(
+                ModelPreview is null
+                    ? $"Failed to generate OBJ model preview for '{asset.RelativePath}'."
+                    : $"OBJ model preview generated for '{asset.RelativePath}'.");
+        }
         else
+        {
             ModelPreview = null;
+        }
     }
 
     private void ResetAudioPreview()
@@ -1144,6 +1192,7 @@ public sealed class UnityPackagePreviewViewModel : INotifyPropertyChanged, IDisp
         _audioPreviewSession.PlaybackStopped -= HandleAudioPlaybackStopped;
         _audioPreviewSession.Dispose();
         _audioPreviewSession = null;
+        LoggingService.LogInformation("Audio preview session reset.");
     }
 
     private void ToggleAudioPlayback()
@@ -1156,6 +1205,7 @@ public sealed class UnityPackagePreviewViewModel : INotifyPropertyChanged, IDisp
             _audioPreviewSession.Pause();
             AudioStatusText = "Paused";
             StopAudioTimer();
+            LoggingService.LogInformation("Audio preview paused.");
         }
         else
         {
@@ -1165,6 +1215,7 @@ public sealed class UnityPackagePreviewViewModel : INotifyPropertyChanged, IDisp
             _audioPreviewSession.Play();
             AudioStatusText = "Playing";
             StartAudioTimer();
+            LoggingService.LogInformation("Audio preview playback started.");
         }
 
         OnPropertyChanged(nameof(IsAudioPlaying));
@@ -1183,6 +1234,7 @@ public sealed class UnityPackagePreviewViewModel : INotifyPropertyChanged, IDisp
         AudioPositionText = FormatTime(TimeSpan.Zero);
         AudioProgress = 0;
         OnPropertyChanged(nameof(IsAudioPlaying));
+        LoggingService.LogInformation("Audio preview stopped.");
     }
 
     private void HandleAudioPlaybackStopped(object? sender, AudioPlaybackStoppedEventArgs e)
@@ -1200,6 +1252,8 @@ public sealed class UnityPackagePreviewViewModel : INotifyPropertyChanged, IDisp
             AudioProgress = 0;
         AudioStatusText = e.Completed ? "Completed" : "Stopped";
         OnPropertyChanged(nameof(IsAudioPlaying));
+        LoggingService.LogInformation(
+            $"Audio playback stopped. Completed={e.Completed}, Position={_audioPreviewSession.CurrentTime}.");
     }
 
     private void StartAudioTimer()
@@ -1456,7 +1510,7 @@ public sealed class UnityPackageAssetPreviewItem
         Category = UnityAssetClassification.ResolveCategory(
             asset.RelativePath,
             asset.AssetSizeBytes,
-            asset.AssetData);
+            asset.AssetData is { Length: > 0 });
         SizeText = FormatFileSize(AssetSizeBytes);
     }
 

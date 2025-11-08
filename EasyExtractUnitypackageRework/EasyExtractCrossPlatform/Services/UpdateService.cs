@@ -62,6 +62,10 @@ public sealed class UpdateService : IUpdateService
             ? "EasyExtractUnitypackage"
             : settings.RepoName.Trim();
 
+        var currentVersionLabel = currentVersion?.ToString() ?? "unknown";
+        LoggingService.LogInformation(
+            $"Checking for updates from {owner}/{repo} (currentVersion={currentVersionLabel}).");
+
         var requestUri = new Uri($"https://api.github.com/repos/{owner}/{repo}/releases/latest");
         using var request = new HttpRequestMessage(HttpMethod.Get, requestUri);
         request.Headers.UserAgent.ParseAdd(UserAgent);
@@ -74,6 +78,7 @@ public sealed class UpdateService : IUpdateService
         if (!response.IsSuccessStatusCode)
         {
             var reason = $"{(int)response.StatusCode} {response.ReasonPhrase}".Trim();
+            LoggingService.LogError($"Update check failed: GitHub responded with {reason}.");
             return new UpdateCheckResult(false, null, $"GitHub responded with {reason}.");
         }
 
@@ -89,24 +94,35 @@ public sealed class UpdateService : IUpdateService
         }
         catch (JsonException jsonEx)
         {
+            LoggingService.LogError("Failed to parse release information from GitHub.", jsonEx);
             return new UpdateCheckResult(false, null, $"Failed to parse release information: {jsonEx.Message}");
         }
 
         if (release is null)
+        {
+            LoggingService.LogError("Update check failed: GitHub returned no release information.");
             return new UpdateCheckResult(false, null, "No release information returned by GitHub.");
+        }
 
         if (release.Draft)
+        {
+            LoggingService.LogInformation("Latest release is a draft; update will be skipped.");
             return new UpdateCheckResult(false, null, "Latest release is marked as draft.");
+        }
 
         var normalizedTag = OperatingSystemInfo.NormalizeVersionTag(release.TagName);
         if (!Version.TryParse(normalizedTag, out var latestVersion))
+        {
+            LoggingService.LogError($"Failed to parse release tag '{release.TagName}'.");
             return new UpdateCheckResult(false, null, $"Unable to parse release tag '{release.TagName}'.");
+        }
 
         if (currentVersion is not null && latestVersion <= currentVersion)
         {
             var message = currentVersion is null
                 ? "No update available."
                 : $"Version {currentVersion} is current.";
+            LoggingService.LogInformation($"No update available. Latest={latestVersion}, current={currentVersion}.");
             return new UpdateCheckResult(false, null, message);
         }
 
@@ -114,10 +130,16 @@ public sealed class UpdateService : IUpdateService
         var architectureToken = OperatingSystemInfo.GetArchitectureToken();
 
         if (!TrySelectAsset(release, platform, architectureToken, out var asset, out var assetMessage))
+        {
+            LoggingService.LogError($"No suitable update asset found: {assetMessage}");
             return new UpdateCheckResult(false, null, assetMessage);
+        }
 
         if (asset?.BrowserDownloadUrl is null)
+        {
+            LoggingService.LogError("Matched update asset is missing a download URL.");
             return new UpdateCheckResult(false, null, "Matched asset is missing a download URL.");
+        }
 
         ReleaseAssetInfo assetInfo;
         try
@@ -130,6 +152,7 @@ public sealed class UpdateService : IUpdateService
         }
         catch (Exception ex)
         {
+            LoggingService.LogError("Failed to prepare release asset metadata.", ex);
             return new UpdateCheckResult(false, null, $"Failed to prepare asset metadata: {ex.Message}");
         }
 
@@ -144,6 +167,9 @@ public sealed class UpdateService : IUpdateService
             assetInfo,
             Uri.TryCreate(release.HtmlUrl, UriKind.Absolute, out var htmlUri) ? htmlUri : null);
 
+        LoggingService.LogInformation(
+            $"Update available: version={latestVersion}, asset='{assetInfo.Name}', size={assetInfo.Size} bytes.");
+
         return new UpdateCheckResult(true, manifest);
     }
 
@@ -153,18 +179,23 @@ public sealed class UpdateService : IUpdateService
     {
         try
         {
+            LoggingService.LogInformation(
+                $"Preparing update {manifest.Version} from {manifest.Asset.DownloadUri}.");
             progress?.Report(new UpdateProgress(UpdatePhase.Downloading, 0.0));
 
             var updatesRoot = Path.Combine(AppSettingsService.SettingsDirectory, "Updates");
             Directory.CreateDirectory(updatesRoot);
+            LoggingService.LogInformation($"Using updates root '{updatesRoot}'.");
 
             var versionDirectory = Path.Combine(updatesRoot, manifest.Version.ToString());
             if (Directory.Exists(versionDirectory))
                 Directory.Delete(versionDirectory, true);
             Directory.CreateDirectory(versionDirectory);
+            LoggingService.LogInformation($"Created working directory '{versionDirectory}'.");
 
             var archivePath = Path.Combine(versionDirectory, manifest.Asset.Name);
             await DownloadAssetAsync(manifest.Asset, archivePath, progress, cancellationToken).ConfigureAwait(false);
+            LoggingService.LogInformation($"Update asset downloaded to '{archivePath}'.");
 
             cancellationToken.ThrowIfCancellationRequested();
 
@@ -173,6 +204,7 @@ public sealed class UpdateService : IUpdateService
             var payloadDirectory = Path.Combine(versionDirectory, "payload");
             Directory.CreateDirectory(payloadDirectory);
             await ExtractArchiveAsync(archivePath, payloadDirectory, cancellationToken).ConfigureAwait(false);
+            LoggingService.LogInformation($"Update payload extracted to '{payloadDirectory}'.");
 
             cancellationToken.ThrowIfCancellationRequested();
 
@@ -194,6 +226,8 @@ public sealed class UpdateService : IUpdateService
                 EnsureUnixExecutable(scriptInfo.ScriptPath);
 
             progress?.Report(new UpdateProgress(UpdatePhase.Preparing, 1.0));
+            LoggingService.LogInformation(
+                $"Update preparation complete. Script='{scriptInfo.ScriptPath}', workingDirectory='{scriptInfo.WorkingDirectory}'.");
 
             var preparation = new UpdatePreparation
             {
@@ -207,14 +241,18 @@ public sealed class UpdateService : IUpdateService
                 ReleaseNotes = manifest.ReleaseNotes
             };
 
+            LoggingService.LogInformation(
+                $"Update prepared successfully. StageDirectory='{preparation.StageDirectory}'.");
             return UpdateInstallResult.FromPreparation(preparation);
         }
         catch (OperationCanceledException)
         {
+            LoggingService.LogInformation("Update preparation was cancelled.");
             return UpdateInstallResult.Failed("Update preparation was cancelled.");
         }
         catch (Exception ex)
         {
+            LoggingService.LogError("Failed to prepare update.", ex);
             return UpdateInstallResult.Failed("Failed to prepare update.", ex);
         }
     }
@@ -223,6 +261,9 @@ public sealed class UpdateService : IUpdateService
     {
         try
         {
+            LoggingService.LogInformation(
+                $"Launching prepared update script '{preparation.ScriptPath}' with arguments '{string.Join(' ', preparation.ScriptArguments)}'.");
+
             ProcessStartInfo startInfo;
             if (OperatingSystem.IsWindows())
             {
@@ -252,11 +293,16 @@ public sealed class UpdateService : IUpdateService
                 startInfo.ArgumentList.Add(argument);
 
             using var process = Process.Start(startInfo);
-            return process is not null;
+            var launched = process is not null;
+            LoggingService.LogInformation(
+                launched
+                    ? "Update script launch succeeded."
+                    : "Update script launch returned null process handle.");
+            return launched;
         }
         catch (Exception ex)
         {
-            Debug.WriteLine($"Failed to launch update script: {ex}");
+            LoggingService.LogError("Failed to launch update script.", ex);
             return false;
         }
     }
@@ -264,37 +310,52 @@ public sealed class UpdateService : IUpdateService
     private static async Task DownloadAssetAsync(ReleaseAssetInfo asset, string destinationPath,
         IProgress<UpdateProgress>? progress, CancellationToken cancellationToken)
     {
-        using var request = new HttpRequestMessage(HttpMethod.Get, asset.DownloadUri);
-        request.Headers.UserAgent.ParseAdd(UserAgent);
-        request.Headers.Accept.ParseAdd("application/octet-stream");
+        LoggingService.LogInformation(
+            $"Downloading update asset '{asset.Name}' ({asset.Size} bytes) to '{destinationPath}'.");
 
-        using var response = await HttpClient
-            .SendAsync(request, HttpCompletionOption.ResponseHeadersRead, cancellationToken)
-            .ConfigureAwait(false);
-
-        response.EnsureSuccessStatusCode();
-
-        await using var responseStream =
-            await response.Content.ReadAsStreamAsync(cancellationToken).ConfigureAwait(false);
-        await using var fileStream = new FileStream(destinationPath, FileMode.Create, FileAccess.Write, FileShare.None);
-
-        var buffer = new byte[81920];
-        long totalRead = 0;
-        while (true)
+        try
         {
-            var read = await responseStream.ReadAsync(buffer.AsMemory(0, buffer.Length), cancellationToken)
+            using var request = new HttpRequestMessage(HttpMethod.Get, asset.DownloadUri);
+            request.Headers.UserAgent.ParseAdd(UserAgent);
+            request.Headers.Accept.ParseAdd("application/octet-stream");
+
+            using var response = await HttpClient
+                .SendAsync(request, HttpCompletionOption.ResponseHeadersRead, cancellationToken)
                 .ConfigureAwait(false);
-            if (read == 0)
-                break;
 
-            await fileStream.WriteAsync(buffer.AsMemory(0, read), cancellationToken).ConfigureAwait(false);
-            totalRead += read;
+            response.EnsureSuccessStatusCode();
 
-            double? percentage = null;
-            if (asset.Size > 0)
-                percentage = Math.Clamp((double)totalRead / asset.Size, 0, 1);
+            await using var responseStream =
+                await response.Content.ReadAsStreamAsync(cancellationToken).ConfigureAwait(false);
+            await using var fileStream =
+                new FileStream(destinationPath, FileMode.Create, FileAccess.Write, FileShare.None);
 
-            progress?.Report(new UpdateProgress(UpdatePhase.Downloading, percentage, totalRead, asset.Size));
+            var buffer = new byte[81920];
+            long totalRead = 0;
+            while (true)
+            {
+                var read = await responseStream.ReadAsync(buffer.AsMemory(0, buffer.Length), cancellationToken)
+                    .ConfigureAwait(false);
+                if (read == 0)
+                    break;
+
+                await fileStream.WriteAsync(buffer.AsMemory(0, read), cancellationToken).ConfigureAwait(false);
+                totalRead += read;
+
+                double? percentage = null;
+                if (asset.Size > 0)
+                    percentage = Math.Clamp((double)totalRead / asset.Size, 0, 1);
+
+                progress?.Report(new UpdateProgress(UpdatePhase.Downloading, percentage, totalRead, asset.Size));
+            }
+
+            LoggingService.LogInformation(
+                $"Download completed for '{asset.Name}'. BytesReceived={totalRead}, destination='{destinationPath}'.");
+        }
+        catch (Exception ex) when (ex is not OperationCanceledException)
+        {
+            LoggingService.LogError($"Failed to download update asset '{asset.Name}'.", ex);
+            throw;
         }
     }
 
@@ -302,22 +363,35 @@ public sealed class UpdateService : IUpdateService
         CancellationToken cancellationToken)
     {
         var fileName = Path.GetFileName(archivePath);
-        if (fileName.EndsWith(".zip", StringComparison.OrdinalIgnoreCase))
-        {
-            ZipFile.ExtractToDirectory(archivePath, destinationDirectory, true);
-            return;
-        }
+        LoggingService.LogInformation(
+            $"Extracting archive '{fileName}' to '{destinationDirectory}'.");
 
-        if (fileName.EndsWith(".tar.gz", StringComparison.OrdinalIgnoreCase) ||
-            fileName.EndsWith(".tgz", StringComparison.OrdinalIgnoreCase))
+        try
         {
-            await using var fileStream = File.OpenRead(archivePath);
-            await using var gzipStream = new GZipStream(fileStream, CompressionMode.Decompress);
-            TarFile.ExtractToDirectory(gzipStream, destinationDirectory, true);
-            return;
-        }
+            if (fileName.EndsWith(".zip", StringComparison.OrdinalIgnoreCase))
+            {
+                ZipFile.ExtractToDirectory(archivePath, destinationDirectory, true);
+                LoggingService.LogInformation("Zip archive extracted successfully.");
+                return;
+            }
 
-        throw new NotSupportedException($"Unsupported archive format for '{fileName}'.");
+            if (fileName.EndsWith(".tar.gz", StringComparison.OrdinalIgnoreCase) ||
+                fileName.EndsWith(".tgz", StringComparison.OrdinalIgnoreCase))
+            {
+                await using var fileStream = File.OpenRead(archivePath);
+                await using var gzipStream = new GZipStream(fileStream, CompressionMode.Decompress);
+                TarFile.ExtractToDirectory(gzipStream, destinationDirectory, true);
+                LoggingService.LogInformation("Tar.gz archive extracted successfully.");
+                return;
+            }
+
+            throw new NotSupportedException($"Unsupported archive format for '{fileName}'.");
+        }
+        catch (Exception ex) when (ex is not OperationCanceledException)
+        {
+            LoggingService.LogError($"Failed to extract archive '{archivePath}'.", ex);
+            throw;
+        }
     }
 
     private static string ResolveContentRoot(string payloadDirectory)
@@ -526,10 +600,11 @@ public sealed class UpdateService : IUpdateService
                                       UnixFileMode.OtherRead | UnixFileMode.OtherExecute;
 
             File.SetUnixFileMode(scriptPath, mode);
+            LoggingService.LogInformation($"Marked update script '{scriptPath}' as executable.");
         }
         catch (Exception ex)
         {
-            Debug.WriteLine($"Failed to set executable bit on '{scriptPath}': {ex}");
+            LoggingService.LogError($"Failed to set executable bit on '{scriptPath}'.", ex);
         }
     }
 
@@ -574,6 +649,8 @@ public sealed class UpdateService : IUpdateService
         }
 
         asset = rankedAssets[0].Asset;
+        LoggingService.LogInformation(
+            $"Selected update asset '{asset.Name}' for platform '{platformToken}' and architecture '{architectureToken}'.");
         message = string.Empty;
         return true;
     }

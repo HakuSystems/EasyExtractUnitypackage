@@ -1,10 +1,12 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
 using System.Net.Http;
 using System.Reflection;
 using System.Runtime.InteropServices;
+using System.Security.Cryptography;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -19,6 +21,13 @@ internal static class EverythingSdkBootstrapper
     private static readonly string TargetDllFileName =
         Environment.Is64BitProcess ? "Everything64.dll" : "Everything32.dll";
 
+    private static readonly IReadOnlyDictionary<string, string> ExpectedDllHashes =
+        new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["Everything64.dll"] = "C7AB8B47F7DD4C41AA735F4BA40B35AD5460A86FA7ABE0C94383F12BCE33BFB6",
+            ["Everything32.dll"] = "C28CD066AF36CAE4403A9933847AFF01DB928787D86751F014A1FA60D8B97FDA"
+        };
+
     private static Task? _initializationTask;
     private static string? _everythingDllPath;
     private static IntPtr _libraryHandle = IntPtr.Zero;
@@ -27,7 +36,10 @@ internal static class EverythingSdkBootstrapper
     public static Task EnsureInitializedAsync(CancellationToken cancellationToken = default)
     {
         if (!OperatingSystem.IsWindows())
+        {
+            LoggingService.LogInformation("Everything SDK bootstrap skipped for non-Windows platform.");
             return Task.CompletedTask;
+        }
 
         Task initTask;
         lock (InitializationLock)
@@ -45,17 +57,21 @@ internal static class EverythingSdkBootstrapper
     {
         try
         {
+            LoggingService.LogInformation("Initializing Everything SDK bootstrapper.");
             var dllPath = await EnsureDllAsync().ConfigureAwait(false);
             RegisterDllImportResolver(dllPath);
             LoadLibrary(dllPath);
+            LoggingService.LogInformation($"Everything SDK initialized using '{dllPath}'.");
         }
         catch (Exception ex) when (ex is HttpRequestException or IOException or InvalidOperationException
                                        or NotSupportedException)
         {
+            LoggingService.LogError("Failed to initialize Everything SDK due to I/O or network error.", ex);
             throw EverythingSearchException.MissingLibrary(ex);
         }
         catch (Exception ex) when (ex is not EverythingSearchException)
         {
+            LoggingService.LogError("Unexpected failure while initializing Everything SDK.", ex);
             throw EverythingSearchException.NativeFailure(ex);
         }
     }
@@ -63,7 +79,10 @@ internal static class EverythingSdkBootstrapper
     private static async Task<string> EnsureDllAsync()
     {
         if (_everythingDllPath is { Length: > 0 } && File.Exists(_everythingDllPath))
+        {
+            LoggingService.LogInformation($"Everything SDK DLL already present at '{_everythingDllPath}'.");
             return _everythingDllPath;
+        }
 
         var appData = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
         var sdkDirectory = Path.Combine(appData, "EasyExtract", "ThirdParty", "EverythingSdk");
@@ -72,14 +91,23 @@ internal static class EverythingSdkBootstrapper
         var dllPath = Path.Combine(sdkDirectory, TargetDllFileName);
         if (File.Exists(dllPath))
         {
-            _everythingDllPath = dllPath;
-            return dllPath;
+            if (ValidateDllHash(dllPath))
+            {
+                LoggingService.LogInformation($"Reusing previously downloaded Everything SDK DLL at '{dllPath}'.");
+                _everythingDllPath = dllPath;
+                return dllPath;
+            }
+            else
+            {
+                LoggingService.LogInformation($"Discarding Everything SDK DLL at '{dllPath}' due to hash mismatch.");
+            }
         }
 
         var tempZipPath = Path.Combine(Path.GetTempPath(), $"Everything-SDK-{Guid.NewGuid():N}.zip");
 
         try
         {
+            LoggingService.LogInformation($"Downloading Everything SDK from '{SdkDownloadUri}'.");
             using (var response = await HttpClient.GetAsync(SdkDownloadUri, HttpCompletionOption.ResponseHeadersRead)
                        .ConfigureAwait(false))
             {
@@ -92,6 +120,8 @@ internal static class EverythingSdkBootstrapper
                 }
             }
 
+            LoggingService.LogInformation($"Everything SDK archive downloaded to '{tempZipPath}'.");
+
             using var archive = ZipFile.OpenRead(tempZipPath);
             var dllEntry = archive.Entries
                 .FirstOrDefault(entry =>
@@ -103,6 +133,14 @@ internal static class EverythingSdkBootstrapper
             await using var entryStream = dllEntry.Open();
             await using var destinationStream = File.Create(dllPath);
             await entryStream.CopyToAsync(destinationStream).ConfigureAwait(false);
+
+            if (!ValidateDllHash(dllPath))
+            {
+                LoggingService.LogError("The downloaded Everything SDK DLL failed integrity validation.");
+                throw new InvalidOperationException("The downloaded Everything SDK DLL failed integrity validation.");
+            }
+
+            LoggingService.LogInformation($"Everything SDK DLL extracted to '{dllPath}'.");
         }
         finally
         {
@@ -128,6 +166,7 @@ internal static class EverythingSdkBootstrapper
 
         NativeLibrary.SetDllImportResolver(typeof(EverythingNative).Assembly, ResolveImport);
         _resolverRegistered = true;
+        LoggingService.LogInformation($"Registered DllImport resolver for Everything SDK using '{dllPath}'.");
 
         IntPtr ResolveImport(string libraryName, Assembly _, DllImportSearchPath? __)
         {
@@ -142,6 +181,7 @@ internal static class EverythingSdkBootstrapper
                 throw new FileNotFoundException("Everything SDK DLL is missing.", dllPath);
 
             _libraryHandle = NativeLibrary.Load(dllPath);
+            LoggingService.LogInformation($"Loaded Everything SDK DLL from '{dllPath}'.");
             return _libraryHandle;
         }
     }
@@ -155,5 +195,28 @@ internal static class EverythingSdkBootstrapper
             throw new FileNotFoundException("Everything SDK DLL is missing.", dllPath);
 
         _libraryHandle = NativeLibrary.Load(dllPath);
+        LoggingService.LogInformation($"Loaded Everything SDK DLL via NativeLibrary.Load from '{dllPath}'.");
+    }
+
+    private static bool ValidateDllHash(string dllPath)
+    {
+        if (!ExpectedDllHashes.TryGetValue(Path.GetFileName(dllPath), out var expectedHash))
+            throw new InvalidOperationException($"No expected hash registered for {Path.GetFileName(dllPath)}.");
+
+        string actualHash;
+        using (var stream = File.OpenRead(dllPath))
+        using (var sha256 = SHA256.Create())
+        {
+            var hashBytes = sha256.ComputeHash(stream);
+            actualHash = Convert.ToHexString(hashBytes);
+        }
+
+        if (actualHash.Equals(expectedHash, StringComparison.OrdinalIgnoreCase))
+            return true;
+
+        File.Delete(dllPath);
+        LoggingService.LogError(
+            $"Everything SDK DLL at '{dllPath}' failed validation. Expected {expectedHash}, actual {actualHash}. Deleted file.");
+        return false;
     }
 }

@@ -87,7 +87,10 @@ public sealed class DiscordRpcService : IDisposable
             _lastSettingsSnapshot = settings;
             _pendingContext = context;
             if (!EnsureClientInitialized())
+            {
+                Log("Discord RPC client initialization was not completed.");
                 return;
+            }
 
             ApplyPresenceLocked(settings, context);
         }
@@ -95,6 +98,7 @@ public sealed class DiscordRpcService : IDisposable
         {
             Debug.WriteLine($"Failed to update Discord Rich Presence: {ex}");
             Log($"UpdatePresenceAsync exception: {ex}");
+            LoggingService.LogError("Failed to update Discord Rich Presence.", ex);
             DisposeClientLocked();
         }
         finally
@@ -130,6 +134,7 @@ public sealed class DiscordRpcService : IDisposable
                 DetachClientHandlers(_client);
                 _client.Dispose();
                 _client = null;
+                LoggingService.LogError("Discord RPC client failed to initialize; Discord may not be running.");
                 return false;
             }
 
@@ -149,6 +154,7 @@ public sealed class DiscordRpcService : IDisposable
             _timestamps = null;
             _lastPresenceSignature = null;
             Log($"Initialization failed: {ex}");
+            LoggingService.LogError("Discord RPC client initialization failed.", ex);
             return false;
         }
     }
@@ -424,6 +430,8 @@ public sealed class DiscordRpcService : IDisposable
 
     private static void Log(string message)
     {
+        Debug.WriteLine($"[DiscordRPC] {message}");
+
         try
         {
             var timestamp = DateTimeOffset.Now.ToString("u", CultureInfo.InvariantCulture);

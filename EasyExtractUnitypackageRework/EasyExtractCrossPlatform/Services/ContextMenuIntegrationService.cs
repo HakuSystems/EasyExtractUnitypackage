@@ -25,6 +25,16 @@ public static class ContextMenuIntegrationService
 
     public static void UpdateContextMenuIntegration(bool enable)
     {
+        var platform = OperatingSystem.IsWindows()
+            ? "Windows"
+            : OperatingSystem.IsLinux()
+                ? "Linux"
+                : OperatingSystem.IsMacOS()
+                    ? "macOS"
+                    : "Unsupported";
+
+        LoggingService.LogInformation($"Updating context menu integration (enable={enable}) on {platform}.");
+
         try
         {
             if (OperatingSystem.IsWindows())
@@ -33,10 +43,12 @@ public static class ContextMenuIntegrationService
                 UpdateLinuxIntegration(enable);
             else if (OperatingSystem.IsMacOS())
                 UpdateMacIntegration(enable);
+
+            LoggingService.LogInformation($"Context menu integration update completed on {platform}.");
         }
         catch (Exception ex)
         {
-            Debug.WriteLine($"Context menu integration update failed: {ex}");
+            LoggingService.LogError("Context menu integration update failed.", ex);
         }
     }
 
@@ -53,7 +65,7 @@ public static class ContextMenuIntegrationService
         }
         catch (Exception ex)
         {
-            Debug.WriteLine($"Failed to resolve executable path: {ex}");
+            LoggingService.LogError("Failed to resolve executable path for context menu integration.", ex);
         }
 
         return null;
@@ -64,10 +76,14 @@ public static class ContextMenuIntegrationService
     [SupportedOSPlatform("windows")]
     private static void UpdateWindowsIntegration(bool enable)
     {
+        LoggingService.LogInformation($"Applying Windows context menu integration (enable={enable}).");
+
         if (enable)
             TryRegisterWindowsContextMenu();
         else
             TryRemoveWindowsContextMenu();
+
+        LoggingService.LogInformation("Windows context menu integration change complete.");
     }
 
     [SupportedOSPlatform("windows")]
@@ -75,12 +91,20 @@ public static class ContextMenuIntegrationService
     {
         var executablePath = ResolveExecutablePath();
         if (string.IsNullOrWhiteSpace(executablePath))
+        {
+            LoggingService.LogError(
+                "Unable to register Windows context menu because the executable path could not be resolved.");
             return;
+        }
+
+        LoggingService.LogInformation($"Registering Windows context menu using executable '{executablePath}'.");
 
         var command = $"\"{executablePath}\" {CommandArgument} \"%1\"";
 
         RegisterWindowsVerb(@"Software\Classes\.unitypackage", command, executablePath);
         RegisterWindowsVerb(@"Software\Classes\SystemFileAssociations\.unitypackage", command, executablePath);
+
+        LoggingService.LogInformation("Windows context menu registration completed.");
     }
 
     [SupportedOSPlatform("windows")]
@@ -110,18 +134,22 @@ public static class ContextMenuIntegrationService
 
             using var commandKey = entryKey.CreateSubKey("command", true);
             commandKey?.SetValue(null, command);
+
+            LoggingService.LogInformation($"Registered Windows context menu verb under '{baseSubKey}'.");
         }
         catch (Exception ex)
         {
-            Debug.WriteLine($"Failed to register Windows verb '{baseSubKey}': {ex}");
+            LoggingService.LogError($"Failed to register Windows context menu verb at '{baseSubKey}'.", ex);
         }
     }
 
     [SupportedOSPlatform("windows")]
     private static void TryRemoveWindowsContextMenu()
     {
+        LoggingService.LogInformation("Removing Windows context menu integration.");
         RemoveWindowsVerb(@"Software\Classes\.unitypackage");
         RemoveWindowsVerb(@"Software\Classes\SystemFileAssociations\.unitypackage");
+        LoggingService.LogInformation("Windows context menu entries removed.");
     }
 
     [SupportedOSPlatform("windows")]
@@ -131,10 +159,11 @@ public static class ContextMenuIntegrationService
         {
             using var shellKey = Registry.CurrentUser.OpenSubKey($"{baseSubKey}\\shell", true);
             shellKey?.DeleteSubKeyTree(MenuKeyName, false);
+            LoggingService.LogInformation($"Removed Windows context menu verb from '{baseSubKey}'.");
         }
         catch (Exception ex)
         {
-            Debug.WriteLine($"Failed to remove Windows verb '{baseSubKey}': {ex}");
+            LoggingService.LogError($"Failed to remove Windows context menu verb from '{baseSubKey}'.", ex);
         }
     }
 
@@ -144,21 +173,36 @@ public static class ContextMenuIntegrationService
 
     private static void UpdateLinuxIntegration(bool enable)
     {
+        LoggingService.LogInformation($"Applying Linux context menu integration (enable={enable}).");
+
         if (enable)
             TryRegisterLinuxIntegration();
         else
             TryRemoveLinuxIntegration();
+
+        LoggingService.LogInformation("Linux context menu integration change complete.");
     }
 
     private static void TryRegisterLinuxIntegration()
     {
         var executablePath = ResolveExecutablePath();
         if (string.IsNullOrWhiteSpace(executablePath))
+        {
+            LoggingService.LogError(
+                "Unable to register Linux context menu because the executable path could not be resolved.");
             return;
+        }
 
         var homeDirectory = Environment.GetFolderPath(Environment.SpecialFolder.Personal);
         if (string.IsNullOrWhiteSpace(homeDirectory))
+        {
+            LoggingService.LogError(
+                "Unable to register Linux context menu because the user's home directory could not be resolved.");
             return;
+        }
+
+        LoggingService.LogInformation(
+            $"Registering Linux context menu integration using executable '{executablePath}'.");
 
         try
         {
@@ -169,10 +213,11 @@ public static class ContextMenuIntegrationService
             RegisterLinuxNemoAction(homeDirectory, xdgDataHome, executablePath, iconReference);
             RegisterLinuxMimeType(homeDirectory, xdgDataHome);
             RefreshLinuxCaches(xdgDataHome);
+            LoggingService.LogInformation("Linux context menu integration registered successfully.");
         }
         catch (Exception ex)
         {
-            Debug.WriteLine($"Failed to register Linux context menu integration: {ex}");
+            LoggingService.LogError("Failed to register Linux context menu integration.", ex);
         }
     }
 
@@ -285,7 +330,7 @@ public static class ContextMenuIntegrationService
             }
             catch (Exception ex)
             {
-                Debug.WriteLine($"Failed to resolve XDG_DATA_HOME '{xdgDataHome}': {ex}");
+                LoggingService.LogError($"Failed to resolve XDG_DATA_HOME '{xdgDataHome}'.", ex);
             }
 
         return Path.Combine(homeDirectory, ".local", "share");
@@ -316,7 +361,7 @@ public static class ContextMenuIntegrationService
         }
         catch (Exception ex)
         {
-            Debug.WriteLine($"Failed to install Linux icon: {ex}");
+            LoggingService.LogError("Failed to install Linux icon for context menu integration.", ex);
             return "utilities-archive";
         }
     }
@@ -337,7 +382,7 @@ public static class ContextMenuIntegrationService
         }
         catch (Exception ex)
         {
-            Debug.WriteLine($"Failed to load icon via Avalonia asset loader: {ex}");
+            LoggingService.LogError("Failed to load icon via Avalonia asset loader.", ex);
         }
 
         try
@@ -352,7 +397,7 @@ public static class ContextMenuIntegrationService
         }
         catch (Exception ex)
         {
-            Debug.WriteLine($"Failed to load icon from disk: {ex}");
+            LoggingService.LogError("Failed to load icon from disk.", ex);
         }
 
         return null;
@@ -376,7 +421,7 @@ public static class ContextMenuIntegrationService
         }
         catch (Exception ex)
         {
-            Debug.WriteLine($"Failed to refresh Linux caches: {ex}");
+            LoggingService.LogError("Failed to refresh Linux desktop caches.", ex);
         }
     }
 
@@ -400,7 +445,7 @@ public static class ContextMenuIntegrationService
         }
         catch (Exception ex)
         {
-            Debug.WriteLine($"Failed to set file mode on '{path}': {ex}");
+            LoggingService.LogError($"Failed to set file mode on '{path}'.", ex);
         }
     }
 
@@ -409,6 +454,8 @@ public static class ContextMenuIntegrationService
         var homeDirectory = Environment.GetFolderPath(Environment.SpecialFolder.Personal);
         if (string.IsNullOrWhiteSpace(homeDirectory))
             return;
+
+        LoggingService.LogInformation("Removing Linux context menu integration.");
 
         var xdgDataHome = GetXdgDataHome(homeDirectory);
         var desktopFilePath = Path.Combine(xdgDataHome, "applications", LinuxDesktopEntryFileName);
@@ -424,6 +471,7 @@ public static class ContextMenuIntegrationService
         DeleteFileIfExists(iconPath);
 
         RefreshLinuxCaches(xdgDataHome);
+        LoggingService.LogInformation("Linux context menu integration removed.");
     }
 
     #endregion
@@ -432,21 +480,35 @@ public static class ContextMenuIntegrationService
 
     private static void UpdateMacIntegration(bool enable)
     {
+        LoggingService.LogInformation($"Applying macOS context menu integration (enable={enable}).");
+
         if (enable)
             TryRegisterMacIntegration();
         else
             TryRemoveMacIntegration();
+
+        LoggingService.LogInformation("macOS context menu integration change complete.");
     }
 
     private static void TryRegisterMacIntegration()
     {
         var executablePath = ResolveExecutablePath();
         if (string.IsNullOrWhiteSpace(executablePath))
+        {
+            LoggingService.LogError(
+                "Unable to register macOS service because the executable path could not be resolved.");
             return;
+        }
 
         var homeDirectory = Environment.GetFolderPath(Environment.SpecialFolder.Personal);
         if (string.IsNullOrWhiteSpace(homeDirectory))
+        {
+            LoggingService.LogError(
+                "Unable to register macOS service because the user's home directory could not be resolved.");
             return;
+        }
+
+        LoggingService.LogInformation($"Registering macOS Automator service using executable '{executablePath}'.");
 
         var servicesDirectory = Path.Combine(homeDirectory, "Library", "Services");
         Directory.CreateDirectory(servicesDirectory);
@@ -462,6 +524,7 @@ public static class ContextMenuIntegrationService
         File.WriteAllText(workflowDocumentPath, BuildMacWorkflowDocument(executablePath));
 
         TryStartProcess("/System/Library/CoreServices/pbs", "-flush");
+        LoggingService.LogInformation("macOS service registration completed.");
     }
 
     private static void TryRemoveMacIntegration()
@@ -470,10 +533,13 @@ public static class ContextMenuIntegrationService
         if (string.IsNullOrWhiteSpace(homeDirectory))
             return;
 
+        LoggingService.LogInformation("Removing macOS Automator service integration.");
+
         var workflowDirectory = Path.Combine(homeDirectory, "Library", "Services", "Extract with EasyExtract.workflow");
         DeleteDirectoryIfExists(workflowDirectory);
 
         TryStartProcess("/System/Library/CoreServices/pbs", "-flush");
+        LoggingService.LogInformation("macOS Automator service removed.");
     }
 
     private static string BuildMacInfoPlist()
@@ -637,7 +703,7 @@ public static class ContextMenuIntegrationService
         }
         catch (Exception ex)
         {
-            Debug.WriteLine($"Failed to resolve icon candidate: {ex}");
+            LoggingService.LogError("Failed to resolve Windows icon candidate.", ex);
         }
 
         return $"{executablePath},0";
@@ -651,7 +717,7 @@ public static class ContextMenuIntegrationService
                 !Path.IsPathRooted(fileName) &&
                 !IsUnixCommandAvailable(fileName))
             {
-                Debug.WriteLine($"Skipping execution of '{fileName}' because it was not found on PATH.");
+                LoggingService.LogInformation($"Skipping execution of '{fileName}' because it was not found on PATH.");
                 return;
             }
 
@@ -669,7 +735,7 @@ public static class ContextMenuIntegrationService
         }
         catch (Exception ex)
         {
-            Debug.WriteLine($"Failed to execute '{fileName} {arguments}': {ex}");
+            LoggingService.LogError($"Failed to execute '{fileName} {arguments}'.", ex);
         }
     }
 
@@ -701,7 +767,7 @@ public static class ContextMenuIntegrationService
         }
         catch (Exception ex)
         {
-            Debug.WriteLine($"Failed to probe PATH for '{command}': {ex}");
+            LoggingService.LogError($"Failed to probe PATH for '{command}'.", ex);
         }
 
         return false;
@@ -716,7 +782,7 @@ public static class ContextMenuIntegrationService
         }
         catch (Exception ex)
         {
-            Debug.WriteLine($"Failed to delete file '{path}': {ex}");
+            LoggingService.LogError($"Failed to delete file '{path}'.", ex);
         }
     }
 
@@ -729,7 +795,7 @@ public static class ContextMenuIntegrationService
         }
         catch (Exception ex)
         {
-            Debug.WriteLine($"Failed to delete directory '{path}': {ex}");
+            LoggingService.LogError($"Failed to delete directory '{path}'.", ex);
         }
     }
 

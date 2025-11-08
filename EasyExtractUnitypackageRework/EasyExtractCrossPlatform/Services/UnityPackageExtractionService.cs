@@ -1,6 +1,8 @@
 using System;
+using System.Buffers;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.Diagnostics;
 using System.Formats.Tar;
 using System.IO;
 using System.IO.Compression;
@@ -37,18 +39,13 @@ public sealed record UnityPackageExtractionResult(
 
 public sealed class UnityPackageExtractionService : IUnityPackageExtractionService
 {
+    private const int StreamCopyBufferSize = 128 * 1024;
+
     private static readonly HashSet<char> InvalidFileNameCharacters =
         Path.GetInvalidFileNameChars().ToHashSet();
 
     private static readonly PathSegmentNormalization[] EmptySegmentNormalizations =
         Array.Empty<PathSegmentNormalization>();
-
-    private static readonly string[] RootSegmentsToTrim =
-    {
-        "Assets",
-        "ProjectSettings",
-        "Packages"
-    };
 
     public async Task<UnityPackageExtractionResult> ExtractAsync(
         string packagePath,
@@ -60,17 +57,47 @@ public sealed class UnityPackageExtractionService : IUnityPackageExtractionServi
         ArgumentException.ThrowIfNullOrWhiteSpace(packagePath);
         ArgumentException.ThrowIfNullOrWhiteSpace(outputDirectory);
 
+        LoggingService.LogInformation(
+            $"Unity package extraction requested. package='{packagePath}', output='{outputDirectory}', organize={options.OrganizeByCategories}, temp='{options.TemporaryDirectory}'.");
+
         if (!File.Exists(packagePath))
+        {
+            LoggingService.LogError($"Unity package extraction aborted. File not found: '{packagePath}'.");
             throw new FileNotFoundException("Unitypackage file was not found.", packagePath);
+        }
 
         Directory.CreateDirectory(outputDirectory);
+        LoggingService.LogInformation($"Ensured output directory '{outputDirectory}' exists.");
 
         if (!string.IsNullOrWhiteSpace(options.TemporaryDirectory))
+        {
             Directory.CreateDirectory(options.TemporaryDirectory!);
+            LoggingService.LogInformation($"Ensured temporary directory '{options.TemporaryDirectory}' exists.");
+        }
 
-        return await Task.Run(() =>
-                ExtractInternal(packagePath, outputDirectory, options, progress, cancellationToken),
-            cancellationToken).ConfigureAwait(false);
+        var stopwatch = Stopwatch.StartNew();
+
+        try
+        {
+            var result = await Task.Run(() =>
+                    ExtractInternal(packagePath, outputDirectory, options, progress, cancellationToken),
+                cancellationToken).ConfigureAwait(false);
+
+            stopwatch.Stop();
+            LoggingService.LogInformation(
+                $"Unity package extraction completed in {stopwatch.Elapsed.TotalMilliseconds:F0} ms. Extracted {result.AssetsExtracted} assets to '{result.OutputDirectory}'.");
+            return result;
+        }
+        catch (Exception ex) when (ex is not OperationCanceledException)
+        {
+            stopwatch.Stop();
+            LoggingService.LogError($"Unity package extraction failed for '{packagePath}'.", ex);
+            throw;
+        }
+        finally
+        {
+            stopwatch.Stop();
+        }
     }
 
     private static UnityPackageExtractionResult ExtractInternal(
@@ -80,6 +107,8 @@ public sealed class UnityPackageExtractionService : IUnityPackageExtractionServi
         IProgress<UnityPackageExtractionProgress>? progress,
         CancellationToken cancellationToken)
     {
+        LoggingService.LogInformation($"Beginning low-level extraction flow for '{packagePath}'.");
+
         using var packageStream = File.OpenRead(packagePath);
         using var gzipStream = new GZipStream(packageStream, CompressionMode.Decompress);
         using var tarReader = new TarReader(gzipStream, false);
@@ -89,6 +118,9 @@ public sealed class UnityPackageExtractionService : IUnityPackageExtractionServi
         var pendingWrites = new List<PendingAssetWrite>();
         var queuedStates = new HashSet<UnityPackageAssetState>();
         var directoriesToCleanup = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        var generatedRelativePaths = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        var duplicateSuffixCounters = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
+        using var temporaryDirectory = CreateTemporaryDirectory(options.TemporaryDirectory);
         var extractionRequired = false;
         var extractedCount = 0;
 
@@ -137,6 +169,8 @@ public sealed class UnityPackageExtractionService : IUnityPackageExtractionServi
                     state,
                     outputDirectory,
                     options.OrganizeByCategories,
+                    generatedRelativePaths,
+                    duplicateSuffixCounters,
                     directoriesToCleanup,
                     out var targetPath,
                     out var metaPath,
@@ -190,27 +224,38 @@ public sealed class UnityPackageExtractionService : IUnityPackageExtractionServi
             if (entry.DataStream is null)
                 continue;
 
-            using var memoryStream = new MemoryStream();
-            entry.DataStream.CopyTo(memoryStream);
-            var data = memoryStream.ToArray();
-
             switch (componentName)
             {
                 case "pathname":
-                    var normalization = NormalizeRelativePath(Encoding.UTF8.GetString(data));
+                {
+                    var normalization =
+                        NormalizeRelativePath(ReadEntryAsUtf8String(entry.DataStream, cancellationToken));
                     state.RelativePath = normalization.NormalizedPath;
                     state.OriginalRelativePath = normalization.OriginalPath;
                     state.PathNormalizations = normalization.Segments;
                     break;
+                }
                 case "asset":
-                    state.AssetData = data;
+                {
+                    var component = CreateAssetComponent(entry.DataStream, temporaryDirectory.DirectoryPath,
+                        cancellationToken);
+                    state.SetAssetComponent(component);
                     break;
+                }
                 case "asset.meta":
-                    state.MetaData = data;
+                {
+                    var component = CreateAssetComponent(entry.DataStream, temporaryDirectory.DirectoryPath,
+                        cancellationToken);
+                    state.SetMetaComponent(component);
                     break;
+                }
                 case "preview.png":
-                    state.PreviewData = data;
+                {
+                    var component = CreateAssetComponent(entry.DataStream, temporaryDirectory.DirectoryPath,
+                        cancellationToken);
+                    state.SetPreviewComponent(component);
                     break;
+                }
                 default:
                     continue;
             }
@@ -237,6 +282,8 @@ public sealed class UnityPackageExtractionService : IUnityPackageExtractionServi
             queuedStates.Clear();
             CleanupCorruptedDirectories(directoriesToCleanup);
 
+            LoggingService.LogInformation($"No writable assets detected in '{packagePath}'.");
+
             return new UnityPackageExtractionResult(
                 packagePath,
                 outputDirectory,
@@ -249,6 +296,9 @@ public sealed class UnityPackageExtractionService : IUnityPackageExtractionServi
 
         CleanupCorruptedDirectories(directoriesToCleanup);
 
+        LoggingService.LogInformation(
+            $"Extraction flow completed for '{packagePath}'. AssetsExtracted={extractedCount}, filesWritten={extractedFiles.Count}.");
+
         return new UnityPackageExtractionResult(
             packagePath,
             outputDirectory,
@@ -260,6 +310,8 @@ public sealed class UnityPackageExtractionService : IUnityPackageExtractionServi
         UnityPackageAssetState state,
         string outputDirectory,
         bool organizeByCategories,
+        HashSet<string> generatedRelativePaths,
+        Dictionary<string, int> duplicateSuffixCounters,
         HashSet<string> directoriesToCleanup,
         out string targetPath,
         out string? metaPath,
@@ -269,17 +321,23 @@ public sealed class UnityPackageExtractionService : IUnityPackageExtractionServi
         metaPath = null;
         previewPath = null;
 
-        if (state.RelativePath is null || state.AssetData is not { Length: > 0 })
+        if (state.RelativePath is null || state.Asset is not { HasContent: true })
             return false;
 
-        var sanitizedPath = ResolveOutputRelativePath(state, organizeByCategories);
+        var relativeOutputPath = ResolveOutputRelativePath(state, organizeByCategories);
 
-        if (string.IsNullOrWhiteSpace(sanitizedPath))
+        if (string.IsNullOrWhiteSpace(relativeOutputPath))
             return false;
 
-        targetPath = Path.Combine(outputDirectory, sanitizedPath);
-        metaPath = state.MetaData is { Length: > 0 } ? $"{targetPath}.meta" : null;
-        previewPath = state.PreviewData is { Length: > 0 } ? $"{targetPath}.preview.png" : null;
+        relativeOutputPath = EnsureUniqueRelativePath(
+            relativeOutputPath,
+            generatedRelativePaths,
+            duplicateSuffixCounters,
+            organizeByCategories);
+
+        targetPath = Path.Combine(outputDirectory, relativeOutputPath);
+        metaPath = state.Meta is { HasContent: true } ? $"{targetPath}.meta" : null;
+        previewPath = state.Preview is { HasContent: true } ? $"{targetPath}.preview.png" : null;
         TrackCorruptedDirectories(outputDirectory, state, directoriesToCleanup);
         return true;
     }
@@ -293,36 +351,97 @@ public sealed class UnityPackageExtractionService : IUnityPackageExtractionServi
             return null;
 
         if (!organizeByCategories)
-            return Path.GetFileName(relativePath);
+        {
+            var normalizedSegments = state.PathNormalizations?
+                .Select(segment => segment.Normalized)
+                .Where(segment => !string.IsNullOrWhiteSpace(segment))
+                .ToArray();
 
-        var assetSize = state.AssetData?.LongLength ?? 0L;
+            if (normalizedSegments is { Length: > 0 })
+                return Path.Combine(normalizedSegments);
+
+            return relativePath;
+        }
+
+        var assetSize = state.Asset?.Length ?? 0L;
         var category = UnityAssetClassification.ResolveCategory(
             state.OriginalRelativePath ?? relativePath,
             assetSize,
-            state.AssetData);
+            state.Asset?.HasContent ?? false);
         var categorySegment = SanitizePathSegment(category);
 
-        var normalizedSegments = state.PathNormalizations?
-            .Select(segment => segment.Normalized)
-            .Where(segment => !string.IsNullOrWhiteSpace(segment))
-            .ToList();
+        var fileName = Path.GetFileName(relativePath);
+        if (string.IsNullOrWhiteSpace(fileName))
+        {
+            var fallbackSegment = state.PathNormalizations?
+                .Select(segment => segment.Normalized)
+                .LastOrDefault(segment => !string.IsNullOrWhiteSpace(segment));
+            if (!string.IsNullOrWhiteSpace(fallbackSegment))
+            {
+                fileName = fallbackSegment;
+            }
+            else
+            {
+                var originalFileName = Path.GetFileName(state.OriginalRelativePath ?? string.Empty);
+                if (!string.IsNullOrWhiteSpace(originalFileName))
+                    fileName = SanitizePathSegment(originalFileName);
+            }
+        }
 
-        if (normalizedSegments is { Count: > 0 })
-            while (normalizedSegments.Count > 1 &&
-                   RootSegmentsToTrim.Contains(normalizedSegments[0], StringComparer.OrdinalIgnoreCase))
-                normalizedSegments.RemoveAt(0);
+        if (string.IsNullOrWhiteSpace(fileName))
+            fileName = "Asset";
 
-        string? pathWithinCategory = null;
-        if (normalizedSegments is { Count: > 0 })
-            pathWithinCategory = Path.Combine(normalizedSegments.ToArray());
+        return Path.Combine(categorySegment, fileName);
+    }
 
-        if (string.IsNullOrWhiteSpace(pathWithinCategory))
-            pathWithinCategory = Path.GetFileName(relativePath);
+    private static string EnsureUniqueRelativePath(
+        string relativePath,
+        HashSet<string> usedRelativePaths,
+        Dictionary<string, int> duplicateSuffixCounters,
+        bool allowSuffixes)
+    {
+        if (string.IsNullOrWhiteSpace(relativePath))
+            return relativePath;
 
-        if (string.IsNullOrWhiteSpace(pathWithinCategory))
-            return categorySegment;
+        if (usedRelativePaths.Add(relativePath) || !allowSuffixes)
+            return relativePath;
 
-        return Path.Combine(categorySegment, pathWithinCategory);
+        var directory = Path.GetDirectoryName(relativePath);
+        var fileName = Path.GetFileName(relativePath);
+
+        if (string.IsNullOrWhiteSpace(fileName)) fileName = "Asset";
+
+        var baseName = Path.GetFileNameWithoutExtension(fileName);
+        var extension = Path.GetExtension(fileName);
+
+        if (string.IsNullOrWhiteSpace(baseName))
+        {
+            baseName = fileName;
+            extension = string.Empty;
+        }
+
+        var duplicateKey = string.IsNullOrWhiteSpace(directory)
+            ? fileName
+            : $"{directory}/{fileName}";
+
+        if (!duplicateSuffixCounters.TryGetValue(duplicateKey, out var counter))
+            counter = 1;
+
+        while (true)
+        {
+            var suffixedName = $"{baseName} ({counter}){extension}";
+            var candidatePath = string.IsNullOrWhiteSpace(directory)
+                ? suffixedName
+                : Path.Combine(directory, suffixedName);
+
+            if (usedRelativePaths.Add(candidatePath))
+            {
+                duplicateSuffixCounters[duplicateKey] = counter + 1;
+                return candidatePath;
+            }
+
+            counter++;
+        }
     }
 
     private static string SanitizePathSegment(string? segment)
@@ -411,13 +530,13 @@ public sealed class UnityPackageExtractionService : IUnityPackageExtractionServi
         string? metaPath,
         string? previewPath)
     {
-        var writeAsset = state.AssetData is { Length: > 0 } && NeedsWrite(targetPath, state.AssetData);
+        var writeAsset = state.Asset is { HasContent: true } && NeedsWrite(targetPath, state.Asset);
         var writeMeta = metaPath is not null &&
-                        state.MetaData is { Length: > 0 } &&
-                        NeedsWrite(metaPath, state.MetaData);
+                        state.Meta is { HasContent: true } &&
+                        NeedsWrite(metaPath, state.Meta);
         var writePreview = previewPath is not null &&
-                           state.PreviewData is { Length: > 0 } &&
-                           NeedsWrite(previewPath, state.PreviewData);
+                           state.Preview is { HasContent: true } &&
+                           NeedsWrite(previewPath, state.Preview);
 
         return new AssetWritePlan(writeAsset, writeMeta, writePreview);
     }
@@ -448,53 +567,52 @@ public sealed class UnityPackageExtractionService : IUnityPackageExtractionServi
             directoryEnsured = true;
         }
 
-        if (plan.WriteAsset && state.AssetData is { Length: > 0 })
+        if (plan.WriteAsset && state.Asset is { HasContent: true } assetComponent)
         {
             EnsureDirectory();
             cancellationToken.ThrowIfCancellationRequested();
-            File.WriteAllBytes(targetPath, state.AssetData);
+            assetComponent.CopyTo(targetPath, cancellationToken);
             writtenFiles.Add(targetPath);
         }
 
-        if (plan.WriteMeta && metaPath is not null && state.MetaData is { Length: > 0 })
+        if (plan.WriteMeta && metaPath is not null && state.Meta is { HasContent: true } metaComponent)
         {
             EnsureDirectory();
             cancellationToken.ThrowIfCancellationRequested();
-            File.WriteAllBytes(metaPath, state.MetaData);
+            metaComponent.CopyTo(metaPath, cancellationToken);
             writtenFiles.Add(metaPath);
         }
 
-        if (plan.WritePreview && previewPath is not null && state.PreviewData is { Length: > 0 })
+        if (plan.WritePreview && previewPath is not null && state.Preview is { HasContent: true } previewComponent)
         {
             EnsureDirectory();
             cancellationToken.ThrowIfCancellationRequested();
-            File.WriteAllBytes(previewPath, state.PreviewData);
+            previewComponent.CopyTo(previewPath, cancellationToken);
             writtenFiles.Add(previewPath);
         }
 
         return writtenFiles;
     }
 
-    private static bool NeedsWrite(string path, byte[] data)
+    private static bool NeedsWrite(string path, AssetComponent component)
     {
         if (!File.Exists(path))
             return true;
 
-        return !ContentMatches(path, data);
+        return !ContentMatches(path, component);
     }
 
-    private static bool ContentMatches(string path, byte[] data)
+    private static bool ContentMatches(string path, AssetComponent component)
     {
         try
         {
             var fileInfo = new FileInfo(path);
-            if (!fileInfo.Exists || fileInfo.Length != data.Length)
+            if (!fileInfo.Exists || fileInfo.Length != component.Length)
                 return false;
 
             using var stream = File.Open(path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
             var fileHash = SHA256.HashData(stream);
-            var dataHash = SHA256.HashData(data);
-            return CryptographicOperations.FixedTimeEquals(fileHash, dataHash);
+            return CryptographicOperations.FixedTimeEquals(fileHash, component.ContentHash.Span);
         }
         catch (IOException)
         {
@@ -507,6 +625,90 @@ public sealed class UnityPackageExtractionService : IUnityPackageExtractionServi
         catch (CryptographicException)
         {
             return false;
+        }
+    }
+
+    private static string ReadEntryAsUtf8String(Stream dataStream, CancellationToken cancellationToken)
+    {
+        using var reader = new StreamReader(
+            dataStream,
+            Encoding.UTF8,
+            true,
+            StreamCopyBufferSize,
+            true);
+        var text = reader.ReadToEnd();
+        cancellationToken.ThrowIfCancellationRequested();
+        return text;
+    }
+
+    private static AssetComponent? CreateAssetComponent(
+        Stream dataStream,
+        string temporaryDirectory,
+        CancellationToken cancellationToken)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+        Directory.CreateDirectory(temporaryDirectory);
+
+        var tempPath = Path.Combine(temporaryDirectory, $"{Guid.NewGuid():N}.tmp");
+        using var output = File.Open(tempPath, FileMode.Create, FileAccess.Write, FileShare.None);
+        using var hasher = IncrementalHash.CreateHash(HashAlgorithmName.SHA256);
+        var buffer = ArrayPool<byte>.Shared.Rent(StreamCopyBufferSize);
+        long totalWritten = 0;
+
+        try
+        {
+            int read;
+            while ((read = dataStream.Read(buffer, 0, buffer.Length)) > 0)
+            {
+                cancellationToken.ThrowIfCancellationRequested();
+                output.Write(buffer, 0, read);
+                hasher.AppendData(buffer, 0, read);
+                totalWritten += read;
+            }
+        }
+        finally
+        {
+            ArrayPool<byte>.Shared.Return(buffer);
+        }
+
+        output.Flush();
+        var hash = hasher.GetHashAndReset();
+        output.Dispose();
+
+        if (totalWritten == 0)
+        {
+            TryDeleteFile(tempPath);
+            return null;
+        }
+
+        return new AssetComponent(tempPath, totalWritten, hash);
+    }
+
+    private static TemporaryDirectoryScope CreateTemporaryDirectory(string? baseDirectory)
+    {
+        var root = string.IsNullOrWhiteSpace(baseDirectory)
+            ? Path.Combine(Path.GetTempPath(), "EasyExtractCrossPlatform")
+            : baseDirectory!;
+
+        Directory.CreateDirectory(root);
+
+        var scopedDirectory = Path.Combine(root, Guid.NewGuid().ToString("N"));
+        Directory.CreateDirectory(scopedDirectory);
+        return new TemporaryDirectoryScope(scopedDirectory);
+    }
+
+    private static void TryDeleteFile(string path)
+    {
+        try
+        {
+            if (File.Exists(path))
+                File.Delete(path);
+        }
+        catch (IOException)
+        {
+        }
+        catch (UnauthorizedAccessException)
+        {
         }
     }
 
@@ -595,28 +797,139 @@ public sealed class UnityPackageExtractionService : IUnityPackageExtractionServi
 
     private sealed class UnityPackageAssetState
     {
+        private AssetComponent? _asset;
+        private AssetComponent? _meta;
+        private AssetComponent? _preview;
         public string? RelativePath { get; set; }
         public string? OriginalRelativePath { get; set; }
         public IReadOnlyList<PathSegmentNormalization>? PathNormalizations { get; set; }
-        public byte[]? AssetData { get; set; }
-        public byte[]? MetaData { get; set; }
-        public byte[]? PreviewData { get; set; }
+
+        public AssetComponent? Asset => _asset;
+        public AssetComponent? Meta => _meta;
+        public AssetComponent? Preview => _preview;
         private bool Completed { get; set; }
 
         public bool CanWriteToDisk =>
             !Completed &&
             !string.IsNullOrWhiteSpace(RelativePath) &&
-            AssetData is { Length: > 0 };
+            Asset is { HasContent: true };
+
+        public void SetAssetComponent(AssetComponent? component)
+        {
+            ReplaceComponent(ref _asset, component);
+        }
+
+        public void SetMetaComponent(AssetComponent? component)
+        {
+            ReplaceComponent(ref _meta, component);
+        }
+
+        public void SetPreviewComponent(AssetComponent? component)
+        {
+            ReplaceComponent(ref _preview, component);
+        }
 
         public void MarkAsCompleted()
         {
             RelativePath = null;
             OriginalRelativePath = null;
             PathNormalizations = null;
-            AssetData = null;
-            MetaData = null;
-            PreviewData = null;
+            ReplaceComponent(ref _asset, null);
+            ReplaceComponent(ref _meta, null);
+            ReplaceComponent(ref _preview, null);
             Completed = true;
+        }
+
+        private void ReplaceComponent(ref AssetComponent? target, AssetComponent? value)
+        {
+            if (ReferenceEquals(target, value))
+                return;
+
+            if (Completed)
+            {
+                value?.Dispose();
+                return;
+            }
+
+            target?.Dispose();
+            target = value;
+        }
+    }
+
+    private sealed class TemporaryDirectoryScope : IDisposable
+    {
+        public TemporaryDirectoryScope(string directoryPath)
+        {
+            DirectoryPath = directoryPath;
+        }
+
+        public string DirectoryPath { get; }
+
+        public void Dispose()
+        {
+            try
+            {
+                if (Directory.Exists(DirectoryPath))
+                    Directory.Delete(DirectoryPath, true);
+            }
+            catch (IOException)
+            {
+            }
+            catch (UnauthorizedAccessException)
+            {
+            }
+        }
+    }
+
+    private sealed class AssetComponent : IDisposable
+    {
+        private bool _disposed;
+
+        public AssetComponent(string tempPath, long length, byte[] contentHash)
+        {
+            TempPath = tempPath;
+            Length = length;
+            ContentHash = contentHash;
+        }
+
+        public string TempPath { get; }
+        public long Length { get; }
+        public ReadOnlyMemory<byte> ContentHash { get; }
+        public bool HasContent => Length > 0;
+
+        public void Dispose()
+        {
+            if (_disposed)
+                return;
+
+            _disposed = true;
+            TryDeleteFile(TempPath);
+        }
+
+        public void CopyTo(string destinationPath, CancellationToken cancellationToken)
+        {
+            if (_disposed)
+                throw new ObjectDisposedException(nameof(AssetComponent));
+
+            cancellationToken.ThrowIfCancellationRequested();
+
+            using var source = File.Open(TempPath, FileMode.Open, FileAccess.Read, FileShare.Read);
+            using var destination = File.Open(destinationPath, FileMode.Create, FileAccess.Write, FileShare.Read);
+            var buffer = ArrayPool<byte>.Shared.Rent(StreamCopyBufferSize);
+
+            try
+            {
+                int read;
+                while ((read = source.Read(buffer, 0, buffer.Length)) > 0)
+                {
+                    cancellationToken.ThrowIfCancellationRequested();
+                    destination.Write(buffer, 0, read);
+                }
+            }
+            finally
+            {
+                ArrayPool<byte>.Shared.Return(buffer);
+            }
         }
     }
 }

@@ -1,9 +1,10 @@
 <Window xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:loc="using:EasyExtractCrossPlatform.Localization"
         xmlns:viewModels="using:EasyExtractCrossPlatform.ViewModels"
         x:Class="EasyExtractCrossPlatform.SettingsWindow"
         x:DataType="viewModels:SettingsViewModel"
-        Title="EasyExtract Settings"
+        Title="{loc:Loc SettingsWindow_Title}"
         Width="880"
         Height="720"
         MinWidth="760"
@@ -34,8 +35,8 @@
                 BorderThickness="1"
                 BoxShadow="0 32 68 0 #15000000">
             <StackPanel>
-                <TextBlock Text="Settings" Classes="display" />
-                <TextBlock Text="Tune EasyExtract to match your workflow."
+                <TextBlock Text="{loc:Loc SettingsWindow_Header}" Classes="display" />
+                <TextBlock Text="{loc:Loc SettingsWindow_Subheader}"
                            Classes="subtle"
                            Margin="0,6,0,0" />
                 <TextBlock Text="{Binding LoadErrorMessage}"
@@ -48,22 +49,22 @@
             <StackPanel>
                 <Border Classes="section">
                     <StackPanel Spacing="18">
-                        <TextBlock Text="General" FontSize="20" FontWeight="SemiBold" />
-                        <TextBlock Text="Update the core behaviour of EasyExtract." Classes="subtle" />
+                        <TextBlock Text="{loc:Loc SettingsWindow_GeneralTitle}" FontSize="20" FontWeight="SemiBold" />
+                        <TextBlock Text="{loc:Loc SettingsWindow_GeneralDescription}" Classes="subtle" />
 
                         <StackPanel Spacing="10">
-                            <TextBlock Text="Application title" />
+                            <TextBlock Text="{loc:Loc SettingsWindow_AppTitleLabel}" />
                             <TextBlock Text="{Binding Settings.AppTitle}" />
                         </StackPanel>
 
                         <StackPanel Spacing="10">
-                            <TextBlock Text="Default output path" />
+                            <TextBlock Text="{loc:Loc SettingsWindow_OutputPathLabel}" />
                             <Grid ColumnDefinitions="*,Auto">
                                 <TextBox x:Name="DefaultOutputPathBox"
                                          Text="{Binding Settings.DefaultOutputPath}"
                                          VerticalAlignment="Center" />
                                 <Button Grid.Column="1"
-                                        Content="Browse"
+                                        Content="{loc:Loc SettingsWindow_Browse}"
                                         Margin="12,0,0,0"
                                         Click="BrowseOutputPath_OnClick"
                                         Width="120" />
@@ -71,13 +72,13 @@
                         </StackPanel>
 
                         <StackPanel Spacing="10">
-                            <TextBlock Text="Temporary extraction path" />
+                            <TextBlock Text="{loc:Loc SettingsWindow_TempPathLabel}" />
                             <Grid ColumnDefinitions="*,Auto">
                                 <TextBox x:Name="DefaultTempPathBox"
                                          Text="{Binding Settings.DefaultTempPath}"
                                          VerticalAlignment="Center" />
                                 <Button Grid.Column="1"
-                                        Content="Browse"
+                                        Content="{loc:Loc SettingsWindow_Browse}"
                                         Margin="12,0,0,0"
                                         Click="BrowseTempPath_OnClick"
                                         Width="120" />
@@ -86,15 +87,15 @@
 
                         <WrapPanel>
                             <ToggleSwitch x:Name="ContextMenuToggle"
-                                          Content="Enable context menu integration"
+                                          Content="{loc:Loc SettingsWindow_ContextMenuToggle}"
                                           Margin="0,0,18,12"
                                           IsChecked="{Binding Settings.ContextMenuToggle}" />
                             <ToggleSwitch x:Name="DiscordRpcToggle"
-                                          Content="Enable Discord Rich Presence"
+                                          Content="{loc:Loc SettingsWindow_DiscordToggle}"
                                           Margin="0,0,18,12"
                                           IsChecked="{Binding Settings.DiscordRpc}" />
                             <ToggleSwitch x:Name="CategoryStructureToggle"
-                                          Content="Organize output into categories"
+                                          Content="{loc:Loc SettingsWindow_CategoryStructureToggle}"
                                           Margin="0,0,0,12"
                                           IsChecked="{Binding Settings.ExtractedCategoryStructure}" />
                         </WrapPanel>
@@ -103,17 +104,17 @@
 
                 <Border Classes="section">
                     <StackPanel Spacing="18">
-                        <TextBlock Text="Audio" FontSize="20" FontWeight="SemiBold" />
-                        <TextBlock Text="Control sound cues while extracting packages." Classes="subtle" />
+                        <TextBlock Text="{loc:Loc SettingsWindow_AudioTitle}" FontSize="20" FontWeight="SemiBold" />
+                        <TextBlock Text="{loc:Loc SettingsWindow_AudioDescription}" Classes="subtle" />
 
                         <ToggleSwitch x:Name="SoundToggle"
-                                      Content="Enable sound effects"
+                                      Content="{loc:Loc SettingsWindow_SoundToggle}"
                                       IsChecked="{Binding Settings.EnableSound}" />
 
                         <StackPanel>
                             <Grid ColumnDefinitions="*,Auto" Margin="0,0,0,6">
                                 <TextBlock Grid.Column="0"
-                                           Text="Volume" />
+                                           Text="{loc:Loc SettingsWindow_VolumeLabel}" />
                                 <TextBlock Grid.Column="1"
                                            Text="{Binding Settings.SoundVolume, StringFormat='{}{0:P0}'}"
                                            HorizontalAlignment="Right"
@@ -131,12 +132,12 @@
 
                 <Border Classes="section">
                     <StackPanel Spacing="18">
-                        <TextBlock Text="Appearance" FontSize="20" FontWeight="SemiBold" />
-                        <TextBlock Text="Personalize layout and scaling." Classes="subtle" />
+                        <TextBlock Text="{loc:Loc SettingsWindow_AppearanceTitle}" FontSize="20" FontWeight="SemiBold" />
+                        <TextBlock Text="{loc:Loc SettingsWindow_AppearanceDescription}" Classes="subtle" />
 
                         <StackPanel Orientation="Horizontal" Spacing="18">
                             <StackPanel Width="220">
-                                <TextBlock Text="Theme" />
+                                <TextBlock Text="{loc:Loc SettingsWindow_ThemeLabel}" />
                                 <ComboBox x:Name="ThemeComboBox"
                                           ItemsSource="{Binding ThemeOptions}"
                                           SelectedIndex="{Binding Settings.ApplicationTheme}">
@@ -151,15 +152,15 @@
 
                         <StackPanel Spacing="12">
                             <StackPanel>
-                                <TextBlock Text="Custom background image" />
+                                <TextBlock Text="{loc:Loc SettingsWindow_BackgroundTitle}" />
                                 <ToggleSwitch x:Name="CustomBackgroundToggle"
-                                              Content="Enable custom background"
+                                              Content="{loc:Loc SettingsWindow_BackgroundToggle}"
                                               IsChecked="{Binding Settings.CustomBackgroundImage.IsEnabled}" />
                                 <TextBox x:Name="BackgroundPathBox"
                                          Text="{Binding Settings.CustomBackgroundImage.BackgroundPath}"
                                          IsEnabled="{Binding IsChecked, ElementName=CustomBackgroundToggle}" />
                                 <StackPanel Orientation="Horizontal" Spacing="12" VerticalAlignment="Center">
-                                    <TextBlock Text="Opacity" />
+                                    <TextBlock Text="{loc:Loc SettingsWindow_OpacityLabel}" />
                                     <Slider x:Name="BackgroundOpacitySlider"
                                             Width="240"
                                             Minimum="0"
@@ -180,53 +181,59 @@
 
                 <Border Classes="section">
                     <StackPanel Spacing="18">
-                        <TextBlock Text="Telemetry &amp; Diagnostics" FontSize="20" FontWeight="SemiBold" />
-                        <TextBlock Text="Toggle runtime diagnostics and logging hooks." Classes="subtle" />
+                        <TextBlock Text="{loc:Loc SettingsWindow_DiagnosticsTitle}" FontSize="20" FontWeight="SemiBold" />
+                        <TextBlock Text="{loc:Loc SettingsWindow_DiagnosticsDescription}" Classes="subtle" />
 
                         <WrapPanel>
                             <ToggleSwitch x:Name="StackTraceToggle"
-                                          Content="Enable stack trace capture"
+                                          Content="{loc:Loc SettingsWindow_StackTraceToggle}"
                                           Margin="0,0,18,12"
                                           IsChecked="{Binding Settings.EnableStackTrace}" />
                             <ToggleSwitch x:Name="PerformanceLoggingToggle"
-                                          Content="Enable performance logging"
+                                          Content="{loc:Loc SettingsWindow_PerformanceToggle}"
                                           Margin="0,0,0,12"
                                           IsChecked="{Binding Settings.EnablePerformanceLogging}" />
                         </WrapPanel>
 
                         <WrapPanel>
                             <ToggleSwitch x:Name="MemoryTrackingToggle"
-                                          Content="Track memory usage"
+                                          Content="{loc:Loc SettingsWindow_MemoryToggle}"
                                           Margin="0,0,18,12"
                                           IsChecked="{Binding Settings.EnableMemoryTracking}" />
                             <ToggleSwitch x:Name="AsyncLoggingToggle"
-                                          Content="Log asynchronously"
+                                          Content="{loc:Loc SettingsWindow_AsyncLoggingToggle}"
                                           Margin="0,0,0,12"
                                           IsChecked="{Binding Settings.EnableAsyncLogging}" />
                         </WrapPanel>
+
+                        <Button Content="{loc:Loc SettingsWindow_OpenLogFolder}"
+                                HorizontalAlignment="Left"
+                                Width="180"
+                                Click="OpenLogFolder_OnClick"
+                                ToolTip.Tip="{loc:Loc SettingsWindow_OpenLogFolderTooltip}" />
                     </StackPanel>
                 </Border>
 
                 <Border Classes="section">
                     <StackPanel Spacing="18">
-                        <TextBlock Text="Updates" FontSize="20" FontWeight="SemiBold" />
-                        <TextBlock Text="Control how EasyExtract stays up to date." Classes="subtle" />
+                        <TextBlock Text="{loc:Loc SettingsWindow_UpdatesTitle}" FontSize="20" FontWeight="SemiBold" />
+                        <TextBlock Text="{loc:Loc SettingsWindow_UpdatesDescription}" Classes="subtle" />
 
                         <ToggleSwitch x:Name="AutoUpdateToggle"
-                                      Content="Auto update"
+                                      Content="{loc:Loc SettingsWindow_AutoUpdateToggle}"
                                       IsChecked="{Binding Settings.Update.AutoUpdate}" />
 
                         <StackPanel Spacing="8">
                             <StackPanel Spacing="4">
-                                <TextBlock Text="Repository owner" Classes="subtle" />
+                                <TextBlock Text="{loc:Loc SettingsWindow_RepositoryOwnerLabel}" Classes="subtle" />
                                 <TextBlock Text="{Binding RepositoryOwner}" />
                             </StackPanel>
                             <StackPanel Spacing="4">
-                                <TextBlock Text="Repository name" Classes="subtle" />
+                                <TextBlock Text="{loc:Loc SettingsWindow_RepositoryNameLabel}" Classes="subtle" />
                                 <TextBlock Text="{Binding RepositoryName}" />
                             </StackPanel>
                             <StackPanel Spacing="4">
-                                <TextBlock Text="Current version" Classes="subtle" />
+                                <TextBlock Text="{loc:Loc SettingsWindow_CurrentVersionLabel}" Classes="subtle" />
                                 <TextBlock Text="{Binding CurrentVersion}" />
                             </StackPanel>
                         </StackPanel>

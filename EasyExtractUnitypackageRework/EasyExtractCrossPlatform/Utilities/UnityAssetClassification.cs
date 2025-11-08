@@ -52,7 +52,7 @@ internal static class UnityAssetClassification
         ".mat"
     };
 
-    internal static string ResolveCategory(string? relativePath, long assetSizeBytes, byte[]? assetData)
+    internal static string ResolveCategory(string? relativePath, long assetSizeBytes, bool hasAssetData)
     {
         var extension = string.IsNullOrWhiteSpace(relativePath)
             ? string.Empty
@@ -60,7 +60,7 @@ internal static class UnityAssetClassification
 
         if (string.IsNullOrWhiteSpace(extension))
         {
-            if (IsLikelyFolder(relativePath, assetSizeBytes, assetData))
+            if (IsLikelyFolder(relativePath, assetSizeBytes, hasAssetData))
                 return "Folder";
         }
         else
@@ -141,9 +141,9 @@ internal static class UnityAssetClassification
         return !string.IsNullOrWhiteSpace(extension) && PluginExtensions.Contains(extension);
     }
 
-    private static bool IsLikelyFolder(string? relativePath, long assetSizeBytes, byte[]? assetData)
+    private static bool IsLikelyFolder(string? relativePath, long assetSizeBytes, bool hasAssetData)
     {
-        if (assetData is { Length: > 0 } || assetSizeBytes > 0)
+        if (hasAssetData || assetSizeBytes > 0)
             return false;
 
         if (string.IsNullOrWhiteSpace(relativePath))

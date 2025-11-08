@@ -8,6 +8,7 @@ using Avalonia.Interactivity;
 using Avalonia.Media;
 using Avalonia.Platform.Storage;
 using Avalonia.Threading;
+using EasyExtractCrossPlatform.Localization;
 using EasyExtractCrossPlatform.Models;
 using EasyExtractCrossPlatform.Services;
 using EasyExtractCrossPlatform.Utilities;
@@ -82,7 +83,7 @@ public partial class SettingsWindow : Window
         Dispatcher.UIThread.Post(() =>
         {
             _autoSaveReady = true;
-            ShowStatus("Changes are saved automatically.");
+            ShowStatus(LocalizationManager.Instance.GetString("SettingsWindow_Status_AutoSaveReady"));
         });
     }
 
@@ -152,14 +153,14 @@ public partial class SettingsWindow : Window
             SettingsSaved?.Invoke(this, _viewModel.Settings);
             if (_lastSaveFailed)
             {
-                ShowStatus("Settings saved successfully.");
+                ShowStatus(LocalizationManager.Instance.GetString("SettingsWindow_Status_Saved"));
                 _lastSaveFailed = false;
             }
         }
         catch (Exception ex)
         {
             _lastSaveFailed = true;
-            ShowStatus($"Failed to save settings: {ex.Message}", true);
+            ShowStatus(LocalizationManager.Instance.GetString("SettingsWindow_Status_SaveFailed", ex.Message), true);
         }
     }
 
@@ -198,6 +199,22 @@ public partial class SettingsWindow : Window
             });
 
         return result?.FirstOrDefault();
+    }
+
+    private void OpenLogFolder_OnClick(object? sender, RoutedEventArgs e)
+    {
+        try
+        {
+            var logDirectory = LoggingService.LogDirectory;
+            if (LoggingService.TryOpenLogFolder())
+                ShowStatus($"Opened log folder: {logDirectory}");
+            else
+                ShowStatus($"Log folder: {logDirectory}", true);
+        }
+        catch (Exception ex)
+        {
+            ShowStatus($"Failed to open log folder: {ex.Message}", true);
+        }
     }
 
     private IStorageProvider? GetStorageProvider()

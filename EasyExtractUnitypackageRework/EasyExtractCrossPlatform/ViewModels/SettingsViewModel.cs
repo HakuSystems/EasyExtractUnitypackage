@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using EasyExtractCrossPlatform.Localization;
 using EasyExtractCrossPlatform.Models;
 using EasyExtractCrossPlatform.Services;
 using EasyExtractCrossPlatform.Utilities;
@@ -18,9 +19,9 @@ public class SettingsViewModel
 
         ThemeOptions = new List<SelectionOption>
         {
-            new(0, "Follow system"),
-            new(1, "Light"),
-            new(2, "Dark")
+            new(0, LocalizationManager.Instance.GetString("SettingsWindow_ThemeFollowSystem")),
+            new(1, LocalizationManager.Instance.GetString("SettingsWindow_ThemeLight")),
+            new(2, LocalizationManager.Instance.GetString("SettingsWindow_ThemeDark"))
         };
     }
 

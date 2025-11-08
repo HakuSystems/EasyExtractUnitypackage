@@ -24,12 +24,16 @@ public static class AppSettingsService
     {
         LastError = null;
 
+        LoggingService.LogInformation($"Loading application settings from '{SettingsFilePath}'.");
+
         try
         {
             if (!File.Exists(SettingsFilePath))
             {
+                LoggingService.LogInformation("Settings file not found. Creating default configuration.");
                 var defaults = CreateDefault();
                 Save(defaults);
+                LoggingService.LogInformation("Default settings persisted successfully.");
                 return defaults;
             }
 
@@ -37,11 +41,13 @@ public static class AppSettingsService
             var settings = JsonSerializer.Deserialize<AppSettings>(stream, SerializerOptions) ?? CreateDefault();
             settings.AppTitle = AppSettings.DefaultAppTitle;
             UpdateStoredVersion(settings);
+            LoggingService.LogInformation("Settings loaded successfully.");
             return settings;
         }
         catch (Exception ex)
         {
             LastError = ex;
+            LoggingService.LogError("Failed to load settings. Falling back to defaults.", ex);
             return CreateDefault();
         }
     }
@@ -49,14 +55,25 @@ public static class AppSettingsService
     public static void Save(AppSettings settings)
     {
         settings.AppTitle = AppSettings.DefaultAppTitle;
-        Directory.CreateDirectory(SettingsDirectory);
-        var json = JsonSerializer.Serialize(settings, SerializerOptions);
-        File.WriteAllText(SettingsFilePath, json);
+        try
+        {
+            LoggingService.LogInformation($"Saving application settings to '{SettingsFilePath}'.");
+            Directory.CreateDirectory(SettingsDirectory);
+            var json = JsonSerializer.Serialize(settings, SerializerOptions);
+            File.WriteAllText(SettingsFilePath, json);
+            LoggingService.LogInformation("Settings saved successfully.");
+        }
+        catch (Exception ex)
+        {
+            LoggingService.LogError("Failed to save application settings.", ex);
+            throw;
+        }
     }
 
     public static AppSettings CreateDefault()
     {
         Directory.CreateDirectory(SettingsDirectory);
+        LoggingService.LogInformation("Creating default application settings profile.");
 
         var defaults = new AppSettings
         {
@@ -73,6 +90,8 @@ public static class AppSettingsService
         };
 
         UpdateStoredVersion(defaults);
+        LoggingService.LogInformation(
+            $"Default settings created with output '{defaults.DefaultOutputPath}' and temp '{defaults.DefaultTempPath}'.");
         return defaults;
     }
 
@@ -86,5 +105,6 @@ public static class AppSettingsService
             settings.Update = new UpdateSettings();
 
         settings.Update.CurrentVersion = version;
+        LoggingService.LogInformation($"Recorded application version '{version}' in settings.");
     }
 }
