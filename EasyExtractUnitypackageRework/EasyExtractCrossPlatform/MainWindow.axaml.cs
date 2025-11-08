@@ -32,8 +32,6 @@ public partial class MainWindow : Window
     private const string UnityPackageExtension = ".unitypackage";
     private const string UnknownVersionLabel = "Version unknown";
 
-    private const string ProUpgradeInfoUrl = "https://github.com/HakuSystems/EasyExtractUnitypackage#readme";
-
     private static readonly HttpClient BackgroundHttpClient = new();
     private readonly Button? _batchExtractionButton;
     private readonly Button? _cancelExtractionButton;
@@ -62,8 +60,6 @@ public partial class MainWindow : Window
     private readonly TextBlock? _extractionOverviewLastExtractionText;
     private readonly TextBlock? _extractionOverviewPackagesCompletedText;
     private readonly IUnityPackageExtractionService _extractionService = new UnityPackageExtractionService();
-    private readonly Border? _licenseTierBadge;
-    private readonly TextBlock? _licenseTierTextBlock;
     private readonly Border? _overlayCard;
     private readonly ContentControl? _overlayContent;
     private readonly Border? _overlayHost;
@@ -84,7 +80,6 @@ public partial class MainWindow : Window
     private readonly string[] _startupArguments;
     private readonly TextBox? _unityPackageSearchBox;
     private readonly IUpdateService _updateService = UpdateService.Instance;
-    private readonly Button? _upgradeButton;
     private readonly TextBlock? _versionTextBlock;
     private Control? _activeOverlayContent;
     private UpdateManifest? _activeUpdateManifest;
@@ -141,9 +136,6 @@ public partial class MainWindow : Window
             _defaultDropSecondaryText = secondaryText;
         _startExtractionHeaderGrid = this.FindControl<Grid>("StartExtractionHeaderGrid");
         _versionTextBlock = this.FindControl<TextBlock>("VersionTextBlock");
-        _licenseTierBadge = this.FindControl<Border>("LicenseTierBadge");
-        _licenseTierTextBlock = this.FindControl<TextBlock>("LicenseTierTextBlock");
-        _upgradeButton = this.FindControl<Button>("UpgradeButton");
         _everythingSearchView = this.FindControl<EverythingSearchView>("EverythingSearch");
         _searchResultsBorder = this.FindControl<Border>("SearchResultsBorder");
         _searchRevealHost = this.FindControl<Border>("SearchRevealHost");
@@ -2625,7 +2617,6 @@ public partial class MainWindow : Window
 
     private void ApplySettings(AppSettings settings)
     {
-        UpdateLicenseTierDisplay(settings);
         ReloadQueueFromSettings();
         ApplyTheme(settings.ApplicationTheme);
         _ = ApplyCustomBackgroundAsync(settings);
@@ -2918,62 +2909,6 @@ public partial class MainWindow : Window
             return null;
 
         return trimmed;
-    }
-
-    private void UpdateLicenseTierDisplay(AppSettings? settings = null)
-    {
-        if (_licenseTierTextBlock is null)
-            return;
-
-        settings ??= _settings;
-        var tier = settings?.LicenseTier;
-        var normalizedTier = string.IsNullOrWhiteSpace(tier) ? "Free" : tier.Trim();
-        var isPro = string.Equals(normalizedTier, "Pro", StringComparison.OrdinalIgnoreCase);
-
-        _licenseTierTextBlock.Text = isPro ? "Pro Version" : "Free Version";
-
-        if (_licenseTierBadge is not null)
-            _licenseTierBadge.Classes.Set("pro-tier", isPro);
-
-        if (_upgradeButton is not null)
-        {
-            if (isPro)
-            {
-                _upgradeButton.Content = "Pro features unlocked";
-                _upgradeButton.IsEnabled = false;
-                ToolTip.SetTip(_upgradeButton, "Premium features are already enabled");
-            }
-            else
-            {
-                _upgradeButton.Content = "Upgrade to Pro";
-                _upgradeButton.IsEnabled = true;
-                ToolTip.SetTip(_upgradeButton, "Unlock upcoming premium features");
-            }
-        }
-    }
-
-    private void UpgradeButton_OnClick(object? sender, RoutedEventArgs e)
-    {
-        if (_upgradeButton?.IsEnabled == false)
-            return;
-
-        e.Handled = true;
-
-        try
-        {
-            Process.Start(new ProcessStartInfo(ProUpgradeInfoUrl) { UseShellExecute = true });
-            ShowDropStatusMessage(
-                "Opening upgrade details",
-                "We launched your browser with information about EasyExtract Pro.",
-                TimeSpan.FromSeconds(5));
-        }
-        catch (Exception ex)
-        {
-            ShowDropStatusMessage(
-                "Couldn't open upgrade page",
-                ex.Message,
-                TimeSpan.FromSeconds(6));
-        }
     }
 
     private async Task ApplyCustomBackgroundAsync(AppSettings settings)

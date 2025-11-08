@@ -56,11 +56,6 @@
             <Setter Property="BorderThickness" Value="2" />
             <Setter Property="Opacity" Value="1" />
         </Style>
-
-        <Style Selector="Border#LicenseTierBadge.pro-tier">
-            <Setter Property="Background" Value="{DynamicResource EasyAccentStrongBrush}" />
-            <Setter Property="BorderBrush" Value="{DynamicResource EasyAccentBrush}" />
-        </Style>
     </Window.Styles>
 
     <Grid>
@@ -136,23 +131,6 @@
                                 VerticalAlignment="Top"
                                 Margin="24,0,0,0"
                                 Spacing="12">
-                        <Border x:Name="LicenseTierBadge"
-                                Padding="14,6"
-                                Background="{DynamicResource EasyGlassOverlayStrongBrush}"
-                                BorderBrush="{DynamicResource EasyGlassNeutralBorderBrush}"
-                                BorderThickness="1"
-                                CornerRadius="12">
-                            <TextBlock x:Name="LicenseTierTextBlock"
-                                       Text="{loc:Loc MainWindow_FreeVersion}"
-                                       FontWeight="SemiBold"
-                                       TextAlignment="Right" />
-                        </Border>
-                        <Button x:Name="UpgradeButton"
-                                Classes="ghost"
-                                HorizontalAlignment="Right"
-                                Content="{loc:Loc MainWindow_UpgradeToPro}"
-                                Click="UpgradeButton_OnClick"
-                                ToolTip.Tip="{loc:Loc MainWindow_UnlockUpcomingPremiumFeatures}" />
                         <StackPanel Spacing="4"
                                     HorizontalAlignment="Right">
                             <TextBlock Text="{loc:Loc MainWindow_CreditsToDigitalazureForTheLogo}"
