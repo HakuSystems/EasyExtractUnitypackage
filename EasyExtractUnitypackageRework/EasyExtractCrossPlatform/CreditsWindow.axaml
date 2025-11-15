@@ -1,0 +1,260 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:loc="using:EasyExtractCrossPlatform.Localization"
+        xmlns:viewmodels="using:EasyExtractCrossPlatform.ViewModels"
+        xmlns:animations="using:Avalonia.Animation"
+        x:Class="EasyExtractCrossPlatform.CreditsWindow"
+        x:DataType="viewmodels:CreditsViewModel"
+        Title="{loc:Loc CreditsWindow_Title}"
+        Width="980"
+        Height="720"
+        MinWidth="820"
+        MinHeight="600"
+        WindowStartupLocation="CenterOwner"
+        TransparencyLevelHint="AcrylicBlur"
+        TransparencyBackgroundFallback="{DynamicResource EasyWindowBackgroundBrush}"
+        Background="{DynamicResource EasyWindowBackgroundBrush}"
+        Foreground="{DynamicResource EasyTextColorBrush}">
+    <Window.Styles>
+        <Style Selector="ListBox.credits-list">
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="Padding" Value="0" />
+        </Style>
+        <Style Selector="ListBox.credits-list ListBoxItem">
+            <Setter Property="Margin" Value="0,0,0,10" />
+            <Setter Property="Padding" Value="0" />
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="Background" Value="Transparent" />
+        </Style>
+        <Style Selector="ListBox.credits-list ListBoxItem:selected Border.credit-card">
+            <Setter Property="BorderBrush" Value="{DynamicResource EasyAccentBrush}" />
+            <Setter Property="Background" Value="{DynamicResource EasyGlassOverlayBrush}" />
+        </Style>
+        <Style Selector="Border.credit-chip">
+            <Setter Property="Padding" Value="6,2" />
+            <Setter Property="CornerRadius" Value="8" />
+            <Setter Property="Margin" Value="0,4,6,0" />
+        </Style>
+    </Window.Styles>
+
+    <Grid RowDefinitions="Auto,*">
+        <Border Padding="28"
+                Margin="32"
+                CornerRadius="28"
+                Background="{DynamicResource EasyGlassGradientBrush}"
+                BorderBrush="{DynamicResource EasyGlassBorderBrush}"
+                BorderThickness="1"
+                BoxShadow="0 36 72 0 #16000000">
+            <StackPanel>
+                <TextBlock Text="{loc:Loc CreditsWindow_Title}"
+                           Classes="display" />
+                <TextBlock Text="{loc:Loc CreditsWindow_Subtitle}"
+                           Classes="subtle"
+                           Margin="0,6,0,0"
+                           TextWrapping="Wrap" />
+                <Border Margin="0,12,0,0"
+                        Padding="12"
+                        CornerRadius="14"
+                        Background="{DynamicResource EasyGlassOverlayBrush}"
+                        BorderBrush="{DynamicResource EasyGlassNeutralBorderBrush}"
+                        BorderThickness="1">
+                    <TextBlock Text="{loc:Loc CreditsWindow_AiNotice}"
+                               Classes="subtle"
+                               TextWrapping="Wrap" />
+                </Border>
+            </StackPanel>
+        </Border>
+
+        <Grid Grid.Row="1"
+              ColumnDefinitions="320,*"
+              Margin="32,0,32,32">
+            <Border Background="{DynamicResource EasyGlassOverlayFaintBrush}"
+                    BorderBrush="{DynamicResource EasyGlassNeutralBorderBrush}"
+                    BorderThickness="1"
+                    CornerRadius="24"
+                    Padding="18"
+                    Margin="0,0,26,0"
+                    BoxShadow="0 22 46 0 #14000000">
+                <ListBox x:Name="CreditsList"
+                         Classes="credits-list"
+                         ItemsSource="{Binding Profiles}"
+                         SelectedItem="{Binding SelectedProfile, Mode=TwoWay}">
+                    <ListBox.ItemTemplate>
+                        <DataTemplate x:DataType="viewmodels:CreditsViewModel+CreditProfileViewModel">
+                            <Border Classes="credit-card"
+                                    Background="{DynamicResource EasyGlassOverlayFaintBrush}"
+                                    BorderBrush="{DynamicResource EasyGlassNeutralBorderBrush}"
+                                    BorderThickness="1"
+                                    CornerRadius="20"
+                                    Padding="16">
+                                <StackPanel Spacing="10">
+                                    <StackPanel Orientation="Horizontal"
+                                                Spacing="12">
+                                        <Border Width="38"
+                                                Height="38"
+                                                CornerRadius="12"
+                                                Background="{Binding EmblemBackgroundBrush}"
+                                                HorizontalAlignment="Center"
+                                                VerticalAlignment="Center">
+                                            <TextBlock Text="{Binding Emoji}"
+                                                       FontSize="20"
+                                                       HorizontalAlignment="Center"
+                                                       VerticalAlignment="Center" />
+                                        </Border>
+                                        <StackPanel>
+                                            <TextBlock Text="{Binding DisplayName}"
+                                                       FontWeight="SemiBold" />
+                                            <TextBlock Text="{Binding Role}"
+                                                       Classes="subtle" />
+                                        </StackPanel>
+                                    </StackPanel>
+
+                                    <TextBlock Text="{Binding Tagline}"
+                                               FontSize="13"
+                                               Classes="subtle"
+                                               TextWrapping="Wrap" />
+
+                                    <ItemsControl ItemsSource="{Binding Highlights}"
+                                                  x:CompileBindings="False">
+                                        <ItemsControl.ItemsPanel>
+                                            <ItemsPanelTemplate>
+                                                <WrapPanel />
+                                            </ItemsPanelTemplate>
+                                        </ItemsControl.ItemsPanel>
+                                        <ItemsControl.ItemTemplate>
+                                            <DataTemplate>
+                                                <Border Classes="credit-chip"
+                                                        Background="{Binding DataContext.ChipBackgroundBrush, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
+                                                        BorderBrush="{Binding DataContext.AccentBorderBrush, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
+                                                        BorderThickness="1">
+                                                    <TextBlock Text="{Binding .}"
+                                                               FontSize="12"
+                                                               FontWeight="SemiBold"
+                                                               Foreground="{Binding DataContext.AccentForegroundBrush, RelativeSource={RelativeSource AncestorType=ItemsControl}}" />
+                                                </Border>
+                                            </DataTemplate>
+                                        </ItemsControl.ItemTemplate>
+                                    </ItemsControl>
+                                </StackPanel>
+                            </Border>
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+                </ListBox>
+            </Border>
+
+            <Border Grid.Column="1"
+                    Background="{DynamicResource EasyGlassOverlayFaintBrush}"
+                    BorderBrush="{DynamicResource EasyGlassNeutralBorderBrush}"
+                    BorderThickness="1"
+                    CornerRadius="28"
+                    Padding="6"
+                    BoxShadow="0 22 46 0 #14000000">
+                <ScrollViewer HorizontalScrollBarVisibility="Disabled">
+                    <TransitioningContentControl Content="{Binding SelectedProfile}">
+                        <TransitioningContentControl.PageTransition>
+                            <animations:CrossFade Duration="0:0:0.35" />
+                        </TransitioningContentControl.PageTransition>
+                        <TransitioningContentControl.ContentTemplate>
+                            <DataTemplate x:DataType="viewmodels:CreditsViewModel+CreditProfileViewModel">
+                                <StackPanel Spacing="18" Margin="18">
+                                    <Border Background="{Binding HeroBrush}"
+                                            CornerRadius="26"
+                                            Padding="24">
+                                        <Grid ColumnDefinitions="Auto,*">
+                                            <Border Width="60"
+                                                    Height="60"
+                                                    CornerRadius="20"
+                                                    Background="{Binding EmblemBackgroundBrush}">
+                                                <TextBlock Text="{Binding Emoji}"
+                                                           FontSize="28"
+                                                           HorizontalAlignment="Center"
+                                                           VerticalAlignment="Center" />
+                                            </Border>
+                                            <StackPanel Grid.Column="1"
+                                                        Margin="18,0,0,0">
+                                                <TextBlock Text="{Binding DisplayName}"
+                                                           FontSize="28"
+                                                           FontWeight="Bold" />
+                                                <TextBlock Text="{Binding Role}"
+                                                           FontWeight="SemiBold"
+                                                           Opacity="0.9" />
+                                                <TextBlock Text="{Binding Tagline}"
+                                                           Margin="0,6,0,0"
+                                                           TextWrapping="Wrap" />
+                                            </StackPanel>
+                                        </Grid>
+                                    </Border>
+
+                                    <StackPanel>
+                                        <TextBlock Text="{loc:Loc CreditsWindow_SpotlightTitle}"
+                                                   FontSize="16"
+                                                   FontWeight="SemiBold" />
+                                        <ItemsControl ItemsSource="{Binding Contributions}"
+                                                      x:CompileBindings="False">
+                                            <ItemsControl.ItemTemplate>
+                                                <DataTemplate>
+                                                    <Border Margin="0,10,0,0"
+                                                            Background="{DynamicResource EasyGlassOverlayBrush}"
+                                                            BorderBrush="{Binding DataContext.AccentBorderBrush, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
+                                                            BorderThickness="1"
+                                                            CornerRadius="18"
+                                                            Padding="16">
+                                                        <StackPanel Orientation="Horizontal"
+                                                                    Spacing="12">
+                                                            <Border Width="28"
+                                                                    Height="28"
+                                                                    CornerRadius="9"
+                                                                    Background="{Binding DataContext.EmblemBackgroundBrush, RelativeSource={RelativeSource AncestorType=ItemsControl}}">
+                                                                <PathIcon Data="M5 13L9 17L19 7"
+                                                                          Width="16"
+                                                                          Height="16"
+                                                                          HorizontalAlignment="Center"
+                                                                          VerticalAlignment="Center" />
+                                                            </Border>
+                                                            <TextBlock Text="{Binding .}"
+                                                                       TextWrapping="Wrap"
+                                                                       FontSize="13" />
+                                                        </StackPanel>
+                                                    </Border>
+                                                </DataTemplate>
+                                            </ItemsControl.ItemTemplate>
+                                        </ItemsControl>
+                                    </StackPanel>
+
+                                    <StackPanel>
+                                        <TextBlock Text="{loc:Loc CreditsWindow_CurrentFocus}"
+                                                   FontWeight="SemiBold"
+                                                   FontSize="16" />
+                                        <ItemsControl ItemsSource="{Binding Highlights}"
+                                                      Margin="0,8,0,0"
+                                                      x:CompileBindings="False">
+                                            <ItemsControl.ItemsPanel>
+                                                <ItemsPanelTemplate>
+                                                    <WrapPanel />
+                                                </ItemsPanelTemplate>
+                                            </ItemsControl.ItemsPanel>
+                                            <ItemsControl.ItemTemplate>
+                                                <DataTemplate>
+                                                    <Border Classes="credit-chip"
+                                                            Background="{Binding DataContext.ChipBackgroundBrush, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
+                                                            BorderBrush="{Binding DataContext.AccentBorderBrush, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
+                                                            BorderThickness="1.2">
+                                                        <TextBlock Text="{Binding .}"
+                                                                   FontSize="12"
+                                                                   FontWeight="SemiBold"
+                                                                   Foreground="{Binding DataContext.AccentForegroundBrush, RelativeSource={RelativeSource AncestorType=ItemsControl}}" />
+                                                    </Border>
+                                                </DataTemplate>
+                                            </ItemsControl.ItemTemplate>
+                                        </ItemsControl>
+                                    </StackPanel>
+                                </StackPanel>
+                            </DataTemplate>
+                        </TransitioningContentControl.ContentTemplate>
+                    </TransitioningContentControl>
+                </ScrollViewer>
+            </Border>
+        </Grid>
+    </Grid>
+</Window>

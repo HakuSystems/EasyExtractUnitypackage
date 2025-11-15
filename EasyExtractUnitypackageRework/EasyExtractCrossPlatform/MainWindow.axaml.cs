@@ -100,6 +100,7 @@ public partial class MainWindow : Window
     private Control? _activeOverlayContent;
     private UpdateManifest? _activeUpdateManifest;
     private object? _checkUpdatesButtonOriginalContent;
+    private CreditsWindow? _creditsWindow;
     private Bitmap? _currentBackgroundBitmap;
     private string? _currentVersionDisplay;
     private IDisposable? _dropStatusReset;
@@ -363,6 +364,22 @@ public partial class MainWindow : Window
         await RunBatchExtractionPickerAsync();
     }
 
+    private void CreditsButton_OnClick(object? sender, RoutedEventArgs e)
+    {
+        if (_creditsWindow is { IsVisible: true })
+        {
+            _creditsWindow.Activate();
+            return;
+        }
+
+        var window = new CreditsWindow();
+        window.Closed += OnCreditsWindowClosed;
+
+        _creditsWindow = window;
+        window.Show(this);
+        QueueDiscordPresenceUpdate("Credits", "Celebrating contributors");
+    }
+
     private void CancelExtractionButton_OnClick(object? sender, RoutedEventArgs e)
     {
         if (!_isExtractionRunning || _extractionCts is null)
@@ -422,12 +439,19 @@ public partial class MainWindow : Window
             if (string.IsNullOrWhiteSpace(normalizedPath))
                 normalizedPath = packagePath;
 
+            Func<Task<MaliciousCodeScanResult?>>? scanProvider = null;
+            if (IsSecurityScanningEnabled)
+            {
+                var targetPath = normalizedPath;
+                scanProvider = () => EnsureSecurityScanTaskAsync(targetPath);
+            }
+
             var previewWindow = new UnityPackagePreviewWindow
             {
                 DataContext = new UnityPackagePreviewViewModel(
                     _previewService,
                     packagePath,
-                    () => EnsureSecurityScanTaskAsync(normalizedPath))
+                    scanProvider)
             };
 
             previewWindow.WindowStartupLocation = WindowStartupLocation.CenterOwner;
@@ -599,25 +623,29 @@ public partial class MainWindow : Window
                 if (string.IsNullOrWhiteSpace(normalizedPackagePath))
                     normalizedPackagePath = packagePath;
 
-                var securityResult = await EnsureSecurityScanTaskAsync(normalizedPackagePath);
-                if (securityResult?.IsMalicious == true && _securityWarningsShown.Add(normalizedPackagePath))
+                MaliciousCodeScanResult? securityResult = null;
+                if (IsSecurityScanningEnabled)
                 {
-                    var warningText = BuildSecuritySummaryText(securityResult);
-                    await Dispatcher.UIThread.InvokeAsync(() =>
+                    securityResult = await EnsureSecurityScanTaskAsync(normalizedPackagePath);
+                    if (securityResult?.IsMalicious == true && _securityWarningsShown.Add(normalizedPackagePath))
                     {
-                        ShowDropStatusMessage(
-                            "Potentially malicious package",
-                            warningText,
-                            TimeSpan.FromSeconds(6));
-                    });
-                }
-                else if (securityResult is null && _securityInfoNotified.Add(normalizedPackagePath))
-                {
-                    await Dispatcher.UIThread.InvokeAsync(() =>
-                        ShowDropStatusMessage(
-                            "Security scan unavailable",
-                            "Unable to verify this package for malicious code.",
-                            TimeSpan.FromSeconds(4)));
+                        var warningText = BuildSecuritySummaryText(securityResult);
+                        await Dispatcher.UIThread.InvokeAsync(() =>
+                        {
+                            ShowDropStatusMessage(
+                                "Potentially malicious package",
+                                warningText,
+                                TimeSpan.FromSeconds(6));
+                        });
+                    }
+                    else if (securityResult is null && _securityInfoNotified.Add(normalizedPackagePath))
+                    {
+                        await Dispatcher.UIThread.InvokeAsync(() =>
+                            ShowDropStatusMessage(
+                                "Security scan unavailable",
+                                "Unable to verify this package for malicious code.",
+                                TimeSpan.FromSeconds(4)));
+                    }
                 }
 
                 if (queueEntry is not null)
@@ -1394,6 +1422,48 @@ public partial class MainWindow : Window
         RefreshQueueSecurityIndicators();
     }
 
+    private void RefreshQueueSecurityIndicators()
+    {
+        if (!Dispatcher.UIThread.CheckAccess())
+        {
+            Dispatcher.UIThread.Post(RefreshQueueSecurityIndicators);
+            return;
+        }
+
+        if (!IsSecurityScanningEnabled)
+        {
+            foreach (var item in _queueItems)
+                item.ClearSecurityIndicators();
+
+            lock (_securityScanGate)
+            {
+                _securityScanResults.Clear();
+                _securityScanTasks.Clear();
+            }
+
+            _securityWarningsShown.Clear();
+            _securityInfoNotified.Clear();
+            HideExtractionDashboardSecurityStatus();
+            return;
+        }
+
+        foreach (var kvp in _queueItemsByPath)
+        {
+            var key = kvp.Key;
+            if (string.IsNullOrWhiteSpace(key))
+                continue;
+
+            lock (_securityScanGate)
+            {
+                _securityScanResults.Remove(key);
+                _securityScanTasks.Remove(key);
+            }
+
+            kvp.Value.ClearSecurityIndicators();
+            StartSecurityScanForPackage(key);
+        }
+    }
+
     private void AddOrUpdateQueueDisplayItem(UnityPackageFile package, string? normalizedPath = null)
     {
         if (package is null)
@@ -1427,6 +1497,12 @@ public partial class MainWindow : Window
         if (string.IsNullOrWhiteSpace(normalizedPath))
             return;
 
+        if (!IsSecurityScanningEnabled)
+        {
+            display.ClearSecurityIndicators();
+            return;
+        }
+
         MaliciousCodeScanResult? result;
         lock (_securityScanGate)
         {
@@ -1447,6 +1523,13 @@ public partial class MainWindow : Window
         if (string.IsNullOrWhiteSpace(normalizedPath))
             return;
 
+        if (!IsSecurityScanningEnabled)
+        {
+            if (_queueItemsByPath.TryGetValue(normalizedPath, out var disabledDisplay))
+                disabledDisplay.ClearSecurityIndicators();
+            return;
+        }
+
         if (!File.Exists(normalizedPath))
             return;
 
@@ -1456,6 +1539,9 @@ public partial class MainWindow : Window
     private Task<MaliciousCodeScanResult?> EnsureSecurityScanTaskAsync(string normalizedPath)
     {
         if (string.IsNullOrWhiteSpace(normalizedPath))
+            return Task.FromResult<MaliciousCodeScanResult?>(null);
+
+        if (!IsSecurityScanningEnabled)
             return Task.FromResult<MaliciousCodeScanResult?>(null);
 
         lock (_securityScanGate)
@@ -1474,10 +1560,16 @@ public partial class MainWindow : Window
 
     private async Task<MaliciousCodeScanResult?> PerformSecurityScanAsync(string normalizedPath)
     {
+        if (!IsSecurityScanningEnabled)
+            return null;
+
         try
         {
             var result = await _maliciousCodeDetectionService.ScanUnityPackageAsync(normalizedPath)
                 .ConfigureAwait(false);
+
+            if (!IsSecurityScanningEnabled)
+                return null;
 
             lock (_securityScanGate)
             {
@@ -1501,6 +1593,9 @@ public partial class MainWindow : Window
             LoggingService.LogError($"Security scan failed for '{normalizedPath}'.", ex);
             await Dispatcher.UIThread.InvokeAsync(() =>
             {
+                if (!IsSecurityScanningEnabled)
+                    return;
+
                 if (_queueItemsByPath.TryGetValue(normalizedPath, out var display))
                     display.SetSecurityInfo("Security scan failed");
             });
@@ -2575,6 +2670,19 @@ public partial class MainWindow : Window
 
         if (ReferenceEquals(_settingsWindow, window))
             _settingsWindow = null;
+
+        RestorePresenceAfterOverlay();
+    }
+
+    private void OnCreditsWindowClosed(object? sender, EventArgs e)
+    {
+        if (sender is not CreditsWindow window)
+            return;
+
+        window.Closed -= OnCreditsWindowClosed;
+
+        if (ReferenceEquals(_creditsWindow, window))
+            _creditsWindow = null;
 
         RestorePresenceAfterOverlay();
     }

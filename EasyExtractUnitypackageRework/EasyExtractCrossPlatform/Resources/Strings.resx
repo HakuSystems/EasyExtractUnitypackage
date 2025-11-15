@@ -359,11 +359,32 @@
     <data name="MainWindow_Feedback" xml:space="preserve">
     <value>Feedback</value>
   </data>
+  <data name="MainWindow_Credits" xml:space="preserve">
+    <value>Credits</value>
+  </data>
+  <data name="MainWindow_ViewCredits" xml:space="preserve">
+    <value>Meet the friends that shaped EasyExtract.</value>
+  </data>
     <data name="MainWindow_MadeByHakusystems" xml:space="preserve">
     <value>Made by HakuSystems</value>
   </data>
     <data name="MainWindow_OpenSettings" xml:space="preserve">
     <value>Open settings</value>
+  </data>
+  <data name="CreditsWindow_Title" xml:space="preserve">
+    <value>Credits</value>
+  </data>
+  <data name="CreditsWindow_Subtitle" xml:space="preserve">
+    <value>Every build is a tiny community project. Here&apos;s who kept EasyExtract shipping.</value>
+  </data>
+  <data name="CreditsWindow_AiNotice" xml:space="preserve">
+    <value>Heads-up: this copy was drafted with AI so everything stays easy to read. Reach out if anything sounds off.</value>
+  </data>
+  <data name="CreditsWindow_SpotlightTitle" xml:space="preserve">
+    <value>Idea spotlight</value>
+  </data>
+  <data name="CreditsWindow_CurrentFocus" xml:space="preserve">
+    <value>Current focus</value>
   </data>
     <data name="EverythingSearchView_AddToExtractionQueue" xml:space="preserve">
     <value>Add to extraction queue</value>
