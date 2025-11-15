@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Specialized;
 using Avalonia.Controls;
+using EasyExtractCrossPlatform.Services;
 using EasyExtractCrossPlatform.Utilities;
 using EasyExtractCrossPlatform.ViewModels;
 
@@ -12,12 +13,14 @@ public partial class CreditsWindow : Window
     private readonly Grid? _detailsGrid;
     private readonly Border? _listPanelBorder;
     private readonly IDisposable? _responsiveLayoutSubscription;
+    private readonly IDisposable _windowPlacementTracker;
 
     public CreditsWindow()
     {
         InitializeComponent();
         LinuxUiHelper.ApplyWindowTweaks(this);
         _responsiveLayoutSubscription = ResponsiveWindowHelper.Enable(this);
+        _windowPlacementTracker = WindowPlacementService.Attach(this, nameof(CreditsWindow));
         _detailsGrid = this.FindControl<Grid>("DetailsGrid");
         _listPanelBorder = this.FindControl<Border>("ListPanelBorder");
         _detailPanelBorder = this.FindControl<Border>("DetailPanelBorder");
@@ -34,6 +37,7 @@ public partial class CreditsWindow : Window
         base.OnClosed(e);
         Classes.CollectionChanged -= OnClassesChanged;
         _responsiveLayoutSubscription?.Dispose();
+        _windowPlacementTracker.Dispose();
     }
 
     private void OnClassesChanged(object? sender, NotifyCollectionChangedEventArgs e)

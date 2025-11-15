@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Specialized;
 using Avalonia.Controls;
+using EasyExtractCrossPlatform.Services;
 using EasyExtractCrossPlatform.Utilities;
 using EasyExtractCrossPlatform.ViewModels;
 
@@ -12,12 +13,14 @@ public partial class HistoryWindow : Window
     private readonly IDisposable? _responsiveLayoutSubscription;
     private readonly Border? _secondarySectionBorder;
     private readonly Grid? _splitGrid;
+    private readonly IDisposable _windowPlacementTracker;
 
     public HistoryWindow()
     {
         InitializeComponent();
         LinuxUiHelper.ApplyWindowTweaks(this);
         _responsiveLayoutSubscription = ResponsiveWindowHelper.Enable(this);
+        _windowPlacementTracker = WindowPlacementService.Attach(this, nameof(HistoryWindow));
         _splitGrid = this.FindControl<Grid>("SplitGrid");
         _primarySectionBorder = this.FindControl<Border>("PrimarySectionBorder");
         _secondarySectionBorder = this.FindControl<Border>("SecondarySectionBorder");
@@ -35,6 +38,7 @@ public partial class HistoryWindow : Window
         base.OnClosed(e);
         Classes.CollectionChanged -= OnClassesChanged;
         _responsiveLayoutSubscription?.Dispose();
+        _windowPlacementTracker.Dispose();
     }
 
     private void OnClassesChanged(object? sender, NotifyCollectionChangedEventArgs e)

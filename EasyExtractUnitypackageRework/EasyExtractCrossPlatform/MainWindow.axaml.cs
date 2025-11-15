@@ -3045,12 +3045,20 @@ public partial class MainWindow : Window
     private void LoadSettings()
     {
         _settings = AppSettingsService.Load();
+        WindowPlacementService.Configure(() => _settings, AppSettingsService.Save);
         ApplyWindowPlacement(_settings);
         ApplySettings(_settings);
     }
 
     private void ApplyWindowPlacement(AppSettings settings)
     {
+        var sharedPlacement = WindowPlacementService.GetPlacement(nameof(MainWindow));
+        if (sharedPlacement is not null)
+        {
+            ApplyWindowPlacementState(sharedPlacement);
+            return;
+        }
+
         var savedWidth = settings.WindowWidth;
         var savedHeight = settings.WindowHeight;
 
@@ -3080,6 +3088,47 @@ public partial class MainWindow : Window
         WindowState = Enum.IsDefined(typeof(WindowState), restoredState)
             ? restoredState
             : WindowState.Normal;
+
+        CaptureCurrentBoundsIfNormal();
+    }
+
+    private void ApplyWindowPlacementState(WindowPlacementService.WindowPlacementState placement)
+    {
+        if (placement.Width.HasValue && placement.Width.Value > 0 && !double.IsNaN(placement.Width.Value))
+        {
+            Width = placement.Width.Value;
+            _settings.WindowWidth = placement.Width.Value;
+        }
+
+        if (placement.Height.HasValue && placement.Height.Value > 0 && !double.IsNaN(placement.Height.Value))
+        {
+            Height = placement.Height.Value;
+            _settings.WindowHeight = placement.Height.Value;
+        }
+
+        if (placement.Width.HasValue && placement.Height.HasValue &&
+            placement.Width.Value > 0 && placement.Height.Value > 0)
+            _lastNormalSize = new Size(placement.Width.Value, placement.Height.Value);
+
+        if (placement.PositionX.HasValue && placement.PositionY.HasValue)
+        {
+            var requestedPosition = new PixelPoint(placement.PositionX.Value, placement.PositionY.Value);
+            var adjustedPosition = EnsureWindowIsVisible(requestedPosition, new Size(Width, Height));
+            Position = adjustedPosition;
+            _lastNormalPosition = adjustedPosition;
+            _settings.WindowPositionX = adjustedPosition.X;
+            _settings.WindowPositionY = adjustedPosition.Y;
+        }
+
+        var restoredState = placement.WindowState == WindowState.Minimized
+            ? WindowState.Normal
+            : placement.WindowState;
+
+        if (Enum.IsDefined(typeof(WindowState), restoredState))
+        {
+            WindowState = restoredState;
+            _settings.WindowState = restoredState;
+        }
 
         CaptureCurrentBoundsIfNormal();
     }
@@ -3159,6 +3208,17 @@ public partial class MainWindow : Window
         _settings.WindowPositionX = positionToPersist.X;
         _settings.WindowPositionY = positionToPersist.Y;
         _settings.WindowState = WindowState == WindowState.Minimized ? WindowState.Normal : WindowState;
+
+        var placementState = new WindowPlacementService.WindowPlacementState
+        {
+            Width = _settings.WindowWidth,
+            Height = _settings.WindowHeight,
+            PositionX = _settings.WindowPositionX,
+            PositionY = _settings.WindowPositionY,
+            WindowState = _settings.WindowState
+        };
+
+        WindowPlacementService.SavePlacement(nameof(MainWindow), placementState);
     }
 
     private void ApplySettings(AppSettings settings)

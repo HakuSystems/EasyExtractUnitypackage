@@ -27,6 +27,7 @@ public partial class SettingsWindow : Window
     private readonly TextBlock? _statusTextBlock;
     private readonly ComboBox? _themeComboBox;
     private readonly SettingsViewModel _viewModel;
+    private readonly IDisposable _windowPlacementTracker;
     private bool _autoSaveHandlersAttached;
     private bool _autoSaveReady;
     private bool _lastSaveFailed;
@@ -36,6 +37,7 @@ public partial class SettingsWindow : Window
         InitializeComponent();
         LinuxUiHelper.ApplyWindowTweaks(this);
         _responsiveLayoutSubscription = ResponsiveWindowHelper.Enable(this, 1000, 1500);
+        _windowPlacementTracker = WindowPlacementService.Attach(this, nameof(SettingsWindow));
 
         _viewModel = SettingsViewModel.CreateFromStorage();
         DataContext = _viewModel;
@@ -321,5 +323,6 @@ public partial class SettingsWindow : Window
     {
         base.OnClosed(e);
         _responsiveLayoutSubscription?.Dispose();
+        _windowPlacementTracker.Dispose();
     }
 }

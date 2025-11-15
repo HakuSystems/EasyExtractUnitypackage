@@ -469,8 +469,10 @@
                     <Border x:Name="InspectorCard"
                             Grid.Column="1"
                             Classes="preview-card inspector-card"
-                            Margin="24,0,0,0">
-                        <Grid RowDefinitions="Auto,Auto,*">
+                            Margin="24,0,0,0"
+                            VerticalAlignment="Top">
+                        <Grid RowDefinitions="Auto,Auto,Auto"
+                              VerticalAlignment="Top">
                             <StackPanel Spacing="4">
                                 <TextBlock Text="{loc:Loc UnityPackagePreviewWindow_SelectedAsset}"
                                            Classes="subtle" />
@@ -501,7 +503,7 @@
                             </Grid>
 
                             <Grid Grid.Row="2"
-                                  RowDefinitions="*,Auto"
+                                  RowDefinitions="Auto,Auto"
                                   Margin="0,18,0,0">
                                 <TabControl Grid.Row="0"
                                             SelectedIndex="{Binding PreviewTabIndex}"

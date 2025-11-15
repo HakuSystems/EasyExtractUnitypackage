@@ -3,6 +3,7 @@ using System.Collections.Specialized;
 using System.Diagnostics;
 using Avalonia;
 using Avalonia.Controls;
+using EasyExtractCrossPlatform.Services;
 using EasyExtractCrossPlatform.Utilities;
 using EasyExtractCrossPlatform.ViewModels;
 
@@ -14,12 +15,14 @@ public partial class UnityPackagePreviewWindow : Window
     private readonly Grid? _detailsGrid;
     private readonly Border? _inspectorCard;
     private readonly IDisposable? _responsiveLayoutSubscription;
+    private readonly IDisposable _windowPlacementTracker;
 
     public UnityPackagePreviewWindow()
     {
         InitializeComponent();
         LinuxUiHelper.ApplyWindowTweaks(this);
         _responsiveLayoutSubscription = ResponsiveWindowHelper.Enable(this);
+        _windowPlacementTracker = WindowPlacementService.Attach(this, nameof(UnityPackagePreviewWindow));
         _detailsGrid = this.FindControl<Grid>("DetailsGrid");
         _assetTreeCard = this.FindControl<Border>("AssetTreeCard");
         _inspectorCard = this.FindControl<Border>("InspectorCard");
@@ -53,6 +56,7 @@ public partial class UnityPackagePreviewWindow : Window
         Closed -= OnClosed;
         Classes.CollectionChanged -= OnClassesChanged;
         _responsiveLayoutSubscription?.Dispose();
+        _windowPlacementTracker.Dispose();
     }
 
     private void OnClassesChanged(object? sender, NotifyCollectionChangedEventArgs e)

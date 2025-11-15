@@ -296,7 +296,7 @@ public static class LoggingService
         {
             cts?.Cancel();
             LogSignal.Release();
-            worker?.Wait(TimeSpan.FromSeconds(2));
+            worker?.WaitAsync(TimeSpan.FromSeconds(2), cts.Token);
         }
         catch (AggregateException)
         {

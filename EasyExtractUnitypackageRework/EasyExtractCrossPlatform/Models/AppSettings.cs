@@ -60,6 +60,9 @@ public class AppSettings
     public int? WindowPositionX { get; set; }
     public int? WindowPositionY { get; set; }
     public WindowState WindowState { get; set; } = WindowState.Normal;
+
+    public Dictionary<string, WindowPlacementSettings> WindowPlacements { get; set; } =
+        new(StringComparer.OrdinalIgnoreCase);
 }
 
 public class UpdateSettings
@@ -89,4 +92,13 @@ public class CustomBackgroundImageSettings
 
     public bool IsEnabled { get; set; }
     public double BackgroundOpacity { get; set; } = 0.2;
+}
+
+public class WindowPlacementSettings
+{
+    public double? Width { get; set; }
+    public double? Height { get; set; }
+    public int? PositionX { get; set; }
+    public int? PositionY { get; set; }
+    public WindowState WindowState { get; set; } = WindowState.Normal;
 }

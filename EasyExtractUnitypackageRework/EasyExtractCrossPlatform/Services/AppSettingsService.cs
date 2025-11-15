@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Text.Json;
@@ -49,6 +50,7 @@ public static class AppSettingsService
                 var settings = JsonSerializer.Deserialize<AppSettings>(stream, SerializerOptions) ?? CreateDefault();
                 settings.AppTitle = AppSettings.DefaultAppTitle;
                 UpdateStoredVersion(settings);
+                EnsureWindowPlacementsStorage(settings);
                 LoggingService.LogInformation("Settings loaded successfully.");
                 resolvedSettings = settings;
                 source = "existing";
@@ -126,10 +128,12 @@ public static class AppSettingsService
                 IsEnabled = false
             },
             FirstRun = false,
-            LastExtractionTime = DateTimeOffset.Now
+            LastExtractionTime = DateTimeOffset.Now,
+            WindowPlacements = new Dictionary<string, WindowPlacementSettings>(StringComparer.OrdinalIgnoreCase)
         };
 
         UpdateStoredVersion(defaults);
+        EnsureWindowPlacementsStorage(defaults);
         LoggingService.LogInformation(
             $"Default settings created with output '{defaults.DefaultOutputPath}' and temp '{defaults.DefaultTempPath}'.");
         return defaults;
@@ -146,5 +150,24 @@ public static class AppSettingsService
 
         settings.Update.CurrentVersion = version;
         LoggingService.LogInformation($"Recorded application version '{version}' in settings.");
+    }
+
+    private static void EnsureWindowPlacementsStorage(AppSettings settings)
+    {
+        if (settings is null)
+            return;
+
+        if (settings.WindowPlacements is null)
+        {
+            settings.WindowPlacements =
+                new Dictionary<string, WindowPlacementSettings>(StringComparer.OrdinalIgnoreCase);
+            return;
+        }
+
+        if (settings.WindowPlacements.Comparer == StringComparer.OrdinalIgnoreCase)
+            return;
+
+        settings.WindowPlacements = new Dictionary<string, WindowPlacementSettings>(settings.WindowPlacements,
+            StringComparer.OrdinalIgnoreCase);
     }
 }

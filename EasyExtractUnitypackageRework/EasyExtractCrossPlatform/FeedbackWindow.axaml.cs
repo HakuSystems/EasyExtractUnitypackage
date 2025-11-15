@@ -17,6 +17,7 @@ public partial class FeedbackWindow : Window
     private readonly Button? _sendButton;
     private readonly TextBlock? _statusTextBlock;
     private readonly TextBlock? _versionLabel;
+    private readonly IDisposable _windowPlacementTracker;
     private bool _isSending;
 
     public FeedbackWindow(string? appVersion)
@@ -24,6 +25,7 @@ public partial class FeedbackWindow : Window
         InitializeComponent();
         LinuxUiHelper.ApplyWindowTweaks(this);
         _responsiveLayoutSubscription = ResponsiveWindowHelper.Enable(this, 900, 1400);
+        _windowPlacementTracker = WindowPlacementService.Attach(this, nameof(FeedbackWindow));
 
         _appVersion = string.IsNullOrWhiteSpace(appVersion) ? null : appVersion.Trim();
 
@@ -112,5 +114,6 @@ public partial class FeedbackWindow : Window
     {
         base.OnClosed(e);
         _responsiveLayoutSubscription?.Dispose();
+        _windowPlacementTracker.Dispose();
     }
 }
