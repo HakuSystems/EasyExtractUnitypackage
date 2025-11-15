@@ -10,6 +10,7 @@ public class AppSettings
 
     public double SoundVolume { get; set; } = 1.0;
     public bool EnableSound { get; set; } = true;
+    public bool EnableSecurityScanning { get; set; } = true;
     public string DefaultOutputPath { get; set; } = string.Empty;
     public long TotalSizeBytes { get; set; }
     public bool IsLoading { get; set; }

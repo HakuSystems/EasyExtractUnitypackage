@@ -128,6 +128,9 @@
     <data name="SettingsWindow_CategoryStructureToggle" xml:space="preserve">
     <value>Organize output into categories</value>
   </data>
+  <data name="SettingsWindow_SecurityScanToggle" xml:space="preserve">
+    <value>Enable malicious code warnings</value>
+  </data>
     <data name="SettingsWindow_ContextMenuToggle" xml:space="preserve">
     <value>Enable context menu integration</value>
   </data>

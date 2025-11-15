@@ -32,6 +32,7 @@ public sealed class UnityPackagePreviewViewModel : INotifyPropertyChanged, IDisp
     private readonly HashSet<string> _directoriesToPrune = new(StringComparer.OrdinalIgnoreCase);
     private readonly CancellationTokenSource _disposeCts = new();
     private readonly IUnityPackagePreviewService _previewService;
+    private readonly Func<Task<MaliciousCodeScanResult?>>? _securityScanProvider;
 
     private readonly Dictionary<string, UnityPackageAssetTreeNode> _treeNodesByPath =
         new(StringComparer.OrdinalIgnoreCase);
@@ -54,6 +55,12 @@ public sealed class UnityPackagePreviewViewModel : INotifyPropertyChanged, IDisp
     private int _previewTabIndex;
     private Bitmap? _primaryImagePreview;
     private string _searchText = string.Empty;
+    private string? _securityErrorText;
+    private bool _securityScanFailed;
+    private bool _securityScanInProgress;
+    private MaliciousCodeScanResult? _securityScanResult;
+    private Task? _securityScanTask;
+    private string? _securityStatusText = "Security scan pending...";
     private UnityPackageAssetPreviewItem? _selectedAsset;
     private string _selectedCategory = AllCategory;
     private UnityPackageAssetTreeNode? _selectedTreeNode;
@@ -61,14 +68,19 @@ public sealed class UnityPackagePreviewViewModel : INotifyPropertyChanged, IDisp
     private bool _suppressTreeSelectionSync;
     private string _totalAssetSizeText = string.Empty;
 
-    public UnityPackagePreviewViewModel(IUnityPackagePreviewService previewService, string packagePath)
+    public UnityPackagePreviewViewModel(
+        IUnityPackagePreviewService previewService,
+        string packagePath,
+        Func<Task<MaliciousCodeScanResult?>>? securityScanProvider = null)
     {
         _previewService = previewService ?? throw new ArgumentNullException(nameof(previewService));
         ArgumentException.ThrowIfNullOrWhiteSpace(packagePath);
         PackagePath = packagePath;
+        _securityScanProvider = securityScanProvider;
 
         Categories.Add(AllCategory);
         Assets.CollectionChanged += OnAssetsCollectionChanged;
+        SecurityThreats.CollectionChanged += OnSecurityThreatsCollectionChanged;
 
         PlayAudioPreviewCommand = new RelayCommand(_ => ToggleAudioPlayback(), _ => HasAudioPreview);
         StopAudioPreviewCommand = new RelayCommand(_ => StopAudioPlayback(), _ => HasAudioPreview);
@@ -88,6 +100,9 @@ public sealed class UnityPackagePreviewViewModel : INotifyPropertyChanged, IDisp
                 CollapseDescendants(node, true);
         });
         ClearCommand = new RelayCommand(_ => SearchText = string.Empty, _ => IsSearchActive);
+
+        if (_securityScanProvider is not null)
+            _securityScanTask = RunSecurityScanAsync();
     }
 
     public ObservableCollection<UnityPackageAssetPreviewItem> Assets { get; } = new();
@@ -95,6 +110,8 @@ public sealed class UnityPackagePreviewViewModel : INotifyPropertyChanged, IDisp
     public ObservableCollection<string> Categories { get; } = new();
 
     public ObservableCollection<UnityPackageAssetTreeNode> RootNodes { get; } = new();
+
+    public ObservableCollection<SecurityThreatDisplay> SecurityThreats { get; } = new();
 
     public RelayCommand ClearCommand { get; }
 
@@ -145,6 +162,69 @@ public sealed class UnityPackagePreviewViewModel : INotifyPropertyChanged, IDisp
     public bool IsSearchActive => !string.IsNullOrWhiteSpace(_searchText);
 
     public bool HasMultipleCategories => Categories.Count > 1;
+
+    public bool SecurityScanInProgress
+    {
+        get => _securityScanInProgress;
+        private set
+        {
+            if (value == _securityScanInProgress)
+                return;
+
+            _securityScanInProgress = value;
+            OnPropertyChanged(nameof(SecurityScanInProgress));
+            OnPropertyChanged(nameof(ShowSecuritySection));
+        }
+    }
+
+    public bool SecurityScanFailed
+    {
+        get => _securityScanFailed;
+        private set
+        {
+            if (value == _securityScanFailed)
+                return;
+
+            _securityScanFailed = value;
+            OnPropertyChanged(nameof(SecurityScanFailed));
+            OnPropertyChanged(nameof(ShowSecuritySection));
+        }
+    }
+
+    public string? SecurityStatusText
+    {
+        get => _securityStatusText;
+        private set
+        {
+            if (string.Equals(_securityStatusText, value, StringComparison.Ordinal))
+                return;
+
+            _securityStatusText = value;
+            OnPropertyChanged(nameof(SecurityStatusText));
+        }
+    }
+
+    public string? SecurityErrorText
+    {
+        get => _securityErrorText;
+        private set
+        {
+            if (string.Equals(_securityErrorText, value, StringComparison.Ordinal))
+                return;
+
+            _securityErrorText = value;
+            OnPropertyChanged(nameof(SecurityErrorText));
+            OnPropertyChanged(nameof(HasSecurityError));
+            OnPropertyChanged(nameof(ShowSecuritySection));
+        }
+    }
+
+    public bool SecurityHasThreats => SecurityThreats.Count > 0;
+
+    public bool HasSecurityError => !string.IsNullOrWhiteSpace(SecurityErrorText);
+
+    public bool ShowSecuritySection =>
+        SecurityScanInProgress || SecurityScanFailed || SecurityHasThreats || HasSecurityError;
 
     public bool IsLoading
     {
@@ -436,6 +516,7 @@ public sealed class UnityPackagePreviewViewModel : INotifyPropertyChanged, IDisp
         _disposeCts.Dispose();
 
         Assets.CollectionChanged -= OnAssetsCollectionChanged;
+        SecurityThreats.CollectionChanged -= OnSecurityThreatsCollectionChanged;
 
         DisposeBitmap(ref _primaryImagePreview);
         DisposeBitmap(ref _fallbackPreviewImage);
@@ -542,6 +623,86 @@ public sealed class UnityPackagePreviewViewModel : INotifyPropertyChanged, IDisp
         ApplyCategoryFilter();
         LoggingService.LogInformation(
             $"Preview applied for '{PackagePath}'. AssetCount={_allAssets.Count}, Categories={Categories.Count}, DirectoriesToPrune={_directoriesToPrune.Count}.");
+    }
+
+    private Task? RunSecurityScanAsync()
+    {
+        if (_securityScanProvider is null)
+            return null;
+
+        return Task.Run(async () =>
+        {
+            try
+            {
+                await Dispatcher.UIThread.InvokeAsync(() =>
+                {
+                    SecurityScanInProgress = true;
+                    SecurityScanFailed = false;
+                    SecurityErrorText = null;
+                    SecurityStatusText = "Scanning for malicious code...";
+                }, DispatcherPriority.Background);
+
+                var result = await _securityScanProvider().ConfigureAwait(false);
+                await Dispatcher.UIThread.InvokeAsync(
+                    () => ApplySecurityScanResult(result),
+                    DispatcherPriority.Background);
+            }
+            catch (OperationCanceledException)
+            {
+                await Dispatcher.UIThread.InvokeAsync(() =>
+                {
+                    SecurityScanInProgress = false;
+                    SecurityStatusText = "Security scan cancelled.";
+                }, DispatcherPriority.Background);
+            }
+            catch (Exception ex)
+            {
+                LoggingService.LogError($"Security scan failed for preview '{PackagePath}'.", ex);
+                await Dispatcher.UIThread.InvokeAsync(() =>
+                {
+                    SecurityScanInProgress = false;
+                    SecurityScanFailed = true;
+                    SecurityStatusText = "Security scan failed.";
+                    SecurityErrorText = "Unable to determine if the package is safe.";
+                }, DispatcherPriority.Background);
+            }
+        }, _disposeCts.Token);
+    }
+
+    private void ApplySecurityScanResult(MaliciousCodeScanResult? result)
+    {
+        _securityScanResult = result;
+        SecurityThreats.Clear();
+
+        if (result?.Threats is { Count: > 0 })
+        {
+            foreach (var threat in result.Threats)
+                SecurityThreats.Add(SecurityThreatDisplay.FromThreat(threat));
+
+            SecurityStatusText = "Potentially malicious content detected.";
+            SecurityScanFailed = false;
+            SecurityErrorText = null;
+        }
+        else if (result is not null)
+        {
+            SecurityStatusText = "No malicious code detected.";
+            SecurityScanFailed = false;
+            SecurityErrorText = null;
+        }
+        else
+        {
+            SecurityStatusText = "Security scan unavailable.";
+            SecurityScanFailed = true;
+            SecurityErrorText = "This package could not be scanned.";
+        }
+
+        SecurityScanInProgress = false;
+    }
+
+    private void OnSecurityThreatsCollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
+    {
+        OnPropertyChanged(nameof(SecurityHasThreats));
+        OnPropertyChanged(nameof(ShowSecuritySection));
     }
 
     private void UpdateCollectionsState()
@@ -1486,6 +1647,68 @@ public sealed class UnityPackagePreviewViewModel : INotifyPropertyChanged, IDisp
     {
         if (_isDisposed)
             throw new ObjectDisposedException(nameof(UnityPackagePreviewViewModel));
+    }
+}
+
+public sealed class SecurityThreatDisplay
+{
+    private SecurityThreatDisplay(
+        string title,
+        string description,
+        MaliciousThreatSeverity severity,
+        IReadOnlyList<string> matches)
+    {
+        Title = title;
+        Description = description;
+        Severity = severity;
+        Matches = matches;
+    }
+
+    public string Title { get; }
+
+    public string Description { get; }
+
+    public MaliciousThreatSeverity Severity { get; }
+
+    public IReadOnlyList<string> Matches { get; }
+
+    public bool HasMatches => Matches.Count > 0;
+
+    public string SeverityLabel => Severity switch
+    {
+        MaliciousThreatSeverity.High => "HIGH",
+        MaliciousThreatSeverity.Medium => "MEDIUM",
+        _ => "LOW"
+    };
+
+    public static SecurityThreatDisplay FromThreat(MaliciousThreat threat)
+    {
+        if (threat is null)
+            throw new ArgumentNullException(nameof(threat));
+
+        var matches = threat.Matches is { Count: > 0 }
+            ? threat.Matches
+                .Select(match => $"{match.FilePath}: {match.Snippet}")
+                .Take(6)
+                .ToList()
+            : new List<string>();
+
+        return new SecurityThreatDisplay(
+            ResolveThreatTitle(threat.Type),
+            threat.Description,
+            threat.Severity,
+            matches);
+    }
+
+    private static string ResolveThreatTitle(MaliciousThreatType type)
+    {
+        return type switch
+        {
+            MaliciousThreatType.DiscordWebhook => "Discord webhook detected",
+            MaliciousThreatType.UnsafeLinks => "Unsafe links detected",
+            MaliciousThreatType.SuspiciousCodePatterns => "Suspicious code patterns",
+            _ => type.ToString()
+        };
     }
 }
 

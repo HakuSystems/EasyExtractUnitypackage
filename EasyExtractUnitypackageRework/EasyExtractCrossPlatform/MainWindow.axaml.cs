@@ -54,12 +54,18 @@ public partial class MainWindow : Window
     private readonly TextBlock? _extractionDashboardPackageText;
     private readonly ProgressBar? _extractionDashboardProgressBar;
     private readonly TextBlock? _extractionDashboardQueueCount;
+    private readonly Border? _extractionDashboardSecurityBanner;
+    private readonly TextBlock? _extractionDashboardSecurityText;
     private readonly TextBlock? _extractionDashboardSubtitle;
     private readonly DispatcherTimer _extractionElapsedTimer;
     private readonly TextBlock? _extractionOverviewAssetsExtractedText;
     private readonly TextBlock? _extractionOverviewLastExtractionText;
     private readonly TextBlock? _extractionOverviewPackagesCompletedText;
     private readonly IUnityPackageExtractionService _extractionService = new UnityPackageExtractionService();
+
+    private readonly IMaliciousCodeDetectionService
+        _maliciousCodeDetectionService = new MaliciousCodeDetectionService();
+
     private readonly Border? _overlayCard;
     private readonly ContentControl? _overlayContent;
     private readonly Border? _overlayHost;
@@ -75,6 +81,16 @@ public partial class MainWindow : Window
     private readonly Border? _searchIconBorder;
     private readonly Border? _searchResultsBorder;
     private readonly Border? _searchRevealHost;
+    private readonly HashSet<string> _securityInfoNotified = new(StringComparer.OrdinalIgnoreCase);
+    private readonly object _securityScanGate = new();
+
+    private readonly Dictionary<string, MaliciousCodeScanResult> _securityScanResults =
+        new(StringComparer.OrdinalIgnoreCase);
+
+    private readonly Dictionary<string, Task<MaliciousCodeScanResult?>> _securityScanTasks =
+        new(StringComparer.OrdinalIgnoreCase);
+
+    private readonly HashSet<string> _securityWarningsShown = new(StringComparer.OrdinalIgnoreCase);
     private readonly Button? _startExtractionButton;
     private readonly Grid? _startExtractionHeaderGrid;
     private readonly string[] _startupArguments;
@@ -173,6 +189,8 @@ public partial class MainWindow : Window
         _extractionDashboardSubtitle = this.FindControl<TextBlock>("ExtractionDashboardSubtitle");
         _extractionDashboardQueueCount = this.FindControl<TextBlock>("ExtractionDashboardQueueCount");
         _extractionDashboardProgressBar = this.FindControl<ProgressBar>("ExtractionDashboardProgressBar");
+        _extractionDashboardSecurityBanner = this.FindControl<Border>("ExtractionDashboardSecurityBanner");
+        _extractionDashboardSecurityText = this.FindControl<TextBlock>("ExtractionDashboardSecurityText");
         _extractionDashboardPackageText = this.FindControl<TextBlock>("ExtractionDashboardPackageText");
         _extractionDashboardAssetText = this.FindControl<TextBlock>("ExtractionDashboardAssetText");
         _extractionDashboardOutputText = this.FindControl<TextBlock>("ExtractionDashboardOutputText");
@@ -229,6 +247,8 @@ public partial class MainWindow : Window
         InitializeStartupExtractionTargets();
         QueueAutomaticUpdateCheck();
     }
+
+    private bool IsSecurityScanningEnabled => _settings?.EnableSecurityScanning ?? true;
 
     public EverythingSearchViewModel? SearchViewModel { get; }
 
@@ -398,9 +418,16 @@ public partial class MainWindow : Window
     {
         try
         {
+            var normalizedPath = TryNormalizeFilePath(packagePath);
+            if (string.IsNullOrWhiteSpace(normalizedPath))
+                normalizedPath = packagePath;
+
             var previewWindow = new UnityPackagePreviewWindow
             {
-                DataContext = new UnityPackagePreviewViewModel(_previewService, packagePath)
+                DataContext = new UnityPackagePreviewViewModel(
+                    _previewService,
+                    packagePath,
+                    () => EnsureSecurityScanTaskAsync(normalizedPath))
             };
 
             previewWindow.WindowStartupLocation = WindowStartupLocation.CenterOwner;
@@ -568,6 +595,31 @@ public partial class MainWindow : Window
                     continue;
                 }
 
+                var normalizedPackagePath = TryNormalizeFilePath(packagePath);
+                if (string.IsNullOrWhiteSpace(normalizedPackagePath))
+                    normalizedPackagePath = packagePath;
+
+                var securityResult = await EnsureSecurityScanTaskAsync(normalizedPackagePath);
+                if (securityResult?.IsMalicious == true && _securityWarningsShown.Add(normalizedPackagePath))
+                {
+                    var warningText = BuildSecuritySummaryText(securityResult);
+                    await Dispatcher.UIThread.InvokeAsync(() =>
+                    {
+                        ShowDropStatusMessage(
+                            "Potentially malicious package",
+                            warningText,
+                            TimeSpan.FromSeconds(6));
+                    });
+                }
+                else if (securityResult is null && _securityInfoNotified.Add(normalizedPackagePath))
+                {
+                    await Dispatcher.UIThread.InvokeAsync(() =>
+                        ShowDropStatusMessage(
+                            "Security scan unavailable",
+                            "Unable to verify this package for malicious code.",
+                            TimeSpan.FromSeconds(4)));
+                }
+
                 if (queueEntry is not null)
                 {
                     queueEntry.IsExtracting = true;
@@ -576,7 +628,10 @@ public partial class MainWindow : Window
 
                 var outputDirectory = ResolveOutputDirectory(packagePath);
                 await Dispatcher.UIThread.InvokeAsync(() =>
-                    BeginExtractionDashboardForPackage(packagePath, outputDirectory, validItems, index));
+                {
+                    UpdateExtractionDashboardSecurityStatus(securityResult);
+                    BeginExtractionDashboardForPackage(packagePath, outputDirectory, validItems, index);
+                });
 
                 var progress = new Progress<UnityPackageExtractionProgress>(update =>
                 {
@@ -1336,6 +1391,7 @@ public partial class MainWindow : Window
             }
 
         UpdateQueueVisualState();
+        RefreshQueueSecurityIndicators();
     }
 
     private void AddOrUpdateQueueDisplayItem(UnityPackageFile package, string? normalizedPath = null)
@@ -1353,12 +1409,134 @@ public partial class MainWindow : Window
         if (_queueItemsByPath.TryGetValue(key, out var existing))
         {
             existing.UpdateFrom(package);
-            return;
+            ApplySecurityResultToDisplay(key, existing);
+        }
+        else
+        {
+            var display = new QueueItemDisplay(package, key);
+            _queueItems.Add(display);
+            _queueItemsByPath[key] = display;
+            ApplySecurityResultToDisplay(key, display);
         }
 
-        var display = new QueueItemDisplay(package, key);
-        _queueItems.Add(display);
-        _queueItemsByPath[key] = display;
+        StartSecurityScanForPackage(key);
+    }
+
+    private void ApplySecurityResultToDisplay(string normalizedPath, QueueItemDisplay display)
+    {
+        if (string.IsNullOrWhiteSpace(normalizedPath))
+            return;
+
+        MaliciousCodeScanResult? result;
+        lock (_securityScanGate)
+        {
+            _securityScanResults.TryGetValue(normalizedPath, out result);
+        }
+
+        if (result is null)
+            return;
+
+        if (result.IsMalicious)
+            display.SetSecurityWarning(BuildSecuritySummaryText(result));
+        else
+            display.ClearSecurityIndicators();
+    }
+
+    private void StartSecurityScanForPackage(string normalizedPath)
+    {
+        if (string.IsNullOrWhiteSpace(normalizedPath))
+            return;
+
+        if (!File.Exists(normalizedPath))
+            return;
+
+        _ = EnsureSecurityScanTaskAsync(normalizedPath);
+    }
+
+    private Task<MaliciousCodeScanResult?> EnsureSecurityScanTaskAsync(string normalizedPath)
+    {
+        if (string.IsNullOrWhiteSpace(normalizedPath))
+            return Task.FromResult<MaliciousCodeScanResult?>(null);
+
+        lock (_securityScanGate)
+        {
+            if (_securityScanResults.TryGetValue(normalizedPath, out var cached))
+                return Task.FromResult<MaliciousCodeScanResult?>(cached);
+
+            if (_securityScanTasks.TryGetValue(normalizedPath, out var existingTask))
+                return existingTask;
+
+            var scanTask = PerformSecurityScanAsync(normalizedPath);
+            _securityScanTasks[normalizedPath] = scanTask;
+            return scanTask;
+        }
+    }
+
+    private async Task<MaliciousCodeScanResult?> PerformSecurityScanAsync(string normalizedPath)
+    {
+        try
+        {
+            var result = await _maliciousCodeDetectionService.ScanUnityPackageAsync(normalizedPath)
+                .ConfigureAwait(false);
+
+            lock (_securityScanGate)
+            {
+                _securityScanResults[normalizedPath] = result;
+            }
+
+            await Dispatcher.UIThread.InvokeAsync(() =>
+            {
+                if (_queueItemsByPath.TryGetValue(normalizedPath, out var display))
+                    ApplySecurityResultToDisplay(normalizedPath, display);
+            });
+
+            return result;
+        }
+        catch (OperationCanceledException)
+        {
+            throw;
+        }
+        catch (Exception ex)
+        {
+            LoggingService.LogError($"Security scan failed for '{normalizedPath}'.", ex);
+            await Dispatcher.UIThread.InvokeAsync(() =>
+            {
+                if (_queueItemsByPath.TryGetValue(normalizedPath, out var display))
+                    display.SetSecurityInfo("Security scan failed");
+            });
+
+            return null;
+        }
+        finally
+        {
+            lock (_securityScanGate)
+            {
+                _securityScanTasks.Remove(normalizedPath);
+            }
+        }
+    }
+
+    private static string BuildSecuritySummaryText(MaliciousCodeScanResult result)
+    {
+        if (result is not { Threats.Count: > 0 })
+            return "Potentially malicious content detected.";
+
+        var parts = result.Threats.Select(threat =>
+        {
+            var label = threat.Type switch
+            {
+                MaliciousThreatType.DiscordWebhook => "Discord webhook",
+                MaliciousThreatType.UnsafeLinks => "Unsafe links",
+                MaliciousThreatType.SuspiciousCodePatterns => "Suspicious code patterns",
+                _ => threat.Type.ToString()
+            };
+
+            return threat.Matches is { Count: > 0 }
+                ? $"{label} ({threat.Matches.Count})"
+                : label;
+        });
+
+        return string.Join(", ", parts);
     }
 
     private void RemoveQueueDisplayItem(string? key)
@@ -1502,6 +1680,69 @@ public partial class MainWindow : Window
         OnExtractionElapsedTick(this, EventArgs.Empty);
     }
 
+    private void UpdateExtractionDashboardSecurityStatus(MaliciousCodeScanResult? result)
+    {
+        if (_extractionDashboardSecurityBanner is null || _extractionDashboardSecurityText is null)
+            return;
+
+        if (!IsSecurityScanningEnabled)
+        {
+            HideExtractionDashboardSecurityStatus();
+            return;
+        }
+
+        if (result is null)
+        {
+            _extractionDashboardSecurityText.Text = "Security scan unavailable for this package.";
+            ApplyExtractionSecurityBannerVisuals(SecurityBannerVisualState.Info);
+            _extractionDashboardSecurityBanner.IsVisible = true;
+            return;
+        }
+
+        if (result.IsMalicious)
+        {
+            _extractionDashboardSecurityText.Text = BuildSecuritySummaryText(result);
+            ApplyExtractionSecurityBannerVisuals(SecurityBannerVisualState.Warning);
+            _extractionDashboardSecurityBanner.IsVisible = true;
+        }
+        else
+        {
+            _extractionDashboardSecurityBanner.IsVisible = false;
+        }
+    }
+
+    private void ApplyExtractionSecurityBannerVisuals(SecurityBannerVisualState state)
+    {
+        if (_extractionDashboardSecurityBanner is null)
+            return;
+
+        switch (state)
+        {
+            case SecurityBannerVisualState.Warning:
+                _extractionDashboardSecurityBanner.Background =
+                    ResolveBrushResource("EasyWarningBrush", Brushes.Orange);
+                _extractionDashboardSecurityBanner.BorderBrush =
+                    ResolveBrushResource("EasyWarningBrush", Brushes.OrangeRed);
+                break;
+            default:
+                _extractionDashboardSecurityBanner.Background =
+                    ResolveBrushResource("EasyGlassOverlayStrongBrush", Brushes.DimGray);
+                _extractionDashboardSecurityBanner.BorderBrush =
+                    ResolveBrushResource("EasyAccentBrush", Brushes.Gray);
+                break;
+        }
+    }
+
+    private void HideExtractionDashboardSecurityStatus()
+    {
+        if (_extractionDashboardSecurityBanner is null)
+            return;
+
+        _extractionDashboardSecurityBanner.IsVisible = false;
+        if (_extractionDashboardSecurityText is not null)
+            _extractionDashboardSecurityText.Text = string.Empty;
+    }
+
     private void UpdateExtractionDashboardProgress(string? assetPath, int assetsExtracted)
     {
         UpdateExtractionDashboardAssetCount(Math.Max(0, assetsExtracted));
@@ -1569,6 +1810,7 @@ public partial class MainWindow : Window
     {
         _extractionStopwatch?.Stop();
         _extractionElapsedTimer.Stop();
+        HideExtractionDashboardSecurityStatus();
 
         _dropZoneVisibilityReset?.Dispose();
         _dropZoneVisibilityReset = null;
@@ -1864,6 +2106,15 @@ public partial class MainWindow : Window
         {
             return path;
         }
+    }
+
+    private IBrush ResolveBrushResource(string resourceKey, IBrush fallback)
+    {
+        if (Application.Current?.TryFindResource(resourceKey, out var resource) == true &&
+            resource is IBrush brush)
+            return brush;
+
+        return fallback;
     }
 
     private static string FormatFileSize(long bytes)
@@ -3169,9 +3420,17 @@ public partial class MainWindow : Window
 
     private readonly record struct ExtractionItem(string Path, UnityPackageFile? QueueEntry);
 
+    private enum SecurityBannerVisualState
+    {
+        Warning,
+        Info
+    }
+
     private sealed class QueueItemDisplay : INotifyPropertyChanged
     {
         private bool _isExtracting;
+        private string? _securityInfoText;
+        private string? _securityWarningText;
 
         public QueueItemDisplay(UnityPackageFile source, string normalizedPath)
         {
@@ -3205,6 +3464,38 @@ public partial class MainWindow : Window
                 ? directory
                 : FilePath;
 
+        public bool HasSecurityWarning => !string.IsNullOrWhiteSpace(SecurityWarningText);
+
+        public string? SecurityWarningText
+        {
+            get => _securityWarningText;
+            private set
+            {
+                if (_securityWarningText == value)
+                    return;
+
+                _securityWarningText = value;
+                OnPropertyChanged();
+                OnPropertyChanged(nameof(HasSecurityWarning));
+            }
+        }
+
+        public bool HasSecurityInfo => !string.IsNullOrWhiteSpace(SecurityInfoText);
+
+        public string? SecurityInfoText
+        {
+            get => _securityInfoText;
+            private set
+            {
+                if (_securityInfoText == value)
+                    return;
+
+                _securityInfoText = value;
+                OnPropertyChanged();
+                OnPropertyChanged(nameof(HasSecurityInfo));
+            }
+        }
+
         public bool IsExtracting
         {
             get => _isExtracting;
@@ -3224,6 +3515,33 @@ public partial class MainWindow : Window
         public void UpdateFrom(UnityPackageFile source)
         {
             IsExtracting = source.IsExtracting;
+        }
+
+        public void SetSecurityWarning(string? text)
+        {
+            SecurityWarningText = string.IsNullOrWhiteSpace(text) ? null : text;
+            if (!string.IsNullOrWhiteSpace(SecurityWarningText))
+                SecurityInfoText = null;
+        }
+
+        public void SetSecurityInfo(string? text)
+        {
+            SecurityInfoText = string.IsNullOrWhiteSpace(text) ? null : text;
+            if (!string.IsNullOrWhiteSpace(SecurityInfoText))
+                SecurityWarningText = null;
+        }
+
+        public void ClearSecurityIndicators()
+        {
+            if (_securityWarningText is null && _securityInfoText is null)
+                return;
+
+            _securityWarningText = null;
+            _securityInfoText = null;
+            OnPropertyChanged(nameof(SecurityWarningText));
+            OnPropertyChanged(nameof(SecurityInfoText));
+            OnPropertyChanged(nameof(HasSecurityWarning));
+            OnPropertyChanged(nameof(HasSecurityInfo));
         }
 
         private void OnPropertyChanged([CallerMemberName] string? propertyName = null)

@@ -98,6 +98,10 @@
                                           Content="{loc:Loc SettingsWindow_CategoryStructureToggle}"
                                           Margin="0,0,0,12"
                                           IsChecked="{Binding Settings.ExtractedCategoryStructure}" />
+                            <ToggleSwitch x:Name="SecurityScanToggle"
+                                          Content="{loc:Loc SettingsWindow_SecurityScanToggle}"
+                                          Margin="18,0,0,12"
+                                          IsChecked="{Binding Settings.EnableSecurityScanning}" />
                         </WrapPanel>
                     </StackPanel>
                 </Border>

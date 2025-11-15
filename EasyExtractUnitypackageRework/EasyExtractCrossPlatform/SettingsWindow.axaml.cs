@@ -67,6 +67,7 @@ public partial class SettingsWindow : Window
         AttachToggleHandler("ContextMenuToggle");
         AttachToggleHandler("DiscordRpcToggle");
         AttachToggleHandler("CategoryStructureToggle");
+        AttachToggleHandler("SecurityScanToggle");
         AttachToggleHandler("SoundToggle");
         AttachToggleHandler("CustomBackgroundToggle");
         AttachToggleHandler("StackTraceToggle");

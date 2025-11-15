@@ -444,6 +444,29 @@
                                         </Button.Content>
                                     </Button>
                                 </Grid>
+                                <Border x:Name="ExtractionDashboardSecurityBanner"
+                                        Padding="14"
+                                        CornerRadius="16"
+                                        Margin="0,6,0,0"
+                                        Background="{DynamicResource EasyGlassOverlayFaintBrush}"
+                                        BorderBrush="{DynamicResource EasyGlassNeutralBorderBrush}"
+                                        BorderThickness="1"
+                                        IsVisible="False">
+                                    <StackPanel Orientation="Horizontal" Spacing="10">
+                                        <PathIcon
+                                            Data="M11 2L1 20H21L11 2ZM11 7.75L16.25 17H5.75L11 7.75ZM10 12V15H12V12H10ZM10 16V18H12V16H10Z"
+                                            Width="22"
+                                            Height="22"
+                                            Foreground="{DynamicResource EasyWarningBrush}"
+                                            VerticalAlignment="Center" />
+                                        <TextBlock x:Name="ExtractionDashboardSecurityText"
+                                                   TextWrapping="Wrap"
+                                                   FontWeight="SemiBold"
+                                                   FontSize="15"
+                                                   VerticalAlignment="Center"
+                                                   Text="Potentially malicious package detected." />
+                                    </StackPanel>
+                                </Border>
 
                                 <Grid ColumnDefinitions="*,Auto" RowDefinitions="Auto,Auto">
                                     <ProgressBar x:Name="ExtractionDashboardProgressBar"
@@ -612,6 +635,18 @@
                                                                    Classes="subtle"
                                                                    TextTrimming="CharacterEllipsis"
                                                                    ToolTip.Tip="{Binding FilePath}" />
+                                                        <TextBlock Text="{Binding SecurityWarningText}"
+                                                                   Margin="0,2,0,0"
+                                                                   Classes="subtle"
+                                                                   Foreground="{DynamicResource EasyWarningBrush}"
+                                                                   TextTrimming="CharacterEllipsis"
+                                                                   IsVisible="{Binding HasSecurityWarning}" />
+                                                        <TextBlock Text="{Binding SecurityInfoText}"
+                                                                   Margin="0,2,0,0"
+                                                                   Classes="subtle"
+                                                                   Foreground="{DynamicResource EasyGlassMutedBrush}"
+                                                                   TextTrimming="CharacterEllipsis"
+                                                                   IsVisible="{Binding HasSecurityInfo}" />
                                                     </StackPanel>
                                                     <StackPanel Grid.Column="1"
                                                                 Margin="16,0,0,0"

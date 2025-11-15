@@ -83,6 +83,7 @@ public static class AppSettingsService
             ContextMenuToggle = true,
             DiscordRpc = true,
             ExtractedCategoryStructure = true,
+            EnableSecurityScanning = true,
             EnableSound = true,
             SoundVolume = 1.0,
             FirstRun = false,
