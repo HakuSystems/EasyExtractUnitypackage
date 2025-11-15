@@ -1,9 +1,13 @@
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
+using EasyExtractCrossPlatform.Models;
 
 namespace EasyExtractCrossPlatform.Services;
 
@@ -22,6 +26,12 @@ public static class LoggingService
     private static string? _logDirectory;
     private static string? _logFilePath;
     private static TimestampedTraceListener? _listener;
+    private static LoggingPreferences _preferences = LoggingPreferences.CreateDefault();
+    private static readonly ConcurrentQueue<PendingLogEntry> PendingEntries = new();
+    private static readonly SemaphoreSlim LogSignal = new(0);
+    private static CancellationTokenSource? _logProcessingCts;
+    private static Task? _logProcessingTask;
+    private static bool _modeStateLogged;
 
     public static string LogDirectory
     {
@@ -46,6 +56,15 @@ public static class LoggingService
         EnsureInitialized();
     }
 
+    public static void ApplySettingsSnapshot(AppSettings settings, string? source = null)
+    {
+        if (settings is null)
+            return;
+
+        var preferences = LoggingPreferences.FromSettings(settings);
+        ApplyPreferences(preferences, settings, source, !_modeStateLogged);
+    }
+
     public static void LogInformation(string message)
     {
         WriteEntry("INFO", message, null);
@@ -53,7 +72,73 @@ public static class LoggingService
 
     public static void LogError(string message, Exception? exception = null)
     {
-        WriteEntry("ERROR", message, exception);
+        WriteEntry("ERROR", message, exception, exception is null);
+    }
+
+    public static void LogMode(string description)
+    {
+        WriteEntry("MODE", description, null);
+    }
+
+    public static void LogPerformance(string operation, TimeSpan duration, string? category = null,
+        string? details = null, long? processedBytes = null)
+    {
+        var preferencesSnapshot = _preferences;
+        if (!preferencesSnapshot.PerformanceLoggingEnabled)
+            return;
+
+        var builder = new StringBuilder()
+            .Append(operation)
+            .Append(" completed in ")
+            .Append(duration.TotalMilliseconds.ToString("F2"))
+            .Append(" ms");
+
+        if (!string.IsNullOrWhiteSpace(category))
+            builder.Append(" | category=").Append(category);
+
+        if (!string.IsNullOrWhiteSpace(details))
+            builder.Append(" | ").Append(details);
+
+        if (processedBytes.HasValue)
+            builder.Append(" | bytes=").Append(processedBytes.Value.ToString("N0"));
+
+        if (preferencesSnapshot.MemoryTrackingEnabled)
+        {
+            var currentMemory = GC.GetTotalMemory(false);
+            builder.Append(" | memory=").Append(FormatBytes(currentMemory));
+        }
+
+        WriteEntry("PERF", builder.ToString(), null);
+    }
+
+    public static IDisposable BeginPerformanceScope(string operation, string? category = null,
+        string? correlationId = null)
+    {
+        var preferencesSnapshot = _preferences;
+        if (!preferencesSnapshot.PerformanceLoggingEnabled)
+            return NoopDisposable.Instance;
+
+        return new PerformanceScope(operation, category, correlationId, preferencesSnapshot);
+    }
+
+    public static void LogMemoryUsage(string context, bool includeGcBreakdown = false)
+    {
+        var preferencesSnapshot = _preferences;
+        if (!preferencesSnapshot.MemoryTrackingEnabled)
+            return;
+
+        var totalMemory = GC.GetTotalMemory(false);
+        var builder = new StringBuilder()
+            .Append(context)
+            .Append(" | memory=")
+            .Append(FormatBytes(totalMemory));
+
+        if (includeGcBreakdown)
+            builder.Append(" | gen0=").Append(GC.CollectionCount(0))
+                .Append(" gen1=").Append(GC.CollectionCount(1))
+                .Append(" gen2=").Append(GC.CollectionCount(2));
+
+        WriteEntry("MEM", builder.ToString(), null);
     }
 
     public static bool TryOpenLogFolder()
@@ -103,23 +188,245 @@ public static class LoggingService
         }
     }
 
-    private static void WriteEntry(string level, string message, Exception? exception)
+    private static void WriteEntry(string level, string message, Exception? exception, bool includeCallerStack = false,
+        bool bypassAsyncPipeline = false)
     {
         EnsureInitialized();
 
+        var preferencesSnapshot = _preferences;
+        string? capturedStack = null;
+
+        if (includeCallerStack && exception is null && preferencesSnapshot.CaptureStackTraces)
+            capturedStack = CaptureCallerStack();
+
+        var entry = new PendingLogEntry(level, message, exception, capturedStack, preferencesSnapshot);
+
+        if (!bypassAsyncPipeline && TryQueueEntry(entry))
+            return;
+
+        WriteEntryCore(entry);
+    }
+
+    private static bool TryQueueEntry(PendingLogEntry entry)
+    {
+        if (!entry.Preferences.AsyncLoggingEnabled)
+            return false;
+
+        EnsureAsyncProcessingLoop();
+
+        PendingEntries.Enqueue(entry);
+        try
+        {
+            LogSignal.Release();
+        }
+        catch (SemaphoreFullException)
+        {
+            if (PendingEntries.TryDequeue(out var overflowEntry))
+                WriteEntryCore(overflowEntry);
+        }
+
+        return true;
+    }
+
+    private static void WriteEntryCore(PendingLogEntry entry)
+    {
         var builder = new StringBuilder();
         builder.Append('[')
-            .Append(level)
+            .Append(entry.Level)
             .Append("] ")
-            .Append(message);
+            .Append(entry.Message);
 
-        if (exception is not null)
+        if (entry.Exception is not null)
         {
             builder.AppendLine();
-            builder.Append(exception);
+            if (entry.Preferences.CaptureStackTraces)
+                builder.Append(entry.Exception);
+            else
+                builder.Append(entry.Exception.GetType().FullName)
+                    .Append(':')
+                    .Append(' ')
+                    .Append(entry.Exception.Message);
+        }
+        else if (!string.IsNullOrWhiteSpace(entry.StackTrace))
+        {
+            builder.AppendLine();
+            builder.Append(entry.StackTrace);
         }
 
         Debug.WriteLine(builder.ToString());
+    }
+
+    private static void EnsureAsyncProcessingLoop()
+    {
+        if (_logProcessingTask is { IsCompleted: false })
+            return;
+
+        lock (SyncRoot)
+        {
+            if (_logProcessingTask is { IsCompleted: false })
+                return;
+
+            _logProcessingCts?.Dispose();
+            _logProcessingCts = new CancellationTokenSource();
+            _logProcessingTask = Task.Run(() => ProcessLogQueueAsync(_logProcessingCts.Token));
+        }
+    }
+
+    private static void StopAsyncProcessingLoop(bool flushQueue)
+    {
+        CancellationTokenSource? cts;
+        Task? worker;
+
+        lock (SyncRoot)
+        {
+            if (_logProcessingTask is null)
+            {
+                if (flushQueue)
+                    FlushPendingEntries();
+                return;
+            }
+
+            cts = _logProcessingCts;
+            worker = _logProcessingTask;
+            _logProcessingTask = null;
+            _logProcessingCts = null;
+        }
+
+        try
+        {
+            cts?.Cancel();
+            LogSignal.Release();
+            worker?.Wait(TimeSpan.FromSeconds(2));
+        }
+        catch (AggregateException)
+        {
+            // Swallow cancellation aggregate from task shutdown.
+        }
+        catch (ObjectDisposedException)
+        {
+            // Semaphore already disposed during shutdown.
+        }
+        finally
+        {
+            cts?.Dispose();
+        }
+
+        if (flushQueue)
+            FlushPendingEntries();
+    }
+
+    private static async Task ProcessLogQueueAsync(CancellationToken token)
+    {
+        try
+        {
+            while (true)
+            {
+                await LogSignal.WaitAsync(token).ConfigureAwait(false);
+                FlushPendingEntries();
+            }
+        }
+        catch (OperationCanceledException)
+        {
+            // Expected during shutdown.
+        }
+        catch (Exception ex)
+        {
+            Debug.WriteLine($"[Logging] Background pipeline faulted: {ex}");
+        }
+        finally
+        {
+            FlushPendingEntries();
+        }
+    }
+
+    private static void FlushPendingEntries()
+    {
+        while (PendingEntries.TryDequeue(out var entry))
+            WriteEntryCore(entry);
+    }
+
+    private static string CaptureCallerStack()
+    {
+        try
+        {
+            var trace = new StackTrace(3, true);
+            return trace.ToString();
+        }
+        catch
+        {
+            return Environment.StackTrace;
+        }
+    }
+
+    private static string FormatBytes(long bytes)
+    {
+        var units = new[] { "B", "KB", "MB", "GB", "TB" };
+        var value = (double)bytes;
+        var unitIndex = 0;
+
+        while (value >= 1024 && unitIndex < units.Length - 1)
+        {
+            value /= 1024;
+            unitIndex++;
+        }
+
+        return $"{value:0.##} {units[unitIndex]}";
+    }
+
+    private static void ApplyPreferences(LoggingPreferences preferences, AppSettings? settings, string? source,
+        bool forceLog)
+    {
+        var startAsync = false;
+        var stopAsync = false;
+
+        lock (SyncRoot)
+        {
+            var changed = !_preferences.Equals(preferences);
+            if (!changed && _modeStateLogged && !forceLog)
+                return;
+
+            startAsync = preferences.AsyncLoggingEnabled && !_preferences.AsyncLoggingEnabled;
+            stopAsync = !preferences.AsyncLoggingEnabled && _preferences.AsyncLoggingEnabled;
+
+            _preferences = preferences;
+            _modeStateLogged = true;
+        }
+
+        if (startAsync)
+            EnsureAsyncProcessingLoop();
+        else if (stopAsync)
+            StopAsyncProcessingLoop(true);
+
+        var summary = BuildDiagnosticsSummary(preferences, settings, source);
+        WriteEntry("MODE", summary, null, false,
+            !preferences.AsyncLoggingEnabled);
+    }
+
+    private static string BuildDiagnosticsSummary(LoggingPreferences preferences, AppSettings? settings,
+        string? source)
+    {
+        var builder = new StringBuilder()
+            .Append("stackTrace=")
+            .Append(preferences.CaptureStackTraces ? "on" : "off")
+            .Append(" | perf=")
+            .Append(preferences.PerformanceLoggingEnabled ? "on" : "off")
+            .Append(" | memory=")
+            .Append(preferences.MemoryTrackingEnabled ? "on" : "off")
+            .Append(" | async=")
+            .Append(preferences.AsyncLoggingEnabled ? "on" : "off");
+
+        if (!string.IsNullOrWhiteSpace(source))
+            builder.Append(" | source=").Append(source);
+
+        if (settings is not null)
+            builder.Append(" | license=")
+                .Append(string.IsNullOrWhiteSpace(settings.LicenseTier) ? "Free" : settings.LicenseTier)
+                .Append(" | uwuMode=")
+                .Append(settings.UwUModeActive ? "on" : "off")
+                .Append(" | discord=")
+                .Append(settings.DiscordRpc ? "on" : "off");
+
+        return builder.ToString();
     }
 
     private static void EnsureInitialized()
@@ -138,7 +445,8 @@ public static class LoggingService
             var logFileName = $"{LogFilePrefix}{DateTime.Now:yyyyMMdd}.log";
             var logFilePath = Path.Combine(directory, logFileName);
 
-            var stream = new FileStream(logFilePath, FileMode.Create, FileAccess.Write, FileShare.ReadWrite);
+            var stream = new FileStream(logFilePath, FileMode.OpenOrCreate, FileAccess.Write, FileShare.ReadWrite);
+            stream.Seek(0, SeekOrigin.End);
             var writer = new StreamWriter(stream, Encoding.UTF8)
             {
                 AutoFlush = true
@@ -160,6 +468,9 @@ public static class LoggingService
             AppDomain.CurrentDomain.ProcessExit += (_, _) => Shutdown();
             AppDomain.CurrentDomain.DomainUnload += (_, _) => Shutdown();
 
+            if (_preferences.AsyncLoggingEnabled)
+                EnsureAsyncProcessingLoop();
+
             _initialized = true;
         }
     }
@@ -173,6 +484,22 @@ public static class LoggingService
                 .AppendLine(new string('=', 80))
                 .Append("EasyExtract session started at ")
                 .Append(DateTimeOffset.Now.ToString("O"))
+                .AppendLine()
+                .Append("Process ")
+                .Append(Environment.ProcessId)
+                .Append(" | Path=")
+                .Append(Environment.ProcessPath ?? "unknown")
+                .AppendLine()
+                .Append("OS: ")
+                .Append(Environment.OSVersion)
+                .Append(" | ")
+                .Append(Environment.Is64BitProcess ? "x64" : "x86")
+                .AppendLine()
+                .Append("CLR ")
+                .Append(Environment.Version)
+                .AppendLine()
+                .Append("Log file: ")
+                .Append(_logFilePath)
                 .AppendLine()
                 .AppendLine(new string('=', 80))
                 .ToString();
@@ -261,6 +588,8 @@ public static class LoggingService
 
     private static void Shutdown()
     {
+        StopAsyncProcessingLoop(true);
+
         lock (SyncRoot)
         {
             if (_listener is null)
@@ -278,6 +607,108 @@ public static class LoggingService
             }
 
             _listener = null;
+        }
+    }
+
+    private readonly record struct PendingLogEntry(
+        string Level,
+        string Message,
+        Exception? Exception,
+        string? StackTrace,
+        LoggingPreferences Preferences);
+
+    private readonly record struct LoggingPreferences(
+        bool CaptureStackTraces,
+        bool PerformanceLoggingEnabled,
+        bool MemoryTrackingEnabled,
+        bool AsyncLoggingEnabled)
+    {
+        public static LoggingPreferences CreateDefault()
+        {
+            return new LoggingPreferences(true, true, true, true);
+        }
+
+        public static LoggingPreferences FromSettings(AppSettings settings)
+        {
+            return new LoggingPreferences(settings.EnableStackTrace, settings.EnablePerformanceLogging,
+                settings.EnableMemoryTracking, settings.EnableAsyncLogging);
+        }
+    }
+
+    private sealed class PerformanceScope : IDisposable
+    {
+        private readonly string? _category;
+        private readonly string? _correlationId;
+        private readonly string _operation;
+        private readonly LoggingPreferences _preferencesSnapshot;
+        private readonly long? _startingMemory;
+        private readonly Stopwatch _stopwatch = Stopwatch.StartNew();
+        private bool _disposed;
+
+        public PerformanceScope(string operation, string? category, string? correlationId,
+            LoggingPreferences preferencesSnapshot)
+        {
+            _operation = operation;
+            _category = category;
+            _correlationId = correlationId;
+            _preferencesSnapshot = preferencesSnapshot;
+            if (preferencesSnapshot.MemoryTrackingEnabled)
+                _startingMemory = GC.GetTotalMemory(false);
+        }
+
+        public void Dispose()
+        {
+            if (_disposed)
+                return;
+
+            _disposed = true;
+            _stopwatch.Stop();
+
+            if (!_preferencesSnapshot.PerformanceLoggingEnabled)
+                return;
+
+            long? endingMemory = null;
+            long? deltaMemory = null;
+
+            if (_preferencesSnapshot.MemoryTrackingEnabled)
+            {
+                endingMemory = GC.GetTotalMemory(false);
+                deltaMemory = endingMemory - (_startingMemory ?? endingMemory);
+            }
+
+            var builder = new StringBuilder()
+                .Append(_operation)
+                .Append(" took ")
+                .Append(_stopwatch.Elapsed.TotalMilliseconds.ToString("F2"))
+                .Append(" ms");
+
+            if (!string.IsNullOrWhiteSpace(_category))
+                builder.Append(" | category=").Append(_category);
+
+            if (!string.IsNullOrWhiteSpace(_correlationId))
+                builder.Append(" | correlation=").Append(_correlationId);
+
+            if (endingMemory.HasValue)
+            {
+                builder.Append(" | memory=").Append(FormatBytes(endingMemory.Value));
+                if (deltaMemory.HasValue)
+                    builder.Append(" (Δ").Append(FormatBytes(deltaMemory.Value)).Append(')');
+            }
+
+            WriteEntry("PERF", builder.ToString(), null);
+        }
+    }
+
+    private sealed class NoopDisposable : IDisposable
+    {
+        public static readonly NoopDisposable Instance = new();
+
+        private NoopDisposable()
+        {
+        }
+
+        public void Dispose()
+        {
         }
     }
 

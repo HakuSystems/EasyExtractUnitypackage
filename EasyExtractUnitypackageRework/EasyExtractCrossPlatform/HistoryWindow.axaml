@@ -17,12 +17,47 @@
         <util:BooleanNegationConverter x:Key="BooleanNegationConverter" />
         <util:BooleanToFontWeightConverter x:Key="BooleanToFontWeightConverter" />
     </Window.Resources>
+    <Window.Styles>
+        <Style Selector="ScrollViewer.history-scroll">
+            <Setter Property="Margin" Value="24" />
+            <Setter Property="HorizontalScrollBarVisibility" Value="Disabled" />
+            <Setter Property="VerticalScrollBarVisibility" Value="Auto" />
+        </Style>
+        <Style Selector="Window.compact ScrollViewer.history-scroll">
+            <Setter Property="Margin" Value="12" />
+        </Style>
+        <Style Selector="Window.compact Border.history-card">
+            <Setter Property="Padding" Value="22" />
+            <Setter Property="CornerRadius" Value="22" />
+        </Style>
+        <Style Selector="Window.compact Border.history-card.hero-card">
+            <Setter Property="Margin" Value="12" />
+        </Style>
+        <Style Selector="Window.compact Border.history-card.section-card">
+            <Setter Property="Margin" Value="12,0,12,0" />
+        </Style>
+        <Style Selector="Window.compact Border.timeline-card">
+            <Setter Property="Margin" Value="12,0,12,12" />
+        </Style>
+        <Style Selector="Window.compact UniformGrid.summary-grid">
+            <Setter Property="Columns" Value="1" />
+        </Style>
+        <Style Selector="Window.compact Border.primary-section">
+            <Setter Property="Margin" Value="0,0,0,12" />
+        </Style>
+        <Style Selector="Window.compact Border.secondary-section">
+            <Setter Property="Margin" Value="0" />
+        </Style>
+    </Window.Styles>
     <Grid>
-        <ScrollViewer Margin="24"
+        <ScrollViewer Classes="history-scroll"
+                      Margin="24"
                       Padding="0,0,12,0"
+                      HorizontalScrollBarVisibility="Disabled"
                       VerticalScrollBarVisibility="Auto">
             <StackPanel Spacing="24">
-                <Border Padding="32"
+                <Border Classes="history-card hero-card"
+                        Padding="32"
                         CornerRadius="28"
                         Background="{DynamicResource EasyGlassGradientBrush}"
                         BorderBrush="{DynamicResource EasyGlassBorderBrush}"
@@ -97,8 +132,12 @@
                     </StackPanel>
                 </Border>
 
-                <Grid ColumnDefinitions="2*,*">
-                    <Border Grid.Column="0"
+                <Grid x:Name="SplitGrid"
+                      Classes="split-grid"
+                      ColumnDefinitions="2*,*">
+                    <Border x:Name="PrimarySectionBorder"
+                            Grid.Column="0"
+                            Classes="history-card section-card primary-section"
                             Margin="0,0,12,0"
                             Padding="28"
                             CornerRadius="24"
@@ -185,7 +224,9 @@
                         </Grid>
                     </Border>
 
-                    <Border Grid.Column="1"
+                    <Border x:Name="SecondarySectionBorder"
+                            Grid.Column="1"
+                            Classes="history-card section-card secondary-section"
                             Margin="12,0,0,0"
                             Padding="28"
                             CornerRadius="24"
@@ -257,7 +298,8 @@
                     </Border>
                 </Grid>
 
-                <Border Padding="28"
+                <Border Classes="history-card section-card timeline-card"
+                        Padding="28"
                         CornerRadius="24"
                         Background="{DynamicResource EasyGlassGradientBrush}"
                         BorderBrush="{DynamicResource EasyGlassBorderBrush}"

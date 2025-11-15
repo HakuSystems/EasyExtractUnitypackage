@@ -23,6 +23,7 @@ public partial class SettingsWindow : Window
     private readonly TextBox? _backgroundPathBox;
     private readonly TextBox? _defaultOutputPathBox;
     private readonly TextBox? _defaultTempPathBox;
+    private readonly IDisposable? _responsiveLayoutSubscription;
     private readonly TextBlock? _statusTextBlock;
     private readonly ComboBox? _themeComboBox;
     private readonly SettingsViewModel _viewModel;
@@ -34,6 +35,7 @@ public partial class SettingsWindow : Window
     {
         InitializeComponent();
         LinuxUiHelper.ApplyWindowTweaks(this);
+        _responsiveLayoutSubscription = ResponsiveWindowHelper.Enable(this, 1000, 1500);
 
         _viewModel = SettingsViewModel.CreateFromStorage();
         DataContext = _viewModel;
@@ -313,5 +315,11 @@ public partial class SettingsWindow : Window
             textBox.SelectionEnd = caretIndex;
         if (textBox.CaretIndex != caretIndex)
             textBox.CaretIndex = caretIndex;
+    }
+
+    protected override void OnClosed(EventArgs e)
+    {
+        base.OnClosed(e);
+        _responsiveLayoutSubscription?.Dispose();
     }
 }

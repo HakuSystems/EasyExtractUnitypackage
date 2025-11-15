@@ -32,12 +32,18 @@ public sealed class UpdateService : IUpdateService
     private const string UserAgent =
         "EasyExtractCrossPlatform-Updater/1.0 (+https://github.com/HakuSystems/EasyExtractUnitypackage)";
 
+    private const string WindowsOnlyUpdateMessage = "Windows-only update detected";
+
     private static readonly HttpClient HttpClient = new();
 
     private static readonly JsonSerializerOptions SerializerOptions = new()
     {
         PropertyNameCaseInsensitive = true
     };
+
+    private static readonly Version LegacyWindowsOnlyMaxVersion = new(2, 0, 7, 0);
+    private static readonly string[] LegacyWindowsOnlyExtensions = { ".rar" };
+    private static readonly string[] LegacyWindowsOnlyNameHints = { "easyextractpublish" };
 
     private static readonly Dictionary<string, string[]> ArchitectureAliases = new(StringComparer.OrdinalIgnoreCase)
     {
@@ -131,6 +137,14 @@ public sealed class UpdateService : IUpdateService
 
         if (!TrySelectAsset(release, platform, architectureToken, out var asset, out var assetMessage))
         {
+            if (IsLegacyWindowsOnlyRelease(release, latestVersion, platform))
+            {
+                var tag = release.TagName ?? latestVersion.ToString();
+                LoggingService.LogInformation(
+                    $"Release '{tag}' is a legacy Windows-only update; skipping update for platform '{platform}'.");
+                return new UpdateCheckResult(false, null, WindowsOnlyUpdateMessage);
+            }
+
             LoggingService.LogError($"No suitable update asset found: {assetMessage}");
             return new UpdateCheckResult(false, null, assetMessage);
         }
@@ -615,6 +629,35 @@ public sealed class UpdateService : IUpdateService
             throw new InvalidOperationException("Unable to determine application directory for installation.");
 
         return Path.GetFullPath(assemblyLocation);
+    }
+
+    private static bool IsLegacyWindowsOnlyRelease(GitHubRelease release, Version latestVersion,
+        RuntimePlatform platform)
+    {
+        if (platform == RuntimePlatform.Windows)
+            return false;
+
+        if (latestVersion > LegacyWindowsOnlyMaxVersion)
+            return false;
+
+        if (release.Assets is null || release.Assets.Count == 0)
+            return false;
+
+        foreach (var asset in release.Assets)
+        {
+            if (string.IsNullOrWhiteSpace(asset.Name))
+                continue;
+
+            var lowered = asset.Name.Trim().ToLowerInvariant();
+
+            if (LegacyWindowsOnlyExtensions.Any(ext => lowered.EndsWith(ext, StringComparison.Ordinal)))
+                return true;
+
+            if (LegacyWindowsOnlyNameHints.Any(hint => lowered.Contains(hint, StringComparison.Ordinal)))
+                return true;
+        }
+
+        return false;
     }
 
     private static bool TrySelectAsset(GitHubRelease release, RuntimePlatform platform, string architectureToken,

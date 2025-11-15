@@ -24,10 +24,35 @@
             <Setter Property="Margin" Value="0,0,0,24" />
             <Setter Property="BoxShadow" Value="0 18 42 0 #16000000" />
         </Style>
+        <Style Selector="ScrollViewer.settings-scroll">
+            <Setter Property="HorizontalScrollBarVisibility" Value="Disabled" />
+            <Setter Property="VerticalScrollBarVisibility" Value="Auto" />
+        </Style>
+        <Style Selector="Window.cozy ScrollViewer.settings-scroll">
+            <Setter Property="Margin" Value="24,0,24,24" />
+        </Style>
+        <Style Selector="Window.compact ScrollViewer.settings-scroll">
+            <Setter Property="Margin" Value="16,0,16,16" />
+        </Style>
+        <Style Selector="Window.cozy Border.header-card">
+            <Setter Property="Margin" Value="24" />
+            <Setter Property="Padding" Value="24" />
+        </Style>
+        <Style Selector="Window.compact Border.header-card">
+            <Setter Property="Margin" Value="16" />
+            <Setter Property="Padding" Value="20" />
+            <Setter Property="CornerRadius" Value="22" />
+        </Style>
+        <Style Selector="Window.compact Border.section">
+            <Setter Property="Padding" Value="18" />
+            <Setter Property="CornerRadius" Value="18" />
+            <Setter Property="Margin" Value="0,0,0,18" />
+        </Style>
     </Window.Styles>
 
     <Grid RowDefinitions="Auto,*">
-        <Border Padding="28"
+        <Border Classes="header-card"
+                Padding="28"
                 Margin="32"
                 CornerRadius="28"
                 Background="{DynamicResource EasyGlassGradientBrush}"
@@ -45,7 +70,9 @@
             </StackPanel>
         </Border>
 
-        <ScrollViewer Grid.Row="1" Margin="32,0,32,32">
+        <ScrollViewer Grid.Row="1"
+                      Classes="settings-scroll"
+                      Margin="32,0,32,32">
             <StackPanel>
                 <Border Classes="section">
                     <StackPanel Spacing="18">

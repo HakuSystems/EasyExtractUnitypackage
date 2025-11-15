@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
@@ -32,6 +33,8 @@ public partial class MainWindow : Window
 {
     private const string UnityPackageExtension = ".unitypackage";
     private const string UnknownVersionLabel = "Version unknown";
+    private const double CompactWidthBreakpoint = 1200;
+    private const double CozyWidthBreakpoint = 1600;
 
     private static readonly HttpClient BackgroundHttpClient = new();
     private readonly Button? _batchExtractionButton;
@@ -61,6 +64,9 @@ public partial class MainWindow : Window
     private readonly TextBlock? _extractionOverviewLastExtractionText;
     private readonly TextBlock? _extractionOverviewPackagesCompletedText;
     private readonly IUnityPackageExtractionService _extractionService = new UnityPackageExtractionService();
+    private readonly Grid? _footerGrid;
+    private readonly Grid? _heroGrid;
+    private readonly Grid? _mainContentGrid;
 
     private readonly IMaliciousCodeDetectionService
         _maliciousCodeDetectionService = new MaliciousCodeDetectionService();
@@ -90,6 +96,8 @@ public partial class MainWindow : Window
         new(StringComparer.OrdinalIgnoreCase);
 
     private readonly HashSet<string> _securityWarningsShown = new(StringComparer.OrdinalIgnoreCase);
+    private readonly string _standardDropPrimaryText = "Drag & drop files here";
+    private readonly string _standardDropSecondaryText = "Supports batch extraction and live progress updates.";
     private readonly Button? _startExtractionButton;
     private readonly Grid? _startExtractionHeaderGrid;
     private readonly string[] _startupArguments;
@@ -137,10 +145,9 @@ public partial class MainWindow : Window
     private ScaleTransform? _overlayCardScaleTransform;
     private List<string>? _pendingStartupExtractions;
     private UpdateManifest? _pendingUpdateManifest;
+    private IDisposable? _responsiveLayoutSubscription;
     private AppSettings _settings = new();
     private SettingsWindow? _settingsWindow;
-    private readonly string _standardDropPrimaryText = "Drag & drop files here";
-    private readonly string _standardDropSecondaryText = "Supports batch extraction and live progress updates.";
     private IDisposable? _versionStatusReset;
 
     public MainWindow(string[]? startupArguments = null)
@@ -149,6 +156,9 @@ public partial class MainWindow : Window
 
         InitializeComponent();
         LinuxUiHelper.ApplyWindowTweaks(this);
+        Classes.CollectionChanged += OnClassesChanged;
+        _responsiveLayoutSubscription = ResponsiveWindowHelper.Enable(this);
+        ApplyResponsiveLayouts();
 
         var localization = LocalizationManager.Instance;
         _uwuDropPrimaryText = localization.GetString("MainWindow_DragAmpDropFilesHereUwU");
@@ -159,6 +169,9 @@ public partial class MainWindow : Window
         _dropZoneHostGrid = this.FindControl<Grid>("DropZoneHostGrid");
         _dropZonePrimaryTextBlock = this.FindControl<TextBlock>("DropZonePrimaryTextBlock");
         _dropZoneSecondaryTextBlock = this.FindControl<TextBlock>("DropZoneSecondaryTextBlock");
+        _heroGrid = this.FindControl<Grid>("HeroGrid");
+        _mainContentGrid = this.FindControl<Grid>("MainContentGrid");
+        _footerGrid = this.FindControl<Grid>("FooterGrid");
         if (_dropZonePrimaryTextBlock?.Text is { Length: > 0 } primaryText)
         {
             _defaultDropPrimaryText = primaryText;
@@ -210,6 +223,7 @@ public partial class MainWindow : Window
         }
 
         UpdateSearchUiState();
+        ApplyResponsiveLayouts();
 
         _startExtractionButton = this.FindControl<Button>("StartExtractionButton");
         _cancelExtractionButton = this.FindControl<Button>("CancelExtractionButton");
@@ -3603,9 +3617,43 @@ public partial class MainWindow : Window
     protected override void OnClosed(EventArgs e)
     {
         base.OnClosed(e);
+        Classes.CollectionChanged -= OnClassesChanged;
+        _responsiveLayoutSubscription?.Dispose();
+        _responsiveLayoutSubscription = null;
         DiscordRpcService.Instance.Dispose();
         _currentBackgroundBitmap?.Dispose();
         _currentBackgroundBitmap = null;
+    }
+
+    private void OnClassesChanged(object? sender, NotifyCollectionChangedEventArgs e)
+    {
+        ApplyResponsiveLayouts();
+    }
+
+    private void ApplyResponsiveLayouts()
+    {
+        var isCompact = Classes.Contains("compact");
+
+        if (_mainContentGrid is not null)
+            _mainContentGrid.ColumnDefinitions =
+                new ColumnDefinitions(isCompact ? "*" : "2*,*");
+
+        if (_heroGrid is not null)
+            _heroGrid.ColumnDefinitions = new ColumnDefinitions(isCompact ? "*" : "Auto,*");
+
+        if (_footerGrid is not null)
+        {
+            if (isCompact)
+            {
+                _footerGrid.ColumnDefinitions = new ColumnDefinitions("*");
+                _footerGrid.RowDefinitions = new RowDefinitions("Auto,Auto,Auto");
+            }
+            else
+            {
+                _footerGrid.ColumnDefinitions = new ColumnDefinitions("Auto,*,Auto");
+                _footerGrid.RowDefinitions = new RowDefinitions("Auto");
+            }
+        }
     }
 
     private void CancelVersionStatusReset()

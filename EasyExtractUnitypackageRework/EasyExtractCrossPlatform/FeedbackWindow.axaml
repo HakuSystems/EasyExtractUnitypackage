@@ -12,56 +12,82 @@
         TransparencyBackgroundFallback="{DynamicResource EasyWindowBackgroundBrush}"
         Foreground="{DynamicResource EasyTextColorBrush}"
         Background="{DynamicResource EasyWindowBackgroundBrush}">
-    <Grid RowDefinitions="Auto,*">
-        <Border Padding="32"
-                Background="{DynamicResource EasyGlassGradientBrush}"
-                BorderBrush="{DynamicResource EasyGlassBorderBrush}"
-                BorderThickness="1"
-                CornerRadius="32"
-                Margin="24,24,24,12"
-                BoxShadow="0 36 72 0 #16000000">
-            <StackPanel Spacing="8">
-                <TextBlock Text="{loc:Loc FeedbackWindow_Header}" Classes="display" />
-                <TextBlock Text="{loc:Loc FeedbackWindow_Description}"
-                           Classes="subtle" />
-                <TextBlock x:Name="VersionLabel"
-                           Classes="subtle"
-                           Text="{loc:Loc FeedbackWindow_VersionLabelUnknown}" />
+    <Window.Styles>
+        <Style Selector="ScrollViewer.feedback-scroll">
+            <Setter Property="Margin" Value="24" />
+            <Setter Property="HorizontalScrollBarVisibility" Value="Disabled" />
+            <Setter Property="VerticalScrollBarVisibility" Value="Auto" />
+        </Style>
+        <Style Selector="Window.compact ScrollViewer.feedback-scroll">
+            <Setter Property="Margin" Value="12" />
+        </Style>
+        <Style Selector="Window.compact Border.feedback-card">
+            <Setter Property="Padding" Value="22" />
+            <Setter Property="CornerRadius" Value="26" />
+        </Style>
+        <Style Selector="Window.compact Border.feedback-card.header-card">
+            <Setter Property="Margin" Value="12,12,12,8" />
+        </Style>
+        <Style Selector="Window.compact Border.feedback-card.content-card">
+            <Setter Property="Margin" Value="12,0,12,12" />
+        </Style>
+    </Window.Styles>
+
+    <Grid>
+        <ScrollViewer Classes="feedback-scroll">
+            <StackPanel Spacing="16">
+                <Border Classes="feedback-card header-card"
+                        Padding="32"
+                        Background="{DynamicResource EasyGlassGradientBrush}"
+                        BorderBrush="{DynamicResource EasyGlassBorderBrush}"
+                        BorderThickness="1"
+                        CornerRadius="32"
+                        Margin="24,24,24,12"
+                        BoxShadow="0 36 72 0 #16000000">
+                    <StackPanel Spacing="8">
+                        <TextBlock Text="{loc:Loc FeedbackWindow_Header}" Classes="display" />
+                        <TextBlock Text="{loc:Loc FeedbackWindow_Description}"
+                                   Classes="subtle" />
+                        <TextBlock x:Name="VersionLabel"
+                                   Classes="subtle"
+                                   Text="{loc:Loc FeedbackWindow_VersionLabelUnknown}" />
+                    </StackPanel>
+                </Border>
+
+                <Border Classes="feedback-card content-card"
+                        Margin="24,0,24,24"
+                        Padding="28"
+                        CornerRadius="28"
+                        Background="{DynamicResource EasyGlassGradientBrush}"
+                        BorderBrush="{DynamicResource EasyGlassBorderBrush}"
+                        BorderThickness="1"
+                        BoxShadow="0 32 68 0 #15000000">
+                    <Grid RowDefinitions="Auto,Auto">
+                        <TextBox x:Name="FeedbackTextBox"
+                                 Grid.Row="0"
+                                 AcceptsReturn="True"
+                                 TextWrapping="Wrap"
+                                 MinHeight="180"
+                                 Watermark="{loc:Loc FeedbackWindow_Watermark}"
+                                 ScrollViewer.VerticalScrollBarVisibility="Auto" />
+
+                        <Grid Grid.Row="1"
+                              ColumnDefinitions="*,Auto"
+                              Margin="0,18,0,0">
+                            <TextBlock x:Name="StatusTextBlock"
+                                       Classes="subtle"
+                                       TextWrapping="Wrap" />
+
+                            <Button x:Name="SendButton"
+                                    Grid.Column="1"
+                                    Margin="18,0,0,0"
+                                    Width="180"
+                                    Content="{loc:Loc FeedbackWindow_SendButton}"
+                                    Click="SendButton_OnClick" />
+                        </Grid>
+                    </Grid>
+                </Border>
             </StackPanel>
-        </Border>
-
-        <Border Grid.Row="1"
-                Margin="24,0,24,24"
-                Padding="28"
-                CornerRadius="28"
-                Background="{DynamicResource EasyGlassGradientBrush}"
-                BorderBrush="{DynamicResource EasyGlassBorderBrush}"
-                BorderThickness="1"
-                BoxShadow="0 32 68 0 #15000000">
-            <Grid RowDefinitions="Auto,Auto">
-                <TextBox x:Name="FeedbackTextBox"
-                         Grid.Row="0"
-                         AcceptsReturn="True"
-                         TextWrapping="Wrap"
-                         MinHeight="180"
-                         Watermark="{loc:Loc FeedbackWindow_Watermark}"
-                         ScrollViewer.VerticalScrollBarVisibility="Auto" />
-
-                <Grid Grid.Row="1"
-                      ColumnDefinitions="*,Auto"
-                      Margin="0,18,0,0">
-                    <TextBlock x:Name="StatusTextBlock"
-                               Classes="subtle"
-                               TextWrapping="Wrap" />
-
-                    <Button x:Name="SendButton"
-                            Grid.Column="1"
-                            Margin="18,0,0,0"
-                            Width="180"
-                            Content="{loc:Loc FeedbackWindow_SendButton}"
-                            Click="SendButton_OnClick" />
-                </Grid>
-            </Grid>
-        </Border>
+        </ScrollViewer>
     </Grid>
 </Window>

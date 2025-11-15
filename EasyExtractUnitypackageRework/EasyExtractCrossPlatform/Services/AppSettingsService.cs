@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics;
 using System.IO;
 using System.Text.Json;
 using EasyExtractCrossPlatform.Models;
@@ -24,6 +25,10 @@ public static class AppSettingsService
     public static AppSettings Load()
     {
         LastError = null;
+        var stopwatch = Stopwatch.StartNew();
+        AppSettings? resolvedSettings = null;
+        var source = "unknown";
+        Exception? failure = null;
 
         LoggingService.LogInformation($"Loading application settings from '{SettingsFilePath}'.");
 
@@ -35,27 +40,48 @@ public static class AppSettingsService
                 var defaults = CreateDefault();
                 Save(defaults);
                 LoggingService.LogInformation("Default settings persisted successfully.");
-                return defaults;
+                resolvedSettings = defaults;
+                source = "defaults";
             }
-
-            using var stream = File.OpenRead(SettingsFilePath);
-            var settings = JsonSerializer.Deserialize<AppSettings>(stream, SerializerOptions) ?? CreateDefault();
-            settings.AppTitle = AppSettings.DefaultAppTitle;
-            UpdateStoredVersion(settings);
-            LoggingService.LogInformation("Settings loaded successfully.");
-            return settings;
+            else
+            {
+                using var stream = File.OpenRead(SettingsFilePath);
+                var settings = JsonSerializer.Deserialize<AppSettings>(stream, SerializerOptions) ?? CreateDefault();
+                settings.AppTitle = AppSettings.DefaultAppTitle;
+                UpdateStoredVersion(settings);
+                LoggingService.LogInformation("Settings loaded successfully.");
+                resolvedSettings = settings;
+                source = "existing";
+            }
         }
         catch (Exception ex)
         {
             LastError = ex;
             LoggingService.LogError("Failed to load settings. Falling back to defaults.", ex);
-            return CreateDefault();
+            resolvedSettings = CreateDefault();
+            source = "fallback";
+            failure = ex;
         }
+        finally
+        {
+            stopwatch.Stop();
+            LoggingService.LogPerformance("AppSettingsService.Load", stopwatch.Elapsed,
+                details: $"source={source}|status={(failure is null ? "ok" : "failed")}");
+            LoggingService.LogMemoryUsage("AppSettingsService.Load");
+
+            if (resolvedSettings is not null)
+                LoggingService.ApplySettingsSnapshot(resolvedSettings, "load");
+        }
+
+        return resolvedSettings!;
     }
 
     public static void Save(AppSettings settings)
     {
         settings.AppTitle = AppSettings.DefaultAppTitle;
+        var stopwatch = Stopwatch.StartNew();
+        var success = false;
+        LoggingService.ApplySettingsSnapshot(settings, "save");
         try
         {
             LoggingService.LogInformation($"Saving application settings to '{SettingsFilePath}'.");
@@ -63,11 +89,19 @@ public static class AppSettingsService
             var json = JsonSerializer.Serialize(settings, SerializerOptions);
             File.WriteAllText(SettingsFilePath, json);
             LoggingService.LogInformation("Settings saved successfully.");
+            success = true;
         }
         catch (Exception ex)
         {
             LoggingService.LogError("Failed to save application settings.", ex);
             throw;
+        }
+        finally
+        {
+            stopwatch.Stop();
+            LoggingService.LogPerformance("AppSettingsService.Save", stopwatch.Elapsed,
+                details: $"status={(success ? "ok" : "failed")}");
+            LoggingService.LogMemoryUsage("AppSettingsService.Save");
         }
     }
 

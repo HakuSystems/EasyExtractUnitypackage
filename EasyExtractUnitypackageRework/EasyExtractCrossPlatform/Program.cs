@@ -15,6 +15,9 @@ internal class Program
     {
         LoggingService.Initialize();
         LoggingService.LogInformation("EasyExtract starting up.");
+        var launchMode = args.Length == 0 ? "Interactive" : "CLI";
+        var argsSummary = args.Length == 0 ? "<none>" : string.Join(' ', args);
+        LoggingService.LogMode($"Startup mode={launchMode} | args={argsSummary}");
 
         AppDomain.CurrentDomain.UnhandledException += OnUnhandledException;
         TaskScheduler.UnobservedTaskException += OnUnobservedTaskException;

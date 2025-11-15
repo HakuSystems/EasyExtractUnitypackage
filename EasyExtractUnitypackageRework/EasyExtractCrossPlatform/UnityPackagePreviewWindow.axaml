@@ -62,245 +62,345 @@
             <Setter Property="BorderBrush" Value="{DynamicResource EasyGlassNeutralBorderBrush}" />
             <Setter Property="BorderThickness" Value="1" />
         </Style>
+        <Style Selector="ScrollViewer.preview-scroll">
+            <Setter Property="HorizontalScrollBarVisibility" Value="Disabled" />
+            <Setter Property="VerticalScrollBarVisibility" Value="Auto" />
+        </Style>
+        <Style Selector="Grid.preview-layout">
+            <Setter Property="Margin" Value="28" />
+        </Style>
+        <Style Selector="Window.cozy Grid.preview-layout">
+            <Setter Property="Margin" Value="24" />
+        </Style>
+        <Style Selector="Window.compact Grid.preview-layout">
+            <Setter Property="Margin" Value="16" />
+        </Style>
+        <Style Selector="Window.compact Border.preview-card">
+            <Setter Property="Padding" Value="18" />
+            <Setter Property="CornerRadius" Value="18" />
+        </Style>
+        <Style Selector="Window.cozy UniformGrid.stats-grid">
+            <Setter Property="Columns" Value="2" />
+        </Style>
+        <Style Selector="Window.compact UniformGrid.stats-grid">
+            <Setter Property="Columns" Value="1" />
+        </Style>
+        <Style Selector="Window.compact Border.asset-tree-card">
+            <Setter Property="Margin" Value="0,0,0,24" />
+        </Style>
+        <Style Selector="Window.compact Border.inspector-card">
+            <Setter Property="Margin" Value="0" />
+        </Style>
+        <Style Selector="Border.preview-overlay">
+            <Setter Property="Margin" Value="28" />
+        </Style>
+        <Style Selector="Window.cozy Border.preview-overlay">
+            <Setter Property="Margin" Value="24" />
+        </Style>
+        <Style Selector="Window.compact Border.preview-overlay">
+            <Setter Property="Margin" Value="16" />
+        </Style>
     </Window.Styles>
 
-    <Grid Margin="28" RowDefinitions="Auto,Auto,Auto,*,Auto">
-        <StackPanel Grid.Row="0" Spacing="8">
-            <TextBlock Text="{Binding PackageName, FallbackValue='Unity Package'}"
-                       FontSize="26"
-                       FontWeight="Bold"
-                       TextTrimming="CharacterEllipsis" />
-            <TextBlock Text="{Binding PackagePath}"
-                       Classes="subtle"
-                       TextWrapping="Wrap"
-                       MaxLines="2"
-                       TextTrimming="CharacterEllipsis" />
-        </StackPanel>
-
-        <Border Grid.Row="1"
-                Padding="16"
-                CornerRadius="18"
-                Margin="0,16,0,16"
-                BorderThickness="1"
-                Background="{DynamicResource EasyGlassOverlayFaintBrush}"
-                BorderBrush="{DynamicResource EasyGlassNeutralBorderBrush}"
-                IsVisible="{Binding ShowSecuritySection}">
-            <StackPanel Spacing="12">
-                <StackPanel Orientation="Horizontal" Spacing="12">
-                    <Border Width="36"
-                            Height="36"
-                            CornerRadius="18"
-                            Background="{DynamicResource EasyGlassOverlayBrush}"
-                            BorderBrush="{DynamicResource EasyGlassNeutralBorderBrush}"
-                            BorderThickness="1">
-                        <PathIcon
-                            Data="M11 3L1 21H21L11 3ZM11 7.92L17.6 19H4.4L11 7.92ZM10 14V16H12V14H10ZM10 10V13H12V10H10Z"
-                            Width="20"
-                            Height="20"
-                            HorizontalAlignment="Center"
-                            VerticalAlignment="Center"
-                            Foreground="{DynamicResource EasyTextColorBrush}" />
-                    </Border>
-                    <StackPanel>
-                        <TextBlock Text="{Binding SecurityStatusText}"
-                                   FontWeight="SemiBold"
-                                   FontSize="16"
-                                   TextWrapping="Wrap" />
-                        <TextBlock Text="{Binding SecurityErrorText}"
-                                   Classes="subtle"
-                                   TextWrapping="Wrap"
-                                   IsVisible="{Binding HasSecurityError}" />
-                    </StackPanel>
+    <Grid>
+        <ScrollViewer Classes="preview-scroll">
+            <Grid x:Name="PreviewLayout"
+                  Classes="preview-layout"
+                  RowDefinitions="Auto,Auto,Auto,*,Auto">
+                <StackPanel Grid.Row="0" Spacing="8">
+                    <TextBlock Text="{Binding PackageName, FallbackValue='Unity Package'}"
+                               FontSize="26"
+                               FontWeight="Bold"
+                               TextTrimming="CharacterEllipsis" />
+                    <TextBlock Text="{Binding PackagePath}"
+                               Classes="subtle"
+                               TextWrapping="Wrap"
+                               MaxLines="2"
+                               TextTrimming="CharacterEllipsis" />
                 </StackPanel>
-                <ItemsControl ItemsSource="{Binding SecurityThreats}"
-                              IsVisible="{Binding SecurityHasThreats}">
-                    <ItemsControl.ItemTemplate>
-                        <DataTemplate>
-                            <Border CornerRadius="14"
-                                    Padding="14"
-                                    Margin="0,0,0,14"
-                                    Background="{DynamicResource EasyGlassOverlayStrongBrush}"
+
+                <Border Grid.Row="1"
+                        Padding="16"
+                        CornerRadius="18"
+                        Margin="0,16,0,16"
+                        BorderThickness="1"
+                        Background="{DynamicResource EasyGlassOverlayFaintBrush}"
+                        BorderBrush="{DynamicResource EasyGlassNeutralBorderBrush}"
+                        IsVisible="{Binding ShowSecuritySection}">
+                    <StackPanel Spacing="12">
+                        <StackPanel Orientation="Horizontal" Spacing="12">
+                            <Border Width="36"
+                                    Height="36"
+                                    CornerRadius="18"
+                                    Background="{DynamicResource EasyGlassOverlayBrush}"
                                     BorderBrush="{DynamicResource EasyGlassNeutralBorderBrush}"
                                     BorderThickness="1">
-                                <StackPanel Spacing="6">
-                                    <StackPanel Orientation="Horizontal" Spacing="8">
-                                        <TextBlock Text="{Binding SeverityLabel}"
-                                                   FontWeight="Bold"
-                                                   Classes="subtle" />
-                                        <TextBlock Text="{Binding Title}"
-                                                   FontWeight="SemiBold"
-                                                   TextWrapping="Wrap" />
-                                    </StackPanel>
-                                    <TextBlock Text="{Binding Description}"
-                                               TextWrapping="Wrap"
-                                               Classes="subtle" />
-                                    <ItemsControl ItemsSource="{Binding Matches}"
-                                                  IsVisible="{Binding HasMatches}"
-                                                  Margin="0,4,0,0">
-                                        <ItemsControl.ItemTemplate>
-                                            <DataTemplate>
-                                                <StackPanel Orientation="Horizontal"
-                                                            Spacing="6">
-                                                    <TextBlock Text="•"
-                                                               FontWeight="Bold" />
-                                                    <TextBlock Text="{Binding}"
-                                                               TextWrapping="Wrap"
-                                                               Classes="subtle" />
+                                <PathIcon
+                                    Data="M11 3L1 21H21L11 3ZM11 7.92L17.6 19H4.4L11 7.92ZM10 14V16H12V14H10ZM10 10V13H12V10H10Z"
+                                    Width="20"
+                                    Height="20"
+                                    HorizontalAlignment="Center"
+                                    VerticalAlignment="Center"
+                                    Foreground="{DynamicResource EasyTextColorBrush}" />
+                            </Border>
+                            <StackPanel>
+                                <TextBlock Text="{Binding SecurityStatusText}"
+                                           FontWeight="SemiBold"
+                                           FontSize="16"
+                                           TextWrapping="Wrap" />
+                                <TextBlock Text="{Binding SecurityErrorText}"
+                                           Classes="subtle"
+                                           TextWrapping="Wrap"
+                                           IsVisible="{Binding HasSecurityError}" />
+                            </StackPanel>
+                        </StackPanel>
+                        <ItemsControl ItemsSource="{Binding SecurityThreats}"
+                                      IsVisible="{Binding SecurityHasThreats}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Border CornerRadius="14"
+                                            Padding="14"
+                                            Margin="0,0,0,14"
+                                            Background="{DynamicResource EasyGlassOverlayStrongBrush}"
+                                            BorderBrush="{DynamicResource EasyGlassNeutralBorderBrush}"
+                                            BorderThickness="1">
+                                        <StackPanel Spacing="6">
+                                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                                <TextBlock Text="{Binding SeverityLabel}"
+                                                           FontWeight="Bold"
+                                                           Classes="subtle" />
+                                                <TextBlock Text="{Binding Title}"
+                                                           FontWeight="SemiBold"
+                                                           TextWrapping="Wrap" />
+                                            </StackPanel>
+                                            <TextBlock Text="{Binding Description}"
+                                                       TextWrapping="Wrap"
+                                                       Classes="subtle" />
+                                            <ItemsControl ItemsSource="{Binding Matches}"
+                                                          IsVisible="{Binding HasMatches}"
+                                                          Margin="0,4,0,0">
+                                                <ItemsControl.ItemTemplate>
+                                                    <DataTemplate>
+                                                        <StackPanel Orientation="Horizontal"
+                                                                    Spacing="6">
+                                                            <TextBlock Text="•"
+                                                                       FontWeight="Bold" />
+                                                            <TextBlock Text="{Binding}"
+                                                                       TextWrapping="Wrap"
+                                                                       Classes="subtle" />
+                                                        </StackPanel>
+                                                    </DataTemplate>
+                                                </ItemsControl.ItemTemplate>
+                                            </ItemsControl>
+                                        </StackPanel>
+                                    </Border>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                        <TextBlock Text="Security scan in progress..."
+                                   Classes="subtle"
+                                   IsVisible="{Binding SecurityScanInProgress}" />
+                    </StackPanel>
+                </Border>
+
+                <UniformGrid Grid.Row="2"
+                             Classes="stats-grid"
+                             Columns="4"
+                             Margin="0,16,0,20">
+                    <Border Classes="preview-card"
+                            Margin="0,0,18,18">
+                        <StackPanel Spacing="4">
+                            <TextBlock Text="{loc:Loc UnityPackagePreviewWindow_Assets}"
+                                       Classes="subtle" />
+                            <TextBlock Text="{Binding AssetCount}"
+                                       FontSize="20"
+                                       FontWeight="SemiBold" />
+                        </StackPanel>
+                    </Border>
+                    <Border Classes="preview-card"
+                            Margin="0,0,18,18">
+                        <StackPanel Spacing="4">
+                            <TextBlock Text="{loc:Loc UnityPackagePreviewWindow_AssetSize}"
+                                       Classes="subtle" />
+                            <TextBlock Text="{Binding TotalAssetSizeText, FallbackValue='0 B'}"
+                                       FontSize="20"
+                                       FontWeight="SemiBold"
+                                       TextTrimming="CharacterEllipsis" />
+                        </StackPanel>
+                    </Border>
+                    <Border Classes="preview-card"
+                            Margin="0,0,18,18">
+                        <StackPanel Spacing="4">
+                            <TextBlock Text="{loc:Loc UnityPackagePreviewWindow_PackageSize}"
+                                       Classes="subtle" />
+                            <TextBlock Text="{Binding PackageSizeText, FallbackValue='0 B'}"
+                                       FontSize="20"
+                                       FontWeight="SemiBold"
+                                       TextTrimming="CharacterEllipsis" />
+                        </StackPanel>
+                    </Border>
+                    <Border Classes="preview-card"
+                            Margin="0,0,18,18">
+                        <StackPanel Spacing="4">
+                            <TextBlock Text="{loc:Loc UnityPackagePreviewWindow_LastModified}"
+                                       Classes="subtle" />
+                            <TextBlock Text="{Binding PackageModifiedText, FallbackValue='-'}"
+                                       FontSize="20"
+                                       FontWeight="SemiBold"
+                                       TextTrimming="CharacterEllipsis" />
+                        </StackPanel>
+                    </Border>
+                </UniformGrid>
+
+                <Grid x:Name="DetailsGrid"
+                      Grid.Row="3"
+                      Classes="details-grid"
+                      ColumnDefinitions="2*,*"
+                      Margin="0,0,0,24">
+                    <Border x:Name="AssetTreeCard"
+                            Classes="preview-card asset-tree-card">
+                        <Grid RowDefinitions="Auto,*">
+                            <Grid Grid.Row="0"
+                                  ColumnDefinitions="Auto,*,Auto,2*"
+                                  Margin="0,0,0,16">
+                                <TextBlock Grid.Column="0"
+                                           Text="{loc:Loc UnityPackagePreviewWindow_Category}"
+                                           Classes="subtle"
+                                           VerticalAlignment="Center"
+                                           Margin="0,0,12,0" />
+                                <ComboBox Grid.Column="1"
+                                          ItemsSource="{Binding Categories}"
+                                          SelectedItem="{Binding SelectedCategory}"
+                                          MinWidth="150"
+                                          HorizontalAlignment="Stretch"
+                                          VerticalAlignment="Center" />
+                                <TextBlock Grid.Column="2"
+                                           Text="{Binding AssetCount, StringFormat='{}{0} assets'}"
+                                           Classes="subtle"
+                                           VerticalAlignment="Center"
+                                           HorizontalAlignment="Right"
+                                           Margin="12,0,12,0" />
+                                <TextBox Grid.Column="3"
+                                         Classes="search-bar search-bar-small"
+                                         Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}"
+                                         Watermark="{loc:Loc UnityPackagePreviewWindow_SearchAssets}"
+                                         MinWidth="220"
+                                         HorizontalAlignment="Stretch"
+                                         VerticalAlignment="Center"
+                                         Margin="12,0,0,0">
+                                    <TextBox.KeyBindings>
+                                        <KeyBinding Gesture="Escape"
+                                                    Command="{Binding ClearCommand}" />
+                                    </TextBox.KeyBindings>
+                                </TextBox>
+                            </Grid>
+
+                            <Grid Grid.Row="1">
+                                <ScrollViewer VerticalScrollBarVisibility="Auto"
+                                              HorizontalScrollBarVisibility="Auto"
+                                              IsVisible="{Binding IsTreeViewVisible}">
+                                    <ItemsControl ItemsSource="{Binding RootNodes}"
+                                                  HorizontalAlignment="Stretch">
+                                        <ItemsControl.Resources>
+                                            <DataTemplate x:Key="AssetTreeTemplate"
+                                                          DataType="vm:UnityPackageAssetTreeNode">
+                                                <StackPanel Spacing="4">
+                                                    <Grid ColumnDefinitions="Auto,Auto,*,Auto"
+                                                          Margin="0,2">
+                                                        <Button Grid.Column="0"
+                                                                Classes="icon-button"
+                                                                Command="{Binding DataContext.NodeToggleCommand, RelativeSource={RelativeSource AncestorType=Window}}"
+                                                                CommandParameter="{Binding}"
+                                                                IsEnabled="{Binding CanToggle}"
+                                                                IsVisible="{Binding CanToggle}"
+                                                                ToolTip.Tip="{loc:Loc UnityPackagePreviewWindow_ExpandOrCollapse}">
+                                                            <Path Data="{Binding ToggleIconGeometry}"
+                                                                  Stroke="{DynamicResource EasyMutedBrush}"
+                                                                  StrokeThickness="1.8"
+                                                                  StrokeJoin="Round"
+                                                                  StrokeLineCap="Round"
+                                                                  HorizontalAlignment="Center"
+                                                                  VerticalAlignment="Center" />
+                                                        </Button>
+                                                        <Button Grid.Column="1"
+                                                                Classes="icon-button"
+                                                                Command="{Binding DataContext.CollapseAllFoldersCommand, RelativeSource={RelativeSource AncestorType=Window}}"
+                                                                CommandParameter="{Binding}"
+                                                                IsVisible="{Binding ShowCollapseDescendants}"
+                                                                ToolTip.Tip="{loc:Loc UnityPackagePreviewWindow_CollapseAllChildFolders}">
+                                                            <Path Data="{Binding CollapseDescendantsIcon}"
+                                                                  Stroke="{DynamicResource EasyMutedBrush}"
+                                                                  StrokeThickness="1.6"
+                                                                  StrokeJoin="Round"
+                                                                  StrokeLineCap="Round"
+                                                                  HorizontalAlignment="Center"
+                                                                  VerticalAlignment="Center" />
+                                                        </Button>
+                                                        <Button Grid.Column="2"
+                                                                Grid.ColumnSpan="2"
+                                                                Classes="tree-row-button"
+                                                                Background="{Binding IsSelected, Converter={StaticResource TreeRowSelectionBrushConverter}}"
+                                                                Command="{Binding DataContext.SelectTreeNodeCommand, RelativeSource={RelativeSource AncestorType=Window}}"
+                                                                CommandParameter="{Binding}"
+                                                                HorizontalAlignment="Stretch"
+                                                                HorizontalContentAlignment="Stretch"
+                                                                Margin="4,0,0,0">
+                                                            <Grid ColumnDefinitions="Auto,*,Auto"
+                                                                  VerticalAlignment="Center">
+                                                                <Path Grid.Column="0"
+                                                                      Data="{Binding IconGeometry}"
+                                                                      Fill="{DynamicResource EasyGlassOverlayFaintBrush}"
+                                                                      Stroke="{DynamicResource EasyMutedBrush}"
+                                                                      StrokeThickness="1.6"
+                                                                      StrokeJoin="Round"
+                                                                      StrokeLineCap="Round"
+                                                                      Width="24"
+                                                                      Height="20"
+                                                                      Stretch="Uniform"
+                                                                      HorizontalAlignment="Center"
+                                                                      VerticalAlignment="Center" />
+                                                                <TextBlock Grid.Column="1"
+                                                                           Text="{Binding Name}"
+                                                                           FontWeight="SemiBold"
+                                                                           Margin="8,0,0,0"
+                                                                           VerticalAlignment="Center"
+                                                                           TextTrimming="CharacterEllipsis" />
+                                                                <TextBlock Grid.Column="2"
+                                                                           Text="{Binding SizeText}"
+                                                                           FontWeight="SemiBold"
+                                                                           VerticalAlignment="Center"
+                                                                           HorizontalAlignment="Right"
+                                                                           Margin="12,0,0,0"
+                                                                           IsVisible="{Binding IsFolder, Converter={StaticResource BooleanNegationConverter}}" />
+                                                            </Grid>
+                                                        </Button>
+                                                    </Grid>
+                                                    <ItemsControl ItemsSource="{Binding Children}"
+                                                                  ItemTemplate="{StaticResource AssetTreeTemplate}"
+                                                                  Margin="24,0,0,0"
+                                                                  HorizontalAlignment="Stretch"
+                                                                  IsVisible="{Binding IsExpanded}" />
                                                 </StackPanel>
                                             </DataTemplate>
+                                        </ItemsControl.Resources>
+                                        <ItemsControl.ItemTemplate>
+                                            <StaticResource ResourceKey="AssetTreeTemplate" />
                                         </ItemsControl.ItemTemplate>
                                     </ItemsControl>
-                                </StackPanel>
-                            </Border>
-                        </DataTemplate>
-                    </ItemsControl.ItemTemplate>
-                </ItemsControl>
-                <TextBlock Text="Security scan in progress..."
-                           Classes="subtle"
-                           IsVisible="{Binding SecurityScanInProgress}" />
-            </StackPanel>
-        </Border>
+                                </ScrollViewer>
 
-        <Grid Grid.Row="2"
-              ColumnDefinitions="*,*,*,*"
-              Margin="0,16,0,20">
-            <Border Classes="preview-card"
-                    Margin="0,0,18,0">
-                <StackPanel Spacing="4">
-                    <TextBlock Text="{loc:Loc UnityPackagePreviewWindow_Assets}"
-                               Classes="subtle" />
-                    <TextBlock Text="{Binding AssetCount}"
-                               FontSize="20"
-                               FontWeight="SemiBold" />
-                </StackPanel>
-            </Border>
-            <Border Classes="preview-card"
-                    Grid.Column="1"
-                    Margin="0,0,18,0">
-                <StackPanel Spacing="4">
-                    <TextBlock Text="{loc:Loc UnityPackagePreviewWindow_AssetSize}"
-                               Classes="subtle" />
-                    <TextBlock Text="{Binding TotalAssetSizeText, FallbackValue='0 B'}"
-                               FontSize="20"
-                               FontWeight="SemiBold"
-                               TextTrimming="CharacterEllipsis" />
-                </StackPanel>
-            </Border>
-            <Border Classes="preview-card"
-                    Grid.Column="2"
-                    Margin="0,0,18,0">
-                <StackPanel Spacing="4">
-                    <TextBlock Text="{loc:Loc UnityPackagePreviewWindow_PackageSize}"
-                               Classes="subtle" />
-                    <TextBlock Text="{Binding PackageSizeText, FallbackValue='0 B'}"
-                               FontSize="20"
-                               FontWeight="SemiBold"
-                               TextTrimming="CharacterEllipsis" />
-                </StackPanel>
-            </Border>
-            <Border Classes="preview-card"
-                    Grid.Column="3">
-                <StackPanel Spacing="4">
-                    <TextBlock Text="{loc:Loc UnityPackagePreviewWindow_LastModified}"
-                               Classes="subtle" />
-                    <TextBlock Text="{Binding PackageModifiedText, FallbackValue='-'}"
-                               FontSize="20"
-                               FontWeight="SemiBold"
-                               TextTrimming="CharacterEllipsis" />
-                </StackPanel>
-            </Border>
-        </Grid>
-
-        <Grid Grid.Row="3"
-              ColumnDefinitions="2*,*"
-              Margin="0,0,0,24">
-            <Border Classes="preview-card">
-                <Grid RowDefinitions="Auto,*">
-                    <Grid Grid.Row="0"
-                          ColumnDefinitions="Auto,*,Auto,2*"
-                          Margin="0,0,0,16">
-                        <TextBlock Grid.Column="0"
-                                   Text="{loc:Loc UnityPackagePreviewWindow_Category}"
-                                   Classes="subtle"
-                                   VerticalAlignment="Center"
-                                   Margin="0,0,12,0" />
-                        <ComboBox Grid.Column="1"
-                                  ItemsSource="{Binding Categories}"
-                                  SelectedItem="{Binding SelectedCategory}"
-                                  MinWidth="150"
-                                  HorizontalAlignment="Stretch"
-                                  VerticalAlignment="Center" />
-                        <TextBlock Grid.Column="2"
-                                   Text="{Binding AssetCount, StringFormat='{}{0} assets'}"
-                                   Classes="subtle"
-                                   VerticalAlignment="Center"
-                                   HorizontalAlignment="Right"
-                                   Margin="12,0,12,0" />
-                        <TextBox Grid.Column="3"
-                                 Classes="search-bar search-bar-small"
-                                 Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}"
-                                 Watermark="{loc:Loc UnityPackagePreviewWindow_SearchAssets}"
-                                 MinWidth="220"
-                                 HorizontalAlignment="Stretch"
-                                 VerticalAlignment="Center"
-                                 Margin="12,0,0,0">
-                            <TextBox.KeyBindings>
-                                <KeyBinding Gesture="Escape"
-                                            Command="{Binding ClearCommand}" />
-                            </TextBox.KeyBindings>
-                        </TextBox>
-                    </Grid>
-
-                    <Grid Grid.Row="1">
-                        <ScrollViewer VerticalScrollBarVisibility="Auto"
-                                      HorizontalScrollBarVisibility="Auto"
-                                      IsVisible="{Binding IsTreeViewVisible}">
-                            <ItemsControl ItemsSource="{Binding RootNodes}"
-                                          HorizontalAlignment="Stretch">
-                                <ItemsControl.Resources>
-                                    <DataTemplate x:Key="AssetTreeTemplate"
-                                                  DataType="vm:UnityPackageAssetTreeNode">
-                                        <StackPanel Spacing="4">
-                                            <Grid ColumnDefinitions="Auto,Auto,*,Auto"
-                                                  Margin="0,2">
-                                                <Button Grid.Column="0"
-                                                        Classes="icon-button"
-                                                        Command="{Binding DataContext.NodeToggleCommand, RelativeSource={RelativeSource AncestorType=Window}}"
-                                                        CommandParameter="{Binding}"
-                                                        IsEnabled="{Binding CanToggle}"
-                                                        IsVisible="{Binding CanToggle}"
-                                                        ToolTip.Tip="{loc:Loc UnityPackagePreviewWindow_ExpandOrCollapse}">
-                                                    <Path Data="{Binding ToggleIconGeometry}"
-                                                          Stroke="{DynamicResource EasyMutedBrush}"
-                                                          StrokeThickness="1.8"
-                                                          StrokeJoin="Round"
-                                                          StrokeLineCap="Round"
-                                                          HorizontalAlignment="Center"
-                                                          VerticalAlignment="Center" />
-                                                </Button>
-                                                <Button Grid.Column="1"
-                                                        Classes="icon-button"
-                                                        Command="{Binding DataContext.CollapseAllFoldersCommand, RelativeSource={RelativeSource AncestorType=Window}}"
-                                                        CommandParameter="{Binding}"
-                                                        IsVisible="{Binding ShowCollapseDescendants}"
-                                                        ToolTip.Tip="{loc:Loc UnityPackagePreviewWindow_CollapseAllChildFolders}">
-                                                    <Path Data="{Binding CollapseDescendantsIcon}"
-                                                          Stroke="{DynamicResource EasyMutedBrush}"
-                                                          StrokeThickness="1.6"
-                                                          StrokeJoin="Round"
-                                                          StrokeLineCap="Round"
-                                                          HorizontalAlignment="Center"
-                                                          VerticalAlignment="Center" />
-                                                </Button>
-                                                <Button Grid.Column="2"
-                                                        Grid.ColumnSpan="2"
-                                                        Classes="tree-row-button"
-                                                        Background="{Binding IsSelected, Converter={StaticResource TreeRowSelectionBrushConverter}}"
-                                                        Command="{Binding DataContext.SelectTreeNodeCommand, RelativeSource={RelativeSource AncestorType=Window}}"
-                                                        CommandParameter="{Binding}"
-                                                        HorizontalAlignment="Stretch"
-                                                        HorizontalContentAlignment="Stretch"
-                                                        Margin="4,0,0,0">
+                                <ScrollViewer VerticalScrollBarVisibility="Auto"
+                                              IsVisible="{Binding IsListViewVisible}">
+                                    <ListBox ItemsSource="{Binding Assets}"
+                                             SelectedItem="{Binding SelectedAsset, Mode=TwoWay}">
+                                        <ListBox.ItemTemplate>
+                                            <DataTemplate x:DataType="vm:UnityPackageAssetPreviewItem">
+                                                <Border Background="{DynamicResource EasyGlassOverlayFaintBrush}"
+                                                        BorderBrush="{DynamicResource EasyGlassNeutralBorderBrush}"
+                                                        BorderThickness="1"
+                                                        CornerRadius="18"
+                                                        Padding="16"
+                                                        Margin="0,0,0,12">
                                                     <Grid ColumnDefinitions="Auto,*,Auto"
                                                           VerticalAlignment="Center">
                                                         <Path Grid.Column="0"
@@ -310,294 +410,250 @@
                                                               StrokeThickness="1.6"
                                                               StrokeJoin="Round"
                                                               StrokeLineCap="Round"
-                                                              Width="24"
-                                                              Height="20"
+                                                              Width="32"
+                                                              Height="28"
                                                               Stretch="Uniform"
                                                               HorizontalAlignment="Center"
                                                               VerticalAlignment="Center" />
-                                                        <TextBlock Grid.Column="1"
-                                                                   Text="{Binding Name}"
-                                                                   FontWeight="SemiBold"
-                                                                   Margin="8,0,0,0"
-                                                                   VerticalAlignment="Center"
-                                                                   TextTrimming="CharacterEllipsis" />
-                                                        <TextBlock Grid.Column="2"
-                                                                   Text="{Binding SizeText}"
-                                                                   FontWeight="SemiBold"
-                                                                   VerticalAlignment="Center"
-                                                                   HorizontalAlignment="Right"
-                                                                   Margin="12,0,0,0"
-                                                                   IsVisible="{Binding IsFolder, Converter={StaticResource BooleanNegationConverter}}" />
+                                                        <StackPanel Grid.Column="1"
+                                                                    Margin="16,0,0,0"
+                                                                    Spacing="6">
+                                                            <TextBlock Text="{Binding FileName}"
+                                                                       FontWeight="SemiBold"
+                                                                       TextTrimming="CharacterEllipsis" />
+                                                            <TextBlock Text="{Binding RelativePath}"
+                                                                       Classes="subtle"
+                                                                       TextTrimming="CharacterEllipsis"
+                                                                       ToolTip.Tip="{Binding RelativePath}" />
+                                                        </StackPanel>
+                                                        <StackPanel Grid.Column="2"
+                                                                    HorizontalAlignment="Right"
+                                                                    Margin="16,0,0,0"
+                                                                    Spacing="6">
+                                                            <Border
+                                                                Background="{DynamicResource EasyGlassOverlayBrush}"
+                                                                BorderBrush="{DynamicResource EasyGlassNeutralBorderBrush}"
+                                                                BorderThickness="1"
+                                                                CornerRadius="12"
+                                                                Padding="6,2"
+                                                                HorizontalAlignment="Right"
+                                                                IsVisible="{Binding HasPreview}">
+                                                                <TextBlock
+                                                                    Text="{loc:Loc UnityPackagePreviewWindow_Preview}"
+                                                                    FontSize="12"
+                                                                    FontWeight="SemiBold" />
+                                                            </Border>
+                                                            <TextBlock Text="{Binding SizeText}"
+                                                                       FontWeight="SemiBold"
+                                                                       HorizontalAlignment="Right" />
+                                                            <TextBlock Text="{Binding Category}"
+                                                                       HorizontalAlignment="Right"
+                                                                       Classes="subtle" />
+                                                        </StackPanel>
                                                     </Grid>
-                                                </Button>
-                                            </Grid>
-                                            <ItemsControl ItemsSource="{Binding Children}"
-                                                          ItemTemplate="{StaticResource AssetTreeTemplate}"
-                                                          Margin="24,0,0,0"
-                                                          HorizontalAlignment="Stretch"
-                                                          IsVisible="{Binding IsExpanded}" />
-                                        </StackPanel>
-                                    </DataTemplate>
-                                </ItemsControl.Resources>
-                                <ItemsControl.ItemTemplate>
-                                    <StaticResource ResourceKey="AssetTreeTemplate" />
-                                </ItemsControl.ItemTemplate>
-                            </ItemsControl>
-                        </ScrollViewer>
+                                                </Border>
+                                            </DataTemplate>
+                                        </ListBox.ItemTemplate>
+                                    </ListBox>
+                                </ScrollViewer>
 
-                        <ScrollViewer VerticalScrollBarVisibility="Auto"
-                                      IsVisible="{Binding IsListViewVisible}">
-                            <ListBox ItemsSource="{Binding Assets}"
-                                     SelectedItem="{Binding SelectedAsset, Mode=TwoWay}">
-                                <ListBox.ItemTemplate>
-                                    <DataTemplate x:DataType="vm:UnityPackageAssetPreviewItem">
-                                        <Border Background="{DynamicResource EasyGlassOverlayFaintBrush}"
+                                <TextBlock Text="{loc:Loc UnityPackagePreviewWindow_NoAssetsMatchTheCurrentFilter}"
+                                           HorizontalAlignment="Center"
+                                           VerticalAlignment="Center"
+                                           IsVisible="{Binding ShowEmptyState}"
+                                           Classes="subtle" />
+                            </Grid>
+                        </Grid>
+                    </Border>
+
+                    <Border x:Name="InspectorCard"
+                            Grid.Column="1"
+                            Classes="preview-card inspector-card"
+                            Margin="24,0,0,0">
+                        <Grid RowDefinitions="Auto,Auto,*">
+                            <StackPanel Spacing="4">
+                                <TextBlock Text="{loc:Loc UnityPackagePreviewWindow_SelectedAsset}"
+                                           Classes="subtle" />
+                                <TextBlock
+                                    Text="{Binding SelectedAssetPath, FallbackValue='Select an asset to inspect'}"
+                                    TextWrapping="Wrap"
+                                    MaxLines="3"
+                                    TextTrimming="CharacterEllipsis" />
+                            </StackPanel>
+
+                            <Grid Grid.Row="1"
+                                  ColumnDefinitions="*,*"
+                                  Margin="0,18,0,0">
+                                <StackPanel Spacing="4">
+                                    <TextBlock Text="{loc:Loc UnityPackagePreviewWindow_Category}"
+                                               Classes="subtle" />
+                                    <TextBlock Text="{Binding SelectedAssetCategory, FallbackValue='-'}"
+                                               FontWeight="SemiBold" />
+                                </StackPanel>
+                                <StackPanel Grid.Column="1"
+                                            Spacing="4"
+                                            Margin="16,0,0,0">
+                                    <TextBlock Text="{loc:Loc UnityPackagePreviewWindow_Size}"
+                                               Classes="subtle" />
+                                    <TextBlock Text="{Binding SelectedAssetSizeText, FallbackValue='-'}"
+                                               FontWeight="SemiBold" />
+                                </StackPanel>
+                            </Grid>
+
+                            <Grid Grid.Row="2"
+                                  RowDefinitions="*,Auto"
+                                  Margin="0,18,0,0">
+                                <TabControl Grid.Row="0"
+                                            SelectedIndex="{Binding PreviewTabIndex}"
+                                            MinHeight="320">
+                                    <TabItem Header="{loc:Loc UnityPackagePreviewWindow_Image}"
+                                             IsVisible="{Binding HasImagePreview}">
+                                        <Border Background="{DynamicResource EasyGlassOverlayBrush}"
                                                 BorderBrush="{DynamicResource EasyGlassNeutralBorderBrush}"
                                                 BorderThickness="1"
-                                                CornerRadius="18"
-                                                Padding="16"
-                                                Margin="0,0,0,12">
-                                            <Grid ColumnDefinitions="Auto,*,Auto"
-                                                  VerticalAlignment="Center">
-                                                <Path Grid.Column="0"
-                                                      Data="{Binding IconGeometry}"
-                                                      Fill="{DynamicResource EasyGlassOverlayFaintBrush}"
-                                                      Stroke="{DynamicResource EasyMutedBrush}"
-                                                      StrokeThickness="1.6"
-                                                      StrokeJoin="Round"
-                                                      StrokeLineCap="Round"
-                                                      Width="32"
-                                                      Height="28"
-                                                      Stretch="Uniform"
-                                                      HorizontalAlignment="Center"
-                                                      VerticalAlignment="Center" />
-                                                <StackPanel Grid.Column="1"
-                                                            Margin="16,0,0,0"
-                                                            Spacing="6">
-                                                    <TextBlock Text="{Binding FileName}"
-                                                               FontWeight="SemiBold"
-                                                               TextTrimming="CharacterEllipsis" />
-                                                    <TextBlock Text="{Binding RelativePath}"
-                                                               Classes="subtle"
-                                                               TextTrimming="CharacterEllipsis"
-                                                               ToolTip.Tip="{Binding RelativePath}" />
-                                                </StackPanel>
-                                                <StackPanel Grid.Column="2"
-                                                            HorizontalAlignment="Right"
-                                                            Margin="16,0,0,0"
-                                                            Spacing="6">
-                                                    <Border Background="{DynamicResource EasyGlassOverlayBrush}"
-                                                            BorderBrush="{DynamicResource EasyGlassNeutralBorderBrush}"
-                                                            BorderThickness="1"
-                                                            CornerRadius="12"
-                                                            Padding="6,2"
-                                                            HorizontalAlignment="Right"
-                                                            IsVisible="{Binding HasPreview}">
-                                                        <TextBlock Text="{loc:Loc UnityPackagePreviewWindow_Preview}"
-                                                                   FontSize="12"
-                                                                   FontWeight="SemiBold" />
-                                                    </Border>
-                                                    <TextBlock Text="{Binding SizeText}"
-                                                               FontWeight="SemiBold"
-                                                               HorizontalAlignment="Right" />
-                                                    <TextBlock Text="{Binding Category}"
-                                                               HorizontalAlignment="Right"
-                                                               Classes="subtle" />
-                                                </StackPanel>
-                                            </Grid>
+                                                CornerRadius="16"
+                                                Padding="12"
+                                                HorizontalAlignment="Stretch"
+                                                VerticalAlignment="Stretch">
+                                            <ScrollViewer HorizontalScrollBarVisibility="Disabled"
+                                                          VerticalScrollBarVisibility="Auto">
+                                                <Image Source="{Binding ImagePreview}"
+                                                       Stretch="Uniform"
+                                                       HorizontalAlignment="Center"
+                                                       VerticalAlignment="Center" />
+                                            </ScrollViewer>
                                         </Border>
-                                    </DataTemplate>
-                                </ListBox.ItemTemplate>
-                            </ListBox>
-                        </ScrollViewer>
+                                    </TabItem>
+                                    <TabItem Header="{loc:Loc UnityPackagePreviewWindow_Preview}"
+                                             IsVisible="{Binding HasFallbackPreview}">
+                                        <Border Background="{DynamicResource EasyGlassOverlayBrush}"
+                                                BorderBrush="{DynamicResource EasyGlassNeutralBorderBrush}"
+                                                BorderThickness="1"
+                                                CornerRadius="16"
+                                                Padding="12"
+                                                HorizontalAlignment="Stretch"
+                                                VerticalAlignment="Stretch">
+                                            <ScrollViewer HorizontalScrollBarVisibility="Disabled"
+                                                          VerticalScrollBarVisibility="Auto">
+                                                <Image Source="{Binding FallbackPreviewImage}"
+                                                       Stretch="Uniform"
+                                                       HorizontalAlignment="Center"
+                                                       VerticalAlignment="Center" />
+                                            </ScrollViewer>
+                                        </Border>
+                                    </TabItem>
+                                    <TabItem Header="{loc:Loc UnityPackagePreviewWindow_Text}"
+                                             IsVisible="{Binding HasTextPreview}">
+                                        <Border Background="{DynamicResource EasyGlassOverlayBrush}"
+                                                BorderBrush="{DynamicResource EasyGlassNeutralBorderBrush}"
+                                                BorderThickness="1"
+                                                CornerRadius="16"
+                                                Padding="12"
+                                                HorizontalAlignment="Stretch"
+                                                VerticalAlignment="Stretch">
+                                            <ScrollViewer HorizontalScrollBarVisibility="Auto"
+                                                          VerticalScrollBarVisibility="Auto">
+                                                <TextBlock Text="{Binding TextPreview}"
+                                                           FontFamily="Consolas"
+                                                           FontSize="14"
+                                                           TextWrapping="Wrap" />
+                                            </ScrollViewer>
+                                        </Border>
+                                    </TabItem>
+                                    <TabItem Header="{loc:Loc UnityPackagePreviewWindow_Audio}"
+                                             IsVisible="{Binding HasAudioPreview}">
+                                        <Border Background="{DynamicResource EasyGlassOverlayBrush}"
+                                                BorderBrush="{DynamicResource EasyGlassNeutralBorderBrush}"
+                                                BorderThickness="1"
+                                                CornerRadius="16"
+                                                Padding="16">
+                                            <StackPanel Spacing="12">
+                                                <TextBlock Text="{Binding AudioStatusText}"
+                                                           FontWeight="SemiBold" />
+                                                <ProgressBar Minimum="0"
+                                                             Maximum="1"
+                                                             Height="6"
+                                                             Value="{Binding AudioProgress}" />
+                                                <StackPanel Orientation="Horizontal"
+                                                            Spacing="6">
+                                                    <TextBlock Text="{Binding AudioPositionText}"
+                                                               FontFamily="Consolas" />
+                                                    <TextBlock Text="/" />
+                                                    <TextBlock Text="{Binding AudioDurationText}"
+                                                               FontFamily="Consolas" />
+                                                </StackPanel>
+                                                <StackPanel Orientation="Horizontal"
+                                                            Spacing="12">
+                                                    <Button Content="{loc:Loc UnityPackagePreviewWindow_PlayPause}"
+                                                            Command="{Binding PlayAudioPreviewCommand}" />
+                                                    <Button Content="{loc:Loc UnityPackagePreviewWindow_Stop}"
+                                                            Command="{Binding StopAudioPreviewCommand}" />
+                                                </StackPanel>
+                                            </StackPanel>
+                                        </Border>
+                                    </TabItem>
+                                    <TabItem Header="{loc:Loc UnityPackagePreviewWindow_3DModel}"
+                                             IsVisible="{Binding HasModelPreview}">
+                                        <Border Background="{DynamicResource EasyGlassOverlayBrush}"
+                                                BorderBrush="{DynamicResource EasyGlassNeutralBorderBrush}"
+                                                BorderThickness="1"
+                                                CornerRadius="16"
+                                                Padding="8">
+                                            <controls:ModelPreviewControl Model="{Binding ModelPreview}"
+                                                                          HorizontalAlignment="Stretch"
+                                                                          VerticalAlignment="Stretch" />
+                                        </Border>
+                                    </TabItem>
+                                </TabControl>
 
-                        <TextBlock Text="{loc:Loc UnityPackagePreviewWindow_NoAssetsMatchTheCurrentFilter}"
-                                   HorizontalAlignment="Center"
-                                   VerticalAlignment="Center"
-                                   IsVisible="{Binding ShowEmptyState}"
-                                   Classes="subtle" />
-                    </Grid>
-                </Grid>
-            </Border>
-
-            <Border Grid.Column="1"
-                    Classes="preview-card"
-                    Margin="24,0,0,0">
-                <Grid RowDefinitions="Auto,Auto,*">
-                    <StackPanel Spacing="4">
-                        <TextBlock Text="{loc:Loc UnityPackagePreviewWindow_SelectedAsset}"
-                                   Classes="subtle" />
-                        <TextBlock Text="{Binding SelectedAssetPath, FallbackValue='Select an asset to inspect'}"
-                                   TextWrapping="Wrap"
-                                   MaxLines="3"
-                                   TextTrimming="CharacterEllipsis" />
-                    </StackPanel>
-
-                    <Grid Grid.Row="1"
-                          ColumnDefinitions="*,*"
-                          Margin="0,18,0,0">
-                        <StackPanel Spacing="4">
-                            <TextBlock Text="{loc:Loc UnityPackagePreviewWindow_Category}"
-                                       Classes="subtle" />
-                            <TextBlock Text="{Binding SelectedAssetCategory, FallbackValue='-'}"
-                                       FontWeight="SemiBold" />
-                        </StackPanel>
-                        <StackPanel Grid.Column="1"
-                                    Spacing="4"
-                                    Margin="16,0,0,0">
-                            <TextBlock Text="{loc:Loc UnityPackagePreviewWindow_Size}"
-                                       Classes="subtle" />
-                            <TextBlock Text="{Binding SelectedAssetSizeText, FallbackValue='-'}"
-                                       FontWeight="SemiBold" />
-                        </StackPanel>
-                    </Grid>
-
-                    <Grid Grid.Row="2"
-                          RowDefinitions="*,Auto"
-                          Margin="0,18,0,0">
-                        <TabControl Grid.Row="0"
-                                    SelectedIndex="{Binding PreviewTabIndex}"
-                                    MinHeight="320">
-                            <TabItem Header="{loc:Loc UnityPackagePreviewWindow_Image}"
-                                     IsVisible="{Binding HasImagePreview}">
-                                <Border Background="{DynamicResource EasyGlassOverlayBrush}"
-                                        BorderBrush="{DynamicResource EasyGlassNeutralBorderBrush}"
-                                        BorderThickness="1"
-                                        CornerRadius="16"
-                                        Padding="12"
-                                        HorizontalAlignment="Stretch"
-                                        VerticalAlignment="Stretch">
-                                    <ScrollViewer HorizontalScrollBarVisibility="Disabled"
-                                                  VerticalScrollBarVisibility="Auto">
-                                        <Image Source="{Binding ImagePreview}"
-                                               Stretch="Uniform"
+                                <StackPanel Grid.Row="1"
+                                            Margin="0,12,0,0"
+                                            Spacing="6">
+                                    <TextBlock
+                                        Text="{loc:Loc UnityPackagePreviewWindow_PreviewNotAvailableForThisAsset}"
+                                        HorizontalAlignment="Center"
+                                        Classes="subtle"
+                                        IsVisible="{Binding HasAnyPreview, Converter={StaticResource BooleanNegationConverter}}" />
+                                    <TextBlock
+                                        Text="{loc:Loc UnityPackagePreviewWindow_TextPreviewTruncatedForLargeFiles}"
+                                        HorizontalAlignment="Center"
+                                        Classes="subtle"
+                                        IsVisible="{Binding IsTextPreviewTruncated}" />
+                                    <TextBlock Text="{loc:Loc UnityPackagePreviewWindow_OnlyAPortionOfThisAsset}"
                                                HorizontalAlignment="Center"
-                                               VerticalAlignment="Center" />
-                                    </ScrollViewer>
-                                </Border>
-                            </TabItem>
-                            <TabItem Header="{loc:Loc UnityPackagePreviewWindow_Preview}"
-                                     IsVisible="{Binding HasFallbackPreview}">
-                                <Border Background="{DynamicResource EasyGlassOverlayBrush}"
-                                        BorderBrush="{DynamicResource EasyGlassNeutralBorderBrush}"
-                                        BorderThickness="1"
-                                        CornerRadius="16"
-                                        Padding="12"
-                                        HorizontalAlignment="Stretch"
-                                        VerticalAlignment="Stretch">
-                                    <ScrollViewer HorizontalScrollBarVisibility="Disabled"
-                                                  VerticalScrollBarVisibility="Auto">
-                                        <Image Source="{Binding FallbackPreviewImage}"
-                                               Stretch="Uniform"
+                                               Classes="subtle"
+                                               IsVisible="{Binding IsAssetDataTruncated}" />
+                                    <TextBlock
+                                        Text="{loc:Loc UnityPackagePreviewWindow_3DPreviewCurrentlySupportsOBJMeshes}"
+                                        HorizontalAlignment="Center"
+                                        Classes="subtle"
+                                        IsVisible="{Binding ShowUnsupportedModelMessage}" />
+                                    <TextBlock Text="{loc:Loc UnityPackagePreviewWindow_AudioPreviewSupportsWAVMP3And}"
                                                HorizontalAlignment="Center"
-                                               VerticalAlignment="Center" />
-                                    </ScrollViewer>
-                                </Border>
-                            </TabItem>
-                            <TabItem Header="{loc:Loc UnityPackagePreviewWindow_Text}"
-                                     IsVisible="{Binding HasTextPreview}">
-                                <Border Background="{DynamicResource EasyGlassOverlayBrush}"
-                                        BorderBrush="{DynamicResource EasyGlassNeutralBorderBrush}"
-                                        BorderThickness="1"
-                                        CornerRadius="16"
-                                        Padding="12"
-                                        HorizontalAlignment="Stretch"
-                                        VerticalAlignment="Stretch">
-                                    <ScrollViewer HorizontalScrollBarVisibility="Auto"
-                                                  VerticalScrollBarVisibility="Auto">
-                                        <TextBlock Text="{Binding TextPreview}"
-                                                   FontFamily="Consolas"
-                                                   FontSize="14"
-                                                   TextWrapping="Wrap" />
-                                    </ScrollViewer>
-                                </Border>
-                            </TabItem>
-                            <TabItem Header="{loc:Loc UnityPackagePreviewWindow_Audio}"
-                                     IsVisible="{Binding HasAudioPreview}">
-                                <Border Background="{DynamicResource EasyGlassOverlayBrush}"
-                                        BorderBrush="{DynamicResource EasyGlassNeutralBorderBrush}"
-                                        BorderThickness="1"
-                                        CornerRadius="16"
-                                        Padding="16">
-                                    <StackPanel Spacing="12">
-                                        <TextBlock Text="{Binding AudioStatusText}"
-                                                   FontWeight="SemiBold" />
-                                        <ProgressBar Minimum="0"
-                                                     Maximum="1"
-                                                     Height="6"
-                                                     Value="{Binding AudioProgress}" />
-                                        <StackPanel Orientation="Horizontal"
-                                                    Spacing="6">
-                                            <TextBlock Text="{Binding AudioPositionText}"
-                                                       FontFamily="Consolas" />
-                                            <TextBlock Text="/" />
-                                            <TextBlock Text="{Binding AudioDurationText}"
-                                                       FontFamily="Consolas" />
-                                        </StackPanel>
-                                        <StackPanel Orientation="Horizontal"
-                                                    Spacing="12">
-                                            <Button Content="{loc:Loc UnityPackagePreviewWindow_PlayPause}"
-                                                    Command="{Binding PlayAudioPreviewCommand}" />
-                                            <Button Content="{loc:Loc UnityPackagePreviewWindow_Stop}"
-                                                    Command="{Binding StopAudioPreviewCommand}" />
-                                        </StackPanel>
-                                    </StackPanel>
-                                </Border>
-                            </TabItem>
-                            <TabItem Header="{loc:Loc UnityPackagePreviewWindow_3DModel}"
-                                     IsVisible="{Binding HasModelPreview}">
-                                <Border Background="{DynamicResource EasyGlassOverlayBrush}"
-                                        BorderBrush="{DynamicResource EasyGlassNeutralBorderBrush}"
-                                        BorderThickness="1"
-                                        CornerRadius="16"
-                                        Padding="8">
-                                    <controls:ModelPreviewControl Model="{Binding ModelPreview}"
-                                                                  HorizontalAlignment="Stretch"
-                                                                  VerticalAlignment="Stretch" />
-                                </Border>
-                            </TabItem>
-                        </TabControl>
-
-                        <StackPanel Grid.Row="1"
-                                    Margin="0,12,0,0"
-                                    Spacing="6">
-                            <TextBlock Text="{loc:Loc UnityPackagePreviewWindow_PreviewNotAvailableForThisAsset}"
-                                       HorizontalAlignment="Center"
-                                       Classes="subtle"
-                                       IsVisible="{Binding HasAnyPreview, Converter={StaticResource BooleanNegationConverter}}" />
-                            <TextBlock Text="{loc:Loc UnityPackagePreviewWindow_TextPreviewTruncatedForLargeFiles}"
-                                       HorizontalAlignment="Center"
-                                       Classes="subtle"
-                                       IsVisible="{Binding IsTextPreviewTruncated}" />
-                            <TextBlock Text="{loc:Loc UnityPackagePreviewWindow_OnlyAPortionOfThisAsset}"
-                                       HorizontalAlignment="Center"
-                                       Classes="subtle"
-                                       IsVisible="{Binding IsAssetDataTruncated}" />
-                            <TextBlock Text="{loc:Loc UnityPackagePreviewWindow_3DPreviewCurrentlySupportsOBJMeshes}"
-                                       HorizontalAlignment="Center"
-                                       Classes="subtle"
-                                       IsVisible="{Binding ShowUnsupportedModelMessage}" />
-                            <TextBlock Text="{loc:Loc UnityPackagePreviewWindow_AudioPreviewSupportsWAVMP3And}"
-                                       HorizontalAlignment="Center"
-                                       Classes="subtle"
-                                       IsVisible="{Binding ShowUnsupportedAudioMessage}" />
-                        </StackPanel>
-                    </Grid>
+                                               Classes="subtle"
+                                               IsVisible="{Binding ShowUnsupportedAudioMessage}" />
+                                </StackPanel>
+                            </Grid>
+                        </Grid>
+                    </Border>
                 </Grid>
-            </Border>
-        </Grid>
 
-        <Grid Grid.Row="4">
-            <TextBlock Text="{Binding StatusMessage}"
-                       Classes="subtle"
-                       VerticalAlignment="Center"
-                       TextWrapping="Wrap" />
-        </Grid>
+                <Grid Grid.Row="4">
+                    <TextBlock Text="{Binding StatusMessage}"
+                               Classes="subtle"
+                               VerticalAlignment="Center"
+                               TextWrapping="Wrap" />
+                </Grid>
 
-        <Border Grid.RowSpan="4"
+            </Grid>
+        </ScrollViewer>
+
+        <Border Classes="preview-overlay"
                 Background="#88000000"
                 CornerRadius="24"
-                IsVisible="{Binding IsLoading}">
+                IsVisible="{Binding IsLoading}"
+                HorizontalAlignment="Stretch"
+                VerticalAlignment="Stretch">
             <Border Background="{DynamicResource EasyGlassOverlayStrongBrush}"
                     BorderBrush="{DynamicResource EasyGlassNeutralBorderBrush}"
                     BorderThickness="1"
@@ -616,10 +672,12 @@
             </Border>
         </Border>
 
-        <Border Grid.RowSpan="4"
+        <Border Classes="preview-overlay"
                 Background="#88000000"
                 CornerRadius="24"
-                IsVisible="{Binding HasError}">
+                IsVisible="{Binding HasError}"
+                HorizontalAlignment="Stretch"
+                VerticalAlignment="Stretch">
             <Border Background="{DynamicResource EasyDangerOverlayBrush}"
                     BorderBrush="{DynamicResource EasyDangerBorderBrush}"
                     BorderThickness="1"

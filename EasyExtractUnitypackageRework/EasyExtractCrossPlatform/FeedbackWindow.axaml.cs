@@ -13,6 +13,7 @@ public partial class FeedbackWindow : Window
 {
     private readonly string? _appVersion;
     private readonly TextBox? _feedbackTextBox;
+    private readonly IDisposable? _responsiveLayoutSubscription;
     private readonly Button? _sendButton;
     private readonly TextBlock? _statusTextBlock;
     private readonly TextBlock? _versionLabel;
@@ -22,6 +23,7 @@ public partial class FeedbackWindow : Window
     {
         InitializeComponent();
         LinuxUiHelper.ApplyWindowTweaks(this);
+        _responsiveLayoutSubscription = ResponsiveWindowHelper.Enable(this, 900, 1400);
 
         _appVersion = string.IsNullOrWhiteSpace(appVersion) ? null : appVersion.Trim();
 
@@ -104,5 +106,11 @@ public partial class FeedbackWindow : Window
             _statusTextBlock.Foreground = Brushes.Gray;
         else
             _statusTextBlock.ClearValue(TextBlock.ForegroundProperty);
+    }
+
+    protected override void OnClosed(EventArgs e)
+    {
+        base.OnClosed(e);
+        _responsiveLayoutSubscription?.Dispose();
     }
 }
