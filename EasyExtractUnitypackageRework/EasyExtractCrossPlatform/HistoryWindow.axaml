@@ -1,0 +1,349 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:util="using:EasyExtractCrossPlatform.Utilities"
+        xmlns:vm="using:EasyExtractCrossPlatform.ViewModels"
+        x:Class="EasyExtractCrossPlatform.HistoryWindow"
+        x:DataType="vm:HistoryViewModel"
+        Title="Extraction history"
+        Width="960"
+        Height="720"
+        MinWidth="820"
+        MinHeight="640"
+        WindowStartupLocation="CenterOwner"
+        TransparencyLevelHint="AcrylicBlur"
+        Foreground="{DynamicResource EasyTextColorBrush}"
+        Background="{DynamicResource EasyWindowBackgroundBrush}">
+    <Window.Resources>
+        <util:BooleanNegationConverter x:Key="BooleanNegationConverter" />
+        <util:BooleanToFontWeightConverter x:Key="BooleanToFontWeightConverter" />
+    </Window.Resources>
+    <Grid>
+        <ScrollViewer Margin="24"
+                      Padding="0,0,12,0"
+                      VerticalScrollBarVisibility="Auto">
+            <StackPanel Spacing="24">
+                <Border Padding="32"
+                        CornerRadius="28"
+                        Background="{DynamicResource EasyGlassGradientBrush}"
+                        BorderBrush="{DynamicResource EasyGlassBorderBrush}"
+                        BorderThickness="1"
+                        BoxShadow="0 36 66 0 #15000000">
+                    <StackPanel Spacing="24">
+                        <StackPanel Spacing="8">
+                            <TextBlock Text="Session history"
+                                       FontSize="28"
+                                       FontWeight="SemiBold" />
+                            <TextBlock Text="{Binding WindowSubtitle}"
+                                       Classes="subtle" />
+                        </StackPanel>
+
+                        <ItemsControl ItemsSource="{Binding SummaryCards}">
+                            <ItemsControl.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <UniformGrid Columns="2" />
+                                </ItemsPanelTemplate>
+                            </ItemsControl.ItemsPanel>
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate x:DataType="vm:HistorySummaryCard">
+                                    <Border Margin="8"
+                                            Padding="20"
+                                            CornerRadius="20"
+                                            BorderThickness="1"
+                                            BorderBrush="{DynamicResource EasyGlassNeutralBorderBrush}"
+                                            Tag="{Binding Accent}">
+                                        <Border.Background>
+                                            <LinearGradientBrush StartPoint="0,0"
+                                                                 EndPoint="1,1">
+                                                <GradientStop Offset="0" Color="#20FFFFFF" />
+                                                <GradientStop Offset="1" Color="#10FFFFFF" />
+                                            </LinearGradientBrush>
+                                        </Border.Background>
+                                        <Border.Styles>
+                                            <Style Selector="Border[Tag=primary]">
+                                                <Setter Property="Background">
+                                                    <Setter.Value>
+                                                        <LinearGradientBrush StartPoint="0,0"
+                                                                             EndPoint="1,1">
+                                                            <GradientStop Offset="0"
+                                                                          Color="#33FFFFFF" />
+                                                            <GradientStop Offset="1"
+                                                                          Color="#10FFFFFF" />
+                                                        </LinearGradientBrush>
+                                                    </Setter.Value>
+                                                </Setter>
+                                            </Style>
+                                            <Style Selector="Border[Tag=accent]">
+                                                <Setter Property="BorderBrush"
+                                                        Value="{DynamicResource EasyAccentBrush}" />
+                                            </Style>
+                                            <Style Selector="Border[Tag=outline]">
+                                                <Setter Property="BorderBrush"
+                                                        Value="{DynamicResource EasyGlassMutedBrush}" />
+                                            </Style>
+                                        </Border.Styles>
+                                        <StackPanel Spacing="6">
+                                            <TextBlock Text="{Binding Title}"
+                                                       Classes="subtle" />
+                                            <TextBlock Text="{Binding Value}"
+                                                       FontSize="28"
+                                                       FontWeight="Bold" />
+                                            <TextBlock Text="{Binding Description}"
+                                                       Classes="subtle" />
+                                        </StackPanel>
+                                    </Border>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </StackPanel>
+                </Border>
+
+                <Grid ColumnDefinitions="2*,*">
+                    <Border Grid.Column="0"
+                            Margin="0,0,12,0"
+                            Padding="28"
+                            CornerRadius="24"
+                            Background="{DynamicResource EasyGlassGradientBrush}"
+                            BorderBrush="{DynamicResource EasyGlassBorderBrush}"
+                            BorderThickness="1"
+                            BoxShadow="0 28 60 0 #14000000">
+                        <Grid RowDefinitions="Auto,*" ColumnDefinitions="*">
+                            <StackPanel Orientation="Horizontal"
+                                        Spacing="12"
+                                        VerticalAlignment="Center">
+                                <Border Width="40"
+                                        Height="40"
+                                        CornerRadius="20"
+                                        Background="{DynamicResource EasyGlassOverlayBrush}"
+                                        BorderBrush="{DynamicResource EasyGlassNeutralBorderBrush}"
+                                        BorderThickness="1">
+                                    <PathIcon Data="M4 11H20V13H4V11ZM4 17H14V19H4V17ZM4 5H20V7H4V5Z"
+                                              Width="22"
+                                              Height="22"
+                                              HorizontalAlignment="Center"
+                                              VerticalAlignment="Center" />
+                                </Border>
+                                <StackPanel>
+                                    <TextBlock Text="Daily activity"
+                                               FontSize="18"
+                                               FontWeight="SemiBold" />
+                                    <TextBlock Text="Packages queued vs extracted"
+                                               Classes="subtle" />
+                                </StackPanel>
+                            </StackPanel>
+
+                            <ItemsControl Grid.Row="1"
+                                          Margin="0,24,0,0"
+                                          ItemsSource="{Binding DailyActivity}"
+                                          IsVisible="{Binding HasEntries}">
+                                <ItemsControl.ItemsPanel>
+                                    <ItemsPanelTemplate>
+                                        <StackPanel Orientation="Horizontal"
+                                                    Spacing="18"
+                                                    VerticalAlignment="Bottom" />
+                                    </ItemsPanelTemplate>
+                                </ItemsControl.ItemsPanel>
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate x:DataType="vm:HistoryActivityPoint">
+                                        <StackPanel Width="62"
+                                                    HorizontalAlignment="Center"
+                                                    ToolTip.Tip="{Binding SubLabel}">
+                                            <Grid Height="160"
+                                                  Margin="0,0,0,8"
+                                                  VerticalAlignment="Bottom">
+                                                <StackPanel VerticalAlignment="Bottom" Spacing="6">
+                                                    <Border Height="{Binding ExtractedHeight}"
+                                                            CornerRadius="8"
+                                                            Background="{DynamicResource EasyAccentBrush}"
+                                                            Opacity="0.8" />
+                                                    <Border Height="{Binding QueuedHeight}"
+                                                            CornerRadius="8"
+                                                            Background="{DynamicResource EasyGlassOverlayBrush}" />
+                                                </StackPanel>
+                                            </Grid>
+                                            <TextBlock Text="{Binding Label}"
+                                                       HorizontalAlignment="Center"
+                                                       FontWeight="{Binding IsToday, Converter={StaticResource BooleanToFontWeightConverter}}" />
+                                            <TextBlock Text="{Binding QueuedCount, StringFormat='Queued {0:N0}'}"
+                                                       Classes="subtle"
+                                                       HorizontalAlignment="Center"
+                                                       FontSize="11" />
+                                            <TextBlock Text="{Binding ExtractedCount, StringFormat='Done {0:N0}'}"
+                                                       Classes="subtle"
+                                                       HorizontalAlignment="Center"
+                                                       FontSize="11" />
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+
+                            <TextBlock Grid.Row="1"
+                                       Margin="0,32,0,0"
+                                       Text="No activity yet. Start extracting packages to populate this timeline."
+                                       TextWrapping="Wrap"
+                                       Foreground="{DynamicResource EasyGlassMutedBrush}"
+                                       IsVisible="{Binding HasEntries, Converter={StaticResource BooleanNegationConverter}}" />
+                        </Grid>
+                    </Border>
+
+                    <Border Grid.Column="1"
+                            Margin="12,0,0,0"
+                            Padding="28"
+                            CornerRadius="24"
+                            Background="{DynamicResource EasyGlassGradientBrush}"
+                            BorderBrush="{DynamicResource EasyGlassBorderBrush}"
+                            BorderThickness="1"
+                            BoxShadow="0 28 60 0 #14000000">
+                        <Grid RowDefinitions="Auto,*">
+                            <StackPanel Orientation="Horizontal"
+                                        Spacing="12"
+                                        VerticalAlignment="Center">
+                                <Border Width="40"
+                                        Height="40"
+                                        CornerRadius="20"
+                                        Background="{DynamicResource EasyGlassOverlayBrush}"
+                                        BorderBrush="{DynamicResource EasyGlassNeutralBorderBrush}"
+                                        BorderThickness="1">
+                                    <PathIcon Data="M4 20V18H20V20H4ZM4 14V12H14V14H4ZM4 8V6H18V8H4ZM4 2V0H22V2H4Z"
+                                              Width="22"
+                                              Height="22"
+                                              HorizontalAlignment="Center"
+                                              VerticalAlignment="Center" />
+                                </Border>
+                                <StackPanel>
+                                    <TextBlock Text="Extraction pulse"
+                                               FontSize="18"
+                                               FontWeight="SemiBold" />
+                                    <TextBlock Text="Recent precision &amp; throughput"
+                                               Classes="subtle" />
+                                </StackPanel>
+                            </StackPanel>
+
+                            <ItemsControl Grid.Row="1"
+                                          Margin="0,24,0,0"
+                                          ItemsSource="{Binding VelocityPoints}"
+                                          IsVisible="{Binding HasVelocityPoints}">
+                                <ItemsControl.ItemsPanel>
+                                    <ItemsPanelTemplate>
+                                        <StackPanel Orientation="Horizontal"
+                                                    Spacing="10"
+                                                    VerticalAlignment="Bottom" />
+                                    </ItemsPanelTemplate>
+                                </ItemsControl.ItemsPanel>
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate x:DataType="vm:HistoryVelocityPoint">
+                                        <StackPanel Width="32"
+                                                    HorizontalAlignment="Center"
+                                                    ToolTip.Tip="{Binding Tooltip}">
+                                            <Border Height="{Binding Height}"
+                                                    CornerRadius="16"
+                                                    Background="{DynamicResource EasyAccentBrush}"
+                                                    Opacity="0.7"
+                                                    VerticalAlignment="Bottom" />
+                                            <TextBlock Text="·"
+                                                       HorizontalAlignment="Center"
+                                                       Foreground="{DynamicResource EasyGlassMutedBrush}" />
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+
+                            <TextBlock Grid.Row="1"
+                                       Margin="0,32,0,0"
+                                       Text="Once extractions finish you'll see their intensity here."
+                                       TextWrapping="Wrap"
+                                       Foreground="{DynamicResource EasyGlassMutedBrush}"
+                                       IsVisible="{Binding HasVelocityPoints, Converter={StaticResource BooleanNegationConverter}}" />
+                        </Grid>
+                    </Border>
+                </Grid>
+
+                <Border Padding="28"
+                        CornerRadius="24"
+                        Background="{DynamicResource EasyGlassGradientBrush}"
+                        BorderBrush="{DynamicResource EasyGlassBorderBrush}"
+                        BorderThickness="1"
+                        BoxShadow="0 28 60 0 #14000000">
+                    <StackPanel Spacing="18">
+                        <StackPanel Orientation="Horizontal"
+                                    Spacing="12"
+                                    VerticalAlignment="Center">
+                            <PathIcon Data="M4 4H20V6H4V4ZM4 11H20V13H4V11ZM4 18H12V20H4V18Z"
+                                      Width="22"
+                                      Height="22"
+                                      Foreground="{DynamicResource EasyAccentBrush}" />
+                            <StackPanel>
+                                <TextBlock Text="Recent timeline"
+                                           FontSize="18"
+                                           FontWeight="SemiBold" />
+                                <TextBlock Text="{Binding WindowSubtitle}"
+                                           Classes="subtle"
+                                           FontSize="12" />
+                            </StackPanel>
+                        </StackPanel>
+
+                        <ItemsControl ItemsSource="{Binding RecentEntries}"
+                                      IsVisible="{Binding HasEntries}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate x:DataType="vm:HistoryEntryDisplay">
+                                    <Border Margin="0,6"
+                                            Padding="16"
+                                            CornerRadius="18"
+                                            Background="{DynamicResource EasyGlassOverlayBrush}"
+                                            BorderBrush="{DynamicResource EasyGlassNeutralBorderBrush}"
+                                            BorderThickness="1">
+                                        <Grid ColumnDefinitions="*,Auto">
+                                            <StackPanel Spacing="2">
+                                                <TextBlock Text="{Binding FileName}"
+                                                           FontWeight="SemiBold" />
+                                                <TextBlock Text="{Binding Details}"
+                                                           Classes="subtle" />
+                                                <TextBlock Text="{Binding Secondary}"
+                                                           Classes="subtle"
+                                                           FontSize="11" />
+                                            </StackPanel>
+                                            <Border Grid.Column="1"
+                                                    Padding="6,2"
+                                                    CornerRadius="12"
+                                                    BorderThickness="1"
+                                                    HorizontalAlignment="Right"
+                                                    Tag="{Binding StatusTag}">
+                                                <Border.Styles>
+                                                    <Style Selector="Border">
+                                                        <Setter Property="Background"
+                                                                Value="{DynamicResource EasyGlassOverlayFaintBrush}" />
+                                                        <Setter Property="BorderBrush"
+                                                                Value="{DynamicResource EasyGlassNeutralBorderBrush}" />
+                                                    </Style>
+                                                    <Style Selector="Border[Tag=success]">
+                                                        <Setter Property="Background"
+                                                                Value="{DynamicResource EasyAccentBrush}" />
+                                                        <Setter Property="BorderBrush"
+                                                                Value="{DynamicResource EasyAccentBrush}" />
+                                                    </Style>
+                                                </Border.Styles>
+                                                <TextBlock Text="{Binding StatusLabel}"
+                                                           FontWeight="SemiBold"
+                                                           FontSize="11"
+                                                           HorizontalAlignment="Center" />
+                                            </Border>
+                                        </Grid>
+                                    </Border>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+
+                        <StackPanel Spacing="6">
+                            <TextBlock Text="{Binding EmptyStateHeadline}"
+                                       FontSize="16"
+                                       FontWeight="SemiBold"
+                                       IsVisible="{Binding HasEntries, Converter={StaticResource BooleanNegationConverter}}" />
+                            <TextBlock Text="{Binding EmptyStateDescription}"
+                                       Classes="subtle"
+                                       IsVisible="{Binding HasEntries, Converter={StaticResource BooleanNegationConverter}}" />
+                        </StackPanel>
+                    </StackPanel>
+                </Border>
+            </StackPanel>
+        </ScrollViewer>
+    </Grid>
+</Window>

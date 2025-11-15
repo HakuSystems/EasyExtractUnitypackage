@@ -125,6 +125,9 @@
     <data name="SettingsWindow_Browse" xml:space="preserve">
     <value>Browse</value>
   </data>
+  <data name="SettingsWindow_OpenFolder" xml:space="preserve">
+    <value>Open folder</value>
+  </data>
     <data name="SettingsWindow_CategoryStructureToggle" xml:space="preserve">
     <value>Organize output into categories</value>
   </data>
@@ -145,6 +148,9 @@
   </data>
     <data name="SettingsWindow_DiscordToggle" xml:space="preserve">
     <value>Enable Discord Rich Presence</value>
+  </data>
+  <data name="SettingsWindow_UwUToggle" xml:space="preserve">
+    <value>Enable EasyExtractUwUnitypackage</value>
   </data>
     <data name="SettingsWindow_GeneralDescription" xml:space="preserve">
     <value>Update the core behaviour of EasyExtract.</value>
@@ -263,8 +269,14 @@
     <data name="MainWindow_DragAmpDropFilesHere" xml:space="preserve">
     <value>Drag &amp; drop files here</value>
   </data>
+  <data name="MainWindow_DragAmpDropFilesHereUwU" xml:space="preserve">
+    <value>Dwop youw unitypackages hewe UwU</value>
+  </data>
     <data name="MainWindow_SupportsBatchExtractionAndLiveProgress" xml:space="preserve">
     <value>Supports batch extraction and live progress updates.</value>
+  </data>
+  <data name="MainWindow_SupportsBatchExtractionAndLiveProgressUwU" xml:space="preserve">
+    <value>We'll keep them tidy with wive pwogwess updates.</value>
   </data>
     <data name="MainWindow_StartExtraction" xml:space="preserve">
     <value>Start extraction</value>
@@ -359,6 +371,12 @@
     <data name="MainWindow_Feedback" xml:space="preserve">
     <value>Feedback</value>
   </data>
+  <data name="MainWindow_ViewHistory" xml:space="preserve">
+    <value>Open your extraction history and analytics</value>
+  </data>
+  <data name="MainWindow_History" xml:space="preserve">
+    <value>History</value>
+  </data>
   <data name="MainWindow_Credits" xml:space="preserve">
     <value>Credits</value>
   </data>
@@ -370,6 +388,9 @@
   </data>
     <data name="MainWindow_OpenSettings" xml:space="preserve">
     <value>Open settings</value>
+  </data>
+  <data name="MainWindow_UwUBanner" xml:space="preserve">
+    <value>EasyExtractUwUnitypackage is active. Expect extwa sparkles.</value>
   </data>
   <data name="CreditsWindow_Title" xml:space="preserve">
     <value>Credits</value>

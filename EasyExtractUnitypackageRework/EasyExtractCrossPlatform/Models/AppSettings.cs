@@ -10,7 +10,7 @@ public class AppSettings
 
     public double SoundVolume { get; set; } = 1.0;
     public bool EnableSound { get; set; } = true;
-    public bool EnableSecurityScanning { get; set; } = true;
+    public bool EnableSecurityScanning { get; set; } = false;
     public string DefaultOutputPath { get; set; } = string.Empty;
     public long TotalSizeBytes { get; set; }
     public bool IsLoading { get; set; }
@@ -25,17 +25,22 @@ public class AppSettings
     public bool FirstRun { get; set; } = true;
     public bool DiscordRpc { get; set; } = true;
     public UpdateSettings Update { get; set; } = new();
-    public bool ExtractedCategoryStructure { get; set; } = true;
+    public bool ExtractedCategoryStructure { get; set; } = false;
     public string DefaultTempPath { get; set; } = string.Empty;
     public int TotalExtracted { get; set; }
     public int CurrentExtractedCount { get; set; }
     public int TotalFilesToExtract { get; set; }
     public int TotalFilesExtracted { get; set; }
-    public List<string> History { get; set; } = new();
+    public List<HistoryEntry> History { get; set; } = new();
     public List<string> IgnoredUnityPackages { get; set; } = new();
     public List<string> SearchEverything { get; set; } = new();
     public List<string> ExtractedUnitypackages { get; set; } = new();
-    public CustomBackgroundImageSettings CustomBackgroundImage { get; set; } = new();
+
+    public CustomBackgroundImageSettings CustomBackgroundImage { get; set; } = new()
+    {
+        IsEnabled = false
+    };
+
     public int TotalFolders { get; set; }
     public int TotalScripts { get; set; }
     public int TotalMaterials { get; set; }
@@ -82,6 +87,6 @@ public class CustomBackgroundImageSettings
     public string BackgroundPath { get; set; } =
         "https://raw.githubusercontent.com/HakuSystems/GraphicsStuff/main/EasyExtractUnitypackage_Background 8K.png";
 
-    public bool IsEnabled { get; set; } = true;
+    public bool IsEnabled { get; set; }
     public double BackgroundOpacity { get; set; } = 0.2;
 }

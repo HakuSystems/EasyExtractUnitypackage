@@ -59,11 +59,16 @@
 
                         <StackPanel Spacing="10">
                             <TextBlock Text="{loc:Loc SettingsWindow_OutputPathLabel}" />
-                            <Grid ColumnDefinitions="*,Auto">
+                            <Grid ColumnDefinitions="*,Auto,Auto">
                                 <TextBox x:Name="DefaultOutputPathBox"
                                          Text="{Binding Settings.DefaultOutputPath}"
                                          VerticalAlignment="Center" />
                                 <Button Grid.Column="1"
+                                        Content="{loc:Loc SettingsWindow_OpenFolder}"
+                                        Margin="12,0,0,0"
+                                        Click="OpenOutputPath_OnClick"
+                                        Width="120" />
+                                <Button Grid.Column="2"
                                         Content="{loc:Loc SettingsWindow_Browse}"
                                         Margin="12,0,0,0"
                                         Click="BrowseOutputPath_OnClick"
@@ -73,11 +78,16 @@
 
                         <StackPanel Spacing="10">
                             <TextBlock Text="{loc:Loc SettingsWindow_TempPathLabel}" />
-                            <Grid ColumnDefinitions="*,Auto">
+                            <Grid ColumnDefinitions="*,Auto,Auto">
                                 <TextBox x:Name="DefaultTempPathBox"
                                          Text="{Binding Settings.DefaultTempPath}"
                                          VerticalAlignment="Center" />
                                 <Button Grid.Column="1"
+                                        Content="{loc:Loc SettingsWindow_OpenFolder}"
+                                        Margin="12,0,0,0"
+                                        Click="OpenTempPath_OnClick"
+                                        Width="120" />
+                                <Button Grid.Column="2"
                                         Content="{loc:Loc SettingsWindow_Browse}"
                                         Margin="12,0,0,0"
                                         Click="BrowseTempPath_OnClick"
@@ -94,6 +104,10 @@
                                           Content="{loc:Loc SettingsWindow_DiscordToggle}"
                                           Margin="0,0,18,12"
                                           IsChecked="{Binding Settings.DiscordRpc}" />
+                            <ToggleSwitch x:Name="UwUModeToggle"
+                                          Content="{loc:Loc SettingsWindow_UwUToggle}"
+                                          Margin="0,0,18,12"
+                                          IsChecked="{Binding Settings.UwUModeActive}" />
                             <ToggleSwitch x:Name="CategoryStructureToggle"
                                           Content="{loc:Loc SettingsWindow_CategoryStructureToggle}"
                                           Margin="0,0,0,12"

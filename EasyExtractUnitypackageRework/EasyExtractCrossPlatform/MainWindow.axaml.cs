@@ -20,6 +20,7 @@ using Avalonia.Media.Imaging;
 using Avalonia.Platform.Storage;
 using Avalonia.Styling;
 using Avalonia.Threading;
+using EasyExtractCrossPlatform.Localization;
 using EasyExtractCrossPlatform.Models;
 using EasyExtractCrossPlatform.Services;
 using EasyExtractCrossPlatform.Utilities;
@@ -38,8 +39,6 @@ public partial class MainWindow : Window
     private readonly Button? _checkUpdatesButton;
     private readonly Button? _clearQueueButton;
     private readonly IBrush _defaultBackgroundBrush;
-    private readonly string _defaultDropPrimaryText = "Drag & drop files here";
-    private readonly string _defaultDropSecondaryText = "Supports batch extraction and live progress updates.";
     private readonly Border? _dropZoneBorder;
     private readonly Grid? _dropZoneHostGrid;
     private readonly TextBlock? _dropZonePrimaryTextBlock;
@@ -96,6 +95,9 @@ public partial class MainWindow : Window
     private readonly string[] _startupArguments;
     private readonly TextBox? _unityPackageSearchBox;
     private readonly IUpdateService _updateService = UpdateService.Instance;
+    private readonly string _uwuDropPrimaryText;
+    private readonly string _uwuDropSecondaryText;
+    private readonly Border? _uwuModeBanner;
     private readonly TextBlock? _versionTextBlock;
     private Control? _activeOverlayContent;
     private UpdateManifest? _activeUpdateManifest;
@@ -103,6 +105,8 @@ public partial class MainWindow : Window
     private CreditsWindow? _creditsWindow;
     private Bitmap? _currentBackgroundBitmap;
     private string? _currentVersionDisplay;
+    private string _defaultDropPrimaryText = "Drag & drop files here";
+    private string _defaultDropSecondaryText = "Supports batch extraction and live progress updates.";
     private IDisposable? _dropStatusReset;
     private IDisposable? _dropSuccessReset;
     private IDisposable? _dropZoneVisibilityReset;
@@ -116,6 +120,7 @@ public partial class MainWindow : Window
     private DateTimeOffset? _extractionOverviewStartTime;
     private Stopwatch? _extractionStopwatch;
     private FeedbackWindow? _feedbackWindow;
+    private HistoryWindow? _historyWindow;
     private bool _isCheckingForUpdates;
     private bool _isExtractionCancelling;
     private bool _isExtractionOverviewLive;
@@ -134,6 +139,8 @@ public partial class MainWindow : Window
     private UpdateManifest? _pendingUpdateManifest;
     private AppSettings _settings = new();
     private SettingsWindow? _settingsWindow;
+    private readonly string _standardDropPrimaryText = "Drag & drop files here";
+    private readonly string _standardDropSecondaryText = "Supports batch extraction and live progress updates.";
     private IDisposable? _versionStatusReset;
 
     public MainWindow(string[]? startupArguments = null)
@@ -142,15 +149,37 @@ public partial class MainWindow : Window
 
         InitializeComponent();
         LinuxUiHelper.ApplyWindowTweaks(this);
+
+        var localization = LocalizationManager.Instance;
+        _uwuDropPrimaryText = localization.GetString("MainWindow_DragAmpDropFilesHereUwU");
+        _uwuDropSecondaryText = localization.GetString("MainWindow_SupportsBatchExtractionAndLiveProgressUwU");
+
         _defaultBackgroundBrush = ResolveDefaultBackgroundBrush();
         _dropZoneBorder = this.FindControl<Border>("DropZoneBorder");
         _dropZoneHostGrid = this.FindControl<Grid>("DropZoneHostGrid");
         _dropZonePrimaryTextBlock = this.FindControl<TextBlock>("DropZonePrimaryTextBlock");
         _dropZoneSecondaryTextBlock = this.FindControl<TextBlock>("DropZoneSecondaryTextBlock");
         if (_dropZonePrimaryTextBlock?.Text is { Length: > 0 } primaryText)
+        {
             _defaultDropPrimaryText = primaryText;
+            _standardDropPrimaryText = primaryText;
+        }
+        else
+        {
+            _standardDropPrimaryText = _defaultDropPrimaryText;
+        }
+
         if (_dropZoneSecondaryTextBlock?.Text is { Length: > 0 } secondaryText)
+        {
             _defaultDropSecondaryText = secondaryText;
+            _standardDropSecondaryText = secondaryText;
+        }
+        else
+        {
+            _standardDropSecondaryText = _defaultDropSecondaryText;
+        }
+
+        _uwuModeBanner = this.FindControl<Border>("UwUModeBanner");
         _startExtractionHeaderGrid = this.FindControl<Grid>("StartExtractionHeaderGrid");
         _versionTextBlock = this.FindControl<TextBlock>("VersionTextBlock");
         _everythingSearchView = this.FindControl<EverythingSearchView>("EverythingSearch");
@@ -249,7 +278,7 @@ public partial class MainWindow : Window
         QueueAutomaticUpdateCheck();
     }
 
-    private bool IsSecurityScanningEnabled => _settings?.EnableSecurityScanning ?? true;
+    private bool IsSecurityScanningEnabled => _settings?.EnableSecurityScanning ?? false;
 
     public EverythingSearchViewModel? SearchViewModel { get; }
 
@@ -677,12 +706,15 @@ public partial class MainWindow : Window
                     }
                 });
 
+                var extractionTimer = Stopwatch.StartNew();
                 try
                 {
                     var result =
                         await ExecuteExtractionAsync(packagePath, outputDirectory, progress, _extractionCts.Token);
+                    extractionTimer.Stop();
                     if (result is not null)
-                        await ApplyExtractionSuccessAsync(packagePath, result, queueEntry);
+                        await ApplyExtractionSuccessAsync(packagePath, result, queueEntry, extractionTimer.Elapsed,
+                            outputDirectory);
                     await Dispatcher.UIThread.InvokeAsync(() =>
                         CompleteCurrentPackageOnDashboard(
                             packagePath,
@@ -693,6 +725,7 @@ public partial class MainWindow : Window
                 }
                 catch (OperationCanceledException)
                 {
+                    extractionTimer.Stop();
                     await Dispatcher.UIThread.InvokeAsync(() =>
                         CompleteCurrentPackageOnDashboard(
                             packagePath,
@@ -716,6 +749,7 @@ public partial class MainWindow : Window
                 }
                 catch (Exception ex)
                 {
+                    extractionTimer.Stop();
                     await HandleExtractionFailureAsync(packagePath, ex, queueEntry);
                     await Dispatcher.UIThread.InvokeAsync(() =>
                         CompleteCurrentPackageOnDashboard(
@@ -759,10 +793,13 @@ public partial class MainWindow : Window
     private async Task ApplyExtractionSuccessAsync(
         string packagePath,
         UnityPackageExtractionResult result,
-        UnityPackageFile? queueEntry)
+        UnityPackageFile? queueEntry,
+        TimeSpan duration,
+        string outputDirectory)
     {
         OnExtractionOverviewPackageCompleted(result.AssetsExtracted);
         UpdateExtractionStatistics(packagePath, result);
+        UpdateHistoryAfterExtraction(packagePath, result, duration, outputDirectory);
 
         if (queueEntry is not null)
         {
@@ -1309,9 +1346,7 @@ public partial class MainWindow : Window
             }
         }
 
-        var historySet = _settings.History is { Count: > 0 }
-            ? new HashSet<string>(_settings.History, StringComparer.OrdinalIgnoreCase)
-            : new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        var historyLookup = BuildHistoryLookup();
 
         foreach (var path in packagePaths)
         {
@@ -1354,8 +1389,7 @@ public partial class MainWindow : Window
             _settings.UnitypackageFiles.Add(queueEntry);
             newlyAddedPackages.Add((queueEntry, normalizedPath));
 
-            if (historySet.Add(normalizedPath))
-                _settings.History.Add(normalizedPath);
+            TrackHistoryEntry(historyLookup, fileInfo, normalizedPath);
 
             addedCount++;
         }
@@ -1370,6 +1404,103 @@ public partial class MainWindow : Window
             AppSettingsService.Save(_settings);
 
         return new QueueResult(addedCount, alreadyQueuedCount);
+    }
+
+    private Dictionary<string, HistoryEntry> BuildHistoryLookup()
+    {
+        var lookup = new Dictionary<string, HistoryEntry>(StringComparer.OrdinalIgnoreCase);
+        foreach (var entry in _settings.History)
+        {
+            if (entry is null || string.IsNullOrWhiteSpace(entry.FilePath))
+                continue;
+
+            var normalized = HistoryEntry.NormalizePathSafe(entry.FilePath) ?? entry.FilePath;
+            entry.FilePath = normalized;
+
+            if (!lookup.ContainsKey(normalized))
+                lookup[normalized] = entry;
+        }
+
+        return lookup;
+    }
+
+    private HistoryEntry TrackHistoryEntry(
+        IDictionary<string, HistoryEntry> historyLookup,
+        FileInfo fileInfo,
+        string normalizedPath)
+    {
+        var timestamp = DateTimeOffset.UtcNow;
+        if (historyLookup.TryGetValue(normalizedPath, out var existing) && existing is not null)
+        {
+            existing.Touch(fileInfo, timestamp);
+            return existing;
+        }
+
+        var entry = HistoryEntry.Create(fileInfo, normalizedPath, timestamp);
+        historyLookup[normalizedPath] = entry;
+        _settings.History.Add(entry);
+        TrimHistoryEntries();
+        return entry;
+    }
+
+    private void TrimHistoryEntries()
+    {
+        const int maxEntries = 512;
+        if (_settings.History.Count <= maxEntries)
+            return;
+
+        var ordered = _settings.History
+            .Where(entry => entry is not null)
+            .OrderBy(entry => entry.AddedUtc)
+            .ToList();
+
+        while (ordered.Count > maxEntries)
+        {
+            var toRemove = ordered[0];
+            ordered.RemoveAt(0);
+            _settings.History.Remove(toRemove);
+        }
+    }
+
+    private void UpdateHistoryAfterExtraction(
+        string packagePath,
+        UnityPackageExtractionResult result,
+        TimeSpan duration,
+        string outputDirectory)
+    {
+        var normalizedPath = TryNormalizeFilePath(packagePath) ?? packagePath;
+        var historyLookup = BuildHistoryLookup();
+        var fileInfo = new FileInfo(packagePath);
+        var historyEntry = historyLookup.TryGetValue(normalizedPath, out var existing) && existing is not null
+            ? existing
+            : TrackHistoryEntry(historyLookup, fileInfo, normalizedPath);
+
+        var extractedBytes = 0L;
+        if (result.ExtractedFiles is { Count: > 0 })
+            foreach (var extractedFile in result.ExtractedFiles)
+            {
+                if (string.IsNullOrWhiteSpace(extractedFile))
+                    continue;
+
+                try
+                {
+                    var info = new FileInfo(extractedFile);
+                    if (info.Exists)
+                        extractedBytes += info.Length;
+                }
+                catch (Exception ex)
+                {
+                    Debug.WriteLine($"Failed to measure extracted file '{extractedFile}': {ex}");
+                }
+            }
+
+        historyEntry.CaptureExtractionSnapshot(
+            result.AssetsExtracted,
+            result.ExtractedFiles?.Count ?? 0,
+            extractedBytes,
+            duration,
+            outputDirectory,
+            DateTimeOffset.UtcNow);
     }
 
     private void ClearQueue()
@@ -2297,6 +2428,18 @@ public partial class MainWindow : Window
         _dropStatusReset = null;
     }
 
+    private void RefreshDropZoneBaseTextIfIdle()
+    {
+        if (_dropStatusReset is not null)
+            return;
+
+        if (_dropZonePrimaryTextBlock is not null)
+            _dropZonePrimaryTextBlock.Text = _defaultDropPrimaryText;
+
+        if (_dropZoneSecondaryTextBlock is not null)
+            _dropZoneSecondaryTextBlock.Text = _defaultDropSecondaryText;
+    }
+
     private async void CheckUpdatesButton_OnClick(object? sender, RoutedEventArgs e)
     {
         if (_isCheckingForUpdates || _isUpdateDownloadInProgress)
@@ -2631,6 +2774,36 @@ public partial class MainWindow : Window
         _settingsWindow = window;
         window.Show(this);
         QueueDiscordPresenceUpdate("Settings", "Tuning preferences");
+    }
+
+    private void HistoryButton_OnClick(object? sender, RoutedEventArgs e)
+    {
+        if (_historyWindow is { IsVisible: true })
+        {
+            _historyWindow.Activate();
+            return;
+        }
+
+        try
+        {
+            var viewModel = new HistoryViewModel(_settings.History);
+            var window = new HistoryWindow(viewModel);
+
+            window.Closed += (_, _) =>
+            {
+                if (ReferenceEquals(_historyWindow, window))
+                    _historyWindow = null;
+            };
+
+            _historyWindow = window;
+            window.Show(this);
+            QueueDiscordPresenceUpdate("History", "Reviewing extraction trends");
+        }
+        catch (Exception ex)
+        {
+            Debug.WriteLine($"Failed to open history window: {ex}");
+            ShowDropStatusMessage("Unable to open history", ex.Message, TimeSpan.FromSeconds(4));
+        }
     }
 
     private void FeedbackButton_OnClick(object? sender, RoutedEventArgs e)
@@ -2979,9 +3152,28 @@ public partial class MainWindow : Window
         ReloadQueueFromSettings();
         ApplyTheme(settings.ApplicationTheme);
         _ = ApplyCustomBackgroundAsync(settings);
+        ApplyUwUMode(settings);
         UpdateExtractionOverviewDisplay();
         QueueDiscordPresenceUpdate("Dashboard", settingsOverride: settings);
         ContextMenuIntegrationService.UpdateContextMenuIntegration(settings.ContextMenuToggle);
+    }
+
+    private void ApplyUwUMode(AppSettings settings)
+    {
+        var isActive = settings.UwUModeActive;
+
+        if (_uwuModeBanner is not null)
+            _uwuModeBanner.IsVisible = isActive;
+
+        _defaultDropPrimaryText = isActive && !string.IsNullOrWhiteSpace(_uwuDropPrimaryText)
+            ? _uwuDropPrimaryText
+            : _standardDropPrimaryText;
+
+        _defaultDropSecondaryText = isActive && !string.IsNullOrWhiteSpace(_uwuDropSecondaryText)
+            ? _uwuDropSecondaryText
+            : _standardDropSecondaryText;
+
+        RefreshDropZoneBaseTextIfIdle();
     }
 
     private void InitializeStartupExtractionTargets()

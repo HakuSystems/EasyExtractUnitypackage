@@ -1,4 +1,6 @@
 using System;
+using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Avalonia;
@@ -66,6 +68,7 @@ public partial class SettingsWindow : Window
 
         AttachToggleHandler("ContextMenuToggle");
         AttachToggleHandler("DiscordRpcToggle");
+        AttachToggleHandler("UwUModeToggle");
         AttachToggleHandler("CategoryStructureToggle");
         AttachToggleHandler("SecurityScanToggle");
         AttachToggleHandler("SoundToggle");
@@ -185,6 +188,61 @@ public partial class SettingsWindow : Window
             UpdateTextBoxText(_defaultTempPathBox, localPath);
             TriggerAutoSave();
         }
+    }
+
+    private void OpenOutputPath_OnClick(object? sender, RoutedEventArgs e)
+    {
+        OpenFolderForSetting(_viewModel.Settings.DefaultOutputPath, "Extracted");
+    }
+
+    private void OpenTempPath_OnClick(object? sender, RoutedEventArgs e)
+    {
+        OpenFolderForSetting(_viewModel.Settings.DefaultTempPath, "Temp");
+    }
+
+    private void OpenFolderForSetting(string? configuredPath, string fallbackSubfolder)
+    {
+        var target = string.IsNullOrWhiteSpace(configuredPath)
+            ? Path.Combine(AppSettingsService.SettingsDirectory, fallbackSubfolder)
+            : configuredPath;
+
+        try
+        {
+            Directory.CreateDirectory(target);
+            var startInfo = CreateOpenFolderStartInfo(target);
+            Process.Start(startInfo);
+            ShowStatus($"Opened folder: {target}");
+        }
+        catch (Exception ex)
+        {
+            ShowStatus($"Failed to open folder: {ex.Message}", true);
+        }
+    }
+
+    private static ProcessStartInfo CreateOpenFolderStartInfo(string target)
+    {
+        if (OperatingSystem.IsWindows())
+            return new ProcessStartInfo
+            {
+                FileName = "explorer.exe",
+                Arguments = $"\"{target}\"",
+                UseShellExecute = true
+            };
+
+        if (OperatingSystem.IsMacOS())
+            return new ProcessStartInfo
+            {
+                FileName = "open",
+                Arguments = target,
+                UseShellExecute = false
+            };
+
+        return new ProcessStartInfo
+        {
+            FileName = "xdg-open",
+            Arguments = target,
+            UseShellExecute = false
+        };
     }
 
     private async Task<IStorageFolder?> PickSingleFolderAsync()

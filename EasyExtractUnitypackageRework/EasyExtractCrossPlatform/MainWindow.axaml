@@ -125,6 +125,27 @@
                                 </Button.Content>
                             </Button>
                         </StackPanel>
+                        <Border x:Name="UwUModeBanner"
+                                IsVisible="False"
+                                Margin="0,8,0,0"
+                                Padding="12"
+                                CornerRadius="14"
+                                Background="{DynamicResource EasyAccentSoftBrush}"
+                                BorderBrush="{DynamicResource EasyAccentBrush}"
+                                BorderThickness="1">
+                            <StackPanel Orientation="Horizontal"
+                                        Spacing="10">
+                                <PathIcon
+                                    Data="M12 21.35L10.55 20.03C5.4 15.36 2 12.27 2 8.5C2 5.42 4.42 3 7.5 3C9.24 3 10.91 3.81 12 5.09C13.09 3.81 14.76 3 16.5 3C19.58 3 22 5.42 22 8.5C22 12.27 18.6 15.36 13.45 20.04L12 21.35Z"
+                                    Width="18"
+                                    Height="18"
+                                    Foreground="{DynamicResource EasyAccentBrush}"
+                                    VerticalAlignment="Center" />
+                                <TextBlock Text="{loc:Loc MainWindow_UwUBanner}"
+                                           TextWrapping="Wrap"
+                                           FontWeight="SemiBold" />
+                            </StackPanel>
+                        </Border>
                     </StackPanel>
                 </Grid>
             </Border>
@@ -727,6 +748,21 @@
                     BoxShadow="0 20 40 0 #12000000">
                 <Grid ColumnDefinitions="Auto,*,Auto" VerticalAlignment="Center">
                     <StackPanel Orientation="Horizontal" Spacing="12" VerticalAlignment="Center">
+                        <Button Classes="ghost"
+                                ToolTip.Tip="{loc:Loc MainWindow_ViewHistory}"
+                                Click="HistoryButton_OnClick">
+                            <Button.Content>
+                                <StackPanel Orientation="Horizontal" Spacing="6">
+                                    <PathIcon
+                                        Data="M4 19H20V21H4V19ZM6 15H10V7H6V15ZM11 15H15V3H11V15ZM16 15H20V11H16V15Z"
+                                        Width="18"
+                                        Height="18"
+                                        Foreground="{DynamicResource EasyAccentBrush}" />
+                                    <TextBlock Text="{loc:Loc MainWindow_History}"
+                                               VerticalAlignment="Center" />
+                                </StackPanel>
+                            </Button.Content>
+                        </Button>
                         <Button Classes="ghost"
                                 ToolTip.Tip="{loc:Loc MainWindow_SendFeedback}"
                                 Click="FeedbackButton_OnClick">

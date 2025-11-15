@@ -10,7 +10,8 @@ public static class AppSettingsService
 {
     private static readonly JsonSerializerOptions SerializerOptions = new()
     {
-        WriteIndented = true
+        WriteIndented = true,
+        Converters = { new HistoryEntryListJsonConverter() }
     };
 
     public static string SettingsDirectory { get; } =
@@ -82,10 +83,14 @@ public static class AppSettingsService
             ApplicationTheme = 0,
             ContextMenuToggle = true,
             DiscordRpc = true,
-            ExtractedCategoryStructure = true,
-            EnableSecurityScanning = true,
+            ExtractedCategoryStructure = false,
+            EnableSecurityScanning = false,
             EnableSound = true,
             SoundVolume = 1.0,
+            CustomBackgroundImage = new CustomBackgroundImageSettings
+            {
+                IsEnabled = false
+            },
             FirstRun = false,
             LastExtractionTime = DateTimeOffset.Now
         };
