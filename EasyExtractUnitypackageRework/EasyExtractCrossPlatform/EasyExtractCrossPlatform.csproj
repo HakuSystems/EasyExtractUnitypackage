@@ -31,6 +31,7 @@
             <IncludeAssets Condition="'$(Configuration)' != 'Debug'">None</IncludeAssets>
             <PrivateAssets Condition="'$(Configuration)' != 'Debug'">All</PrivateAssets>
         </PackageReference>
+        <PackageReference Include="OpenTK" Version="4.9.4"/>
     </ItemGroup>
     <ItemGroup>
         <AvaloniaResource Include="Assets\**"/>

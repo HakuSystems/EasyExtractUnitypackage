@@ -20,10 +20,12 @@ namespace EasyExtractCrossPlatform;
 
 public partial class SettingsWindow : Window
 {
+    private readonly Slider? _backgroundOpacitySlider;
     private readonly TextBox? _backgroundPathBox;
     private readonly TextBox? _defaultOutputPathBox;
     private readonly TextBox? _defaultTempPathBox;
     private readonly IDisposable? _responsiveLayoutSubscription;
+    private readonly Slider? _soundVolumeSlider;
     private readonly TextBlock? _statusTextBlock;
     private readonly ComboBox? _themeComboBox;
     private readonly SettingsViewModel _viewModel;
@@ -31,6 +33,7 @@ public partial class SettingsWindow : Window
     private bool _autoSaveHandlersAttached;
     private bool _autoSaveReady;
     private bool _lastSaveFailed;
+    private DateTime _lastSliderCueAt = DateTime.MinValue;
 
     public SettingsWindow()
     {
@@ -47,6 +50,8 @@ public partial class SettingsWindow : Window
         _backgroundPathBox = this.FindControl<TextBox>("BackgroundPathBox");
         _themeComboBox = this.FindControl<ComboBox>("ThemeComboBox");
         _statusTextBlock = this.FindControl<TextBlock>("StatusTextBlock");
+        _soundVolumeSlider = this.FindControl<Slider>("SoundVolumeSlider");
+        _backgroundOpacitySlider = this.FindControl<Slider>("BackgroundOpacitySlider");
 
         Opened += OnOpened;
     }
@@ -131,18 +136,33 @@ public partial class SettingsWindow : Window
     private void OnTogglePropertyChanged(object? sender, AvaloniaPropertyChangedEventArgs e)
     {
         if (e.Property == ToggleButton.IsCheckedProperty && !Equals(e.OldValue, e.NewValue))
+        {
+            if (!_autoSaveReady)
+                return;
             TriggerAutoSave();
+            if (sender is ToggleButton { IsChecked: not null } toggle)
+                PlayToggleCue(toggle.IsChecked);
+        }
     }
 
     private void OnSliderPropertyChanged(object? sender, AvaloniaPropertyChangedEventArgs e)
     {
         if (e.Property == RangeBase.ValueProperty && !Equals(e.OldValue, e.NewValue))
+        {
+            if (!_autoSaveReady)
+                return;
             TriggerAutoSave();
+            if (sender is Slider slider)
+                PlaySliderCue(slider);
+        }
     }
 
     private void OnComboBoxSelectionChanged(object? sender, SelectionChangedEventArgs e)
     {
+        if (!_autoSaveReady)
+            return;
         TriggerAutoSave();
+        UiSoundService.Instance.Play(UiSoundEffect.Subtle);
     }
 
     private void TriggerAutoSave()
@@ -292,14 +312,49 @@ public partial class SettingsWindow : Window
 
         _statusTextBlock.Text = message;
 
+        if (string.IsNullOrWhiteSpace(message))
+        {
+            _statusTextBlock.ClearValue(TextBlock.ForegroundProperty);
+            return;
+        }
+
         if (isError)
         {
             _statusTextBlock.Foreground = Brushes.OrangeRed;
+            UiSoundService.Instance.Play(UiSoundEffect.Negative);
         }
         else
         {
             _statusTextBlock.ClearValue(TextBlock.ForegroundProperty);
         }
+    }
+
+    private void PlayToggleCue(bool? isChecked)
+    {
+        var effect = isChecked switch
+        {
+            true => UiSoundEffect.Positive,
+            false => UiSoundEffect.Subtle,
+            _ => UiSoundEffect.None
+        };
+
+        if (effect != UiSoundEffect.None)
+            UiSoundService.Instance.Play(effect);
+    }
+
+    private void PlaySliderCue(Slider slider)
+    {
+        var now = DateTime.UtcNow;
+        if (now - _lastSliderCueAt < TimeSpan.FromMilliseconds(160))
+            return;
+
+        _lastSliderCueAt = now;
+
+        var effect = ReferenceEquals(slider, _soundVolumeSlider)
+            ? UiSoundEffect.Positive
+            : UiSoundEffect.Subtle;
+
+        UiSoundService.Instance.Play(effect);
     }
 
     private static void UpdateTextBoxText(TextBox? textBox, string? value)

@@ -71,6 +71,8 @@ public partial class MainWindow : Window
     private readonly IMaliciousCodeDetectionService
         _maliciousCodeDetectionService = new MaliciousCodeDetectionService();
 
+    private readonly INotificationService _notificationService = new NotificationService();
+
     private readonly Border? _overlayCard;
     private readonly ContentControl? _overlayContent;
     private readonly Border? _overlayHost;
@@ -332,7 +334,8 @@ public partial class MainWindow : Window
                 ShowDropStatusMessage(
                     "Failed to queue dropped files",
                     "See debug output for details.",
-                    TimeSpan.FromSeconds(3));
+                    TimeSpan.FromSeconds(3),
+                    UiSoundEffect.Negative);
                 e.DragEffects = DragDropEffects.None;
                 ResetDragClasses();
                 e.Handled = true;
@@ -358,7 +361,8 @@ public partial class MainWindow : Window
                         ? "Queued 1 Unitypackage"
                         : $"Queued {queueResult.AddedCount} Unitypackages",
                     secondary,
-                    TimeSpan.FromSeconds(3));
+                    TimeSpan.FromSeconds(3),
+                    UiSoundEffect.Positive);
             }
             else if (queueResult.AlreadyQueuedCount > 0)
             {
@@ -367,14 +371,16 @@ public partial class MainWindow : Window
                         ? "Already queued"
                         : "All packages already queued",
                     "Drop different files to add new items.",
-                    TimeSpan.FromSeconds(3));
+                    TimeSpan.FromSeconds(3),
+                    UiSoundEffect.Subtle);
             }
             else
             {
                 ShowDropStatusMessage(
                     "No usable files found",
                     "Ensure the packages still exist on disk.",
-                    TimeSpan.FromSeconds(3));
+                    TimeSpan.FromSeconds(3),
+                    UiSoundEffect.Negative);
             }
         }
         else
@@ -385,12 +391,14 @@ public partial class MainWindow : Window
                 ShowDropStatusMessage(
                     "Couldn't access dropped package",
                     "Try dropping files directly from a local folder.",
-                    TimeSpan.FromSeconds(3));
+                    TimeSpan.FromSeconds(3),
+                    UiSoundEffect.Negative);
             else
                 ShowDropStatusMessage(
                     "Unsupported files",
                     "Drop .unitypackage files to queue them.",
-                    TimeSpan.FromSeconds(3));
+                    TimeSpan.FromSeconds(3),
+                    UiSoundEffect.Negative);
         }
 
         ResetDragClasses();
@@ -420,6 +428,7 @@ public partial class MainWindow : Window
 
         _creditsWindow = window;
         window.Show(this);
+        UiSoundService.Instance.Play(UiSoundEffect.Subtle);
         QueueDiscordPresenceUpdate("Credits", "Celebrating contributors");
     }
 
@@ -442,7 +451,11 @@ public partial class MainWindow : Window
             _extractionDashboardProgressBar.Value = 0;
         }
 
-        ShowDropStatusMessage("Cancelling extraction", "Stopping the current operation...", TimeSpan.Zero);
+        ShowDropStatusMessage(
+            "Cancelling extraction",
+            "Stopping the current operation...",
+            TimeSpan.Zero,
+            UiSoundEffect.Subtle);
 
         UpdateExtractionButtonsState();
     }
@@ -467,7 +480,8 @@ public partial class MainWindow : Window
             ShowDropStatusMessage(
                 "Preview unavailable",
                 "The selected package could not be found on disk.",
-                TimeSpan.FromSeconds(4));
+                TimeSpan.FromSeconds(4),
+                UiSoundEffect.Negative);
             return;
         }
 
@@ -506,7 +520,8 @@ public partial class MainWindow : Window
             ShowDropStatusMessage(
                 "Preview failed",
                 "Unable to open the package preview window.",
-                TimeSpan.FromSeconds(4));
+                TimeSpan.FromSeconds(4),
+                UiSoundEffect.Negative);
         }
     }
 
@@ -517,7 +532,11 @@ public partial class MainWindow : Window
 
         if (StorageProvider is null)
         {
-            ShowDropStatusMessage("File picker unavailable", "Restart the app and try again.", TimeSpan.FromSeconds(4));
+            ShowDropStatusMessage(
+                "File picker unavailable",
+                "Restart the app and try again.",
+                TimeSpan.FromSeconds(4),
+                UiSoundEffect.Negative);
             return;
         }
 
@@ -540,8 +559,11 @@ public partial class MainWindow : Window
         var path = TryResolveLocalPath(files[0]);
         if (string.IsNullOrWhiteSpace(path))
         {
-            ShowDropStatusMessage("Unsupported location", "Only local files can be extracted.",
-                TimeSpan.FromSeconds(4));
+            ShowDropStatusMessage(
+                "Unsupported location",
+                "Only local files can be extracted.",
+                TimeSpan.FromSeconds(4),
+                UiSoundEffect.Negative);
             return;
         }
 
@@ -555,7 +577,11 @@ public partial class MainWindow : Window
 
         if (StorageProvider is null)
         {
-            ShowDropStatusMessage("File picker unavailable", "Restart the app and try again.", TimeSpan.FromSeconds(4));
+            ShowDropStatusMessage(
+                "File picker unavailable",
+                "Restart the app and try again.",
+                TimeSpan.FromSeconds(4),
+                UiSoundEffect.Negative);
             return;
         }
 
@@ -584,8 +610,11 @@ public partial class MainWindow : Window
 
         if (paths.Count == 0)
         {
-            ShowDropStatusMessage("No local files selected", "Select files stored on this device.",
-                TimeSpan.FromSeconds(4));
+            ShowDropStatusMessage(
+                "No local files selected",
+                "Select files stored on this device.",
+                TimeSpan.FromSeconds(4),
+                UiSoundEffect.Subtle);
             return;
         }
 
@@ -602,8 +631,11 @@ public partial class MainWindow : Window
 
         if (queuedPackages is null || queuedPackages.Count == 0)
         {
-            ShowDropStatusMessage("Queue is empty", "Add packages before starting extraction.",
-                TimeSpan.FromSeconds(4));
+            ShowDropStatusMessage(
+                "Queue is empty",
+                "Add packages before starting extraction.",
+                TimeSpan.FromSeconds(4),
+                UiSoundEffect.Subtle);
             return;
         }
 
@@ -621,8 +653,11 @@ public partial class MainWindow : Window
 
         if (_isExtractionRunning)
         {
-            ShowDropStatusMessage("Extraction already running", "Wait for the current extraction to finish.",
-                TimeSpan.FromSeconds(4));
+            ShowDropStatusMessage(
+                "Extraction already running",
+                "Wait for the current extraction to finish.",
+                TimeSpan.FromSeconds(4),
+                UiSoundEffect.Subtle);
             return;
         }
 
@@ -631,6 +666,7 @@ public partial class MainWindow : Window
         _extractionCts = new CancellationTokenSource();
         UpdateExtractionButtonsState();
         BeginExtractionOverviewSession();
+        UiSoundService.Instance.Play(UiSoundEffect.Positive);
         PrepareExtractionDashboard(validItems);
 
         try
@@ -645,7 +681,11 @@ public partial class MainWindow : Window
 
                 if (!File.Exists(packagePath))
                 {
-                    ShowDropStatusMessage("Package not found", Path.GetFileName(packagePath), TimeSpan.FromSeconds(4));
+                    ShowDropStatusMessage(
+                        "Package not found",
+                        Path.GetFileName(packagePath),
+                        TimeSpan.FromSeconds(4),
+                        UiSoundEffect.Negative);
                     await Dispatcher.UIThread.InvokeAsync(() =>
                     {
                         UpdateExtractionDashboardQueueBadge(Math.Max(0, validItems.Count - index - 1));
@@ -678,7 +718,8 @@ public partial class MainWindow : Window
                             ShowDropStatusMessage(
                                 "Potentially malicious package",
                                 warningText,
-                                TimeSpan.FromSeconds(6));
+                                TimeSpan.FromSeconds(6),
+                                UiSoundEffect.Negative);
                         });
                     }
                     else if (securityResult is null && _securityInfoNotified.Add(normalizedPackagePath))
@@ -687,7 +728,8 @@ public partial class MainWindow : Window
                             ShowDropStatusMessage(
                                 "Security scan unavailable",
                                 "Unable to verify this package for malicious code.",
-                                TimeSpan.FromSeconds(4)));
+                                TimeSpan.FromSeconds(4),
+                                UiSoundEffect.Subtle));
                     }
                 }
 
@@ -777,7 +819,11 @@ public partial class MainWindow : Window
         }
         catch (OperationCanceledException)
         {
-            ShowDropStatusMessage("Extraction cancelled", "The operation was cancelled.", TimeSpan.FromSeconds(4));
+            ShowDropStatusMessage(
+                "Extraction cancelled",
+                "The operation was cancelled.",
+                TimeSpan.FromSeconds(4),
+                UiSoundEffect.Subtle);
         }
         finally
         {
@@ -827,8 +873,12 @@ public partial class MainWindow : Window
             });
         }
 
-        ShowDropStatusMessage("Extraction complete", $"{Path.GetFileName(packagePath)} extracted.",
-            TimeSpan.FromSeconds(4));
+        ShowDropStatusMessage(
+            "Extraction complete",
+            $"{Path.GetFileName(packagePath)} extracted.",
+            TimeSpan.FromSeconds(4),
+            UiSoundEffect.Positive);
+        _notificationService.ShowExtractionSuccess(packagePath, outputDirectory, result.AssetsExtracted);
     }
 
     private async Task HandleExtractionFailureAsync(
@@ -854,7 +904,11 @@ public partial class MainWindow : Window
             _ => exception.Message
         };
 
-        ShowDropStatusMessage("Extraction failed", message, TimeSpan.FromSeconds(6));
+        ShowDropStatusMessage(
+            "Extraction failed",
+            message,
+            TimeSpan.FromSeconds(6),
+            UiSoundEffect.Negative);
     }
 
     private void UpdateExtractionStatistics(string packagePath, UnityPackageExtractionResult result)
@@ -922,8 +976,11 @@ public partial class MainWindow : Window
         if (!_isExtractionRunning)
             return true;
 
-        ShowDropStatusMessage("Extraction already running", "Please wait for the current extraction to complete.",
-            TimeSpan.FromSeconds(4));
+        ShowDropStatusMessage(
+            "Extraction already running",
+            "Please wait for the current extraction to complete.",
+            TimeSpan.FromSeconds(4),
+            UiSoundEffect.Subtle);
         return false;
     }
 
@@ -1051,21 +1108,24 @@ public partial class MainWindow : Window
                 ShowDropStatusMessage(
                     "Queued 1 Unitypackage",
                     fileName,
-                    TimeSpan.FromSeconds(3));
+                    TimeSpan.FromSeconds(3),
+                    UiSoundEffect.Positive);
             }
             else if (result.AlreadyQueuedCount > 0)
             {
                 ShowDropStatusMessage(
                     "Already queued",
                     fileName,
-                    TimeSpan.FromSeconds(3));
+                    TimeSpan.FromSeconds(3),
+                    UiSoundEffect.Subtle);
             }
             else
             {
                 ShowDropStatusMessage(
                     "Nothing queued",
                     "The selected package could not be added.",
-                    TimeSpan.FromSeconds(3));
+                    TimeSpan.FromSeconds(3),
+                    UiSoundEffect.Negative);
             }
         }
         catch (Exception ex)
@@ -1074,7 +1134,8 @@ public partial class MainWindow : Window
             ShowDropStatusMessage(
                 "Failed to queue package",
                 ex.Message,
-                TimeSpan.FromSeconds(3));
+                TimeSpan.FromSeconds(3),
+                UiSoundEffect.Negative);
         }
     }
 
@@ -1544,7 +1605,8 @@ public partial class MainWindow : Window
         ShowDropStatusMessage(
             "Queue cleared",
             "Drop or search for .unitypackage files to add new items.",
-            TimeSpan.FromSeconds(3));
+            TimeSpan.FromSeconds(3),
+            UiSoundEffect.Subtle);
         AppSettingsService.Save(_settings);
     }
 
@@ -2407,7 +2469,11 @@ public partial class MainWindow : Window
         }
     }
 
-    private void ShowDropStatusMessage(string primary, string? secondary, TimeSpan? resetAfter = null)
+    private void ShowDropStatusMessage(
+        string primary,
+        string? secondary,
+        TimeSpan? resetAfter = null,
+        UiSoundEffect effect = UiSoundEffect.None)
     {
         if (string.IsNullOrWhiteSpace(primary))
             primary = _defaultDropPrimaryText;
@@ -2429,6 +2495,9 @@ public partial class MainWindow : Window
         var duration = resetAfter ?? TimeSpan.FromSeconds(3);
         if (duration > TimeSpan.Zero)
             _dropStatusReset = DispatcherTimer.RunOnce(ResetDropStatusMessage, duration);
+
+        if (effect != UiSoundEffect.None)
+            UiSoundService.Instance.Play(effect);
     }
 
     private void ResetDropStatusMessage()
@@ -2464,7 +2533,8 @@ public partial class MainWindow : Window
             ShowDropStatusMessage(
                 "Extraction in progress",
                 "Finish the current extraction before installing an update.",
-                TimeSpan.FromSeconds(6));
+                TimeSpan.FromSeconds(6),
+                UiSoundEffect.Subtle);
             return;
         }
 
@@ -2496,7 +2566,11 @@ public partial class MainWindow : Window
                 await Dispatcher.UIThread.InvokeAsync(() =>
                 {
                     SetVersionStatusMessage(message, TimeSpan.FromSeconds(6));
-                    ShowDropStatusMessage("No updates available", message, TimeSpan.FromSeconds(6));
+                    ShowDropStatusMessage(
+                        "No updates available",
+                        message,
+                        TimeSpan.FromSeconds(6),
+                        UiSoundEffect.Subtle);
                 });
                 return;
             }
@@ -2509,7 +2583,11 @@ public partial class MainWindow : Window
             await Dispatcher.UIThread.InvokeAsync(() =>
             {
                 SetVersionStatusMessage("Update check cancelled", TimeSpan.FromSeconds(6));
-                ShowDropStatusMessage("Update check cancelled", "Try again in a moment.", TimeSpan.FromSeconds(6));
+                ShowDropStatusMessage(
+                    "Update check cancelled",
+                    "Try again in a moment.",
+                    TimeSpan.FromSeconds(6),
+                    UiSoundEffect.Subtle);
             });
         }
         catch (Exception ex)
@@ -2517,7 +2595,11 @@ public partial class MainWindow : Window
             await Dispatcher.UIThread.InvokeAsync(() =>
             {
                 SetVersionStatusMessage("Update check failed", TimeSpan.FromSeconds(6));
-                ShowDropStatusMessage("Update check failed", ex.Message, TimeSpan.FromSeconds(8));
+                ShowDropStatusMessage(
+                    "Update check failed",
+                    ex.Message,
+                    TimeSpan.FromSeconds(8),
+                    UiSoundEffect.Negative);
             });
         }
         finally
@@ -2559,7 +2641,8 @@ public partial class MainWindow : Window
                     ShowDropStatusMessage(
                         "Extraction still running",
                         "Update will start automatically when extraction finishes.",
-                        TimeSpan.FromSeconds(6)));
+                        TimeSpan.FromSeconds(6),
+                        UiSoundEffect.Subtle));
 
             return;
         }
@@ -2581,7 +2664,11 @@ public partial class MainWindow : Window
             {
                 SetVersionStatusMessage("Update failed", TimeSpan.FromSeconds(6));
                 var detail = preparationResult.ErrorMessage ?? "Update could not be prepared.";
-                ShowDropStatusMessage("Update failed", detail, TimeSpan.FromSeconds(8));
+                ShowDropStatusMessage(
+                    "Update failed",
+                    detail,
+                    TimeSpan.FromSeconds(8),
+                    UiSoundEffect.Negative);
             });
             return;
         }
@@ -2596,7 +2683,11 @@ public partial class MainWindow : Window
             var detail = isAutomatic
                 ? "EasyExtract will restart automatically to finish installing."
                 : "EasyExtract will restart to finish installing.";
-            ShowDropStatusMessage(status, detail, TimeSpan.FromSeconds(6));
+            ShowDropStatusMessage(
+                status,
+                detail,
+                TimeSpan.FromSeconds(6),
+                UiSoundEffect.Positive);
         });
 
         try
@@ -2616,7 +2707,11 @@ public partial class MainWindow : Window
             await Dispatcher.UIThread.InvokeAsync(() =>
             {
                 SetVersionStatusMessage("Update failed", TimeSpan.FromSeconds(6));
-                ShowDropStatusMessage("Update failed", "Installer could not be started.", TimeSpan.FromSeconds(8));
+                ShowDropStatusMessage(
+                    "Update failed",
+                    "Installer could not be started.",
+                    TimeSpan.FromSeconds(8),
+                    UiSoundEffect.Negative);
             });
             return;
         }
@@ -2787,6 +2882,7 @@ public partial class MainWindow : Window
 
         _settingsWindow = window;
         window.Show(this);
+        UiSoundService.Instance.Play(UiSoundEffect.Subtle);
         QueueDiscordPresenceUpdate("Settings", "Tuning preferences");
     }
 
@@ -2811,12 +2907,17 @@ public partial class MainWindow : Window
 
             _historyWindow = window;
             window.Show(this);
+            UiSoundService.Instance.Play(UiSoundEffect.Subtle);
             QueueDiscordPresenceUpdate("History", "Reviewing extraction trends");
         }
         catch (Exception ex)
         {
             Debug.WriteLine($"Failed to open history window: {ex}");
-            ShowDropStatusMessage("Unable to open history", ex.Message, TimeSpan.FromSeconds(4));
+            ShowDropStatusMessage(
+                "Unable to open history",
+                ex.Message,
+                TimeSpan.FromSeconds(4),
+                UiSoundEffect.Negative);
         }
     }
 
@@ -2834,6 +2935,7 @@ public partial class MainWindow : Window
 
         _feedbackWindow = window;
         window.Show(this);
+        UiSoundService.Instance.Play(UiSoundEffect.Subtle);
         QueueDiscordPresenceUpdate("Feedback", "Drafting feedback");
     }
 
@@ -2876,7 +2978,11 @@ public partial class MainWindow : Window
 
     private void OnFeedbackWindowSent(object? sender, EventArgs e)
     {
-        ShowDropStatusMessage("Feedback sent", "Thanks for helping us improve EasyExtract.", TimeSpan.FromSeconds(4));
+        ShowDropStatusMessage(
+            "Feedback sent",
+            "Thanks for helping us improve EasyExtract.",
+            TimeSpan.FromSeconds(4),
+            UiSoundEffect.Positive);
     }
 
     private void OnFeedbackWindowClosed(object? sender, EventArgs e)
@@ -2904,6 +3010,7 @@ public partial class MainWindow : Window
         _activeOverlayContent = view;
         _overlayContent.Content = view;
         await RunOverlayAnimationAsync(true);
+        UiSoundService.Instance.Play(UiSoundEffect.Subtle);
         QueueDiscordPresenceUpdate(
             ResolveOverlayPresenceState(view),
             ResolveOverlayPresenceDetail(view));
@@ -3223,6 +3330,7 @@ public partial class MainWindow : Window
 
     private void ApplySettings(AppSettings settings)
     {
+        UiSoundService.Instance.UpdateSettings(settings);
         ReloadQueueFromSettings();
         ApplyTheme(settings.ApplicationTheme);
         _ = ApplyCustomBackgroundAsync(settings);

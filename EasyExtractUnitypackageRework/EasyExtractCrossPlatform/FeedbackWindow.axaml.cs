@@ -103,11 +103,19 @@ public partial class FeedbackWindow : Window
         }
 
         if (isError)
+        {
             _statusTextBlock.Foreground = Brushes.OrangeRed;
+            UiSoundService.Instance.Play(UiSoundEffect.Negative);
+        }
         else if (isPending)
+        {
             _statusTextBlock.Foreground = Brushes.Gray;
+        }
         else
+        {
             _statusTextBlock.ClearValue(TextBlock.ForegroundProperty);
+            UiSoundService.Instance.Play(UiSoundEffect.Positive);
+        }
     }
 
     protected override void OnClosed(EventArgs e)

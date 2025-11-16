@@ -161,7 +161,7 @@
                                 <TextBlock Grid.Column="0"
                                            Text="{loc:Loc SettingsWindow_VolumeLabel}" />
                                 <TextBlock Grid.Column="1"
-                                           Text="{Binding Settings.SoundVolume, StringFormat='{}{0:P0}'}"
+                                           Text="{Binding Value, ElementName=SoundVolumeSlider, StringFormat='{}{0:P0}'}"
                                            HorizontalAlignment="Right"
                                            Margin="12,0,0,0" />
                             </Grid>

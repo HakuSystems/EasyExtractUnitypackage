@@ -70,6 +70,11 @@ public static class LoggingService
         WriteEntry("INFO", message, null);
     }
 
+    public static void LogWarning(string message, Exception? exception = null)
+    {
+        WriteEntry("WARN", message, exception);
+    }
+
     public static void LogError(string message, Exception? exception = null)
     {
         WriteEntry("ERROR", message, exception, exception is null);
