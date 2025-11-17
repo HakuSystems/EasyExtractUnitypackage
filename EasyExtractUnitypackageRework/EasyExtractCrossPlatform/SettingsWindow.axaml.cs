@@ -406,14 +406,34 @@ public partial class SettingsWindow : Window
 
     private void SyncExtractionLimitInputs()
     {
-        if (_assetLimitNumeric is not null)
-            _assetLimitNumeric.SetCurrentValue(NumericUpDown.ValueProperty, _viewModel.ExtractionMaxAssetMegabytes);
+        ApplyNumericValue(_assetLimitNumeric, _viewModel.ExtractionMaxAssetMegabytes);
+        ApplyNumericValue(_packageLimitNumeric, _viewModel.ExtractionMaxPackageGigabytes);
+        ApplyNumericValue(_assetCountNumeric, _viewModel.ExtractionMaxAssetCount);
+    }
 
-        if (_packageLimitNumeric is not null)
-            _packageLimitNumeric.SetCurrentValue(NumericUpDown.ValueProperty, _viewModel.ExtractionMaxPackageGigabytes);
+    private static void ApplyNumericValue(NumericUpDown? control, double rawValue)
+    {
+        if (control is null)
+            return;
 
-        if (_assetCountNumeric is not null)
-            _assetCountNumeric.SetCurrentValue(NumericUpDown.ValueProperty, _viewModel.ExtractionMaxAssetCount);
+        var value = ConvertToDecimal(rawValue);
+
+        var min = control.Minimum;
+        var max = control.Maximum;
+        if (max < min)
+            (min, max) = (max, min);
+
+        var clamped = decimal.Clamp(value, min, max);
+        control.SetCurrentValue(NumericUpDown.ValueProperty, clamped);
+    }
+
+    private static decimal ConvertToDecimal(double value)
+    {
+        if (!double.IsFinite(value))
+            return 0m;
+
+        var capped = Math.Clamp(value, (double)decimal.MinValue, (double)decimal.MaxValue);
+        return Convert.ToDecimal(capped);
     }
 
     private static void UpdateTextBoxText(TextBox? textBox, string? value)

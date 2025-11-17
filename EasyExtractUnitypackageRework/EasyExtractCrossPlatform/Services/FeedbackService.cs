@@ -1,8 +1,6 @@
 using System;
 using System.Net.Http;
 using System.Runtime.InteropServices;
-using System.Text;
-using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -12,8 +10,6 @@ public static class FeedbackService
 {
     private const string WebhookUrl =
         "https://discord.com/api/webhooks/1278449395431637066/Z3HwKW5Z4omiOugfz0zKPPoheaaYFG-3J1s6caEsx1mGISrLOqSc1sOuVVD5in6crmzM";
-
-    private static readonly HttpClient HttpClient = CreateHttpClient();
 
     public static async Task SendFeedbackAsync(string feedback, string? version,
         CancellationToken cancellationToken = default)
@@ -68,22 +64,7 @@ public static class FeedbackService
                 }
             };
 
-            var json = JsonSerializer.Serialize(payload);
-            using var request = new HttpRequestMessage(HttpMethod.Post, WebhookUrl)
-            {
-                Content = new StringContent(json, Encoding.UTF8, "application/json")
-            };
-
-            using var response = await HttpClient.SendAsync(request, cancellationToken).ConfigureAwait(false);
-
-            if (!response.IsSuccessStatusCode)
-            {
-                var body = await response.Content.ReadAsStringAsync(cancellationToken).ConfigureAwait(false);
-                var message =
-                    $"Discord webhook responded with status {(int)response.StatusCode}: {body}";
-                throw new HttpRequestException(message);
-            }
-
+            await DiscordWebhookNotifier.SendPayloadAsync(WebhookUrl, payload, cancellationToken).ConfigureAwait(false);
             LoggingService.LogInformation("Feedback sent successfully.");
         }
         catch (TaskCanceledException ex) when (!cancellationToken.IsCancellationRequested)
@@ -97,25 +78,6 @@ public static class FeedbackService
             LoggingService.LogError("Failed to send feedback to Discord webhook.", ex);
             throw;
         }
-    }
-
-    private static HttpClient CreateHttpClient()
-    {
-        var client = new HttpClient
-        {
-            Timeout = TimeSpan.FromSeconds(10)
-        };
-
-        try
-        {
-            client.DefaultRequestHeaders.UserAgent.ParseAdd("EasyExtractCrossPlatform-FeedbackClient");
-        }
-        catch
-        {
-            // If setting the user agent fails for any reason, we can still send feedback.
-        }
-
-        return client;
     }
 
     private static string GetEnvironmentLabel()

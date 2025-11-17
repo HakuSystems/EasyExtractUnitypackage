@@ -130,9 +130,11 @@ internal static class EverythingSdkBootstrapper
             if (dllEntry is null)
                 throw new InvalidOperationException($"The Everything SDK package did not contain {TargetDllFileName}.");
 
-            await using var entryStream = dllEntry.Open();
-            await using var destinationStream = File.Create(dllPath);
-            await entryStream.CopyToAsync(destinationStream).ConfigureAwait(false);
+            await using (var entryStream = dllEntry.Open())
+            await using (var destinationStream = File.Create(dllPath))
+            {
+                await entryStream.CopyToAsync(destinationStream).ConfigureAwait(false);
+            }
 
             if (!ValidateDllHash(dllPath))
             {

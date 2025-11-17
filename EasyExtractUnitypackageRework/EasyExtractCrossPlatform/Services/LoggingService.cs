@@ -258,7 +258,33 @@ public static class LoggingService
             builder.Append(entry.StackTrace);
         }
 
-        Debug.WriteLine(builder.ToString());
+        var formattedPayload = builder.ToString();
+        DispatchLogPayload(formattedPayload);
+
+        if (string.Equals(entry.Level, "ERROR", StringComparison.OrdinalIgnoreCase))
+            DiscordWebhookNotifier.PostErrorAsync(formattedPayload);
+    }
+
+    private static void DispatchLogPayload(string payload)
+    {
+        var wroteToCustomListener = false;
+
+        if (_listener is { } listener)
+            try
+            {
+                listener.WriteLine(payload);
+                wroteToCustomListener = true;
+            }
+            catch (ObjectDisposedException)
+            {
+                // Listener was disposed between writes; fall through to Trace/Debugger.
+            }
+
+        if (!wroteToCustomListener)
+            Trace.WriteLine(payload);
+
+        if (Debugger.IsAttached)
+            Debugger.Log(0, "EasyExtract", payload + Environment.NewLine);
     }
 
     private static void EnsureAsyncProcessingLoop()
@@ -301,7 +327,18 @@ public static class LoggingService
         {
             cts?.Cancel();
             LogSignal.Release();
-            worker?.WaitAsync(TimeSpan.FromSeconds(2), cts.Token);
+            if (worker is not null)
+                try
+                {
+                    var completed = worker.Wait(TimeSpan.FromSeconds(2));
+                    if (!completed)
+                        WriteEntry("WARN", "Logging background worker did not shut down within timeout.",
+                            null, bypassAsyncPipeline: true);
+                }
+                catch (AggregateException ex) when (ex.InnerExceptions.All(static e => e is OperationCanceledException))
+                {
+                    // Expected if worker observes cancellation as fault.
+                }
         }
         catch (AggregateException)
         {
@@ -336,7 +373,7 @@ public static class LoggingService
         }
         catch (Exception ex)
         {
-            Debug.WriteLine($"[Logging] Background pipeline faulted: {ex}");
+            WriteEntry("ERROR", "Logging background pipeline faulted.", ex, bypassAsyncPipeline: true);
         }
         finally
         {
@@ -444,31 +481,50 @@ public static class LoggingService
             if (_initialized)
                 return;
 
-            var directory = ResolveLogDirectory();
-            Directory.CreateDirectory(directory);
-
             var logFileName = $"{LogFilePrefix}{DateTime.Now:yyyyMMdd}.log";
-            var logFilePath = Path.Combine(directory, logFileName);
+            var initializationNotes = new List<(string Level, string Message)>();
+            TextWriter? writer = null;
+            string? directoryInUse = null;
+            string? logFilePath = null;
+            string? lastAttemptedDirectory = null;
 
-            var stream = new FileStream(logFilePath, FileMode.OpenOrCreate, FileAccess.Write, FileShare.ReadWrite);
-            stream.Seek(0, SeekOrigin.End);
-            var writer = new StreamWriter(stream, Encoding.UTF8)
+            foreach (var candidate in GetPreferredLogDirectories())
             {
-                AutoFlush = true
-            };
+                lastAttemptedDirectory = candidate;
+                if (TryCreateLogWriter(candidate, logFileName, out writer, out logFilePath, out var failure))
+                {
+                    directoryInUse = candidate;
+                    break;
+                }
+
+                initializationNotes.Add(("WARN",
+                    $"Failed to initialize log directory '{candidate}': {failure}"));
+            }
+
+            if (writer is null)
+            {
+                writer = TextWriter.Synchronized(TextWriter.Null);
+                directoryInUse = lastAttemptedDirectory ?? ResolveLogDirectory();
+                logFilePath ??= Path.Combine(directoryInUse, logFileName);
+                initializationNotes.Add(("ERROR",
+                    "Logging disabled because no writable log directory was available. Entries will only appear in the debugger output."));
+            }
 
             var listener = new TimestampedTraceListener(writer, "EasyExtractLogListener");
 
             Trace.AutoFlush = true;
-
             Trace.Listeners.Add(listener);
 
             _listener = listener;
-            _logDirectory = directory;
+            _logDirectory = directoryInUse;
             _logFilePath = logFilePath;
 
             WriteSessionHeader();
-            PruneOldLogs(directory);
+            if (Directory.Exists(directoryInUse))
+                PruneOldLogs(directoryInUse);
+
+            foreach (var (level, message) in initializationNotes)
+                WriteEntryCore(new PendingLogEntry(level, message, null, null, _preferences));
 
             AppDomain.CurrentDomain.ProcessExit += (_, _) => Shutdown();
             AppDomain.CurrentDomain.DomainUnload += (_, _) => Shutdown();
@@ -509,11 +565,11 @@ public static class LoggingService
                 .AppendLine(new string('=', 80))
                 .ToString();
 
-            Debug.WriteLine(header.TrimEnd());
+            DispatchLogPayload(header.TrimEnd());
         }
         catch (Exception ex)
         {
-            Debug.WriteLine($"Failed to write session header: {ex}");
+            WriteEntry("WARN", "Failed to write session header.", ex, bypassAsyncPipeline: true);
         }
     }
 
@@ -546,12 +602,14 @@ public static class LoggingService
                 }
                 catch (Exception ex)
                 {
-                    Debug.WriteLine($"Failed to delete log file '{file}': {ex}");
+                    WriteEntryCore(new PendingLogEntry("WARN",
+                        $"Failed to delete log file '{file}'.", ex, null, _preferences));
                 }
         }
         catch (Exception ex)
         {
-            Debug.WriteLine($"Failed to prune old log files: {ex}");
+            WriteEntryCore(new PendingLogEntry("WARN",
+                "Failed to prune old log files.", ex, null, _preferences));
         }
     }
 
@@ -589,6 +647,57 @@ public static class LoggingService
                 "share");
 
         return Path.Combine(localAppData, "EasyExtract", "logs");
+    }
+
+    private static IEnumerable<string> GetPreferredLogDirectories()
+    {
+        var primary = ResolveLogDirectory();
+        if (!string.IsNullOrWhiteSpace(primary))
+            yield return primary;
+
+        var tempDirectory = Path.Combine(Path.GetTempPath(), "EasyExtract", "logs");
+        if (!string.IsNullOrWhiteSpace(tempDirectory) &&
+            !string.Equals(tempDirectory, primary, StringComparison.OrdinalIgnoreCase))
+            yield return tempDirectory;
+
+        var processDirectory = AppContext.BaseDirectory ?? Environment.CurrentDirectory;
+        if (!string.IsNullOrWhiteSpace(processDirectory))
+        {
+            var fallback = Path.Combine(processDirectory, "logs");
+            if (!string.Equals(fallback, primary, StringComparison.OrdinalIgnoreCase) &&
+                !string.Equals(fallback, tempDirectory, StringComparison.OrdinalIgnoreCase))
+                yield return fallback;
+        }
+    }
+
+    private static bool TryCreateLogWriter(string directory, string logFileName, out TextWriter? writer,
+        out string? logFilePath, out string? failureMessage)
+    {
+        writer = null;
+        logFilePath = null;
+        failureMessage = null;
+
+        try
+        {
+            Directory.CreateDirectory(directory);
+
+            var filePath = Path.Combine(directory, logFileName);
+            var stream = new FileStream(filePath, FileMode.OpenOrCreate, FileAccess.Write,
+                FileShare.ReadWrite | FileShare.Delete);
+            stream.Seek(0, SeekOrigin.End);
+            writer = new StreamWriter(stream, new UTF8Encoding(false))
+            {
+                AutoFlush = true
+            };
+
+            logFilePath = filePath;
+            return true;
+        }
+        catch (Exception ex)
+        {
+            failureMessage = $"{ex.GetType().Name}: {ex.Message}";
+            return false;
+        }
     }
 
     private static void Shutdown()
@@ -697,7 +806,7 @@ public static class LoggingService
             {
                 builder.Append(" | memory=").Append(FormatBytes(endingMemory.Value));
                 if (deltaMemory.HasValue)
-                    builder.Append(" (Δ").Append(FormatBytes(deltaMemory.Value)).Append(')');
+                    builder.Append(" (+/-").Append(FormatBytes(deltaMemory.Value)).Append(')');
             }
 
             WriteEntry("PERF", builder.ToString(), null);
