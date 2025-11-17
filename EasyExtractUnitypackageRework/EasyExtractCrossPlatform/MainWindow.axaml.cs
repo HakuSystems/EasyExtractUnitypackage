@@ -951,9 +951,11 @@ public partial class MainWindow : Window
             ? null
             : _settings.DefaultTempPath;
 
+        var limits = UnityPackageExtractionLimits.Normalize(_settings?.ExtractionLimits);
         return new UnityPackageExtractionOptions(
             _settings.ExtractedCategoryStructure,
-            tempPath);
+            tempPath,
+            limits);
     }
 
     private string ResolveOutputDirectory(string packagePath)

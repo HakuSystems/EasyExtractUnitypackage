@@ -72,7 +72,11 @@ public static class AppSettingsService
             LoggingService.LogMemoryUsage("AppSettingsService.Load");
 
             if (resolvedSettings is not null)
+            {
+                resolvedSettings.ExtractionLimits =
+                    UnityPackageExtractionLimits.Normalize(resolvedSettings.ExtractionLimits);
                 LoggingService.ApplySettingsSnapshot(resolvedSettings, "load");
+            }
         }
 
         return resolvedSettings!;
@@ -81,6 +85,7 @@ public static class AppSettingsService
     public static void Save(AppSettings settings)
     {
         settings.AppTitle = AppSettings.DefaultAppTitle;
+        settings.ExtractionLimits = UnityPackageExtractionLimits.Normalize(settings.ExtractionLimits);
         var stopwatch = Stopwatch.StartNew();
         var success = false;
         LoggingService.ApplySettingsSnapshot(settings, "save");
@@ -127,6 +132,7 @@ public static class AppSettingsService
             {
                 IsEnabled = false
             },
+            ExtractionLimits = UnityPackageExtractionLimits.Default,
             FirstRun = false,
             LastExtractionTime = DateTimeOffset.Now,
             WindowPlacements = new Dictionary<string, WindowPlacementSettings>(StringComparer.OrdinalIgnoreCase)

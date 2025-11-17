@@ -149,6 +149,75 @@
 
                 <Border Classes="section">
                     <StackPanel Spacing="18">
+                        <TextBlock Text="{loc:Loc SettingsWindow_ExtractionTitle}" FontSize="20" FontWeight="SemiBold" />
+                        <TextBlock Text="{loc:Loc SettingsWindow_ExtractionDescription}" Classes="subtle" />
+
+                        <StackPanel Spacing="6">
+                            <TextBlock Text="{loc:Loc SettingsWindow_ExtractionPerFileLabel}" />
+                            <StackPanel Orientation="Horizontal" Spacing="10">
+                                <NumericUpDown x:Name="AssetLimitNumeric"
+                                               Width="140"
+                                               Minimum="16"
+                                               Maximum="1024"
+                                               Increment="16"
+                                               FormatString="0"
+                                               Value="{Binding ExtractionMaxAssetMegabytes, Mode=TwoWay}" />
+                                <TextBlock Text="{loc:Loc SettingsWindow_ExtractionUnitMB}"
+                                           VerticalAlignment="Center"
+                                           Classes="subtle" />
+                            </StackPanel>
+                            <TextBlock Text="{loc:Loc SettingsWindow_ExtractionPerFileHint}"
+                                       Classes="subtle"
+                                       TextWrapping="Wrap" />
+                        </StackPanel>
+
+                        <StackPanel Spacing="6">
+                            <TextBlock Text="{loc:Loc SettingsWindow_ExtractionPerPackageLabel}" />
+                            <StackPanel Orientation="Horizontal" Spacing="10">
+                                <NumericUpDown x:Name="PackageLimitNumeric"
+                                               Width="140"
+                                               Minimum="1"
+                                               Maximum="64"
+                                               Increment="1"
+                                               FormatString="0"
+                                               Value="{Binding ExtractionMaxPackageGigabytes, Mode=TwoWay}" />
+                                <TextBlock Text="{loc:Loc SettingsWindow_ExtractionUnitGB}"
+                                           VerticalAlignment="Center"
+                                           Classes="subtle" />
+                            </StackPanel>
+                            <TextBlock Text="{loc:Loc SettingsWindow_ExtractionPerPackageHint}"
+                                       Classes="subtle"
+                                       TextWrapping="Wrap" />
+                        </StackPanel>
+
+                        <StackPanel Spacing="6">
+                            <TextBlock Text="{loc:Loc SettingsWindow_ExtractionAssetCountLabel}" />
+                            <NumericUpDown x:Name="AssetCountNumeric"
+                                           Width="180"
+                                           Minimum="100"
+                                           Maximum="200000"
+                                           Increment="500"
+                                           FormatString="0"
+                                           Value="{Binding ExtractionMaxAssetCount, Mode=TwoWay}" />
+                            <TextBlock Text="{loc:Loc SettingsWindow_ExtractionAssetCountHint}"
+                                       Classes="subtle"
+                                       TextWrapping="Wrap" />
+                        </StackPanel>
+
+                        <TextBlock Text="{loc:Loc SettingsWindow_ExtractionHelper}"
+                                   Classes="subtle"
+                                   TextWrapping="Wrap" />
+
+                        <Button Content="{loc:Loc SettingsWindow_ExtractionReset}"
+                                HorizontalAlignment="Left"
+                                Width="220"
+                                Click="ResetExtractionLimits_OnClick"
+                                ToolTip.Tip="{loc:Loc SettingsWindow_ExtractionResetTooltip}" />
+                    </StackPanel>
+                </Border>
+
+                <Border Classes="section">
+                    <StackPanel Spacing="18">
                         <TextBlock Text="{loc:Loc SettingsWindow_AudioTitle}" FontSize="20" FontWeight="SemiBold" />
                         <TextBlock Text="{loc:Loc SettingsWindow_AudioDescription}" Classes="subtle" />
 

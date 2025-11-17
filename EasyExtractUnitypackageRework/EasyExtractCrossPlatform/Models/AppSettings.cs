@@ -27,6 +27,7 @@ public class AppSettings
     public UpdateSettings Update { get; set; } = new();
     public bool ExtractedCategoryStructure { get; set; } = false;
     public string DefaultTempPath { get; set; } = string.Empty;
+    public UnityPackageExtractionLimits ExtractionLimits { get; set; } = UnityPackageExtractionLimits.Default;
     public int TotalExtracted { get; set; }
     public int CurrentExtractedCount { get; set; }
     public int TotalFilesToExtract { get; set; }

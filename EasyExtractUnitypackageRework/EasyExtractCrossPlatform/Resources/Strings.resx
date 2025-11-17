@@ -155,6 +155,48 @@
     <data name="SettingsWindow_GeneralDescription" xml:space="preserve">
     <value>Update the core behaviour of EasyExtract.</value>
   </data>
+  <data name="SettingsWindow_ExtractionTitle" xml:space="preserve">
+    <value>Extraction limits</value>
+  </data>
+  <data name="SettingsWindow_ExtractionDescription" xml:space="preserve">
+    <value>Clamp how much disk space a package can consume before we stop the run.</value>
+  </data>
+  <data name="SettingsWindow_ExtractionPerFileLabel" xml:space="preserve">
+    <value>Per-asset size limit</value>
+  </data>
+  <data name="SettingsWindow_ExtractionPerFileHint" xml:space="preserve">
+    <value>If a single asset grows past this many megabytes, extraction stops instead of filling your disk.</value>
+  </data>
+  <data name="SettingsWindow_ExtractionPerPackageLabel" xml:space="preserve">
+    <value>Per-package size limit</value>
+  </data>
+  <data name="SettingsWindow_ExtractionPerPackageHint" xml:space="preserve">
+    <value>Protects against bloated archives by capping the total gigabytes each extraction may write.</value>
+  </data>
+  <data name="SettingsWindow_ExtractionAssetCountLabel" xml:space="preserve">
+    <value>Maximum assets per package</value>
+  </data>
+  <data name="SettingsWindow_ExtractionAssetCountHint" xml:space="preserve">
+    <value>Stops suspicious packages that contain hundreds of thousands of files.</value>
+  </data>
+  <data name="SettingsWindow_ExtractionHelper" xml:space="preserve">
+    <value>Lower limits block malicious uploads sooner; higher limits help with very large trusted packages.</value>
+  </data>
+  <data name="SettingsWindow_ExtractionReset" xml:space="preserve">
+    <value>Restore safe defaults</value>
+  </data>
+  <data name="SettingsWindow_ExtractionResetTooltip" xml:space="preserve">
+    <value>Revert the extraction limits back to the recommended defaults.</value>
+  </data>
+  <data name="SettingsWindow_ExtractionUnitMB" xml:space="preserve">
+    <value>MB</value>
+  </data>
+  <data name="SettingsWindow_ExtractionUnitGB" xml:space="preserve">
+    <value>GB</value>
+  </data>
+  <data name="SettingsWindow_Status_LimitsReset" xml:space="preserve">
+    <value>Extraction limits restored to defaults.</value>
+  </data>
     <data name="SettingsWindow_GeneralTitle" xml:space="preserve">
     <value>General</value>
   </data>

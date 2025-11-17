@@ -11,6 +11,7 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using EasyExtractCrossPlatform.Models;
 using EasyExtractCrossPlatform.Utilities;
 
 namespace EasyExtractCrossPlatform.Services;
@@ -27,7 +28,8 @@ public interface IUnityPackageExtractionService
 
 public sealed record UnityPackageExtractionOptions(
     bool OrganizeByCategories,
-    string? TemporaryDirectory);
+    string? TemporaryDirectory,
+    UnityPackageExtractionLimits? Limits = null);
 
 public sealed record UnityPackageExtractionProgress(string? AssetPath, int AssetsExtracted);
 
@@ -40,6 +42,7 @@ public sealed record UnityPackageExtractionResult(
 public sealed class UnityPackageExtractionService : IUnityPackageExtractionService
 {
     private const int StreamCopyBufferSize = 128 * 1024;
+    private const int MaxPathEntryCharacters = 4096;
 
     private static readonly HashSet<char> InvalidFileNameCharacters =
         Path.GetInvalidFileNameChars().ToHashSet();
@@ -113,6 +116,9 @@ public sealed class UnityPackageExtractionService : IUnityPackageExtractionServi
         using var gzipStream = new GZipStream(packageStream, CompressionMode.Decompress);
         using var tarReader = new TarReader(gzipStream, false);
 
+        var normalizedOutputDirectory = NormalizeOutputDirectory(outputDirectory);
+        var limits = UnityPackageExtractionLimits.Normalize(options.Limits);
+        var limiter = new ExtractionLimiter(limits);
         var extractedFiles = new List<string>();
         var assetStates = new Dictionary<string, UnityPackageAssetState>(StringComparer.OrdinalIgnoreCase);
         var pendingWrites = new List<PendingAssetWrite>();
@@ -168,6 +174,7 @@ public sealed class UnityPackageExtractionService : IUnityPackageExtractionServi
             if (!TryGetAssetPaths(
                     state,
                     outputDirectory,
+                    normalizedOutputDirectory,
                     options.OrganizeByCategories,
                     generatedRelativePaths,
                     duplicateSuffixCounters,
@@ -177,6 +184,7 @@ public sealed class UnityPackageExtractionService : IUnityPackageExtractionServi
                     out var previewPath))
                 return;
 
+            limiter.RegisterAsset();
             var plan = CreateAssetWritePlan(state, targetPath, metaPath, previewPath);
 
             if (!plan.RequiresWrite)
@@ -237,21 +245,33 @@ public sealed class UnityPackageExtractionService : IUnityPackageExtractionServi
                 }
                 case "asset":
                 {
-                    var component = CreateAssetComponent(entry.DataStream, temporaryDirectory.DirectoryPath,
+                    var component = CreateAssetComponent(
+                        entry,
+                        temporaryDirectory.DirectoryPath,
+                        limits,
+                        limiter,
                         cancellationToken);
                     state.SetAssetComponent(component);
                     break;
                 }
                 case "asset.meta":
                 {
-                    var component = CreateAssetComponent(entry.DataStream, temporaryDirectory.DirectoryPath,
+                    var component = CreateAssetComponent(
+                        entry,
+                        temporaryDirectory.DirectoryPath,
+                        limits,
+                        limiter,
                         cancellationToken);
                     state.SetMetaComponent(component);
                     break;
                 }
                 case "preview.png":
                 {
-                    var component = CreateAssetComponent(entry.DataStream, temporaryDirectory.DirectoryPath,
+                    var component = CreateAssetComponent(
+                        entry,
+                        temporaryDirectory.DirectoryPath,
+                        limits,
+                        limiter,
                         cancellationToken);
                     state.SetPreviewComponent(component);
                     break;
@@ -306,9 +326,26 @@ public sealed class UnityPackageExtractionService : IUnityPackageExtractionServi
             extractedFiles.ToImmutableArray());
     }
 
+    private static string NormalizeOutputDirectory(string directory)
+    {
+        var full = Path.GetFullPath(directory);
+        if (!Path.EndsInDirectorySeparator(full))
+            full += Path.DirectorySeparatorChar;
+        return full;
+    }
+
+    private static void EnsurePathIsUnderRoot(string normalizedRoot, string candidatePath)
+    {
+        var candidate = Path.GetFullPath(candidatePath);
+        if (!candidate.StartsWith(normalizedRoot, StringComparison.OrdinalIgnoreCase))
+            throw new InvalidDataException(
+                $"Extraction aborted. Asset path '{candidate}' points outside of '{normalizedRoot}'.");
+    }
+
     private static bool TryGetAssetPaths(
         UnityPackageAssetState state,
         string outputDirectory,
+        string normalizedOutputDirectory,
         bool organizeByCategories,
         HashSet<string> generatedRelativePaths,
         Dictionary<string, int> duplicateSuffixCounters,
@@ -338,6 +375,11 @@ public sealed class UnityPackageExtractionService : IUnityPackageExtractionServi
         targetPath = Path.Combine(outputDirectory, relativeOutputPath);
         metaPath = state.Meta is { HasContent: true } ? $"{targetPath}.meta" : null;
         previewPath = state.Preview is { HasContent: true } ? $"{targetPath}.preview.png" : null;
+        EnsurePathIsUnderRoot(normalizedOutputDirectory, targetPath);
+        if (metaPath is not null)
+            EnsurePathIsUnderRoot(normalizedOutputDirectory, metaPath);
+        if (previewPath is not null)
+            EnsurePathIsUnderRoot(normalizedOutputDirectory, previewPath);
         TrackCorruptedDirectories(outputDirectory, state, directoriesToCleanup);
         return true;
     }
@@ -630,58 +672,95 @@ public sealed class UnityPackageExtractionService : IUnityPackageExtractionServi
 
     private static string ReadEntryAsUtf8String(Stream dataStream, CancellationToken cancellationToken)
     {
+        cancellationToken.ThrowIfCancellationRequested();
         using var reader = new StreamReader(
             dataStream,
             Encoding.UTF8,
             true,
-            StreamCopyBufferSize,
+            1024,
             true);
-        var text = reader.ReadToEnd();
-        cancellationToken.ThrowIfCancellationRequested();
-        return text;
+        var buffer = new char[512];
+        var builder = new StringBuilder();
+        var totalRead = 0;
+
+        int read;
+        while ((read = reader.Read(buffer, 0, buffer.Length)) > 0)
+        {
+            totalRead += read;
+            if (totalRead > MaxPathEntryCharacters)
+                throw new InvalidDataException(
+                    $"Path entry exceeded the maximum supported length of {MaxPathEntryCharacters:N0} characters.");
+
+            builder.Append(buffer, 0, read);
+            cancellationToken.ThrowIfCancellationRequested();
+        }
+
+        return builder.ToString();
     }
 
     private static AssetComponent? CreateAssetComponent(
-        Stream dataStream,
+        TarEntry entry,
         string temporaryDirectory,
+        UnityPackageExtractionLimits limits,
+        ExtractionLimiter limiter,
         CancellationToken cancellationToken)
     {
+        if (entry.DataStream is null)
+            return null;
+
         cancellationToken.ThrowIfCancellationRequested();
         Directory.CreateDirectory(temporaryDirectory);
+        var entryName = string.IsNullOrWhiteSpace(entry.Name) ? "asset" : entry.Name;
+        limiter.ValidateDeclaredSize(entry.Length, entryName);
 
         var tempPath = Path.Combine(temporaryDirectory, $"{Guid.NewGuid():N}.tmp");
-        using var output = File.Open(tempPath, FileMode.Create, FileAccess.Write, FileShare.None);
-        using var hasher = IncrementalHash.CreateHash(HashAlgorithmName.SHA256);
-        var buffer = ArrayPool<byte>.Shared.Rent(StreamCopyBufferSize);
-        long totalWritten = 0;
-
+        FileStream? output = null;
         try
         {
-            int read;
-            while ((read = dataStream.Read(buffer, 0, buffer.Length)) > 0)
+            output = File.Open(tempPath, FileMode.Create, FileAccess.Write, FileShare.None);
+            using var hasher = IncrementalHash.CreateHash(HashAlgorithmName.SHA256);
+            var buffer = ArrayPool<byte>.Shared.Rent(StreamCopyBufferSize);
+            long totalWritten = 0;
+
+            try
             {
-                cancellationToken.ThrowIfCancellationRequested();
-                output.Write(buffer, 0, read);
-                hasher.AppendData(buffer, 0, read);
-                totalWritten += read;
+                int read;
+                while ((read = entry.DataStream.Read(buffer, 0, buffer.Length)) > 0)
+                {
+                    cancellationToken.ThrowIfCancellationRequested();
+                    output.Write(buffer, 0, read);
+                    hasher.AppendData(buffer, 0, read);
+                    totalWritten += read;
+
+                    if (limits.MaxAssetBytes > 0 && totalWritten > limits.MaxAssetBytes)
+                        throw new InvalidDataException(
+                            $"Asset '{entryName}' exceeded the configured per-file limit of {limits.MaxAssetBytes:N0} bytes.");
+                }
             }
-        }
-        finally
-        {
-            ArrayPool<byte>.Shared.Return(buffer);
-        }
+            finally
+            {
+                ArrayPool<byte>.Shared.Return(buffer);
+            }
 
-        output.Flush();
-        var hash = hasher.GetHashAndReset();
-        output.Dispose();
+            output.Flush();
+            var hash = hasher.GetHashAndReset();
+            output.Dispose();
 
-        if (totalWritten == 0)
+            if (totalWritten == 0)
+            {
+                TryDeleteFile(tempPath);
+                return null;
+            }
+
+            limiter.TrackAssetBytes(totalWritten);
+            return new AssetComponent(tempPath, totalWritten, hash);
+        }
+        catch
         {
+            output?.Dispose();
             TryDeleteFile(tempPath);
-            return null;
+            throw;
         }
-
-        return new AssetComponent(tempPath, totalWritten, hash);
     }
 
     private static TemporaryDirectoryScope CreateTemporaryDirectory(string? baseDirectory)
@@ -794,6 +873,64 @@ public sealed class UnityPackageExtractionService : IUnityPackageExtractionServi
         string? MetaPath,
         string? PreviewPath,
         AssetWritePlan Plan);
+
+    private sealed class ExtractionLimiter
+    {
+        private int _assetCount;
+        private long _totalBytes;
+
+        public ExtractionLimiter(UnityPackageExtractionLimits limits)
+        {
+            Limits = limits;
+        }
+
+        public UnityPackageExtractionLimits Limits { get; }
+
+        public void ValidateDeclaredSize(long declaredLength, string entryName)
+        {
+            if (declaredLength <= 0 || Limits.MaxAssetBytes <= 0)
+                return;
+
+            if (declaredLength > Limits.MaxAssetBytes)
+                throw new InvalidDataException(
+                    $"Entry '{entryName}' declares {declaredLength:N0} bytes which exceeds the per-file limit of {Limits.MaxAssetBytes:N0} bytes.");
+        }
+
+        public void TrackAssetBytes(long bytes)
+        {
+            if (bytes <= 0)
+                return;
+
+            if (Limits.MaxAssetBytes > 0 && bytes > Limits.MaxAssetBytes)
+                throw new InvalidDataException(
+                    $"Asset exceeded the per-file limit of {Limits.MaxAssetBytes:N0} bytes.");
+
+            if (Limits.MaxPackageBytes <= 0)
+                return;
+
+            if (long.MaxValue - _totalBytes < bytes)
+                throw new InvalidDataException("Extraction aborted due to overflow while tracking package size.");
+
+            var next = _totalBytes + bytes;
+            if (next > Limits.MaxPackageBytes)
+                throw new InvalidDataException(
+                    $"Extraction aborted. Total extracted bytes {next:N0} exceeded the configured limit of {Limits.MaxPackageBytes:N0} bytes.");
+
+            _totalBytes = next;
+        }
+
+        public void RegisterAsset()
+        {
+            if (Limits.MaxAssets <= 0)
+                return;
+
+            if (_assetCount + 1 > Limits.MaxAssets)
+                throw new InvalidDataException(
+                    $"Extraction aborted. Asset count exceeded the configured limit of {Limits.MaxAssets:N0} entries.");
+
+            _assetCount++;
+        }
+    }
 
     private sealed class UnityPackageAssetState
     {

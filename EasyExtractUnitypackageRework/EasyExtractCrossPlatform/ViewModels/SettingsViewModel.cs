@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using EasyExtractCrossPlatform.Localization;
 using EasyExtractCrossPlatform.Models;
@@ -8,6 +9,12 @@ namespace EasyExtractCrossPlatform.ViewModels;
 
 public class SettingsViewModel
 {
+    private const double BytesPerMegabyte = 1024d * 1024d;
+    private const double BytesPerGigabyte = BytesPerMegabyte * 1024d;
+    private const double MinAssetMegabytes = 16d;
+    private const double MinPackageGigabytes = 1d;
+    private const double MinAssetCount = 100d;
+
     public SettingsViewModel(AppSettings settings, string? loadError = null)
     {
         Settings = settings;
@@ -37,10 +44,61 @@ public class SettingsViewModel
 
     public string CurrentVersion { get; }
 
+    public double ExtractionMaxAssetMegabytes
+    {
+        get => Math.Round(EnsureExtractionLimits().MaxAssetBytes / BytesPerMegabyte, 2);
+        set => EnsureExtractionLimits().MaxAssetBytes = ToBytes(
+            value,
+            MinAssetMegabytes,
+            UnityPackageExtractionLimits.MaxAllowedAssetBytes,
+            BytesPerMegabyte);
+    }
+
+    public double ExtractionMaxPackageGigabytes
+    {
+        get => Math.Round(EnsureExtractionLimits().MaxPackageBytes / BytesPerGigabyte, 2);
+        set => EnsureExtractionLimits().MaxPackageBytes = ToBytes(
+            value,
+            MinPackageGigabytes,
+            UnityPackageExtractionLimits.MaxAllowedPackageBytes,
+            BytesPerGigabyte);
+    }
+
+    public double ExtractionMaxAssetCount
+    {
+        get => EnsureExtractionLimits().MaxAssets;
+        set
+        {
+            var sanitized = double.IsNaN(value) || double.IsInfinity(value) ? MinAssetCount : value;
+            var clamped = (int)Math.Clamp(Math.Round(sanitized, MidpointRounding.AwayFromZero), MinAssetCount,
+                UnityPackageExtractionLimits.MaxAllowedAssets);
+            EnsureExtractionLimits().MaxAssets = clamped;
+        }
+    }
+
     public static SettingsViewModel CreateFromStorage()
     {
         var settings = AppSettingsService.Load();
         return new SettingsViewModel(settings, AppSettingsService.LastError?.Message);
+    }
+
+    public void ResetExtractionLimits()
+    {
+        Settings.ExtractionLimits = UnityPackageExtractionLimits.Normalize(UnityPackageExtractionLimits.Default);
+    }
+
+    private UnityPackageExtractionLimits EnsureExtractionLimits()
+    {
+        Settings.ExtractionLimits = UnityPackageExtractionLimits.Normalize(Settings.ExtractionLimits);
+        return Settings.ExtractionLimits;
+    }
+
+    private static long ToBytes(double value, double minUnits, long maxBytes, double unitSize)
+    {
+        var sanitized = double.IsNaN(value) || double.IsInfinity(value) ? minUnits : value;
+        var maxUnits = maxBytes / unitSize;
+        var clamped = Math.Clamp(sanitized, minUnits, maxUnits);
+        return (long)Math.Round(clamped * unitSize, MidpointRounding.AwayFromZero);
     }
 }
 

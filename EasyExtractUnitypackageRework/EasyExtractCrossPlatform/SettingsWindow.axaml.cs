@@ -20,10 +20,13 @@ namespace EasyExtractCrossPlatform;
 
 public partial class SettingsWindow : Window
 {
+    private readonly NumericUpDown? _assetCountNumeric;
+    private readonly NumericUpDown? _assetLimitNumeric;
     private readonly Slider? _backgroundOpacitySlider;
     private readonly TextBox? _backgroundPathBox;
     private readonly TextBox? _defaultOutputPathBox;
     private readonly TextBox? _defaultTempPathBox;
+    private readonly NumericUpDown? _packageLimitNumeric;
     private readonly IDisposable? _responsiveLayoutSubscription;
     private readonly Slider? _soundVolumeSlider;
     private readonly TextBlock? _statusTextBlock;
@@ -34,6 +37,7 @@ public partial class SettingsWindow : Window
     private bool _autoSaveReady;
     private bool _lastSaveFailed;
     private DateTime _lastSliderCueAt = DateTime.MinValue;
+    private bool _suppressAutoSave;
 
     public SettingsWindow()
     {
@@ -52,6 +56,9 @@ public partial class SettingsWindow : Window
         _statusTextBlock = this.FindControl<TextBlock>("StatusTextBlock");
         _soundVolumeSlider = this.FindControl<Slider>("SoundVolumeSlider");
         _backgroundOpacitySlider = this.FindControl<Slider>("BackgroundOpacitySlider");
+        _assetLimitNumeric = this.FindControl<NumericUpDown>("AssetLimitNumeric");
+        _packageLimitNumeric = this.FindControl<NumericUpDown>("PackageLimitNumeric");
+        _assetCountNumeric = this.FindControl<NumericUpDown>("AssetCountNumeric");
 
         Opened += OnOpened;
     }
@@ -90,6 +97,9 @@ public partial class SettingsWindow : Window
 
         AttachSliderHandler("SoundVolumeSlider");
         AttachSliderHandler("BackgroundOpacitySlider");
+        AttachNumericUpDownHandler(_assetLimitNumeric);
+        AttachNumericUpDownHandler(_packageLimitNumeric);
+        AttachNumericUpDownHandler(_assetCountNumeric);
 
         AttachComboBoxHandler(_themeComboBox);
 
@@ -125,6 +135,14 @@ public partial class SettingsWindow : Window
             return;
 
         comboBox.SelectionChanged += OnComboBoxSelectionChanged;
+    }
+
+    private void AttachNumericUpDownHandler(NumericUpDown? numericUpDown)
+    {
+        if (numericUpDown is null)
+            return;
+
+        numericUpDown.PropertyChanged += OnNumericUpDownPropertyChanged;
     }
 
     private void OnTextBoxPropertyChanged(object? sender, AvaloniaPropertyChangedEventArgs e)
@@ -165,9 +183,20 @@ public partial class SettingsWindow : Window
         UiSoundService.Instance.Play(UiSoundEffect.Subtle);
     }
 
+    private void OnNumericUpDownPropertyChanged(object? sender, AvaloniaPropertyChangedEventArgs e)
+    {
+        if (e.Property == NumericUpDown.ValueProperty && !Equals(e.OldValue, e.NewValue))
+        {
+            if (!_autoSaveReady)
+                return;
+            TriggerAutoSave();
+            UiSoundService.Instance.Play(UiSoundEffect.Subtle);
+        }
+    }
+
     private void TriggerAutoSave()
     {
-        if (!_autoSaveReady)
+        if (!_autoSaveReady || _suppressAutoSave)
             return;
 
         PersistSettings();
@@ -201,6 +230,24 @@ public partial class SettingsWindow : Window
             UpdateTextBoxText(_defaultOutputPathBox, localPath);
             TriggerAutoSave();
         }
+    }
+
+    private void ResetExtractionLimits_OnClick(object? sender, RoutedEventArgs e)
+    {
+        _suppressAutoSave = true;
+        try
+        {
+            _viewModel.ResetExtractionLimits();
+            SyncExtractionLimitInputs();
+        }
+        finally
+        {
+            _suppressAutoSave = false;
+        }
+
+        TriggerAutoSave();
+        UiSoundService.Instance.Play(UiSoundEffect.Positive);
+        ShowStatus(LocalizationManager.Instance.GetString("SettingsWindow_Status_LimitsReset"));
     }
 
     private async void BrowseTempPath_OnClick(object? sender, RoutedEventArgs e)
@@ -355,6 +402,18 @@ public partial class SettingsWindow : Window
             : UiSoundEffect.Subtle;
 
         UiSoundService.Instance.Play(effect);
+    }
+
+    private void SyncExtractionLimitInputs()
+    {
+        if (_assetLimitNumeric is not null)
+            _assetLimitNumeric.SetCurrentValue(NumericUpDown.ValueProperty, _viewModel.ExtractionMaxAssetMegabytes);
+
+        if (_packageLimitNumeric is not null)
+            _packageLimitNumeric.SetCurrentValue(NumericUpDown.ValueProperty, _viewModel.ExtractionMaxPackageGigabytes);
+
+        if (_assetCountNumeric is not null)
+            _assetCountNumeric.SetCurrentValue(NumericUpDown.ValueProperty, _viewModel.ExtractionMaxAssetCount);
     }
 
     private static void UpdateTextBoxText(TextBox? textBox, string? value)
