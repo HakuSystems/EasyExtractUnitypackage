@@ -60,6 +60,8 @@ public sealed class UpdateService : IUpdateService
         CancellationToken cancellationToken = default)
     {
         cancellationToken.ThrowIfCancellationRequested();
+        using var updateCheckScope =
+            LoggingService.BeginPerformanceScope("CheckForUpdates", "Updater");
 
         var owner = string.IsNullOrWhiteSpace(settings.RepoOwner)
             ? "HakuSystems"
@@ -70,7 +72,7 @@ public sealed class UpdateService : IUpdateService
 
         var currentVersionLabel = currentVersion?.ToString() ?? "unknown";
         LoggingService.LogInformation(
-            $"Checking for updates from {owner}/{repo} (currentVersion={currentVersionLabel}).");
+            $"CheckForUpdates: requesting latest release | owner={owner} | repo={repo} | currentVersion={currentVersionLabel}");
 
         var requestUri = new Uri($"https://api.github.com/repos/{owner}/{repo}/releases/latest");
         using var request = new HttpRequestMessage(HttpMethod.Get, requestUri);
@@ -84,7 +86,7 @@ public sealed class UpdateService : IUpdateService
         if (!response.IsSuccessStatusCode)
         {
             var reason = $"{(int)response.StatusCode} {response.ReasonPhrase}".Trim();
-            LoggingService.LogError($"Update check failed: GitHub responded with {reason}.");
+            LoggingService.LogError($"CheckForUpdates: GitHub request failed | reason={reason}");
             return new UpdateCheckResult(false, null, $"GitHub responded with {reason}.");
         }
 
@@ -100,26 +102,30 @@ public sealed class UpdateService : IUpdateService
         }
         catch (JsonException jsonEx)
         {
-            LoggingService.LogError("Failed to parse release information from GitHub.", jsonEx);
+            LoggingService.LogError("CheckForUpdates: failed to parse release information.", jsonEx);
             return new UpdateCheckResult(false, null, $"Failed to parse release information: {jsonEx.Message}");
         }
 
         if (release is null)
         {
-            LoggingService.LogError("Update check failed: GitHub returned no release information.");
+            LoggingService.LogError("CheckForUpdates: GitHub returned no release information.");
             return new UpdateCheckResult(false, null, "No release information returned by GitHub.");
         }
 
+        LoggingService.LogInformation(
+            $"CheckForUpdates: release metadata received | tag={release.TagName ?? "unknown"} | draft={release.Draft} | prerelease={release.Prerelease} | published={release.PublishedAt?.ToString("O") ?? "n/a"}");
+
         if (release.Draft)
         {
-            LoggingService.LogInformation("Latest release is a draft; update will be skipped.");
+            LoggingService.LogInformation(
+                $"CheckForUpdates: skipping draft release | tag={release.TagName ?? "unknown"}");
             return new UpdateCheckResult(false, null, "Latest release is marked as draft.");
         }
 
         var normalizedTag = OperatingSystemInfo.NormalizeVersionTag(release.TagName);
         if (!Version.TryParse(normalizedTag, out var latestVersion))
         {
-            LoggingService.LogError($"Failed to parse release tag '{release.TagName}'.");
+            LoggingService.LogError($"CheckForUpdates: failed to parse release tag '{release.TagName}'.");
             return new UpdateCheckResult(false, null, $"Unable to parse release tag '{release.TagName}'.");
         }
 
@@ -128,12 +134,15 @@ public sealed class UpdateService : IUpdateService
             var message = currentVersion is null
                 ? "No update available."
                 : $"Version {currentVersion} is current.";
-            LoggingService.LogInformation($"No update available. Latest={latestVersion}, current={currentVersion}.");
+            LoggingService.LogInformation(
+                $"CheckForUpdates: no update needed | latest={latestVersion} | current={currentVersion}");
             return new UpdateCheckResult(false, null, message);
         }
 
         var platform = OperatingSystemInfo.GetCurrentPlatform();
         var architectureToken = OperatingSystemInfo.GetArchitectureToken();
+        LoggingService.LogInformation(
+            $"CheckForUpdates: runtime context | platform={platform} | architecture={architectureToken}");
 
         if (!TrySelectAsset(release, platform, architectureToken, out var asset, out var assetMessage))
         {
@@ -141,17 +150,17 @@ public sealed class UpdateService : IUpdateService
             {
                 var tag = release.TagName ?? latestVersion.ToString();
                 LoggingService.LogInformation(
-                    $"Release '{tag}' is a legacy Windows-only update; skipping update for platform '{platform}'.");
+                    $"CheckForUpdates: legacy Windows-only release detected | tag='{tag}' | platform={platform}");
                 return new UpdateCheckResult(false, null, WindowsOnlyUpdateMessage);
             }
 
-            LoggingService.LogError($"No suitable update asset found: {assetMessage}");
+            LoggingService.LogError($"CheckForUpdates: asset selection failed | reason={assetMessage}");
             return new UpdateCheckResult(false, null, assetMessage);
         }
 
         if (asset?.BrowserDownloadUrl is null)
         {
-            LoggingService.LogError("Matched update asset is missing a download URL.");
+            LoggingService.LogError("CheckForUpdates: matched update asset is missing a download URL.");
             return new UpdateCheckResult(false, null, "Matched asset is missing a download URL.");
         }
 
@@ -166,7 +175,7 @@ public sealed class UpdateService : IUpdateService
         }
         catch (Exception ex)
         {
-            LoggingService.LogError("Failed to prepare release asset metadata.", ex);
+            LoggingService.LogError("CheckForUpdates: failed to prepare release asset metadata.", ex);
             return new UpdateCheckResult(false, null, $"Failed to prepare asset metadata: {ex.Message}");
         }
 
@@ -182,7 +191,7 @@ public sealed class UpdateService : IUpdateService
             Uri.TryCreate(release.HtmlUrl, UriKind.Absolute, out var htmlUri) ? htmlUri : null);
 
         LoggingService.LogInformation(
-            $"Update available: version={latestVersion}, asset='{assetInfo.Name}', size={assetInfo.Size} bytes.");
+            $"CheckForUpdates: update available | version={latestVersion} | asset='{assetInfo.Name}' | size={assetInfo.Size} bytes");
 
         return new UpdateCheckResult(true, manifest);
     }
@@ -191,25 +200,33 @@ public sealed class UpdateService : IUpdateService
         IProgress<UpdateProgress>? progress = null,
         CancellationToken cancellationToken = default)
     {
+        using var prepareUpdateScope = LoggingService.BeginPerformanceScope("PrepareUpdate", "Updater",
+            manifest.Version.ToString());
+
         try
         {
             LoggingService.LogInformation(
-                $"Preparing update {manifest.Version} from {manifest.Asset.DownloadUri}.");
+                $"PrepareUpdate: start | version={manifest.Version} | asset={manifest.Asset.Name} | uri={manifest.Asset.DownloadUri}");
             progress?.Report(new UpdateProgress(UpdatePhase.Downloading, 0.0));
 
             var updatesRoot = Path.Combine(AppSettingsService.SettingsDirectory, "Updates");
             Directory.CreateDirectory(updatesRoot);
-            LoggingService.LogInformation($"Using updates root '{updatesRoot}'.");
+            LoggingService.LogInformation($"PrepareUpdate: using updates root | path='{updatesRoot}'");
 
             var versionDirectory = Path.Combine(updatesRoot, manifest.Version.ToString());
             if (Directory.Exists(versionDirectory))
+            {
+                LoggingService.LogInformation(
+                    $"PrepareUpdate: clearing existing stage directory | path='{versionDirectory}'");
                 Directory.Delete(versionDirectory, true);
+            }
+
             Directory.CreateDirectory(versionDirectory);
-            LoggingService.LogInformation($"Created working directory '{versionDirectory}'.");
+            LoggingService.LogInformation($"PrepareUpdate: working directory ready | path='{versionDirectory}'");
 
             var archivePath = Path.Combine(versionDirectory, manifest.Asset.Name);
             await DownloadAssetAsync(manifest.Asset, archivePath, progress, cancellationToken).ConfigureAwait(false);
-            LoggingService.LogInformation($"Update asset downloaded to '{archivePath}'.");
+            LoggingService.LogInformation($"PrepareUpdate: asset downloaded | path='{archivePath}'");
 
             cancellationToken.ThrowIfCancellationRequested();
 
@@ -218,7 +235,7 @@ public sealed class UpdateService : IUpdateService
             var payloadDirectory = Path.Combine(versionDirectory, "payload");
             Directory.CreateDirectory(payloadDirectory);
             await ExtractArchiveAsync(archivePath, payloadDirectory, cancellationToken).ConfigureAwait(false);
-            LoggingService.LogInformation($"Update payload extracted to '{payloadDirectory}'.");
+            LoggingService.LogInformation($"PrepareUpdate: payload extracted | path='{payloadDirectory}'");
 
             cancellationToken.ThrowIfCancellationRequested();
 
@@ -229,6 +246,8 @@ public sealed class UpdateService : IUpdateService
             var appName = OperatingSystemInfo.GetApplicationName();
             var executableRelativePath = ResolveExecutableRelativePath(contentRoot, platform, appName);
             var installDirectory = ResolveInstallDirectory();
+            LoggingService.LogInformation(
+                $"PrepareUpdate: resolved directories | contentRoot='{contentRoot}' | installDirectory='{installDirectory}'");
 
             var scriptsDirectory = Path.Combine(versionDirectory, "scripts");
             Directory.CreateDirectory(scriptsDirectory);
@@ -241,7 +260,7 @@ public sealed class UpdateService : IUpdateService
 
             progress?.Report(new UpdateProgress(UpdatePhase.Preparing, 1.0));
             LoggingService.LogInformation(
-                $"Update preparation complete. Script='{scriptInfo.ScriptPath}', workingDirectory='{scriptInfo.WorkingDirectory}'.");
+                $"PrepareUpdate: script ready | platform={platform} | scriptPath='{scriptInfo.ScriptPath}' | workingDirectory='{scriptInfo.WorkingDirectory}'");
 
             var preparation = new UpdatePreparation
             {
@@ -256,17 +275,17 @@ public sealed class UpdateService : IUpdateService
             };
 
             LoggingService.LogInformation(
-                $"Update prepared successfully. StageDirectory='{preparation.StageDirectory}'.");
+                $"PrepareUpdate: complete | stageDirectory='{preparation.StageDirectory}' | version={preparation.TargetVersion}");
             return UpdateInstallResult.FromPreparation(preparation);
         }
         catch (OperationCanceledException)
         {
-            LoggingService.LogInformation("Update preparation was cancelled.");
+            LoggingService.LogInformation("PrepareUpdate: cancelled");
             return UpdateInstallResult.Failed("Update preparation was cancelled.");
         }
         catch (Exception ex)
         {
-            LoggingService.LogError("Failed to prepare update.", ex);
+            LoggingService.LogError("PrepareUpdate: failure", ex);
             return UpdateInstallResult.Failed("Failed to prepare update.", ex);
         }
     }
@@ -276,7 +295,7 @@ public sealed class UpdateService : IUpdateService
         try
         {
             LoggingService.LogInformation(
-                $"Launching prepared update script '{preparation.ScriptPath}' with arguments '{string.Join(' ', preparation.ScriptArguments)}'.");
+                $"LaunchUpdateScript: start | script='{preparation.ScriptPath}' | workingDirectory='{preparation.WorkingDirectory}' | arguments='{string.Join(' ', preparation.ScriptArguments)}'");
 
             ProcessStartInfo startInfo;
             if (OperatingSystem.IsWindows())
@@ -310,13 +329,15 @@ public sealed class UpdateService : IUpdateService
             var launched = process is not null;
             LoggingService.LogInformation(
                 launched
-                    ? "Update script launch succeeded."
-                    : "Update script launch returned null process handle.");
+                    ? $"LaunchUpdateScript: success | script='{preparation.ScriptPath}'"
+                    : $"LaunchUpdateScript: failed to obtain process handle | script='{preparation.ScriptPath}'");
             return launched;
         }
         catch (Exception ex)
         {
-            LoggingService.LogError("Failed to launch update script.", ex);
+            LoggingService.LogError(
+                $"LaunchUpdateScript: failure | script='{preparation.ScriptPath}' | workingDirectory='{preparation.WorkingDirectory}'",
+                ex);
             return false;
         }
     }
@@ -324,8 +345,11 @@ public sealed class UpdateService : IUpdateService
     private static async Task DownloadAssetAsync(ReleaseAssetInfo asset, string destinationPath,
         IProgress<UpdateProgress>? progress, CancellationToken cancellationToken)
     {
+        using var downloadAssetScope =
+            LoggingService.BeginPerformanceScope("DownloadAsset", "Updater", asset.Name);
+        var stopwatch = Stopwatch.StartNew();
         LoggingService.LogInformation(
-            $"Downloading update asset '{asset.Name}' ({asset.Size} bytes) to '{destinationPath}'.");
+            $"DownloadAsset: start | asset='{asset.Name}' | size={asset.Size} | destination='{destinationPath}'");
 
         try
         {
@@ -363,12 +387,16 @@ public sealed class UpdateService : IUpdateService
                 progress?.Report(new UpdateProgress(UpdatePhase.Downloading, percentage, totalRead, asset.Size));
             }
 
+            stopwatch.Stop();
             LoggingService.LogInformation(
-                $"Download completed for '{asset.Name}'. BytesReceived={totalRead}, destination='{destinationPath}'.");
+                $"DownloadAsset: completed | asset='{asset.Name}' | bytesReceived={totalRead} | destination='{destinationPath}'");
+            LoggingService.LogPerformance("DownloadAsset", stopwatch.Elapsed, "Updater",
+                $"asset={asset.Name} | destination={destinationPath}", totalRead);
         }
         catch (Exception ex) when (ex is not OperationCanceledException)
         {
-            LoggingService.LogError($"Failed to download update asset '{asset.Name}'.", ex);
+            LoggingService.LogError(
+                $"DownloadAsset: failure | asset='{asset.Name}' | destination='{destinationPath}'", ex);
             throw;
         }
     }
@@ -377,15 +405,22 @@ public sealed class UpdateService : IUpdateService
         CancellationToken cancellationToken)
     {
         var fileName = Path.GetFileName(archivePath);
+        using var extractArchiveScope =
+            LoggingService.BeginPerformanceScope("ExtractArchive", "Updater", fileName);
+        var stopwatch = Stopwatch.StartNew();
         LoggingService.LogInformation(
-            $"Extracting archive '{fileName}' to '{destinationDirectory}'.");
+            $"ExtractArchive: start | archive='{fileName}' | destination='{destinationDirectory}'");
 
         try
         {
             if (fileName.EndsWith(".zip", StringComparison.OrdinalIgnoreCase))
             {
                 ZipFile.ExtractToDirectory(archivePath, destinationDirectory, true);
-                LoggingService.LogInformation("Zip archive extracted successfully.");
+                stopwatch.Stop();
+                LoggingService.LogInformation(
+                    $"ExtractArchive: zip completed | destination='{destinationDirectory}'");
+                LoggingService.LogPerformance("ExtractArchive", stopwatch.Elapsed, "Updater",
+                    $"archive={fileName} | type=zip");
                 return;
             }
 
@@ -395,15 +430,22 @@ public sealed class UpdateService : IUpdateService
                 await using var fileStream = File.OpenRead(archivePath);
                 await using var gzipStream = new GZipStream(fileStream, CompressionMode.Decompress);
                 TarFile.ExtractToDirectory(gzipStream, destinationDirectory, true);
-                LoggingService.LogInformation("Tar.gz archive extracted successfully.");
+                stopwatch.Stop();
+                LoggingService.LogInformation(
+                    $"ExtractArchive: tar.gz completed | destination='{destinationDirectory}'");
+                LoggingService.LogPerformance("ExtractArchive", stopwatch.Elapsed, "Updater",
+                    $"archive={fileName} | type=tar.gz");
                 return;
             }
 
+            LoggingService.LogError(
+                $"ExtractArchive: unsupported format | archive='{fileName}' | destination='{destinationDirectory}'");
             throw new NotSupportedException($"Unsupported archive format for '{fileName}'.");
         }
         catch (Exception ex) when (ex is not OperationCanceledException)
         {
-            LoggingService.LogError($"Failed to extract archive '{archivePath}'.", ex);
+            LoggingService.LogError(
+                $"ExtractArchive: failure | archive='{archivePath}' | destination='{destinationDirectory}'", ex);
             throw;
         }
     }
@@ -427,22 +469,31 @@ public sealed class UpdateService : IUpdateService
             })
             .ToList();
 
-        if (directories.Count == 1 && files.Count == 0)
-            return directories[0];
+        var resolved = directories.Count == 1 && files.Count == 0
+            ? directories[0]
+            : payloadDirectory;
 
-        return payloadDirectory;
+        LoggingService.LogInformation(
+            $"ResolveContentRoot: resolved | payload='{payloadDirectory}' | directories={directories.Count} | files={files.Count} | resolved='{resolved}'");
+
+        return resolved;
     }
 
     private static string ResolveExecutableRelativePath(string contentRoot, RuntimePlatform platform,
         string applicationName)
     {
-        return platform switch
+        var resolved = platform switch
         {
             RuntimePlatform.Windows => ResolveWindowsExecutable(contentRoot, applicationName),
             RuntimePlatform.MacOS => ResolveMacExecutable(contentRoot, applicationName),
             RuntimePlatform.Linux => ResolveLinuxExecutable(contentRoot, applicationName),
             _ => throw new ArgumentOutOfRangeException(nameof(platform), platform, "Unsupported platform.")
         };
+
+        LoggingService.LogInformation(
+            $"ResolveExecutablePath: resolved | platform={platform} | application='{applicationName}' | relativePath='{resolved}'");
+
+        return resolved;
     }
 
     private static string ResolveWindowsExecutable(string contentRoot, string applicationName)
@@ -453,7 +504,11 @@ public sealed class UpdateService : IUpdateService
 
         var candidates = Directory.GetFiles(contentRoot, exeName, SearchOption.AllDirectories);
         if (candidates.Length == 0)
+        {
+            LoggingService.LogError(
+                $"ResolveWindowsExecutable: missing executable | application='{applicationName}' | searchRoot='{contentRoot}'");
             throw new FileNotFoundException($"Could not find '{exeName}' in extracted payload.");
+        }
 
         var selected = candidates.OrderBy(path => path.Length).First();
         return Path.GetRelativePath(contentRoot, selected);
@@ -471,8 +526,12 @@ public sealed class UpdateService : IUpdateService
 
         var binaryCandidates = Directory.GetFiles(contentRoot, applicationName, SearchOption.AllDirectories);
         if (binaryCandidates.Length == 0)
+        {
+            LoggingService.LogError(
+                $"ResolveMacExecutable: missing bundle/binary | application='{applicationName}' | searchRoot='{contentRoot}'");
             throw new FileNotFoundException(
                 $"Could not locate '{applicationName}' bundle or binary in update payload.");
+        }
 
         var selected = binaryCandidates.OrderBy(path => path.Length).First();
         return Path.GetRelativePath(contentRoot, selected);
@@ -493,13 +552,15 @@ public sealed class UpdateService : IUpdateService
         if (shellCandidates.Length > 0)
             return Path.GetRelativePath(contentRoot, shellCandidates.OrderBy(path => path.Length).First());
 
+        LoggingService.LogError(
+            $"ResolveLinuxExecutable: missing executable | application='{applicationName}' | searchRoot='{contentRoot}'");
         throw new FileNotFoundException($"Could not locate '{applicationName}' executable in update payload.");
     }
 
     private static ScriptInfo CreateUpdateScript(RuntimePlatform platform, string scriptsDirectory, string contentRoot,
         string installDirectory, string executableRelativePath, Version targetVersion, string applicationName)
     {
-        return platform switch
+        var script = platform switch
         {
             RuntimePlatform.Windows => CreateWindowsScript(scriptsDirectory, contentRoot, installDirectory,
                 executableRelativePath, targetVersion, applicationName),
@@ -507,6 +568,8 @@ public sealed class UpdateService : IUpdateService
                 installDirectory, executableRelativePath, targetVersion, applicationName),
             _ => throw new ArgumentOutOfRangeException(nameof(platform), platform, "Unsupported platform.")
         };
+
+        return script;
     }
 
     private static ScriptInfo CreateWindowsScript(string scriptsDirectory, string contentRoot, string installDirectory,
@@ -626,9 +689,14 @@ public sealed class UpdateService : IUpdateService
     {
         var assemblyLocation = AppContext.BaseDirectory;
         if (string.IsNullOrWhiteSpace(assemblyLocation))
+        {
+            LoggingService.LogError("ResolveInstallDirectory: base directory is unavailable.");
             throw new InvalidOperationException("Unable to determine application directory for installation.");
+        }
 
-        return Path.GetFullPath(assemblyLocation);
+        var resolved = Path.GetFullPath(assemblyLocation);
+        LoggingService.LogInformation($"ResolveInstallDirectory: resolved | path='{resolved}'");
+        return resolved;
     }
 
     private static bool IsLegacyWindowsOnlyRelease(GitHubRelease release, Version latestVersion,
