@@ -1,7 +1,6 @@
 using System;
 using System.Diagnostics;
 using System.Globalization;
-using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 using DiscordRPC;
@@ -22,9 +21,6 @@ public sealed class DiscordRpcService : IDisposable
     private const string DetailsText = "A Software to get files out of a .unitypackage";
 
     private static readonly Lazy<DiscordRpcService> InstanceLazy = new(static () => new DiscordRpcService());
-
-    private static readonly string LogFilePath =
-        Path.Combine(AppSettingsService.SettingsDirectory, "Logs", "discord-rpc.log");
 
     private static readonly TimeSpan KeepAliveInterval = TimeSpan.FromSeconds(10);
 
@@ -430,18 +426,9 @@ public sealed class DiscordRpcService : IDisposable
 
     private static void Log(string message)
     {
-        Debug.WriteLine($"[DiscordRPC] {message}");
-
-        try
-        {
-            var timestamp = DateTimeOffset.Now.ToString("u", CultureInfo.InvariantCulture);
-            Directory.CreateDirectory(Path.GetDirectoryName(LogFilePath)!);
-            File.AppendAllText(LogFilePath, $"[{timestamp}] {message}{Environment.NewLine}");
-        }
-        catch
-        {
-            // Swallow logging errors – avoid recursive failures.
-        }
+        var formatted = $"[DiscordRPC] {message}";
+        Debug.WriteLine(formatted);
+        LoggingService.LogInformation(formatted);
     }
 
     private sealed class DebugLogger : ILogger
