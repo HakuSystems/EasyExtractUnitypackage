@@ -19,6 +19,7 @@ public static class WindowPlacementService
     {
         _settingsAccessor = settingsAccessor ?? throw new ArgumentNullException(nameof(settingsAccessor));
         _settingsPersister = settingsPersister ?? throw new ArgumentNullException(nameof(settingsPersister));
+        LoggingService.LogInformation("WindowPlacementService.Configure: persistence delegates registered.");
     }
 
     public static IDisposable Attach(Window window, string windowKey, bool persistWindowState = false)
@@ -28,38 +29,80 @@ public static class WindowPlacementService
         if (string.IsNullOrWhiteSpace(windowKey))
             throw new ArgumentException("Window key must be provided.", nameof(windowKey));
 
+        LoggingService.LogInformation(
+            $"WindowPlacementService.Attach: tracker created | windowKey={windowKey} | persistState={persistWindowState} | windowType={window.GetType().Name}");
+
         return new WindowPlacementTracker(window, windowKey, persistWindowState);
     }
 
     internal static WindowPlacementState? GetPlacement(string key)
     {
         if (string.IsNullOrWhiteSpace(key))
+        {
+            LoggingService.LogWarning("WindowPlacementService.GetPlacement: empty key provided.");
             return null;
+        }
+
+        LoggingService.LogInformation($"WindowPlacementService.GetPlacement: loading placement | key={key}");
 
         var settings = GetSettings();
-        if (settings?.WindowPlacements is not { Count: > 0 } placements)
+        if (settings is null)
+        {
+            LoggingService.LogWarning($"WindowPlacementService.GetPlacement: settings unavailable | key={key}");
             return null;
+        }
+
+        if (settings.WindowPlacements is not { Count: > 0 } placements)
+        {
+            LoggingService.LogInformation($"WindowPlacementService.GetPlacement: no placements saved | key={key}");
+            return null;
+        }
 
         if (!placements.TryGetValue(key, out var stored) || stored is null)
+        {
+            LoggingService.LogInformation($"WindowPlacementService.GetPlacement: placement not found | key={key}");
             return null;
+        }
 
+        LoggingService.LogInformation(
+            $"WindowPlacementService.GetPlacement: placement restored | key={key} | size={FormatDimension(stored.Width)}x{FormatDimension(stored.Height)} | pos={FormatCoordinate(stored.PositionX)},{FormatCoordinate(stored.PositionY)} | state={stored.WindowState}");
         return CreateState(stored);
     }
 
     internal static void SavePlacement(string key, WindowPlacementState placement)
     {
-        if (string.IsNullOrWhiteSpace(key) || placement is null)
+        if (string.IsNullOrWhiteSpace(key))
+        {
+            LoggingService.LogWarning("WindowPlacementService.SavePlacement: empty key provided.");
             return;
+        }
+
+        if (placement is null)
+        {
+            LoggingService.LogWarning($"WindowPlacementService.SavePlacement: null placement ignored | key={key}");
+            return;
+        }
+
+        LoggingService.LogInformation(
+            $"WindowPlacementService.SavePlacement: persisting placement | key={key} | size={FormatDimension(placement.Width)}x{FormatDimension(placement.Height)} | pos={FormatCoordinate(placement.PositionX)},{FormatCoordinate(placement.PositionY)} | state={placement.WindowState}");
 
         var settings = GetSettings();
         if (settings is null)
+        {
+            LoggingService.LogWarning($"WindowPlacementService.SavePlacement: settings unavailable | key={key}");
             return;
+        }
+
+        using var scope = LoggingService.BeginPerformanceScope("SaveWindowPlacement", "WindowPlacement",
+            key);
 
         lock (SyncRoot)
         {
             var placements = EnsurePlacementsDictionary(settings);
             placements[key] = CreateSettings(placement);
             Persist(settings);
+            LoggingService.LogInformation(
+                $"WindowPlacementService.SavePlacement: placement persisted | key={key} | totalPlacements={placements.Count}");
         }
     }
 
@@ -74,6 +117,12 @@ public static class WindowPlacementService
             ? new Dictionary<string, WindowPlacementSettings>(StringComparer.OrdinalIgnoreCase)
             : new Dictionary<string, WindowPlacementSettings>(existing, StringComparer.OrdinalIgnoreCase);
 
+        if (existing is null)
+            LoggingService.LogInformation("WindowPlacementService: initialized placement store.");
+        else
+            LoggingService.LogInformation(
+                $"WindowPlacementService: normalized placement store comparer | previousCount={existing.Count}");
+
         settings.WindowPlacements = normalized;
         return normalized;
     }
@@ -82,7 +131,10 @@ public static class WindowPlacementService
     {
         var accessor = _settingsAccessor;
         if (accessor is null)
+        {
+            LoggingService.LogWarning("WindowPlacementService: settings accessor not configured.");
             return null;
+        }
 
         try
         {
@@ -99,11 +151,15 @@ public static class WindowPlacementService
     {
         var persister = _settingsPersister;
         if (persister is null)
+        {
+            LoggingService.LogWarning("WindowPlacementService: settings persister not configured.");
             return;
+        }
 
         try
         {
             persister(settings);
+            LoggingService.LogInformation("WindowPlacementService: window placement settings persisted.");
         }
         catch (Exception ex)
         {
@@ -135,6 +191,16 @@ public static class WindowPlacementService
         };
     }
 
+    private static string FormatDimension(double? value)
+    {
+        return value.HasValue ? value.Value.ToString("0.##") : "n/a";
+    }
+
+    private static string FormatCoordinate(int? value)
+    {
+        return value.HasValue ? value.Value.ToString() : "n/a";
+    }
+
     private sealed class WindowPlacementTracker : IDisposable
     {
         private readonly bool _persistWindowState;
@@ -144,17 +210,22 @@ public static class WindowPlacementService
         private bool _isDisposed;
         private PixelPoint? _lastNormalPosition;
         private Size? _lastNormalSize;
+        private WindowState _lastReportedState = WindowState.Normal;
 
         public WindowPlacementTracker(Window window, string windowKey, bool persistWindowState)
         {
             _window = window;
             _windowKey = windowKey;
             _persistWindowState = persistWindowState;
+            _lastReportedState = window.WindowState;
 
             _window.Opened += OnWindowOpened;
             _window.Closing += OnWindowClosing;
             _window.PropertyChanged += OnWindowPropertyChanged;
             _window.PositionChanged += OnWindowPositionChanged;
+
+            LoggingService.LogInformation(
+                $"WindowPlacementTracker: subscribed | key={_windowKey} | persistState={_persistWindowState} | windowType={_window.GetType().Name}");
         }
 
         public void Dispose()
@@ -167,24 +238,38 @@ public static class WindowPlacementService
             _window.Closing -= OnWindowClosing;
             _window.PropertyChanged -= OnWindowPropertyChanged;
             _window.PositionChanged -= OnWindowPositionChanged;
+
+            LoggingService.LogInformation($"WindowPlacementTracker.Dispose: unsubscribed | key={_windowKey}");
         }
 
         private void OnWindowOpened(object? sender, EventArgs e)
         {
+            LoggingService.LogInformation($"WindowPlacementTracker.OnWindowOpened: triggered | key={_windowKey}");
             if (_hasRestoredPlacement)
+            {
+                LoggingService.LogInformation(
+                    $"WindowPlacementTracker.OnWindowOpened: placement already restored earlier | key={_windowKey}");
                 return;
+            }
 
             _hasRestoredPlacement = true;
 
             var placement = GetPlacement(_windowKey);
             if (placement is null)
+            {
+                LoggingService.LogInformation(
+                    $"WindowPlacementTracker.OnWindowOpened: no saved placement available | key={_windowKey}");
                 return;
+            }
 
             ApplyPlacement(placement);
         }
 
         private void ApplyPlacement(WindowPlacementState placement)
         {
+            LoggingService.LogInformation(
+                $"WindowPlacementTracker.ApplyPlacement: applying | key={_windowKey} | size={FormatDimension(placement.Width)}x{FormatDimension(placement.Height)} | pos={FormatCoordinate(placement.PositionX)},{FormatCoordinate(placement.PositionY)} | state={placement.WindowState}");
+
             if (placement.Width.HasValue && placement.Width.Value > 0 && !double.IsNaN(placement.Width.Value))
                 _window.Width = placement.Width.Value;
 
@@ -218,6 +303,8 @@ public static class WindowPlacementService
 
         private void OnWindowClosing(object? sender, WindowClosingEventArgs e)
         {
+            LoggingService.LogInformation(
+                $"WindowPlacementTracker.OnWindowClosing: saving placement | key={_windowKey}");
             SavePlacement();
         }
 
@@ -245,6 +332,8 @@ public static class WindowPlacementService
                 WindowState = stateToPersist
             };
 
+            LoggingService.LogInformation(
+                $"WindowPlacementTracker.SavePlacement: captured | key={_windowKey} | size={FormatDimension(placement.Width)}x{FormatDimension(placement.Height)} | pos={FormatCoordinate(placement.PositionX)},{FormatCoordinate(placement.PositionY)} | state={placement.WindowState}");
             WindowPlacementService.SavePlacement(_windowKey, placement);
         }
 
@@ -252,6 +341,14 @@ public static class WindowPlacementService
         {
             if (e.Property == Window.WindowStateProperty || e.Property == Window.BoundsProperty)
                 CaptureCurrentBoundsIfNormal();
+
+            if (e.Property == Window.WindowStateProperty && e.NewValue is WindowState newState)
+                if (newState != _lastReportedState)
+                {
+                    LoggingService.LogInformation(
+                        $"WindowPlacementTracker: window state changed | key={_windowKey} | state={newState}");
+                    _lastReportedState = newState;
+                }
         }
 
         private void OnWindowPositionChanged(object? sender, PixelPointEventArgs e)
@@ -289,7 +386,12 @@ public static class WindowPlacementService
             var clampedX = Math.Clamp(desiredPosition.X, left, Math.Max(left, maxX));
             var clampedY = Math.Clamp(desiredPosition.Y, top, Math.Max(top, maxY));
 
-            return new PixelPoint(clampedX, clampedY);
+            var adjusted = new PixelPoint(clampedX, clampedY);
+            if (adjusted != desiredPosition)
+                LoggingService.LogInformation(
+                    $"WindowPlacementTracker.EnsureWindowIsVisible: adjusted position | key={_windowKey} | requested={desiredPosition} | adjusted={adjusted} | screen={workingArea}");
+
+            return adjusted;
         }
     }
 
