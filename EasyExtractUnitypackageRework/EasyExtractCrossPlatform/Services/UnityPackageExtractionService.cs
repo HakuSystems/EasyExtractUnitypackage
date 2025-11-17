@@ -60,46 +60,79 @@ public sealed class UnityPackageExtractionService : IUnityPackageExtractionServi
         ArgumentException.ThrowIfNullOrWhiteSpace(packagePath);
         ArgumentException.ThrowIfNullOrWhiteSpace(outputDirectory);
 
+        var correlationId = Guid.NewGuid().ToString("N")[..8];
+        var limits = UnityPackageExtractionLimits.Normalize(options.Limits);
+
         LoggingService.LogInformation(
-            $"Unity package extraction requested. package='{packagePath}', output='{outputDirectory}', organize={options.OrganizeByCategories}, temp='{options.TemporaryDirectory}'.");
+            $"ExtractAsync: package='{packagePath}' | output='{outputDirectory}' | organize={options.OrganizeByCategories} | temp='{options.TemporaryDirectory}' | limits=[maxAssets={limits.MaxAssets}, maxAssetBytes={limits.MaxAssetBytes:N0}, maxPackageBytes={limits.MaxPackageBytes:N0}] | correlationId={correlationId}");
 
         if (!File.Exists(packagePath))
         {
-            LoggingService.LogError($"Unity package extraction aborted. File not found: '{packagePath}'.");
+            LoggingService.LogError(
+                $"ExtractAsync aborted: File not found | path='{packagePath}' | correlationId={correlationId}");
             throw new FileNotFoundException("Unitypackage file was not found.", packagePath);
         }
 
-        Directory.CreateDirectory(outputDirectory);
-        LoggingService.LogInformation($"Ensured output directory '{outputDirectory}' exists.");
+        try
+        {
+            Directory.CreateDirectory(outputDirectory);
+            LoggingService.LogInformation(
+                $"Created output directory | path='{outputDirectory}' | correlationId={correlationId}");
+        }
+        catch (Exception ex)
+        {
+            LoggingService.LogError(
+                $"Failed to create output directory | path='{outputDirectory}' | correlationId={correlationId}", ex);
+            throw;
+        }
 
         if (!string.IsNullOrWhiteSpace(options.TemporaryDirectory))
         {
-            Directory.CreateDirectory(options.TemporaryDirectory!);
-            LoggingService.LogInformation($"Ensured temporary directory '{options.TemporaryDirectory}' exists.");
+            try
+            {
+                Directory.CreateDirectory(options.TemporaryDirectory!);
+                LoggingService.LogInformation(
+                    $"Created temporary directory | path='{options.TemporaryDirectory}' | correlationId={correlationId}");
+            }
+            catch (Exception ex)
+            {
+                LoggingService.LogError(
+                    $"Failed to create temporary directory | path='{options.TemporaryDirectory}' | correlationId={correlationId}",
+                    ex);
+                throw;
+            }
         }
 
-        var stopwatch = Stopwatch.StartNew();
+        using (LoggingService.BeginPerformanceScope("UnityPackageExtraction", "Extraction",
+                   correlationId))
+        {
+            try
+            {
+                LoggingService.LogMemoryUsage($"Before extraction | correlationId={correlationId}");
 
-        try
-        {
-            var result = await Task.Run(() =>
-                    ExtractInternal(packagePath, outputDirectory, options, progress, cancellationToken),
-                cancellationToken).ConfigureAwait(false);
+                var result = await Task.Run(() =>
+                        ExtractInternal(packagePath, outputDirectory, options, progress, cancellationToken,
+                            correlationId),
+                    cancellationToken).ConfigureAwait(false);
 
-            stopwatch.Stop();
-            LoggingService.LogInformation(
-                $"Unity package extraction completed in {stopwatch.Elapsed.TotalMilliseconds:F0} ms. Extracted {result.AssetsExtracted} assets to '{result.OutputDirectory}'.");
-            return result;
-        }
-        catch (Exception ex) when (ex is not OperationCanceledException)
-        {
-            stopwatch.Stop();
-            LoggingService.LogError($"Unity package extraction failed for '{packagePath}'.", ex);
-            throw;
-        }
-        finally
-        {
-            stopwatch.Stop();
+                LoggingService.LogMemoryUsage($"After extraction | correlationId={correlationId}",
+                    true);
+                LoggingService.LogInformation(
+                    $"ExtractAsync completed: assets={result.AssetsExtracted} | files={result.ExtractedFiles.Count} | output='{result.OutputDirectory}' | correlationId={correlationId}");
+                return result;
+            }
+            catch (OperationCanceledException)
+            {
+                LoggingService.LogInformation(
+                    $"ExtractAsync cancelled | package='{packagePath}' | correlationId={correlationId}");
+                throw;
+            }
+            catch (Exception ex)
+            {
+                LoggingService.LogError(
+                    $"ExtractAsync failed | package='{packagePath}' | correlationId={correlationId}", ex);
+                throw;
+            }
         }
     }
 
@@ -108,9 +141,11 @@ public sealed class UnityPackageExtractionService : IUnityPackageExtractionServi
         string outputDirectory,
         UnityPackageExtractionOptions options,
         IProgress<UnityPackageExtractionProgress>? progress,
-        CancellationToken cancellationToken)
+        CancellationToken cancellationToken,
+        string correlationId)
     {
-        LoggingService.LogInformation($"Beginning low-level extraction flow for '{packagePath}'.");
+        LoggingService.LogInformation(
+            $"ExtractInternal started | package='{packagePath}' | correlationId={correlationId}");
 
         using var packageStream = File.OpenRead(packagePath);
         using var gzipStream = new GZipStream(packageStream, CompressionMode.Decompress);
@@ -126,9 +161,14 @@ public sealed class UnityPackageExtractionService : IUnityPackageExtractionServi
         var directoriesToCleanup = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
         var generatedRelativePaths = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
         var duplicateSuffixCounters = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
-        using var temporaryDirectory = CreateTemporaryDirectory(options.TemporaryDirectory);
+        using var temporaryDirectory = CreateTemporaryDirectory(options.TemporaryDirectory, correlationId);
         var extractionRequired = false;
         var extractedCount = 0;
+        var tarEntriesProcessed = 0;
+        var tarEntriesSkipped = 0;
+        var assetsSkippedNoPath = 0;
+        var assetsSkippedNoContent = 0;
+        var assetsDuplicated = 0;
 
         void WriteAndTrack(
             UnityPackageAssetState state,
@@ -137,18 +177,28 @@ public sealed class UnityPackageExtractionService : IUnityPackageExtractionServi
             string? previewPath,
             AssetWritePlan plan)
         {
-            var writtenFiles = WriteAssetToDisk(
-                state,
-                targetPath,
-                metaPath,
-                previewPath,
-                plan,
-                cancellationToken);
-            if (writtenFiles.Count > 0)
+            using (LoggingService.BeginPerformanceScope("WriteAssetToDisk", "Extraction",
+                       correlationId))
             {
-                extractedCount++;
-                extractedFiles.AddRange(writtenFiles);
-                progress?.Report(new UnityPackageExtractionProgress(state.RelativePath, extractedCount));
+                var writtenFiles = WriteAssetToDisk(
+                    state,
+                    targetPath,
+                    metaPath,
+                    previewPath,
+                    plan,
+                    cancellationToken,
+                    correlationId);
+                if (writtenFiles.Count > 0)
+                {
+                    extractedCount++;
+                    extractedFiles.AddRange(writtenFiles);
+                    progress?.Report(new UnityPackageExtractionProgress(state.RelativePath, extractedCount));
+                }
+                else
+                {
+                    LoggingService.LogInformation(
+                        $"Asset write produced no files | path='{state.RelativePath}' | correlationId={correlationId}");
+                }
             }
 
             state.MarkAsCompleted();
@@ -157,6 +207,12 @@ public sealed class UnityPackageExtractionService : IUnityPackageExtractionServi
 
         void FlushPendingWrites()
         {
+            if (pendingWrites.Count == 0)
+                return;
+
+            LoggingService.LogInformation(
+                $"FlushPendingWrites: flushing pending assets | count={pendingWrites.Count} | correlationId={correlationId}");
+
             foreach (var pending in pendingWrites)
                 WriteAndTrack(
                     pending.State,
@@ -167,6 +223,8 @@ public sealed class UnityPackageExtractionService : IUnityPackageExtractionServi
 
             pendingWrites.Clear();
             queuedStates.Clear();
+
+            LoggingService.LogInformation($"FlushPendingWrites completed | correlationId={correlationId}");
         }
 
         void HandleReadyState(UnityPackageAssetState state)
@@ -179,16 +237,28 @@ public sealed class UnityPackageExtractionService : IUnityPackageExtractionServi
                     generatedRelativePaths,
                     duplicateSuffixCounters,
                     directoriesToCleanup,
+                    correlationId,
                     out var targetPath,
                     out var metaPath,
                     out var previewPath))
+            {
+                if (state.RelativePath is null)
+                    assetsSkippedNoPath++;
+                else if (state.Asset is not { HasContent: true })
+                    assetsSkippedNoContent++;
+
+                LoggingService.LogInformation(
+                    $"Asset skipped (no valid paths) | relativePath='{state.RelativePath}' | hasAsset={state.Asset?.HasContent} | correlationId={correlationId}");
                 return;
+            }
 
             limiter.RegisterAsset();
             var plan = CreateAssetWritePlan(state, targetPath, metaPath, previewPath);
 
             if (!plan.RequiresWrite)
             {
+                LoggingService.LogInformation(
+                    $"Asset skipped (already up-to-date) | path='{state.RelativePath}' | target='{targetPath}' | correlationId={correlationId}");
                 state.MarkAsCompleted();
                 queuedStates.Remove(state);
                 return;
@@ -197,6 +267,8 @@ public sealed class UnityPackageExtractionService : IUnityPackageExtractionServi
             if (!extractionRequired)
             {
                 extractionRequired = true;
+                LoggingService.LogInformation(
+                    $"First asset queued for extraction | path='{state.RelativePath}' | correlationId={correlationId}");
                 pendingWrites.Add(new PendingAssetWrite(state, targetPath, metaPath, previewPath, plan));
                 queuedStates.Add(state);
                 FlushPendingWrites();
@@ -207,91 +279,136 @@ public sealed class UnityPackageExtractionService : IUnityPackageExtractionServi
             }
         }
 
+        LoggingService.LogInformation($"Starting TAR entry processing loop | correlationId={correlationId}");
+        var lastBatchLog = Stopwatch.StartNew();
+        const int batchLogInterval = 100;
+
         TarEntry? entry;
-        while ((entry = tarReader.GetNextEntry()) is not null)
+        using (LoggingService.BeginPerformanceScope("ProcessTarEntries", "Extraction",
+                   correlationId))
         {
-            cancellationToken.ThrowIfCancellationRequested();
-
-            if (entry.EntryType == TarEntryType.Directory)
-                continue;
-
-            var entryName = entry.Name ?? string.Empty;
-            if (string.IsNullOrWhiteSpace(entryName))
-                continue;
-
-            var (assetKey, componentName) = SplitEntryName(entryName);
-            if (string.IsNullOrWhiteSpace(assetKey) || string.IsNullOrWhiteSpace(componentName))
-                continue;
-
-            if (!assetStates.TryGetValue(assetKey, out var state))
+            while ((entry = tarReader.GetNextEntry()) is not null)
             {
-                state = new UnityPackageAssetState();
-                assetStates[assetKey] = state;
-            }
+                cancellationToken.ThrowIfCancellationRequested();
+                tarEntriesProcessed++;
 
-            if (entry.DataStream is null)
-                continue;
-
-            switch (componentName)
-            {
-                case "pathname":
+                if (entry.EntryType == TarEntryType.Directory)
                 {
-                    var normalization =
-                        NormalizeRelativePath(ReadEntryAsUtf8String(entry.DataStream, cancellationToken));
-                    state.RelativePath = normalization.NormalizedPath;
-                    state.OriginalRelativePath = normalization.OriginalPath;
-                    state.PathNormalizations = normalization.Segments;
-                    break;
-                }
-                case "asset":
-                {
-                    var component = CreateAssetComponent(
-                        entry,
-                        temporaryDirectory.DirectoryPath,
-                        limits,
-                        limiter,
-                        cancellationToken);
-                    state.SetAssetComponent(component);
-                    break;
-                }
-                case "asset.meta":
-                {
-                    var component = CreateAssetComponent(
-                        entry,
-                        temporaryDirectory.DirectoryPath,
-                        limits,
-                        limiter,
-                        cancellationToken);
-                    state.SetMetaComponent(component);
-                    break;
-                }
-                case "preview.png":
-                {
-                    var component = CreateAssetComponent(
-                        entry,
-                        temporaryDirectory.DirectoryPath,
-                        limits,
-                        limiter,
-                        cancellationToken);
-                    state.SetPreviewComponent(component);
-                    break;
-                }
-                default:
+                    tarEntriesSkipped++;
                     continue;
-            }
+                }
 
-            if (state.CanWriteToDisk && !queuedStates.Contains(state))
-                HandleReadyState(state);
+                var entryName = entry.Name ?? string.Empty;
+                if (string.IsNullOrWhiteSpace(entryName))
+                {
+                    tarEntriesSkipped++;
+                    continue;
+                }
+
+                var (assetKey, componentName) = SplitEntryName(entryName);
+                if (string.IsNullOrWhiteSpace(assetKey) || string.IsNullOrWhiteSpace(componentName))
+                {
+                    tarEntriesSkipped++;
+                    continue;
+                }
+
+                if (!assetStates.TryGetValue(assetKey, out var state))
+                {
+                    state = new UnityPackageAssetState();
+                    assetStates[assetKey] = state;
+                }
+
+                if (entry.DataStream is null)
+                {
+                    tarEntriesSkipped++;
+                    continue;
+                }
+
+                switch (componentName)
+                {
+                    case "pathname":
+                    {
+                        var normalization = NormalizeRelativePath(
+                            ReadEntryAsUtf8String(entry.DataStream, cancellationToken, correlationId),
+                            correlationId);
+                        state.RelativePath = normalization.NormalizedPath;
+                        state.OriginalRelativePath = normalization.OriginalPath;
+                        state.PathNormalizations = normalization.Segments;
+                        break;
+                    }
+                    case "asset":
+                    {
+                        var component = CreateAssetComponent(
+                            entry,
+                            temporaryDirectory.DirectoryPath,
+                            limits,
+                            limiter,
+                            cancellationToken,
+                            correlationId);
+                        state.SetAssetComponent(component);
+                        break;
+                    }
+                    case "asset.meta":
+                    {
+                        var component = CreateAssetComponent(
+                            entry,
+                            temporaryDirectory.DirectoryPath,
+                            limits,
+                            limiter,
+                            cancellationToken,
+                            correlationId);
+                        state.SetMetaComponent(component);
+                        break;
+                    }
+                    case "preview.png":
+                    {
+                        var component = CreateAssetComponent(
+                            entry,
+                            temporaryDirectory.DirectoryPath,
+                            limits,
+                            limiter,
+                            cancellationToken,
+                            correlationId);
+                        state.SetPreviewComponent(component);
+                        break;
+                    }
+                    default:
+                        tarEntriesSkipped++;
+                        continue;
+                }
+
+                if (state.CanWriteToDisk && !queuedStates.Contains(state))
+                    HandleReadyState(state);
+
+                // Log batch progress every N entries
+                if (tarEntriesProcessed % batchLogInterval == 0 && lastBatchLog.Elapsed.TotalSeconds >= 2)
+                {
+                    LoggingService.LogInformation(
+                        $"TAR processing progress: entries={tarEntriesProcessed} | assets={assetStates.Count} | extracted={extractedCount} | skipped={tarEntriesSkipped} | correlationId={correlationId}");
+                    lastBatchLog.Restart();
+                }
+            }
         }
 
+        LoggingService.LogInformation(
+            $"TAR entry processing completed | totalEntries={tarEntriesProcessed} | skipped={tarEntriesSkipped} | uniqueAssets={assetStates.Count} | correlationId={correlationId}");
+
         // Emit remaining entries that might have been waiting for path or asset information.
+        LoggingService.LogInformation(
+            $"Processing remaining asset states | remaining={assetStates.Count} | queued={queuedStates.Count} | correlationId={correlationId}");
+        var remainingProcessed = 0;
         foreach (var (_, state) in assetStates)
         {
             if (!state.CanWriteToDisk || queuedStates.Contains(state))
                 continue;
 
             HandleReadyState(state);
+            remainingProcessed++;
         }
+
+        if (remainingProcessed > 0)
+            LoggingService.LogInformation(
+                $"Processed remaining assets | count={remainingProcessed} | correlationId={correlationId}");
 
         if (!extractionRequired)
         {
@@ -300,9 +417,10 @@ public sealed class UnityPackageExtractionService : IUnityPackageExtractionServi
 
             pendingWrites.Clear();
             queuedStates.Clear();
-            CleanupCorruptedDirectories(directoriesToCleanup);
+            CleanupCorruptedDirectories(directoriesToCleanup, correlationId);
 
-            LoggingService.LogInformation($"No writable assets detected in '{packagePath}'.");
+            LoggingService.LogInformation(
+                $"No writable assets detected | package='{packagePath}' | totalAssets={assetStates.Count} | skippedNoPath={assetsSkippedNoPath} | skippedNoContent={assetsSkippedNoContent} | correlationId={correlationId}");
 
             return new UnityPackageExtractionResult(
                 packagePath,
@@ -314,10 +432,10 @@ public sealed class UnityPackageExtractionService : IUnityPackageExtractionServi
         if (pendingWrites.Count > 0)
             FlushPendingWrites();
 
-        CleanupCorruptedDirectories(directoriesToCleanup);
+        CleanupCorruptedDirectories(directoriesToCleanup, correlationId);
 
         LoggingService.LogInformation(
-            $"Extraction flow completed for '{packagePath}'. AssetsExtracted={extractedCount}, filesWritten={extractedFiles.Count}.");
+            $"ExtractInternal completed | package='{packagePath}' | assetsExtracted={extractedCount} | filesWritten={extractedFiles.Count} | tarEntries={tarEntriesProcessed} | skippedNoPath={assetsSkippedNoPath} | skippedNoContent={assetsSkippedNoContent} | duplicated={assetsDuplicated} | correlationId={correlationId}");
 
         return new UnityPackageExtractionResult(
             packagePath,
@@ -334,12 +452,16 @@ public sealed class UnityPackageExtractionService : IUnityPackageExtractionServi
         return full;
     }
 
-    private static void EnsurePathIsUnderRoot(string normalizedRoot, string candidatePath)
+    private static void EnsurePathIsUnderRoot(string normalizedRoot, string candidatePath, string correlationId)
     {
         var candidate = Path.GetFullPath(candidatePath);
         if (!candidate.StartsWith(normalizedRoot, StringComparison.OrdinalIgnoreCase))
+        {
+            LoggingService.LogError(
+                $"Path traversal detected | candidate='{candidate}' | root='{normalizedRoot}' | correlationId={correlationId}");
             throw new InvalidDataException(
                 $"Extraction aborted. Asset path '{candidate}' points outside of '{normalizedRoot}'.");
+        }
     }
 
     private static bool TryGetAssetPaths(
@@ -350,6 +472,7 @@ public sealed class UnityPackageExtractionService : IUnityPackageExtractionServi
         HashSet<string> generatedRelativePaths,
         Dictionary<string, int> duplicateSuffixCounters,
         HashSet<string> directoriesToCleanup,
+        string correlationId,
         out string targetPath,
         out string? metaPath,
         out string? previewPath)
@@ -366,20 +489,38 @@ public sealed class UnityPackageExtractionService : IUnityPackageExtractionServi
         if (string.IsNullOrWhiteSpace(relativeOutputPath))
             return false;
 
+        var originalPath = relativeOutputPath;
         relativeOutputPath = EnsureUniqueRelativePath(
             relativeOutputPath,
             generatedRelativePaths,
             duplicateSuffixCounters,
-            organizeByCategories);
+            organizeByCategories,
+            correlationId);
+
+        if (!string.Equals(originalPath, relativeOutputPath, StringComparison.Ordinal))
+            LoggingService.LogInformation(
+                $"Path renamed for uniqueness | original='{originalPath}' | unique='{relativeOutputPath}' | correlationId={correlationId}");
 
         targetPath = Path.Combine(outputDirectory, relativeOutputPath);
         metaPath = state.Meta is { HasContent: true } ? $"{targetPath}.meta" : null;
         previewPath = state.Preview is { HasContent: true } ? $"{targetPath}.preview.png" : null;
-        EnsurePathIsUnderRoot(normalizedOutputDirectory, targetPath);
-        if (metaPath is not null)
-            EnsurePathIsUnderRoot(normalizedOutputDirectory, metaPath);
-        if (previewPath is not null)
-            EnsurePathIsUnderRoot(normalizedOutputDirectory, previewPath);
+
+        try
+        {
+            EnsurePathIsUnderRoot(normalizedOutputDirectory, targetPath, correlationId);
+            if (metaPath is not null)
+                EnsurePathIsUnderRoot(normalizedOutputDirectory, metaPath, correlationId);
+            if (previewPath is not null)
+                EnsurePathIsUnderRoot(normalizedOutputDirectory, previewPath, correlationId);
+        }
+        catch (InvalidDataException ex)
+        {
+            LoggingService.LogError(
+                $"Path validation failed for asset | relativePath='{state.RelativePath}' | correlationId={correlationId}",
+                ex);
+            throw;
+        }
+
         TrackCorruptedDirectories(outputDirectory, state, directoriesToCleanup);
         return true;
     }
@@ -440,7 +581,8 @@ public sealed class UnityPackageExtractionService : IUnityPackageExtractionServi
         string relativePath,
         HashSet<string> usedRelativePaths,
         Dictionary<string, int> duplicateSuffixCounters,
-        bool allowSuffixes)
+        bool allowSuffixes,
+        string correlationId)
     {
         if (string.IsNullOrWhiteSpace(relativePath))
             return relativePath;
@@ -479,6 +621,8 @@ public sealed class UnityPackageExtractionService : IUnityPackageExtractionServi
             if (usedRelativePaths.Add(candidatePath))
             {
                 duplicateSuffixCounters[duplicateKey] = counter + 1;
+                LoggingService.LogInformation(
+                    $"Duplicate path resolved | original='{relativePath}' | unique='{candidatePath}' | suffix={counter} | correlationId={correlationId}");
                 return candidatePath;
             }
 
@@ -541,10 +685,14 @@ public sealed class UnityPackageExtractionService : IUnityPackageExtractionServi
         }
     }
 
-    private static void CleanupCorruptedDirectories(HashSet<string> directoriesToCleanup)
+    private static void CleanupCorruptedDirectories(HashSet<string> directoriesToCleanup, string correlationId)
     {
         if (directoriesToCleanup.Count == 0)
             return;
+
+        LoggingService.LogInformation(
+            $"CleanupCorruptedDirectories started | count={directoriesToCleanup.Count} | correlationId={correlationId}");
+        var deletedCount = 0;
 
         foreach (var directory in directoriesToCleanup
                      .OrderByDescending(path => path.Length))
@@ -557,13 +705,22 @@ public sealed class UnityPackageExtractionService : IUnityPackageExtractionServi
                     continue;
 
                 Directory.Delete(directory);
+                deletedCount++;
             }
-            catch (IOException)
+            catch (IOException ex)
             {
+                LoggingService.LogWarning(
+                    $"Failed to delete empty directory | path='{directory}' | correlationId={correlationId}", ex);
             }
-            catch (UnauthorizedAccessException)
+            catch (UnauthorizedAccessException ex)
             {
+                LoggingService.LogWarning(
+                    $"Access denied when deleting directory | path='{directory}' | correlationId={correlationId}", ex);
             }
+
+        if (deletedCount > 0)
+            LoggingService.LogInformation(
+                $"CleanupCorruptedDirectories completed | deleted={deletedCount}/{directoriesToCleanup.Count} | correlationId={correlationId}");
     }
 
     private static AssetWritePlan CreateAssetWritePlan(
@@ -589,7 +746,8 @@ public sealed class UnityPackageExtractionService : IUnityPackageExtractionServi
         string? metaPath,
         string? previewPath,
         AssetWritePlan plan,
-        CancellationToken cancellationToken)
+        CancellationToken cancellationToken,
+        string correlationId)
     {
         if (!plan.RequiresWrite)
             return Array.Empty<string>();
@@ -604,7 +762,18 @@ public sealed class UnityPackageExtractionService : IUnityPackageExtractionServi
                 return;
 
             if (!string.IsNullOrWhiteSpace(directory))
-                Directory.CreateDirectory(directory);
+            {
+                try
+                {
+                    Directory.CreateDirectory(directory);
+                }
+                catch (Exception ex)
+                {
+                    LoggingService.LogError(
+                        $"Failed to create asset directory | path='{directory}' | correlationId={correlationId}", ex);
+                    throw;
+                }
+            }
 
             directoryEnsured = true;
         }
@@ -613,24 +782,52 @@ public sealed class UnityPackageExtractionService : IUnityPackageExtractionServi
         {
             EnsureDirectory();
             cancellationToken.ThrowIfCancellationRequested();
-            assetComponent.CopyTo(targetPath, cancellationToken);
-            writtenFiles.Add(targetPath);
+            try
+            {
+                assetComponent.CopyTo(targetPath, cancellationToken);
+                writtenFiles.Add(targetPath);
+            }
+            catch (Exception ex)
+            {
+                LoggingService.LogError(
+                    $"Failed to write asset | path='{targetPath}' | size={assetComponent.Length} | correlationId={correlationId}",
+                    ex);
+                throw;
+            }
         }
 
         if (plan.WriteMeta && metaPath is not null && state.Meta is { HasContent: true } metaComponent)
         {
             EnsureDirectory();
             cancellationToken.ThrowIfCancellationRequested();
-            metaComponent.CopyTo(metaPath, cancellationToken);
-            writtenFiles.Add(metaPath);
+            try
+            {
+                metaComponent.CopyTo(metaPath, cancellationToken);
+                writtenFiles.Add(metaPath);
+            }
+            catch (Exception ex)
+            {
+                LoggingService.LogError(
+                    $"Failed to write meta file | path='{metaPath}' | correlationId={correlationId}", ex);
+                throw;
+            }
         }
 
         if (plan.WritePreview && previewPath is not null && state.Preview is { HasContent: true } previewComponent)
         {
             EnsureDirectory();
             cancellationToken.ThrowIfCancellationRequested();
-            previewComponent.CopyTo(previewPath, cancellationToken);
-            writtenFiles.Add(previewPath);
+            try
+            {
+                previewComponent.CopyTo(previewPath, cancellationToken);
+                writtenFiles.Add(previewPath);
+            }
+            catch (Exception ex)
+            {
+                LoggingService.LogError(
+                    $"Failed to write preview | path='{previewPath}' | correlationId={correlationId}", ex);
+                throw;
+            }
         }
 
         return writtenFiles;
@@ -656,21 +853,25 @@ public sealed class UnityPackageExtractionService : IUnityPackageExtractionServi
             var fileHash = SHA256.HashData(stream);
             return CryptographicOperations.FixedTimeEquals(fileHash, component.ContentHash.Span);
         }
-        catch (IOException)
+        catch (IOException ex)
         {
+            LoggingService.LogWarning($"IOException during content comparison | path='{path}'", ex);
             return false;
         }
-        catch (UnauthorizedAccessException)
+        catch (UnauthorizedAccessException ex)
         {
+            LoggingService.LogWarning($"Access denied during content comparison | path='{path}'", ex);
             return false;
         }
-        catch (CryptographicException)
+        catch (CryptographicException ex)
         {
+            LoggingService.LogWarning($"Cryptographic error during content comparison | path='{path}'", ex);
             return false;
         }
     }
 
-    private static string ReadEntryAsUtf8String(Stream dataStream, CancellationToken cancellationToken)
+    private static string ReadEntryAsUtf8String(Stream dataStream, CancellationToken cancellationToken,
+        string correlationId)
     {
         cancellationToken.ThrowIfCancellationRequested();
         using var reader = new StreamReader(
@@ -688,8 +889,12 @@ public sealed class UnityPackageExtractionService : IUnityPackageExtractionServi
         {
             totalRead += read;
             if (totalRead > MaxPathEntryCharacters)
+            {
+                LoggingService.LogError(
+                    $"Path entry exceeded max length | length={totalRead} | max={MaxPathEntryCharacters} | correlationId={correlationId}");
                 throw new InvalidDataException(
                     $"Path entry exceeded the maximum supported length of {MaxPathEntryCharacters:N0} characters.");
+            }
 
             builder.Append(buffer, 0, read);
             cancellationToken.ThrowIfCancellationRequested();
@@ -703,7 +908,8 @@ public sealed class UnityPackageExtractionService : IUnityPackageExtractionServi
         string temporaryDirectory,
         UnityPackageExtractionLimits limits,
         ExtractionLimiter limiter,
-        CancellationToken cancellationToken)
+        CancellationToken cancellationToken,
+        string correlationId)
     {
         if (entry.DataStream is null)
             return null;
@@ -715,45 +921,64 @@ public sealed class UnityPackageExtractionService : IUnityPackageExtractionServi
 
         var tempPath = Path.Combine(temporaryDirectory, $"{Guid.NewGuid():N}.tmp");
         FileStream? output = null;
+
         try
         {
-            output = File.Open(tempPath, FileMode.Create, FileAccess.Write, FileShare.None);
-            using var hasher = IncrementalHash.CreateHash(HashAlgorithmName.SHA256);
-            var buffer = ArrayPool<byte>.Shared.Rent(StreamCopyBufferSize);
-            long totalWritten = 0;
-
-            try
+            using (LoggingService.BeginPerformanceScope("CreateAssetComponent", "Extraction",
+                       correlationId))
             {
-                int read;
-                while ((read = entry.DataStream.Read(buffer, 0, buffer.Length)) > 0)
+                output = File.Open(tempPath, FileMode.Create, FileAccess.Write, FileShare.None);
+                using var hasher = IncrementalHash.CreateHash(HashAlgorithmName.SHA256);
+                var buffer = ArrayPool<byte>.Shared.Rent(StreamCopyBufferSize);
+                long totalWritten = 0;
+
+                try
                 {
-                    cancellationToken.ThrowIfCancellationRequested();
-                    output.Write(buffer, 0, read);
-                    hasher.AppendData(buffer, 0, read);
-                    totalWritten += read;
+                    int read;
+                    while ((read = entry.DataStream.Read(buffer, 0, buffer.Length)) > 0)
+                    {
+                        cancellationToken.ThrowIfCancellationRequested();
+                        output.Write(buffer, 0, read);
+                        hasher.AppendData(buffer, 0, read);
+                        totalWritten += read;
 
-                    if (limits.MaxAssetBytes > 0 && totalWritten > limits.MaxAssetBytes)
-                        throw new InvalidDataException(
-                            $"Asset '{entryName}' exceeded the configured per-file limit of {limits.MaxAssetBytes:N0} bytes.");
+                        if (limits.MaxAssetBytes > 0 && totalWritten > limits.MaxAssetBytes)
+                        {
+                            LoggingService.LogError(
+                                $"Asset exceeded per-file limit | entry='{entryName}' | size={totalWritten} | limit={limits.MaxAssetBytes} | correlationId={correlationId}");
+                            throw new InvalidDataException(
+                                $"Asset '{entryName}' exceeded the configured per-file limit of {limits.MaxAssetBytes:N0} bytes.");
+                        }
+                    }
                 }
-            }
-            finally
-            {
-                ArrayPool<byte>.Shared.Return(buffer);
-            }
+                finally
+                {
+                    ArrayPool<byte>.Shared.Return(buffer);
+                }
 
-            output.Flush();
-            var hash = hasher.GetHashAndReset();
-            output.Dispose();
+                output.Flush();
+                var hash = hasher.GetHashAndReset();
+                output.Dispose();
 
-            if (totalWritten == 0)
-            {
-                TryDeleteFile(tempPath);
-                return null;
+                if (totalWritten == 0)
+                {
+                    TryDeleteFile(tempPath);
+                    LoggingService.LogInformation(
+                        $"Asset component empty, skipping | entry='{entryName}' | correlationId={correlationId}");
+                    return null;
+                }
+
+                limiter.TrackAssetBytes(totalWritten);
+                return new AssetComponent(tempPath, totalWritten, hash);
             }
-
-            limiter.TrackAssetBytes(totalWritten);
-            return new AssetComponent(tempPath, totalWritten, hash);
+        }
+        catch (Exception ex) when (ex is not OperationCanceledException and not InvalidDataException)
+        {
+            output?.Dispose();
+            TryDeleteFile(tempPath);
+            LoggingService.LogError(
+                $"Failed to create asset component | entry='{entryName}' | correlationId={correlationId}", ex);
+            throw;
         }
         catch
         {
@@ -763,17 +988,38 @@ public sealed class UnityPackageExtractionService : IUnityPackageExtractionServi
         }
     }
 
-    private static TemporaryDirectoryScope CreateTemporaryDirectory(string? baseDirectory)
+    private static TemporaryDirectoryScope CreateTemporaryDirectory(string? baseDirectory, string correlationId)
     {
         var root = string.IsNullOrWhiteSpace(baseDirectory)
             ? Path.Combine(Path.GetTempPath(), "EasyExtractCrossPlatform")
             : baseDirectory!;
 
-        Directory.CreateDirectory(root);
+        try
+        {
+            Directory.CreateDirectory(root);
+        }
+        catch (Exception ex)
+        {
+            LoggingService.LogError(
+                $"Failed to create temp root directory | path='{root}' | correlationId={correlationId}", ex);
+            throw;
+        }
 
         var scopedDirectory = Path.Combine(root, Guid.NewGuid().ToString("N"));
-        Directory.CreateDirectory(scopedDirectory);
-        return new TemporaryDirectoryScope(scopedDirectory);
+        try
+        {
+            Directory.CreateDirectory(scopedDirectory);
+            LoggingService.LogInformation(
+                $"Created temporary directory | path='{scopedDirectory}' | correlationId={correlationId}");
+            return new TemporaryDirectoryScope(scopedDirectory, correlationId);
+        }
+        catch (Exception ex)
+        {
+            LoggingService.LogError(
+                $"Failed to create scoped temp directory | path='{scopedDirectory}' | correlationId={correlationId}",
+                ex);
+            throw;
+        }
     }
 
     private static void TryDeleteFile(string path)
@@ -783,11 +1029,13 @@ public sealed class UnityPackageExtractionService : IUnityPackageExtractionServi
             if (File.Exists(path))
                 File.Delete(path);
         }
-        catch (IOException)
+        catch (IOException ex)
         {
+            LoggingService.LogWarning($"Failed to delete temporary file | path='{path}'", ex);
         }
-        catch (UnauthorizedAccessException)
+        catch (UnauthorizedAccessException ex)
         {
+            LoggingService.LogWarning($"Access denied when deleting temporary file | path='{path}'", ex);
         }
     }
 
@@ -803,7 +1051,7 @@ public sealed class UnityPackageExtractionService : IUnityPackageExtractionServi
         return (key, remainder.ToLowerInvariant());
     }
 
-    private static PathNormalizationResult NormalizeRelativePath(string? input)
+    private static PathNormalizationResult NormalizeRelativePath(string? input, string correlationId)
     {
         if (string.IsNullOrWhiteSpace(input))
             return new PathNormalizationResult(string.Empty, string.Empty, EmptySegmentNormalizations);
@@ -822,11 +1070,16 @@ public sealed class UnityPackageExtractionService : IUnityPackageExtractionServi
 
         var originalSegments = new List<string>(segments.Length);
         var normalizedSegments = new List<string>(segments.Length);
+        var hadDotDotSegments = false;
+        var filteredSegments = 0;
 
         foreach (var segment in segments)
         {
             if (segment is "." or "..")
+            {
+                hadDotDotSegments = true;
                 continue;
+            }
 
             var trimmed = segment.Trim();
             if (string.IsNullOrWhiteSpace(trimmed))
@@ -835,7 +1088,10 @@ public sealed class UnityPackageExtractionService : IUnityPackageExtractionServi
             var filtered = new string(trimmed.Where(c => !InvalidFileNameCharacters.Contains(c)).ToArray());
             filtered = filtered.Trim();
             if (string.IsNullOrWhiteSpace(filtered))
+            {
+                filteredSegments++;
                 continue;
+            }
 
             originalSegments.Add(filtered);
             var normalizedSegment = FileExtensionNormalizer.Normalize(filtered);
@@ -843,7 +1099,11 @@ public sealed class UnityPackageExtractionService : IUnityPackageExtractionServi
         }
 
         if (originalSegments.Count == 0)
+        {
+            LoggingService.LogWarning(
+                $"Path normalization resulted in empty path | original='{input}' | hadDotDot={hadDotDotSegments} | filteredCount={filteredSegments} | correlationId={correlationId}");
             return new PathNormalizationResult(string.Empty, string.Empty, EmptySegmentNormalizations);
+        }
 
         var segmentPairs = new PathSegmentNormalization[originalSegments.Count];
         for (var i = 0; i < segmentPairs.Length; i++)
@@ -851,6 +1111,10 @@ public sealed class UnityPackageExtractionService : IUnityPackageExtractionServi
 
         var originalPath = Path.Combine(originalSegments.ToArray());
         var normalizedPath = Path.Combine(normalizedSegments.ToArray());
+
+        if (!string.Equals(originalPath, normalizedPath, StringComparison.Ordinal))
+            LoggingService.LogInformation(
+                $"Path normalized | original='{originalPath}' | normalized='{normalizedPath}' | correlationId={correlationId}");
 
         return new PathNormalizationResult(normalizedPath, originalPath, segmentPairs);
     }
@@ -995,12 +1259,15 @@ public sealed class UnityPackageExtractionService : IUnityPackageExtractionServi
 
     private sealed class TemporaryDirectoryScope : IDisposable
     {
-        public TemporaryDirectoryScope(string directoryPath)
+        public TemporaryDirectoryScope(string directoryPath, string correlationId)
         {
             DirectoryPath = directoryPath;
+            CorrelationId = correlationId;
         }
 
         public string DirectoryPath { get; }
+
+        public string CorrelationId { get; }
 
         public void Dispose()
         {
@@ -1009,11 +1276,17 @@ public sealed class UnityPackageExtractionService : IUnityPackageExtractionServi
                 if (Directory.Exists(DirectoryPath))
                     Directory.Delete(DirectoryPath, true);
             }
-            catch (IOException)
+            catch (IOException ex)
             {
+                LoggingService.LogWarning(
+                    $"Failed to delete empty directory | path='{DirectoryPath}' | correlationId={CorrelationId}",
+                    ex);
             }
-            catch (UnauthorizedAccessException)
+            catch (UnauthorizedAccessException ex)
             {
+                LoggingService.LogWarning(
+                    $"Access denied when deleting directory | path='{DirectoryPath}' | correlationId={CorrelationId}",
+                    ex);
             }
         }
     }
