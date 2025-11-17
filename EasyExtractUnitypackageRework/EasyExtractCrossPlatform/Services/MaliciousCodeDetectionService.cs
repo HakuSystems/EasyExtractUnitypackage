@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Formats.Tar;
 using System.IO;
 using System.IO.Compression;
@@ -178,17 +179,33 @@ public sealed class MaliciousCodeDetectionService : IMaliciousCodeDetectionServi
         ArgumentException.ThrowIfNullOrWhiteSpace(packagePath);
 
         var normalizedPath = NormalizeFullPath(packagePath);
-        if (!File.Exists(normalizedPath))
-            throw new FileNotFoundException("Unitypackage file was not found.", normalizedPath);
+        LoggingService.LogInformation($"MaliciousCodeScan: request | path={normalizedPath}");
 
-        if (_scanCache.TryGetValue(normalizedPath, out var cached) &&
-            DateTimeOffset.UtcNow - cached.Timestamp < CacheExpiration)
-            return Task.FromResult(cached.Result);
+        if (!File.Exists(normalizedPath))
+        {
+            LoggingService.LogWarning($"MaliciousCodeScan: file_missing | path={normalizedPath}");
+            throw new FileNotFoundException("Unitypackage file was not found.", normalizedPath);
+        }
+
+        if (_scanCache.TryGetValue(normalizedPath, out var cached))
+        {
+            var age = DateTimeOffset.UtcNow - cached.Timestamp;
+            if (age < CacheExpiration)
+            {
+                LoggingService.LogInformation(
+                    $"MaliciousCodeScan: cache_hit | path={normalizedPath} | ageMs={age.TotalMilliseconds:F0}");
+                return Task.FromResult(cached.Result);
+            }
+
+            LoggingService.LogInformation(
+                $"MaliciousCodeScan: cache_expired | path={normalizedPath} | ageMs={age.TotalMilliseconds:F0}");
+        }
 
         var scanTask = _inFlightScans.GetOrAdd(
             normalizedPath,
             _ => RunScanAsync(normalizedPath, cancellationToken));
 
+        LoggingService.LogInformation($"MaliciousCodeScan: awaiting_result | path={normalizedPath}");
         return scanTask;
     }
 
@@ -196,15 +213,50 @@ public sealed class MaliciousCodeDetectionService : IMaliciousCodeDetectionServi
         string packagePath,
         CancellationToken cancellationToken)
     {
+        var correlationId = Path.GetFileName(packagePath);
+        if (string.IsNullOrWhiteSpace(correlationId))
+            correlationId = packagePath;
+
+        var stopwatch = Stopwatch.StartNew();
+        LoggingService.LogInformation($"MaliciousCodeScan.Run: start | path={packagePath}");
+        using var performanceScope = LoggingService.BeginPerformanceScope(
+            "MaliciousCodeScan",
+            "Security",
+            correlationId);
+        var stats = new ScanStatistics();
+
         try
         {
-            LoggingService.LogInformation($"Security scan started for '{packagePath}'.");
-            var result = await Task.Run(() => ScanUnityPackageCore(packagePath, cancellationToken), cancellationToken)
+            var result = await Task.Run(() => ScanUnityPackageCore(packagePath, cancellationToken, stats),
+                    cancellationToken)
                 .ConfigureAwait(false);
+            stopwatch.Stop();
+            stats.ThreatCount = result.Threats.Count;
             _scanCache[packagePath] = new CachedScanResult(result, DateTimeOffset.UtcNow);
             LoggingService.LogInformation(
-                $"Security scan completed for '{packagePath}'. Threats={result.Threats.Count}.");
+                $"MaliciousCodeScan.Run: success | path={packagePath} | threats={result.Threats.Count} | durationMs={stopwatch.Elapsed.TotalMilliseconds:F0}");
+            LoggingService.LogPerformance(
+                "MaliciousCodeDetectionService.ScanUnityPackage",
+                stopwatch.Elapsed,
+                "Security",
+                stats.ToPerformanceDetails(),
+                stats.TotalBytesAnalyzed);
             return result;
+        }
+        catch (OperationCanceledException)
+        {
+            stopwatch.Stop();
+            LoggingService.LogInformation(
+                $"MaliciousCodeScan.Run: cancelled | path={packagePath} | durationMs={stopwatch.Elapsed.TotalMilliseconds:F0}");
+            throw;
+        }
+        catch (Exception ex)
+        {
+            stopwatch.Stop();
+            LoggingService.LogError(
+                $"MaliciousCodeScan.Run: failed | path={packagePath} | durationMs={stopwatch.Elapsed.TotalMilliseconds:F0}",
+                ex);
+            throw;
         }
         finally
         {
@@ -212,8 +264,13 @@ public sealed class MaliciousCodeDetectionService : IMaliciousCodeDetectionServi
         }
     }
 
-    private static MaliciousCodeScanResult ScanUnityPackageCore(string packagePath, CancellationToken cancellationToken)
+    private static MaliciousCodeScanResult ScanUnityPackageCore(
+        string packagePath,
+        CancellationToken cancellationToken,
+        ScanStatistics stats)
     {
+        ArgumentNullException.ThrowIfNull(stats);
+
         var collector = new MaliciousThreatCollector();
         var assetStates = new Dictionary<string, AssetSecurityState>(StringComparer.OrdinalIgnoreCase);
 
@@ -224,6 +281,7 @@ public sealed class MaliciousCodeDetectionService : IMaliciousCodeDetectionServi
         TarEntry? entry;
         while ((entry = tarReader.GetNextEntry()) is not null)
         {
+            stats.TarEntriesRead++;
             cancellationToken.ThrowIfCancellationRequested();
 
             if (entry.EntryType == TarEntryType.Directory)
@@ -247,12 +305,13 @@ public sealed class MaliciousCodeDetectionService : IMaliciousCodeDetectionServi
             {
                 case "pathname" when entry.DataStream is not null:
                 {
+                    stats.PathComponentsSeen++;
                     var relativePath = ReadPath(entry);
                     state.RelativePath = NormalizeAssetPath(relativePath);
                     if (state.PendingAssetData is { Length: > 0 } pendingData &&
                         !string.IsNullOrWhiteSpace(state.RelativePath))
                     {
-                        ProcessAssetData(state.RelativePath, pendingData, collector);
+                        ProcessAssetData(state.RelativePath, pendingData, collector, stats);
                         state.PendingAssetData = null;
                         assetStates.Remove(assetKey);
                     }
@@ -261,13 +320,14 @@ public sealed class MaliciousCodeDetectionService : IMaliciousCodeDetectionServi
                 }
                 case "asset" when entry.DataStream is not null:
                 {
-                    var data = ReadAssetData(entry, cancellationToken);
+                    stats.AssetComponentsSeen++;
+                    var data = ReadAssetData(entry, cancellationToken, stats);
                     if (data is null || data.Length == 0)
                         break;
 
                     if (!string.IsNullOrWhiteSpace(state.RelativePath))
                     {
-                        ProcessAssetData(state.RelativePath, data, collector);
+                        ProcessAssetData(state.RelativePath, data, collector, stats);
                         assetStates.Remove(assetKey);
                     }
                     else
@@ -280,7 +340,18 @@ public sealed class MaliciousCodeDetectionService : IMaliciousCodeDetectionServi
             }
         }
 
+        var unresolvedPendingAssets = assetStates.Values.Count(s =>
+            s.PendingAssetData is { Length: > 0 } && string.IsNullOrWhiteSpace(s.RelativePath));
+
+        if (unresolvedPendingAssets > 0)
+        {
+            stats.AssetsSkippedMissingPath += unresolvedPendingAssets;
+            LoggingService.LogWarning(
+                $"MaliciousCodeScan: skipped assets without pathname | path={packagePath} | count={unresolvedPendingAssets}");
+        }
+
         var threats = collector.BuildResults();
+        stats.ThreatCount = threats.Count;
         return new MaliciousCodeScanResult(
             packagePath,
             threats.Count > 0,
@@ -315,14 +386,25 @@ public sealed class MaliciousCodeDetectionService : IMaliciousCodeDetectionServi
         return sanitized;
     }
 
-    private static byte[]? ReadAssetData(TarEntry entry, CancellationToken cancellationToken)
+    private static byte[]? ReadAssetData(
+        TarEntry entry,
+        CancellationToken cancellationToken,
+        ScanStatistics stats)
     {
+        ArgumentNullException.ThrowIfNull(stats);
+
         if (entry.DataStream is null)
+        {
+            stats.AssetsSkippedMissingStream++;
             return null;
+        }
 
         var declaredLength = entry.Length;
         if (declaredLength > MaxScannableBytes)
+        {
+            stats.AssetsSkippedOversize++;
             return null;
+        }
 
         using var memoryStream = declaredLength is > 0 and <= int.MaxValue
             ? new MemoryStream((int)declaredLength)
@@ -334,7 +416,10 @@ public sealed class MaliciousCodeDetectionService : IMaliciousCodeDetectionServi
         {
             cancellationToken.ThrowIfCancellationRequested();
             if (memoryStream.Length + read > MaxScannableBytes)
+            {
+                stats.AssetsSkippedOversize++;
                 return null;
+            }
 
             memoryStream.Write(buffer, 0, read);
         }
@@ -355,21 +440,35 @@ public sealed class MaliciousCodeDetectionService : IMaliciousCodeDetectionServi
     private static void ProcessAssetData(
         string relativePath,
         byte[] data,
-        MaliciousThreatCollector collector)
+        MaliciousThreatCollector collector,
+        ScanStatistics stats)
     {
+        ArgumentNullException.ThrowIfNull(stats);
+
         if (string.IsNullOrWhiteSpace(relativePath))
+        {
+            stats.AssetsSkippedMissingPath++;
             return;
+        }
 
         if (!ShouldScanFile(relativePath))
+        {
+            stats.AssetsSkippedByExtension++;
             return;
+        }
 
         if (!LooksLikeText(data))
+        {
+            stats.AssetsSkippedBinary++;
             return;
+        }
 
         var content = Encoding.UTF8.GetString(data);
         if (string.IsNullOrWhiteSpace(content))
             return;
 
+        stats.AssetsAnalyzed++;
+        stats.TotalBytesAnalyzed += data.LongLength;
         AnalyzeTextContent(relativePath, content, collector);
     }
 
@@ -549,6 +648,27 @@ public sealed class MaliciousCodeDetectionService : IMaliciousCodeDetectionServi
         var key = normalized[..firstSlash].Trim();
         var remainder = normalized[(firstSlash + 1)..].Trim();
         return (key, remainder.ToLowerInvariant());
+    }
+
+    private sealed class ScanStatistics
+    {
+        public int TarEntriesRead { get; set; }
+        public int PathComponentsSeen { get; set; }
+        public int AssetComponentsSeen { get; set; }
+        public int AssetsAnalyzed { get; set; }
+        public int AssetsSkippedByExtension { get; set; }
+        public int AssetsSkippedBinary { get; set; }
+        public int AssetsSkippedMissingPath { get; set; }
+        public int AssetsSkippedOversize { get; set; }
+        public int AssetsSkippedMissingStream { get; set; }
+        public long TotalBytesAnalyzed { get; set; }
+        public int ThreatCount { get; set; }
+
+        public string ToPerformanceDetails()
+        {
+            return
+                $"entries={TarEntriesRead}|assets={AssetComponentsSeen}|analyzed={AssetsAnalyzed}|skipExt={AssetsSkippedByExtension}|skipBinary={AssetsSkippedBinary}|skipMissingPath={AssetsSkippedMissingPath}|skipSize={AssetsSkippedOversize}|skipStream={AssetsSkippedMissingStream}|threats={ThreatCount}";
+        }
     }
 
     private sealed record CachedScanResult(MaliciousCodeScanResult Result, DateTimeOffset Timestamp);
