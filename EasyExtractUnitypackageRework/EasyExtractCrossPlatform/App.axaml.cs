@@ -40,7 +40,10 @@ public class App : Application
         }
 
         if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
-            desktop.MainWindow = new MainWindow(desktop.Args);
+        {
+            var serviceProvider = AppServiceLocator.Current;
+            desktop.MainWindow = new MainWindow(desktop.Args, serviceProvider);
+        }
 
         base.OnFrameworkInitializationCompleted();
     }

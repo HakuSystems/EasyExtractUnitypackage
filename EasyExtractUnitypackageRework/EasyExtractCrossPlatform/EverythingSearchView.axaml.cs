@@ -1,18 +1,26 @@
 using Avalonia.Controls;
 using Avalonia.Interactivity;
+using EasyExtractCrossPlatform.Services;
 using EasyExtractCrossPlatform.ViewModels;
 
 namespace EasyExtractCrossPlatform;
 
 public partial class EverythingSearchView : UserControl
 {
+    private readonly IAppServiceProvider _serviceProvider;
     private bool _initialized;
 
-    public EverythingSearchView()
+    public EverythingSearchView() : this(null)
     {
+    }
+
+    public EverythingSearchView(IAppServiceProvider? serviceProvider)
+    {
+        _serviceProvider = serviceProvider ?? AppServiceLocator.Current;
         InitializeComponent();
 
-        ViewModel = new EverythingSearchViewModel();
+        var searchService = _serviceProvider.GetRequiredService<IEverythingSearchService>();
+        ViewModel = new EverythingSearchViewModel(searchService);
         DataContext = ViewModel;
 
         Loaded += OnLoaded;

@@ -30,7 +30,7 @@ public sealed class EverythingSearchViewModel : INotifyPropertyChanged, IDisposa
     private string? _statusMessage = DefaultStatus;
 
     public EverythingSearchViewModel()
-        : this(CreateDefaultSearchService())
+        : this(AppServiceLocator.Current.GetRequiredService<IEverythingSearchService>())
     {
     }
 
@@ -293,18 +293,6 @@ public sealed class EverythingSearchViewModel : INotifyPropertyChanged, IDisposa
                 IsSearching = false;
             }
         }
-    }
-
-    private static IEverythingSearchService CreateDefaultSearchService()
-    {
-        if (OperatingSystem.IsWindows())
-            return new EverythingSearchService();
-        if (OperatingSystem.IsMacOS())
-            return new SpotlightSearchService();
-        if (OperatingSystem.IsLinux())
-            return new LinuxSearchService();
-
-        return new UnsupportedSearchService(Environment.OSVersion.Platform.ToString());
     }
 
     private void HandleAddToQueue(object? parameter)

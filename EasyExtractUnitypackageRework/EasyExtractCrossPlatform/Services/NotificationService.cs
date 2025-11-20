@@ -19,17 +19,7 @@ public sealed class NotificationService : INotificationService
     public void ShowExtractionSuccess(string packagePath, string outputDirectory, int assetsExtracted)
     {
         var title = DefaultTitle;
-        var fileName = TryGetFileName(packagePath);
-        var assetDescriptor = BuildAssetDescriptor(assetsExtracted);
-        var destinationDescriptor = string.IsNullOrWhiteSpace(outputDirectory)
-            ? assetDescriptor
-            : $"{assetDescriptor} to {outputDirectory}";
-
-        var message = string.IsNullOrWhiteSpace(fileName)
-            ? destinationDescriptor
-            : $"{fileName}: {destinationDescriptor}";
-
-        message = NormalizeMessage(message);
+        var message = NotificationMessageFormatter.BuildExtractionMessage(packagePath, outputDirectory, assetsExtracted);
 
         if (OperatingSystem.IsWindows() && TryShowWindowsNotification(title, message))
             return;
@@ -41,39 +31,6 @@ public sealed class NotificationService : INotificationService
             return;
 
         LoggingService.LogInformation("System notifications are not available on this platform.");
-    }
-
-    private static string TryGetFileName(string packagePath)
-    {
-        if (string.IsNullOrWhiteSpace(packagePath))
-            return string.Empty;
-
-        try
-        {
-            return Path.GetFileName(packagePath);
-        }
-        catch
-        {
-            return packagePath;
-        }
-    }
-
-    private static string BuildAssetDescriptor(int assetsExtracted)
-    {
-        if (assetsExtracted <= 0)
-            return "Extraction completed";
-
-        return assetsExtracted == 1
-            ? "1 asset extracted"
-            : $"{assetsExtracted} assets extracted";
-    }
-
-    private static string NormalizeMessage(string message)
-    {
-        if (string.IsNullOrWhiteSpace(message))
-            return string.Empty;
-
-        return message.ReplaceLineEndings(" ").Trim();
     }
 
     private static bool TryShowWindowsNotification(string title, string message)

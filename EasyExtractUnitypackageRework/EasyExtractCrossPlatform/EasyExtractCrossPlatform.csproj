@@ -34,6 +34,10 @@
         <PackageReference Include="OpenTK" Version="4.9.4"/>
     </ItemGroup>
     <ItemGroup>
+        <Compile Remove="EasyExtractCrossPlatform.Tests\**\*.cs"/>
+        <None Remove="EasyExtractCrossPlatform.Tests\**\*"/>
+    </ItemGroup>
+    <ItemGroup>
         <AvaloniaResource Include="Assets\**"/>
     </ItemGroup>
 </Project>
