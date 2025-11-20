@@ -179,6 +179,119 @@ public sealed partial class UnityPackageExtractionService
         return new PathNormalizationResult(normalizedPath, originalPath, segmentPairs);
     }
 
+    private static bool TryGetAssetPaths(
+        UnityPackageAssetState state,
+        string outputDirectory,
+        string normalizedOutputDirectory,
+        bool organizeByCategories,
+        HashSet<string> generatedRelativePaths,
+        Dictionary<string, int> duplicateSuffixCounters,
+        HashSet<string> directoriesToCleanup,
+        string correlationId,
+        out string targetPath,
+        out string? metaPath,
+        out string? previewPath)
+    {
+        targetPath = string.Empty;
+        metaPath = null;
+        previewPath = null;
+
+        if (state.RelativePath is null || state.Asset is not { HasContent: true })
+            return false;
+
+        var relativeOutputPath = ResolveOutputRelativePath(state, organizeByCategories);
+
+        if (string.IsNullOrWhiteSpace(relativeOutputPath))
+            return false;
+
+        var originalPath = relativeOutputPath;
+        relativeOutputPath = EnsureUniqueRelativePath(
+            relativeOutputPath,
+            generatedRelativePaths,
+            duplicateSuffixCounters,
+            organizeByCategories,
+            correlationId);
+
+        if (!string.Equals(originalPath, relativeOutputPath, StringComparison.Ordinal))
+            LoggingService.LogInformation(
+                $"Path renamed for uniqueness | original='{originalPath}' | unique='{relativeOutputPath}' | correlationId={correlationId}");
+
+        targetPath = Path.Combine(outputDirectory, relativeOutputPath);
+        metaPath = state.Meta is { HasContent: true } ? $"{targetPath}.meta" : null;
+        previewPath = state.Preview is { HasContent: true } ? $"{targetPath}.preview.png" : null;
+
+        try
+        {
+            EnsurePathIsUnderRoot(normalizedOutputDirectory, targetPath, correlationId);
+            if (metaPath is not null)
+                EnsurePathIsUnderRoot(normalizedOutputDirectory, metaPath, correlationId);
+            if (previewPath is not null)
+                EnsurePathIsUnderRoot(normalizedOutputDirectory, previewPath, correlationId);
+        }
+        catch (InvalidDataException ex)
+        {
+            LoggingService.LogError(
+                $"Path validation failed for asset | relativePath='{state.RelativePath}' | correlationId={correlationId}",
+                ex);
+            throw;
+        }
+
+        TrackCorruptedDirectories(outputDirectory, state, directoriesToCleanup);
+        return true;
+    }
+
+    private static string? ResolveOutputRelativePath(
+        UnityPackageAssetState state,
+        bool organizeByCategories)
+    {
+        var relativePath = state.RelativePath;
+        if (string.IsNullOrWhiteSpace(relativePath))
+            return null;
+
+        if (!organizeByCategories)
+        {
+            var normalizedSegments = state.PathNormalizations?
+                .Select(segment => segment.Normalized)
+                .Where(segment => !string.IsNullOrWhiteSpace(segment))
+                .ToArray();
+
+            if (normalizedSegments is { Length: > 0 })
+                return Path.Combine(normalizedSegments);
+
+            return relativePath;
+        }
+
+        var assetSize = state.Asset?.Length ?? 0L;
+        var category = UnityAssetClassification.ResolveCategory(
+            state.OriginalRelativePath ?? relativePath,
+            assetSize,
+            state.Asset?.HasContent ?? false);
+        var categorySegment = SanitizePathSegment(category);
+
+        var fileName = Path.GetFileName(relativePath);
+        if (string.IsNullOrWhiteSpace(fileName))
+        {
+            var fallbackSegment = state.PathNormalizations?
+                .Select(segment => segment.Normalized)
+                .LastOrDefault(segment => !string.IsNullOrWhiteSpace(segment));
+            if (!string.IsNullOrWhiteSpace(fallbackSegment))
+            {
+                fileName = fallbackSegment;
+            }
+            else
+            {
+                var originalFileName = Path.GetFileName(state.OriginalRelativePath ?? string.Empty);
+                if (!string.IsNullOrWhiteSpace(originalFileName))
+                    fileName = SanitizePathSegment(originalFileName);
+            }
+        }
+
+        if (string.IsNullOrWhiteSpace(fileName))
+            fileName = "Asset";
+
+        return Path.Combine(categorySegment, fileName);
+    }
+
 
     private readonly record struct PathSegmentNormalization(string Original, string Normalized);
 
