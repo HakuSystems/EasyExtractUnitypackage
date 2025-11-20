@@ -31,6 +31,10 @@ namespace EasyExtractCrossPlatform;
 
 public partial class MainWindow : Window
 {
+    public MainWindow() : this(null, null)
+    {
+    }
+
     private const string UnityPackageExtension = ".unitypackage";
     private const string UnknownVersionLabel = "Version unknown";
     private const double CompactWidthBreakpoint = 1200;

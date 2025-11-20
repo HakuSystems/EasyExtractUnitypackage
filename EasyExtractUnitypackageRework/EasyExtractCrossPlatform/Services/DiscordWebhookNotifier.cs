@@ -43,8 +43,10 @@ internal static class DiscordWebhookNotifier
     public static Task SendPayloadAsync(string webhookUrl, object payload,
         CancellationToken cancellationToken = default)
     {
+        ArgumentNullException.ThrowIfNull(payload);
+
         var webhookId = GetWebhookIdentity(webhookUrl);
-        var payloadType = payload?.GetType().Name ?? "null";
+        var payloadType = payload.GetType().Name;
         LoggingService.LogInformation(
             $"SendPayloadAsync: dispatch requested | webhookId={webhookId} | payloadType={payloadType}");
         return SendPayloadAsyncInternal(webhookUrl, payload, cancellationToken, false);
@@ -53,8 +55,10 @@ internal static class DiscordWebhookNotifier
     private static async Task SendPayloadAsyncInternal(string webhookUrl, object payload,
         CancellationToken cancellationToken, bool swallowExceptions)
     {
+        ArgumentNullException.ThrowIfNull(payload);
+
         var webhookId = GetWebhookIdentity(webhookUrl);
-        var payloadType = payload?.GetType().Name ?? "null";
+        var payloadType = payload.GetType().Name;
         LoggingService.LogInformation(
             $"SendPayloadAsyncInternal: begin send | webhookId={webhookId} | swallowExceptions={swallowExceptions} | payloadType={payloadType}");
 

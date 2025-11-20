@@ -11,6 +11,10 @@ namespace EasyExtractCrossPlatform;
 
 public partial class FeedbackWindow : Window
 {
+    public FeedbackWindow() : this(null)
+    {
+    }
+
     private readonly string? _appVersion;
     private readonly TextBox? _feedbackTextBox;
     private readonly IDisposable? _responsiveLayoutSubscription;
