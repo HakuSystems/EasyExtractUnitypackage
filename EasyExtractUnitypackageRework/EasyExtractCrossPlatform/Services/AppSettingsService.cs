@@ -121,6 +121,7 @@ public static class AppSettingsService
             ExtractedCategoryStructure = false,
             EnableSecurityScanning = false,
             EnableSound = true,
+            EnableNotifications = true,
             SoundVolume = 1.0,
             CustomBackgroundImage = new CustomBackgroundImageSettings
             {

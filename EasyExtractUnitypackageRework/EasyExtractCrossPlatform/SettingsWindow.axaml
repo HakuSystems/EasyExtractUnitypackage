@@ -131,6 +131,10 @@
                                           Content="{loc:Loc SettingsWindow_DiscordToggle}"
                                           Margin="0,0,18,12"
                                           IsChecked="{Binding Settings.DiscordRpc}" />
+                            <ToggleSwitch x:Name="NotificationToggle"
+                                          Content="{loc:Loc SettingsWindow_NotificationsToggle}"
+                                          Margin="0,0,18,12"
+                                          IsChecked="{Binding Settings.EnableNotifications}" />
                             <ToggleSwitch x:Name="UwUModeToggle"
                                           Content="{loc:Loc SettingsWindow_UwUToggle}"
                                           Margin="0,0,18,12"

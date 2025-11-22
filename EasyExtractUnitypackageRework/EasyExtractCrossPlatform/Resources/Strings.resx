@@ -147,8 +147,11 @@
     <value>Telemetry &amp; Diagnostics</value>
   </data>
     <data name="SettingsWindow_DiscordToggle" xml:space="preserve">
-    <value>Enable Discord Rich Presence</value>
-  </data>
+      <value>Enable Discord Rich Presence</value>
+    </data>
+  <data name="SettingsWindow_NotificationsToggle" xml:space="preserve">
+      <value>Show extraction notifications</value>
+    </data>
   <data name="SettingsWindow_UwUToggle" xml:space="preserve">
     <value>Enable EasyExtractUwUnitypackage</value>
   </data>

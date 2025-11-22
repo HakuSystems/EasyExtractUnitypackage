@@ -6,6 +6,7 @@ public class AppSettings
 
     public double SoundVolume { get; set; } = 1.0;
     public bool EnableSound { get; set; } = true;
+    public bool EnableNotifications { get; set; } = true;
     public bool EnableSecurityScanning { get; set; } = false;
     public string DefaultOutputPath { get; set; } = string.Empty;
     public long TotalSizeBytes { get; set; }

@@ -30,7 +30,8 @@ public partial class MainWindow : Window
             $"{Path.GetFileName(packagePath)} extracted.",
             TimeSpan.FromSeconds(4),
             UiSoundEffect.Positive);
-        _notificationService.ShowExtractionSuccess(packagePath, outputDirectory, result.AssetsExtracted);
+        if (_settings.EnableNotifications)
+            _notificationService.ShowExtractionSuccess(packagePath, outputDirectory, result.AssetsExtracted);
     }
 
 
