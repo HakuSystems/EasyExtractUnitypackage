@@ -1,8 +1,3 @@
-using System;
-using System.Diagnostics;
-using System.Globalization;
-using System.Threading;
-using System.Threading.Tasks;
 using DiscordRPC.Logging;
 using DiscordRPC.Message;
 
@@ -86,7 +81,7 @@ public sealed partial class DiscordRpcService
             if (_client is null || _client.IsDisposed || !_client.IsInitialized)
                 return;
 
-            ApplyPresenceLocked(settings, context.Value, force: true);
+            ApplyPresenceLocked(settings, context.Value, true);
         }
         catch (Exception ex)
         {
@@ -115,10 +110,25 @@ public sealed partial class DiscordRpcService
 
         public LogLevel Level { get; set; }
 
-        public void Trace(string message, params object[] args) => Write(LogLevel.Trace, message, args);
-        public void Info(string message, params object[] args) => Write(LogLevel.Info, message, args);
-        public void Warning(string message, params object[] args) => Write(LogLevel.Warning, message, args);
-        public void Error(string message, params object[] args) => Write(LogLevel.Error, message, args);
+        public void Trace(string message, params object[] args)
+        {
+            Write(LogLevel.Trace, message, args);
+        }
+
+        public void Info(string message, params object[] args)
+        {
+            Write(LogLevel.Info, message, args);
+        }
+
+        public void Warning(string message, params object[] args)
+        {
+            Write(LogLevel.Warning, message, args);
+        }
+
+        public void Error(string message, params object[] args)
+        {
+            Write(LogLevel.Error, message, args);
+        }
 
         private void Write(LogLevel level, string message, params object[] args)
         {

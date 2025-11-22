@@ -1,19 +1,3 @@
-using System;
-using System.Buffers;
-using System.Collections.Generic;
-using System.Collections.Immutable;
-using System.Diagnostics;
-using System.Formats.Tar;
-using System.IO;
-using System.IO.Compression;
-using System.Linq;
-using System.Security.Cryptography;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
-using EasyExtractCrossPlatform.Models;
-using EasyExtractCrossPlatform.Utilities;
-
 namespace EasyExtractCrossPlatform.Services;
 
 public interface IUnityPackageExtractionService
@@ -87,7 +71,6 @@ public sealed partial class UnityPackageExtractionService : IUnityPackageExtract
         }
 
         if (!string.IsNullOrWhiteSpace(options.TemporaryDirectory))
-        {
             try
             {
                 Directory.CreateDirectory(options.TemporaryDirectory!);
@@ -101,7 +84,6 @@ public sealed partial class UnityPackageExtractionService : IUnityPackageExtract
                     ex);
                 throw;
             }
-        }
 
         using (LoggingService.BeginPerformanceScope("UnityPackageExtraction", "Extraction",
                    correlationId))
@@ -135,6 +117,4 @@ public sealed partial class UnityPackageExtractionService : IUnityPackageExtract
             }
         }
     }
-
-
 }

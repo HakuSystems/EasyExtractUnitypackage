@@ -2,9 +2,15 @@ namespace EasyExtractCrossPlatform;
 
 public partial class MainWindow : Window
 {
-    private void DropZoneBorder_OnDragEnter(object? sender, DragEventArgs e) => UpdateDragVisualState(e);
+    private void DropZoneBorder_OnDragEnter(object? sender, DragEventArgs e)
+    {
+        UpdateDragVisualState(e);
+    }
 
-    private void DropZoneBorder_OnDragOver(object? sender, DragEventArgs e) => UpdateDragVisualState(e);
+    private void DropZoneBorder_OnDragOver(object? sender, DragEventArgs e)
+    {
+        UpdateDragVisualState(e);
+    }
 
     private void DropZoneBorder_OnDragLeave(object? sender, DragEventArgs e)
     {
@@ -86,21 +92,17 @@ public partial class MainWindow : Window
             e.DragEffects = DragDropEffects.None;
 
             if (detectedUnityPackages)
-            {
                 ShowDropStatusMessage(
                     "Couldn't access dropped package",
                     "Try dropping files directly from a local folder.",
                     TimeSpan.FromSeconds(3),
                     UiSoundEffect.Negative);
-            }
             else
-            {
                 ShowDropStatusMessage(
                     "Unsupported files",
                     "Drop .unitypackage files to queue them.",
                     TimeSpan.FromSeconds(3),
                     UiSoundEffect.Negative);
-            }
         }
 
         ResetDragClasses();

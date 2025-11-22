@@ -1,20 +1,4 @@
-using System;
-using System.Diagnostics;
-using System.IO;
-using System.Linq;
-using System.Threading.Tasks;
-using Avalonia;
-using Avalonia.Controls;
 using Avalonia.Controls.Primitives;
-using Avalonia.Interactivity;
-using Avalonia.Media;
-using Avalonia.Platform.Storage;
-using Avalonia.Threading;
-using EasyExtractCrossPlatform.Localization;
-using EasyExtractCrossPlatform.Models;
-using EasyExtractCrossPlatform.Services;
-using EasyExtractCrossPlatform.Utilities;
-using EasyExtractCrossPlatform.ViewModels;
 
 namespace EasyExtractCrossPlatform;
 

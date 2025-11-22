@@ -1,12 +1,5 @@
-using System;
-using System.Collections.Generic;
 using System.Collections.Immutable;
-using System.Diagnostics;
 using System.Formats.Tar;
-using System.IO;
-using System.Threading;
-using EasyExtractCrossPlatform.Models;
-using EasyExtractCrossPlatform.Utilities;
 
 namespace EasyExtractCrossPlatform.Services;
 
@@ -14,35 +7,36 @@ public sealed partial class UnityPackageExtractionService
 {
     private sealed class ExtractionSession
     {
-        private readonly string _packagePath;
-        private readonly string _outputDirectory;
-        private readonly string _normalizedOutputDirectory;
-        private readonly bool _organizeByCategories;
-        private readonly UnityPackageExtractionLimits _limits;
-        private readonly ExtractionLimiter _limiter;
-        private readonly string _temporaryDirectoryPath;
-        private readonly TarReader _tarReader;
-        private readonly IProgress<UnityPackageExtractionProgress>? _progress;
-        private readonly CancellationToken _cancellationToken;
-        private readonly string _correlationId;
+        private readonly int _assetsDuplicated;
 
         private readonly Dictionary<string, UnityPackageAssetState> _assetStates =
             new(StringComparer.OrdinalIgnoreCase);
 
-        private readonly List<string> _extractedFiles = new();
-        private readonly List<PendingAssetWrite> _pendingWrites = new();
-        private readonly HashSet<UnityPackageAssetState> _queuedStates = new();
+        private readonly CancellationToken _cancellationToken;
+        private readonly string _correlationId;
         private readonly HashSet<string> _directoriesToCleanup = new(StringComparer.OrdinalIgnoreCase);
-        private readonly HashSet<string> _generatedRelativePaths = new(StringComparer.OrdinalIgnoreCase);
         private readonly Dictionary<string, int> _duplicateSuffixCounters = new(StringComparer.OrdinalIgnoreCase);
 
-        private bool _extractionRequired;
+        private readonly List<string> _extractedFiles = new();
+        private readonly HashSet<string> _generatedRelativePaths = new(StringComparer.OrdinalIgnoreCase);
+        private readonly ExtractionLimiter _limiter;
+        private readonly UnityPackageExtractionLimits _limits;
+        private readonly string _normalizedOutputDirectory;
+        private readonly bool _organizeByCategories;
+        private readonly string _outputDirectory;
+        private readonly string _packagePath;
+        private readonly List<PendingAssetWrite> _pendingWrites = new();
+        private readonly IProgress<UnityPackageExtractionProgress>? _progress;
+        private readonly HashSet<UnityPackageAssetState> _queuedStates = new();
+        private readonly TarReader _tarReader;
+        private readonly string _temporaryDirectoryPath;
+        private int _assetsSkippedNoContent;
+        private int _assetsSkippedNoPath;
         private int _extractedCount;
+
+        private bool _extractionRequired;
         private int _tarEntriesProcessed;
         private int _tarEntriesSkipped;
-        private int _assetsSkippedNoPath;
-        private int _assetsSkippedNoContent;
-        private int _assetsDuplicated;
 
         public ExtractionSession(
             string packagePath,
@@ -227,10 +221,8 @@ public sealed partial class UnityPackageExtractionService
             }
 
             if (remainingProcessed > 0)
-            {
                 LoggingService.LogInformation(
                     $"Processed remaining assets | count={remainingProcessed} | correlationId={_correlationId}");
-            }
         }
 
         private UnityPackageExtractionResult CompleteWithoutExtraction()
@@ -350,14 +342,12 @@ public sealed partial class UnityPackageExtractionService
                 $"FlushPendingWrites: flushing pending assets | count={_pendingWrites.Count} | correlationId={_correlationId}");
 
             foreach (var pending in _pendingWrites)
-            {
                 WriteAndTrack(
                     pending.State,
                     pending.TargetPath,
                     pending.MetaPath,
                     pending.PreviewPath,
                     pending.Plan);
-            }
 
             _pendingWrites.Clear();
             _queuedStates.Clear();

@@ -1,27 +1,18 @@
-using System;
-using System.IO;
-using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
-using Avalonia;
-using Avalonia.Media;
-using Avalonia.Media.Imaging;
 using Avalonia.Platform;
 using Docnet.Core;
 using Docnet.Core.Models;
-using EasyExtractCrossPlatform.Models;
-using EasyExtractCrossPlatform.Services;
-using EasyExtractCrossPlatform.Utilities;
 
 namespace EasyExtractCrossPlatform.ViewModels;
 
 public sealed partial class UnityPackagePreviewViewModel
 {
     private static readonly PageDimensions PdfPreviewDimensions = new(2.0d);
-    private Bitmap? _primaryImagePreview;
     private Bitmap? _fallbackPreviewImage;
-    private UnityPackageAssetPreviewItem? _selectedAsset;
     private int _previewTabIndex;
+    private Bitmap? _primaryImagePreview;
+    private UnityPackageAssetPreviewItem? _selectedAsset;
 
     public UnityPackageAssetPreviewItem? SelectedAsset
     {

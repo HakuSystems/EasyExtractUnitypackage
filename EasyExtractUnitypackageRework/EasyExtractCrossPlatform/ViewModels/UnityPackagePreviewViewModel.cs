@@ -1,27 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Collections.Specialized;
-using System.ComponentModel;
-using System.Diagnostics;
-using System.Diagnostics.CodeAnalysis;
-using System.IO;
-using System.Linq;
-using System.Runtime.InteropServices;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
-using Avalonia;
-using Avalonia.Media;
-using Avalonia.Media.Imaging;
-using Avalonia.Platform;
-using Avalonia.Threading;
-using Docnet.Core;
-using Docnet.Core.Models;
-using EasyExtractCrossPlatform.Models;
-using EasyExtractCrossPlatform.Services;
-using EasyExtractCrossPlatform.Utilities;
-
 namespace EasyExtractCrossPlatform.ViewModels;
 
 public sealed partial class UnityPackagePreviewViewModel : INotifyPropertyChanged, IDisposable
@@ -231,4 +207,3 @@ public sealed partial class UnityPackagePreviewViewModel : INotifyPropertyChange
             throw new ObjectDisposedException(nameof(UnityPackagePreviewViewModel));
     }
 }
-

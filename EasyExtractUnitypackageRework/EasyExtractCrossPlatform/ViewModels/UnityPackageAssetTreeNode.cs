@@ -1,10 +1,3 @@
-using System;
-using System.Collections.ObjectModel;
-using System.ComponentModel;
-using System.Linq;
-using Avalonia.Media;
-using EasyExtractCrossPlatform.Utilities;
-
 namespace EasyExtractCrossPlatform.ViewModels;
 
 public sealed class UnityPackageAssetTreeNode : INotifyPropertyChanged

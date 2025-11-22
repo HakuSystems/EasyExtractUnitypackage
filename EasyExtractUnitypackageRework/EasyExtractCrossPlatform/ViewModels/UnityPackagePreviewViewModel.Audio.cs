@@ -1,8 +1,3 @@
-using System;
-using Avalonia.Threading;
-using EasyExtractCrossPlatform.Services;
-using EasyExtractCrossPlatform.Utilities;
-
 namespace EasyExtractCrossPlatform.ViewModels;
 
 public sealed partial class UnityPackagePreviewViewModel

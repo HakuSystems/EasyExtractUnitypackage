@@ -1,8 +1,4 @@
-using System.Collections.Generic;
-using System.Net.Http;
 using System.Text.Json;
-using EasyExtractCrossPlatform.Models;
-using EasyExtractCrossPlatform.Utilities;
 
 namespace EasyExtractCrossPlatform.Services;
 

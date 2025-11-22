@@ -1,10 +1,3 @@
-using System;
-using System.Collections.Specialized;
-using Avalonia.Controls;
-using EasyExtractCrossPlatform.Services;
-using EasyExtractCrossPlatform.Utilities;
-using EasyExtractCrossPlatform.ViewModels;
-
 namespace EasyExtractCrossPlatform;
 
 public partial class CreditsWindow : Window

@@ -1,16 +1,5 @@
-﻿using System;
-using System.Collections.Concurrent;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Formats.Tar;
-using System.IO;
-using System.IO.Compression;
-using System.Linq;
-using System.Text;
+﻿using System.Collections.Concurrent;
 using System.Text.RegularExpressions;
-using System.Threading;
-using System.Threading.Tasks;
-using EasyExtractCrossPlatform.Models;
 
 namespace EasyExtractCrossPlatform.Services;
 
@@ -171,6 +160,4 @@ public sealed partial class MaliciousCodeDetectionService : IMaliciousCodeDetect
         new(StringComparer.OrdinalIgnoreCase);
 
     private readonly ConcurrentDictionary<string, CachedScanResult> _scanCache = new(StringComparer.OrdinalIgnoreCase);
-
 }
-

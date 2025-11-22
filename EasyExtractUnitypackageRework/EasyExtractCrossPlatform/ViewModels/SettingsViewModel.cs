@@ -1,10 +1,3 @@
-using System;
-using System.Collections.Generic;
-using EasyExtractCrossPlatform.Localization;
-using EasyExtractCrossPlatform.Models;
-using EasyExtractCrossPlatform.Services;
-using EasyExtractCrossPlatform.Utilities;
-
 namespace EasyExtractCrossPlatform.ViewModels;
 
 public class SettingsViewModel

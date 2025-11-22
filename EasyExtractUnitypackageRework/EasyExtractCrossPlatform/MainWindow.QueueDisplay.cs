@@ -148,8 +148,10 @@ public partial class MainWindow : Window
             OnPropertyChanged(nameof(HasSecurityInfo));
         }
 
-        private void OnPropertyChanged([CallerMemberName] string? propertyName = null) =>
+        private void OnPropertyChanged([CallerMemberName] string? propertyName = null)
+        {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        }
 
         private static long ParseFileSize(string? input)
         {

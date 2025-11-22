@@ -1,18 +1,7 @@
-using System;
 using System.Buffers;
-using System.Collections.Generic;
-using System.Collections.Immutable;
-using System.Diagnostics;
 using System.Formats.Tar;
-using System.IO;
-using System.IO.Compression;
-using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
-using EasyExtractCrossPlatform.Models;
-using EasyExtractCrossPlatform.Utilities;
 
 namespace EasyExtractCrossPlatform.Services;
 
@@ -137,7 +126,6 @@ public sealed partial class UnityPackageExtractionService
                 return;
 
             if (!string.IsNullOrWhiteSpace(directory))
-            {
                 try
                 {
                     Directory.CreateDirectory(directory);
@@ -148,7 +136,6 @@ public sealed partial class UnityPackageExtractionService
                         $"Failed to create asset directory | path='{directory}' | correlationId={correlationId}", ex);
                     throw;
                 }
-            }
 
             directoryEnsured = true;
         }
@@ -432,5 +419,4 @@ public sealed partial class UnityPackageExtractionService
         var remainder = normalized[(firstSlash + 1)..].Trim();
         return (key, remainder.ToLowerInvariant());
     }
-
 }

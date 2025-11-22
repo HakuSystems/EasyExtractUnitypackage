@@ -1,8 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using EasyExtractCrossPlatform.Models;
-
 namespace EasyExtractCrossPlatform.ViewModels;
 
 public sealed class SecurityThreatDisplay

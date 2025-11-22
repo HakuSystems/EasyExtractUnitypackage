@@ -169,6 +169,4 @@ public partial class MainWindow : Window
         _extractionOverviewStartTime = null;
         UpdateExtractionOverviewDisplay();
     }
-
-
 }

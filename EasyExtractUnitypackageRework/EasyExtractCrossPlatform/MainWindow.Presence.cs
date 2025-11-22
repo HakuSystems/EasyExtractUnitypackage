@@ -153,6 +153,4 @@ public partial class MainWindow : Window
 
         return trimmed;
     }
-
 }
-

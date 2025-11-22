@@ -1,14 +1,7 @@
-using System;
-using System.Collections.Generic;
-using System.IO;
 using System.IO.Compression;
-using System.Linq;
-using System.Net.Http;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Security.Cryptography;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace EasyExtractCrossPlatform.Services;
 
@@ -97,10 +90,8 @@ internal static class EverythingSdkBootstrapper
                 _everythingDllPath = dllPath;
                 return dllPath;
             }
-            else
-            {
-                LoggingService.LogInformation($"Discarding Everything SDK DLL at '{dllPath}' due to hash mismatch.");
-            }
+
+            LoggingService.LogInformation($"Discarding Everything SDK DLL at '{dllPath}' due to hash mismatch.");
         }
 
         var tempZipPath = Path.Combine(Path.GetTempPath(), $"Everything-SDK-{Guid.NewGuid():N}.zip");

@@ -1,5 +1,4 @@
 ﻿using System.Security;
-using System.Text;
 
 namespace EasyExtractCrossPlatform.Services;
 

@@ -1,20 +1,7 @@
-using System;
-using System.Threading.Tasks;
-using Avalonia.Controls;
-using Avalonia.Interactivity;
-using Avalonia.Media;
-using EasyExtractCrossPlatform.Localization;
-using EasyExtractCrossPlatform.Services;
-using EasyExtractCrossPlatform.Utilities;
-
 namespace EasyExtractCrossPlatform;
 
 public partial class FeedbackWindow : Window
 {
-    public FeedbackWindow() : this(null)
-    {
-    }
-
     private readonly string? _appVersion;
     private readonly TextBox? _feedbackTextBox;
     private readonly IDisposable? _responsiveLayoutSubscription;
@@ -23,6 +10,10 @@ public partial class FeedbackWindow : Window
     private readonly TextBlock? _versionLabel;
     private readonly IDisposable _windowPlacementTracker;
     private bool _isSending;
+
+    public FeedbackWindow() : this(null)
+    {
+    }
 
     public FeedbackWindow(string? appVersion)
     {

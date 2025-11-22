@@ -1,19 +1,3 @@
-using System;
-using System.Buffers;
-using System.Collections.Generic;
-using System.Collections.Immutable;
-using System.Diagnostics;
-using System.Formats.Tar;
-using System.IO;
-using System.IO.Compression;
-using System.Linq;
-using System.Security.Cryptography;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
-using EasyExtractCrossPlatform.Models;
-using EasyExtractCrossPlatform.Utilities;
-
 namespace EasyExtractCrossPlatform.Services;
 
 public sealed partial class UnityPackageExtractionService
@@ -300,5 +284,4 @@ public sealed partial class UnityPackageExtractionService
         string NormalizedPath,
         string OriginalPath,
         IReadOnlyList<PathSegmentNormalization> Segments);
-
 }

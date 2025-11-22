@@ -1,8 +1,4 @@
-using System;
-using System.Diagnostics;
 using DiscordRPC;
-using EasyExtractCrossPlatform.Models;
-using EasyExtractCrossPlatform.Utilities;
 
 namespace EasyExtractCrossPlatform.Services;
 

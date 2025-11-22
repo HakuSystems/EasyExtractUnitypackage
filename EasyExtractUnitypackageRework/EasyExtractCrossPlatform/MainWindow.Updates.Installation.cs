@@ -139,7 +139,8 @@ public partial class MainWindow : Window
                 _ => $"Updating to version {manifest.Version}"
             };
 
-            ShowDropStatusMessage(phaseMessage, manifest.ReleaseName ?? $"Tag {manifest.TagName}", TimeSpan.FromSeconds(4));
+            ShowDropStatusMessage(phaseMessage, manifest.ReleaseName ?? $"Tag {manifest.TagName}",
+                TimeSpan.FromSeconds(4));
         });
     }
 

@@ -352,7 +352,6 @@ public partial class MainWindow : Window
     }
 
 
-
     private static string FormatElapsed(TimeSpan elapsed)
     {
         if (elapsed < TimeSpan.FromSeconds(1))
@@ -366,6 +365,4 @@ public partial class MainWindow : Window
 
         return $"{(int)elapsed.TotalHours}h {elapsed.Minutes:D2}m";
     }
-
-
 }

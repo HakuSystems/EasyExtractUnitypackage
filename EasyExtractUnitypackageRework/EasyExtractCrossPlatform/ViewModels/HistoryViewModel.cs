@@ -1,9 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Globalization;
-using System.Linq;
-using EasyExtractCrossPlatform.Models;
-
 namespace EasyExtractCrossPlatform.ViewModels;
 
 public class HistoryViewModel

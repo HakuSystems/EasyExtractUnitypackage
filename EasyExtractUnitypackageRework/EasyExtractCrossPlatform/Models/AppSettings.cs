@@ -1,7 +1,3 @@
-using System;
-using System.Collections.Generic;
-using Avalonia.Controls;
-
 namespace EasyExtractCrossPlatform.Models;
 
 public class AppSettings

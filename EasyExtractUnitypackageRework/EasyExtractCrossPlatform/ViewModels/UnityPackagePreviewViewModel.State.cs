@@ -1,5 +1,3 @@
-using System;
-
 namespace EasyExtractCrossPlatform.ViewModels;
 
 public sealed partial class UnityPackagePreviewViewModel

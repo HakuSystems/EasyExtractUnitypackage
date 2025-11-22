@@ -1,11 +1,4 @@
-using System;
-using System.Diagnostics;
-using System.Threading;
-using System.Threading.Tasks;
 using DiscordRPC;
-using DiscordRPC.Logging;
-using EasyExtractCrossPlatform.Models;
-using EasyExtractCrossPlatform.Utilities;
 
 namespace EasyExtractCrossPlatform.Services;
 
@@ -72,7 +65,7 @@ public sealed partial class DiscordRpcService : IDisposable
             if (!settings.DiscordRpc)
             {
                 Log("Discord RPC disabled in settings. Disposing client.");
-                DisposeClientLocked(clearPresence: true);
+                DisposeClientLocked(true);
                 return;
             }
 

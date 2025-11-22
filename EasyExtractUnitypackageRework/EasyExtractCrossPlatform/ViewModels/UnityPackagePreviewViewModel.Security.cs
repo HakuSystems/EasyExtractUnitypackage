@@ -1,10 +1,3 @@
-using System.Collections.ObjectModel;
-using System.Collections.Specialized;
-using System.Threading.Tasks;
-using Avalonia.Threading;
-using EasyExtractCrossPlatform.Models;
-using EasyExtractCrossPlatform.Services;
-
 namespace EasyExtractCrossPlatform.ViewModels;
 
 public sealed partial class UnityPackagePreviewViewModel

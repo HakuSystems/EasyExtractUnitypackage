@@ -1,7 +1,3 @@
-using System;
-using System.IO;
-using System.Linq;
-
 namespace EasyExtractCrossPlatform.Services;
 
 public sealed partial class UpdateService

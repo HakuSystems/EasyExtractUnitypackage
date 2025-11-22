@@ -1,9 +1,5 @@
-using System;
-using System.Collections.Generic;
-using System.IO;
 using System.Numerics;
 using Assimp;
-using EasyExtractCrossPlatform.Models;
 
 namespace EasyExtractCrossPlatform.Utilities;
 

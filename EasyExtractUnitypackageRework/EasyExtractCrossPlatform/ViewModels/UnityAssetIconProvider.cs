@@ -1,5 +1,3 @@
-using Avalonia.Media;
-
 namespace EasyExtractCrossPlatform.ViewModels;
 
 internal static class UnityAssetIconProvider

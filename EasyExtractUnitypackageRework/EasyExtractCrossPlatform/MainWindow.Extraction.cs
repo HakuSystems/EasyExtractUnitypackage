@@ -104,6 +104,4 @@ public partial class MainWindow : Window
                 UiSoundEffect.Negative);
         }
     }
-
-
 }

@@ -1,7 +1,3 @@
-using System;
-using System.Globalization;
-using System.IO;
-
 namespace EasyExtractCrossPlatform.Models;
 
 public sealed class EverythingSearchResult

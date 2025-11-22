@@ -1,6 +1,4 @@
-using System;
 using System.Collections.Concurrent;
-using System.Threading;
 
 namespace EasyExtractCrossPlatform.Services;
 
@@ -12,6 +10,15 @@ public interface IAppServiceProvider
 public sealed class AppServiceProvider : IAppServiceProvider
 {
     private readonly ConcurrentDictionary<Type, Lazy<object>> _registrations = new();
+
+    public TService GetRequiredService<TService>() where TService : class
+    {
+        if (_registrations.TryGetValue(typeof(TService), out var lazy) && lazy.Value is TService service)
+            return service;
+
+        throw new InvalidOperationException(
+            $"Service '{typeof(TService).FullName}' has not been registered.");
+    }
 
     public AppServiceProvider RegisterSingleton<TService>(Func<TService> factory) where TService : class
     {
@@ -33,15 +40,6 @@ public sealed class AppServiceProvider : IAppServiceProvider
 
         return this;
     }
-
-    public TService GetRequiredService<TService>() where TService : class
-    {
-        if (_registrations.TryGetValue(typeof(TService), out var lazy) && lazy.Value is TService service)
-            return service;
-
-        throw new InvalidOperationException(
-            $"Service '{typeof(TService).FullName}' has not been registered.");
-    }
 }
 
 public static class AppServiceLocator
@@ -56,7 +54,7 @@ public static class AppServiceLocator
         var provider = new AppServiceProvider();
 
         provider
-            .RegisterSingleton<IEverythingSearchService>(CreateSearchServiceForCurrentPlatform)
+            .RegisterSingleton(CreateSearchServiceForCurrentPlatform)
             .RegisterSingleton<IUnityPackageExtractionService>(() => new UnityPackageExtractionService())
             .RegisterSingleton<IMaliciousCodeDetectionService>(() => new MaliciousCodeDetectionService())
             .RegisterSingleton<INotificationService>(() => new NotificationService())

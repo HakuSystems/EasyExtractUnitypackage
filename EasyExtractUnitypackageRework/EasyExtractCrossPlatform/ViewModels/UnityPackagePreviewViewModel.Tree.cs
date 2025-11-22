@@ -1,17 +1,14 @@
-using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Linq;
 using System.Text;
-using EasyExtractCrossPlatform.Utilities;
 
 namespace EasyExtractCrossPlatform.ViewModels;
 
 public sealed partial class UnityPackagePreviewViewModel
 {
+    private readonly HashSet<string> _directoriesToPrune = new(StringComparer.OrdinalIgnoreCase);
+
     private readonly Dictionary<string, UnityPackageAssetTreeNode> _treeNodesByPath =
         new(StringComparer.OrdinalIgnoreCase);
-    private readonly HashSet<string> _directoriesToPrune = new(StringComparer.OrdinalIgnoreCase);
+
     private UnityPackageAssetTreeNode? _selectedTreeNode;
     private bool _suppressTreeSelectionSync;
 

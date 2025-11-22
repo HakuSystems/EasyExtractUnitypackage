@@ -293,6 +293,4 @@ public partial class MainWindow : Window
 
         return Background ?? new SolidColorBrush(Colors.Black);
     }
-
 }
-

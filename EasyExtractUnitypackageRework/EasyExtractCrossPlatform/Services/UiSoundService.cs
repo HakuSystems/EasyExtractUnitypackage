@@ -1,10 +1,4 @@
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Threading;
-using System.Threading.Tasks;
 using Avalonia.Platform;
-using EasyExtractCrossPlatform.Models;
 using NAudio.Wave;
 using OpenTK.Audio.OpenAL;
 

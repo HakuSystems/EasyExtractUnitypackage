@@ -135,6 +135,4 @@ public partial class MainWindow : Window
                argument.Equals("-extract", StringComparison.OrdinalIgnoreCase) ||
                argument.Equals("/extract", StringComparison.OrdinalIgnoreCase);
     }
-
 }
-

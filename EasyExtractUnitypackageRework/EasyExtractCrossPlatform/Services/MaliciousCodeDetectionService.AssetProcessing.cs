@@ -1,7 +1,6 @@
 ﻿using System.Formats.Tar;
 using System.Text;
 using System.Text.RegularExpressions;
-using System.Threading;
 
 namespace EasyExtractCrossPlatform.Services;
 
@@ -297,5 +296,4 @@ public sealed partial class MaliciousCodeDetectionService
         var remainder = normalized[(firstSlash + 1)..].Trim();
         return (key, remainder.ToLowerInvariant());
     }
-
 }

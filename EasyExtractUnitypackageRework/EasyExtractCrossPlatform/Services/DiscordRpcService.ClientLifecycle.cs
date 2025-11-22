@@ -1,5 +1,3 @@
-using System;
-using System.Diagnostics;
 using DiscordRPC;
 using DiscordRPC.Logging;
 
@@ -66,7 +64,6 @@ public sealed partial class DiscordRpcService
             DetachClientHandlers(_client);
 
             if (clearPresence)
-            {
                 try
                 {
                     _client.ClearPresence();
@@ -76,7 +73,6 @@ public sealed partial class DiscordRpcService
                     Debug.WriteLine($"Failed to clear Discord Rich Presence: {ex}");
                     Log($"ClearPresence failed: {ex}");
                 }
-            }
 
             _client.Dispose();
         }

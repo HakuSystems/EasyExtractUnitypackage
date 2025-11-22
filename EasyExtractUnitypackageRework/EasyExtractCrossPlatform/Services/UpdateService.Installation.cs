@@ -1,6 +1,3 @@
-using System;
-using System.Diagnostics;
-
 namespace EasyExtractCrossPlatform.Services;
 
 public sealed partial class UpdateService

@@ -8,6 +8,9 @@ public readonly record struct DiscordPresenceContext(
     int QueueCount,
     bool IsBusy)
 {
-    public static DiscordPresenceContext Disabled() =>
-        new("Rich Presence disabled", "Discord integration disabled by user", null, null, 0, false);
+    public static DiscordPresenceContext Disabled()
+    {
+        return new DiscordPresenceContext("Rich Presence disabled", "Discord integration disabled by user", null, null,
+            0, false);
+    }
 }

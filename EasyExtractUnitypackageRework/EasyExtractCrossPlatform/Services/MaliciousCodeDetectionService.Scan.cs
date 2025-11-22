@@ -1,10 +1,5 @@
-﻿using System.Diagnostics;
-using System.Formats.Tar;
-using System.IO;
+﻿using System.Formats.Tar;
 using System.IO.Compression;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace EasyExtractCrossPlatform.Services;
 
@@ -114,7 +109,7 @@ public sealed partial class MaliciousCodeDetectionService
 
         using var packageStream = File.OpenRead(packagePath);
         using var gzipStream = new GZipStream(packageStream, CompressionMode.Decompress);
-        using var tarReader = new TarReader(gzipStream, false);
+        using var tarReader = new TarReader(gzipStream);
 
         TarEntry? entry;
         while ((entry = tarReader.GetNextEntry()) is not null)
@@ -196,5 +191,4 @@ public sealed partial class MaliciousCodeDetectionService
             threats,
             DateTimeOffset.UtcNow);
     }
-
 }

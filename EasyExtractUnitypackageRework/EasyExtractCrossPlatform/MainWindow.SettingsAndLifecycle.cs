@@ -210,6 +210,4 @@ public partial class MainWindow : Window
 
         RefreshDropZoneBaseTextIfIdle();
     }
-
 }
-

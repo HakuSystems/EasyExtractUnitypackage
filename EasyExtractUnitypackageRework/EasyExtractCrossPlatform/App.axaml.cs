@@ -1,14 +1,6 @@
-using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Threading.Tasks;
-using Avalonia;
-using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
 using Avalonia.Platform;
-using Avalonia.Styling;
-using EasyExtractCrossPlatform.Services;
 
 namespace EasyExtractCrossPlatform;
 
@@ -30,14 +22,12 @@ public class App : Application
         ApplyThemeResources(RequestedThemeVariant ?? ThemeVariant.Default);
 
         if (OperatingSystem.IsWindows())
-        {
             _ = EverythingSdkBootstrapper.EnsureInitializedAsync()
                 .ContinueWith(task =>
                 {
                     if (task.Exception is not null)
                         Debug.WriteLine($"Failed to initialize Everything SDK: {task.Exception}");
                 }, TaskScheduler.Default);
-        }
 
         if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
         {

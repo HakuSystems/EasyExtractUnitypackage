@@ -1,5 +1,3 @@
-using System;
-
 namespace EasyExtractCrossPlatform.Models;
 
 public enum UpdatePhase

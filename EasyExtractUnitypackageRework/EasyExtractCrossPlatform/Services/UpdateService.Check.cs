@@ -246,5 +246,4 @@ public sealed partial class UpdateService
 
         return weight;
     }
-
 }

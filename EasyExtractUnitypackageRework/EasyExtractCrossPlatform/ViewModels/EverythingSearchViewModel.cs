@@ -1,17 +1,3 @@
-using System;
-using System.Collections.ObjectModel;
-using System.Collections.Specialized;
-using System.ComponentModel;
-using System.Diagnostics;
-using System.IO;
-using System.Runtime.CompilerServices;
-using System.Threading;
-using System.Threading.Tasks;
-using Avalonia.Threading;
-using EasyExtractCrossPlatform.Models;
-using EasyExtractCrossPlatform.Services;
-using EasyExtractCrossPlatform.Utilities;
-
 namespace EasyExtractCrossPlatform.ViewModels;
 
 public sealed class EverythingSearchViewModel : INotifyPropertyChanged, IDisposable

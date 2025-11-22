@@ -1,8 +1,3 @@
-using Avalonia.Controls;
-using Avalonia.Interactivity;
-using EasyExtractCrossPlatform.Services;
-using EasyExtractCrossPlatform.ViewModels;
-
 namespace EasyExtractCrossPlatform;
 
 public partial class EverythingSearchView : UserControl

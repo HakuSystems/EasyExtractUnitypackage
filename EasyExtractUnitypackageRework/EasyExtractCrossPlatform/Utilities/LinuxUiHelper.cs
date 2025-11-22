@@ -1,8 +1,3 @@
-using System;
-using Avalonia;
-using Avalonia.Controls;
-using Avalonia.Media;
-
 namespace EasyExtractCrossPlatform.Utilities;
 
 public static class LinuxUiHelper

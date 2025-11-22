@@ -10,5 +10,4 @@ public partial class MainWindow : Window
         Warning,
         Info
     }
-
 }

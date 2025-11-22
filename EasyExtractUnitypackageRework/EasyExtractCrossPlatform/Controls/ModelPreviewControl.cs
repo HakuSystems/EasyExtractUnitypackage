@@ -1,11 +1,4 @@
-using System;
-using System.Globalization;
 using System.Numerics;
-using Avalonia;
-using Avalonia.Controls;
-using Avalonia.Input;
-using Avalonia.Media;
-using EasyExtractCrossPlatform.Models;
 
 namespace EasyExtractCrossPlatform.Controls;
 

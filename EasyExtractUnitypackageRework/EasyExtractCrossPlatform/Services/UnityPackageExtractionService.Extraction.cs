@@ -1,10 +1,5 @@
-using System;
 using System.Formats.Tar;
-using System.IO;
 using System.IO.Compression;
-using System.Threading;
-using EasyExtractCrossPlatform.Models;
-using EasyExtractCrossPlatform.Utilities;
 
 namespace EasyExtractCrossPlatform.Services;
 
@@ -23,7 +18,7 @@ public sealed partial class UnityPackageExtractionService
 
         using var packageStream = File.OpenRead(packagePath);
         using var gzipStream = new GZipStream(packageStream, CompressionMode.Decompress);
-        using var tarReader = new TarReader(gzipStream, false);
+        using var tarReader = new TarReader(gzipStream);
 
         var normalizedOutputDirectory = NormalizeOutputDirectory(outputDirectory);
         var limits = UnityPackageExtractionLimits.Normalize(options.Limits);

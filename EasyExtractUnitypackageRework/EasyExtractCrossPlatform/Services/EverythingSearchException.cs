@@ -1,5 +1,3 @@
-using System;
-
 namespace EasyExtractCrossPlatform.Services;
 
 public sealed class EverythingSearchException : Exception

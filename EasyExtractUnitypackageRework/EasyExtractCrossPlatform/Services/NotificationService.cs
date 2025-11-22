@@ -1,9 +1,4 @@
-using System;
-using System.ComponentModel;
-using System.Diagnostics;
-using System.IO;
 using System.Text;
-using EasyExtractCrossPlatform.Utilities;
 
 namespace EasyExtractCrossPlatform.Services;
 
@@ -19,7 +14,8 @@ public sealed class NotificationService : INotificationService
     public void ShowExtractionSuccess(string packagePath, string outputDirectory, int assetsExtracted)
     {
         var title = DefaultTitle;
-        var message = NotificationMessageFormatter.BuildExtractionMessage(packagePath, outputDirectory, assetsExtracted);
+        var message =
+            NotificationMessageFormatter.BuildExtractionMessage(packagePath, outputDirectory, assetsExtracted);
 
         if (OperatingSystem.IsWindows() && TryShowWindowsNotification(title, message))
             return;

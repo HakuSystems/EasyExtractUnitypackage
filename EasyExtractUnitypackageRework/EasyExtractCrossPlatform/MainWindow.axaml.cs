@@ -1,40 +1,7 @@
-using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Collections.Specialized;
-using System.ComponentModel;
-using System.Diagnostics;
-using System.Diagnostics.CodeAnalysis;
-using System.Globalization;
-using System.IO;
-using System.Linq;
-using System.Net.Http;
-using System.Runtime.CompilerServices;
-using System.Threading;
-using System.Threading.Tasks;
-using Avalonia;
-using Avalonia.Controls;
-using Avalonia.Input;
-using Avalonia.Interactivity;
-using Avalonia.Media;
-using Avalonia.Media.Imaging;
-using Avalonia.Platform.Storage;
-using Avalonia.Styling;
-using Avalonia.Threading;
-using EasyExtractCrossPlatform.Localization;
-using EasyExtractCrossPlatform.Models;
-using EasyExtractCrossPlatform.Services;
-using EasyExtractCrossPlatform.Utilities;
-using EasyExtractCrossPlatform.ViewModels;
-
 namespace EasyExtractCrossPlatform;
 
 public partial class MainWindow : Window
 {
-    public MainWindow() : this(null, null)
-    {
-    }
-
     private const string UnityPackageExtension = ".unitypackage";
     private const string UnknownVersionLabel = "Version unknown";
     private const double CompactWidthBreakpoint = 1200;
@@ -101,13 +68,13 @@ public partial class MainWindow : Window
         new(StringComparer.OrdinalIgnoreCase);
 
     private readonly HashSet<string> _securityWarningsShown = new(StringComparer.OrdinalIgnoreCase);
+    private readonly IAppServiceProvider _serviceProvider;
     private readonly string _standardDropPrimaryText = "Drag & drop files here";
     private readonly string _standardDropSecondaryText = "Supports batch extraction and live progress updates.";
     private readonly Button? _startExtractionButton;
     private readonly Grid? _startExtractionHeaderGrid;
     private readonly string[] _startupArguments;
     private readonly TextBox? _unityPackageSearchBox;
-    private readonly IAppServiceProvider _serviceProvider;
     private readonly IUpdateService _updateService;
     private readonly string _uwuDropPrimaryText;
     private readonly string _uwuDropSecondaryText;
@@ -155,6 +122,10 @@ public partial class MainWindow : Window
     private AppSettings _settings = new();
     private SettingsWindow? _settingsWindow;
     private IDisposable? _versionStatusReset;
+
+    public MainWindow() : this(null)
+    {
+    }
 
     public MainWindow(string[]? startupArguments = null, IAppServiceProvider? serviceProvider = null)
     {
@@ -305,5 +276,4 @@ public partial class MainWindow : Window
     }
 
     public EverythingSearchViewModel? SearchViewModel { get; }
-
 }

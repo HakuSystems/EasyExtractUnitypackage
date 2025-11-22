@@ -1,10 +1,3 @@
-using System;
-using System.Diagnostics.CodeAnalysis;
-using System.IO;
-using Avalonia.Media;
-using EasyExtractCrossPlatform.Models;
-using EasyExtractCrossPlatform.Utilities;
-
 namespace EasyExtractCrossPlatform.ViewModels;
 
 public sealed class UnityPackageAssetPreviewItem

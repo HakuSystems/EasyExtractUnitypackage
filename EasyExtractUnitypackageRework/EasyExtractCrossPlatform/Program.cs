@@ -1,9 +1,4 @@
-﻿using System;
-using System.Threading.Tasks;
-using Avalonia;
-using EasyExtractCrossPlatform.Services;
-
-namespace EasyExtractCrossPlatform;
+﻿namespace EasyExtractCrossPlatform;
 
 internal class Program
 {

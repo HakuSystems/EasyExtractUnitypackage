@@ -1,9 +1,3 @@
-using System;
-using System.Collections.Generic;
-using Avalonia;
-using Avalonia.Controls;
-using EasyExtractCrossPlatform.Models;
-
 namespace EasyExtractCrossPlatform.Services;
 
 /// <summary>

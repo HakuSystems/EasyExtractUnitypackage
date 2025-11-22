@@ -1,12 +1,3 @@
-using System;
-using System.Collections.Specialized;
-using System.Diagnostics;
-using Avalonia;
-using Avalonia.Controls;
-using EasyExtractCrossPlatform.Services;
-using EasyExtractCrossPlatform.Utilities;
-using EasyExtractCrossPlatform.ViewModels;
-
 namespace EasyExtractCrossPlatform;
 
 public partial class UnityPackagePreviewWindow : Window

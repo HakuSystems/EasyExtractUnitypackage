@@ -1,7 +1,3 @@
-using System;
-using Avalonia;
-using Avalonia.Controls;
-
 namespace EasyExtractCrossPlatform.Utilities;
 
 public static class ResponsiveWindowHelper
