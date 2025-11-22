@@ -1,7 +1,4 @@
-﻿using System.Diagnostics;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
+﻿using System.Text;
 
 namespace EasyExtractCrossPlatform.Services;
 
@@ -125,19 +122,28 @@ public static partial class LoggingService
             if (worker is not null)
                 try
                 {
-                    var completed = worker.Wait(TimeSpan.FromSeconds(2));
-                    if (!completed)
-                        WriteEntry("WARN", "Logging background worker did not shut down within timeout.",
-                            null, bypassAsyncPipeline: true);
+                    worker.WaitAsync(TimeSpan.FromSeconds(2))
+                        .GetAwaiter()
+                        .GetResult();
                 }
-                catch (AggregateException ex) when (ex.InnerExceptions.All(static e => e is OperationCanceledException))
+                catch (TimeoutException)
+                {
+                    WriteEntry("WARN", "Logging background worker did not shut down within timeout.",
+                        null, bypassAsyncPipeline: true);
+                }
+                catch (OperationCanceledException)
                 {
                     // Expected if worker observes cancellation as fault.
                 }
-        }
-        catch (AggregateException)
-        {
-            // Swallow cancellation aggregate from task shutdown.
+                catch (ObjectDisposedException)
+                {
+                    // Worker already cleaned up.
+                }
+                catch (Exception ex)
+                {
+                    WriteEntry("WARN", "Logging background worker faulted during shutdown.",
+                        ex, bypassAsyncPipeline: true);
+                }
         }
         catch (ObjectDisposedException)
         {
