@@ -1,20 +1,22 @@
-Page written with AI
 # EasyExtract.net
 
-![EasyExtract.net Web and Desktop Interface](https://github.com/user-attachments/assets/d17b4012-aa7b-457c-8cef-bcd96a83f682)
-*(Pictured: The Windows Desktop App)*
+<div align="center">
+  <img src="https://github.com/user-attachments/assets/84d5c498-2f6b-45f9-895f-ac04471941f1" width="100%" alt="EasyExtract Desktop App"/>
+</div>
+
+<br/>
 
 ## What is EasyExtract?
 
 EasyExtract lets you unpack Unity packages (`.unitypackage`) **without installing Unity**. Use the web app free for
 instant browser extractions, upgrade to **EasyExtract Paid** if you want to keep Unity packages on your own machine, or
-download the Windows desktop client for free today.
+download the **Cross-Platform Desktop Client** (Windows, Linux, macOS) for free today.
 
 It is ideal for:
 
 - Inspecting the contents of Unity packages before importing them into a project.
 - Quickly extracting assets without launching the Unity Editor.
-- Power users who want shell integration, batch jobs, or offline workflows on Windows.
+- Power users who want system integration, batch jobs, or offline workflows on Windows, Linux, or macOS.
 
 ---
 
@@ -32,68 +34,79 @@ It is ideal for:
 4. Choose extraction options and pick a destination folder.
 5. Extract and download the files directly to your machine.
 
-### 2. Windows Desktop App (Currently Free)
+### 2. Desktop App (Windows, Linux, macOS)
 
 1. Download the latest build from
    the [GitHub Releases page](https://github.com/HakuSystems/EasyExtractUnitypackage/releases).
 2. Unzip the archive to any folder.
-3. Launch `EasyExtractUnitypackage.exe` to begin extracting packages offline.
+3. Launch the application:
+   - **Windows:** Run `EasyExtract.exe`
+   - **Linux/macOS:** Run the executable via terminal or double-click (Check [Installation Docs](https://github.com/HakuSystems/EasyExtractUnitypackage/blob/main/EasyExtractUnitypackageRework/EasyExtractCrossPlatform/docs/PlatformInstallation.md) for permissions).
 
 ---
 
 ## Pricing & Licensing
 
 - **Web app:** Core extraction is free. An **EasyExtract Paid** Gumroad license unlocks the "keep files local" privacy toggle.
-- **Desktop app:** Free today. A paid Pro upgrade with deeper Windows integration is planned.
+- **Desktop app:** Free today. A paid Pro upgrade with deeper system integrations is planned.
 - **Lost access?** Clearing cookies or moving to a new device removes the local unlock for paid features. Contact us on Discord (DM *Notlyze*) to receive a fresh key.
 
 ---
 
 ## Feature Comparison
 
-| Feature                         | Web Version (Free) | EasyExtract Paid Add-on | Windows App (Free today) |
-|:--------------------------------|:------------------:|:-----------------------:|:------------------------:|
-| No installation                 |        Yes         |          N/A            |           No             |
-| Cross-platform                  |        Yes         |          N/A            |           No             |
-| Drag & drop                     |        Yes         |          N/A            |           Yes            |
-| Fast extraction                 |        Yes         |          N/A            |           Yes            |
-| Security scanning               |        Yes         |          N/A            |           Yes            |
-| Keep Unity packages on device   |         No         |           Yes           |           Yes            |
-| Windows right-click integration |         No         |           No            |           Yes            |
-| Offline access                  |         No         |           No            |           Yes            |
-| Batch processing                |         No         |           No            |           Yes            |
-| Pricing                         |        Free        | Gumroad license required | Free (Pro upgrade planned) |
+| Feature                          | Web Version (Free) | EasyExtract Paid Add-on | Desktop App (Free today) |
+|:---------------------------------|:------------------:|:-----------------------:|:------------------------:|
+| No installation                  |        Yes         |           N/A           |            No            |
+| Cross-platform                   |        Yes         |           N/A           |         **Yes** |
+| Drag & drop                      |        Yes         |           N/A           |           Yes            |
+| Fast extraction                  |        Yes         |           N/A           |           Yes            |
+| Security scanning                |        Yes         |           N/A           |           Yes            |
+| Keep Unity packages on device    |         No         |           Yes           |           Yes            |
+| Context Menu Integration         |         No         |           No            | **Yes (Win/Linux/Mac)** |
+| Offline access                   |         No         |           No            |           Yes            |
+| Batch processing                 |         No         |           No            |           Yes            |
+| Pricing                          |        Free        | Gumroad license required| Free (Pro upgrade planned)|
 
 ---
 
-## Screenshots
+## Screenshots & Previews
 
 ### Web Interface
+<div align="center">
+  <img src="https://github.com/user-attachments/assets/2790f520-76e0-4a14-8660-16cc11148efc" width="80%" alt="Web Interface" />
+</div>
 
-<img width="1280" height="1062" alt="image" src="https://github.com/user-attachments/assets/2790f520-76e0-4a14-8660-16cc11148efc" />
+<br/>
+
+### Desktop Application
+
+| Main Dashboard | Settings |
+| :---: | :---: |
+| <img src="https://github.com/user-attachments/assets/4ad9e235-dedc-4ab0-b346-f22a66c6c304" width="100%" alt="Main Dashboard"/> | <img src="https://github.com/user-attachments/assets/46f547a6-f36c-458c-bb3c-4dff8ef33ed6" width="100%" alt="Settings"/> |
+
+| Menu Context |
+| :---: |
+| <img src="https://github.com/user-attachments/assets/11979408-57eb-4f71-aae5-8b379c77276c" width="300" alt="Toast"/> |
+
+<br/>
+
+### Feature Demos
 
 
-### Windows Application
+https://github.com/user-attachments/assets/1d2048e6-e4e3-43e8-b83d-1b1d7f65bd76
 
-| Main Interface | Settings Page | Extraction Progress |
-|:---:|:---:|:---:|
-| ![User Interface](https://github.com/user-attachments/assets/d17b4012-aa7b-457c-8cef-bcd96a83f682) | ![Settings Page](https://github.com/user-attachments/assets/cb7edfd9-13d7-4b8c-8109-fe91b0a93080) | ![Extraction Progress](https://github.com/user-attachments/assets/b4064b64-a8a7-4254-8cde-167d8a1a88ab) |
 
----
 
-## Coming Soon
 
-- Performance improvements for both web and desktop builds.
-- Enhanced Windows-only tooling as part of the upcoming Pro upgrade.
-- Additional customization options for extraction workflows.
+https://github.com/user-attachments/assets/7492bc68-1279-4599-b041-3588657e4378
+
 
 ---
 
 ## Get Help & Connect
 
 - **Discord:** [https://discord.gg/Wn7XfhPCyD](https://discord.gg/Wn7XfhPCyD)
-- **GitHub:
-  ** [https://github.com/HakuSystems/EasyExtractUnitypackage](https://github.com/HakuSystems/EasyExtractUnitypackage)
 
 ---
 
