@@ -1,12 +1,7 @@
-using System.Runtime.InteropServices;
-
 namespace EasyExtractCrossPlatform.Services;
 
 public static class FeedbackService
 {
-    private const string WebhookUrl =
-        "https://discord.com/api/webhooks/1278449395431637066/Z3HwKW5Z4omiOugfz0zKPPoheaaYFG-3J1s6caEsx1mGISrLOqSc1sOuVVD5in6crmzM";
-
     public static async Task SendFeedbackAsync(string feedback, string? version,
         CancellationToken cancellationToken = default)
     {
@@ -14,53 +9,20 @@ public static class FeedbackService
             throw new ArgumentException("Feedback must not be empty.", nameof(feedback));
 
         var trimmedFeedback = feedback.Trim();
-        if (trimmedFeedback.Length > 1800) trimmedFeedback = trimmedFeedback[..1800] + "...";
+        if (trimmedFeedback.Length > 1800)
+            trimmedFeedback = trimmedFeedback[..1800] + "...";
 
         var versionLabel = string.IsNullOrWhiteSpace(version)
-            ? "unknown"
+            ? null
             : version.Trim();
 
-        var environmentLabel = GetEnvironmentLabel();
-        var timestamp = DateTimeOffset.UtcNow;
-
         LoggingService.LogInformation(
-            $"Sending feedback payload (length={trimmedFeedback.Length}, version={versionLabel}).");
+            $"Sending feedback payload via HakuApi (length={trimmedFeedback.Length}, version={versionLabel ?? "unknown"}).");
 
         try
         {
-            var payload = new
-            {
-                content = $"**New feedback (v {versionLabel})**",
-                allowed_mentions = new
-                {
-                    parse = Array.Empty<string>()
-                },
-                embeds = new[]
-                {
-                    new
-                    {
-                        description = trimmedFeedback,
-                        timestamp,
-                        fields = new[]
-                        {
-                            new
-                            {
-                                name = "App version",
-                                value = versionLabel,
-                                inline = true
-                            },
-                            new
-                            {
-                                name = "OS",
-                                value = environmentLabel,
-                                inline = true
-                            }
-                        }
-                    }
-                }
-            };
-
-            await DiscordWebhookNotifier.SendPayloadAsync(WebhookUrl, payload, cancellationToken).ConfigureAwait(false);
+            var client = HakuWebhookClientProvider.Instance;
+            await client.SendFeedbackAsync(trimmedFeedback, versionLabel, cancellationToken).ConfigureAwait(false);
             LoggingService.LogInformation("Feedback sent successfully.");
         }
         catch (TaskCanceledException ex) when (!cancellationToken.IsCancellationRequested)
@@ -71,20 +33,8 @@ public static class FeedbackService
         }
         catch (Exception ex)
         {
-            LoggingService.LogError("Failed to send feedback to Discord webhook.", ex);
+            LoggingService.LogError("Failed to send feedback via HakuApi webhook.", ex);
             throw;
-        }
-    }
-
-    private static string GetEnvironmentLabel()
-    {
-        try
-        {
-            return RuntimeInformation.OSDescription;
-        }
-        catch
-        {
-            return "unknown";
         }
     }
 }

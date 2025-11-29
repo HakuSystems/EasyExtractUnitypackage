@@ -54,7 +54,7 @@ public static partial class LoggingService
         DispatchLogPayload(formattedPayload);
 
         if (string.Equals(entry.Level, "ERROR", StringComparison.OrdinalIgnoreCase))
-            DiscordWebhookNotifier.PostErrorAsync(formattedPayload);
+            QueueHakuWebhookDispatch(formattedPayload);
     }
 
     private static void DispatchLogPayload(string payload)
@@ -186,5 +186,22 @@ public static partial class LoggingService
     {
         while (PendingEntries.TryDequeue(out var entry))
             WriteEntryCore(entry);
+    }
+
+    private static void QueueHakuWebhookDispatch(string payload)
+    {
+        _ = Task.Run(async () =>
+        {
+            try
+            {
+                var client = HakuWebhookClientProvider.Instance;
+                var version = VersionProvider.GetApplicationVersion();
+                await client.SendErrorReportAsync(payload, version).ConfigureAwait(false);
+            }
+            catch (Exception ex)
+            {
+                Trace.WriteLine($"[Webhook] Failed to forward log payload: {ex.Message}");
+            }
+        });
     }
 }
