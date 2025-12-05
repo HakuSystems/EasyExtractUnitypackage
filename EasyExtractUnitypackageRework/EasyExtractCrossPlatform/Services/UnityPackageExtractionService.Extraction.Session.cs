@@ -248,7 +248,7 @@ public sealed partial class UnityPackageExtractionService
         {
             if (!TryGetAssetPaths(
                     state,
-                    _outputDirectory,
+                    _normalizedOutputDirectory,
                     _normalizedOutputDirectory,
                     _organizeByCategories,
                     _generatedRelativePaths,
