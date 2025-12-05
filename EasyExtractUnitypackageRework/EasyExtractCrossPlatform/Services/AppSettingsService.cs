@@ -11,6 +11,7 @@ public static class AppSettingsService
         Converters =
         {
             new HistoryEntryListJsonConverter(),
+            new SafeWindowStateConverter(),
             new JsonStringEnumConverter()
         }
     };
@@ -175,5 +176,29 @@ public static class AppSettingsService
 
         settings.WindowPlacements = new Dictionary<string, WindowPlacementSettings>(settings.WindowPlacements,
             StringComparer.OrdinalIgnoreCase);
+    }
+
+    private class SafeWindowStateConverter : JsonConverter<WindowState>
+    {
+        public override WindowState Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+        {
+            try
+            {
+                using var doc = JsonDocument.ParseValue(ref reader);
+                var value = doc.RootElement.GetString();
+                if (Enum.TryParse<WindowState>(value, true, out var result)) return result;
+            }
+            catch
+            {
+                // Ignore any parsing errors
+            }
+
+            return WindowState.Normal;
+        }
+
+        public override void Write(Utf8JsonWriter writer, WindowState value, JsonSerializerOptions options)
+        {
+            writer.WriteStringValue(value.ToString());
+        }
     }
 }

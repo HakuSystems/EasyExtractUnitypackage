@@ -4,7 +4,7 @@ public sealed record class UnityPackageExtractionLimits
 {
     public const long DefaultMaxAssetBytes = 2L * 1024 * 1024 * 1024; // 2 GB
     public const long DefaultMaxPackageBytes = 16L * 1024 * 1024 * 1024; // 16 GB
-    public const int DefaultMaxAssets = 50000;
+    public const int DefaultMaxAssets = 100000;
 
     public const long MaxAllowedAssetBytes = 100L * 1024 * 1024 * 1024; // 100 GB per asset (practically unlimited)
     public const long MaxAllowedPackageBytes = 1024L * 1024 * 1024 * 1024; // 1 TB per package (practically unlimited)
@@ -25,6 +25,10 @@ public sealed record class UnityPackageExtractionLimits
 
         if (limits.MaxPackageBytes <= 4L * 1024 * 1024 * 1024)
             limits.MaxPackageBytes = DefaultMaxPackageBytes;
+
+        // Auto-upgrade asset count limit if it's using the old default (or lower, specifically targeting the 20k/50k range)
+        if (limits.MaxAssets <= 50000)
+            limits.MaxAssets = DefaultMaxAssets;
 
         limits.MaxAssetBytes = NormalizeBytes(limits.MaxAssetBytes, DefaultMaxAssetBytes, MaxAllowedAssetBytes);
         limits.MaxPackageBytes = NormalizeBytes(limits.MaxPackageBytes, DefaultMaxPackageBytes, MaxAllowedPackageBytes);
