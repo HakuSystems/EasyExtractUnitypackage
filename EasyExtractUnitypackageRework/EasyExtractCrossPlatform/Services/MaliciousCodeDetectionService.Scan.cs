@@ -1,5 +1,5 @@
 ﻿using System.Formats.Tar;
-using System.IO.Compression;
+using ICSharpCode.SharpZipLib.GZip;
 
 namespace EasyExtractCrossPlatform.Services;
 
@@ -108,7 +108,7 @@ public sealed partial class MaliciousCodeDetectionService
         var assetStates = new Dictionary<string, AssetSecurityState>(StringComparer.OrdinalIgnoreCase);
 
         using var packageStream = File.OpenRead(packagePath);
-        using var gzipStream = new GZipStream(packageStream, CompressionMode.Decompress);
+        using var gzipStream = new GZipInputStream(packageStream);
         using var tarReader = new TarReader(gzipStream);
 
         TarEntry? entry;

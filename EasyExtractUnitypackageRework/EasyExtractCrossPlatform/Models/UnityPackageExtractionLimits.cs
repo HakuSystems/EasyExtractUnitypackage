@@ -20,6 +20,12 @@ public sealed record class UnityPackageExtractionLimits
     {
         var limits = candidate ?? new UnityPackageExtractionLimits();
 
+        if (limits.MaxAssetBytes <= 256L * 1024 * 1024)
+            limits.MaxAssetBytes = DefaultMaxAssetBytes;
+
+        if (limits.MaxPackageBytes <= 4L * 1024 * 1024 * 1024)
+            limits.MaxPackageBytes = DefaultMaxPackageBytes;
+
         limits.MaxAssetBytes = NormalizeBytes(limits.MaxAssetBytes, DefaultMaxAssetBytes, MaxAllowedAssetBytes);
         limits.MaxPackageBytes = NormalizeBytes(limits.MaxPackageBytes, DefaultMaxPackageBytes, MaxAllowedPackageBytes);
         if (limits.MaxPackageBytes < limits.MaxAssetBytes)
