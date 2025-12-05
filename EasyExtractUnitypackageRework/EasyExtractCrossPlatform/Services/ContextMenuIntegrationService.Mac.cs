@@ -28,6 +28,9 @@ public static partial class ContextMenuIntegrationService
 
         var homeDirectory = Environment.GetFolderPath(Environment.SpecialFolder.Personal);
         if (string.IsNullOrWhiteSpace(homeDirectory))
+	        homeDirectory = Environment.GetEnvironmentVariable("HOME");
+
+        if (string.IsNullOrWhiteSpace(homeDirectory))
         {
             LoggingService.LogError(
                 "Unable to register macOS service because the user's home directory could not be resolved.");
@@ -36,36 +39,58 @@ public static partial class ContextMenuIntegrationService
 
         LoggingService.LogInformation($"Registering macOS Automator service using executable '{executablePath}'.");
 
-        var servicesDirectory = Path.Combine(homeDirectory, "Library", "Services");
-        Directory.CreateDirectory(servicesDirectory);
+        try
+        {
+	        var servicesDirectory = Path.Combine(homeDirectory, "Library", "Services");
+	        Directory.CreateDirectory(servicesDirectory);
 
-        var workflowDirectory = Path.Combine(servicesDirectory, "Extract with EasyExtract.workflow");
-        var contentsDirectory = Path.Combine(workflowDirectory, "Contents");
-        Directory.CreateDirectory(contentsDirectory);
+	        var workflowDirectory = Path.Combine(servicesDirectory, "Extract with EasyExtract.workflow");
+	        var contentsDirectory = Path.Combine(workflowDirectory, "Contents");
+	        Directory.CreateDirectory(contentsDirectory);
 
-        var infoPlistPath = Path.Combine(contentsDirectory, "Info.plist");
-        var workflowDocumentPath = Path.Combine(contentsDirectory, "document.wflow");
+	        var infoPlistPath = Path.Combine(contentsDirectory, "Info.plist");
+	        var workflowDocumentPath = Path.Combine(contentsDirectory, "document.wflow");
 
-        File.WriteAllText(infoPlistPath, BuildMacInfoPlist());
-        File.WriteAllText(workflowDocumentPath, BuildMacWorkflowDocument(executablePath));
+	        // Attempt to delete existing files to reset permissions if needed
+	        if (File.Exists(infoPlistPath)) File.Delete(infoPlistPath);
+	        if (File.Exists(workflowDocumentPath)) File.Delete(workflowDocumentPath);
 
-        TryStartProcess("/System/Library/CoreServices/pbs", "-flush");
-        LoggingService.LogInformation("macOS service registration completed.");
+	        File.WriteAllText(infoPlistPath, BuildMacInfoPlist());
+	        File.WriteAllText(workflowDocumentPath, BuildMacWorkflowDocument(executablePath));
+
+	        TryStartProcess("/System/Library/CoreServices/pbs", "-flush");
+	        LoggingService.LogInformation("macOS service registration completed.");
+        }
+        catch (Exception ex)
+        {
+	        LoggingService.LogError("Failed to register macOS service integration.", ex);
+        }
     }
 
     private static void TryRemoveMacIntegration()
     {
         var homeDirectory = Environment.GetFolderPath(Environment.SpecialFolder.Personal);
         if (string.IsNullOrWhiteSpace(homeDirectory))
+	        homeDirectory = Environment.GetEnvironmentVariable("HOME");
+
+        if (string.IsNullOrWhiteSpace(homeDirectory))
             return;
 
         LoggingService.LogInformation("Removing macOS Automator service integration.");
 
-        var workflowDirectory = Path.Combine(homeDirectory, "Library", "Services", "Extract with EasyExtract.workflow");
-        DeleteDirectoryIfExists(workflowDirectory);
+        try
+        {
+	        var workflowDirectory =
+		        Path.Combine(homeDirectory, "Library", "Services", "Extract with EasyExtract.workflow");
+	        DeleteDirectoryIfExists(workflowDirectory);
 
-        TryStartProcess("/System/Library/CoreServices/pbs", "-flush");
-        LoggingService.LogInformation("macOS Automator service removed.");
+	        TryStartProcess("/System/Library/CoreServices/pbs", "-flush");
+	        LoggingService.LogInformation("macOS Automator service removed.");
+        }
+        catch (Exception ex)
+        {
+	        LoggingService.LogError("Failed to remove macOS service integration.", ex);
+        }
     }
 
     private static string BuildMacInfoPlist()

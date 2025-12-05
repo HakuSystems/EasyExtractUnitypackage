@@ -1,7 +1,7 @@
 using System.Buffers;
-using System.Formats.Tar;
 using System.Security.Cryptography;
 using System.Text;
+using ICSharpCode.SharpZipLib.Tar;
 
 namespace EasyExtractCrossPlatform.Services;
 
@@ -271,19 +271,17 @@ public sealed partial class UnityPackageExtractionService
 
     private static AssetComponent? CreateAssetComponent(
         TarEntry entry,
+        Stream currentEntryStream,
         string temporaryDirectory,
         UnityPackageExtractionLimits limits,
         ExtractionLimiter limiter,
         CancellationToken cancellationToken,
         string correlationId)
     {
-        if (entry.DataStream is null)
-            return null;
-
         cancellationToken.ThrowIfCancellationRequested();
         Directory.CreateDirectory(temporaryDirectory);
         var entryName = string.IsNullOrWhiteSpace(entry.Name) ? "asset" : entry.Name;
-        limiter.ValidateDeclaredSize(entry.Length, entryName);
+        limiter.ValidateDeclaredSize(entry.Size, entryName);
 
         var tempPath = Path.Combine(temporaryDirectory, $"{Guid.NewGuid():N}.tmp");
         FileStream? output = null;
@@ -301,7 +299,9 @@ public sealed partial class UnityPackageExtractionService
                 try
                 {
                     int read;
-                    while ((read = entry.DataStream.Read(buffer, 0, buffer.Length)) > 0)
+                    // Read from the current entry stream (TarInputStream)
+                    // SharpZipLib's TarInputStream returns 0 when the current entry ends.
+                    while ((read = currentEntryStream.Read(buffer, 0, buffer.Length)) > 0)
                     {
                         cancellationToken.ThrowIfCancellationRequested();
                         output.Write(buffer, 0, read);

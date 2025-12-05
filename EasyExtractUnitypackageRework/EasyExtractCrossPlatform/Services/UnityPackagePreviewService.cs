@@ -1,6 +1,6 @@
-using System.Formats.Tar;
 using System.Text;
 using ICSharpCode.SharpZipLib.GZip;
+using ICSharpCode.SharpZipLib.Tar;
 
 namespace EasyExtractCrossPlatform.Services;
 
@@ -61,7 +61,7 @@ public sealed class UnityPackagePreviewService : IUnityPackagePreviewService
 
         using var packageStream = File.OpenRead(packagePath);
         using var gzipStream = new GZipInputStream(packageStream);
-        using var tarReader = new TarReader(gzipStream);
+        using var tarReader = new TarInputStream(gzipStream, Encoding.UTF8);
 
         var assetStates = new Dictionary<string, UnityPackageAssetPreviewState>(StringComparer.OrdinalIgnoreCase);
 
@@ -70,7 +70,7 @@ public sealed class UnityPackagePreviewService : IUnityPackagePreviewService
         {
             cancellationToken.ThrowIfCancellationRequested();
 
-            if (entry.EntryType == TarEntryType.Directory)
+            if (entry.IsDirectory)
                 continue;
 
             var entryName = entry.Name ?? string.Empty;
@@ -89,10 +89,10 @@ public sealed class UnityPackagePreviewService : IUnityPackagePreviewService
 
             switch (componentName)
             {
-                case "pathname" when entry.DataStream is not null:
+                case "pathname":
                     using (var buffer = new MemoryStream())
                     {
-                        entry.DataStream.CopyTo(buffer);
+                        tarReader.CopyTo(buffer);
                         var path = Encoding.UTF8.GetString(buffer.ToArray());
                         var normalization = NormalizeRelativePath(path);
                         state.RelativePath = normalization.NormalizedPath;
@@ -100,36 +100,23 @@ public sealed class UnityPackagePreviewService : IUnityPackagePreviewService
                     }
 
                     break;
-                case "asset" when entry.DataStream is not null:
-                    state.AssetSizeBytes = Math.Max(0, entry.Length);
+                case "asset":
+                    state.AssetSizeBytes = Math.Max(0, entry.Size);
                     state.AssetFilePath = null;
                     state.NeedsAssetExtraction = false;
-                    if (entry.Length >= 0 && entry.Length <= MaxEmbeddedAssetBytes)
+
+                    // Check size limits
+                    if (entry.Size >= 0 && entry.Size <= MaxEmbeddedAssetBytes)
                     {
                         using var assetBuffer = new MemoryStream();
-                        entry.DataStream.CopyTo(assetBuffer);
+                        tarReader.CopyTo(assetBuffer);
                         state.AssetData = assetBuffer.ToArray();
                         state.IsAssetDataTruncated = false;
                     }
-                    else if (entry.Length < 0)
-                    {
-                        using var assetBuffer = new MemoryStream();
-                        entry.DataStream.CopyTo(assetBuffer);
-                        if (assetBuffer.Length <= MaxEmbeddedAssetBytes)
-                        {
-                            state.AssetData = assetBuffer.ToArray();
-                            state.IsAssetDataTruncated = false;
-                            state.NeedsAssetExtraction = false;
-                        }
-                        else
-                        {
-                            state.AssetData = null;
-                            state.IsAssetDataTruncated = true;
-                            state.NeedsAssetExtraction = true;
-                        }
-                    }
                     else
                     {
+                        // Too large to embed, skip reading. 
+                        // GetNextEntry will automatically skip the rest of this entry's data.
                         state.AssetData = null;
                         state.IsAssetDataTruncated = true;
                         state.NeedsAssetExtraction = true;
@@ -139,10 +126,10 @@ public sealed class UnityPackagePreviewService : IUnityPackagePreviewService
                 case "asset.meta":
                     state.HasMetaFile = true;
                     break;
-                case "preview.png" when entry.DataStream is not null:
+                case "preview.png":
                     using (var memoryStream = new MemoryStream())
                     {
-                        entry.DataStream.CopyTo(memoryStream);
+                        tarReader.CopyTo(memoryStream);
                         state.PreviewImageData = memoryStream.ToArray();
                     }
 
@@ -222,14 +209,14 @@ public sealed class UnityPackagePreviewService : IUnityPackagePreviewService
 
         using var packageStream = File.OpenRead(packagePath);
         using var gzipStream = new GZipInputStream(packageStream);
-        using var tarReader = new TarReader(gzipStream);
+        using var tarReader = new TarInputStream(gzipStream, Encoding.UTF8);
 
         TarEntry? entry;
         while ((entry = tarReader.GetNextEntry()) is not null && candidates.Count > 0)
         {
             cancellationToken.ThrowIfCancellationRequested();
 
-            if (entry.EntryType == TarEntryType.Directory)
+            if (entry.IsDirectory)
                 continue;
 
             var entryName = entry.Name ?? string.Empty;
@@ -241,9 +228,6 @@ public sealed class UnityPackagePreviewService : IUnityPackagePreviewService
                 continue;
 
             if (!candidates.TryGetValue(assetKey, out var state))
-                continue;
-
-            if (entry.DataStream is null)
                 continue;
 
             extractionRoot ??= CreateExtractionRoot();
@@ -261,7 +245,7 @@ public sealed class UnityPackagePreviewService : IUnityPackagePreviewService
 
             using (var output = File.Create(targetPath))
             {
-                entry.DataStream.CopyTo(output);
+                tarReader.CopyTo(output);
             }
 
             state.AssetFilePath = targetPath;

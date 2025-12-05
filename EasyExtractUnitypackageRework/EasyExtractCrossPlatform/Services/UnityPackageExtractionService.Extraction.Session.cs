@@ -1,5 +1,5 @@
 using System.Collections.Immutable;
-using System.Formats.Tar;
+using ICSharpCode.SharpZipLib.Tar;
 
 namespace EasyExtractCrossPlatform.Services;
 
@@ -28,7 +28,8 @@ public sealed partial class UnityPackageExtractionService
         private readonly List<PendingAssetWrite> _pendingWrites = new();
         private readonly IProgress<UnityPackageExtractionProgress>? _progress;
         private readonly HashSet<UnityPackageAssetState> _queuedStates = new();
-        private readonly TarReader _tarReader;
+
+        private readonly TarInputStream _tarReader;
         private readonly string _temporaryDirectoryPath;
         private int _assetsSkippedNoContent;
         private int _assetsSkippedNoPath;
@@ -45,7 +46,7 @@ public sealed partial class UnityPackageExtractionService
             bool organizeByCategories,
             UnityPackageExtractionLimits limits,
             string temporaryDirectoryPath,
-            TarReader tarReader,
+            TarInputStream tarReader,
             IProgress<UnityPackageExtractionProgress>? progress,
             CancellationToken cancellationToken,
             string correlationId)
@@ -103,7 +104,7 @@ public sealed partial class UnityPackageExtractionService
                     _cancellationToken.ThrowIfCancellationRequested();
                     _tarEntriesProcessed++;
 
-                    if (entry.EntryType == TarEntryType.Directory)
+                    if (entry.IsDirectory)
                     {
                         _tarEntriesSkipped++;
                         continue;
@@ -129,18 +130,12 @@ public sealed partial class UnityPackageExtractionService
                         _assetStates[assetKey] = state;
                     }
 
-                    if (entry.DataStream is null)
-                    {
-                        _tarEntriesSkipped++;
-                        continue;
-                    }
-
                     switch (componentName)
                     {
                         case "pathname":
                         {
                             var normalization = NormalizeRelativePath(
-                                ReadEntryAsUtf8String(entry.DataStream, _cancellationToken, _correlationId),
+                                ReadEntryAsUtf8String(_tarReader, _cancellationToken, _correlationId),
                                 _correlationId);
                             state.RelativePath = normalization.NormalizedPath;
                             state.OriginalRelativePath = normalization.OriginalPath;
@@ -151,6 +146,7 @@ public sealed partial class UnityPackageExtractionService
                         {
                             var component = CreateAssetComponent(
                                 entry,
+                                _tarReader,
                                 _temporaryDirectoryPath,
                                 _limits,
                                 _limiter,
@@ -163,6 +159,7 @@ public sealed partial class UnityPackageExtractionService
                         {
                             var component = CreateAssetComponent(
                                 entry,
+                                _tarReader,
                                 _temporaryDirectoryPath,
                                 _limits,
                                 _limiter,
@@ -175,6 +172,7 @@ public sealed partial class UnityPackageExtractionService
                         {
                             var component = CreateAssetComponent(
                                 entry,
+                                _tarReader,
                                 _temporaryDirectoryPath,
                                 _limits,
                                 _limiter,
