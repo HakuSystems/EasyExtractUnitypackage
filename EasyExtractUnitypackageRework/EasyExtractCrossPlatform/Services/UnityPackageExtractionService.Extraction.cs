@@ -1,5 +1,5 @@
 using System.Formats.Tar;
-using System.IO.Compression;
+using ICSharpCode.SharpZipLib.GZip;
 
 namespace EasyExtractCrossPlatform.Services;
 
@@ -17,7 +17,7 @@ public sealed partial class UnityPackageExtractionService
             $"ExtractInternal started | package='{packagePath}' | correlationId={correlationId}");
 
         using var packageStream = File.OpenRead(packagePath);
-        using var gzipStream = new GZipStream(packageStream, CompressionMode.Decompress);
+        using var gzipStream = new GZipInputStream(packageStream);
         using var tarReader = new TarReader(gzipStream);
 
         var normalizedOutputDirectory = NormalizeOutputDirectory(outputDirectory);

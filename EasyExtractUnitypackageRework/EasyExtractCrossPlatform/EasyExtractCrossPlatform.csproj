@@ -33,6 +33,7 @@
             <PrivateAssets Condition="'$(Configuration)' != 'Debug'">All</PrivateAssets>
         </PackageReference>
         <PackageReference Include="OpenTK" Version="4.9.4"/>
+        <PackageReference Include="SharpZipLib" Version="1.4.2"/>
     </ItemGroup>
     <ItemGroup>
         <Compile Remove="EasyExtractCrossPlatform.Tests\**\*.cs"/>

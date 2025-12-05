@@ -1,4 +1,5 @@
 using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace EasyExtractCrossPlatform.Services;
 
@@ -7,7 +8,11 @@ public static class AppSettingsService
     private static readonly JsonSerializerOptions SerializerOptions = new()
     {
         WriteIndented = true,
-        Converters = { new HistoryEntryListJsonConverter() }
+        Converters =
+        {
+            new HistoryEntryListJsonConverter(),
+            new JsonStringEnumConverter()
+        }
     };
 
     public static string SettingsDirectory { get; } =
