@@ -28,8 +28,31 @@ public sealed partial class UpdateService
 
             await using var responseStream =
                 await response.Content.ReadAsStreamAsync(cancellationToken).ConfigureAwait(false);
-            await using var fileStream =
-                new FileStream(destinationPath, FileMode.Create, FileAccess.Write, FileShare.None);
+
+            FileStream? fileStream = null;
+            const int maxRetries = 3;
+            for (var i = 0; i < maxRetries; i++)
+                try
+                {
+                    fileStream = new FileStream(destinationPath, FileMode.Create, FileAccess.Write, FileShare.None);
+                    break;
+                }
+                catch (IOException ex)
+                {
+                    if (i == maxRetries - 1)
+                    {
+                        LoggingService.LogError(
+                            $"DownloadAsset: failed to create file stream after {maxRetries} attempts | path='{destinationPath}'",
+                            ex);
+                        throw;
+                    }
+
+                    LoggingService.LogWarning(
+                        $"DownloadAsset: file locked, retrying... ({i + 1}/{maxRetries}) | path='{destinationPath}'");
+                    await Task.Delay(500 * (i + 1), cancellationToken).ConfigureAwait(false);
+                }
+
+            await using var fs = fileStream!;
 
             var buffer = new byte[81920];
             long totalRead = 0;
@@ -40,7 +63,7 @@ public sealed partial class UpdateService
                 if (read == 0)
                     break;
 
-                await fileStream.WriteAsync(buffer.AsMemory(0, read), cancellationToken).ConfigureAwait(false);
+                await fs.WriteAsync(buffer.AsMemory(0, read), cancellationToken).ConfigureAwait(false);
                 totalRead += read;
 
                 double? percentage = null;
