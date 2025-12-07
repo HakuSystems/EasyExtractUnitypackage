@@ -223,22 +223,44 @@ public static class AppSettingsService
             }
 
             if (reader.TokenType == JsonTokenType.StartObject)
-                try
+            {
+                var model = new ExtractedPackageModel();
+                while (reader.Read())
                 {
-                    using var doc = JsonDocument.ParseValue(ref reader);
-                    return JsonSerializer.Deserialize<ExtractedPackageModel>(doc.RootElement.GetRawText(), options);
+                    if (reader.TokenType == JsonTokenType.EndObject)
+                        return model;
+
+                    if (reader.TokenType == JsonTokenType.PropertyName)
+                    {
+                        var propertyName = reader.GetString();
+                        reader.Read();
+                        switch (propertyName)
+                        {
+                            case nameof(ExtractedPackageModel.FileName):
+                                model.FileName = reader.GetString() ?? string.Empty;
+                                break;
+                            case nameof(ExtractedPackageModel.FilePath):
+                                model.FilePath = reader.GetString() ?? string.Empty;
+                                break;
+                            case nameof(ExtractedPackageModel.DateExtracted):
+                                if (reader.TryGetDateTimeOffset(out var date))
+                                    model.DateExtracted = date;
+                                break;
+                        }
+                    }
                 }
-                catch
-                {
-                    // Ignore deserialization errors
-                }
+            }
 
             return null;
         }
 
         public override void Write(Utf8JsonWriter writer, ExtractedPackageModel value, JsonSerializerOptions options)
         {
-            JsonSerializer.Serialize(writer, value, options);
+            writer.WriteStartObject();
+            writer.WriteString(nameof(ExtractedPackageModel.FileName), value.FileName);
+            writer.WriteString(nameof(ExtractedPackageModel.FilePath), value.FilePath);
+            writer.WriteString(nameof(ExtractedPackageModel.DateExtracted), value.DateExtracted);
+            writer.WriteEndObject();
         }
     }
 }
