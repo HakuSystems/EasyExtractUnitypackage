@@ -12,6 +12,7 @@ public static class AppSettingsService
         {
             new HistoryEntryListJsonConverter(),
             new SafeWindowStateConverter(),
+            new ExtractedPackageModelConverter(),
             new JsonStringEnumConverter()
         }
     };
@@ -199,6 +200,45 @@ public static class AppSettingsService
         public override void Write(Utf8JsonWriter writer, WindowState value, JsonSerializerOptions options)
         {
             writer.WriteStringValue(value.ToString());
+        }
+    }
+
+    private class ExtractedPackageModelConverter : JsonConverter<ExtractedPackageModel>
+    {
+        public override ExtractedPackageModel? Read(ref Utf8JsonReader reader, Type typeToConvert,
+            JsonSerializerOptions options)
+        {
+            if (reader.TokenType == JsonTokenType.String)
+            {
+                var path = reader.GetString();
+                if (string.IsNullOrWhiteSpace(path))
+                    return null;
+
+                return new ExtractedPackageModel
+                {
+                    FilePath = path,
+                    FileName = Path.GetFileName(path),
+                    DateExtracted = DateTimeOffset.UtcNow
+                };
+            }
+
+            if (reader.TokenType == JsonTokenType.StartObject)
+                try
+                {
+                    using var doc = JsonDocument.ParseValue(ref reader);
+                    return JsonSerializer.Deserialize<ExtractedPackageModel>(doc.RootElement.GetRawText(), options);
+                }
+                catch
+                {
+                    // Ignore deserialization errors
+                }
+
+            return null;
+        }
+
+        public override void Write(Utf8JsonWriter writer, ExtractedPackageModel value, JsonSerializerOptions options)
+        {
+            JsonSerializer.Serialize(writer, value, options);
         }
     }
 }
