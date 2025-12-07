@@ -32,7 +32,7 @@ public class AppSettings
     public List<HistoryEntry> History { get; set; } = new();
     public List<string> IgnoredUnityPackages { get; set; } = new();
     public List<string> SearchEverything { get; set; } = new();
-    public List<string> ExtractedUnitypackages { get; set; } = new();
+    public List<ExtractedPackageModel> ExtractedUnitypackages { get; set; } = new();
 
     public CustomBackgroundImageSettings CustomBackgroundImage { get; set; } = new()
     {
@@ -61,6 +61,13 @@ public class AppSettings
 
     public Dictionary<string, WindowPlacementSettings> WindowPlacements { get; set; } =
         new(StringComparer.OrdinalIgnoreCase);
+}
+
+public class ExtractedPackageModel
+{
+    public string FileName { get; set; } = string.Empty;
+    public string FilePath { get; set; } = string.Empty;
+    public DateTimeOffset DateExtracted { get; set; }
 }
 
 public class UpdateSettings

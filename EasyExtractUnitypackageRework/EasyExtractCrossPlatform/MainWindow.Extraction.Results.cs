@@ -74,11 +74,16 @@ public partial class MainWindow : Window
             _settings.TotalFilesExtracted = Math.Max(0, _settings.TotalFilesExtracted) + result.AssetsExtracted;
 
         if (_settings.ExtractedUnitypackages is null)
-            _settings.ExtractedUnitypackages = new List<string>();
+            _settings.ExtractedUnitypackages = new List<ExtractedPackageModel>();
 
         if (_settings.ExtractedUnitypackages.All(existing =>
-                !string.Equals(existing, packagePath, StringComparison.OrdinalIgnoreCase)))
-            _settings.ExtractedUnitypackages.Add(packagePath);
+                !string.Equals(existing.FilePath, packagePath, StringComparison.OrdinalIgnoreCase)))
+            _settings.ExtractedUnitypackages.Add(new ExtractedPackageModel
+            {
+                FileName = Path.GetFileName(packagePath),
+                FilePath = packagePath,
+                DateExtracted = DateTimeOffset.Now
+            });
 
         var normalizedPackagePath = TryNormalizeFilePath(packagePath);
 
