@@ -31,6 +31,7 @@ public static partial class LoggingService
         builder.Append('[')
             .Append(entry.Level)
             .Append("] ")
+            .Append(" V" + VersionProvider.GetApplicationVersion() + " ")
             .Append(entry.Message);
 
         if (entry.Exception is not null)

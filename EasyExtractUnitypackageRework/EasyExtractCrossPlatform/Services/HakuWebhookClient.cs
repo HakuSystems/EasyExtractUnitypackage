@@ -64,7 +64,7 @@ public sealed class HakuWebhookClient
         if (string.IsNullOrWhiteSpace(message))
             throw new ArgumentException("Error message must not be empty.", nameof(message));
 
-        var payload = CreateBasePayload($"{message}\nVersion: {currentVersion}", currentVersion, true);
+        var payload = CreateBasePayload(message, currentVersion, true);
         payload.WebhookType = webhookType ?? "AppLogs";
 
         return SendAsync(payload, cancellationToken);
