@@ -26,10 +26,7 @@ public static partial class ContextMenuIntegrationService
             return;
         }
 
-        var homeDirectory = Environment.GetFolderPath(Environment.SpecialFolder.Personal);
-        if (string.IsNullOrWhiteSpace(homeDirectory))
-	        homeDirectory = Environment.GetEnvironmentVariable("HOME");
-
+        var homeDirectory = ResolveMacHomeDirectory();
         if (string.IsNullOrWhiteSpace(homeDirectory))
         {
             LoggingService.LogError(
@@ -69,9 +66,7 @@ public static partial class ContextMenuIntegrationService
 
     private static void TryRemoveMacIntegration()
     {
-        var homeDirectory = Environment.GetFolderPath(Environment.SpecialFolder.Personal);
-        if (string.IsNullOrWhiteSpace(homeDirectory))
-	        homeDirectory = Environment.GetEnvironmentVariable("HOME");
+	    var homeDirectory = ResolveMacHomeDirectory();
 
         if (string.IsNullOrWhiteSpace(homeDirectory))
             return;
@@ -91,6 +86,39 @@ public static partial class ContextMenuIntegrationService
         {
 	        LoggingService.LogError("Failed to remove macOS service integration.", ex);
         }
+    }
+
+    private static string? ResolveMacHomeDirectory()
+    {
+	    var candidates = new[]
+	    {
+		    Environment.GetFolderPath(Environment.SpecialFolder.UserProfile),
+		    Environment.GetFolderPath(Environment.SpecialFolder.Personal),
+		    Environment.GetEnvironmentVariable("HOME"),
+		    Environment.GetEnvironmentVariable("USERPROFILE"),
+		    BuildUserProfileFromUserName()
+	    };
+
+	    foreach (var candidate in candidates)
+	    {
+		    if (string.IsNullOrWhiteSpace(candidate))
+			    continue;
+
+		    var trimmed = candidate.Trim();
+		    if (Directory.Exists(trimmed))
+			    return trimmed;
+	    }
+
+	    return null;
+    }
+
+    private static string? BuildUserProfileFromUserName()
+    {
+	    var userName = Environment.UserName;
+	    if (string.IsNullOrWhiteSpace(userName))
+		    return null;
+
+	    return Path.Combine("/Users", userName);
     }
 
     private static string BuildMacInfoPlist()
