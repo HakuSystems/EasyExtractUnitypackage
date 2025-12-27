@@ -142,6 +142,20 @@ public partial class MainWindow : Window
         {
             throw;
         }
+        catch (InvalidDataException ex)
+        {
+            LoggingService.LogWarning($"Security scan skipped for '{normalizedPath}': {ex.Message}", ex);
+            await Dispatcher.UIThread.InvokeAsync(() =>
+            {
+                if (!IsSecurityScanningEnabled)
+                    return;
+
+                if (_queueItemsByPath.TryGetValue(normalizedPath, out var display))
+                    display.SetSecurityInfo(ex.Message);
+            });
+
+            return null;
+        }
         catch (Exception ex)
         {
             LoggingService.LogError($"Security scan failed for '{normalizedPath}'.", ex);
