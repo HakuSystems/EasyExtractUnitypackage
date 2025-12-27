@@ -97,106 +97,119 @@ public sealed partial class UnityPackageExtractionService
             const int batchLogInterval = 100;
             TarEntry? entry;
 
-            using (LoggingService.BeginPerformanceScope("ProcessTarEntries", "Extraction", _correlationId))
+            try
             {
-                while ((entry = _tarReader.GetNextEntry()) is not null)
+                using (LoggingService.BeginPerformanceScope("ProcessTarEntries", "Extraction", _correlationId))
                 {
-                    _cancellationToken.ThrowIfCancellationRequested();
-                    _tarEntriesProcessed++;
-
-                    if (entry.IsDirectory)
+                    while ((entry = _tarReader.GetNextEntry()) is not null)
                     {
-                        _tarEntriesSkipped++;
-                        continue;
-                    }
+                        _cancellationToken.ThrowIfCancellationRequested();
+                        _tarEntriesProcessed++;
 
-                    var entryName = entry.Name ?? string.Empty;
-                    if (string.IsNullOrWhiteSpace(entryName))
-                    {
-                        _tarEntriesSkipped++;
-                        continue;
-                    }
-
-                    var (assetKey, componentName) = SplitEntryName(entryName);
-                    if (string.IsNullOrWhiteSpace(assetKey) || string.IsNullOrWhiteSpace(componentName))
-                    {
-                        _tarEntriesSkipped++;
-                        continue;
-                    }
-
-                    if (!_assetStates.TryGetValue(assetKey, out var state))
-                    {
-                        state = new UnityPackageAssetState();
-                        _assetStates[assetKey] = state;
-                    }
-
-                    switch (componentName)
-                    {
-                        case "pathname":
+                        if (entry.IsDirectory)
                         {
-                            var normalization = NormalizeRelativePath(
-                                ReadEntryAsUtf8String(_tarReader, _cancellationToken, _correlationId),
-                                _correlationId);
-                            state.RelativePath = normalization.NormalizedPath;
-                            state.OriginalRelativePath = normalization.OriginalPath;
-                            state.PathNormalizations = normalization.Segments;
-                            break;
-                        }
-                        case "asset":
-                        {
-                            var component = CreateAssetComponent(
-                                entry,
-                                _tarReader,
-                                _temporaryDirectoryPath,
-                                _limits,
-                                _limiter,
-                                _cancellationToken,
-                                _correlationId);
-                            state.SetAssetComponent(component);
-                            break;
-                        }
-                        case "asset.meta":
-                        {
-                            var component = CreateAssetComponent(
-                                entry,
-                                _tarReader,
-                                _temporaryDirectoryPath,
-                                _limits,
-                                _limiter,
-                                _cancellationToken,
-                                _correlationId);
-                            state.SetMetaComponent(component);
-                            break;
-                        }
-                        case "preview.png":
-                        {
-                            var component = CreateAssetComponent(
-                                entry,
-                                _tarReader,
-                                _temporaryDirectoryPath,
-                                _limits,
-                                _limiter,
-                                _cancellationToken,
-                                _correlationId);
-                            state.SetPreviewComponent(component);
-                            break;
-                        }
-                        default:
                             _tarEntriesSkipped++;
                             continue;
-                    }
+                        }
 
-                    if (state.CanWriteToDisk && !_queuedStates.Contains(state))
-                        HandleReadyState(state);
+                        var entryName = entry.Name ?? string.Empty;
+                        if (string.IsNullOrWhiteSpace(entryName))
+                        {
+                            _tarEntriesSkipped++;
+                            continue;
+                        }
 
-                    if (_tarEntriesProcessed % batchLogInterval == 0 &&
-                        lastBatchLog.Elapsed.TotalSeconds >= 2)
-                    {
-                        LoggingService.LogInformation(
-                            $"TAR processing progress: entries={_tarEntriesProcessed} | assets={_assetStates.Count} | extracted={_extractedCount} | skipped={_tarEntriesSkipped} | correlationId={_correlationId}");
-                        lastBatchLog.Restart();
+                        var (assetKey, componentName) = SplitEntryName(entryName);
+                        if (string.IsNullOrWhiteSpace(assetKey) || string.IsNullOrWhiteSpace(componentName))
+                        {
+                            _tarEntriesSkipped++;
+                            continue;
+                        }
+
+                        if (!_assetStates.TryGetValue(assetKey, out var state))
+                        {
+                            state = new UnityPackageAssetState();
+                            _assetStates[assetKey] = state;
+                        }
+
+                        switch (componentName)
+                        {
+                            case "pathname":
+                            {
+                                var normalization = NormalizeRelativePath(
+                                    ReadEntryAsUtf8String(_tarReader, _cancellationToken, _correlationId),
+                                    _correlationId);
+                                state.RelativePath = normalization.NormalizedPath;
+                                state.OriginalRelativePath = normalization.OriginalPath;
+                                state.PathNormalizations = normalization.Segments;
+                                break;
+                            }
+                            case "asset":
+                            {
+                                var component = CreateAssetComponent(
+                                    entry,
+                                    _tarReader,
+                                    _temporaryDirectoryPath,
+                                    _limits,
+                                    _limiter,
+                                    _cancellationToken,
+                                    _correlationId);
+                                state.SetAssetComponent(component);
+                                break;
+                            }
+                            case "asset.meta":
+                            {
+                                var component = CreateAssetComponent(
+                                    entry,
+                                    _tarReader,
+                                    _temporaryDirectoryPath,
+                                    _limits,
+                                    _limiter,
+                                    _cancellationToken,
+                                    _correlationId);
+                                state.SetMetaComponent(component);
+                                break;
+                            }
+                            case "preview.png":
+                            {
+                                var component = CreateAssetComponent(
+                                    entry,
+                                    _tarReader,
+                                    _temporaryDirectoryPath,
+                                    _limits,
+                                    _limiter,
+                                    _cancellationToken,
+                                    _correlationId);
+                                state.SetPreviewComponent(component);
+                                break;
+                            }
+                            default:
+                                _tarEntriesSkipped++;
+                                continue;
+                        }
+
+                        if (state.CanWriteToDisk && !_queuedStates.Contains(state))
+                            HandleReadyState(state);
+
+                        if (_tarEntriesProcessed % batchLogInterval == 0 &&
+                            lastBatchLog.Elapsed.TotalSeconds >= 2)
+                        {
+                            LoggingService.LogInformation(
+                                $"TAR processing progress: entries={_tarEntriesProcessed} | assets={_assetStates.Count} | extracted={_extractedCount} | skipped={_tarEntriesSkipped} | correlationId={_correlationId}");
+                            lastBatchLog.Restart();
+                        }
                     }
                 }
+            }
+            catch (TarException ex)
+            {
+                LoggingService.LogError(
+                    $"TAR processing failed (likely not a valid unitypackage) | entriesProcessed={_tarEntriesProcessed} | skipped={_tarEntriesSkipped} | correlationId={_correlationId}",
+                    ex);
+
+                throw new InvalidDataException(
+                    "The selected file is not a valid .unitypackage (gzipped TAR). It may be a ZIP/RAR/7z file or is corrupted.",
+                    ex);
             }
 
             LoggingService.LogInformation(
