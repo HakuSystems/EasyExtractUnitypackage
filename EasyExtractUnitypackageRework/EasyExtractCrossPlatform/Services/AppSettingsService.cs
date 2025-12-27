@@ -208,50 +208,70 @@ public static class AppSettingsService
         public override ExtractedPackageModel? Read(ref Utf8JsonReader reader, Type typeToConvert,
             JsonSerializerOptions options)
         {
-            if (reader.TokenType == JsonTokenType.String)
+            try
             {
-                var path = reader.GetString();
-                if (string.IsNullOrWhiteSpace(path))
+                if (reader.TokenType == JsonTokenType.String)
+                {
+                    var path = reader.GetString();
+                    if (string.IsNullOrWhiteSpace(path))
+                        return null;
+
+                    return new ExtractedPackageModel
+                    {
+                        FilePath = path,
+                        FileName = Path.GetFileName(path),
+                        DateExtracted = DateTimeOffset.UtcNow
+                    };
+                }
+
+                if (reader.TokenType == JsonTokenType.Null)
+                    return null;
+
+                if (reader.TokenType != JsonTokenType.StartObject)
+                {
+                    reader.Skip();
+                    return null;
+                }
+
+                using var document = JsonDocument.ParseValue(ref reader);
+                var root = document.RootElement;
+
+                var filePath = root.TryGetProperty(nameof(ExtractedPackageModel.FilePath),
+                    out var filePathElement)
+                    ? filePathElement.GetString()
+                    : null;
+
+                var fileName = root.TryGetProperty(nameof(ExtractedPackageModel.FileName),
+                    out var fileNameElement)
+                    ? fileNameElement.GetString()
+                    : null;
+
+                if (string.IsNullOrWhiteSpace(fileName) && !string.IsNullOrWhiteSpace(filePath))
+                    fileName = Path.GetFileName(filePath);
+
+                var date = DateTimeOffset.UtcNow;
+                if (root.TryGetProperty(nameof(ExtractedPackageModel.DateExtracted),
+                        out var dateElement) &&
+                    dateElement.ValueKind != JsonValueKind.Null &&
+                    dateElement.TryGetDateTimeOffset(out var parsedDate))
+                    date = parsedDate;
+
+                if (string.IsNullOrWhiteSpace(fileName) && string.IsNullOrWhiteSpace(filePath))
                     return null;
 
                 return new ExtractedPackageModel
                 {
-                    FilePath = path,
-                    FileName = Path.GetFileName(path),
-                    DateExtracted = DateTimeOffset.UtcNow
+                    FileName = fileName ?? string.Empty,
+                    FilePath = filePath ?? string.Empty,
+                    DateExtracted = date
                 };
             }
-
-            if (reader.TokenType == JsonTokenType.StartObject)
+            catch (Exception)
             {
-                var model = new ExtractedPackageModel();
-                while (reader.Read())
-                {
-                    if (reader.TokenType == JsonTokenType.EndObject)
-                        return model;
-
-                    if (reader.TokenType == JsonTokenType.PropertyName)
-                    {
-                        var propertyName = reader.GetString();
-                        reader.Read();
-                        switch (propertyName)
-                        {
-                            case nameof(ExtractedPackageModel.FileName):
-                                model.FileName = reader.GetString() ?? string.Empty;
-                                break;
-                            case nameof(ExtractedPackageModel.FilePath):
-                                model.FilePath = reader.GetString() ?? string.Empty;
-                                break;
-                            case nameof(ExtractedPackageModel.DateExtracted):
-                                if (reader.TryGetDateTimeOffset(out var date))
-                                    model.DateExtracted = date;
-                                break;
-                        }
-                    }
-                }
+                if (reader.TokenType != JsonTokenType.None)
+                    reader.Skip();
+                return null;
             }
-
-            return null;
         }
 
         public override void Write(Utf8JsonWriter writer, ExtractedPackageModel value, JsonSerializerOptions options)
