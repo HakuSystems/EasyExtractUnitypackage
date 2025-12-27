@@ -54,6 +54,8 @@ public partial class MainWindow : Window
 
         var message = exception switch
         {
+            InvalidDataException invalid when !string.IsNullOrWhiteSpace(invalid.Message)
+                => invalid.Message,
             InvalidDataException => "The package could not be read. It may be damaged.",
             _ => exception.Message
         };
