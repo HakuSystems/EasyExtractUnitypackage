@@ -108,87 +108,130 @@ public sealed partial class MaliciousCodeDetectionService
         var assetStates = new Dictionary<string, AssetSecurityState>(StringComparer.OrdinalIgnoreCase);
 
         using var packageStream = File.OpenRead(packagePath);
-        using var gzipStream = new GZipInputStream(packageStream);
-        using var tarReader = new TarReader(gzipStream);
+        var format = UnityPackageFormatDetector.Detect(packageStream);
 
-        TarEntry? entry;
-        while ((entry = tarReader.GetNextEntry()) is not null)
+        Stream archiveStream = packageStream;
+        GZipInputStream? gzipStream = null;
+
+        try
         {
-            stats.TarEntriesRead++;
-            cancellationToken.ThrowIfCancellationRequested();
-
-            if (entry.EntryType == TarEntryType.Directory)
-                continue;
-
-            var entryName = entry.Name ?? string.Empty;
-            if (string.IsNullOrWhiteSpace(entryName))
-                continue;
-
-            var (assetKey, componentName) = SplitEntryName(entryName);
-            if (string.IsNullOrWhiteSpace(assetKey) || string.IsNullOrWhiteSpace(componentName))
-                continue;
-
-            if (!assetStates.TryGetValue(assetKey, out var state))
+            switch (format)
             {
-                state = new AssetSecurityState();
-                assetStates[assetKey] = state;
+                case UnityPackageFormat.GzipTar:
+                    gzipStream = new GZipInputStream(packageStream);
+                    archiveStream = gzipStream;
+                    break;
+                case UnityPackageFormat.Tar:
+                    archiveStream = packageStream;
+                    break;
+                case UnityPackageFormat.TooSmall:
+                    LoggingService.LogWarning(
+                        $"MaliciousCodeScan: invalid_package_too_small | path={packagePath} | bytes={packageStream.Length}");
+                    throw new InvalidDataException(
+                        "The selected file is too small to be a valid .unitypackage. It may be incomplete or corrupted.");
+                default:
+                    var detected = UnityPackageFormatDetector.Describe(format);
+                    LoggingService.LogWarning(
+                        $"MaliciousCodeScan: unsupported_package_format | path={packagePath} | detected={detected}");
+                    throw new InvalidDataException(
+                        $"The selected file appears to be {detected}, not a Unity .unitypackage (gzipped TAR).");
             }
 
-            switch (componentName)
-            {
-                case "pathname" when entry.DataStream is not null:
-                {
-                    stats.PathComponentsSeen++;
-                    var relativePath = ReadPath(entry);
-                    state.RelativePath = NormalizeAssetPath(relativePath);
-                    if (state.PendingAssetData is { Length: > 0 } pendingData &&
-                        !string.IsNullOrWhiteSpace(state.RelativePath))
-                    {
-                        ProcessAssetData(state.RelativePath, pendingData, collector, stats);
-                        state.PendingAssetData = null;
-                        assetStates.Remove(assetKey);
-                    }
+            using var tarReader = new TarReader(archiveStream);
 
-                    break;
-                }
-                case "asset" when entry.DataStream is not null:
+            TarEntry? entry;
+            while ((entry = tarReader.GetNextEntry()) is not null)
+            {
+                stats.TarEntriesRead++;
+                cancellationToken.ThrowIfCancellationRequested();
+
+                if (entry.EntryType == TarEntryType.Directory)
+                    continue;
+
+                var entryName = entry.Name ?? string.Empty;
+                if (string.IsNullOrWhiteSpace(entryName))
+                    continue;
+
+                var (assetKey, componentName) = SplitEntryName(entryName);
+                if (string.IsNullOrWhiteSpace(assetKey) || string.IsNullOrWhiteSpace(componentName))
+                    continue;
+
+                if (!assetStates.TryGetValue(assetKey, out var state))
                 {
-                    stats.AssetComponentsSeen++;
-                    var data = ReadAssetData(entry, cancellationToken, stats);
-                    if (data is null || data.Length == 0)
+                    state = new AssetSecurityState();
+                    assetStates[assetKey] = state;
+                }
+
+                switch (componentName)
+                {
+                    case "pathname" when entry.DataStream is not null:
+                    {
+                        stats.PathComponentsSeen++;
+                        var relativePath = ReadPath(entry);
+                        state.RelativePath = NormalizeAssetPath(relativePath);
+                        if (state.PendingAssetData is { Length: > 0 } pendingData &&
+                            !string.IsNullOrWhiteSpace(state.RelativePath))
+                        {
+                            ProcessAssetData(state.RelativePath, pendingData, collector, stats);
+                            state.PendingAssetData = null;
+                            assetStates.Remove(assetKey);
+                        }
+
                         break;
-
-                    if (!string.IsNullOrWhiteSpace(state.RelativePath))
-                    {
-                        ProcessAssetData(state.RelativePath, data, collector, stats);
-                        assetStates.Remove(assetKey);
                     }
-                    else
+                    case "asset" when entry.DataStream is not null:
                     {
-                        state.PendingAssetData = data;
-                    }
+                        stats.AssetComponentsSeen++;
+                        var data = ReadAssetData(entry, cancellationToken, stats);
+                        if (data is null || data.Length == 0)
+                            break;
 
-                    break;
+                        if (!string.IsNullOrWhiteSpace(state.RelativePath))
+                        {
+                            ProcessAssetData(state.RelativePath, data, collector, stats);
+                            assetStates.Remove(assetKey);
+                        }
+                        else
+                        {
+                            state.PendingAssetData = data;
+                        }
+
+                        break;
+                    }
                 }
             }
+
+            var unresolvedPendingAssets = assetStates.Values.Count(s =>
+                s.PendingAssetData is { Length: > 0 } && string.IsNullOrWhiteSpace(s.RelativePath));
+
+            if (unresolvedPendingAssets > 0)
+            {
+                stats.AssetsSkippedMissingPath += unresolvedPendingAssets;
+                LoggingService.LogWarning(
+                    $"MaliciousCodeScan: skipped assets without pathname | path={packagePath} | count={unresolvedPendingAssets}");
+            }
+
+            var threats = collector.BuildResults();
+            stats.ThreatCount = threats.Count;
+            return new MaliciousCodeScanResult(
+                packagePath,
+                threats.Count > 0,
+                threats,
+                DateTimeOffset.UtcNow);
         }
-
-        var unresolvedPendingAssets = assetStates.Values.Count(s =>
-            s.PendingAssetData is { Length: > 0 } && string.IsNullOrWhiteSpace(s.RelativePath));
-
-        if (unresolvedPendingAssets > 0)
+        catch (GZipException ex)
         {
-            stats.AssetsSkippedMissingPath += unresolvedPendingAssets;
-            LoggingService.LogWarning(
-                $"MaliciousCodeScan: skipped assets without pathname | path={packagePath} | count={unresolvedPendingAssets}");
-        }
+            LoggingService.LogError(
+                $"MaliciousCodeScan: invalid gzip data | path={packagePath}",
+                ex);
 
-        var threats = collector.BuildResults();
-        stats.ThreatCount = threats.Count;
-        return new MaliciousCodeScanResult(
-            packagePath,
-            threats.Count > 0,
-            threats,
-            DateTimeOffset.UtcNow);
+            throw new InvalidDataException(
+                "The package appears to be corrupted (gzip checksum mismatch). Please download the .unitypackage again.",
+                ex);
+        }
+        finally
+        {
+            gzipStream?.Dispose();
+        }
     }
 }

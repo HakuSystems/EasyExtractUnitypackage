@@ -1,4 +1,6 @@
 using System.Collections.Immutable;
+using ICSharpCode.SharpZipLib;
+using ICSharpCode.SharpZipLib.GZip;
 using ICSharpCode.SharpZipLib.Tar;
 
 namespace EasyExtractCrossPlatform.Services;
@@ -209,6 +211,16 @@ public sealed partial class UnityPackageExtractionService
 
                 throw new InvalidDataException(
                     "The selected file is not a valid .unitypackage (gzipped TAR). It may be a ZIP/RAR/7z file or is corrupted.",
+                    ex);
+            }
+            catch (SharpZipBaseException ex) when (ex is not GZipException)
+            {
+                LoggingService.LogError(
+                    $"Compressed data is invalid while reading the package | entriesProcessed={_tarEntriesProcessed} | skipped={_tarEntriesSkipped} | correlationId={_correlationId}",
+                    ex);
+
+                throw new InvalidDataException(
+                    "The package appears to be corrupted (compressed data inside the .unitypackage is invalid). Please download the file again.",
                     ex);
             }
 
