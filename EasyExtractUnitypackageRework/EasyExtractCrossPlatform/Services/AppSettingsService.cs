@@ -101,7 +101,20 @@ public static class AppSettingsService
         }
         catch (Exception ex)
         {
-            LoggingService.LogError("Failed to save application settings.", ex);
+            var diskFull = DiskSpaceHelper.IsDiskFull(ex);
+            var message = diskFull
+                ? $"{DiskSpaceHelper.BuildFriendlyMessage(SettingsFilePath)} Unable to save application settings."
+                : "Failed to save application settings.";
+
+            var logMessage = diskFull
+                ? $"{message} | path='{SettingsFilePath}'"
+                : message;
+
+            LoggingService.LogError(logMessage, ex);
+
+            if (diskFull)
+                throw new IOException(message, ex);
+
             throw;
         }
         finally
