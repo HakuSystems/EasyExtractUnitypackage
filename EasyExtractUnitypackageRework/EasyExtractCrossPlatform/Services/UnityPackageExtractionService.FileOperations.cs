@@ -151,6 +151,15 @@ public sealed partial class UnityPackageExtractionService
             }
             catch (Exception ex)
             {
+                if (DiskSpaceHelper.IsDiskFull(ex))
+                {
+                    var friendlyMessage = DiskSpaceHelper.BuildFriendlyMessage(targetPath);
+                    LoggingService.LogError(
+                        $"{friendlyMessage} | path='{targetPath}' | correlationId={correlationId}",
+                        ex);
+                    throw new IOException(friendlyMessage, ex);
+                }
+
                 LoggingService.LogError(
                     $"Failed to write asset | path='{targetPath}' | size={assetComponent.Length} | correlationId={correlationId}",
                     ex);
@@ -169,6 +178,15 @@ public sealed partial class UnityPackageExtractionService
             }
             catch (Exception ex)
             {
+                if (DiskSpaceHelper.IsDiskFull(ex))
+                {
+                    var friendlyMessage = DiskSpaceHelper.BuildFriendlyMessage(metaPath);
+                    LoggingService.LogError(
+                        $"{friendlyMessage} | path='{metaPath}' | correlationId={correlationId}",
+                        ex);
+                    throw new IOException(friendlyMessage, ex);
+                }
+
                 LoggingService.LogError(
                     $"Failed to write meta file | path='{metaPath}' | correlationId={correlationId}", ex);
                 throw;
@@ -186,6 +204,15 @@ public sealed partial class UnityPackageExtractionService
             }
             catch (Exception ex)
             {
+                if (DiskSpaceHelper.IsDiskFull(ex))
+                {
+                    var friendlyMessage = DiskSpaceHelper.BuildFriendlyMessage(previewPath);
+                    LoggingService.LogError(
+                        $"{friendlyMessage} | path='{previewPath}' | correlationId={correlationId}",
+                        ex);
+                    throw new IOException(friendlyMessage, ex);
+                }
+
                 LoggingService.LogError(
                     $"Failed to write preview | path='{previewPath}' | correlationId={correlationId}", ex);
                 throw;
