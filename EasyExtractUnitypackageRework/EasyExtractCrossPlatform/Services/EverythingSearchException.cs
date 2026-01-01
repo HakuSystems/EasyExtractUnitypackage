@@ -36,6 +36,16 @@ public sealed class EverythingSearchException : Exception
             inner);
     }
 
+    public static EverythingSearchException ServiceUnavailable(string? remoteStatus, Exception inner)
+    {
+        var statusPrefix = string.IsNullOrWhiteSpace(remoteStatus) ? string.Empty : $"{remoteStatus}. ";
+        return new EverythingSearchException(
+            $"{statusPrefix}The Search Everything service (voidtools.com) is not reachable right now. " +
+            "Automatic SDK download failed. Please try again later or place the Everything SDK DLL next to the EasyExtract executable.",
+            EverythingErrorCode.ServiceUnavailable,
+            inner);
+    }
+
     private static string GetErrorMessage(EverythingErrorCode errorCode)
     {
         return errorCode switch
@@ -52,6 +62,7 @@ public sealed class EverythingSearchException : Exception
             EverythingErrorCode.LibraryMissing => "Everything SDK library missing.",
             EverythingErrorCode.LibraryMismatch => "Everything SDK library mismatch.",
             EverythingErrorCode.NativeFailure => "Unexpected native failure while querying Everything.",
+            EverythingErrorCode.ServiceUnavailable => "Search Everything service is unreachable.",
             _ => $"Everything reported an unknown error ({(int)errorCode})."
         };
     }
@@ -69,5 +80,6 @@ public enum EverythingErrorCode
     InvalidCall = 7,
     LibraryMissing = 1000,
     LibraryMismatch = 1001,
-    NativeFailure = 1002
+    NativeFailure = 1002,
+    ServiceUnavailable = 1003
 }

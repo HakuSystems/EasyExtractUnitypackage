@@ -1,4 +1,5 @@
 using System.IO.Compression;
+using System.Net;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Security.Cryptography;
@@ -56,8 +57,16 @@ internal static class EverythingSdkBootstrapper
             LoadLibrary(dllPath);
             LoggingService.LogInformation($"Everything SDK initialized using '{dllPath}'.");
         }
-        catch (Exception ex) when (ex is HttpRequestException or IOException or InvalidOperationException
-                                       or NotSupportedException)
+        catch (HttpRequestException ex)
+        {
+            var status = ex.StatusCode is HttpStatusCode code
+                ? $"{(int)code} {code}"
+                : "No response from voidtools.com";
+
+            LoggingService.LogError($"Failed to initialize Everything SDK due to network error ({status}).", ex);
+            throw EverythingSearchException.ServiceUnavailable(status, ex);
+        }
+        catch (Exception ex) when (ex is IOException or InvalidOperationException or NotSupportedException)
         {
             LoggingService.LogError("Failed to initialize Everything SDK due to I/O or network error.", ex);
             throw EverythingSearchException.MissingLibrary(ex);
