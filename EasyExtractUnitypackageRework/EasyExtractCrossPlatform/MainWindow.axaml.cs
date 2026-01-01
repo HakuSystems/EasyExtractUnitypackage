@@ -278,9 +278,4 @@ public partial class MainWindow : Window
     }
 
     public EverythingSearchViewModel? SearchViewModel { get; }
-
-    private void Button_OnClick(object? sender, RoutedEventArgs e)
-    {
-        LoggingService.LogError("TEST ERROR IGNORE");
-    }
 }
