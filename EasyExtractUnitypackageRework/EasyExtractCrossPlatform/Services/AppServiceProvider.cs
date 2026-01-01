@@ -58,6 +58,7 @@ public static class AppServiceLocator
             .RegisterSingleton<IUnityPackageExtractionService>(() => new UnityPackageExtractionService())
             .RegisterSingleton<IMaliciousCodeDetectionService>(() => new MaliciousCodeDetectionService())
             .RegisterSingleton<INotificationService>(() => new NotificationService())
+            .RegisterSingleton<IErrorDialogService>(() => new ErrorDialogService())
             .RegisterSingleton<IUnityPackagePreviewService>(() => new UnityPackagePreviewService())
             .RegisterSingleton<IUpdateService>(() => UpdateService.Instance);
 

@@ -17,6 +17,7 @@ public partial class MainWindow : Window
     private readonly Grid? _dropZoneHostGrid;
     private readonly TextBlock? _dropZonePrimaryTextBlock;
     private readonly TextBlock? _dropZoneSecondaryTextBlock;
+    private readonly IErrorDialogService _errorDialogService;
     private readonly EverythingSearchView? _everythingSearchView;
     private readonly Border? _extractionDashboard;
     private readonly TextBlock? _extractionDashboardAssetCount;
@@ -134,6 +135,7 @@ public partial class MainWindow : Window
         _extractionService = _serviceProvider.GetRequiredService<IUnityPackageExtractionService>();
         _maliciousCodeDetectionService = _serviceProvider.GetRequiredService<IMaliciousCodeDetectionService>();
         _notificationService = _serviceProvider.GetRequiredService<INotificationService>();
+        _errorDialogService = _serviceProvider.GetRequiredService<IErrorDialogService>();
         _previewService = _serviceProvider.GetRequiredService<IUnityPackagePreviewService>();
         _updateService = _serviceProvider.GetRequiredService<IUpdateService>();
 
@@ -276,4 +278,9 @@ public partial class MainWindow : Window
     }
 
     public EverythingSearchViewModel? SearchViewModel { get; }
+
+    private void Button_OnClick(object? sender, RoutedEventArgs e)
+    {
+        LoggingService.LogError("TEST ERROR IGNORE");
+    }
 }
