@@ -57,7 +57,8 @@ internal sealed class LinuxSearchService : IEverythingSearchService
         var backend = _resolvedBackend != LinuxBackend.None ? _resolvedBackend : DetermineBackend();
         if (backend == LinuxBackend.None)
         {
-            LoggingService.LogError("Linux search aborted: no supported backend available.");
+            LoggingService.LogError("Linux search aborted: no supported backend available.",
+                forwardToWebhook: false);
             throw new InvalidOperationException("No supported Linux search backend is available.");
         }
 

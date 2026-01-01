@@ -56,7 +56,8 @@ public static partial class LoggingService
 
         if (string.Equals(entry.Level, "ERROR", StringComparison.OrdinalIgnoreCase))
         {
-            QueueHakuWebhookDispatch(formattedPayload);
+            if (entry.ForwardToWebhook)
+                QueueHakuWebhookDispatch(formattedPayload);
             NotifyErrorObservers(entry, formattedPayload);
         }
     }

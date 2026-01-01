@@ -207,7 +207,8 @@ public sealed partial class UnityPackageExtractionService
             {
                 LoggingService.LogError(
                     $"TAR processing failed (likely not a valid unitypackage) | entriesProcessed={_tarEntriesProcessed} | skipped={_tarEntriesSkipped} | correlationId={_correlationId}",
-                    ex);
+                    ex,
+                    false);
 
                 throw new InvalidDataException(
                     "The selected file is not a valid .unitypackage (gzipped TAR). It may be a ZIP/RAR/7z file or is corrupted.",

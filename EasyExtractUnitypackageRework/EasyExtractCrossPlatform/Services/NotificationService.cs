@@ -51,7 +51,8 @@ public sealed class NotificationService : INotificationService
         }
         catch (Exception ex)
         {
-            LoggingService.LogError("Failed to trigger Windows notification.", ex);
+            LoggingService.LogError("Failed to trigger Windows notification.", ex,
+                false);
             return false;
         }
     }

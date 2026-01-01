@@ -9,7 +9,8 @@ public static partial class LoggingService
         string Message,
         Exception? Exception,
         string? StackTrace,
-        LoggingPreferences Preferences);
+        LoggingPreferences Preferences,
+        bool ForwardToWebhook);
 
     private readonly record struct LoggingPreferences(
         bool CaptureStackTraces,

@@ -63,7 +63,8 @@ internal static class EverythingSdkBootstrapper
                 ? $"{(int)code} {code}"
                 : "No response from voidtools.com";
 
-            LoggingService.LogError($"Failed to initialize Everything SDK due to network error ({status}).", ex);
+            LoggingService.LogError($"Failed to initialize Everything SDK due to network error ({status}).", ex,
+                false);
             throw EverythingSearchException.ServiceUnavailable(status, ex);
         }
         catch (Exception ex) when (ex is IOException or InvalidOperationException or NotSupportedException)

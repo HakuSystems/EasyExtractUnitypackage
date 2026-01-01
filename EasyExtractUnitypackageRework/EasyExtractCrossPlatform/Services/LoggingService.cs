@@ -67,9 +67,9 @@ public static partial class LoggingService
         WriteEntry("WARN", message, exception);
     }
 
-    public static void LogError(string message, Exception? exception = null)
+    public static void LogError(string message, Exception? exception = null, bool forwardToWebhook = true)
     {
-        WriteEntry("ERROR", message, exception, exception is null);
+        WriteEntry("ERROR", message, exception, exception is null, false, forwardToWebhook);
     }
 
     public static void LogMode(string description)
@@ -186,7 +186,7 @@ public static partial class LoggingService
     }
 
     private static void WriteEntry(string level, string message, Exception? exception, bool includeCallerStack = false,
-        bool bypassAsyncPipeline = false)
+        bool bypassAsyncPipeline = false, bool forwardToWebhook = true)
     {
         EnsureInitialized();
 
@@ -196,7 +196,8 @@ public static partial class LoggingService
         if (includeCallerStack && exception is null && preferencesSnapshot.CaptureStackTraces)
             capturedStack = CaptureCallerStack();
 
-        var entry = new PendingLogEntry(level, message, exception, capturedStack, preferencesSnapshot);
+        var entry = new PendingLogEntry(level, message, exception, capturedStack, preferencesSnapshot,
+            forwardToWebhook);
 
         if (!bypassAsyncPipeline && TryQueueEntry(entry))
             return;

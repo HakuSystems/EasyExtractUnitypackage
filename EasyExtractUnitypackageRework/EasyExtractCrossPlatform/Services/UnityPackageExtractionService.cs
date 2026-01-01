@@ -53,7 +53,8 @@ public sealed partial class UnityPackageExtractionService : IUnityPackageExtract
         if (!File.Exists(packagePath))
         {
             LoggingService.LogError(
-                $"ExtractAsync aborted: File not found | path='{packagePath}' | correlationId={correlationId}");
+                $"ExtractAsync aborted: File not found | path='{packagePath}' | correlationId={correlationId}",
+                forwardToWebhook: false);
             throw new FileNotFoundException("Unitypackage file was not found.", packagePath);
         }
 
@@ -107,6 +108,14 @@ public sealed partial class UnityPackageExtractionService : IUnityPackageExtract
             {
                 LoggingService.LogInformation(
                     $"ExtractAsync cancelled | package='{packagePath}' | correlationId={correlationId}");
+                throw;
+            }
+            catch (InvalidDataException ex)
+            {
+                LoggingService.LogError(
+                    $"ExtractAsync aborted: invalid package data | package='{packagePath}' | correlationId={correlationId}",
+                    ex,
+                    false);
                 throw;
             }
             catch (Exception ex)

@@ -17,7 +17,8 @@ public sealed partial class UnityPackageExtractionService
         if (!candidate.StartsWith(normalizedRoot, StringComparison.OrdinalIgnoreCase))
         {
             LoggingService.LogError(
-                $"Path traversal detected | candidate='{candidate}' | root='{normalizedRoot}' | correlationId={correlationId}");
+                $"Path traversal detected | candidate='{candidate}' | root='{normalizedRoot}' | correlationId={correlationId}",
+                forwardToWebhook: false);
             throw new InvalidDataException(
                 $"Extraction aborted. Asset path '{candidate}' points outside of '{normalizedRoot}'.");
         }

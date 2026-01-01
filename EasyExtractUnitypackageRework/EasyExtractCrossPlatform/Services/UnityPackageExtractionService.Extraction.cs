@@ -85,7 +85,8 @@ public sealed partial class UnityPackageExtractionService
         var detected = UnityPackageFormatDetector.Describe(format);
 
         LoggingService.LogError(
-            $"ExtractInternal aborted: unsupported package format | path='{packagePath}' | detected='{detected}' | correlationId={correlationId}");
+            $"ExtractInternal aborted: unsupported package format | path='{packagePath}' | detected='{detected}' | correlationId={correlationId}",
+            forwardToWebhook: false);
 
         return new InvalidDataException(
             $"The selected file appears to be {detected}, not a Unity .unitypackage (gzipped TAR). Please select a valid .unitypackage file.");

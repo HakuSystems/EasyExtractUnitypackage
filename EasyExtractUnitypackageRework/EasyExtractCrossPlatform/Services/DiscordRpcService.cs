@@ -83,7 +83,8 @@ public sealed partial class DiscordRpcService : IDisposable
         {
             Debug.WriteLine($"Failed to update Discord Rich Presence: {ex}");
             Log($"UpdatePresenceAsync exception: {ex}");
-            LoggingService.LogError("Failed to update Discord Rich Presence.", ex);
+            LoggingService.LogError("Failed to update Discord Rich Presence.", ex,
+                false);
             DisposeClientLocked();
         }
         finally

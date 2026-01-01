@@ -64,7 +64,8 @@ public sealed partial class EverythingSearchService : IEverythingSearchService
         catch (DllNotFoundException ex)
         {
             stopwatch.Stop();
-            LoggingService.LogError("Everything search failed: SDK DLL not found.", ex);
+            LoggingService.LogError("Everything search failed: SDK DLL not found.", ex,
+                false);
             throw EverythingSearchException.MissingLibrary(ex);
         }
         catch (EntryPointNotFoundException ex)
@@ -110,7 +111,8 @@ public sealed partial class EverythingSearchService : IEverythingSearchService
         {
             Volatile.Write(ref _availabilityHint,
                 "Everything SDK DLL is missing. Download the official Everything SDK or allow EasyExtract to fetch it automatically.");
-            LoggingService.LogError("Everything availability check failed: SDK DLL missing.", ex);
+            LoggingService.LogError("Everything availability check failed: SDK DLL missing.", ex,
+                false);
             throw EverythingSearchException.MissingLibrary(ex);
         }
         catch (EntryPointNotFoundException ex)

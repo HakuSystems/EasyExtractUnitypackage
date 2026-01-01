@@ -57,7 +57,7 @@ public static partial class LoggingService
                 PruneOldLogs(directoryInUse);
 
             foreach (var (level, message) in initializationNotes)
-                WriteEntryCore(new PendingLogEntry(level, message, null, null, _preferences));
+                WriteEntryCore(new PendingLogEntry(level, message, null, null, _preferences, true));
 
             AppDomain.CurrentDomain.ProcessExit += (_, _) => Shutdown();
             AppDomain.CurrentDomain.DomainUnload += (_, _) => Shutdown();
@@ -136,13 +136,13 @@ public static partial class LoggingService
                 catch (Exception ex)
                 {
                     WriteEntryCore(new PendingLogEntry("WARN",
-                        $"Failed to delete log file '{file}'.", ex, null, _preferences));
+                        $"Failed to delete log file '{file}'.", ex, null, _preferences, true));
                 }
         }
         catch (Exception ex)
         {
             WriteEntryCore(new PendingLogEntry("WARN",
-                "Failed to prune old log files.", ex, null, _preferences));
+                "Failed to prune old log files.", ex, null, _preferences, true));
         }
     }
 

@@ -32,7 +32,8 @@ public sealed partial class DiscordRpcService
                 DetachClientHandlers(_client);
                 _client.Dispose();
                 _client = null;
-                LoggingService.LogError("Discord RPC client failed to initialize; Discord may not be running.");
+                LoggingService.LogError("Discord RPC client failed to initialize; Discord may not be running.",
+                    forwardToWebhook: false);
                 return false;
             }
 
@@ -52,7 +53,8 @@ public sealed partial class DiscordRpcService
             _timestamps = null;
             _lastPresenceSignature = null;
             Log($"Initialization failed: {ex}");
-            LoggingService.LogError("Discord RPC client initialization failed.", ex);
+            LoggingService.LogError("Discord RPC client initialization failed.", ex,
+                false);
             return false;
         }
     }
