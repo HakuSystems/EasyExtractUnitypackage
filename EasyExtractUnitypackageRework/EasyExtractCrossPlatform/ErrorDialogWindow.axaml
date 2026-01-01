@@ -1,0 +1,98 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        x:Class="EasyExtractCrossPlatform.ErrorDialogWindow"
+        Width="600"
+        Height="420"
+        CanResize="False"
+        ShowInTaskbar="False"
+        WindowStartupLocation="CenterOwner"
+        TransparencyLevelHint="AcrylicBlur"
+        Background="Transparent"
+        Title="EasyExtract - Error">
+    <Border Background="{DynamicResource EasyGlassGradientBrush}"
+            BorderBrush="{DynamicResource EasyDangerBorderBrush}"
+            BorderThickness="1.5"
+            CornerRadius="22"
+            Padding="22"
+            BoxShadow="0 36 90 0 #22000000">
+        <Grid RowDefinitions="Auto,Auto,*,Auto"
+              ColumnDefinitions="Auto,*">
+            <Border Grid.Row="0"
+                    Grid.RowSpan="2"
+                    Width="64"
+                    Height="64"
+                    Background="{DynamicResource EasyDangerOverlayBrush}"
+                    BorderBrush="{DynamicResource EasyDangerBorderBrush}"
+                    BorderThickness="1"
+                    CornerRadius="18"
+                    HorizontalAlignment="Center"
+                    VerticalAlignment="Center">
+                <PathIcon Width="32"
+                          Height="32"
+                          HorizontalAlignment="Center"
+                          VerticalAlignment="Center"
+                          Foreground="{DynamicResource EasyTextColorBrush}"
+                          Data="M13 13H11V7H13M13 17H11V15H13M12 2C6.47 2 2 6.5 2 12C2 17.5 6.47 22 12 22C17.53 22 22 17.5 22 12C22 6.5 17.53 2 12 2Z" />
+            </Border>
+
+            <StackPanel Grid.Column="1"
+                        Grid.Row="0"
+                        Spacing="6"
+                        Margin="12,0,0,0">
+                <TextBlock x:Name="TitleTextBlock"
+                           Text="Something went wrong"
+                           Classes="headline"
+                           FontSize="20"
+                           TextWrapping="Wrap" />
+                <TextBlock x:Name="MessageTextBlock"
+                           Text="We hit an unexpected error."
+                           TextWrapping="Wrap"
+                           Classes="subtle" />
+                <TextBlock Text="This log was already sent to the developer. You can close this dialog safely."
+                           TextWrapping="Wrap"
+                           Classes="subtle" />
+            </StackPanel>
+
+            <Border x:Name="DetailsCard"
+                    Grid.Row="2"
+                    Grid.ColumnSpan="2"
+                    Margin="0,10,0,0"
+                    Background="{DynamicResource EasyGlassOverlayFaintBrush}"
+                    BorderBrush="{DynamicResource EasyGlassBorderBrush}"
+                    BorderThickness="1"
+                    CornerRadius="12"
+                    Padding="12">
+                <ScrollViewer VerticalScrollBarVisibility="Auto">
+                    <TextBox x:Name="DetailsTextBox"
+                             Classes="code"
+                             IsReadOnly="True"
+                             BorderThickness="0"
+                             Background="Transparent"
+                             AcceptsReturn="True"
+                             TextWrapping="Wrap"
+                             FontFamily="Consolas, Courier New, SFMono-Regular" />
+                </ScrollViewer>
+            </Border>
+
+            <StackPanel Grid.Row="3"
+                        Grid.ColumnSpan="2"
+                        Margin="0,12,0,0"
+                        Orientation="Horizontal"
+                        Spacing="10"
+                        HorizontalAlignment="Right">
+                <Button x:Name="OpenLogsButton"
+                        Classes="ghost"
+                        Click="OpenLogsButton_OnClick"
+                        Content="Open logs" />
+                <Button x:Name="CopyButton"
+                        Classes="ghost"
+                        Click="CopyButton_OnClick"
+                        Content="Copy details" />
+                <Button x:Name="CloseButton"
+                        Classes="accent"
+                        Click="CloseButton_OnClick"
+                        Content="Dismiss" />
+            </StackPanel>
+        </Grid>
+    </Border>
+</Window>
