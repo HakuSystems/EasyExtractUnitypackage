@@ -1,6 +1,7 @@
 using System.Text;
 using ICSharpCode.SharpZipLib.GZip;
 using ICSharpCode.SharpZipLib.Tar;
+using ICSharpCode.SharpZipLib.Zip;
 
 namespace EasyExtractCrossPlatform.Services;
 
@@ -15,6 +16,7 @@ public sealed class UnityPackagePreviewService : IUnityPackagePreviewService
 {
     private const long MaxEmbeddedAssetBytes = 8 * 1024 * 1024; // 8 MB
     private const string TemporaryExtractionFolderPrefix = "EasyExtractPreviewAudio";
+    private const string TemporaryPackageFolderPrefix = "EasyExtractPreviewPackage";
     private static readonly HashSet<char> InvalidFileNameCharacters = Path.GetInvalidFileNameChars().ToHashSet();
 
     private static readonly PathSegmentNormalization[] EmptySegmentNormalizations =
@@ -59,135 +61,142 @@ public sealed class UnityPackagePreviewService : IUnityPackagePreviewService
     {
         LoggingService.LogInformation($"Parsing unitypackage for preview: '{packagePath}'.");
 
-        using var packageStream = File.OpenRead(packagePath);
-        using var gzipStream = new GZipInputStream(packageStream);
-        using var tarReader = new TarInputStream(gzipStream, Encoding.UTF8);
+        var resolvedPackage = ResolvePackagePath(packagePath);
 
-        var assetStates = new Dictionary<string, UnityPackageAssetPreviewState>(StringComparer.OrdinalIgnoreCase);
-
-        TarEntry? entry;
-        while ((entry = tarReader.GetNextEntry()) is not null)
+        try
         {
-            cancellationToken.ThrowIfCancellationRequested();
+            using var packageStream = File.OpenRead(resolvedPackage.ResolvedPath);
+            using var gzipStream = new GZipInputStream(packageStream);
+            using var tarReader = new TarInputStream(gzipStream, Encoding.UTF8);
 
-            if (entry.IsDirectory)
-                continue;
+            var assetStates = new Dictionary<string, UnityPackageAssetPreviewState>(StringComparer.OrdinalIgnoreCase);
 
-            var entryName = entry.Name ?? string.Empty;
-            if (string.IsNullOrWhiteSpace(entryName))
-                continue;
-
-            var (assetKey, componentName) = SplitEntryName(entryName);
-            if (string.IsNullOrWhiteSpace(assetKey) || string.IsNullOrWhiteSpace(componentName))
-                continue;
-
-            if (!assetStates.TryGetValue(assetKey, out var state))
+            TarEntry? entry;
+            while ((entry = tarReader.GetNextEntry()) is not null)
             {
-                state = new UnityPackageAssetPreviewState(assetKey);
-                assetStates[assetKey] = state;
+                cancellationToken.ThrowIfCancellationRequested();
+
+                if (entry.IsDirectory)
+                    continue;
+
+                var entryName = entry.Name ?? string.Empty;
+                if (string.IsNullOrWhiteSpace(entryName))
+                    continue;
+
+                var (assetKey, componentName) = SplitEntryName(entryName);
+                if (string.IsNullOrWhiteSpace(assetKey) || string.IsNullOrWhiteSpace(componentName))
+                    continue;
+
+                if (!assetStates.TryGetValue(assetKey, out var state))
+                {
+                    state = new UnityPackageAssetPreviewState(assetKey);
+                    assetStates[assetKey] = state;
+                }
+
+                switch (componentName)
+                {
+                    case "pathname":
+                        using (var buffer = new MemoryStream())
+                        {
+                            tarReader.CopyTo(buffer);
+                            var path = Encoding.UTF8.GetString(buffer.ToArray());
+                            var normalization = NormalizeRelativePath(path);
+                            state.RelativePath = normalization.NormalizedPath;
+                            state.PathNormalization = normalization;
+                        }
+
+                        break;
+                    case "asset":
+                        state.AssetSizeBytes = Math.Max(0, entry.Size);
+                        state.AssetFilePath = null;
+                        state.NeedsAssetExtraction = false;
+
+                        if (entry.Size >= 0 && entry.Size <= MaxEmbeddedAssetBytes)
+                        {
+                            using var assetBuffer = new MemoryStream();
+                            tarReader.CopyTo(assetBuffer);
+                            state.AssetData = assetBuffer.ToArray();
+                            state.IsAssetDataTruncated = false;
+                        }
+                        else
+                        {
+                            state.AssetData = null;
+                            state.IsAssetDataTruncated = true;
+                            state.NeedsAssetExtraction = true;
+                        }
+
+                        break;
+                    case "asset.meta":
+                        state.HasMetaFile = true;
+                        break;
+                    case "preview.png":
+                        using (var memoryStream = new MemoryStream())
+                        {
+                            tarReader.CopyTo(memoryStream);
+                            state.PreviewImageData = memoryStream.ToArray();
+                        }
+
+                        break;
+                }
             }
 
-            switch (componentName)
+            var extractionRoot = ExtractLargeAudioAssets(resolvedPackage.ResolvedPath, assetStates, cancellationToken);
+            if (!string.IsNullOrWhiteSpace(extractionRoot))
+                LoggingService.LogInformation(
+                    $"Extracted large audio assets to temporary directory '{extractionRoot}'.");
+
+            var assets = new List<UnityPackagePreviewAsset>(assetStates.Count);
+            var directoriesToPrune = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            long totalAssetSize = 0;
+
+            foreach (var state in assetStates.Values)
             {
-                case "pathname":
-                    using (var buffer = new MemoryStream())
-                    {
-                        tarReader.CopyTo(buffer);
-                        var path = Encoding.UTF8.GetString(buffer.ToArray());
-                        var normalization = NormalizeRelativePath(path);
-                        state.RelativePath = normalization.NormalizedPath;
-                        state.PathNormalization = normalization;
-                    }
+                cancellationToken.ThrowIfCancellationRequested();
 
-                    break;
-                case "asset":
-                    state.AssetSizeBytes = Math.Max(0, entry.Size);
-                    state.AssetFilePath = null;
-                    state.NeedsAssetExtraction = false;
+                if (string.IsNullOrWhiteSpace(state.RelativePath))
+                    continue;
 
-                    // Check size limits
-                    if (entry.Size >= 0 && entry.Size <= MaxEmbeddedAssetBytes)
-                    {
-                        using var assetBuffer = new MemoryStream();
-                        tarReader.CopyTo(assetBuffer);
-                        state.AssetData = assetBuffer.ToArray();
-                        state.IsAssetDataTruncated = false;
-                    }
-                    else
-                    {
-                        // Too large to embed, skip reading. 
-                        // GetNextEntry will automatically skip the rest of this entry's data.
-                        state.AssetData = null;
-                        state.IsAssetDataTruncated = true;
-                        state.NeedsAssetExtraction = true;
-                    }
+                TrackCorruptedDirectories(state, directoriesToPrune);
 
-                    break;
-                case "asset.meta":
-                    state.HasMetaFile = true;
-                    break;
-                case "preview.png":
-                    using (var memoryStream = new MemoryStream())
-                    {
-                        tarReader.CopyTo(memoryStream);
-                        state.PreviewImageData = memoryStream.ToArray();
-                    }
+                var assetSize = state.AssetSizeBytes;
+                totalAssetSize += assetSize;
 
-                    break;
+                assets.Add(new UnityPackagePreviewAsset(
+                    state.RelativePath!,
+                    assetSize,
+                    state.HasMetaFile,
+                    state.PreviewImageData,
+                    state.AssetData,
+                    state.IsAssetDataTruncated,
+                    state.AssetFilePath));
             }
+
+            assets.Sort(static (left, right) =>
+                string.Compare(left.RelativePath, right.RelativePath, StringComparison.OrdinalIgnoreCase));
+
+            var fileInfo = new FileInfo(packagePath);
+            var packageSizeBytes = resolvedPackage.PackageSizeBytes ?? (fileInfo.Exists ? fileInfo.Length : 0);
+            var lastModifiedUtc = resolvedPackage.LastModifiedUtc ?? (fileInfo.Exists
+                ? new DateTimeOffset(fileInfo.LastWriteTimeUtc)
+                : null);
+
+            LoggingService.LogInformation(
+                $"Preview data assembled for '{packagePath}'. Assets={assets.Count}, totalAssetSize={totalAssetSize}, directoriesToPrune={directoriesToPrune.Count}.");
+
+            return new UnityPackagePreviewResult(
+                packagePath,
+                resolvedPackage.PackageName,
+                packageSizeBytes,
+                lastModifiedUtc,
+                totalAssetSize,
+                assets,
+                directoriesToPrune,
+                extractionRoot);
         }
-
-        var extractionRoot = ExtractLargeAudioAssets(packagePath, assetStates, cancellationToken);
-        if (!string.IsNullOrWhiteSpace(extractionRoot))
-            LoggingService.LogInformation($"Extracted large audio assets to temporary directory '{extractionRoot}'.");
-
-        var assets = new List<UnityPackagePreviewAsset>(assetStates.Count);
-        var directoriesToPrune = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-        long totalAssetSize = 0;
-
-        foreach (var state in assetStates.Values)
+        finally
         {
-            cancellationToken.ThrowIfCancellationRequested();
-
-            if (string.IsNullOrWhiteSpace(state.RelativePath))
-                continue;
-
-            TrackCorruptedDirectories(state, directoriesToPrune);
-
-            var assetSize = state.AssetSizeBytes;
-            totalAssetSize += assetSize;
-
-            assets.Add(new UnityPackagePreviewAsset(
-                state.RelativePath!,
-                assetSize,
-                state.HasMetaFile,
-                state.PreviewImageData,
-                state.AssetData,
-                state.IsAssetDataTruncated,
-                state.AssetFilePath));
+            CleanupTemporaryPackage(resolvedPackage);
         }
-
-        assets.Sort(static (left, right) =>
-            string.Compare(left.RelativePath, right.RelativePath, StringComparison.OrdinalIgnoreCase));
-
-        var fileInfo = new FileInfo(packagePath);
-        var packageSizeBytes = fileInfo.Exists ? fileInfo.Length : 0;
-        DateTimeOffset? lastModifiedUtc = fileInfo.Exists
-            ? new DateTimeOffset(fileInfo.LastWriteTimeUtc)
-            : null;
-
-        LoggingService.LogInformation(
-            $"Preview data assembled for '{packagePath}'. Assets={assets.Count}, totalAssetSize={totalAssetSize}, directoriesToPrune={directoriesToPrune.Count}.");
-
-        return new UnityPackagePreviewResult(
-            packagePath,
-            fileInfo.Name,
-            packageSizeBytes,
-            lastModifiedUtc,
-            totalAssetSize,
-            assets,
-            directoriesToPrune,
-            extractionRoot);
     }
 
     private static string? ExtractLargeAudioAssets(
@@ -273,6 +282,106 @@ public sealed class UnityPackagePreviewService : IUnityPackagePreviewService
     {
         var root = Path.Combine(Path.GetTempPath(), $"{TemporaryExtractionFolderPrefix}_{Guid.NewGuid():N}");
         return root;
+    }
+
+    private static PackagePathResolution ResolvePackagePath(string packagePath)
+    {
+        var format = DetectPackageFormat(packagePath);
+        return format switch
+        {
+            PackageFormat.GzipTar => new PackagePathResolution(packagePath, Path.GetFileName(packagePath), null, null,
+                null),
+            PackageFormat.Zip => ResolveFromZip(packagePath),
+            _ => throw new InvalidDataException(
+                "Unitypackage is not a valid gzip tar archive. If this came from a .zip, unpack the .unitypackage first.")
+        };
+    }
+
+    private static PackagePathResolution ResolveFromZip(string packagePath)
+    {
+        LoggingService.LogInformation(
+            $"Package '{packagePath}' appears to be a zip archive. Extracting embedded unitypackage.");
+
+        var tempDirectory = Path.Combine(Path.GetTempPath(), $"{TemporaryPackageFolderPrefix}_{Guid.NewGuid():N}");
+        Directory.CreateDirectory(tempDirectory);
+
+        try
+        {
+            using var zipFile = new ZipFile(packagePath);
+            ZipEntry? targetEntry = null;
+
+            foreach (ZipEntry entry in zipFile)
+            {
+                if (!entry.IsFile)
+                    continue;
+
+                var name = entry.Name ?? string.Empty;
+                if (name.EndsWith(".unitypackage", StringComparison.OrdinalIgnoreCase))
+                {
+                    targetEntry = entry;
+                    break;
+                }
+            }
+
+            if (targetEntry is null)
+                throw new InvalidDataException("Zip archive does not contain a .unitypackage payload.");
+
+            var fileName = Path.GetFileName(targetEntry.Name);
+            if (string.IsNullOrWhiteSpace(fileName))
+                fileName = "package.unitypackage";
+
+            var targetPath = Path.Combine(tempDirectory, fileName);
+            using (var entryStream = zipFile.GetInputStream(targetEntry))
+            using (var output = File.Create(targetPath))
+            {
+                entryStream.CopyTo(output);
+            }
+
+            long? size = targetEntry.Size >= 0 ? targetEntry.Size : null;
+            var lastModified = new DateTimeOffset(targetEntry.DateTime.ToUniversalTime());
+
+            LoggingService.LogInformation($"Extracted '{fileName}' from zip '{packagePath}' for preview.");
+            return new PackagePathResolution(targetPath, fileName, tempDirectory, size, lastModified);
+        }
+        catch
+        {
+            CleanupTemporaryDirectory(tempDirectory);
+            throw;
+        }
+    }
+
+    private static PackageFormat DetectPackageFormat(string packagePath)
+    {
+        using var stream = File.OpenRead(packagePath);
+        Span<byte> header = stackalloc byte[4];
+        var bytesRead = stream.Read(header);
+
+        if (bytesRead >= 2 && header[0] == 0x1F && header[1] == 0x8B)
+            return PackageFormat.GzipTar;
+
+        if (bytesRead >= 2 && header[0] == 0x50 && header[1] == 0x4B)
+            return PackageFormat.Zip;
+
+        return PackageFormat.Unknown;
+    }
+
+    private static void CleanupTemporaryPackage(PackagePathResolution resolution)
+    {
+        if (resolution.TemporaryDirectory is null)
+            return;
+
+        CleanupTemporaryDirectory(resolution.TemporaryDirectory);
+    }
+
+    private static void CleanupTemporaryDirectory(string path)
+    {
+        try
+        {
+            Directory.Delete(path, true);
+        }
+        catch
+        {
+        }
     }
 
     private static string SanitizeFileName(string? input)
@@ -386,6 +495,20 @@ public sealed class UnityPackagePreviewService : IUnityPackagePreviewService
         string NormalizedPath,
         string OriginalPath,
         IReadOnlyList<PathSegmentNormalization> Segments);
+
+    private enum PackageFormat
+    {
+        Unknown,
+        GzipTar,
+        Zip
+    }
+
+    private readonly record struct PackagePathResolution(
+        string ResolvedPath,
+        string PackageName,
+        string? TemporaryDirectory,
+        long? PackageSizeBytes,
+        DateTimeOffset? LastModifiedUtc);
 
     private sealed class UnityPackageAssetPreviewState
     {
