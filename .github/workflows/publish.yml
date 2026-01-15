@@ -4,8 +4,8 @@ on:
   push:
     tags:
       - 'v*'
-      - 'V*'  # Für Uppercase Tags
-      - '[0-9]*' # (z.B. 2.0.7.5)
+      - 'V*'      # Für Uppercase Tags wie V2.0.8.1
+      - '[0-9]*'  # Für Tags ohne Prefix wie 2.0.7.5
 
 permissions:
   contents: write
@@ -46,9 +46,17 @@ jobs:
       - name: Clean Version String
         shell: bash
         run: |
-          # Strip 'v' prefix (v1.0.0 -> 1.0.0)
-          TAG_NAME=${GITHUB_REF#refs/tags/v}
-          echo "VERSION=$TAG_NAME" >> $GITHUB_ENV
+          # Holt den Tag Name (z.B. "refs/tags/V2.0.8.1")
+          TAG_NAME=${GITHUB_REF#refs/tags/}
+          
+          # Entfernt führendes 'v' oder 'V' via Regex, falls vorhanden
+          # V2.0.8.1 -> 2.0.8.1
+          # v1.0.0   -> 1.0.0
+          # 2.0.7.5  -> 2.0.7.5
+          CLEAN_VERSION=$(echo "$TAG_NAME" | sed 's/^[vV]//')
+          
+          echo "Processing Version: $CLEAN_VERSION"
+          echo "VERSION=$CLEAN_VERSION" >> $GITHUB_ENV
 
       - name: Publish DotNet
         run: |
