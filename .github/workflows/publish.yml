@@ -4,6 +4,8 @@ on:
   push:
     tags:
       - 'v*'
+      - 'V*'  # Für Uppercase Tags
+      - '[0-9]*' # (z.B. 2.0.7.5)
 
 permissions:
   contents: write
