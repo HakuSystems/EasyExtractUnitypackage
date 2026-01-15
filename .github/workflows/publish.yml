@@ -90,5 +90,7 @@ jobs:
         if: startsWith(github.ref, 'refs/tags/')
         with:
           files: release_output/*
+          draft: true                 # Erstellt Release als Entwurf (User sehen es noch nicht)
+          generate_release_notes: true # Generiert automatisch Changelog aus Commits
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
