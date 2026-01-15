@@ -1,0 +1,84 @@
+name: Publish Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+jobs:
+  build-and-release:
+    name: Build for ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: windows-latest
+            rid: win-x64
+          - os: ubuntu-latest
+            rid: linux-x64
+          - os: macos-latest
+            rid: osx-arm64
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup .NET 9
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 9.0.x
+
+      - name: Install Velopack (vpk)
+        run: dotnet tool install -g vpk
+
+      - name: Install Dependencies (Linux)
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libfuse2
+
+      - name: Clean Version String
+        shell: bash
+        run: |
+          # Strip 'v' prefix (v1.0.0 -> 1.0.0)
+          TAG_NAME=${GITHUB_REF#refs/tags/v}
+          echo "VERSION=$TAG_NAME" >> $GITHUB_ENV
+
+      - name: Publish DotNet
+        run: |
+          dotnet publish EasyExtractCrossPlatform.csproj \
+            -c Release \
+            -r ${{ matrix.rid }} \
+            --self-contained \
+            -p:Version=${{ env.VERSION }} \
+            -o publish_output
+
+      # --- WINDOWS PACKING (mit .exe) ---
+      - name: Pack with Velopack (Windows)
+        if: runner.os == 'Windows'
+        run: |
+          vpk pack -u EasyExtractCrossPlatform -v ${{ env.VERSION }} -p publish_output -o release_output --mainExe EasyExtractCrossPlatform.exe
+
+      # --- LINUX PACKING (ohne .exe) ---
+      - name: Pack with Velopack (Linux)
+        if: runner.os == 'Linux'
+        run: |
+          vpk pack -u EasyExtractCrossPlatform -v ${{ env.VERSION }} -p publish_output -o release_output --mainExe EasyExtractCrossPlatform
+
+      # --- MAC PACKING (ohne .exe) ---
+      - name: Pack with Velopack (macOS)
+        if: runner.os == 'macOS'
+        run: |
+          vpk pack -u EasyExtractCrossPlatform -v ${{ env.VERSION }} -p publish_output -o release_output --mainExe EasyExtractCrossPlatform
+
+      - name: Upload Release Assets
+        uses: softprops/action-gh-release@v1
+        if: startsWith(github.ref, 'refs/tags/')
+        with:
+          files: release_output/*
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
