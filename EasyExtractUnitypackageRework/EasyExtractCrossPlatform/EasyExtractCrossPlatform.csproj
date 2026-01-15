@@ -34,6 +34,7 @@
         </PackageReference>
         <PackageReference Include="OpenTK" Version="4.9.4"/>
         <PackageReference Include="SharpZipLib" Version="1.4.2"/>
+        <PackageReference Include="Velopack" Version="0.0.1298"/>
     </ItemGroup>
     <ItemGroup>
         <Compile Remove="EasyExtractCrossPlatform.Tests\**\*.cs"/>

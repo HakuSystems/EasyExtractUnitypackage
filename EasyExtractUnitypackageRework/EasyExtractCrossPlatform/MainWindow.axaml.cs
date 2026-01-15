@@ -76,13 +76,14 @@ public partial class MainWindow : Window
     private readonly Grid? _startExtractionHeaderGrid;
     private readonly string[] _startupArguments;
     private readonly TextBox? _unityPackageSearchBox;
-    private readonly IUpdateService _updateService;
+
     private readonly string _uwuDropPrimaryText;
     private readonly string _uwuDropSecondaryText;
     private readonly Border? _uwuModeBanner;
+    private readonly IVelopackUpdateService _velopackUpdateService;
     private readonly TextBlock? _versionTextBlock;
     private Control? _activeOverlayContent;
-    private UpdateManifest? _activeUpdateManifest;
+
     private object? _checkUpdatesButtonOriginalContent;
     private CreditsWindow? _creditsWindow;
     private Bitmap? _currentBackgroundBitmap;
@@ -103,22 +104,20 @@ public partial class MainWindow : Window
     private Stopwatch? _extractionStopwatch;
     private FeedbackWindow? _feedbackWindow;
     private HistoryWindow? _historyWindow;
-    private bool _isCheckingForUpdates;
+
     private bool _isExtractionCancelling;
     private bool _isExtractionOverviewLive;
     private bool _isExtractionRunning;
     private bool _isSearchHover;
-    private bool _isUpdateDownloadInProgress;
+
     private bool _lastDiscordPresenceEnabled;
     private PixelPoint? _lastNormalPosition;
     private Size? _lastNormalSize;
-    private double? _lastUpdatePercentage;
-    private UpdatePhase? _lastUpdatePhase;
-    private DateTime _lastUpdateUiRefresh = DateTime.MinValue;
+
     private CancellationTokenSource? _overlayAnimationCts;
     private ScaleTransform? _overlayCardScaleTransform;
     private List<string>? _pendingStartupExtractions;
-    private UpdateManifest? _pendingUpdateManifest;
+
     private IDisposable? _responsiveLayoutSubscription;
     private AppSettings _settings = new();
     private SettingsWindow? _settingsWindow;
@@ -137,7 +136,8 @@ public partial class MainWindow : Window
         _notificationService = _serviceProvider.GetRequiredService<INotificationService>();
         _errorDialogService = _serviceProvider.GetRequiredService<IErrorDialogService>();
         _previewService = _serviceProvider.GetRequiredService<IUnityPackagePreviewService>();
-        _updateService = _serviceProvider.GetRequiredService<IUpdateService>();
+        _velopackUpdateService = _serviceProvider.GetRequiredService<IVelopackUpdateService>();
+
 
         InitializeComponent();
         LinuxUiHelper.ApplyWindowTweaks(this);
@@ -274,7 +274,7 @@ public partial class MainWindow : Window
         SetVersionText();
         QueueDiscordPresenceUpdate("Dashboard");
         InitializeStartupExtractionTargets();
-        QueueAutomaticUpdateCheck();
+        _ = CheckForUpdatesSilentlyAsync();
     }
 
     public EverythingSearchViewModel? SearchViewModel { get; }

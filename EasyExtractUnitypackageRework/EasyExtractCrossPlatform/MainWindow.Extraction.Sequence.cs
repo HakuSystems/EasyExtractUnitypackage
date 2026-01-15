@@ -195,7 +195,7 @@ public partial class MainWindow : Window
             _extractionCts = null;
             UpdateExtractionButtonsState();
             RestorePresenceAfterOverlay();
-            TryLaunchPendingUpdateAfterExtraction();
+            RestorePresenceAfterOverlay();
         }
     }
 
