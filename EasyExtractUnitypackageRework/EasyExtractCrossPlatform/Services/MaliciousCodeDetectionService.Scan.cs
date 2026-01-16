@@ -111,14 +111,14 @@ public sealed partial class MaliciousCodeDetectionService
         var format = UnityPackageFormatDetector.Detect(packageStream);
 
         Stream archiveStream = packageStream;
-        GZipInputStream? gzipStream = null;
+        GZipStream? gzipStream = null;
 
         try
         {
             switch (format)
             {
                 case UnityPackageFormat.GzipTar:
-                    gzipStream = new GZipInputStream(packageStream);
+                    gzipStream = new GZipStream(packageStream, CompressionMode.Decompress);
                     archiveStream = gzipStream;
                     break;
                 case UnityPackageFormat.Tar:
@@ -145,7 +145,7 @@ public sealed partial class MaliciousCodeDetectionService
                 stats.TarEntriesRead++;
                 cancellationToken.ThrowIfCancellationRequested();
 
-                if (entry.EntryType == TarEntryType.Directory)
+                if (entry.EntryType is not (TarEntryType.RegularFile or TarEntryType.V7RegularFile))
                     continue;
 
                 var entryName = entry.Name ?? string.Empty;
@@ -219,7 +219,7 @@ public sealed partial class MaliciousCodeDetectionService
                 threats,
                 DateTimeOffset.UtcNow);
         }
-        catch (GZipException ex)
+        catch (InvalidDataException ex)
         {
             LoggingService.LogError(
                 $"MaliciousCodeScan: invalid gzip data | path={packagePath}",
