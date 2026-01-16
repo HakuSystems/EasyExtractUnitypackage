@@ -1,7 +1,5 @@
 using System.Collections.Immutable;
-using ICSharpCode.SharpZipLib;
-using ICSharpCode.SharpZipLib.GZip;
-using ICSharpCode.SharpZipLib.Tar;
+using System.Formats.Tar;
 
 namespace EasyExtractCrossPlatform.Services;
 

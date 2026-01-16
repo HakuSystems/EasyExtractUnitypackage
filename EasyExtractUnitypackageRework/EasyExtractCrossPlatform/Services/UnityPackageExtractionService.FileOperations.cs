@@ -1,7 +1,7 @@
 using System.Buffers;
+using System.Formats.Tar;
 using System.Security.Cryptography;
 using System.Text;
-using ICSharpCode.SharpZipLib.Tar;
 
 namespace EasyExtractCrossPlatform.Services;
 

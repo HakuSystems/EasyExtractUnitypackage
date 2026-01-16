@@ -1,7 +1,6 @@
+using System.Formats.Tar;
+using System.IO.Compression;
 using System.Text;
-using ICSharpCode.SharpZipLib.GZip;
-using ICSharpCode.SharpZipLib.Tar;
-using ICSharpCode.SharpZipLib.Zip;
 
 namespace EasyExtractCrossPlatform.Services;
 
@@ -486,6 +485,17 @@ public sealed class UnityPackagePreviewService : IUnityPackagePreviewService
                 continue;
 
             directoriesToPrune.Add(builder.ToString());
+        }
+    }
+
+    private static void CopyStreamWithCancellation(Stream source, Stream destination, CancellationToken token)
+    {
+        var buffer = new byte[81920];
+        int read;
+        while ((read = source.Read(buffer, 0, buffer.Length)) > 0)
+        {
+            token.ThrowIfCancellationRequested();
+            destination.Write(buffer, 0, read);
         }
     }
 

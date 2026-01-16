@@ -1,5 +1,5 @@
 ﻿using System.Formats.Tar;
-using ICSharpCode.SharpZipLib.GZip;
+using System.IO.Compression;
 
 namespace EasyExtractCrossPlatform.Services;
 
