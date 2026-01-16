@@ -8,11 +8,11 @@
         <AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
         <LangVersion>default</LangVersion>
         <!--  <ApplicationIcon Condition="$([MSBuild]::IsOSPlatform('Windows'))">Smallicon.ico</ApplicationIcon> -->
-        <AssemblyVersion>2.0.8.1</AssemblyVersion>
-        <FileVersion>2.0.8.1</FileVersion>
-        <Version>2.0.8.1</Version>
+        <AssemblyVersion>2.8.2</AssemblyVersion>
+        <FileVersion>2.8.2</FileVersion>
+        <Version>2.8.2</Version>
         <IncludeSourceRevisionInInformationalVersion>false</IncludeSourceRevisionInInformationalVersion>
-        <AssemblyInformationalVersion>2.0.8.1</AssemblyInformationalVersion>
+        <AssemblyInformationalVersion>2.8.2</AssemblyInformationalVersion>
     </PropertyGroup>
 
     <ItemGroup>

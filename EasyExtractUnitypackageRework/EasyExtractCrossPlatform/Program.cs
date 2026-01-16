@@ -10,7 +10,7 @@ internal class Program
     [STAThread]
     public static void Main(string[] args)
     {
-        VelopackApp.Build().Run(); // oops my bad
+        VelopackApp.Build().Run();
         LoggingService.Initialize();
         LoggingService.LogInformation("EasyExtract starting up.");
         var launchMode = args.Length == 0 ? "Interactive" : "CLI";
