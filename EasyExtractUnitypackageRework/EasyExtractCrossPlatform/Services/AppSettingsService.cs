@@ -13,6 +13,7 @@ public static class AppSettingsService
             new HistoryEntryListJsonConverter(),
             new SafeWindowStateConverter(),
             new ExtractedPackageModelConverter(),
+            new SafeDateTimeOffsetConverter(),
             new JsonStringEnumConverter()
         }
     };
@@ -294,6 +295,31 @@ public static class AppSettingsService
             writer.WriteString(nameof(ExtractedPackageModel.FilePath), value.FilePath);
             writer.WriteString(nameof(ExtractedPackageModel.DateExtracted), value.DateExtracted);
             writer.WriteEndObject();
+        }
+    }
+
+    private class SafeDateTimeOffsetConverter : JsonConverter<DateTimeOffset?>
+    {
+        public override DateTimeOffset? Read(ref Utf8JsonReader reader, Type typeToConvert,
+            JsonSerializerOptions options)
+        {
+            if (reader.TokenType == JsonTokenType.String)
+            {
+                var dateString = reader.GetString();
+                if (DateTimeOffset.TryParse(dateString, CultureInfo.InvariantCulture, DateTimeStyles.None,
+                        out var date))
+                    return date;
+            }
+
+            return null;
+        }
+
+        public override void Write(Utf8JsonWriter writer, DateTimeOffset? value, JsonSerializerOptions options)
+        {
+            if (value.HasValue)
+                writer.WriteStringValue(value.Value);
+            else
+                writer.WriteNullValue();
         }
     }
 }
