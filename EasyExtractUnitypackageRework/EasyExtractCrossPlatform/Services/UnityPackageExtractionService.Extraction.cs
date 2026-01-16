@@ -20,12 +20,12 @@ public sealed partial class UnityPackageExtractionService
         var format = UnityPackageFormatDetector.Detect(packageStream);
 
         Stream inputStream = packageStream;
-        GZipInputStream? gzipStream = null;
+        GZipStream? gzipStream = null;
 
         switch (format)
         {
             case UnityPackageFormat.GzipTar:
-                gzipStream = new GZipInputStream(packageStream);
+                gzipStream = new GZipStream(packageStream, CompressionMode.Decompress);
                 inputStream = gzipStream;
                 break;
             case UnityPackageFormat.Tar:
@@ -38,7 +38,7 @@ public sealed partial class UnityPackageExtractionService
                 throw CreateInvalidFormatException(format, packagePath, correlationId);
         }
 
-        using var tarReader = new TarInputStream(inputStream, Encoding.UTF8);
+        using var tarReader = new TarReader(inputStream, true);
 
         var normalizedOutputDirectory = NormalizeOutputDirectory(outputDirectory);
         var limits = UnityPackageExtractionLimits.Normalize(options.Limits);
@@ -60,7 +60,7 @@ public sealed partial class UnityPackageExtractionService
         {
             return session.Execute();
         }
-        catch (GZipException ex)
+        catch (InvalidDataException ex)
         {
             LoggingService.LogError(
                 $"Extraction failed: invalid gzip data (package may be corrupted) | path='{packagePath}' | correlationId={correlationId}",

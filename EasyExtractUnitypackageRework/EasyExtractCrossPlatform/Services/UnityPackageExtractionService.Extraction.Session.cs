@@ -29,7 +29,7 @@ public sealed partial class UnityPackageExtractionService
         private readonly IProgress<UnityPackageExtractionProgress>? _progress;
         private readonly HashSet<UnityPackageAssetState> _queuedStates = new();
 
-        private readonly TarInputStream _tarReader;
+        private readonly TarReader _tarReader;
         private readonly string _temporaryDirectoryPath;
         private int _assetsSkippedNoContent;
         private int _assetsSkippedNoPath;
@@ -46,7 +46,7 @@ public sealed partial class UnityPackageExtractionService
             bool organizeByCategories,
             UnityPackageExtractionLimits limits,
             string temporaryDirectoryPath,
-            TarInputStream tarReader,
+            TarReader tarReader,
             IProgress<UnityPackageExtractionProgress>? progress,
             CancellationToken cancellationToken,
             string correlationId)
@@ -106,7 +106,7 @@ public sealed partial class UnityPackageExtractionService
                         _cancellationToken.ThrowIfCancellationRequested();
                         _tarEntriesProcessed++;
 
-                        if (entry.IsDirectory)
+                        if (entry.EntryType is not (TarEntryType.RegularFile or TarEntryType.V7RegularFile))
                         {
                             _tarEntriesSkipped++;
                             continue;
@@ -137,7 +137,8 @@ public sealed partial class UnityPackageExtractionService
                             case "pathname":
                             {
                                 var normalization = NormalizeRelativePath(
-                                    ReadEntryAsUtf8String(_tarReader, _cancellationToken, _correlationId),
+                                    ReadEntryAsUtf8String(entry.DataStream ?? Stream.Null, _cancellationToken,
+                                        _correlationId),
                                     _correlationId);
                                 state.RelativePath = normalization.NormalizedPath;
                                 state.OriginalRelativePath = normalization.OriginalPath;
@@ -148,7 +149,6 @@ public sealed partial class UnityPackageExtractionService
                             {
                                 var component = CreateAssetComponent(
                                     entry,
-                                    _tarReader,
                                     _temporaryDirectoryPath,
                                     _limits,
                                     _limiter,
@@ -161,7 +161,6 @@ public sealed partial class UnityPackageExtractionService
                             {
                                 var component = CreateAssetComponent(
                                     entry,
-                                    _tarReader,
                                     _temporaryDirectoryPath,
                                     _limits,
                                     _limiter,
@@ -174,7 +173,6 @@ public sealed partial class UnityPackageExtractionService
                             {
                                 var component = CreateAssetComponent(
                                     entry,
-                                    _tarReader,
                                     _temporaryDirectoryPath,
                                     _limits,
                                     _limiter,
@@ -201,25 +199,14 @@ public sealed partial class UnityPackageExtractionService
                     }
                 }
             }
-            catch (TarException ex)
+            catch (Exception ex) when (ex is IOException or InvalidDataException)
             {
                 LoggingService.LogError(
-                    $"TAR processing failed (likely not a valid unitypackage) | entriesProcessed={_tarEntriesProcessed} | skipped={_tarEntriesSkipped} | correlationId={_correlationId}",
-                    ex,
-                    false);
-
-                throw new InvalidDataException(
-                    "The selected file is not a valid .unitypackage (gzipped TAR). It may be a ZIP/RAR/7z file or is corrupted.",
-                    ex);
-            }
-            catch (SharpZipBaseException ex) when (ex is not GZipException)
-            {
-                LoggingService.LogError(
-                    $"Compressed data is invalid while reading the package | entriesProcessed={_tarEntriesProcessed} | skipped={_tarEntriesSkipped} | correlationId={_correlationId}",
+                    $"TAR processing failed | entriesProcessed={_tarEntriesProcessed} | skipped={_tarEntriesSkipped} | correlationId={_correlationId}",
                     ex);
 
                 throw new InvalidDataException(
-                    "The package appears to be corrupted (compressed data inside the .unitypackage is invalid). Please download the file again.",
+                    "The selected file is not a valid .unitypackage or is corrupted. Please download the file again.",
                     ex);
             }
 

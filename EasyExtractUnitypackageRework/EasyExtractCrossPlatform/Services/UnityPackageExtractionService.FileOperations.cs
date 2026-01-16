@@ -298,7 +298,6 @@ public sealed partial class UnityPackageExtractionService
 
     private static AssetComponent? CreateAssetComponent(
         TarEntry entry,
-        Stream currentEntryStream,
         string temporaryDirectory,
         UnityPackageExtractionLimits limits,
         ExtractionLimiter limiter,
@@ -308,7 +307,7 @@ public sealed partial class UnityPackageExtractionService
         cancellationToken.ThrowIfCancellationRequested();
         Directory.CreateDirectory(temporaryDirectory);
         var entryName = string.IsNullOrWhiteSpace(entry.Name) ? "asset" : entry.Name;
-        limiter.ValidateDeclaredSize(entry.Size, entryName);
+        limiter.ValidateDeclaredSize(entry.Length, entryName);
 
         var tempPath = Path.Combine(temporaryDirectory, $"{Guid.NewGuid():N}.tmp");
         FileStream? output = null;
@@ -326,21 +325,23 @@ public sealed partial class UnityPackageExtractionService
                 try
                 {
                     int read;
-                    // Read from the current entry stream (TarInputStream)
-                    // SharpZipLib's TarInputStream returns 0 when the current entry ends.
-                    while ((read = currentEntryStream.Read(buffer, 0, buffer.Length)) > 0)
-                    {
-                        cancellationToken.ThrowIfCancellationRequested();
-                        output.Write(buffer, 0, read);
-                        hasher.AppendData(buffer, 0, read);
-                        totalWritten += read;
 
-                        if (limits.MaxAssetBytes > 0 && totalWritten > limits.MaxAssetBytes)
+                    if (entry.DataStream != null)
+                    {
+                        while ((read = entry.DataStream.Read(buffer, 0, buffer.Length)) > 0)
                         {
-                            LoggingService.LogError(
-                                $"Asset exceeded per-file limit | entry='{entryName}' | size={totalWritten} | limit={limits.MaxAssetBytes} | correlationId={correlationId}");
-                            throw new InvalidDataException(
-                                $"Asset '{entryName}' exceeded the configured per-file limit of {limits.MaxAssetBytes:N0} bytes.");
+                            cancellationToken.ThrowIfCancellationRequested();
+                            output.Write(buffer, 0, read);
+                            hasher.AppendData(buffer, 0, read);
+                            totalWritten += read;
+
+                            if (limits.MaxAssetBytes > 0 && totalWritten > limits.MaxAssetBytes)
+                            {
+                                LoggingService.LogError(
+                                    $"Asset exceeded per-file limit | entry='{entryName}' | size={totalWritten} | limit={limits.MaxAssetBytes} | correlationId={correlationId}");
+                                throw new InvalidDataException(
+                                    $"Asset '{entryName}' exceeded the configured per-file limit of {limits.MaxAssetBytes:N0} bytes.");
+                            }
                         }
                     }
                 }
