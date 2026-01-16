@@ -60,13 +60,13 @@ public sealed class UnityPackagePreviewService : IUnityPackagePreviewService
     {
         LoggingService.LogInformation($"Parsing unitypackage for preview: '{packagePath}'.");
 
-        var resolvedPackage = ResolvePackagePath(packagePath);
+        var resolvedPackage = ResolvePackagePath(packagePath, cancellationToken);
 
         try
         {
             using var packageStream = File.OpenRead(resolvedPackage.ResolvedPath);
-            using var gzipStream = new GZipInputStream(packageStream);
-            using var tarReader = new TarInputStream(gzipStream, Encoding.UTF8);
+            using var gzipStream = new GZipStream(packageStream, CompressionMode.Decompress);
+            using var tarReader = new TarReader(gzipStream);
 
             var assetStates = new Dictionary<string, UnityPackageAssetPreviewState>(StringComparer.OrdinalIgnoreCase);
 
@@ -75,7 +75,7 @@ public sealed class UnityPackagePreviewService : IUnityPackagePreviewService
             {
                 cancellationToken.ThrowIfCancellationRequested();
 
-                if (entry.IsDirectory)
+                if (entry.EntryType is not (TarEntryType.RegularFile or TarEntryType.V7RegularFile))
                     continue;
 
                 var entryName = entry.Name ?? string.Empty;
@@ -97,7 +97,8 @@ public sealed class UnityPackagePreviewService : IUnityPackagePreviewService
                     case "pathname":
                         using (var buffer = new MemoryStream())
                         {
-                            tarReader.CopyTo(buffer);
+                            if (entry.DataStream != null)
+                                CopyStreamWithCancellation(entry.DataStream, buffer, cancellationToken);
                             var path = Encoding.UTF8.GetString(buffer.ToArray());
                             var normalization = NormalizeRelativePath(path);
                             state.RelativePath = normalization.NormalizedPath;
@@ -106,14 +107,15 @@ public sealed class UnityPackagePreviewService : IUnityPackagePreviewService
 
                         break;
                     case "asset":
-                        state.AssetSizeBytes = Math.Max(0, entry.Size);
+                        state.AssetSizeBytes = Math.Max(0, entry.Length);
                         state.AssetFilePath = null;
                         state.NeedsAssetExtraction = false;
 
-                        if (entry.Size >= 0 && entry.Size <= MaxEmbeddedAssetBytes)
+                        if (entry.Length >= 0 && entry.Length <= MaxEmbeddedAssetBytes)
                         {
                             using var assetBuffer = new MemoryStream();
-                            tarReader.CopyTo(assetBuffer);
+                            if (entry.DataStream != null)
+                                CopyStreamWithCancellation(entry.DataStream, assetBuffer, cancellationToken);
                             state.AssetData = assetBuffer.ToArray();
                             state.IsAssetDataTruncated = false;
                         }
@@ -131,7 +133,8 @@ public sealed class UnityPackagePreviewService : IUnityPackagePreviewService
                     case "preview.png":
                         using (var memoryStream = new MemoryStream())
                         {
-                            tarReader.CopyTo(memoryStream);
+                            if (entry.DataStream != null)
+                                CopyStreamWithCancellation(entry.DataStream, memoryStream, cancellationToken);
                             state.PreviewImageData = memoryStream.ToArray();
                         }
 
@@ -216,15 +219,15 @@ public sealed class UnityPackagePreviewService : IUnityPackagePreviewService
         string? extractionRoot = null;
 
         using var packageStream = File.OpenRead(packagePath);
-        using var gzipStream = new GZipInputStream(packageStream);
-        using var tarReader = new TarInputStream(gzipStream, Encoding.UTF8);
+        using var gzipStream = new GZipStream(packageStream, CompressionMode.Decompress);
+        using var tarReader = new TarReader(gzipStream);
 
         TarEntry? entry;
         while ((entry = tarReader.GetNextEntry()) is not null && candidates.Count > 0)
         {
             cancellationToken.ThrowIfCancellationRequested();
 
-            if (entry.IsDirectory)
+            if (entry.EntryType is not (TarEntryType.RegularFile or TarEntryType.V7RegularFile))
                 continue;
 
             var entryName = entry.Name ?? string.Empty;
@@ -249,11 +252,16 @@ public sealed class UnityPackagePreviewService : IUnityPackagePreviewService
                 safeName = Guid.NewGuid().ToString("N");
 
             var targetPath = Path.Combine(extractionRoot, $"{safeName}{extension}");
+            var fullTargetPath = Path.GetFullPath(targetPath);
+            if (!fullTargetPath.StartsWith(extractionRoot, StringComparison.OrdinalIgnoreCase))
+                throw new IOException("Security Error: Zip Slip detected during large asset extraction.");
+
             Directory.CreateDirectory(extractionRoot);
 
             using (var output = File.Create(targetPath))
             {
-                tarReader.CopyTo(output);
+                if (entry.DataStream != null)
+                    CopyStreamWithCancellation(entry.DataStream, output, cancellationToken);
             }
 
             state.AssetFilePath = targetPath;
@@ -283,20 +291,20 @@ public sealed class UnityPackagePreviewService : IUnityPackagePreviewService
         return root;
     }
 
-    private static PackagePathResolution ResolvePackagePath(string packagePath)
+    private static PackagePathResolution ResolvePackagePath(string packagePath, CancellationToken cancellationToken)
     {
         var format = DetectPackageFormat(packagePath);
         return format switch
         {
             PackageFormat.GzipTar => new PackagePathResolution(packagePath, Path.GetFileName(packagePath), null, null,
                 null),
-            PackageFormat.Zip => ResolveFromZip(packagePath),
+            PackageFormat.Zip => ResolveFromZip(packagePath, cancellationToken),
             _ => throw new InvalidDataException(
                 "Unitypackage is not a valid gzip tar archive. If this came from a .zip, unpack the .unitypackage first.")
         };
     }
 
-    private static PackagePathResolution ResolveFromZip(string packagePath)
+    private static PackagePathResolution ResolveFromZip(string packagePath, CancellationToken cancellationToken)
     {
         LoggingService.LogInformation(
             $"Package '{packagePath}' appears to be a zip archive. Extracting embedded unitypackage.");
@@ -306,15 +314,12 @@ public sealed class UnityPackagePreviewService : IUnityPackagePreviewService
 
         try
         {
-            using var zipFile = new ZipFile(packagePath);
-            ZipEntry? targetEntry = null;
+            using var zipArchive = ZipFile.OpenRead(packagePath);
+            ZipArchiveEntry? targetEntry = null;
 
-            foreach (ZipEntry entry in zipFile)
+            foreach (var entry in zipArchive.Entries)
             {
-                if (!entry.IsFile)
-                    continue;
-
-                var name = entry.Name ?? string.Empty;
+                var name = entry.FullName;
                 if (name.EndsWith(".unitypackage", StringComparison.OrdinalIgnoreCase))
                 {
                     targetEntry = entry;
@@ -330,14 +335,14 @@ public sealed class UnityPackagePreviewService : IUnityPackagePreviewService
                 fileName = "package.unitypackage";
 
             var targetPath = Path.Combine(tempDirectory, fileName);
-            using (var entryStream = zipFile.GetInputStream(targetEntry))
+            using (var entryStream = targetEntry.Open())
             using (var output = File.Create(targetPath))
             {
-                entryStream.CopyTo(output);
+                CopyStreamWithCancellation(entryStream, output, cancellationToken);
             }
 
-            long? size = targetEntry.Size >= 0 ? targetEntry.Size : null;
-            var lastModified = new DateTimeOffset(targetEntry.DateTime.ToUniversalTime());
+            long? size = targetEntry.Length >= 0 ? targetEntry.Length : null;
+            var lastModified = targetEntry.LastWriteTime.ToUniversalTime();
 
             LoggingService.LogInformation($"Extracted '{fileName}' from zip '{packagePath}' for preview.");
             return new PackagePathResolution(targetPath, fileName, tempDirectory, size, lastModified);
