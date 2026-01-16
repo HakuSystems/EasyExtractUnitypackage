@@ -15,12 +15,12 @@
 
 ## 🚀 What is EasyExtract?
 
-EasyExtract is the ultimate tool to unpack, inspect, and manage Unity packages (`.unitypackage`) **without ever opening the Unity Editor**. 
+EasyExtract is the ultimate tool to unpack, inspect, and manage Unity packages (`.unitypackage`) **and Zip archives** (`.zip`) containing packages **without ever opening the Unity Editor**. 
 
 Whether you are a developer checking assets or a power user managing a massive library, EasyExtract provides a high-performance, cross-platform solution (built with **Avalonia**) to streamline your workflow.
 
 **Choose your weapon:**
-* **Desktop Client (Recommended):** Full offline power, system-wide search, batch processing, and deep integration.
+* **Desktop Client (Recommended):** Full offline power, auto-updates, system-wide search, and deep integration.
 * **Web App:** Instant, no-install extraction directly in your browser.
 
 ---
@@ -28,13 +28,16 @@ Whether you are a developer checking assets or a power user managing a massive l
 ## 📥 Download & Quick Start
 
 ### 🖥️ Desktop App (Windows, macOS, Linux)
-*The complete experience.*
+*The complete experience with Auto-Updates.*
 
 1.  **Download** the latest release from [GitHub Releases](https://github.com/HakuSystems/EasyExtractUnitypackage/releases).
-2.  **Run it:**
-    * **Windows:** Launch `EasyExtract.exe`.
-    * **Linux/macOS:** Run the executable (Check [Installation Docs](https://github.com/HakuSystems/EasyExtractUnitypackage/blob/main/EasyExtractUnitypackageRework/EasyExtractCrossPlatform/docs/PlatformInstallation.md) if you need permission help).
+2.  **Install & Run:**
+    * **Windows:** Download and run `EasyExtract-Setup.exe`. It will automatically install to your local app data and launch.
+    * **Linux:** Download the `.AppImage`, make it executable (`chmod +x`), and run it.
+    * **macOS:** Download the `.zip` or `.pkg` and install/run the App.
 3.  **Enjoy:** Drag & drop files, or let the auto-search find packages for you.
+
+*(Check [Installation Docs](https://github.com/HakuSystems/EasyExtractUnitypackage/blob/main/EasyExtractUnitypackageRework/EasyExtractCrossPlatform/docs/PlatformInstallation.md) for detailed steps)*
 
 ### 🌐 Web Version
 *For quick, on-the-fly access.*
@@ -47,13 +50,13 @@ Whether you are a developer checking assets or a power user managing a massive l
 
 ## 🔥 Desktop Features (Power User)
 
-The Desktop app is built for speed and safety using a modern .NET stack.
+The Desktop app is built for speed and safety using a modern .NET 9 stack.
 
 ### ⚡ Smart Extraction Workflow
+* **Auto-Updates:** Integrated **Velopack** keeps your app always up to date with delta patches.
+* **Zip Support:** Extract `.unitypackage` files directly from inside `.zip` archives seamlessly.
 * **Batch & Queue:** Process hundreds of packages at once via drag-and-drop or CLI (`--extract`).
-* **Intelligent Output:** Auto-resolves folders, handles duplicates, and sanitizes paths.
 * **Live Dashboard:** Real-time velocity charts, progress tracking per asset, and "Time Remaining" estimates.
-* **History:** Tracks up to 512 recent extractions with a visual velocity chart.
 
 ### 🔍 Discovery & Global Search
 Stop digging through folders. EasyExtract finds your packages instantly.
@@ -89,8 +92,9 @@ Don't import blind. Know what's inside.
 | Feature | Desktop App (Recommended) | Web Version (Free) |
 | :--- | :---: | :---: |
 | **Platform** | **Windows, Linux, macOS** | Browser |
-| **Setup** | Download & Run | Instant |
+| **Setup** | **One-Click Installer (Auto-Update)** | Instant |
 | **System Search** | **Yes (Everything / Spotlight)** | No |
+| **Zip Extraction** | **Yes** | No |
 | **Batch Processing** | **Unlimited Queue** | Limited |
 | **Security Scanning** | **Advanced (Deep Scan)** | Basic |
 | **Offline Access** | **Yes** | No |
