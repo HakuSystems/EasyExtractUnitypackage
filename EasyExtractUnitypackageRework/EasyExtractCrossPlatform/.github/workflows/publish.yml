@@ -14,8 +14,7 @@ jobs:
   build-and-release:
     name: Build for ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
-    # FIX 1: Wir zwingen alle Systeme (auch Windows) Bash zu nutzen.
-    # Das fixt den "ParserError" mit den Backslashes \
+    # WICHTIG: Erzwingt Bash auf allen Systemen (fixet den Windows ParserError)
     defaults:
       run:
         shell: bash
@@ -57,10 +56,9 @@ jobs:
           echo "VERSION=$CLEAN_VERSION" >> $GITHUB_ENV
 
       - name: Publish DotNet
-        # FIX 2: Pfad zur csproj angepasst! 
-        # Falls dein Repo-Root anders ist, pass "EasyExtractCrossPlatform/" an.
+        # FIX: Hier ist der korrekte, volle Pfad zu deiner .csproj
         run: |
-          dotnet publish EasyExtractCrossPlatform/EasyExtractCrossPlatform.csproj \
+          dotnet publish EasyExtractUnitypackageRework/EasyExtractCrossPlatform/EasyExtractCrossPlatform.csproj \
             -c Release \
             -r ${{ matrix.rid }} \
             --self-contained \
