@@ -19,6 +19,13 @@ public class VelopackUpdateService : IVelopackUpdateService
         try
         {
             var mgr = new UpdateManager(new GithubSource(RepoUrl, null, isPrerelease));
+            if (!mgr.IsInstalled)
+            {
+                LoggingService.LogInformation(
+                    "Application is not installed (likely dev environment). Skipping update check.");
+                return null;
+            }
+
             var newVersion = await mgr.CheckForUpdatesAsync();
             return newVersion;
         }
@@ -34,6 +41,12 @@ public class VelopackUpdateService : IVelopackUpdateService
         try
         {
             var mgr = new UpdateManager(new GithubSource(RepoUrl, null, false));
+            if (!mgr.IsInstalled)
+            {
+                LoggingService.LogWarning("Cannot download updates: Application is not installed.");
+                return;
+            }
+
             await mgr.DownloadUpdatesAsync(update, progress);
         }
         catch (Exception ex)
@@ -48,6 +61,12 @@ public class VelopackUpdateService : IVelopackUpdateService
         try
         {
             var mgr = new UpdateManager(new GithubSource(RepoUrl, null, false));
+            if (!mgr.IsInstalled)
+            {
+                LoggingService.LogWarning("Cannot apply updates: Application is not installed.");
+                return;
+            }
+
             mgr.ApplyUpdatesAndRestart(update);
         }
         catch (Exception ex)
