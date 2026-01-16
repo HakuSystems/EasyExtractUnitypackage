@@ -1,4 +1,5 @@
-﻿using Velopack;
+﻿using System.Text;
+using Velopack;
 
 namespace EasyExtractCrossPlatform;
 
@@ -11,6 +12,7 @@ internal class Program
     public static void Main(string[] args)
     {
         VelopackApp.Build().Run();
+        Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
         LoggingService.Initialize();
         LoggingService.LogInformation("EasyExtract starting up.");
         var launchMode = args.Length == 0 ? "Interactive" : "CLI";
