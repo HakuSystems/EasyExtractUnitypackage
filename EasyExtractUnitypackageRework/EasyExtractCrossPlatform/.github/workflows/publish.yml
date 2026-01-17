@@ -84,7 +84,7 @@ jobs:
           vpk pack -u EasyExtractCrossPlatform -v ${{ env.VERSION }} -p publish_output -o release_output --mainExe EasyExtractCrossPlatform
 
       - name: Upload Release Assets
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@v2
         if: startsWith(github.ref, 'refs/tags/')
         with:
           files: release_output/*
