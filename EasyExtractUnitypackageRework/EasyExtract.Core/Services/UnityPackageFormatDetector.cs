@@ -1,6 +1,9 @@
-namespace EasyExtractCrossPlatform.Services;
+using System;
+using System.IO;
 
-internal enum UnityPackageFormat
+namespace EasyExtract.Core.Services;
+
+public enum UnityPackageFormat
 {
     Unknown,
     GzipTar,
@@ -12,7 +15,7 @@ internal enum UnityPackageFormat
     TooSmall
 }
 
-internal static class UnityPackageFormatDetector
+public static class UnityPackageFormatDetector
 {
     private const int MaxHeaderBytes = 512;
 
@@ -20,15 +23,24 @@ internal static class UnityPackageFormatDetector
     {
         ArgumentNullException.ThrowIfNull(stream);
 
-        var headerLength = stream.Length > 0
-            ? (int)Math.Min(stream.Length, MaxHeaderBytes)
-            : 0;
+        var position = stream.Position;
+        try
+        {
+            var headerLength = stream.Length > 0
+                ? (int)Math.Min(stream.Length, MaxHeaderBytes)
+                : 0;
 
-        var headerBuffer = new byte[headerLength];
-        var bytesRead = stream.Read(headerBuffer, 0, headerBuffer.Length);
-        stream.Position = 0;
-
-        return Detect(headerBuffer.AsSpan(0, bytesRead));
+            var headerBuffer = new byte[headerLength];
+            var bytesRead = stream.Read(headerBuffer, 0, headerBuffer.Length);
+            
+            return Detect(headerBuffer.AsSpan(0, bytesRead));
+        }
+        finally
+        {
+            // Restore position if possible (though callers usually expect stream to be read)
+            if (stream.CanSeek)
+                stream.Position = position;
+        }
     }
 
     public static UnityPackageFormat Detect(ReadOnlySpan<byte> header)
@@ -51,7 +63,7 @@ internal static class UnityPackageFormatDetector
         if (LooksLikeTar(header))
             return UnityPackageFormat.Tar;
 
-        return header.Length < MaxHeaderBytes
+        return header.Length < MaxHeaderBytes && header.Length > 0 // if empty or small and no match
             ? UnityPackageFormat.TooSmall
             : UnityPackageFormat.Unknown;
     }
@@ -60,6 +72,8 @@ internal static class UnityPackageFormatDetector
     {
         return format switch
         {
+            UnityPackageFormat.GzipTar => "Standard .unitypackage (Gzipped TAR)",
+            UnityPackageFormat.Tar => "Uncompressed TAR archive",
             UnityPackageFormat.Zip => "a ZIP archive",
             UnityPackageFormat.Rar => "a RAR archive",
             UnityPackageFormat.SevenZip => "a 7z archive",

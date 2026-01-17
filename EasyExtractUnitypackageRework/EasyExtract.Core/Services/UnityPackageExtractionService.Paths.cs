@@ -1,4 +1,10 @@
-namespace EasyExtractCrossPlatform.Services;
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using EasyExtract.Core.Utilities;
+
+namespace EasyExtract.Core.Services;
 
 public sealed partial class UnityPackageExtractionService
 {
@@ -11,14 +17,13 @@ public sealed partial class UnityPackageExtractionService
     }
 
 
-    private static void EnsurePathIsUnderRoot(string normalizedRoot, string candidatePath, string correlationId)
+    private static void EnsurePathIsUnderRoot(string normalizedRoot, string candidatePath, string correlationId, IEasyExtractLogger logger)
     {
         var candidate = Path.GetFullPath(candidatePath);
         if (!candidate.StartsWith(normalizedRoot, StringComparison.OrdinalIgnoreCase))
         {
-            LoggingService.LogError(
-                $"Path traversal detected | candidate='{candidate}' | root='{normalizedRoot}' | correlationId={correlationId}",
-                forwardToWebhook: false);
+            logger.LogError(
+                $"Path traversal detected | candidate='{candidate}' | root='{normalizedRoot}' | correlationId={correlationId}");
             throw new InvalidDataException(
                 $"Extraction aborted. Asset path '{candidate}' points outside of '{normalizedRoot}'.");
         }
@@ -30,7 +35,8 @@ public sealed partial class UnityPackageExtractionService
         HashSet<string> usedRelativePaths,
         Dictionary<string, int> duplicateSuffixCounters,
         bool allowSuffixes,
-        string correlationId)
+        string correlationId,
+        IEasyExtractLogger logger)
     {
         if (string.IsNullOrWhiteSpace(relativePath))
             return relativePath;
@@ -69,7 +75,7 @@ public sealed partial class UnityPackageExtractionService
             if (usedRelativePaths.Add(candidatePath))
             {
                 duplicateSuffixCounters[duplicateKey] = counter + 1;
-                LoggingService.LogInformation(
+                logger.LogInformation(
                     $"Duplicate path resolved | original='{relativePath}' | unique='{candidatePath}' | suffix={counter} | correlationId={correlationId}");
                 return candidatePath;
             }
@@ -96,7 +102,7 @@ public sealed partial class UnityPackageExtractionService
     }
 
 
-    private static PathNormalizationResult NormalizeRelativePath(string? input, string correlationId)
+    private static PathNormalizationResult NormalizeRelativePath(string? input, string correlationId, IEasyExtractLogger logger)
     {
         if (string.IsNullOrWhiteSpace(input))
             return new PathNormalizationResult(string.Empty, string.Empty, EmptySegmentNormalizations);
@@ -145,7 +151,7 @@ public sealed partial class UnityPackageExtractionService
 
         if (originalSegments.Count == 0)
         {
-            LoggingService.LogWarning(
+            logger.LogWarning(
                 $"Path normalization resulted in empty path | original='{input}' | hadDotDot={hadDotDotSegments} | filteredCount={filteredSegments} | correlationId={correlationId}");
             return new PathNormalizationResult(string.Empty, string.Empty, EmptySegmentNormalizations);
         }
@@ -158,7 +164,7 @@ public sealed partial class UnityPackageExtractionService
         var normalizedPath = Path.Combine(normalizedSegments.ToArray());
 
         if (!string.Equals(originalPath, normalizedPath, StringComparison.Ordinal))
-            LoggingService.LogInformation(
+            logger.LogInformation(
                 $"Path normalized | original='{originalPath}' | normalized='{normalizedPath}' | correlationId={correlationId}");
 
         return new PathNormalizationResult(normalizedPath, originalPath, segmentPairs);
@@ -173,6 +179,7 @@ public sealed partial class UnityPackageExtractionService
         Dictionary<string, int> duplicateSuffixCounters,
         HashSet<string> directoriesToCleanup,
         string correlationId,
+        IEasyExtractLogger logger,
         out string targetPath,
         out string? metaPath,
         out string? previewPath)
@@ -195,10 +202,11 @@ public sealed partial class UnityPackageExtractionService
             generatedRelativePaths,
             duplicateSuffixCounters,
             organizeByCategories,
-            correlationId);
+            correlationId,
+            logger);
 
         if (!string.Equals(originalPath, relativeOutputPath, StringComparison.Ordinal))
-            LoggingService.LogInformation(
+            logger.LogInformation(
                 $"Path renamed for uniqueness | original='{originalPath}' | unique='{relativeOutputPath}' | correlationId={correlationId}");
 
         targetPath = Path.Combine(outputDirectory, relativeOutputPath);
@@ -207,15 +215,15 @@ public sealed partial class UnityPackageExtractionService
 
         try
         {
-            EnsurePathIsUnderRoot(normalizedOutputDirectory, targetPath, correlationId);
+            EnsurePathIsUnderRoot(normalizedOutputDirectory, targetPath, correlationId, logger);
             if (metaPath is not null)
-                EnsurePathIsUnderRoot(normalizedOutputDirectory, metaPath, correlationId);
+                EnsurePathIsUnderRoot(normalizedOutputDirectory, metaPath, correlationId, logger);
             if (previewPath is not null)
-                EnsurePathIsUnderRoot(normalizedOutputDirectory, previewPath, correlationId);
+                EnsurePathIsUnderRoot(normalizedOutputDirectory, previewPath, correlationId, logger);
         }
         catch (InvalidDataException ex)
         {
-            LoggingService.LogError(
+            logger.LogError(
                 $"Path validation failed for asset | relativePath='{state.RelativePath}' | correlationId={correlationId}",
                 ex);
             throw;

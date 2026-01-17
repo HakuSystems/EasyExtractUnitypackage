@@ -1,14 +1,17 @@
+using System;
+using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.Diagnostics;
 using System.Formats.Tar;
+using System.IO;
+using EasyExtract.Core.Models;
 
-namespace EasyExtractCrossPlatform.Services;
+namespace EasyExtract.Core.Services;
 
 public sealed partial class UnityPackageExtractionService
 {
     private sealed class ExtractionSession
     {
-        private readonly int _assetsDuplicated;
-
         private readonly Dictionary<string, UnityPackageAssetState> _assetStates =
             new(StringComparer.OrdinalIgnoreCase);
 
@@ -31,13 +34,16 @@ public sealed partial class UnityPackageExtractionService
 
         private readonly TarReader _tarReader;
         private readonly string _temporaryDirectoryPath;
+        private readonly IEasyExtractLogger _logger; // Logger Injected
+
+        private int _assetsDuplicated;
         private int _assetsSkippedNoContent;
         private int _assetsSkippedNoPath;
         private int _extractedCount;
-
         private bool _extractionRequired;
         private int _tarEntriesProcessed;
         private int _tarEntriesSkipped;
+        private long _calculatedTotalSize; // To store accumulated size
 
         public ExtractionSession(
             string packagePath,
@@ -49,7 +55,8 @@ public sealed partial class UnityPackageExtractionService
             TarReader tarReader,
             IProgress<UnityPackageExtractionProgress>? progress,
             CancellationToken cancellationToken,
-            string correlationId)
+            string correlationId,
+            IEasyExtractLogger logger) // Logger Injected
         {
             _packagePath = packagePath;
             _outputDirectory = outputDirectory;
@@ -62,7 +69,9 @@ public sealed partial class UnityPackageExtractionService
             _progress = progress;
             _cancellationToken = cancellationToken;
             _correlationId = correlationId;
+            _logger = logger;
             _assetsDuplicated = 0;
+            _calculatedTotalSize = 0;
         }
 
         public UnityPackageExtractionResult Execute()
@@ -76,21 +85,21 @@ public sealed partial class UnityPackageExtractionService
             if (_pendingWrites.Count > 0)
                 FlushPendingWrites();
 
-            CleanupCorruptedDirectories(_directoriesToCleanup, _correlationId);
+            CleanupCorruptedDirectories(_directoriesToCleanup, _correlationId, _logger);
 
-            LoggingService.LogInformation(
-                $"ExtractInternal completed | package='{_packagePath}' | assetsExtracted={_extractedCount} | filesWritten={_extractedFiles.Count} | tarEntries={_tarEntriesProcessed} | skippedNoPath={_assetsSkippedNoPath} | skippedNoContent={_assetsSkippedNoContent} | duplicated={_assetsDuplicated} | correlationId={_correlationId}");
+            _logger.LogInformation(
+                $"ExtractInternal completed | package='{_packagePath}' | assetsExtracted={_extractedCount} | filesWritten={_extractedFiles.Count} | size={_calculatedTotalSize} | tarEntries={_tarEntriesProcessed} | skippedNoPath={_assetsSkippedNoPath} | skippedNoContent={_assetsSkippedNoContent} | duplicated={_assetsDuplicated} | correlationId={_correlationId}");
 
             return new UnityPackageExtractionResult(
                 _packagePath,
                 _outputDirectory,
                 _extractedCount,
-                _extractedFiles.ToImmutableArray());
+                _extractedFiles.ToImmutableArray()) { TotalSize = _calculatedTotalSize };
         }
 
         private void ProcessTarEntries()
         {
-            LoggingService.LogInformation(
+            _logger.LogInformation(
                 $"Starting TAR entry processing loop | correlationId={_correlationId}");
 
             var lastBatchLog = Stopwatch.StartNew();
@@ -99,7 +108,7 @@ public sealed partial class UnityPackageExtractionService
 
             try
             {
-                using (LoggingService.BeginPerformanceScope("ProcessTarEntries", "Extraction", _correlationId))
+                using (_logger.BeginPerformanceScope("ProcessTarEntries", "Extraction", _correlationId))
                 {
                     while ((entry = _tarReader.GetNextEntry()) is not null)
                     {
@@ -138,8 +147,8 @@ public sealed partial class UnityPackageExtractionService
                             {
                                 var normalization = NormalizeRelativePath(
                                     ReadEntryAsUtf8String(entry.DataStream ?? Stream.Null, _cancellationToken,
-                                        _correlationId),
-                                    _correlationId);
+                                        _correlationId, _logger),
+                                    _correlationId, _logger);
                                 state.RelativePath = normalization.NormalizedPath;
                                 state.OriginalRelativePath = normalization.OriginalPath;
                                 state.PathNormalizations = normalization.Segments;
@@ -153,7 +162,8 @@ public sealed partial class UnityPackageExtractionService
                                     _limits,
                                     _limiter,
                                     _cancellationToken,
-                                    _correlationId);
+                                    _correlationId,
+                                    _logger);
                                 state.SetAssetComponent(component);
                                 break;
                             }
@@ -165,7 +175,8 @@ public sealed partial class UnityPackageExtractionService
                                     _limits,
                                     _limiter,
                                     _cancellationToken,
-                                    _correlationId);
+                                    _correlationId,
+                                    _logger);
                                 state.SetMetaComponent(component);
                                 break;
                             }
@@ -177,7 +188,8 @@ public sealed partial class UnityPackageExtractionService
                                     _limits,
                                     _limiter,
                                     _cancellationToken,
-                                    _correlationId);
+                                    _correlationId,
+                                    _logger);
                                 state.SetPreviewComponent(component);
                                 break;
                             }
@@ -192,7 +204,7 @@ public sealed partial class UnityPackageExtractionService
                         if (_tarEntriesProcessed % batchLogInterval == 0 &&
                             lastBatchLog.Elapsed.TotalSeconds >= 2)
                         {
-                            LoggingService.LogInformation(
+                            _logger.LogInformation(
                                 $"TAR processing progress: entries={_tarEntriesProcessed} | assets={_assetStates.Count} | extracted={_extractedCount} | skipped={_tarEntriesSkipped} | correlationId={_correlationId}");
                             lastBatchLog.Restart();
                         }
@@ -201,7 +213,7 @@ public sealed partial class UnityPackageExtractionService
             }
             catch (Exception ex) when (ex is IOException or InvalidDataException)
             {
-                LoggingService.LogError(
+                _logger.LogError(
                     $"TAR processing failed | entriesProcessed={_tarEntriesProcessed} | skipped={_tarEntriesSkipped} | correlationId={_correlationId}",
                     ex);
 
@@ -210,13 +222,13 @@ public sealed partial class UnityPackageExtractionService
                     ex);
             }
 
-            LoggingService.LogInformation(
+            _logger.LogInformation(
                 $"TAR entry processing completed | totalEntries={_tarEntriesProcessed} | skipped={_tarEntriesSkipped} | uniqueAssets={_assetStates.Count} | correlationId={_correlationId}");
         }
 
         private void ProcessRemainingAssetStates()
         {
-            LoggingService.LogInformation(
+            _logger.LogInformation(
                 $"Processing remaining asset states | remaining={_assetStates.Count} | queued={_queuedStates.Count} | correlationId={_correlationId}");
 
             var remainingProcessed = 0;
@@ -230,7 +242,7 @@ public sealed partial class UnityPackageExtractionService
             }
 
             if (remainingProcessed > 0)
-                LoggingService.LogInformation(
+                _logger.LogInformation(
                     $"Processed remaining assets | count={remainingProcessed} | correlationId={_correlationId}");
         }
 
@@ -241,16 +253,16 @@ public sealed partial class UnityPackageExtractionService
 
             _pendingWrites.Clear();
             _queuedStates.Clear();
-            CleanupCorruptedDirectories(_directoriesToCleanup, _correlationId);
+            CleanupCorruptedDirectories(_directoriesToCleanup, _correlationId, _logger);
 
-            LoggingService.LogInformation(
+            _logger.LogInformation(
                 $"No writable assets detected | package='{_packagePath}' | totalAssets={_assetStates.Count} | skippedNoPath={_assetsSkippedNoPath} | skippedNoContent={_assetsSkippedNoContent} | correlationId={_correlationId}");
 
             return new UnityPackageExtractionResult(
                 _packagePath,
                 _outputDirectory,
                 0,
-                _extractedFiles.ToImmutableArray());
+                _extractedFiles.ToImmutableArray()) { TotalSize = 0 };
         }
 
         private void HandleReadyState(UnityPackageAssetState state)
@@ -264,6 +276,7 @@ public sealed partial class UnityPackageExtractionService
                     _duplicateSuffixCounters,
                     _directoriesToCleanup,
                     _correlationId,
+                    _logger,
                     out var targetPath,
                     out var metaPath,
                     out var previewPath))
@@ -273,17 +286,17 @@ public sealed partial class UnityPackageExtractionService
                 else if (state.Asset is not { HasContent: true })
                     _assetsSkippedNoContent++;
 
-                LoggingService.LogInformation(
+                _logger.LogInformation(
                     $"Asset skipped (no valid paths) | relativePath='{state.RelativePath}' | hasAsset={state.Asset?.HasContent} | correlationId={_correlationId}");
                 return;
             }
 
             _limiter.RegisterAsset();
-            var plan = CreateAssetWritePlan(state, targetPath, metaPath, previewPath);
+            var plan = CreateAssetWritePlan(state, targetPath, metaPath, previewPath, _logger);
 
             if (!plan.RequiresWrite)
             {
-                LoggingService.LogInformation(
+                _logger.LogInformation(
                     $"Asset skipped (already up-to-date) | path='{state.RelativePath}' | target='{targetPath}' | correlationId={_correlationId}");
                 state.MarkAsCompleted();
                 _queuedStates.Remove(state);
@@ -293,7 +306,7 @@ public sealed partial class UnityPackageExtractionService
             if (!_extractionRequired)
             {
                 _extractionRequired = true;
-                LoggingService.LogInformation(
+                _logger.LogInformation(
                     $"First asset queued for extraction | path='{state.RelativePath}' | correlationId={_correlationId}");
                 _pendingWrites.Add(new PendingAssetWrite(state, targetPath, metaPath, previewPath, plan));
                 _queuedStates.Add(state);
@@ -313,8 +326,16 @@ public sealed partial class UnityPackageExtractionService
             AssetWritePlan plan)
         {
             var relativePath = state.RelativePath;
+         
+            // Accumulate Size
+            if (plan.WriteAsset && state.Asset is { HasContent: true } assetComp)
+                _calculatedTotalSize += assetComp.Length;
+            if (plan.WriteMeta && state.Meta is { HasContent: true } metaComp)
+                _calculatedTotalSize += metaComp.Length;
+            if (plan.WritePreview && state.Preview is { HasContent: true } previewComp)
+                _calculatedTotalSize += previewComp.Length;
 
-            using (LoggingService.BeginPerformanceScope("WriteAssetToDisk", "Extraction", _correlationId))
+            using (_logger.BeginPerformanceScope("WriteAssetToDisk", "Extraction", _correlationId))
             {
                 var writtenFiles = WriteAssetToDisk(
                     state,
@@ -323,7 +344,8 @@ public sealed partial class UnityPackageExtractionService
                     previewPath,
                     plan,
                     _cancellationToken,
-                    _correlationId);
+                    _correlationId,
+                    _logger);
 
                 if (writtenFiles.Count > 0)
                 {
@@ -333,7 +355,7 @@ public sealed partial class UnityPackageExtractionService
                 }
                 else
                 {
-                    LoggingService.LogInformation(
+                    _logger.LogInformation(
                         $"Asset write produced no files | path='{state.RelativePath}' | correlationId={_correlationId}");
                 }
             }
@@ -347,7 +369,7 @@ public sealed partial class UnityPackageExtractionService
             if (_pendingWrites.Count == 0)
                 return;
 
-            LoggingService.LogInformation(
+            _logger.LogInformation(
                 $"FlushPendingWrites: flushing pending assets | count={_pendingWrites.Count} | correlationId={_correlationId}");
 
             foreach (var pending in _pendingWrites)
@@ -361,7 +383,7 @@ public sealed partial class UnityPackageExtractionService
             _pendingWrites.Clear();
             _queuedStates.Clear();
 
-            LoggingService.LogInformation(
+            _logger.LogInformation(
                 $"FlushPendingWrites completed | correlationId={_correlationId}");
         }
     }

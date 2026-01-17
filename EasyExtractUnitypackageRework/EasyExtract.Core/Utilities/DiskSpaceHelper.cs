@@ -1,4 +1,7 @@
-namespace EasyExtractCrossPlatform.Utilities;
+using System;
+using System.IO;
+
+namespace EasyExtract.Core.Utilities;
 
 public static class DiskSpaceHelper
 {

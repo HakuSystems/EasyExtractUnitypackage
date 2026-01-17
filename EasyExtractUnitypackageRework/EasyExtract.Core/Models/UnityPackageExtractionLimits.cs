@@ -1,4 +1,4 @@
-namespace EasyExtractCrossPlatform.Models;
+namespace EasyExtract.Core.Models;
 
 public sealed record class UnityPackageExtractionLimits
 {

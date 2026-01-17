@@ -212,8 +212,8 @@ public sealed partial class UnityPackagePreviewViewModel
 
     private void UpdateAudioCommands()
     {
-        PlayAudioPreviewCommand.RaiseCanExecuteChanged();
-        StopAudioPreviewCommand.RaiseCanExecuteChanged();
+        PlayAudioPreviewCommand.NotifyCanExecuteChanged();
+        StopAudioPreviewCommand.NotifyCanExecuteChanged();
     }
 
     private static string FormatTime(TimeSpan timeSpan)

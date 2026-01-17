@@ -119,7 +119,7 @@ public partial class MainWindow : Window
 
         try
         {
-            var result = await _maliciousCodeDetectionService.ScanUnityPackageAsync(normalizedPath)
+            var result = await _maliciousCodeDetectionService.ScanPackageAsync(normalizedPath)
                 .ConfigureAwait(false);
 
             if (!IsSecurityScanningEnabled)

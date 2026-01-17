@@ -1,6 +1,11 @@
-namespace EasyExtractCrossPlatform.Utilities;
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
 
-internal static class FileExtensionNormalizer
+namespace EasyExtract.Core.Utilities;
+
+public static class FileExtensionNormalizer
 {
     // Unitypackage extraction bug inflates extensions well beyond their expected length (~30+ chars).
     private const int MinimumCorruptedExtensionLength = 30;

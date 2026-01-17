@@ -1,8 +1,12 @@
-﻿using System.Formats.Tar;
+using System;
+using System.Formats.Tar;
+using System.IO;
 using System.Text;
 using System.Text.RegularExpressions;
+using System.Threading;
+using EasyExtract.Core.Models;
 
-namespace EasyExtractCrossPlatform.Services;
+namespace EasyExtract.Core.Services;
 
 public sealed partial class MaliciousCodeDetectionService
 {

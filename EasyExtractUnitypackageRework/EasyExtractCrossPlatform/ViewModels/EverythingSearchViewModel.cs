@@ -33,21 +33,22 @@ public sealed class EverythingSearchViewModel : INotifyPropertyChanged, IDisposa
         };
         _autoSearchTimer.Tick += OnAutoSearchTimerTick;
 
-        SearchCommand = new AsyncRelayCommand(_ => ExecuteSearchAsync(), _ => !IsSearching && IsEverythingAvailable);
-        OpenItemCommand = new RelayCommand(HandleAddToQueue);
-        RevealItemCommand = new RelayCommand(HandleOpenDirectory);
-        ClearCommand = new RelayCommand(ClearResults, _ => HasResults || !string.IsNullOrWhiteSpace(SearchQuery));
+        SearchCommand = new AsyncRelayCommand(() => ExecuteSearchAsync(), () => !IsSearching && IsEverythingAvailable);
+        OpenItemCommand = new RelayCommand<object>(HandleAddToQueue);
+        RevealItemCommand = new RelayCommand<object>(HandleOpenDirectory);
+        ClearCommand =
+            new RelayCommand<object>(ClearResults, _ => HasResults || !string.IsNullOrWhiteSpace(SearchQuery));
     }
 
     public ObservableCollection<EverythingSearchResult> Results { get; } = new();
 
     public AsyncRelayCommand SearchCommand { get; }
 
-    public RelayCommand OpenItemCommand { get; }
+    public RelayCommand<object> OpenItemCommand { get; }
 
-    public RelayCommand RevealItemCommand { get; }
+    public RelayCommand<object> RevealItemCommand { get; }
 
-    public RelayCommand ClearCommand { get; }
+    public RelayCommand<object> ClearCommand { get; }
 
     public string SearchQuery
     {
@@ -60,8 +61,8 @@ public sealed class EverythingSearchViewModel : INotifyPropertyChanged, IDisposa
             _searchQuery = value ?? string.Empty;
             OnPropertyChanged();
             OnPropertyChanged(nameof(IsInteractionActive));
-            SearchCommand.RaiseCanExecuteChanged();
-            ClearCommand.RaiseCanExecuteChanged();
+            SearchCommand.NotifyCanExecuteChanged();
+            ClearCommand.NotifyCanExecuteChanged();
             ScheduleAutoSearch();
         }
     }
@@ -77,7 +78,7 @@ public sealed class EverythingSearchViewModel : INotifyPropertyChanged, IDisposa
             _isSearching = value;
             OnPropertyChanged();
             OnPropertyChanged(nameof(IsInteractionActive));
-            SearchCommand.RaiseCanExecuteChanged();
+            SearchCommand.NotifyCanExecuteChanged();
         }
     }
 
@@ -105,7 +106,7 @@ public sealed class EverythingSearchViewModel : INotifyPropertyChanged, IDisposa
             _isEverythingAvailable = value;
             OnPropertyChanged();
             OnPropertyChanged(nameof(ShowUnavailableNotice));
-            SearchCommand.RaiseCanExecuteChanged();
+            SearchCommand.NotifyCanExecuteChanged();
             if (!value)
                 _autoSearchTimer.Stop();
         }
@@ -372,7 +373,7 @@ public sealed class EverythingSearchViewModel : INotifyPropertyChanged, IDisposa
     {
         OnPropertyChanged(nameof(HasResults));
         OnPropertyChanged(nameof(IsInteractionActive));
-        ClearCommand.RaiseCanExecuteChanged();
+        ClearCommand.NotifyCanExecuteChanged();
     }
 
     private void ScheduleAutoSearch()
