@@ -1,4 +1,5 @@
 using System.Collections.Concurrent;
+using EasyExtract.Core;
 
 namespace EasyExtractCrossPlatform.Services;
 
@@ -53,13 +54,19 @@ public static class AppServiceLocator
     {
         var provider = new AppServiceProvider();
 
+        // Register Logger First
+        provider.RegisterSingleton<IEasyExtractLogger>(() => new EasyExtractLoggerWrapper());
+
+        // Resolve Logger for other services
+        var logger = provider.GetRequiredService<IEasyExtractLogger>();
+
         provider
             .RegisterSingleton(CreateSearchServiceForCurrentPlatform)
-            .RegisterSingleton<IUnityPackageExtractionService>(() => new UnityPackageExtractionService())
-            .RegisterSingleton<IMaliciousCodeDetectionService>(() => new MaliciousCodeDetectionService())
+            .RegisterSingleton<IUnityPackageExtractionService>(() => new UnityPackageExtractionService(logger))
+            .RegisterSingleton<IMaliciousCodeDetectionService>(() => new MaliciousCodeDetectionService(logger))
             .RegisterSingleton<INotificationService>(() => new NotificationService())
             .RegisterSingleton<IErrorDialogService>(() => new ErrorDialogService())
-            .RegisterSingleton<IUnityPackagePreviewService>(() => new UnityPackagePreviewService())
+            .RegisterSingleton<IUnityPackagePreviewService>(() => new UnityPackagePreviewService(logger))
             .RegisterSingleton<IVelopackUpdateService>(() => new VelopackUpdateService());
 
         return provider;

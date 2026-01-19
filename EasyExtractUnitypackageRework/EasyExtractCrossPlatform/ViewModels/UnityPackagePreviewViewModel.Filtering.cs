@@ -49,7 +49,7 @@ public sealed partial class UnityPackagePreviewViewModel
             OnPropertyChanged(nameof(IsSearchActive));
             OnPropertyChanged(nameof(IsTreeViewVisible));
             OnPropertyChanged(nameof(IsListViewVisible));
-            ClearCommand?.RaiseCanExecuteChanged();
+            ClearCommand?.NotifyCanExecuteChanged();
             ApplyCategoryFilter();
         }
     }

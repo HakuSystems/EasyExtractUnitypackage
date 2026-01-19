@@ -1,6 +1,10 @@
-namespace EasyExtractCrossPlatform.Utilities;
+using System;
+using System.Collections.Generic;
+using System.IO;
 
-internal static class UnityAssetClassification
+namespace EasyExtract.Core.Utilities;
+
+public static class UnityAssetClassification
 {
     private static readonly HashSet<string> TextureExtensions = new(StringComparer.OrdinalIgnoreCase)
     {
@@ -48,7 +52,7 @@ internal static class UnityAssetClassification
         ".mat"
     };
 
-    internal static string ResolveCategory(string? relativePath, long assetSizeBytes, bool hasAssetData)
+    public static string ResolveCategory(string? relativePath, long assetSizeBytes, bool hasAssetData)
     {
         var extension = string.IsNullOrWhiteSpace(relativePath)
             ? string.Empty
@@ -92,42 +96,42 @@ internal static class UnityAssetClassification
         return "Other";
     }
 
-    internal static bool IsTextureExtension(string? extension)
+    public static bool IsTextureExtension(string? extension)
     {
         return !string.IsNullOrWhiteSpace(extension) && TextureExtensions.Contains(extension);
     }
 
-    internal static bool IsPdfExtension(string? extension)
+    public static bool IsPdfExtension(string? extension)
     {
         return !string.IsNullOrWhiteSpace(extension) && PdfExtensions.Contains(extension);
     }
 
-    internal static bool IsModelExtension(string? extension)
+    public static bool IsModelExtension(string? extension)
     {
         return !string.IsNullOrWhiteSpace(extension) && ModelExtensions.Contains(extension);
     }
 
-    internal static bool IsAudioExtension(string? extension)
+    public static bool IsAudioExtension(string? extension)
     {
         return !string.IsNullOrWhiteSpace(extension) && AudioExtensions.Contains(extension);
     }
 
-    internal static bool IsScriptExtension(string? extension)
+    public static bool IsScriptExtension(string? extension)
     {
         return !string.IsNullOrWhiteSpace(extension) && ScriptExtensions.Contains(extension);
     }
 
-    internal static bool IsAnimationExtension(string? extension)
+    public static bool IsAnimationExtension(string? extension)
     {
         return !string.IsNullOrWhiteSpace(extension) && AnimationExtensions.Contains(extension);
     }
 
-    internal static bool IsShaderExtension(string? extension)
+    public static bool IsShaderExtension(string? extension)
     {
         return !string.IsNullOrWhiteSpace(extension) && ShaderExtensions.Contains(extension);
     }
 
-    internal static bool IsMaterialExtension(string? extension)
+    public static bool IsMaterialExtension(string? extension)
     {
         return !string.IsNullOrWhiteSpace(extension) && MaterialExtensions.Contains(extension);
     }

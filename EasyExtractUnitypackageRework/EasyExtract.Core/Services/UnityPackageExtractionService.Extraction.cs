@@ -1,11 +1,17 @@
-using System.Formats.Tar;
+using System;
+using System.IO;
 using System.IO.Compression;
+using System.Threading;
+using System.Threading.Tasks;
+using System.Formats.Tar;
+using EasyExtract.Core.Models;
+using EasyExtract.Core.Utilities;
 
-namespace EasyExtractCrossPlatform.Services;
+namespace EasyExtract.Core.Services;
 
 public sealed partial class UnityPackageExtractionService
 {
-    private static UnityPackageExtractionResult ExtractInternal(
+    private UnityPackageExtractionResult ExtractInternal(
         string packagePath,
         string outputDirectory,
         UnityPackageExtractionOptions options,
@@ -13,7 +19,7 @@ public sealed partial class UnityPackageExtractionService
         CancellationToken cancellationToken,
         string correlationId)
     {
-        LoggingService.LogInformation(
+        _logger.LogInformation(
             $"ExtractInternal started | package='{packagePath}' | correlationId={correlationId}");
 
         using var packageStream = File.OpenRead(packagePath);
@@ -42,7 +48,7 @@ public sealed partial class UnityPackageExtractionService
 
         var normalizedOutputDirectory = NormalizeOutputDirectory(outputDirectory);
         var limits = UnityPackageExtractionLimits.Normalize(options.Limits);
-        using var temporaryDirectory = CreateTemporaryDirectory(options.TemporaryDirectory, correlationId);
+        using var temporaryDirectory = CreateTemporaryDirectory(options.TemporaryDirectory, correlationId, _logger);
 
         var session = new ExtractionSession(
             packagePath,
@@ -54,7 +60,8 @@ public sealed partial class UnityPackageExtractionService
             tarReader,
             progress,
             cancellationToken,
-            correlationId);
+            correlationId,
+            _logger); // Inject Logger
 
         try
         {
@@ -62,7 +69,7 @@ public sealed partial class UnityPackageExtractionService
         }
         catch (InvalidDataException ex)
         {
-            LoggingService.LogError(
+            _logger.LogError(
                 $"Extraction failed: invalid gzip data (package may be corrupted) | path='{packagePath}' | correlationId={correlationId}",
                 ex);
 
@@ -76,16 +83,15 @@ public sealed partial class UnityPackageExtractionService
         }
     }
 
-    private static InvalidDataException CreateInvalidFormatException(
+    private InvalidDataException CreateInvalidFormatException(
         UnityPackageFormat format,
         string packagePath,
         string correlationId)
     {
         var detected = UnityPackageFormatDetector.Describe(format);
 
-        LoggingService.LogError(
-            $"ExtractInternal aborted: unsupported package format | path='{packagePath}' | detected='{detected}' | correlationId={correlationId}",
-            forwardToWebhook: false);
+        _logger.LogError(
+            $"ExtractInternal aborted: unsupported package format | path='{packagePath}' | detected='{detected}' | correlationId={correlationId}");
 
         return new InvalidDataException(
             $"The selected file appears to be {detected}, not a Unity .unitypackage (gzipped TAR). Please select a valid .unitypackage file.");

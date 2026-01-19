@@ -14,11 +14,11 @@ public sealed partial class UnityPackagePreviewViewModel
 
     public ObservableCollection<UnityPackageAssetTreeNode> RootNodes { get; } = new();
 
-    public RelayCommand SelectTreeNodeCommand { get; }
+    public RelayCommand<object> SelectTreeNodeCommand { get; }
 
-    public RelayCommand NodeToggleCommand { get; }
+    public RelayCommand<object> NodeToggleCommand { get; }
 
-    public RelayCommand CollapseAllFoldersCommand { get; }
+    public RelayCommand<object> CollapseAllFoldersCommand { get; }
 
     public UnityPackageAssetTreeNode? SelectedTreeNode
     {

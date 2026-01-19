@@ -3,6 +3,7 @@
         <OutputType>WinExe</OutputType>
         <TargetFramework>net9.0</TargetFramework>
         <Nullable>enable</Nullable>
+        <ImplicitUsings>enable</ImplicitUsings>
         <BuiltInComInteropSupport>true</BuiltInComInteropSupport>
         <ApplicationManifest>app.manifest</ApplicationManifest>
         <AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
@@ -42,5 +43,8 @@
     </ItemGroup>
     <ItemGroup>
         <AvaloniaResource Include="Assets\**"/>
+    </ItemGroup>
+    <ItemGroup>
+        <ProjectReference Include="..\EasyExtract.Core\EasyExtract.Core.csproj"/>
     </ItemGroup>
 </Project>

@@ -33,24 +33,24 @@ public sealed partial class UnityPackagePreviewViewModel : INotifyPropertyChange
         Assets.CollectionChanged += OnAssetsCollectionChanged;
         SecurityThreats.CollectionChanged += OnSecurityThreatsCollectionChanged;
 
-        PlayAudioPreviewCommand = new RelayCommand(_ => ToggleAudioPlayback(), _ => HasAudioPreview);
-        StopAudioPreviewCommand = new RelayCommand(_ => StopAudioPlayback(), _ => HasAudioPreview);
-        NodeToggleCommand = new RelayCommand(parameter =>
+        PlayAudioPreviewCommand = new RelayCommand(() => ToggleAudioPlayback(), () => HasAudioPreview);
+        StopAudioPreviewCommand = new RelayCommand(() => StopAudioPlayback(), () => HasAudioPreview);
+        NodeToggleCommand = new RelayCommand<object>(parameter =>
         {
             if (parameter is UnityPackageAssetTreeNode node)
                 ToggleNode(node);
         });
-        SelectTreeNodeCommand = new RelayCommand(parameter =>
+        SelectTreeNodeCommand = new RelayCommand<object>(parameter =>
         {
             if (parameter is UnityPackageAssetTreeNode node)
                 SelectTreeNode(node);
         });
-        CollapseAllFoldersCommand = new RelayCommand(parameter =>
+        CollapseAllFoldersCommand = new RelayCommand<object>(parameter =>
         {
             if (parameter is UnityPackageAssetTreeNode node)
                 CollapseDescendants(node, true);
         });
-        ClearCommand = new RelayCommand(_ => SearchText = string.Empty, _ => IsSearchActive);
+        ClearCommand = new RelayCommand(() => SearchText = string.Empty, () => IsSearchActive);
 
         if (_securityScanProvider is not null)
             _securityScanTask = RunSecurityScanAsync();

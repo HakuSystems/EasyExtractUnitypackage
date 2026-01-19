@@ -1,4 +1,7 @@
-namespace EasyExtractCrossPlatform.Models;
+using System;
+using System.Collections.Generic;
+
+namespace EasyExtract.Core.Models;
 
 public enum MaliciousThreatSeverity
 {

@@ -1,6 +1,10 @@
+using System;
 using System.Buffers;
+using System.Collections.Generic;
+using System.IO;
+using EasyExtract.Core.Models;
 
-namespace EasyExtractCrossPlatform.Services;
+namespace EasyExtract.Core.Services;
 
 public sealed partial class UnityPackageExtractionService
 {
@@ -141,10 +145,13 @@ public sealed partial class UnityPackageExtractionService
 
     private sealed class TemporaryDirectoryScope : IDisposable
     {
-        public TemporaryDirectoryScope(string directoryPath, string correlationId)
+        private readonly IEasyExtractLogger _logger;
+
+        public TemporaryDirectoryScope(string directoryPath, string correlationId, IEasyExtractLogger logger)
         {
             DirectoryPath = directoryPath;
             CorrelationId = correlationId;
+            _logger = logger;
         }
 
         public string DirectoryPath { get; }
@@ -160,13 +167,13 @@ public sealed partial class UnityPackageExtractionService
             }
             catch (IOException ex)
             {
-                LoggingService.LogWarning(
+                _logger.LogWarning(
                     $"Failed to delete empty directory | path='{DirectoryPath}' | correlationId={CorrelationId}",
                     ex);
             }
             catch (UnauthorizedAccessException ex)
             {
-                LoggingService.LogWarning(
+                _logger.LogWarning(
                     $"Access denied when deleting directory | path='{DirectoryPath}' | correlationId={CorrelationId}",
                     ex);
             }
@@ -176,13 +183,15 @@ public sealed partial class UnityPackageExtractionService
 
     private sealed class AssetComponent : IDisposable
     {
+        private readonly IEasyExtractLogger _logger;
         private bool _disposed;
 
-        public AssetComponent(string tempPath, long length, byte[] contentHash)
+        public AssetComponent(string tempPath, long length, byte[] contentHash, IEasyExtractLogger logger)
         {
             TempPath = tempPath;
             Length = length;
             ContentHash = contentHash;
+            _logger = logger;
         }
 
         public string TempPath { get; }
@@ -196,7 +205,7 @@ public sealed partial class UnityPackageExtractionService
                 return;
 
             _disposed = true;
-            TryDeleteFile(TempPath);
+            TryDeleteFile(TempPath, _logger);
         }
 
         public void CopyTo(string destinationPath, CancellationToken cancellationToken)

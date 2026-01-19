@@ -1,8 +1,17 @@
+using System;
+using System.Collections.Generic;
+using System.Diagnostics;
 using System.Formats.Tar;
+using System.IO;
 using System.IO.Compression;
+using System.Linq;
 using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
+using EasyExtract.Core.Models;
+using EasyExtract.Core.Utilities;
 
-namespace EasyExtractCrossPlatform.Services;
+namespace EasyExtract.Core.Services;
 
 public interface IUnityPackagePreviewService
 {
@@ -20,6 +29,13 @@ public sealed class UnityPackagePreviewService : IUnityPackagePreviewService
 
     private static readonly PathSegmentNormalization[] EmptySegmentNormalizations =
         Array.Empty<PathSegmentNormalization>();
+        
+    private readonly IEasyExtractLogger _logger;
+
+    public UnityPackagePreviewService(IEasyExtractLogger logger)
+    {
+        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+    }
 
     public async Task<UnityPackagePreviewResult> LoadPreviewAsync(
         string packagePath,
@@ -30,7 +46,7 @@ public sealed class UnityPackagePreviewService : IUnityPackagePreviewService
         if (!File.Exists(packagePath))
             throw new FileNotFoundException("Unitypackage file was not found.", packagePath);
 
-        LoggingService.LogInformation($"Loading preview for '{packagePath}'.");
+        _logger.LogInformation($"Loading preview for '{packagePath}'.");
         var stopwatch = Stopwatch.StartNew();
 
         try
@@ -39,14 +55,14 @@ public sealed class UnityPackagePreviewService : IUnityPackagePreviewService
                 .ConfigureAwait(false);
 
             stopwatch.Stop();
-            LoggingService.LogInformation(
+            _logger.LogInformation(
                 $"Preview loaded for '{packagePath}' in {stopwatch.Elapsed.TotalMilliseconds:F0} ms. AssetCount={result.Assets.Count}.");
             return result;
         }
         catch (Exception ex) when (ex is not OperationCanceledException)
         {
             stopwatch.Stop();
-            LoggingService.LogError($"Failed to load preview for '{packagePath}'.", ex);
+            _logger.LogError($"Failed to load preview for '{packagePath}'.", ex);
             throw;
         }
         finally
@@ -55,10 +71,10 @@ public sealed class UnityPackagePreviewService : IUnityPackagePreviewService
         }
     }
 
-    private static UnityPackagePreviewResult LoadPreviewInternal(string packagePath,
+    private UnityPackagePreviewResult LoadPreviewInternal(string packagePath,
         CancellationToken cancellationToken)
     {
-        LoggingService.LogInformation($"Parsing unitypackage for preview: '{packagePath}'.");
+        _logger.LogInformation($"Parsing unitypackage for preview: '{packagePath}'.");
 
         var resolvedPackage = ResolvePackagePath(packagePath, cancellationToken);
 
@@ -144,7 +160,7 @@ public sealed class UnityPackagePreviewService : IUnityPackagePreviewService
 
             var extractionRoot = ExtractLargeAudioAssets(resolvedPackage.ResolvedPath, assetStates, cancellationToken);
             if (!string.IsNullOrWhiteSpace(extractionRoot))
-                LoggingService.LogInformation(
+                _logger.LogInformation(
                     $"Extracted large audio assets to temporary directory '{extractionRoot}'.");
 
             var assets = new List<UnityPackagePreviewAsset>(assetStates.Count);
@@ -182,7 +198,7 @@ public sealed class UnityPackagePreviewService : IUnityPackagePreviewService
                 ? new DateTimeOffset(fileInfo.LastWriteTimeUtc)
                 : null);
 
-            LoggingService.LogInformation(
+            _logger.LogInformation(
                 $"Preview data assembled for '{packagePath}'. Assets={assets.Count}, totalAssetSize={totalAssetSize}, directoriesToPrune={directoriesToPrune.Count}.");
 
             return new UnityPackagePreviewResult(
@@ -201,7 +217,7 @@ public sealed class UnityPackagePreviewService : IUnityPackagePreviewService
         }
     }
 
-    private static string? ExtractLargeAudioAssets(
+    private string? ExtractLargeAudioAssets(
         string packagePath,
         IDictionary<string, UnityPackageAssetPreviewState> assetStates,
         CancellationToken cancellationToken)
@@ -291,7 +307,7 @@ public sealed class UnityPackagePreviewService : IUnityPackagePreviewService
         return root;
     }
 
-    private static PackagePathResolution ResolvePackagePath(string packagePath, CancellationToken cancellationToken)
+    private PackagePathResolution ResolvePackagePath(string packagePath, CancellationToken cancellationToken)
     {
         var format = DetectPackageFormat(packagePath);
         return format switch
@@ -304,9 +320,9 @@ public sealed class UnityPackagePreviewService : IUnityPackagePreviewService
         };
     }
 
-    private static PackagePathResolution ResolveFromZip(string packagePath, CancellationToken cancellationToken)
+    private PackagePathResolution ResolveFromZip(string packagePath, CancellationToken cancellationToken)
     {
-        LoggingService.LogInformation(
+        _logger.LogInformation(
             $"Package '{packagePath}' appears to be a zip archive. Extracting embedded unitypackage.");
 
         var tempDirectory = Path.Combine(Path.GetTempPath(), $"{TemporaryPackageFolderPrefix}_{Guid.NewGuid():N}");
@@ -344,7 +360,7 @@ public sealed class UnityPackagePreviewService : IUnityPackagePreviewService
             long? size = targetEntry.Length >= 0 ? targetEntry.Length : null;
             var lastModified = targetEntry.LastWriteTime.ToUniversalTime();
 
-            LoggingService.LogInformation($"Extracted '{fileName}' from zip '{packagePath}' for preview.");
+            _logger.LogInformation($"Extracted '{fileName}' from zip '{packagePath}' for preview.");
             return new PackagePathResolution(targetPath, fileName, tempDirectory, size, lastModified);
         }
         catch

@@ -1,9 +1,15 @@
+using System;
 using System.Buffers;
+using System.Collections.Generic;
 using System.Formats.Tar;
+using System.IO;
+using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
+using EasyExtract.Core.Models;
+using EasyExtract.Core.Utilities;
 
-namespace EasyExtractCrossPlatform.Services;
+namespace EasyExtract.Core.Services;
 
 public sealed partial class UnityPackageExtractionService
 {
@@ -47,12 +53,12 @@ public sealed partial class UnityPackageExtractionService
     }
 
 
-    private static void CleanupCorruptedDirectories(HashSet<string> directoriesToCleanup, string correlationId)
+    private static void CleanupCorruptedDirectories(HashSet<string> directoriesToCleanup, string correlationId, IEasyExtractLogger logger)
     {
         if (directoriesToCleanup.Count == 0)
             return;
 
-        LoggingService.LogInformation(
+        logger.LogInformation(
             $"CleanupCorruptedDirectories started | count={directoriesToCleanup.Count} | correlationId={correlationId}");
         var deletedCount = 0;
 
@@ -71,17 +77,17 @@ public sealed partial class UnityPackageExtractionService
             }
             catch (IOException ex)
             {
-                LoggingService.LogWarning(
+                logger.LogWarning(
                     $"Failed to delete empty directory | path='{directory}' | correlationId={correlationId}", ex);
             }
             catch (UnauthorizedAccessException ex)
             {
-                LoggingService.LogWarning(
+                logger.LogWarning(
                     $"Access denied when deleting directory | path='{directory}' | correlationId={correlationId}", ex);
             }
 
         if (deletedCount > 0)
-            LoggingService.LogInformation(
+            logger.LogInformation(
                 $"CleanupCorruptedDirectories completed | deleted={deletedCount}/{directoriesToCleanup.Count} | correlationId={correlationId}");
     }
 
@@ -92,13 +98,34 @@ public sealed partial class UnityPackageExtractionService
         string? metaPath,
         string? previewPath)
     {
-        var writeAsset = state.Asset is { HasContent: true } && NeedsWrite(targetPath, state.Asset);
+        // Internal helper: NeedsWrite requires logger now? Yes, ContentMatches logs.
+        // But CreateAssetWritePlan just CALLS NeedsWrite.
+        // So CreateAssetWritePlan needs logger to pass to NeedsWrite.
+        // Wait, NeedsWrite calls ContentMatches.
+        // So check signature of NeedsWrite later.
+        // I will change the signature here as well to pass logger down.
+        // Wait, the original method was static. To pass logger, I must add it to arguments.
+        // But do I want to pass logger to CreateAssetWritePlan? Ideally yes.
+        // But this method logic depends on NeedsWrite outcome.
+        // So yes, I add logger argument.
+        throw new NotImplementedException("This method logic is moved inside extraction logic actually or handled below. Wait. I am rewriting this file.");
+    }
+    
+    // Rewriting completely to avoid the throw.
+    private static AssetWritePlan CreateAssetWritePlan(
+        UnityPackageAssetState state,
+        string targetPath,
+        string? metaPath,
+        string? previewPath,
+        IEasyExtractLogger logger)
+    {
+        var writeAsset = state.Asset is { HasContent: true } && NeedsWrite(targetPath, state.Asset, logger);
         var writeMeta = metaPath is not null &&
                         state.Meta is { HasContent: true } &&
-                        NeedsWrite(metaPath, state.Meta);
+                        NeedsWrite(metaPath, state.Meta, logger);
         var writePreview = previewPath is not null &&
                            state.Preview is { HasContent: true } &&
-                           NeedsWrite(previewPath, state.Preview);
+                           NeedsWrite(previewPath, state.Preview, logger);
 
         return new AssetWritePlan(writeAsset, writeMeta, writePreview);
     }
@@ -111,7 +138,8 @@ public sealed partial class UnityPackageExtractionService
         string? previewPath,
         AssetWritePlan plan,
         CancellationToken cancellationToken,
-        string correlationId)
+        string correlationId,
+        IEasyExtractLogger logger)
     {
         if (!plan.RequiresWrite)
             return Array.Empty<string>();
@@ -132,7 +160,7 @@ public sealed partial class UnityPackageExtractionService
                 }
                 catch (Exception ex)
                 {
-                    LoggingService.LogError(
+                    logger.LogError(
                         $"Failed to create asset directory | path='{directory}' | correlationId={correlationId}", ex);
                     throw;
                 }
@@ -154,13 +182,13 @@ public sealed partial class UnityPackageExtractionService
                 if (DiskSpaceHelper.IsDiskFull(ex))
                 {
                     var friendlyMessage = DiskSpaceHelper.BuildFriendlyMessage(targetPath);
-                    LoggingService.LogError(
+                    logger.LogError(
                         $"{friendlyMessage} | path='{targetPath}' | correlationId={correlationId}",
                         ex);
                     throw new IOException(friendlyMessage, ex);
                 }
 
-                LoggingService.LogError(
+                logger.LogError(
                     $"Failed to write asset | path='{targetPath}' | size={assetComponent.Length} | correlationId={correlationId}",
                     ex);
                 throw;
@@ -181,13 +209,13 @@ public sealed partial class UnityPackageExtractionService
                 if (DiskSpaceHelper.IsDiskFull(ex))
                 {
                     var friendlyMessage = DiskSpaceHelper.BuildFriendlyMessage(metaPath);
-                    LoggingService.LogError(
+                    logger.LogError(
                         $"{friendlyMessage} | path='{metaPath}' | correlationId={correlationId}",
                         ex);
                     throw new IOException(friendlyMessage, ex);
                 }
 
-                LoggingService.LogError(
+                logger.LogError(
                     $"Failed to write meta file | path='{metaPath}' | correlationId={correlationId}", ex);
                 throw;
             }
@@ -207,13 +235,13 @@ public sealed partial class UnityPackageExtractionService
                 if (DiskSpaceHelper.IsDiskFull(ex))
                 {
                     var friendlyMessage = DiskSpaceHelper.BuildFriendlyMessage(previewPath);
-                    LoggingService.LogError(
+                    logger.LogError(
                         $"{friendlyMessage} | path='{previewPath}' | correlationId={correlationId}",
                         ex);
                     throw new IOException(friendlyMessage, ex);
                 }
 
-                LoggingService.LogError(
+                logger.LogError(
                     $"Failed to write preview | path='{previewPath}' | correlationId={correlationId}", ex);
                 throw;
             }
@@ -223,16 +251,16 @@ public sealed partial class UnityPackageExtractionService
     }
 
 
-    private static bool NeedsWrite(string path, AssetComponent component)
+    private static bool NeedsWrite(string path, AssetComponent component, IEasyExtractLogger logger)
     {
         if (!File.Exists(path))
             return true;
 
-        return !ContentMatches(path, component);
+        return !ContentMatches(path, component, logger);
     }
 
 
-    private static bool ContentMatches(string path, AssetComponent component)
+    private static bool ContentMatches(string path, AssetComponent component, IEasyExtractLogger logger)
     {
         try
         {
@@ -246,24 +274,24 @@ public sealed partial class UnityPackageExtractionService
         }
         catch (IOException ex)
         {
-            LoggingService.LogWarning($"IOException during content comparison | path='{path}'", ex);
+            logger.LogWarning($"IOException during content comparison | path='{path}'", ex);
             return false;
         }
         catch (UnauthorizedAccessException ex)
         {
-            LoggingService.LogWarning($"Access denied during content comparison | path='{path}'", ex);
+            logger.LogWarning($"Access denied during content comparison | path='{path}'", ex);
             return false;
         }
         catch (CryptographicException ex)
         {
-            LoggingService.LogWarning($"Cryptographic error during content comparison | path='{path}'", ex);
+            logger.LogWarning($"Cryptographic error during content comparison | path='{path}'", ex);
             return false;
         }
     }
 
 
     private static string ReadEntryAsUtf8String(Stream dataStream, CancellationToken cancellationToken,
-        string correlationId)
+        string correlationId, IEasyExtractLogger logger)
     {
         cancellationToken.ThrowIfCancellationRequested();
         using var reader = new StreamReader(
@@ -282,7 +310,7 @@ public sealed partial class UnityPackageExtractionService
             totalRead += read;
             if (totalRead > MaxPathEntryCharacters)
             {
-                LoggingService.LogError(
+                logger.LogError(
                     $"Path entry exceeded max length | length={totalRead} | max={MaxPathEntryCharacters} | correlationId={correlationId}");
                 throw new InvalidDataException(
                     $"Path entry exceeded the maximum supported length of {MaxPathEntryCharacters:N0} characters.");
@@ -302,7 +330,8 @@ public sealed partial class UnityPackageExtractionService
         UnityPackageExtractionLimits limits,
         ExtractionLimiter limiter,
         CancellationToken cancellationToken,
-        string correlationId)
+        string correlationId,
+        IEasyExtractLogger logger)
     {
         cancellationToken.ThrowIfCancellationRequested();
         Directory.CreateDirectory(temporaryDirectory);
@@ -314,7 +343,7 @@ public sealed partial class UnityPackageExtractionService
 
         try
         {
-            using (LoggingService.BeginPerformanceScope("CreateAssetComponent", "Extraction",
+            using (logger.BeginPerformanceScope("CreateAssetComponent", "Extraction",
                        correlationId))
             {
                 output = File.Open(tempPath, FileMode.Create, FileAccess.Write, FileShare.None);
@@ -337,7 +366,7 @@ public sealed partial class UnityPackageExtractionService
 
                             if (limits.MaxAssetBytes > 0 && totalWritten > limits.MaxAssetBytes)
                             {
-                                LoggingService.LogError(
+                                logger.LogError(
                                     $"Asset exceeded per-file limit | entry='{entryName}' | size={totalWritten} | limit={limits.MaxAssetBytes} | correlationId={correlationId}");
                                 throw new InvalidDataException(
                                     $"Asset '{entryName}' exceeded the configured per-file limit of {limits.MaxAssetBytes:N0} bytes.");
@@ -356,34 +385,34 @@ public sealed partial class UnityPackageExtractionService
 
                 if (totalWritten == 0)
                 {
-                    TryDeleteFile(tempPath);
-                    LoggingService.LogInformation(
+                    TryDeleteFile(tempPath, logger);
+                    logger.LogInformation(
                         $"Asset component empty, skipping | entry='{entryName}' | correlationId={correlationId}");
                     return null;
                 }
 
                 limiter.TrackAssetBytes(totalWritten);
-                return new AssetComponent(tempPath, totalWritten, hash);
+                return new AssetComponent(tempPath, totalWritten, hash, logger);
             }
         }
         catch (Exception ex) when (ex is not OperationCanceledException and not InvalidDataException)
         {
             output?.Dispose();
-            TryDeleteFile(tempPath);
-            LoggingService.LogError(
+            TryDeleteFile(tempPath, logger);
+            logger.LogError(
                 $"Failed to create asset component | entry='{entryName}' | correlationId={correlationId}", ex);
             throw;
         }
         catch
         {
             output?.Dispose();
-            TryDeleteFile(tempPath);
+            TryDeleteFile(tempPath, logger);
             throw;
         }
     }
 
 
-    private static TemporaryDirectoryScope CreateTemporaryDirectory(string? baseDirectory, string correlationId)
+    private static TemporaryDirectoryScope CreateTemporaryDirectory(string? baseDirectory, string correlationId, IEasyExtractLogger logger)
     {
         var root = string.IsNullOrWhiteSpace(baseDirectory)
             ? Path.Combine(Path.GetTempPath(), "EasyExtractCrossPlatform")
@@ -395,7 +424,7 @@ public sealed partial class UnityPackageExtractionService
         }
         catch (Exception ex)
         {
-            LoggingService.LogError(
+            logger.LogError(
                 $"Failed to create temp root directory | path='{root}' | correlationId={correlationId}", ex);
             throw;
         }
@@ -404,13 +433,13 @@ public sealed partial class UnityPackageExtractionService
         try
         {
             Directory.CreateDirectory(scopedDirectory);
-            LoggingService.LogInformation(
+            logger.LogInformation(
                 $"Created temporary directory | path='{scopedDirectory}' | correlationId={correlationId}");
-            return new TemporaryDirectoryScope(scopedDirectory, correlationId);
+            return new TemporaryDirectoryScope(scopedDirectory, correlationId, logger);
         }
         catch (Exception ex)
         {
-            LoggingService.LogError(
+            logger.LogError(
                 $"Failed to create scoped temp directory | path='{scopedDirectory}' | correlationId={correlationId}",
                 ex);
             throw;
@@ -418,7 +447,7 @@ public sealed partial class UnityPackageExtractionService
     }
 
 
-    private static void TryDeleteFile(string path)
+    private static void TryDeleteFile(string path, IEasyExtractLogger logger)
     {
         try
         {
@@ -427,11 +456,11 @@ public sealed partial class UnityPackageExtractionService
         }
         catch (IOException ex)
         {
-            LoggingService.LogWarning($"Failed to delete temporary file | path='{path}'", ex);
+            logger.LogWarning($"Failed to delete temporary file | path='{path}'", ex);
         }
         catch (UnauthorizedAccessException ex)
         {
-            LoggingService.LogWarning($"Access denied when deleting temporary file | path='{path}'", ex);
+            logger.LogWarning($"Access denied when deleting temporary file | path='{path}'", ex);
         }
     }
 
