@@ -10,6 +10,7 @@ using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using EasyExtract.Core.Models;
+using EasyExtract.Core;
 
 namespace EasyExtract.Core.Services;
 
@@ -20,7 +21,7 @@ public interface IMaliciousCodeDetectionService
         CancellationToken cancellationToken = default);
 }
 
-public sealed partial class MaliciousCodeDetectionService : IMaliciousCodeDetectionService
+public sealed class MaliciousCodeDetectionService : IMaliciousCodeDetectionService
 {
     private const long MaxScannableBytes = 5 * 1024 * 1024; // 5 MB per file limit
     private const int MaxMatchesPerPatternPerFile = 5;
@@ -200,5 +201,439 @@ public sealed partial class MaliciousCodeDetectionService : IMaliciousCodeDetect
             isMalicious,
             threats,
             DateTimeOffset.UtcNow);
+    }
+    
+    // --- AssetProcessing Partials ---
+
+    private static string NormalizeFullPath(string path)
+    {
+        try
+        {
+            return Path.GetFullPath(path);
+        }
+        catch
+        {
+            return path;
+        }
+    }
+
+    private static string NormalizeAssetPath(string? input)
+    {
+        if (string.IsNullOrWhiteSpace(input))
+            return string.Empty;
+
+        var sanitized = input
+            .Replace("\0", string.Empty, StringComparison.Ordinal)
+            .Replace("\r", string.Empty, StringComparison.Ordinal)
+            .Replace("\n", string.Empty, StringComparison.Ordinal)
+            .Replace('\\', '/')
+            .Trim();
+
+        return sanitized;
+    }
+
+    private static byte[]? ReadAssetData(
+        TarEntry entry,
+        CancellationToken cancellationToken,
+        ScanStatistics stats)
+    {
+        ArgumentNullException.ThrowIfNull(stats);
+
+        if (entry.DataStream is null)
+        {
+            stats.AssetsSkippedMissingStream++;
+            return null;
+        }
+
+        var declaredLength = entry.Length;
+        if (declaredLength > MaxScannableBytes)
+        {
+            stats.AssetsSkippedOversize++;
+            return null;
+        }
+
+        using var memoryStream = declaredLength is > 0 and <= int.MaxValue
+            ? new MemoryStream((int)declaredLength)
+            : new MemoryStream();
+
+        var buffer = new byte[81920];
+        int read;
+        while ((read = entry.DataStream.Read(buffer, 0, buffer.Length)) > 0)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            if (memoryStream.Length + read > MaxScannableBytes)
+            {
+                stats.AssetsSkippedOversize++;
+                return null;
+            }
+
+            memoryStream.Write(buffer, 0, read);
+        }
+
+        return memoryStream.ToArray();
+    }
+
+    private static string ReadPath(TarEntry entry)
+    {
+        if (entry.DataStream is null)
+            return string.Empty;
+
+        using var buffer = new MemoryStream();
+        entry.DataStream.CopyTo(buffer);
+        return Encoding.UTF8.GetString(buffer.ToArray());
+    }
+
+    private static void ProcessAssetData(
+        string relativePath,
+        byte[] data,
+        MaliciousThreatCollector collector,
+        ScanStatistics stats)
+    {
+        ArgumentNullException.ThrowIfNull(stats);
+
+        if (string.IsNullOrWhiteSpace(relativePath))
+        {
+            stats.AssetsSkippedMissingPath++;
+            return;
+        }
+
+        if (!ShouldScanFile(relativePath))
+        {
+            stats.AssetsSkippedByExtension++;
+            return;
+        }
+
+        if (!LooksLikeText(data))
+        {
+            stats.AssetsSkippedBinary++;
+            return;
+        }
+
+        var content = Encoding.UTF8.GetString(data);
+        if (string.IsNullOrWhiteSpace(content))
+            return;
+
+        stats.AssetsAnalyzed++;
+        stats.TotalBytesAnalyzed += data.LongLength;
+        AnalyzeTextContent(relativePath, content, collector);
+    }
+
+    private static bool ShouldScanFile(string path)
+    {
+        var extension = Path.GetExtension(path);
+        return !string.IsNullOrWhiteSpace(extension) && ScannableExtensions.Contains(extension);
+    }
+
+    private static bool LooksLikeText(ReadOnlySpan<byte> data)
+    {
+        if (data.IsEmpty)
+            return false;
+
+        var sampleLength = Math.Min(data.Length, 4096);
+        var controlCount = 0;
+
+        for (var i = 0; i < sampleLength; i++)
+        {
+            var value = data[i];
+            if (value == 0)
+                return false;
+
+            if (value < 9 || (value > 13 && value < 32))
+                controlCount++;
+        }
+
+        return controlCount <= sampleLength * 0.2;
+    }
+
+    private static void AnalyzeTextContent(
+        string relativePath,
+        string content,
+        MaliciousThreatCollector collector)
+    {
+        var discordMatches = ExtractMatches(DiscordWebhookRegex, content);
+        if (discordMatches.Count > 0)
+            collector.AddMatches(
+                MaliciousThreatType.DiscordWebhook,
+                MaliciousThreatSeverity.High,
+                "Discord webhook URL detected - potential data exfiltration",
+                relativePath,
+                discordMatches);
+
+        var linkMatches = ExtractMatches(LinkDetectionRegex, content);
+        if (linkMatches.Count > 0)
+        {
+            var suspiciousLinks = linkMatches
+                .Where(link => !IsAllowedLink(link))
+                .Distinct(StringComparer.OrdinalIgnoreCase)
+                .ToList();
+
+            if (suspiciousLinks.Count > 0)
+                collector.AddMatches(
+                    MaliciousThreatType.UnsafeLinks,
+                    MaliciousThreatSeverity.High,
+                    "UNSAFE links detected - only links from the embedded allowed domains list are considered safe",
+                    relativePath,
+                    suspiciousLinks);
+        }
+
+        var suspiciousMatches = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        foreach (var pattern in SuspiciousPatterns)
+        {
+            foreach (Match match in pattern.Matches(content))
+            {
+                if (!match.Success || string.IsNullOrWhiteSpace(match.Value))
+                    continue;
+
+                suspiciousMatches.Add(SanitizeMatch(match.Value));
+                if (suspiciousMatches.Count >= MaxMatchesPerPatternPerFile)
+                    break;
+            }
+
+            if (suspiciousMatches.Count >= MaxMatchesPerPatternPerFile)
+                break;
+        }
+
+        if (suspiciousMatches.Count > 0)
+            collector.AddMatches(
+                MaliciousThreatType.SuspiciousCodePatterns,
+                MaliciousThreatSeverity.Medium,
+                "Potentially dangerous API calls or patterns detected",
+                relativePath,
+                suspiciousMatches);
+    }
+
+    private static List<string> ExtractMatches(Regex regex, string content)
+    {
+        var matches = new List<string>();
+        foreach (Match match in regex.Matches(content))
+        {
+            if (!match.Success || string.IsNullOrWhiteSpace(match.Value))
+                continue;
+
+            matches.Add(SanitizeMatch(match.Value));
+            if (matches.Count >= MaxMatchesPerPatternPerFile)
+                break;
+        }
+
+        return matches;
+    }
+
+    private static string SanitizeMatch(string value)
+    {
+        var cleaned = value
+            .Replace("\r", " ", StringComparison.Ordinal)
+            .Replace("\n", " ", StringComparison.Ordinal)
+            .Trim();
+
+        if (cleaned.Length > 200)
+            cleaned = cleaned[..200] + "...";
+
+        return cleaned;
+    }
+
+    private static bool IsAllowedLink(string link)
+    {
+        if (string.IsNullOrWhiteSpace(link))
+            return false;
+
+        if (!Uri.TryCreate(link, UriKind.Absolute, out var uri))
+            return false;
+
+        var host = uri.Host;
+        if (string.IsNullOrWhiteSpace(host))
+            return false;
+
+        foreach (var allowed in AllowedDomains)
+        {
+            if (string.IsNullOrWhiteSpace(allowed))
+                continue;
+
+            var allowedHost = ExtractAllowedDomain(allowed);
+            if (string.IsNullOrWhiteSpace(allowedHost))
+                continue;
+
+            if (DomainMatches(host, allowedHost))
+                return true;
+        }
+
+        return false;
+    }
+
+    private static string ExtractAllowedDomain(string entry)
+    {
+        if (entry.Contains("://", StringComparison.Ordinal))
+        {
+            if (Uri.TryCreate(entry, UriKind.Absolute, out var uri))
+                return uri.Host;
+            return entry;
+        }
+
+        var trimmed = entry.Trim();
+        var slashIndex = trimmed.IndexOf('/', StringComparison.Ordinal);
+        if (slashIndex >= 0)
+            trimmed = trimmed[..slashIndex];
+
+        return trimmed.TrimStart('.');
+    }
+
+    private static bool DomainMatches(string host, string allowed)
+    {
+        if (string.Equals(host, allowed, StringComparison.OrdinalIgnoreCase))
+            return true;
+
+        return host.EndsWith("." + allowed, StringComparison.OrdinalIgnoreCase);
+    }
+
+    private static (string AssetKey, string ComponentName) SplitEntryName(string entryName)
+    {
+        var normalized = entryName.Replace('\\', '/');
+        var firstSlash = normalized.IndexOf('/');
+        if (firstSlash < 0)
+            return (string.Empty, string.Empty);
+
+        var key = normalized[..firstSlash].Trim();
+        var remainder = normalized[(firstSlash + 1)..].Trim();
+        return (key, remainder.ToLowerInvariant());
+    }
+
+    // --- Collectors Partials ---
+
+    private sealed class ScanStatistics
+    {
+        public int TarEntriesRead { get; set; }
+        public int PathComponentsSeen { get; set; }
+        public int AssetComponentsSeen { get; set; }
+        public int AssetsAnalyzed { get; set; }
+        public int AssetsSkippedByExtension { get; set; }
+        public int AssetsSkippedBinary { get; set; }
+        public int AssetsSkippedMissingPath { get; set; }
+        public int AssetsSkippedOversize { get; set; }
+        public int AssetsSkippedMissingStream { get; set; }
+        public long TotalBytesAnalyzed { get; set; }
+        public int ThreatCount { get; set; }
+
+        public string ToPerformanceDetails()
+        {
+            return
+                $"entries={TarEntriesRead}|assets={AssetComponentsSeen}|analyzed={AssetsAnalyzed}|skipExt={AssetsSkippedByExtension}|skipBinary={AssetsSkippedBinary}|skipMissingPath={AssetsSkippedMissingPath}|skipSize={AssetsSkippedOversize}|skipStream={AssetsSkippedMissingStream}|threats={ThreatCount}";
+        }
+    }
+
+    private sealed record CachedScanResult(MaliciousCodeScanResult Result, DateTimeOffset Timestamp);
+
+    private sealed class AssetSecurityState
+    {
+        public string? RelativePath { get; set; }
+        public byte[]? PendingAssetData { get; set; }
+    }
+
+    private sealed class MaliciousThreatCollector
+    {
+        private readonly Dictionary<MaliciousThreatType, ThreatAccumulator> _accumulators = new();
+
+        public void AddMatches(
+            MaliciousThreatType type,
+            MaliciousThreatSeverity severity,
+            string description,
+            string filePath,
+            IEnumerable<string> matches)
+        {
+            if (!matches.Any())
+                return;
+
+            if (!_accumulators.TryGetValue(type, out var accumulator))
+            {
+                accumulator = new ThreatAccumulator(type, severity, description);
+                _accumulators[type] = accumulator;
+            }
+
+            accumulator.AddMatches(filePath, matches);
+        }
+
+        public List<MaliciousThreat> BuildResults()
+        {
+            var results = new List<MaliciousThreat>();
+            foreach (var accumulator in _accumulators.Values)
+            {
+                if (!accumulator.HasMatches)
+                    continue;
+
+                results.Add(new MaliciousThreat(
+                    accumulator.Type,
+                    accumulator.Severity,
+                    accumulator.Description,
+                    accumulator.ToMatches()));
+            }
+
+            return results;
+        }
+    }
+
+    private sealed class ThreatAccumulator
+    {
+        private const int MaxMatchesPerThreat = 50;
+
+        private readonly Dictionary<string, HashSet<string>> _matchesByFile =
+            new(StringComparer.OrdinalIgnoreCase);
+
+        private int _totalMatches;
+
+        public ThreatAccumulator(
+            MaliciousThreatType type,
+            MaliciousThreatSeverity severity,
+            string description)
+        {
+            Type = type;
+            Severity = severity;
+            Description = description;
+        }
+
+        public MaliciousThreatType Type { get; }
+        public MaliciousThreatSeverity Severity { get; }
+        public string Description { get; }
+
+        public bool HasMatches => _totalMatches > 0;
+
+        public void AddMatches(string filePath, IEnumerable<string> matches)
+        {
+            if (_totalMatches >= MaxMatchesPerThreat)
+                return;
+
+            var path = NormalizeAssetPath(filePath);
+            if (string.IsNullOrWhiteSpace(path))
+                path = "Unknown asset";
+
+            if (!_matchesByFile.TryGetValue(path, out var set))
+            {
+                set = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+                _matchesByFile[path] = set;
+            }
+
+            foreach (var match in matches)
+            {
+                if (_totalMatches >= MaxMatchesPerThreat)
+                    break;
+
+                if (string.IsNullOrWhiteSpace(match))
+                    continue;
+
+                if (set.Add(match))
+                    _totalMatches++;
+            }
+        }
+
+        public IReadOnlyList<MaliciousThreatMatch> ToMatches()
+        {
+            var matches = new List<MaliciousThreatMatch>(_totalMatches);
+            foreach (var kvp in _matchesByFile.OrderBy(k => k.Key, StringComparer.OrdinalIgnoreCase))
+            {
+                var snippets = kvp.Value.ToList();
+                snippets.Sort(StringComparer.OrdinalIgnoreCase);
+                foreach (var snippet in snippets)
+                    matches.Add(new MaliciousThreatMatch(kvp.Key, snippet));
+            }
+
+            return matches;
+        }
     }
 }

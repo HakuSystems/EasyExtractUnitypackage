@@ -5,7 +5,6 @@ using System.Diagnostics;
 using System.Formats.Tar;
 using System.IO;
 using EasyExtract.Core.Models;
-using EasyExtract.Core;
 
 namespace EasyExtract.Core.Services;
 

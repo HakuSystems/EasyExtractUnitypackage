@@ -6,7 +6,6 @@ using System.Threading.Tasks;
 using System.Formats.Tar;
 using EasyExtract.Core.Models;
 using EasyExtract.Core.Utilities;
-using EasyExtract.Core;
 
 namespace EasyExtract.Core.Services;
 

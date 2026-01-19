@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using EasyExtract.Core.Utilities;
-using EasyExtract.Core;
 
 namespace EasyExtract.Core.Services;
 
@@ -285,4 +284,13 @@ public sealed partial class UnityPackageExtractionService
 
         return Path.Combine(categorySegment, fileName);
     }
+
+
+    private readonly record struct PathSegmentNormalization(string Original, string Normalized);
+
+
+    private readonly record struct PathNormalizationResult(
+        string NormalizedPath,
+        string OriginalPath,
+        IReadOnlyList<PathSegmentNormalization> Segments);
 }

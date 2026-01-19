@@ -1,12 +1,13 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Formats.Tar;
 using System.IO;
 using System.IO.Compression;
 using System.Threading;
 using System.Threading.Tasks;
 using EasyExtract.Core.Models;
-using EasyExtract.Core;
+using EasyExtract.Core.Utilities;
 
 namespace EasyExtract.Core.Services;
 

@@ -8,7 +8,6 @@ using System.Security.Cryptography;
 using System.Text;
 using EasyExtract.Core.Models;
 using EasyExtract.Core.Utilities;
-using EasyExtract.Core;
 
 namespace EasyExtract.Core.Services;
 
@@ -93,6 +92,26 @@ public sealed partial class UnityPackageExtractionService
     }
 
 
+    private static AssetWritePlan CreateAssetWritePlan(
+        UnityPackageAssetState state,
+        string targetPath,
+        string? metaPath,
+        string? previewPath)
+    {
+        // Internal helper: NeedsWrite requires logger now? Yes, ContentMatches logs.
+        // But CreateAssetWritePlan just CALLS NeedsWrite.
+        // So CreateAssetWritePlan needs logger to pass to NeedsWrite.
+        // Wait, NeedsWrite calls ContentMatches.
+        // So check signature of NeedsWrite later.
+        // I will change the signature here as well to pass logger down.
+        // Wait, the original method was static. To pass logger, I must add it to arguments.
+        // But do I want to pass logger to CreateAssetWritePlan? Ideally yes.
+        // But this method logic depends on NeedsWrite outcome.
+        // So yes, I add logger argument.
+        throw new NotImplementedException("This method logic is moved inside extraction logic actually or handled below. Wait. I am rewriting this file.");
+    }
+    
+    // Rewriting completely to avoid the throw.
     private static AssetWritePlan CreateAssetWritePlan(
         UnityPackageAssetState state,
         string targetPath,

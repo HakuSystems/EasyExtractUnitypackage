@@ -3,7 +3,6 @@ using System.Buffers;
 using System.Collections.Generic;
 using System.IO;
 using EasyExtract.Core.Models;
-using EasyExtract.Core;
 
 namespace EasyExtract.Core.Services;
 
@@ -81,12 +80,6 @@ public sealed partial class UnityPackageExtractionService
         }
     }
 
-    private readonly record struct PathSegmentNormalization(string Original, string Normalized);
-
-    private readonly record struct PathNormalizationResult(
-        string NormalizedPath,
-        string OriginalPath,
-        IReadOnlyList<PathSegmentNormalization> Segments);
 
     private sealed class UnityPackageAssetState
     {
@@ -224,7 +217,7 @@ public sealed partial class UnityPackageExtractionService
 
             using var source = File.Open(TempPath, FileMode.Open, FileAccess.Read, FileShare.Read);
             using var destination = File.Open(destinationPath, FileMode.Create, FileAccess.Write, FileShare.Read);
-            var buffer = ArrayPool<byte>.Shared.Rent(128 * 1024);
+            var buffer = ArrayPool<byte>.Shared.Rent(StreamCopyBufferSize);
 
             try
             {
