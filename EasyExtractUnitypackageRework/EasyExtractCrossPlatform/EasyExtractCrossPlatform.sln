@@ -4,6 +4,10 @@ VisualStudioVersion = 17.5.2.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EasyExtractCrossPlatform", "EasyExtractCrossPlatform.csproj", "{C8027C75-D17D-6A85-B93B-D96892668840}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EasyExtract.Core", "..\EasyExtract.Core\EasyExtract.Core.csproj", "{6DBC33B1-8C41-4D51-B0A7-B5E4665387DE}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HakuApi", "..\..\..\HakuApi\HakuApi\HakuApi.csproj", "{8E9BAE85-C4FB-4930-9997-8BCA882918CE}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -14,6 +18,14 @@ Global
 		{C8027C75-D17D-6A85-B93B-D96892668840}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C8027C75-D17D-6A85-B93B-D96892668840}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C8027C75-D17D-6A85-B93B-D96892668840}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6DBC33B1-8C41-4D51-B0A7-B5E4665387DE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6DBC33B1-8C41-4D51-B0A7-B5E4665387DE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6DBC33B1-8C41-4D51-B0A7-B5E4665387DE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6DBC33B1-8C41-4D51-B0A7-B5E4665387DE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8E9BAE85-C4FB-4930-9997-8BCA882918CE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8E9BAE85-C4FB-4930-9997-8BCA882918CE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8E9BAE85-C4FB-4930-9997-8BCA882918CE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8E9BAE85-C4FB-4930-9997-8BCA882918CE}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

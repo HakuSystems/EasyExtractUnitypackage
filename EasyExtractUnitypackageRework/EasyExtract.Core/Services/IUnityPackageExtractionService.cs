@@ -13,4 +13,8 @@ public interface IUnityPackageExtractionService
         UnityPackageExtractionOptions options,
         IProgress<UnityPackageExtractionProgress>? progress = null,
         CancellationToken cancellationToken = default);
+
+    Task<UnityPackageExtractionResult> ExtractInfoAsync(
+        string packagePath,
+        CancellationToken cancellationToken = default);
 }
