@@ -70,17 +70,30 @@ public partial class MainWindow : Window
                 if (IsSecurityScanningEnabled)
                 {
                     securityResult = await EnsureSecurityScanTaskAsync(normalizedPackagePath);
-                    if (securityResult?.IsMalicious == true && _securityWarningsShown.Add(normalizedPackagePath))
+                    if (securityResult?.IsMalicious == true)
                     {
-                        var warningText = BuildSecuritySummaryText(securityResult);
-                        await Dispatcher.UIThread.InvokeAsync(() =>
+                        // BLOCKING UI: Wait for user to Confirm or Cancel
+                        var forceExtract = await WaitForSecurityClearanceAsync(normalizedPackagePath, securityResult);
+                        if (!forceExtract)
                         {
-                            ShowDropStatusMessage(
-                                "Potentially malicious package",
-                                warningText,
-                                TimeSpan.FromSeconds(6),
-                                UiSoundEffect.Negative);
-                        });
+                            ShowDropStatusMessage("Extraction Blocked", "Malicious package skipped by user.",
+                                TimeSpan.FromSeconds(4), UiSoundEffect.Subtle);
+
+                            await Dispatcher.UIThread.InvokeAsync(() =>
+                                CompleteCurrentPackageOnDashboard(
+                                    packagePath,
+                                    false,
+                                    0,
+                                    true, // treat as cancelled
+                                    Math.Max(0, validItems.Count - index - 1),
+                                    ResolveNextPackageName(validItems, index)));
+
+                            continue;
+                        }
+
+                        // User chose to Force Extract -> Proceed (maybe log this explicitly)
+                        ShowDropStatusMessage("Risk Accepted", "Proceeding with extraction...", TimeSpan.FromSeconds(2),
+                            UiSoundEffect.Negative);
                     }
                     else if (securityResult is null && _securityInfoNotified.Add(normalizedPackagePath))
                     {

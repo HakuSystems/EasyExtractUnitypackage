@@ -1,3 +1,5 @@
+using Avalonia.Layout;
+
 namespace EasyExtractCrossPlatform;
 
 public partial class MainWindow : Window
@@ -177,6 +179,99 @@ public partial class MainWindow : Window
                 _securityScanTasks.Remove(normalizedPath);
             }
         }
+    }
+
+    private async Task<bool> WaitForSecurityClearanceAsync(string packagePath, MaliciousCodeScanResult result)
+    {
+        var tcs = new TaskCompletionSource<bool>();
+
+        await Dispatcher.UIThread.InvokeAsync(async () =>
+        {
+            var warningText = BuildSecuritySummaryText(result);
+
+            var panel = new StackPanel
+            {
+                Spacing = 20,
+                VerticalAlignment = VerticalAlignment.Center,
+                HorizontalAlignment = HorizontalAlignment.Center,
+                MaxWidth = 500
+            };
+
+            panel.Children.Add(new TextBlock
+            {
+                Text = "⚠️ SECURITY THREAT DETECTED",
+                FontSize = 24,
+                FontWeight = FontWeight.Bold,
+                Foreground = Brushes.Red,
+                TextAlignment = TextAlignment.Center
+            });
+
+            panel.Children.Add(new TextBlock
+            {
+                Text = $"The package '{Path.GetFileName(packagePath)}' contains signatures matching malicious code.",
+                TextWrapping = TextWrapping.Wrap,
+                TextAlignment = TextAlignment.Center
+            });
+
+            panel.Children.Add(new TextBlock
+            {
+                Text = warningText,
+                TextWrapping = TextWrapping.Wrap,
+                Foreground = Brushes.OrangeRed,
+                TextAlignment = TextAlignment.Center
+            });
+            var buttons = new StackPanel
+            {
+                Orientation = Orientation.Horizontal,
+                Spacing = 20,
+                HorizontalAlignment = HorizontalAlignment.Center
+            };
+
+            var cancelButton = new Button
+            {
+                Content = "CANCEL (Recommended)",
+                Padding = new Thickness(20, 10),
+                Background = Brushes.DarkGreen // visual cue for safe option
+            };
+            cancelButton.Click += async (_, _) =>
+            {
+                tcs.TrySetResult(false);
+                await CloseOverlayAsync();
+            };
+
+            var forceButton = new Button
+            {
+                Content = "Force Extract (Danger)",
+                Foreground = Brushes.White,
+                Background = Brushes.Red,
+                FontWeight = FontWeight.Bold,
+                Padding = new Thickness(20, 10),
+                Margin = new Thickness(20, 0, 0, 0)
+            };
+            forceButton.Click += async (_, _) =>
+            {
+                tcs.TrySetResult(true);
+                await CloseOverlayAsync();
+            };
+
+            buttons.Children.Add(cancelButton);
+            buttons.Children.Add(forceButton);
+            panel.Children.Add(buttons);
+
+            var card = new Border
+            {
+                Background = Brushes.Black,
+                BorderBrush = Brushes.Red,
+                BorderThickness = new Thickness(2),
+                CornerRadius = new CornerRadius(12),
+                Padding = new Thickness(30),
+                Child = panel
+            };
+
+            await ShowOverlayAsync(card);
+        });
+
+        return await tcs.Task;
     }
 
     private static string BuildSecuritySummaryText(MaliciousCodeScanResult result)

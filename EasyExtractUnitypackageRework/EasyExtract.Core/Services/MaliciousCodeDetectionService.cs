@@ -1,16 +1,9 @@
-using System;
 using System.Collections.Concurrent;
-using System.Collections.Generic;
 using System.Formats.Tar;
-using System.IO;
 using System.IO.Compression;
-using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
-using System.Threading;
-using System.Threading.Tasks;
 using EasyExtract.Core.Models;
-using EasyExtract.Core;
 
 namespace EasyExtract.Core.Services;
 
@@ -45,7 +38,10 @@ public sealed class MaliciousCodeDetectionService : IMaliciousCodeDetectionServi
         new(@"HttpClient", RegexOptions.Compiled | RegexOptions.IgnoreCase | RegexOptions.CultureInvariant),
         new(@"Socket", RegexOptions.Compiled | RegexOptions.IgnoreCase | RegexOptions.CultureInvariant),
         new(@"System\.Reflection", RegexOptions.Compiled | RegexOptions.IgnoreCase | RegexOptions.CultureInvariant),
-        new(@"DllImport", RegexOptions.Compiled | RegexOptions.IgnoreCase | RegexOptions.CultureInvariant)
+        new(@"DllImport", RegexOptions.Compiled | RegexOptions.IgnoreCase | RegexOptions.CultureInvariant),
+        // EICAR-style Dummy Trigger for UI Testing
+        new(@"HAKU-TEST-MALWARE-SIGNATURE",
+            RegexOptions.Compiled | RegexOptions.IgnoreCase | RegexOptions.CultureInvariant)
     };
 
     private static readonly HashSet<string> ScannableExtensions = new(StringComparer.OrdinalIgnoreCase)
@@ -60,13 +56,13 @@ public sealed class MaliciousCodeDetectionService : IMaliciousCodeDetectionServi
         "paypal.com", "imgur.com", "pastebin.com", "hastebin.com", "gist.github.com"
     };
 
-    private readonly ConcurrentDictionary<string, CachedScanResult> _scanCache =
-        new(StringComparer.OrdinalIgnoreCase);
+    private readonly IEasyExtractLogger _logger;
 
     private readonly ConcurrentDictionary<string, Task<MaliciousCodeScanResult>> _pendingScans =
         new(StringComparer.OrdinalIgnoreCase);
 
-    private readonly IEasyExtractLogger _logger;
+    private readonly ConcurrentDictionary<string, CachedScanResult> _scanCache =
+        new(StringComparer.OrdinalIgnoreCase);
 
     public MaliciousCodeDetectionService(IEasyExtractLogger logger)
     {
@@ -162,7 +158,7 @@ public sealed class MaliciousCodeDetectionService : IMaliciousCodeDetectionServi
                 stats.PathComponentsSeen++;
                 var path = ReadPath(entry);
                 state.RelativePath = NormalizeFullPath(NormalizeAssetPath(path));
-                
+
                 // If we have pending data, process it now that we have the path
                 if (state.PendingAssetData is not null)
                 {
@@ -192,7 +188,7 @@ public sealed class MaliciousCodeDetectionService : IMaliciousCodeDetectionServi
 
         var threats = collector.BuildResults();
         var isMalicious = threats.Count > 0;
-        
+
         _logger.LogInformation(
             $"Scan completed for '{packagePath}'. Threats={threats.Count}, Malicious={isMalicious}. Stats: {stats.ToPerformanceDetails()}");
 
@@ -202,7 +198,7 @@ public sealed class MaliciousCodeDetectionService : IMaliciousCodeDetectionServi
             threats,
             DateTimeOffset.UtcNow);
     }
-    
+
     // --- AssetProcessing Partials ---
 
     private static string NormalizeFullPath(string path)
