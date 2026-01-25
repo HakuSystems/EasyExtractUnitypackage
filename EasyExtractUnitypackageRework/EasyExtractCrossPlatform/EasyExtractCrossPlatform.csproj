@@ -8,12 +8,12 @@
         <ApplicationManifest>app.manifest</ApplicationManifest>
         <AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
         <LangVersion>default</LangVersion>
-        <!--  <ApplicationIcon Condition="$([MSBuild]::IsOSPlatform('Windows'))">Smallicon.ico</ApplicationIcon> -->
-        <AssemblyVersion>2.8.4</AssemblyVersion>
-        <FileVersion>2.8.4</FileVersion>
-        <Version>2.8.4</Version>
+        <ApplicationIcon>Assets\logo-flat.ico</ApplicationIcon>
+        <AssemblyVersion>2.8.5</AssemblyVersion>
+        <FileVersion>2.8.5</FileVersion>
+        <Version>2.8.5</Version>
         <IncludeSourceRevisionInInformationalVersion>false</IncludeSourceRevisionInInformationalVersion>
-        <AssemblyInformationalVersion>2.8.4</AssemblyInformationalVersion>
+        <AssemblyInformationalVersion>2.8.5</AssemblyInformationalVersion>
     </PropertyGroup>
 
     <ItemGroup>

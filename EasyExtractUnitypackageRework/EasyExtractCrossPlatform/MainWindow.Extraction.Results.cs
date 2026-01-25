@@ -57,6 +57,8 @@ public partial class MainWindow : Window
             InvalidDataException invalid when !string.IsNullOrWhiteSpace(invalid.Message)
                 => invalid.Message,
             InvalidDataException => "The package could not be read. It may be damaged.",
+            Exception ex when DiskSpaceHelper.IsDiskFull(ex)
+                => DiskSpaceHelper.BuildFriendlyMessage(null),
             _ => exception.Message
         };
 

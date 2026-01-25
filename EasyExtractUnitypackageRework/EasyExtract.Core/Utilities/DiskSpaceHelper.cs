@@ -1,6 +1,3 @@
-using System;
-using System.IO;
-
 namespace EasyExtract.Core.Utilities;
 
 public static class DiskSpaceHelper
@@ -60,6 +57,22 @@ public static class DiskSpaceHelper
         catch
         {
             return null;
+        }
+    }
+
+    public static long GetFreeSpace(string? path)
+    {
+        var root = TryFormatDrive(path);
+        if (string.IsNullOrWhiteSpace(root))
+            return long.MaxValue; // Can't check, assume enough
+
+        try
+        {
+            return new DriveInfo(root).AvailableFreeSpace;
+        }
+        catch
+        {
+            return long.MaxValue;
         }
     }
 }

@@ -1,18 +1,10 @@
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
 using EasyExtract.Core.Models;
-using EasyExtract.Core;
+using EasyExtract.Core.Utilities;
 
 namespace EasyExtract.Core.Services;
 
-
 public sealed partial class UnityPackageExtractionService : IUnityPackageExtractionService
 {
-    private readonly IEasyExtractLogger _logger;
     private const int StreamCopyBufferSize = 128 * 1024;
     private const int MaxPathEntryCharacters = 4096;
 
@@ -21,6 +13,8 @@ public sealed partial class UnityPackageExtractionService : IUnityPackageExtract
 
     private static readonly PathSegmentNormalization[] EmptySegmentNormalizations =
         Array.Empty<PathSegmentNormalization>();
+
+    private readonly IEasyExtractLogger _logger;
 
     public UnityPackageExtractionService(IEasyExtractLogger logger)
     {
@@ -63,21 +57,30 @@ public sealed partial class UnityPackageExtractionService : IUnityPackageExtract
             throw;
         }
 
+        var packageSize = new FileInfo(packagePath).Length;
+        var requiredSpace = packageSize * 3;
+        var freeSpace = DiskSpaceHelper.GetFreeSpace(outputDirectory);
+
+        if (freeSpace < requiredSpace)
+        {
+            var message = DiskSpaceHelper.BuildFriendlyMessage(outputDirectory);
+            // 0x80070070 is HR_DISK_FULL
+            throw new IOException(message, unchecked((int)0x80070070));
+        }
+
         // HakuAPI Logic: Ensure Isolation if TemporaryDirectory is provided (or if we need one internally)
         // If the user (or API) provides a general temp root, we append a session-ID based folder to it to avoid collisions.
         // If options.TemporaryDirectory is null, we stick to null (Internal logic might use default temp if needed, but here we prep custom path).
         string? activeTempDir = options.TemporaryDirectory;
         if (!string.IsNullOrWhiteSpace(activeTempDir))
         {
-             // We ensure we don't just dump into the root of provided temp, but a specific subfolder if not already unique.
-             // But usually the desktop client provides a unique folder.
-             // For API, the caller should likely handle uniqueness or we enforce it here.
-             // To be safe and compliant with "Isolation" request:
-             if (!activeTempDir.Contains(correlationId)) 
-             {
-                 // Append correlation ID to ensure isolation if not present
-                 activeTempDir = Path.Combine(activeTempDir, $"EasyExtract_Session_{correlationId}");
-             }
+            // We ensure we don't just dump into the root of provided temp, but a specific subfolder if not already unique.
+            // But usually the desktop client provides a unique folder.
+            // For API, the caller should likely handle uniqueness or we enforce it here.
+            // To be safe and compliant with "Isolation" request:
+            if (!activeTempDir.Contains(correlationId))
+                // Append correlation ID to ensure isolation if not present
+                activeTempDir = Path.Combine(activeTempDir, $"EasyExtract_Session_{correlationId}");
 
             try
             {
@@ -93,7 +96,7 @@ public sealed partial class UnityPackageExtractionService : IUnityPackageExtract
                 throw;
             }
         }
-        
+
         // Use modified options for internal call
         var activeOptions = options with { TemporaryDirectory = activeTempDir };
 

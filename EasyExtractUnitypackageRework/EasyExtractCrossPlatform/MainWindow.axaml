@@ -11,6 +11,7 @@
         d:DesignHeight="1180"
         x:Class="EasyExtractCrossPlatform.MainWindow"
         Title="{loc:Loc MainWindow_Easyextract}"
+        Icon="/Assets/logo-flat.ico"
         TransparencyLevelHint="AcrylicBlur"
         TransparencyBackgroundFallback="{DynamicResource EasyWindowBackgroundBrush}">
     <Window.Styles>
