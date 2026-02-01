@@ -226,8 +226,7 @@ public partial class MainWindow : Window
                     _hakuSyncService.SyncActivityAsync(_settings.DeviceId, entry)));
             }
 
-            //var url = $"https://easyextract.net/dashboard?sync_id={_settings.DeviceId}";
-            var url = $"http://localhost:3000/dashboard?sync_id={_settings.DeviceId}";
+            var url = $"https://easyextract.net/dashboard?sync_id={_settings.DeviceId}";
             Process.Start(new ProcessStartInfo(url) { UseShellExecute = true });
             UiSoundService.Instance.Play(UiSoundEffect.Subtle);
         }
