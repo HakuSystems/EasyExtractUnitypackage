@@ -67,7 +67,8 @@ public static class AppServiceLocator
             .RegisterSingleton<INotificationService>(() => new NotificationService())
             .RegisterSingleton<IErrorDialogService>(() => new ErrorDialogService())
             .RegisterSingleton<IUnityPackagePreviewService>(() => new UnityPackagePreviewService(logger))
-            .RegisterSingleton<IVelopackUpdateService>(() => new VelopackUpdateService());
+            .RegisterSingleton<IVelopackUpdateService>(() => new VelopackUpdateService())
+            .RegisterSingleton<IHakuSyncService>(() => new HakuSyncService());
 
         return provider;
     }

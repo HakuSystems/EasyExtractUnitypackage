@@ -42,6 +42,7 @@ public class AppSettings
     public int TotalFolders { get; set; }
     public int TotalScripts { get; set; }
     public int TotalMaterials { get; set; }
+    public string DeviceId { get; set; } = Guid.NewGuid().ToString();
     public int Total3DObjects { get; set; }
     public int TotalImages { get; set; }
     public int TotalAudios { get; set; }

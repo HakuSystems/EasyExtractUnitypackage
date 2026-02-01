@@ -533,4 +533,10 @@
     <data name="UnityPackagePreviewWindow_UnableToLoadThisPackage" xml:space="preserve">
     <value>Unable to load this package.</value>
   </data>
+  <data name="MainWindow_WebDashboard" xml:space="preserve">
+    <value>Web Dashboard</value>
+  </data>
+  <data name="MainWindow_OpenDashboard" xml:space="preserve">
+    <value>Opens Your Browser</value>
+  </data>
 </root>

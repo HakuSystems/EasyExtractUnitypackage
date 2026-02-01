@@ -210,4 +210,35 @@ public partial class MainWindow : Window
 
         RefreshDropZoneBaseTextIfIdle();
     }
+
+    private async void DashboardButton_OnClick(object? sender, RoutedEventArgs e)
+    {
+        try
+        {
+            // Sync last 25 entries to ensure dashboard is up to date
+            if (_settings.History.Count > 0)
+            {
+                var entriesToSync = _settings.History
+                    .OrderByDescending(x => x.AddedUtc)
+                    .Take(25);
+
+                await Task.WhenAll(entriesToSync.Select(entry =>
+                    _hakuSyncService.SyncActivityAsync(_settings.DeviceId, entry)));
+            }
+
+            //var url = $"https://easyextract.net/dashboard?sync_id={_settings.DeviceId}";
+            var url = $"http://localhost:3000/dashboard?sync_id={_settings.DeviceId}";
+            Process.Start(new ProcessStartInfo(url) { UseShellExecute = true });
+            UiSoundService.Instance.Play(UiSoundEffect.Subtle);
+        }
+        catch (Exception ex)
+        {
+            Debug.WriteLine($"Failed to open dashboard: {ex}");
+            ShowDropStatusMessage(
+                "Unable to open dashboard",
+                ex.Message,
+                TimeSpan.FromSeconds(4),
+                UiSoundEffect.Negative);
+        }
+    }
 }

@@ -37,6 +37,7 @@ public partial class MainWindow : Window
     private readonly TextBlock? _extractionOverviewPackagesCompletedText;
     private readonly IUnityPackageExtractionService _extractionService;
     private readonly Grid? _footerGrid;
+    private readonly IHakuSyncService _hakuSyncService;
     private readonly Grid? _heroGrid;
     private readonly Grid? _mainContentGrid;
 
@@ -137,6 +138,7 @@ public partial class MainWindow : Window
         _errorDialogService = _serviceProvider.GetRequiredService<IErrorDialogService>();
         _previewService = _serviceProvider.GetRequiredService<IUnityPackagePreviewService>();
         _velopackUpdateService = _serviceProvider.GetRequiredService<IVelopackUpdateService>();
+        _hakuSyncService = _serviceProvider.GetRequiredService<IHakuSyncService>();
 
 
         InitializeComponent();

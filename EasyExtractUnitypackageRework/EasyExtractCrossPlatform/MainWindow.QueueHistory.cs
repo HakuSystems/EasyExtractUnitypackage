@@ -97,5 +97,11 @@ public partial class MainWindow : Window
             duration,
             outputDirectory,
             DateTimeOffset.UtcNow);
+
+        _ = _hakuSyncService.SyncActivityAsync(_settings.DeviceId, historyEntry);
+    }
+
+    private void WebDashboardClick(object? sender, RoutedEventArgs e)
+    {
     }
 }
