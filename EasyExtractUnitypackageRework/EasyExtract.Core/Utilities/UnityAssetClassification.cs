@@ -1,55 +1,61 @@
-using System;
-using System.Collections.Generic;
-using System.IO;
-
 namespace EasyExtract.Core.Utilities;
 
 public static class UnityAssetClassification
 {
-    private static readonly HashSet<string> TextureExtensions = new(StringComparer.OrdinalIgnoreCase)
+    private static readonly Dictionary<string, string> ExtensionToCategory = new(StringComparer.OrdinalIgnoreCase)
     {
-        ".png", ".jpg", ".jpeg", ".tga", ".tif", ".tiff", ".psd", ".bmp", ".dds", ".gif", ".hdr", ".exr"
-    };
+        // Textures
+        { ".png", "Texture" }, { ".jpg", "Texture" }, { ".jpeg", "Texture" }, { ".tga", "Texture" },
+        { ".tif", "Texture" }, { ".tiff", "Texture" }, { ".psd", "Texture" }, { ".bmp", "Texture" },
+        { ".dds", "Texture" }, { ".gif", "Texture" }, { ".hdr", "Texture" }, { ".exr", "Texture" },
 
-    private static readonly HashSet<string> PdfExtensions = new(StringComparer.OrdinalIgnoreCase)
-    {
-        ".pdf"
-    };
+        // 3D Models
+        { ".fbx", "3D Model" }, { ".obj", "3D Model" }, { ".dae", "3D Model" }, { ".blend", "3D Model" },
+        { ".3ds", "3D Model" }, { ".dxf", "3D Model" }, { ".stl", "3D Model" },
 
-    private static readonly HashSet<string> ModelExtensions = new(StringComparer.OrdinalIgnoreCase)
-    {
-        ".fbx", ".obj", ".dae", ".blend", ".3ds"
-    };
+        // Audio
+        { ".wav", "Audio" }, { ".wave", "Audio" }, { ".mp3", "Audio" }, { ".ogg", "Audio" },
+        { ".oga", "Audio" }, { ".aiff", "Audio" }, { ".aif", "Audio" }, { ".flac", "Audio" },
+        { ".m4a", "Audio" }, { ".aac", "Audio" }, { ".wma", "Audio" }, { ".opus", "Audio" },
+        { ".caf", "Audio" }, { ".au", "Audio" },
 
-    private static readonly HashSet<string> AudioExtensions = new(StringComparer.OrdinalIgnoreCase)
-    {
-        ".wav", ".wave", ".mp3", ".ogg", ".oga", ".aiff", ".aif", ".flac", ".m4a", ".aac", ".wma", ".opus", ".caf",
-        ".au"
-    };
+        // Scripts & Code
+        { ".cs", "Script" }, { ".js", "Script" }, { ".boo", "Script" }, { ".asmdef", "Script" },
 
-    private static readonly HashSet<string> PluginExtensions = new(StringComparer.OrdinalIgnoreCase)
-    {
-        ".dll"
-    };
+        // Shaders
+        { ".shader", "Shader" }, { ".cg", "Shader" }, { ".cginc", "Shader" }, { ".compute", "Shader" },
+        { ".shadergraph", "Shader" }, { ".shadersubgraph", "Shader" }, { ".hlsl", "Shader" },
+        { ".glsl", "Shader" },
 
-    private static readonly HashSet<string> ScriptExtensions = new(StringComparer.OrdinalIgnoreCase)
-    {
-        ".cs", ".js", ".boo"
-    };
+        // Plugins
+        { ".dll", "DLL" },
 
-    private static readonly HashSet<string> AnimationExtensions = new(StringComparer.OrdinalIgnoreCase)
-    {
-        ".anim", ".controller", ".overridecontroller", ".mask"
-    };
+        // Animations
+        { ".anim", "Animation" }, { ".controller", "Animation" },
+        { ".overridecontroller", "Animation" }, { ".mask", "Animation" },
 
-    private static readonly HashSet<string> ShaderExtensions = new(StringComparer.OrdinalIgnoreCase)
-    {
-        ".shader", ".cg", ".cginc", ".compute", ".shadergraph", ".shadersubgraph", ".hlsl", ".glsl"
-    };
+        // Materials
+        { ".mat", "Material" }, { ".physicmaterial", "Material" },
 
-    private static readonly HashSet<string> MaterialExtensions = new(StringComparer.OrdinalIgnoreCase)
-    {
-        ".mat"
+        // Prefabs
+        { ".prefab", "Prefab" },
+
+        // Scenes
+        { ".unity", "Scene" },
+
+        // Fonts
+        { ".ttf", "Font" }, { ".otf", "Font" },
+
+        // Documents / Configs
+        { ".pdf", "Document" }, { ".txt", "Document" }, { ".md", "Document" }, { ".rtf", "Document" },
+        { ".json", "Document" }, { ".xml", "Document" }, { ".yml", "Document" }, { ".yaml", "Document" },
+        { ".uss", "Document" }, { ".uxml", "Document" },
+
+        // Videos
+        { ".mp4", "Video" }, { ".mov", "Video" }, { ".webm", "Video" },
+
+        // Generic Asset
+        { ".asset", "Asset" }
     };
 
     public static string ResolveCategory(string? relativePath, long assetSizeBytes, bool hasAssetData)
@@ -62,84 +68,70 @@ public static class UnityAssetClassification
         {
             if (IsLikelyFolder(relativePath, assetSizeBytes, hasAssetData))
                 return "Folder";
+            return "Other";
         }
-        else
-        {
-            if (IsTextureExtension(extension) || IsPdfExtension(extension))
-                return "Texture";
 
-            if (IsModelExtension(extension))
-                return "3D Model";
+        if (ExtensionToCategory.TryGetValue(extension, out var category)) return category;
 
-            if (IsAudioExtension(extension))
-                return "Audio";
-
-            if (IsPluginExtension(extension))
-                return "DLL";
-
-            if (IsScriptExtension(extension))
-                return "Script";
-
-            if (IsAnimationExtension(extension))
-                return "Animation";
-
-            if (IsShaderExtension(extension))
-                return "Shader";
-
-            if (IsMaterialExtension(extension))
-                return "Material";
-
-            if (extension.Equals(".prefab", StringComparison.OrdinalIgnoreCase))
-                return "Prefab";
-        }
+        // Fallback: It has an extension (or looks like it), but it's not in our list.
+        // It might be a folder named "My.Folder" or similar.
+        if (IsLikelyFolder(relativePath, assetSizeBytes, hasAssetData)) return "Folder";
 
         return "Other";
     }
 
+    // --- Backward Compatibility Helpers ---
+
     public static bool IsTextureExtension(string? extension)
     {
-        return !string.IsNullOrWhiteSpace(extension) && TextureExtensions.Contains(extension);
+        return !string.IsNullOrWhiteSpace(extension) && ExtensionToCategory.TryGetValue(extension, out var cat) &&
+               cat == "Texture";
     }
 
     public static bool IsPdfExtension(string? extension)
     {
-        return !string.IsNullOrWhiteSpace(extension) && PdfExtensions.Contains(extension);
+        // PDF is now categorized as "Document", but specific check might be needed for PDF preview logic.
+        return !string.IsNullOrWhiteSpace(extension) &&
+               string.Equals(extension, ".pdf", StringComparison.OrdinalIgnoreCase);
     }
 
     public static bool IsModelExtension(string? extension)
     {
-        return !string.IsNullOrWhiteSpace(extension) && ModelExtensions.Contains(extension);
+        return !string.IsNullOrWhiteSpace(extension) && ExtensionToCategory.TryGetValue(extension, out var cat) &&
+               cat == "3D Model";
     }
 
     public static bool IsAudioExtension(string? extension)
     {
-        return !string.IsNullOrWhiteSpace(extension) && AudioExtensions.Contains(extension);
+        return !string.IsNullOrWhiteSpace(extension) && ExtensionToCategory.TryGetValue(extension, out var cat) &&
+               cat == "Audio";
     }
 
     public static bool IsScriptExtension(string? extension)
     {
-        return !string.IsNullOrWhiteSpace(extension) && ScriptExtensions.Contains(extension);
+        return !string.IsNullOrWhiteSpace(extension) && ExtensionToCategory.TryGetValue(extension, out var cat) &&
+               cat == "Script";
     }
 
     public static bool IsAnimationExtension(string? extension)
     {
-        return !string.IsNullOrWhiteSpace(extension) && AnimationExtensions.Contains(extension);
+        return !string.IsNullOrWhiteSpace(extension) && ExtensionToCategory.TryGetValue(extension, out var cat) &&
+               cat == "Animation";
     }
 
     public static bool IsShaderExtension(string? extension)
     {
-        return !string.IsNullOrWhiteSpace(extension) && ShaderExtensions.Contains(extension);
+        return !string.IsNullOrWhiteSpace(extension) && ExtensionToCategory.TryGetValue(extension, out var cat) &&
+               cat == "Shader";
     }
 
     public static bool IsMaterialExtension(string? extension)
     {
-        return !string.IsNullOrWhiteSpace(extension) && MaterialExtensions.Contains(extension);
+        return !string.IsNullOrWhiteSpace(extension) && ExtensionToCategory.TryGetValue(extension, out var cat) &&
+               cat == "Material";
     }
 
-    private static bool IsPluginExtension(string? extension)
-    {
-        return !string.IsNullOrWhiteSpace(extension) && PluginExtensions.Contains(extension);
-    }
+    // Kept internal/private helpers if needed, but since they weren't public in original mostly, we just ensure public ones are safe.
 
     private static bool IsLikelyFolder(string? relativePath, long assetSizeBytes, bool hasAssetData)
     {

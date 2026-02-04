@@ -1,14 +1,9 @@
-using System;
 using System.Buffers;
-using System.Collections.Generic;
 using System.Formats.Tar;
-using System.IO;
-using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
 using EasyExtract.Core.Models;
 using EasyExtract.Core.Utilities;
-using EasyExtract.Core;
 
 namespace EasyExtract.Core.Services;
 
@@ -54,7 +49,8 @@ public sealed partial class UnityPackageExtractionService
     }
 
 
-    private static void CleanupCorruptedDirectories(HashSet<string> directoriesToCleanup, string correlationId, IEasyExtractLogger logger)
+    private static void CleanupCorruptedDirectories(HashSet<string> directoriesToCleanup, string correlationId,
+        IEasyExtractLogger logger)
     {
         if (directoriesToCleanup.Count == 0)
             return;
@@ -366,10 +362,11 @@ public sealed partial class UnityPackageExtractionService
 
                 if (totalWritten == 0)
                 {
-                    TryDeleteFile(tempPath, logger);
+                    // Allow 0-byte assets
                     logger.LogInformation(
-                        $"Asset component empty, skipping | entry='{entryName}' | correlationId={correlationId}");
-                    return null;
+                        $"Asset component empty (0 bytes) | entry='{entryName}' | correlationId={correlationId}");
+                    // We keep the temp file (it's empty) or we can delete it and just use length=0?
+                    // AssetComponent expects a path. Valid empty file exists at tempPath.
                 }
 
                 limiter.TrackAssetBytes(totalWritten);
@@ -393,7 +390,8 @@ public sealed partial class UnityPackageExtractionService
     }
 
 
-    private static TemporaryDirectoryScope CreateTemporaryDirectory(string? baseDirectory, string correlationId, IEasyExtractLogger logger)
+    private static TemporaryDirectoryScope CreateTemporaryDirectory(string? baseDirectory, string correlationId,
+        IEasyExtractLogger logger)
     {
         var root = string.IsNullOrWhiteSpace(baseDirectory)
             ? Path.Combine(Path.GetTempPath(), "EasyExtractCrossPlatform")

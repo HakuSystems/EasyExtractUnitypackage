@@ -1,9 +1,5 @@
-using System;
 using System.Buffers;
-using System.Collections.Generic;
-using System.IO;
 using EasyExtract.Core.Models;
-using EasyExtract.Core;
 
 namespace EasyExtract.Core.Services;
 
@@ -204,7 +200,7 @@ public sealed partial class UnityPackageExtractionService
         public string TempPath { get; }
         public long Length { get; }
         public ReadOnlyMemory<byte> ContentHash { get; }
-        public bool HasContent => Length > 0;
+        public bool HasContent => Length >= 0;
 
         public void Dispose()
         {
