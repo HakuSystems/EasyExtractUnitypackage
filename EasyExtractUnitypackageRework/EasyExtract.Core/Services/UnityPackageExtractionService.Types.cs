@@ -200,7 +200,7 @@ public sealed partial class UnityPackageExtractionService
         public string TempPath { get; }
         public long Length { get; }
         public ReadOnlyMemory<byte> ContentHash { get; }
-        public bool HasContent => Length >= 0;
+        public bool HasContent => Length > 0;
 
         public void Dispose()
         {
@@ -211,25 +211,25 @@ public sealed partial class UnityPackageExtractionService
             TryDeleteFile(TempPath, _logger);
         }
 
-        public void CopyTo(string destinationPath, CancellationToken cancellationToken)
+        public async Task CopyToAsync(string destinationPath, CancellationToken cancellationToken)
         {
             if (_disposed)
                 throw new ObjectDisposedException(nameof(AssetComponent));
 
             cancellationToken.ThrowIfCancellationRequested();
 
-            using var source = File.Open(TempPath, FileMode.Open, FileAccess.Read, FileShare.Read);
-            using var destination = File.Open(destinationPath, FileMode.Create, FileAccess.Write, FileShare.Read);
+            await using var source = new FileStream(TempPath, FileMode.Open, FileAccess.Read, FileShare.Read, 4096,
+                FileOptions.Asynchronous);
+            await using var destination = new FileStream(destinationPath, FileMode.Create, FileAccess.Write,
+                FileShare.Read, 4096, FileOptions.Asynchronous);
             var buffer = ArrayPool<byte>.Shared.Rent(128 * 1024);
 
             try
             {
                 int read;
-                while ((read = source.Read(buffer, 0, buffer.Length)) > 0)
-                {
-                    cancellationToken.ThrowIfCancellationRequested();
-                    destination.Write(buffer, 0, read);
-                }
+                while ((read = await source.ReadAsync(buffer, 0, buffer.Length, cancellationToken)
+                           .ConfigureAwait(false)) >
+                       0) await destination.WriteAsync(buffer, 0, read, cancellationToken).ConfigureAwait(false);
             }
             finally
             {

@@ -1,6 +1,3 @@
-using System;
-using System.Collections.Generic;
-
 namespace EasyExtract.Core.Models;
 
 public enum MaliciousThreatSeverity
@@ -29,4 +26,6 @@ public sealed record MaliciousCodeScanResult(
     string PackagePath,
     bool IsMalicious,
     IReadOnlyList<MaliciousThreat> Threats,
-    DateTimeOffset ScanTimestamp);
+    DateTimeOffset ScannedAt,
+    bool ScanSkipped = false,
+    string? SkipReason = null);

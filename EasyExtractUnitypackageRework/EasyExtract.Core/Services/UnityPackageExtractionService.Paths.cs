@@ -1,9 +1,4 @@
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
 using EasyExtract.Core.Utilities;
-using EasyExtract.Core;
 
 namespace EasyExtract.Core.Services;
 
@@ -18,7 +13,8 @@ public sealed partial class UnityPackageExtractionService
     }
 
 
-    private static void EnsurePathIsUnderRoot(string normalizedRoot, string candidatePath, string correlationId, IEasyExtractLogger logger)
+    private static void EnsurePathIsUnderRoot(string normalizedRoot, string candidatePath, string correlationId,
+        IEasyExtractLogger logger)
     {
         var candidate = Path.GetFullPath(candidatePath);
         if (!candidate.StartsWith(normalizedRoot, StringComparison.OrdinalIgnoreCase))
@@ -103,7 +99,8 @@ public sealed partial class UnityPackageExtractionService
     }
 
 
-    private static PathNormalizationResult NormalizeRelativePath(string? input, string correlationId, IEasyExtractLogger logger)
+    private static PathNormalizationResult NormalizeRelativePath(string? input, string correlationId,
+        IEasyExtractLogger logger)
     {
         if (string.IsNullOrWhiteSpace(input))
             return new PathNormalizationResult(string.Empty, string.Empty, EmptySegmentNormalizations);

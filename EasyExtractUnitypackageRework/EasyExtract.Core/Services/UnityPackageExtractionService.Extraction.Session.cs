@@ -1,11 +1,7 @@
-using System;
-using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Diagnostics;
 using System.Formats.Tar;
-using System.IO;
 using EasyExtract.Core.Models;
-using EasyExtract.Core;
 
 namespace EasyExtract.Core.Services;
 
@@ -13,6 +9,8 @@ public sealed partial class UnityPackageExtractionService
 {
     private sealed class ExtractionSession
     {
+        private readonly int _assetsDuplicated;
+
         private readonly Dictionary<string, UnityPackageAssetState> _assetStates =
             new(StringComparer.OrdinalIgnoreCase);
 
@@ -25,6 +23,7 @@ public sealed partial class UnityPackageExtractionService
         private readonly HashSet<string> _generatedRelativePaths = new(StringComparer.OrdinalIgnoreCase);
         private readonly ExtractionLimiter _limiter;
         private readonly UnityPackageExtractionLimits _limits;
+        private readonly IEasyExtractLogger _logger; // Logger Injected
         private readonly string _normalizedOutputDirectory;
         private readonly bool _organizeByCategories;
         private readonly string _outputDirectory;
@@ -35,16 +34,13 @@ public sealed partial class UnityPackageExtractionService
 
         private readonly TarReader _tarReader;
         private readonly string _temporaryDirectoryPath;
-        private readonly IEasyExtractLogger _logger; // Logger Injected
-
-        private int _assetsDuplicated;
         private int _assetsSkippedNoContent;
         private int _assetsSkippedNoPath;
+        private long _calculatedTotalSize; // To store accumulated size
         private int _extractedCount;
         private bool _extractionRequired;
         private int _tarEntriesProcessed;
         private int _tarEntriesSkipped;
-        private long _calculatedTotalSize; // To store accumulated size
 
         public ExtractionSession(
             string packagePath,
@@ -75,16 +71,16 @@ public sealed partial class UnityPackageExtractionService
             _calculatedTotalSize = 0;
         }
 
-        public UnityPackageExtractionResult Execute()
+        public async Task<UnityPackageExtractionResult> ExecuteAsync()
         {
-            ProcessTarEntries();
-            ProcessRemainingAssetStates();
+            await ProcessTarEntriesAsync().ConfigureAwait(false);
+            await ProcessRemainingAssetStatesAsync().ConfigureAwait(false);
 
             if (!_extractionRequired)
                 return CompleteWithoutExtraction();
 
             if (_pendingWrites.Count > 0)
-                FlushPendingWrites();
+                await FlushPendingWritesAsync().ConfigureAwait(false);
 
             CleanupCorruptedDirectories(_directoriesToCleanup, _correlationId, _logger);
 
@@ -98,7 +94,7 @@ public sealed partial class UnityPackageExtractionService
                 _extractedFiles.ToImmutableArray()) { TotalSize = _calculatedTotalSize };
         }
 
-        private void ProcessTarEntries()
+        private async Task ProcessTarEntriesAsync()
         {
             _logger.LogInformation(
                 $"Starting TAR entry processing loop | correlationId={_correlationId}");
@@ -111,7 +107,8 @@ public sealed partial class UnityPackageExtractionService
             {
                 using (_logger.BeginPerformanceScope("ProcessTarEntries", "Extraction", _correlationId))
                 {
-                    while ((entry = _tarReader.GetNextEntry()) is not null)
+                    while ((entry = await _tarReader.GetNextEntryAsync(false, _cancellationToken).ConfigureAwait(false))
+                           is not null)
                     {
                         _cancellationToken.ThrowIfCancellationRequested();
                         _tarEntriesProcessed++;
@@ -146,10 +143,10 @@ public sealed partial class UnityPackageExtractionService
                         {
                             case "pathname":
                             {
-                                var normalization = NormalizeRelativePath(
-                                    ReadEntryAsUtf8String(entry.DataStream ?? Stream.Null, _cancellationToken,
-                                        _correlationId, _logger),
-                                    _correlationId, _logger);
+                                var content = await ReadEntryAsUtf8StringAsync(entry.DataStream ?? Stream.Null,
+                                    _cancellationToken,
+                                    _correlationId, _logger).ConfigureAwait(false);
+                                var normalization = NormalizeRelativePath(content, _correlationId, _logger);
                                 state.RelativePath = normalization.NormalizedPath;
                                 state.OriginalRelativePath = normalization.OriginalPath;
                                 state.PathNormalizations = normalization.Segments;
@@ -157,40 +154,40 @@ public sealed partial class UnityPackageExtractionService
                             }
                             case "asset":
                             {
-                                var component = CreateAssetComponent(
+                                var component = await CreateAssetComponentAsync(
                                     entry,
                                     _temporaryDirectoryPath,
                                     _limits,
                                     _limiter,
                                     _cancellationToken,
                                     _correlationId,
-                                    _logger);
+                                    _logger).ConfigureAwait(false);
                                 state.SetAssetComponent(component);
                                 break;
                             }
                             case "asset.meta":
                             {
-                                var component = CreateAssetComponent(
+                                var component = await CreateAssetComponentAsync(
                                     entry,
                                     _temporaryDirectoryPath,
                                     _limits,
                                     _limiter,
                                     _cancellationToken,
                                     _correlationId,
-                                    _logger);
+                                    _logger).ConfigureAwait(false);
                                 state.SetMetaComponent(component);
                                 break;
                             }
                             case "preview.png":
                             {
-                                var component = CreateAssetComponent(
+                                var component = await CreateAssetComponentAsync(
                                     entry,
                                     _temporaryDirectoryPath,
                                     _limits,
                                     _limiter,
                                     _cancellationToken,
                                     _correlationId,
-                                    _logger);
+                                    _logger).ConfigureAwait(false);
                                 state.SetPreviewComponent(component);
                                 break;
                             }
@@ -200,7 +197,7 @@ public sealed partial class UnityPackageExtractionService
                         }
 
                         if (state.CanWriteToDisk && !_queuedStates.Contains(state))
-                            HandleReadyState(state);
+                            await HandleReadyStateAsync(state).ConfigureAwait(false);
 
                         if (_tarEntriesProcessed % batchLogInterval == 0 &&
                             lastBatchLog.Elapsed.TotalSeconds >= 2)
@@ -227,7 +224,7 @@ public sealed partial class UnityPackageExtractionService
                 $"TAR entry processing completed | totalEntries={_tarEntriesProcessed} | skipped={_tarEntriesSkipped} | uniqueAssets={_assetStates.Count} | correlationId={_correlationId}");
         }
 
-        private void ProcessRemainingAssetStates()
+        private async Task ProcessRemainingAssetStatesAsync()
         {
             _logger.LogInformation(
                 $"Processing remaining asset states | remaining={_assetStates.Count} | queued={_queuedStates.Count} | correlationId={_correlationId}");
@@ -238,7 +235,7 @@ public sealed partial class UnityPackageExtractionService
                 if (!state.CanWriteToDisk || _queuedStates.Contains(state))
                     continue;
 
-                HandleReadyState(state);
+                await HandleReadyStateAsync(state).ConfigureAwait(false);
                 remainingProcessed++;
             }
 
@@ -266,7 +263,7 @@ public sealed partial class UnityPackageExtractionService
                 _extractedFiles.ToImmutableArray()) { TotalSize = 0 };
         }
 
-        private void HandleReadyState(UnityPackageAssetState state)
+        private async Task HandleReadyStateAsync(UnityPackageAssetState state)
         {
             if (!TryGetAssetPaths(
                     state,
@@ -293,7 +290,8 @@ public sealed partial class UnityPackageExtractionService
             }
 
             _limiter.RegisterAsset();
-            var plan = CreateAssetWritePlan(state, targetPath, metaPath, previewPath, _logger);
+            var plan = await CreateAssetWritePlanAsync(state, targetPath, metaPath, previewPath, _logger)
+                .ConfigureAwait(false);
 
             if (!plan.RequiresWrite)
             {
@@ -311,15 +309,15 @@ public sealed partial class UnityPackageExtractionService
                     $"First asset queued for extraction | path='{state.RelativePath}' | correlationId={_correlationId}");
                 _pendingWrites.Add(new PendingAssetWrite(state, targetPath, metaPath, previewPath, plan));
                 _queuedStates.Add(state);
-                FlushPendingWrites();
+                await FlushPendingWritesAsync().ConfigureAwait(false);
             }
             else
             {
-                WriteAndTrack(state, targetPath, metaPath, previewPath, plan);
+                await WriteAndTrackAsync(state, targetPath, metaPath, previewPath, plan).ConfigureAwait(false);
             }
         }
 
-        private void WriteAndTrack(
+        private async Task WriteAndTrackAsync(
             UnityPackageAssetState state,
             string targetPath,
             string? metaPath,
@@ -327,7 +325,7 @@ public sealed partial class UnityPackageExtractionService
             AssetWritePlan plan)
         {
             var relativePath = state.RelativePath;
-         
+
             // Accumulate Size
             if (plan.WriteAsset && state.Asset is { HasContent: true } assetComp)
                 _calculatedTotalSize += assetComp.Length;
@@ -338,7 +336,7 @@ public sealed partial class UnityPackageExtractionService
 
             using (_logger.BeginPerformanceScope("WriteAssetToDisk", "Extraction", _correlationId))
             {
-                var writtenFiles = WriteAssetToDisk(
+                var writtenFiles = await WriteAssetToDiskAsync(
                     state,
                     targetPath,
                     metaPath,
@@ -346,7 +344,7 @@ public sealed partial class UnityPackageExtractionService
                     plan,
                     _cancellationToken,
                     _correlationId,
-                    _logger);
+                    _logger).ConfigureAwait(false);
 
                 if (writtenFiles.Count > 0)
                 {
@@ -365,7 +363,7 @@ public sealed partial class UnityPackageExtractionService
             _queuedStates.Remove(state);
         }
 
-        private void FlushPendingWrites()
+        private async Task FlushPendingWritesAsync()
         {
             if (_pendingWrites.Count == 0)
                 return;
@@ -374,12 +372,12 @@ public sealed partial class UnityPackageExtractionService
                 $"FlushPendingWrites: flushing pending assets | count={_pendingWrites.Count} | correlationId={_correlationId}");
 
             foreach (var pending in _pendingWrites)
-                WriteAndTrack(
+                await WriteAndTrackAsync(
                     pending.State,
                     pending.TargetPath,
                     pending.MetaPath,
                     pending.PreviewPath,
-                    pending.Plan);
+                    pending.Plan).ConfigureAwait(false);
 
             _pendingWrites.Clear();
             _queuedStates.Clear();

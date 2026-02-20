@@ -1,6 +1,3 @@
-using System;
-using System.IO;
-
 namespace EasyExtract.Core.Services;
 
 public enum UnityPackageFormat
@@ -32,7 +29,7 @@ public static class UnityPackageFormatDetector
 
             var headerBuffer = new byte[headerLength];
             var bytesRead = stream.Read(headerBuffer, 0, headerBuffer.Length);
-            
+
             return Detect(headerBuffer.AsSpan(0, bytesRead));
         }
         finally

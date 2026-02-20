@@ -89,26 +89,27 @@ public sealed partial class UnityPackageExtractionService
     }
 
 
-    private static AssetWritePlan CreateAssetWritePlan(
+    private static async Task<AssetWritePlan> CreateAssetWritePlanAsync(
         UnityPackageAssetState state,
         string targetPath,
         string? metaPath,
         string? previewPath,
         IEasyExtractLogger logger)
     {
-        var writeAsset = state.Asset is { HasContent: true } && NeedsWrite(targetPath, state.Asset, logger);
+        var writeAsset = state.Asset is { HasContent: true } &&
+                         await NeedsWriteAsync(targetPath, state.Asset, logger).ConfigureAwait(false);
         var writeMeta = metaPath is not null &&
                         state.Meta is { HasContent: true } &&
-                        NeedsWrite(metaPath, state.Meta, logger);
+                        await NeedsWriteAsync(metaPath, state.Meta, logger).ConfigureAwait(false);
         var writePreview = previewPath is not null &&
                            state.Preview is { HasContent: true } &&
-                           NeedsWrite(previewPath, state.Preview, logger);
+                           await NeedsWriteAsync(previewPath, state.Preview, logger).ConfigureAwait(false);
 
         return new AssetWritePlan(writeAsset, writeMeta, writePreview);
     }
 
 
-    private static IReadOnlyList<string> WriteAssetToDisk(
+    private static async Task<IReadOnlyList<string>> WriteAssetToDiskAsync(
         UnityPackageAssetState state,
         string targetPath,
         string? metaPath,
@@ -151,7 +152,7 @@ public sealed partial class UnityPackageExtractionService
             cancellationToken.ThrowIfCancellationRequested();
             try
             {
-                assetComponent.CopyTo(targetPath, cancellationToken);
+                await assetComponent.CopyToAsync(targetPath, cancellationToken).ConfigureAwait(false);
                 writtenFiles.Add(targetPath);
             }
             catch (Exception ex)
@@ -178,7 +179,7 @@ public sealed partial class UnityPackageExtractionService
             cancellationToken.ThrowIfCancellationRequested();
             try
             {
-                metaComponent.CopyTo(metaPath, cancellationToken);
+                await metaComponent.CopyToAsync(metaPath, cancellationToken).ConfigureAwait(false);
                 writtenFiles.Add(metaPath);
             }
             catch (Exception ex)
@@ -204,7 +205,7 @@ public sealed partial class UnityPackageExtractionService
             cancellationToken.ThrowIfCancellationRequested();
             try
             {
-                previewComponent.CopyTo(previewPath, cancellationToken);
+                await previewComponent.CopyToAsync(previewPath, cancellationToken).ConfigureAwait(false);
                 writtenFiles.Add(previewPath);
             }
             catch (Exception ex)
@@ -228,16 +229,17 @@ public sealed partial class UnityPackageExtractionService
     }
 
 
-    private static bool NeedsWrite(string path, AssetComponent component, IEasyExtractLogger logger)
+    private static async Task<bool> NeedsWriteAsync(string path, AssetComponent component, IEasyExtractLogger logger)
     {
         if (!File.Exists(path))
             return true;
 
-        return !ContentMatches(path, component, logger);
+        return !await ContentMatchesAsync(path, component, logger).ConfigureAwait(false);
     }
 
 
-    private static bool ContentMatches(string path, AssetComponent component, IEasyExtractLogger logger)
+    private static async Task<bool> ContentMatchesAsync(string path, AssetComponent component,
+        IEasyExtractLogger logger)
     {
         try
         {
@@ -245,8 +247,9 @@ public sealed partial class UnityPackageExtractionService
             if (!fileInfo.Exists || fileInfo.Length != component.Length)
                 return false;
 
-            using var stream = File.Open(path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
-            var fileHash = SHA256.HashData(stream);
+            await using var stream = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite, 4096,
+                FileOptions.Asynchronous);
+            var fileHash = await SHA256.HashDataAsync(stream).ConfigureAwait(false);
             return CryptographicOperations.FixedTimeEquals(fileHash, component.ContentHash.Span);
         }
         catch (IOException ex)
@@ -267,7 +270,7 @@ public sealed partial class UnityPackageExtractionService
     }
 
 
-    private static string ReadEntryAsUtf8String(Stream dataStream, CancellationToken cancellationToken,
+    private static async Task<string> ReadEntryAsUtf8StringAsync(Stream dataStream, CancellationToken cancellationToken,
         string correlationId, IEasyExtractLogger logger)
     {
         cancellationToken.ThrowIfCancellationRequested();
@@ -282,7 +285,7 @@ public sealed partial class UnityPackageExtractionService
         var totalRead = 0;
 
         int read;
-        while ((read = reader.Read(buffer, 0, buffer.Length)) > 0)
+        while ((read = await reader.ReadAsync(buffer, 0, buffer.Length).ConfigureAwait(false)) > 0)
         {
             totalRead += read;
             if (totalRead > MaxPathEntryCharacters)
@@ -301,7 +304,7 @@ public sealed partial class UnityPackageExtractionService
     }
 
 
-    private static AssetComponent? CreateAssetComponent(
+    private static async Task<AssetComponent?> CreateAssetComponentAsync(
         TarEntry entry,
         string temporaryDirectory,
         UnityPackageExtractionLimits limits,
@@ -323,7 +326,8 @@ public sealed partial class UnityPackageExtractionService
             using (logger.BeginPerformanceScope("CreateAssetComponent", "Extraction",
                        correlationId))
             {
-                output = File.Open(tempPath, FileMode.Create, FileAccess.Write, FileShare.None);
+                output = new FileStream(tempPath, FileMode.Create, FileAccess.Write, FileShare.None, 4096,
+                    FileOptions.Asynchronous);
                 using var hasher = IncrementalHash.CreateHash(HashAlgorithmName.SHA256);
                 var buffer = ArrayPool<byte>.Shared.Rent(StreamCopyBufferSize);
                 long totalWritten = 0;
@@ -333,11 +337,11 @@ public sealed partial class UnityPackageExtractionService
                     int read;
 
                     if (entry.DataStream != null)
-                    {
-                        while ((read = entry.DataStream.Read(buffer, 0, buffer.Length)) > 0)
+                        while ((read = await entry.DataStream.ReadAsync(buffer, 0, buffer.Length, cancellationToken)
+                                   .ConfigureAwait(false)) > 0)
                         {
                             cancellationToken.ThrowIfCancellationRequested();
-                            output.Write(buffer, 0, read);
+                            await output.WriteAsync(buffer, 0, read, cancellationToken).ConfigureAwait(false);
                             hasher.AppendData(buffer, 0, read);
                             totalWritten += read;
 
@@ -349,7 +353,6 @@ public sealed partial class UnityPackageExtractionService
                                     $"Asset '{entryName}' exceeded the configured per-file limit of {limits.MaxAssetBytes:N0} bytes.");
                             }
                         }
-                    }
                 }
                 finally
                 {
@@ -358,15 +361,14 @@ public sealed partial class UnityPackageExtractionService
 
                 output.Flush();
                 var hash = hasher.GetHashAndReset();
-                output.Dispose();
+                await output.DisposeAsync().ConfigureAwait(false);
 
                 if (totalWritten == 0)
                 {
-                    // Allow 0-byte assets
+                    TryDeleteFile(tempPath, logger);
                     logger.LogInformation(
-                        $"Asset component empty (0 bytes) | entry='{entryName}' | correlationId={correlationId}");
-                    // We keep the temp file (it's empty) or we can delete it and just use length=0?
-                    // AssetComponent expects a path. Valid empty file exists at tempPath.
+                        $"Asset component empty, skipping | entry='{entryName}' | correlationId={correlationId}");
+                    return null;
                 }
 
                 limiter.TrackAssetBytes(totalWritten);
@@ -375,7 +377,7 @@ public sealed partial class UnityPackageExtractionService
         }
         catch (Exception ex) when (ex is not OperationCanceledException and not InvalidDataException)
         {
-            output?.Dispose();
+            if (output != null) await output.DisposeAsync().ConfigureAwait(false);
             TryDeleteFile(tempPath, logger);
             logger.LogError(
                 $"Failed to create asset component | entry='{entryName}' | correlationId={correlationId}", ex);
@@ -383,7 +385,7 @@ public sealed partial class UnityPackageExtractionService
         }
         catch
         {
-            output?.Dispose();
+            if (output != null) await output.DisposeAsync().ConfigureAwait(false);
             TryDeleteFile(tempPath, logger);
             throw;
         }

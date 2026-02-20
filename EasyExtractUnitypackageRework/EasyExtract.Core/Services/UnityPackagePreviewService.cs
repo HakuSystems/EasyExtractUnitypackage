@@ -1,13 +1,7 @@
-using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.Formats.Tar;
-using System.IO;
 using System.IO.Compression;
-using System.Linq;
 using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
 using EasyExtract.Core.Models;
 using EasyExtract.Core.Utilities;
 
@@ -29,7 +23,7 @@ public sealed class UnityPackagePreviewService : IUnityPackagePreviewService
 
     private static readonly PathSegmentNormalization[] EmptySegmentNormalizations =
         Array.Empty<PathSegmentNormalization>();
-        
+
     private readonly IEasyExtractLogger _logger;
 
     public UnityPackagePreviewService(IEasyExtractLogger logger)

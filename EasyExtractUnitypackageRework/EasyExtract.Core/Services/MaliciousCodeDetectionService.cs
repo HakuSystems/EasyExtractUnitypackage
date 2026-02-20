@@ -1,3 +1,4 @@
+using System.Buffers;
 using System.Collections.Concurrent;
 using System.Formats.Tar;
 using System.IO.Compression;
@@ -38,10 +39,7 @@ public sealed class MaliciousCodeDetectionService : IMaliciousCodeDetectionServi
         new(@"HttpClient", RegexOptions.Compiled | RegexOptions.IgnoreCase | RegexOptions.CultureInvariant),
         new(@"Socket", RegexOptions.Compiled | RegexOptions.IgnoreCase | RegexOptions.CultureInvariant),
         new(@"System\.Reflection", RegexOptions.Compiled | RegexOptions.IgnoreCase | RegexOptions.CultureInvariant),
-        new(@"DllImport", RegexOptions.Compiled | RegexOptions.IgnoreCase | RegexOptions.CultureInvariant),
-        // EICAR-style Dummy Trigger for UI Testing
-        new(@"HAKU-TEST-MALWARE-SIGNATURE",
-            RegexOptions.Compiled | RegexOptions.IgnoreCase | RegexOptions.CultureInvariant)
+        new(@"DllImport", RegexOptions.Compiled | RegexOptions.IgnoreCase | RegexOptions.CultureInvariant)
     };
 
     private static readonly HashSet<string> ScannableExtensions = new(StringComparer.OrdinalIgnoreCase)
@@ -55,6 +53,13 @@ public sealed class MaliciousCodeDetectionService : IMaliciousCodeDetectionServi
         "twitter.com", "x.com", "youtube.com", "discord.gg", "discord.com", "patreon.com", "ko-fi.com",
         "paypal.com", "imgur.com", "pastebin.com", "hastebin.com", "gist.github.com"
     };
+
+    private static readonly SearchValues<string> FastPathKeywords = SearchValues.Create(
+    [
+        "discord", "http://", "https://", "UnityWebRequest", "File.Delete",
+        "Directory.Delete", "Process.Start", "RegistryKey", "WebClient",
+        "HttpClient", "Socket", "System.Reflection", "DllImport"
+    ], StringComparison.OrdinalIgnoreCase);
 
     private readonly IEasyExtractLogger _logger;
 
@@ -103,7 +108,7 @@ public sealed class MaliciousCodeDetectionService : IMaliciousCodeDetectionServi
         {
             _logger.LogInformation($"Starting malicious code scan for '{packagePath}'.");
 
-            var result = await Task.Run(() => ScanSync(packagePath, cancellationToken), cancellationToken)
+            var result = await ScanPackageStreamAsync(packagePath, cancellationToken)
                 .ConfigureAwait(false);
 
             _scanCache[packagePath] = new CachedScanResult(result, DateTimeOffset.UtcNow);
@@ -120,83 +125,98 @@ public sealed class MaliciousCodeDetectionService : IMaliciousCodeDetectionServi
         }
     }
 
-    private MaliciousCodeScanResult ScanSync(string packagePath, CancellationToken cancellationToken)
+    private async Task<MaliciousCodeScanResult> ScanPackageStreamAsync(string packagePath,
+        CancellationToken cancellationToken)
     {
-        using var stream = File.OpenRead(packagePath);
-        using var gzipStream = new GZipStream(stream, CompressionMode.Decompress);
-        using var tarReader = new TarReader(gzipStream);
-
-        var collector = new MaliciousThreatCollector();
-        var stats = new ScanStatistics();
-        var assetStates = new Dictionary<string, AssetSecurityState>(StringComparer.OrdinalIgnoreCase);
-
-        TarEntry? entry;
-        while ((entry = tarReader.GetNextEntry()) is not null)
+        try
         {
-            cancellationToken.ThrowIfCancellationRequested();
-            stats.TarEntriesRead++;
+            await using var stream = new FileStream(packagePath, FileMode.Open, FileAccess.Read, FileShare.Read, 4096,
+                FileOptions.Asynchronous | FileOptions.SequentialScan);
+            await using var gzipStream = new GZipStream(stream, CompressionMode.Decompress);
+            using var tarReader = new TarReader(gzipStream);
 
-            if (entry.EntryType is not (TarEntryType.RegularFile or TarEntryType.V7RegularFile))
-                continue;
+            var collector = new MaliciousThreatCollector();
+            var stats = new ScanStatistics();
+            var assetStates = new Dictionary<string, AssetSecurityState>(StringComparer.OrdinalIgnoreCase);
 
-            var entryName = entry.Name ?? string.Empty;
-            if (string.IsNullOrWhiteSpace(entryName))
-                continue;
-
-            var (assetKey, componentName) = SplitEntryName(entryName);
-            if (string.IsNullOrWhiteSpace(assetKey))
-                continue;
-
-            if (!assetStates.TryGetValue(assetKey, out var state))
+            TarEntry? entry;
+            while ((entry = await tarReader.GetNextEntryAsync(false, cancellationToken)) is not null)
             {
-                state = new AssetSecurityState();
-                assetStates[assetKey] = state;
-            }
+                cancellationToken.ThrowIfCancellationRequested();
+                stats.TarEntriesRead++;
 
-            if (componentName == "pathname")
-            {
-                stats.PathComponentsSeen++;
-                var path = ReadPath(entry);
-                state.RelativePath = NormalizeFullPath(NormalizeAssetPath(path));
-
-                // If we have pending data, process it now that we have the path
-                if (state.PendingAssetData is not null)
-                {
-                    ProcessAssetData(state.RelativePath, state.PendingAssetData, collector, stats);
-                    state.PendingAssetData = null; // Clear to save memory
-                }
-            }
-            else if (componentName == "asset")
-            {
-                stats.AssetComponentsSeen++;
-                var data = ReadAssetData(entry, cancellationToken, stats);
-
-                if (data is null)
+                if (entry.EntryType is not (TarEntryType.RegularFile or TarEntryType.V7RegularFile))
                     continue;
 
-                if (!string.IsNullOrWhiteSpace(state.RelativePath))
+                var entryName = entry.Name ?? string.Empty;
+                if (string.IsNullOrWhiteSpace(entryName))
+                    continue;
+
+                var (assetKey, componentName) = SplitEntryName(entryName);
+                if (string.IsNullOrWhiteSpace(assetKey))
+                    continue;
+
+                if (!assetStates.TryGetValue(assetKey, out var state))
                 {
-                    ProcessAssetData(state.RelativePath, data, collector, stats);
+                    state = new AssetSecurityState();
+                    assetStates[assetKey] = state;
                 }
-                else
+
+                if (componentName == "pathname")
                 {
-                    // Buffer data until path is found
-                    state.PendingAssetData = data;
+                    stats.PathComponentsSeen++;
+                    var path = await ReadPathAsync(entry, cancellationToken);
+                    state.RelativePath = NormalizeFullPath(NormalizeAssetPath(path));
+
+                    // If we have pending data, process it now that we have the path
+                    if (state.PendingAssetData is not null)
+                    {
+                        ProcessAssetData(state.RelativePath, state.PendingAssetData, collector, stats);
+                        state.PendingAssetData = null; // Clear to save memory
+                    }
+                }
+                else if (componentName == "asset")
+                {
+                    stats.AssetComponentsSeen++;
+                    var data = await ReadAssetDataAsync(entry, cancellationToken, stats);
+
+                    if (data is null)
+                        continue;
+
+                    if (!string.IsNullOrWhiteSpace(state.RelativePath))
+                        ProcessAssetData(state.RelativePath, data, collector, stats);
+                    else
+                        // Buffer data until path is found
+                        state.PendingAssetData = data;
                 }
             }
+
+            var threats = collector.BuildResults();
+            var isMalicious = threats.Count > 0;
+
+            _logger.LogInformation(
+                $"Scan completed for '{packagePath}'. Threats={threats.Count}, Malicious={isMalicious}. Stats: {stats.ToPerformanceDetails()}");
+
+            return new MaliciousCodeScanResult(
+                packagePath,
+                isMalicious,
+                threats,
+                DateTimeOffset.UtcNow);
         }
+        catch (InvalidDataException ex)
+        {
+            // Some Unity packages use compression methods not supported by .NET's GZipStream/TarReader
+            // (e.g., LZMA, LZ4 from Asset Bundles). Return a "scan skipped" result instead of crashing.
+            _logger.LogWarning($"Scan skipped for '{packagePath}': unsupported compression format. {ex.Message}");
 
-        var threats = collector.BuildResults();
-        var isMalicious = threats.Count > 0;
-
-        _logger.LogInformation(
-            $"Scan completed for '{packagePath}'. Threats={threats.Count}, Malicious={isMalicious}. Stats: {stats.ToPerformanceDetails()}");
-
-        return new MaliciousCodeScanResult(
-            packagePath,
-            isMalicious,
-            threats,
-            DateTimeOffset.UtcNow);
+            return new MaliciousCodeScanResult(
+                packagePath,
+                false,
+                new List<MaliciousThreat>(),
+                DateTimeOffset.UtcNow,
+                true,
+                "Package uses unsupported compression format. Manual review recommended.");
+        }
     }
 
     // --- AssetProcessing Partials ---
@@ -228,7 +248,7 @@ public sealed class MaliciousCodeDetectionService : IMaliciousCodeDetectionServi
         return sanitized;
     }
 
-    private static byte[]? ReadAssetData(
+    private static async Task<byte[]?> ReadAssetDataAsync(
         TarEntry entry,
         CancellationToken cancellationToken,
         ScanStatistics stats)
@@ -252,31 +272,38 @@ public sealed class MaliciousCodeDetectionService : IMaliciousCodeDetectionServi
             ? new MemoryStream((int)declaredLength)
             : new MemoryStream();
 
-        var buffer = new byte[81920];
-        int read;
-        while ((read = entry.DataStream.Read(buffer, 0, buffer.Length)) > 0)
+        // ⚡ Bolt: Utilize ArrayPool to prevent massive GC allocations for thousands of small assets.
+        var buffer = ArrayPool<byte>.Shared.Rent(81920);
+        try
         {
-            cancellationToken.ThrowIfCancellationRequested();
-            if (memoryStream.Length + read > MaxScannableBytes)
+            int read;
+            while ((read = await entry.DataStream.ReadAsync(buffer, 0, buffer.Length, cancellationToken)) > 0)
             {
-                stats.AssetsSkippedOversize++;
-                return null;
-            }
+                if (memoryStream.Length + read > MaxScannableBytes)
+                {
+                    stats.AssetsSkippedOversize++;
+                    return null;
+                }
 
-            memoryStream.Write(buffer, 0, read);
+                memoryStream.Write(buffer, 0, read);
+            }
+        }
+        finally
+        {
+            ArrayPool<byte>.Shared.Return(buffer);
         }
 
         return memoryStream.ToArray();
     }
 
-    private static string ReadPath(TarEntry entry)
+    private static async Task<string> ReadPathAsync(TarEntry entry, CancellationToken cancellationToken)
     {
         if (entry.DataStream is null)
             return string.Empty;
 
-        using var buffer = new MemoryStream();
-        entry.DataStream.CopyTo(buffer);
-        return Encoding.UTF8.GetString(buffer.ToArray());
+        // ⚡ Bolt: Use StreamReader to avoid allocating entire byte[] in MemoryStream just to decode UTF8.
+        using var reader = new StreamReader(entry.DataStream, Encoding.UTF8, true, 1024, true);
+        return await reader.ReadToEndAsync(cancellationToken);
     }
 
     private static void ProcessAssetData(
@@ -346,6 +373,9 @@ public sealed class MaliciousCodeDetectionService : IMaliciousCodeDetectionServi
         string content,
         MaliciousThreatCollector collector)
     {
+        if (!content.AsSpan().ContainsAny(FastPathKeywords))
+            return;
+
         var discordMatches = ExtractMatches(DiscordWebhookRegex, content);
         if (discordMatches.Count > 0)
             collector.AddMatches(

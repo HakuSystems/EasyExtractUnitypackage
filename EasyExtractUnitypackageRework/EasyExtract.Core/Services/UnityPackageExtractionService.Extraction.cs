@@ -1,18 +1,12 @@
-using System;
-using System.IO;
-using System.IO.Compression;
-using System.Threading;
-using System.Threading.Tasks;
 using System.Formats.Tar;
+using System.IO.Compression;
 using EasyExtract.Core.Models;
-using EasyExtract.Core.Utilities;
-using EasyExtract.Core;
 
 namespace EasyExtract.Core.Services;
 
 public sealed partial class UnityPackageExtractionService
 {
-    private UnityPackageExtractionResult ExtractInternal(
+    private async Task<UnityPackageExtractionResult> ExtractInternalAsync(
         string packagePath,
         string outputDirectory,
         UnityPackageExtractionOptions options,
@@ -23,7 +17,8 @@ public sealed partial class UnityPackageExtractionService
         _logger.LogInformation(
             $"ExtractInternal started | package='{packagePath}' | correlationId={correlationId}");
 
-        using var packageStream = File.OpenRead(packagePath);
+        await using var packageStream = new FileStream(packagePath, FileMode.Open, FileAccess.Read, FileShare.Read,
+            4096, FileOptions.Asynchronous);
         var format = UnityPackageFormatDetector.Detect(packageStream);
 
         Stream inputStream = packageStream;
@@ -45,7 +40,7 @@ public sealed partial class UnityPackageExtractionService
                 throw CreateInvalidFormatException(format, packagePath, correlationId);
         }
 
-        using var tarReader = new TarReader(inputStream, true);
+        await using var tarReader = new TarReader(inputStream, true);
 
         var normalizedOutputDirectory = NormalizeOutputDirectory(outputDirectory);
         var limits = UnityPackageExtractionLimits.Normalize(options.Limits);
@@ -66,7 +61,7 @@ public sealed partial class UnityPackageExtractionService
 
         try
         {
-            return session.Execute();
+            return await session.ExecuteAsync().ConfigureAwait(false);
         }
         catch (InvalidDataException ex)
         {
@@ -80,7 +75,8 @@ public sealed partial class UnityPackageExtractionService
         }
         finally
         {
-            gzipStream?.Dispose();
+            if (gzipStream != null)
+                await gzipStream.DisposeAsync().ConfigureAwait(false);
         }
     }
 

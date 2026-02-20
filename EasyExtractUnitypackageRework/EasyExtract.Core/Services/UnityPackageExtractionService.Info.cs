@@ -1,12 +1,6 @@
-using System;
-using System.Collections.Generic;
 using System.Formats.Tar;
-using System.IO;
 using System.IO.Compression;
-using System.Threading;
-using System.Threading.Tasks;
 using EasyExtract.Core.Models;
-using EasyExtract.Core;
 
 namespace EasyExtract.Core.Services;
 
@@ -23,11 +17,13 @@ public sealed partial class UnityPackageExtractionService
 
         if (!File.Exists(packagePath))
         {
-            _logger.LogError($"ExtractInfoAsync aborted: File not found | path='{packagePath}' | correlationId={correlationId}");
+            _logger.LogError(
+                $"ExtractInfoAsync aborted: File not found | path='{packagePath}' | correlationId={correlationId}");
             throw new FileNotFoundException("Unitypackage file was not found.", packagePath);
         }
 
-        using var packageStream = File.OpenRead(packagePath);
+        await using var packageStream = new FileStream(packagePath, FileMode.Open, FileAccess.Read, FileShare.Read,
+            4096, FileOptions.Asynchronous);
         var format = UnityPackageFormatDetector.Detect(packageStream);
 
         Stream inputStream = packageStream;
@@ -52,7 +48,8 @@ public sealed partial class UnityPackageExtractionService
         {
             using var tarReader = new TarReader(inputStream, true);
             var result = await ScanPackageAsync(tarReader, packagePath, cancellationToken, correlationId);
-            _logger.LogInformation($"ExtractInfoAsync completed | files={result.ExtractedFiles.Count} | size={result.TotalSize:N0} | correlationId={correlationId}");
+            _logger.LogInformation(
+                $"ExtractInfoAsync completed | files={result.ExtractedFiles.Count} | size={result.TotalSize:N0} | correlationId={correlationId}");
             return result;
         }
         catch (Exception ex)
@@ -62,7 +59,7 @@ public sealed partial class UnityPackageExtractionService
         }
         finally
         {
-            gzipStream?.Dispose();
+            if (gzipStream != null) await gzipStream.DisposeAsync().ConfigureAwait(false);
         }
     }
 
@@ -76,7 +73,7 @@ public sealed partial class UnityPackageExtractionService
         var assetSizes = new Dictionary<string, long>(StringComparer.OrdinalIgnoreCase);
         var extractedFiles = new List<string>();
         long totalSize = 0;
-        int entriesProcessed = 0;
+        var entriesProcessed = 0;
 
         TarEntry? entry;
         while ((entry = await tarReader.GetNextEntryAsync(false, cancellationToken)) != null)
@@ -94,15 +91,15 @@ public sealed partial class UnityPackageExtractionService
             switch (componentName)
             {
                 case "pathname":
-                    var rawPath = ReadEntryAsUtf8String(entry.DataStream ?? Stream.Null, cancellationToken, correlationId, _logger);
+                    var rawPath =
+                        await ReadEntryAsUtf8StringAsync(entry.DataStream ?? Stream.Null, cancellationToken,
+                            correlationId, _logger).ConfigureAwait(false);
                     // Normalize just to be safe and clean, but keep structure
                     // We reuse NormalizeRelativePath but without caring about strict safety for Info, 
                     // though it cleans up slashes etc.
                     var normalization = NormalizeRelativePath(rawPath, correlationId, _logger);
                     if (!string.IsNullOrWhiteSpace(normalization.NormalizedPath))
-                    {
                         assetPaths[assetKey] = normalization.NormalizedPath;
-                    }
                     break;
 
                 case "asset":
@@ -121,7 +118,7 @@ public sealed partial class UnityPackageExtractionService
         {
             var guid = kvp.Key;
             var path = kvp.Value;
-            
+
             // If we have a path, we consider it a file in the package.
             extractedFiles.Add(path);
         }
@@ -129,7 +126,7 @@ public sealed partial class UnityPackageExtractionService
         return new UnityPackageExtractionResult(
             packagePath,
             string.Empty, // No output directory
-            0,            // No assets extracted to disk
+            0, // No assets extracted to disk
             extractedFiles)
         {
             TotalSize = totalSize

@@ -1,5 +1,3 @@
-using System.Collections.Generic;
-
 namespace EasyExtract.Core.Models;
 
 public sealed record UnityPackageExtractionResult(
@@ -10,5 +8,5 @@ public sealed record UnityPackageExtractionResult(
 {
     // HakuAPI Requirement: Computed Property for Result Size
     // For now we default to 0, logic to populate this will be in the Service.
-    public long TotalSize { get; init; } 
+    public long TotalSize { get; init; }
 }

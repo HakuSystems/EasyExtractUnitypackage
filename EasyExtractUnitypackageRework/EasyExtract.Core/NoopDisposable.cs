@@ -1,12 +1,14 @@
-using System;
-
 namespace EasyExtract.Core;
 
 public sealed class NoopDisposable : IDisposable
 {
     public static readonly NoopDisposable Instance = new();
 
-    private NoopDisposable() { }
+    private NoopDisposable()
+    {
+    }
 
-    public void Dispose() { }
+    public void Dispose()
+    {
+    }
 }

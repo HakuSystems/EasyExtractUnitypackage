@@ -1,6 +1,3 @@
-using System;
-using System.Collections.Generic;
-
 namespace EasyExtract.Core.Models;
 
 public sealed record UnityPackagePreviewResult(
