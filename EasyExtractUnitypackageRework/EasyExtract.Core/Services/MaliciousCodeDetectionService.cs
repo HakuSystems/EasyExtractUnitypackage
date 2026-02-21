@@ -238,14 +238,35 @@ public sealed class MaliciousCodeDetectionService : IMaliciousCodeDetectionServi
         if (string.IsNullOrWhiteSpace(input))
             return string.Empty;
 
-        var sanitized = input
-            .Replace("\0", string.Empty, StringComparison.Ordinal)
-            .Replace("\r", string.Empty, StringComparison.Ordinal)
-            .Replace("\n", string.Empty, StringComparison.Ordinal)
-            .Replace('\\', '/')
-            .Trim();
+        var span = input.AsSpan().Trim();
+        var needsModification = false;
+        var newLength = 0;
 
-        return sanitized;
+        foreach (var ch in span)
+            if (ch is '\0' or '\r' or '\n')
+            {
+                needsModification = true;
+            }
+            else
+            {
+                if (ch == '\\') needsModification = true;
+                newLength++;
+            }
+
+        if (!needsModification)
+            return span.Length == input.Length ? input : span.ToString();
+
+        return string.Create(newLength, span, static (dest, src) =>
+        {
+            var destIndex = 0;
+            foreach (var ch in src)
+            {
+                if (ch is '\0' or '\r' or '\n')
+                    continue;
+
+                dest[destIndex++] = ch == '\\' ? '/' : ch;
+            }
+        });
     }
 
     private static async Task<byte[]?> ReadAssetDataAsync(
@@ -447,8 +468,8 @@ public sealed class MaliciousCodeDetectionService : IMaliciousCodeDetectionServi
     private static string SanitizeMatch(string value)
     {
         var cleaned = value
-            .Replace("\r", " ", StringComparison.Ordinal)
-            .Replace("\n", " ", StringComparison.Ordinal)
+            .Replace('\r', ' ')
+            .Replace('\n', ' ')
             .Trim();
 
         if (cleaned.Length > 200)
