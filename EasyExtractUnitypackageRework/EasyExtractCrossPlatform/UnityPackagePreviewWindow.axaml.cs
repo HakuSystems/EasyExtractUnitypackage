@@ -81,4 +81,61 @@ public partial class UnityPackagePreviewWindow : Window
             _inspectorCard.Margin = new Thickness(24, 0, 0, 0);
         }
     }
+
+    private async void ExportAssetButton_OnClick(object? sender, RoutedEventArgs e)
+    {
+        if (DataContext is not UnityPackagePreviewViewModel vm)
+            return;
+
+        var asset = vm.SelectedAsset;
+        if (asset is null)
+            return;
+
+        if (asset.IsAssetDataTruncated)
+        {
+            Debug.WriteLine("Asset data is truncated – export aborted.");
+            return;
+        }
+
+        var ext = Path.GetExtension(asset.FileName);
+        var suggestedName = asset.FileName ?? "asset";
+
+        var file = await StorageProvider.SaveFilePickerAsync(new FilePickerSaveOptions
+        {
+            Title = "Export Asset",
+            SuggestedFileName = suggestedName,
+            DefaultExtension = ext.TrimStart('.'),
+            FileTypeChoices =
+            [
+                new FilePickerFileType("Asset file") { Patterns = [$"*{ext}"] },
+                new FilePickerFileType("All files") { Patterns = ["*"] }
+            ]
+        });
+
+        if (file is null)
+            return;
+
+        try
+        {
+            // Prefer raw byte data if available
+            if (asset.AssetData is { Length: > 0 })
+            {
+                await using var stream = await file.OpenWriteAsync();
+                await stream.WriteAsync(asset.AssetData, CancellationToken.None);
+            }
+            else if (!string.IsNullOrWhiteSpace(asset.AssetFilePath) && File.Exists(asset.AssetFilePath))
+            {
+                var destPath = file.Path.LocalPath;
+                File.Copy(asset.AssetFilePath, destPath, true);
+            }
+            else
+            {
+                Debug.WriteLine("ExportAsset: no data available for this asset.");
+            }
+        }
+        catch (Exception ex)
+        {
+            Debug.WriteLine($"ExportAsset failed: {ex}");
+        }
+    }
 }
