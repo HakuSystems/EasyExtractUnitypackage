@@ -539,4 +539,10 @@
   <data name="MainWindow_OpenDashboard" xml:space="preserve">
     <value>Opens Your Browser</value>
   </data>
+  <data name="MainWindow_OpenOutputFolder" xml:space="preserve">
+    <value>Open output folder</value>
+  </data>
+  <data name="MainWindow_ExportAsset" xml:space="preserve">
+    <value>Export asset</value>
+  </data>
 </root>
