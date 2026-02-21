@@ -33,7 +33,7 @@ public sealed class ErrorDialogService : IErrorDialogService
 
     private void OnErrorLogged(object? sender, LogEntryEventArgs args)
     {
-        var detail = NormalizeDetail(args.Exception?.ToString()) ?? args.FormattedPayload;
+        var detail = NormalizeDetail(args.Exception?.Message) ?? args.FormattedPayload;
         var message = string.IsNullOrWhiteSpace(args.Message)
             ? "An unexpected error occurred."
             : args.Message;

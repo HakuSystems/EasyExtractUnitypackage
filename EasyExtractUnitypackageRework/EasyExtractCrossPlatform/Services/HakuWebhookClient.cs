@@ -55,7 +55,7 @@ public sealed class HakuWebhookClient
         CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(exception);
-        return SendErrorReportAsync(exception.ToString(), currentVersion, cancellationToken: cancellationToken);
+        return SendErrorReportAsync(exception.Message, currentVersion, cancellationToken: cancellationToken);
     }
 
     public Task SendErrorReportAsync(string message, string? currentVersion, string? webhookType = null,
@@ -158,7 +158,6 @@ internal static class HakuWebhookClientProvider
         }
         catch
         {
-            // It's safe to continue without a custom user agent.
         }
 
         return new HakuWebhookClient(httpClient, ApplicationName);
