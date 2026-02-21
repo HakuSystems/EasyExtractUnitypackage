@@ -12,6 +12,30 @@ public partial class MainWindow : Window
         await RunBatchExtractionPickerAsync();
     }
 
+    private void OpenOutputFolderButton_OnClick(object? sender, RoutedEventArgs e)
+    {
+        try
+        {
+            var path = _settings.DefaultOutputPath;
+            if (string.IsNullOrWhiteSpace(path))
+                path = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments),
+                    "EasyExtractUnitypackage", "Extracted");
+
+            if (!Directory.Exists(path)) Directory.CreateDirectory(path);
+
+            Process.Start(new ProcessStartInfo { FileName = path, UseShellExecute = true });
+        }
+        catch (Exception ex)
+        {
+            Debug.WriteLine($"Failed to open output folder: {ex}");
+            ShowDropStatusMessage(
+                "Error opening folder",
+                "Could not open the output folder.",
+                TimeSpan.FromSeconds(4),
+                UiSoundEffect.Negative);
+        }
+    }
+
     private void CancelExtractionButton_OnClick(object? sender, RoutedEventArgs e)
     {
         if (!_isExtractionRunning || _extractionCts is null)
