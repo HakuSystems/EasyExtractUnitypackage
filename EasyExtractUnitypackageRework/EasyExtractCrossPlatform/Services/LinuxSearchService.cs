@@ -120,7 +120,17 @@ internal sealed class LinuxSearchService : IEverythingSearchService
         if (FdPath is null)
             throw new InvalidOperationException("fd command could not be located on PATH.");
 
-        var pattern = string.IsNullOrWhiteSpace(query) ? ".*" : Regex.Escape(query);
+        var arguments = BuildFdArgumentsForQuery(query, maxResults, DefaultSearchRoots);
+        return ExecuteCommand(FdPath, arguments, maxResults, cancellationToken);
+    }
+
+    internal static IReadOnlyList<string> BuildFdArgumentsForQuery(
+        string query,
+        int maxResults,
+        IReadOnlyList<string>? searchRoots = null)
+    {
+        var normalizedQuery = (query ?? string.Empty).Trim().Replace('\\', '/');
+        var pattern = string.IsNullOrWhiteSpace(normalizedQuery) ? ".*" : Regex.Escape(normalizedQuery);
         var arguments = new List<string>
         {
             "--absolute-path",
@@ -130,14 +140,19 @@ internal sealed class LinuxSearchService : IEverythingSearchService
             "unitypackage",
             "--max-results",
             Math.Clamp(maxResults, 1, 2000).ToString(CultureInfo.InvariantCulture),
-            "--ignore-case",
-            pattern.Length == 0 ? ".*" : pattern
+            "--ignore-case"
         };
 
-        foreach (var root in DefaultSearchRoots)
+        if (normalizedQuery.Contains('/', StringComparison.Ordinal))
+            arguments.Add("--full-path");
+
+        arguments.Add(pattern.Length == 0 ? ".*" : pattern);
+
+        var roots = searchRoots is { Count: > 0 } ? searchRoots : DefaultSearchRoots;
+        foreach (var root in roots)
             arguments.Add(root);
 
-        return ExecuteCommand(FdPath, arguments, maxResults, cancellationToken);
+        return arguments;
     }
 
     private static (List<EverythingSearchResult> Results, int FilteredCount) ExecuteLocateSearch(

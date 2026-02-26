@@ -47,4 +47,9 @@
     <ItemGroup>
         <ProjectReference Include="..\EasyExtract.Core\EasyExtract.Core.csproj"/>
     </ItemGroup>
+    <ItemGroup>
+        <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleTo">
+            <_Parameter1>EasyExtractCrossPlatform.Tests</_Parameter1>
+        </AssemblyAttribute>
+    </ItemGroup>
 </Project>
