@@ -211,13 +211,22 @@ public sealed partial class UnityPackageExtractionService
             }
             catch (Exception ex) when (ex is IOException or InvalidDataException)
             {
-                _logger.LogError(
-                    $"TAR processing failed | entriesProcessed={_tarEntriesProcessed} | skipped={_tarEntriesSkipped} | correlationId={_correlationId}",
-                    ex);
+                if (_tarEntriesProcessed > 0 && ex is InvalidDataException)
+                {
+                    _logger.LogWarning(
+                        $"TAR processing encountered an error after reading {_tarEntriesProcessed} entries. Archiving may have trailing junk data. Proceeding with extracted assets. | correlationId={_correlationId}",
+                        ex);
+                }
+                else
+                {
+                    _logger.LogError(
+                        $"TAR processing failed | entriesProcessed={_tarEntriesProcessed} | skipped={_tarEntriesSkipped} | correlationId={_correlationId}",
+                        ex);
 
-                throw new InvalidDataException(
-                    "The selected file is not a valid .unitypackage or is corrupted. Please download the file again.",
-                    ex);
+                    throw new InvalidDataException(
+                        "The selected file is not a valid .unitypackage or is corrupted. Please download the file again.",
+                        ex);
+                }
             }
 
             _logger.LogInformation(
