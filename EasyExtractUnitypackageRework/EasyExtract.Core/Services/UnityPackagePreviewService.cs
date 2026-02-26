@@ -81,75 +81,84 @@ public sealed class UnityPackagePreviewService : IUnityPackagePreviewService
             var assetStates = new Dictionary<string, UnityPackageAssetPreviewState>(StringComparer.OrdinalIgnoreCase);
 
             TarEntry? entry;
-            while ((entry = tarReader.GetNextEntry()) is not null)
+            try
             {
-                cancellationToken.ThrowIfCancellationRequested();
-
-                if (entry.EntryType is not (TarEntryType.RegularFile or TarEntryType.V7RegularFile))
-                    continue;
-
-                var entryName = entry.Name ?? string.Empty;
-                if (string.IsNullOrWhiteSpace(entryName))
-                    continue;
-
-                var (assetKey, componentName) = SplitEntryName(entryName);
-                if (string.IsNullOrWhiteSpace(assetKey) || string.IsNullOrWhiteSpace(componentName))
-                    continue;
-
-                if (!assetStates.TryGetValue(assetKey, out var state))
+                while ((entry = tarReader.GetNextEntry()) is not null)
                 {
-                    state = new UnityPackageAssetPreviewState(assetKey);
-                    assetStates[assetKey] = state;
+                    cancellationToken.ThrowIfCancellationRequested();
+
+                    if (entry.EntryType is not (TarEntryType.RegularFile or TarEntryType.V7RegularFile))
+                        continue;
+
+                    var entryName = entry.Name ?? string.Empty;
+                    if (string.IsNullOrWhiteSpace(entryName))
+                        continue;
+
+                    var (assetKey, componentName) = SplitEntryName(entryName);
+                    if (string.IsNullOrWhiteSpace(assetKey) || string.IsNullOrWhiteSpace(componentName))
+                        continue;
+
+                    if (!assetStates.TryGetValue(assetKey, out var state))
+                    {
+                        state = new UnityPackageAssetPreviewState(assetKey);
+                        assetStates[assetKey] = state;
+                    }
+
+                    switch (componentName)
+                    {
+                        case "pathname":
+                            using (var buffer = new MemoryStream())
+                            {
+                                if (entry.DataStream != null)
+                                    CopyStreamWithCancellation(entry.DataStream, buffer, cancellationToken);
+                                var path = Encoding.UTF8.GetString(buffer.ToArray());
+                                var normalization = NormalizeRelativePath(path);
+                                state.RelativePath = normalization.NormalizedPath;
+                                state.PathNormalization = normalization;
+                            }
+
+                            break;
+                        case "asset":
+                            state.AssetSizeBytes = Math.Max(0, entry.Length);
+                            state.AssetFilePath = null;
+                            state.NeedsAssetExtraction = false;
+
+                            if (entry.Length >= 0 && entry.Length <= MaxEmbeddedAssetBytes)
+                            {
+                                using var assetBuffer = new MemoryStream();
+                                if (entry.DataStream != null)
+                                    CopyStreamWithCancellation(entry.DataStream, assetBuffer, cancellationToken);
+                                state.AssetData = assetBuffer.ToArray();
+                                state.IsAssetDataTruncated = false;
+                            }
+                            else
+                            {
+                                state.AssetData = null;
+                                state.IsAssetDataTruncated = true;
+                                state.NeedsAssetExtraction = true;
+                            }
+
+                            break;
+                        case "asset.meta":
+                            state.HasMetaFile = true;
+                            break;
+                        case "preview.png":
+                            using (var memoryStream = new MemoryStream())
+                            {
+                                if (entry.DataStream != null)
+                                    CopyStreamWithCancellation(entry.DataStream, memoryStream, cancellationToken);
+                                state.PreviewImageData = memoryStream.ToArray();
+                            }
+
+                            break;
+                    }
                 }
-
-                switch (componentName)
-                {
-                    case "pathname":
-                        using (var buffer = new MemoryStream())
-                        {
-                            if (entry.DataStream != null)
-                                CopyStreamWithCancellation(entry.DataStream, buffer, cancellationToken);
-                            var path = Encoding.UTF8.GetString(buffer.ToArray());
-                            var normalization = NormalizeRelativePath(path);
-                            state.RelativePath = normalization.NormalizedPath;
-                            state.PathNormalization = normalization;
-                        }
-
-                        break;
-                    case "asset":
-                        state.AssetSizeBytes = Math.Max(0, entry.Length);
-                        state.AssetFilePath = null;
-                        state.NeedsAssetExtraction = false;
-
-                        if (entry.Length >= 0 && entry.Length <= MaxEmbeddedAssetBytes)
-                        {
-                            using var assetBuffer = new MemoryStream();
-                            if (entry.DataStream != null)
-                                CopyStreamWithCancellation(entry.DataStream, assetBuffer, cancellationToken);
-                            state.AssetData = assetBuffer.ToArray();
-                            state.IsAssetDataTruncated = false;
-                        }
-                        else
-                        {
-                            state.AssetData = null;
-                            state.IsAssetDataTruncated = true;
-                            state.NeedsAssetExtraction = true;
-                        }
-
-                        break;
-                    case "asset.meta":
-                        state.HasMetaFile = true;
-                        break;
-                    case "preview.png":
-                        using (var memoryStream = new MemoryStream())
-                        {
-                            if (entry.DataStream != null)
-                                CopyStreamWithCancellation(entry.DataStream, memoryStream, cancellationToken);
-                            state.PreviewImageData = memoryStream.ToArray();
-                        }
-
-                        break;
-                }
+            }
+            catch (IOException ex)
+            {
+                _logger.LogWarning(
+                    "Preview parsed partially before encountering an IOException (e.g. EndOfStreamException). The package may be truncated or have trailing junk data. Proceeding with loaded assets.",
+                    ex);
             }
 
             var extractionRoot = ExtractLargeAudioAssets(resolvedPackage.ResolvedPath, assetStates, cancellationToken);
@@ -233,52 +242,62 @@ public sealed class UnityPackagePreviewService : IUnityPackagePreviewService
         using var tarReader = new TarReader(gzipStream);
 
         TarEntry? entry;
-        while ((entry = tarReader.GetNextEntry()) is not null && candidates.Count > 0)
+        try
         {
-            cancellationToken.ThrowIfCancellationRequested();
-
-            if (entry.EntryType is not (TarEntryType.RegularFile or TarEntryType.V7RegularFile))
-                continue;
-
-            var entryName = entry.Name ?? string.Empty;
-            if (string.IsNullOrWhiteSpace(entryName))
-                continue;
-
-            var (assetKey, componentName) = SplitEntryName(entryName);
-            if (string.IsNullOrWhiteSpace(assetKey) || !string.Equals(componentName, "asset", StringComparison.Ordinal))
-                continue;
-
-            if (!candidates.TryGetValue(assetKey, out var state))
-                continue;
-
-            extractionRoot ??= CreateExtractionRoot();
-
-            var extension = Path.GetExtension(state.RelativePath ?? string.Empty);
-            if (string.IsNullOrWhiteSpace(extension))
-                extension = ".audio";
-
-            var safeName = SanitizeFileName(state.AssetKey);
-            if (string.IsNullOrWhiteSpace(safeName))
-                safeName = Guid.NewGuid().ToString("N");
-
-            var targetPath = Path.Combine(extractionRoot, $"{safeName}{extension}");
-            var fullTargetPath = Path.GetFullPath(targetPath);
-            if (!fullTargetPath.StartsWith(extractionRoot, StringComparison.OrdinalIgnoreCase))
-                throw new IOException("Security Error: Zip Slip detected during large asset extraction.");
-
-            Directory.CreateDirectory(extractionRoot);
-
-            using (var output = File.Create(targetPath))
+            while ((entry = tarReader.GetNextEntry()) is not null && candidates.Count > 0)
             {
-                if (entry.DataStream != null)
-                    CopyStreamWithCancellation(entry.DataStream, output, cancellationToken);
+                cancellationToken.ThrowIfCancellationRequested();
+
+                if (entry.EntryType is not (TarEntryType.RegularFile or TarEntryType.V7RegularFile))
+                    continue;
+
+                var entryName = entry.Name ?? string.Empty;
+                if (string.IsNullOrWhiteSpace(entryName))
+                    continue;
+
+                var (assetKey, componentName) = SplitEntryName(entryName);
+                if (string.IsNullOrWhiteSpace(assetKey) ||
+                    !string.Equals(componentName, "asset", StringComparison.Ordinal))
+                    continue;
+
+                if (!candidates.TryGetValue(assetKey, out var state))
+                    continue;
+
+                extractionRoot ??= CreateExtractionRoot();
+
+                var extension = Path.GetExtension(state.RelativePath ?? string.Empty);
+                if (string.IsNullOrWhiteSpace(extension))
+                    extension = ".audio";
+
+                var safeName = SanitizeFileName(state.AssetKey);
+                if (string.IsNullOrWhiteSpace(safeName))
+                    safeName = Guid.NewGuid().ToString("N");
+
+                var targetPath = Path.Combine(extractionRoot, $"{safeName}{extension}");
+                var fullTargetPath = Path.GetFullPath(targetPath);
+                if (!fullTargetPath.StartsWith(extractionRoot, StringComparison.OrdinalIgnoreCase))
+                    throw new IOException("Security Error: Zip Slip detected during large asset extraction.");
+
+                Directory.CreateDirectory(extractionRoot);
+
+                using (var output = File.Create(targetPath))
+                {
+                    if (entry.DataStream != null)
+                        CopyStreamWithCancellation(entry.DataStream, output, cancellationToken);
+                }
+
+                state.AssetFilePath = targetPath;
+                state.IsAssetDataTruncated = false;
+                state.NeedsAssetExtraction = false;
+
+                candidates.Remove(assetKey);
             }
-
-            state.AssetFilePath = targetPath;
-            state.IsAssetDataTruncated = false;
-            state.NeedsAssetExtraction = false;
-
-            candidates.Remove(assetKey);
+        }
+        catch (IOException ex)
+        {
+            _logger.LogWarning(
+                "Large audio asset extraction parsed partially before encountering an IOException. Proceeding with loaded assets.",
+                ex);
         }
 
         if (candidates.Count > 0 && extractionRoot is not null && Directory.Exists(extractionRoot))

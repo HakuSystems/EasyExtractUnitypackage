@@ -211,7 +211,7 @@ public sealed partial class UnityPackageExtractionService
             }
             catch (Exception ex) when (ex is IOException or InvalidDataException)
             {
-                if (_tarEntriesProcessed > 0 && ex is InvalidDataException)
+                if (_tarEntriesProcessed > 0)
                 {
                     _logger.LogWarning(
                         $"TAR processing encountered an error after reading {_tarEntriesProcessed} entries. Archiving may have trailing junk data. Proceeding with extracted assets. | correlationId={_correlationId}",
