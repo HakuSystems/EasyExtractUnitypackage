@@ -109,6 +109,15 @@ public partial class MainWindow : Window
                 return existingTask;
 
             var scanTask = PerformSecurityScanAsync(normalizedPath);
+
+            // Prevent UnobservedTaskException if this task is never awaited
+            // and an OperationCanceledException (or other fault) is thrown.
+            _ = scanTask.ContinueWith(
+                t => _ = t.Exception,
+                CancellationToken.None,
+                TaskContinuationOptions.OnlyOnFaulted | TaskContinuationOptions.ExecuteSynchronously,
+                TaskScheduler.Default);
+
             _securityScanTasks[normalizedPath] = scanTask;
             return scanTask;
         }
