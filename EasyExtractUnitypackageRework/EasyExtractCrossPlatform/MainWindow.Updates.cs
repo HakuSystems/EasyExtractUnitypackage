@@ -6,8 +6,8 @@ public partial class MainWindow : Window
     {
         try
         {
-            var updateInfo = await _velopackUpdateService.CheckForUpdatesAsync();
-            if (updateInfo != null)
+            var updateCheck = await _velopackUpdateService.CheckForUpdatesAsync();
+            if (updateCheck is { State: UpdateCheckState.UpdateAvailable, UpdateInfo: { } updateInfo })
                 await Dispatcher.UIThread.InvokeAsync(() =>
                 {
                     SetVersionStatusMessage($"Update available: {updateInfo.TargetFullRelease.Version}",
@@ -51,9 +51,21 @@ public partial class MainWindow : Window
         try
         {
             // Check
-            var updateInfo = await _velopackUpdateService.CheckForUpdatesAsync();
+            var updateCheck = await _velopackUpdateService.CheckForUpdatesAsync();
 
-            if (updateInfo == null)
+            if (updateCheck.State == UpdateCheckState.Unavailable)
+            {
+                await Dispatcher.UIThread.InvokeAsync(() =>
+                {
+                    SetVersionStatusMessage("Update checks unavailable", TimeSpan.FromSeconds(6));
+                    ShowDropStatusMessage(
+                        "Update checks unavailable",
+                        "Updates are only available in installed app builds.",
+                        TimeSpan.FromSeconds(6),
+                        UiSoundEffect.Subtle);
+                });
+            }
+            else if (updateCheck.State == UpdateCheckState.UpToDate)
             {
                 await Dispatcher.UIThread.InvokeAsync(() =>
                 {
@@ -65,7 +77,7 @@ public partial class MainWindow : Window
                         UiSoundEffect.Subtle);
                 });
             }
-            else
+            else if (updateCheck.UpdateInfo is { } updateInfo)
             {
                 // Update found
                 await Dispatcher.UIThread.InvokeAsync(() =>
@@ -101,6 +113,10 @@ public partial class MainWindow : Window
                 await Task.Delay(2000);
 
                 _velopackUpdateService.ApplyUpdates(updateInfo);
+            }
+            else
+            {
+                throw new InvalidOperationException("Update check returned an invalid state.");
             }
         }
         catch (Exception ex)
