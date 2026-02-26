@@ -37,6 +37,7 @@ public sealed class NotificationService : INotificationService
             var encodedScript = Convert.ToBase64String(Encoding.Unicode.GetBytes(script));
             var startInfo = new ProcessStartInfo("powershell.exe")
             {
+                WorkingDirectory = Environment.GetFolderPath(Environment.SpecialFolder.System),
                 UseShellExecute = false,
                 CreateNoWindow = true
             };
@@ -63,6 +64,7 @@ public sealed class NotificationService : INotificationService
         {
             var startInfo = new ProcessStartInfo("notify-send")
             {
+                WorkingDirectory = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile),
                 UseShellExecute = false,
                 CreateNoWindow = true
             };
@@ -93,6 +95,7 @@ public sealed class NotificationService : INotificationService
         {
             var startInfo = new ProcessStartInfo("osascript")
             {
+                WorkingDirectory = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile),
                 UseShellExecute = false,
                 CreateNoWindow = true
             };
