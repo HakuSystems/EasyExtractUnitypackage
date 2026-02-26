@@ -193,21 +193,22 @@ public static class AppSettingsService
             StringComparer.OrdinalIgnoreCase);
     }
 
-    private class SafeWindowStateConverter : JsonConverter<WindowState>
+    public class SafeWindowStateConverter : JsonConverter<WindowState>
     {
         public override WindowState Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
         {
-            try
+            if (reader.TokenType == JsonTokenType.Number)
             {
-                using var doc = JsonDocument.ParseValue(ref reader);
-                var value = doc.RootElement.GetString();
+                if (reader.TryGetInt32(out var intValue) && Enum.IsDefined(typeof(WindowState), intValue))
+                    return (WindowState)intValue;
+            }
+            else if (reader.TokenType == JsonTokenType.String)
+            {
+                var value = reader.GetString();
                 if (Enum.TryParse<WindowState>(value, true, out var result)) return result;
             }
-            catch
-            {
-                // Ignore any parsing errors
-            }
 
+            reader.Skip();
             return WindowState.Normal;
         }
 
@@ -222,70 +223,61 @@ public static class AppSettingsService
         public override ExtractedPackageModel? Read(ref Utf8JsonReader reader, Type typeToConvert,
             JsonSerializerOptions options)
         {
-            try
+            if (reader.TokenType == JsonTokenType.String)
             {
-                if (reader.TokenType == JsonTokenType.String)
-                {
-                    var path = reader.GetString();
-                    if (string.IsNullOrWhiteSpace(path))
-                        return null;
-
-                    return new ExtractedPackageModel
-                    {
-                        FilePath = path,
-                        FileName = Path.GetFileName(path),
-                        DateExtracted = DateTimeOffset.UtcNow
-                    };
-                }
-
-                if (reader.TokenType == JsonTokenType.Null)
-                    return null;
-
-                if (reader.TokenType != JsonTokenType.StartObject)
-                {
-                    reader.Skip();
-                    return null;
-                }
-
-                using var document = JsonDocument.ParseValue(ref reader);
-                var root = document.RootElement;
-
-                var filePath = root.TryGetProperty(nameof(ExtractedPackageModel.FilePath),
-                    out var filePathElement)
-                    ? filePathElement.GetString()
-                    : null;
-
-                var fileName = root.TryGetProperty(nameof(ExtractedPackageModel.FileName),
-                    out var fileNameElement)
-                    ? fileNameElement.GetString()
-                    : null;
-
-                if (string.IsNullOrWhiteSpace(fileName) && !string.IsNullOrWhiteSpace(filePath))
-                    fileName = Path.GetFileName(filePath);
-
-                var date = DateTimeOffset.UtcNow;
-                if (root.TryGetProperty(nameof(ExtractedPackageModel.DateExtracted),
-                        out var dateElement) &&
-                    dateElement.ValueKind != JsonValueKind.Null &&
-                    dateElement.TryGetDateTimeOffset(out var parsedDate))
-                    date = parsedDate;
-
-                if (string.IsNullOrWhiteSpace(fileName) && string.IsNullOrWhiteSpace(filePath))
+                var path = reader.GetString();
+                if (string.IsNullOrWhiteSpace(path))
                     return null;
 
                 return new ExtractedPackageModel
                 {
-                    FileName = fileName ?? string.Empty,
-                    FilePath = filePath ?? string.Empty,
-                    DateExtracted = date
+                    FilePath = path,
+                    FileName = Path.GetFileName(path),
+                    DateExtracted = DateTimeOffset.UtcNow
                 };
             }
-            catch (Exception)
+
+            if (reader.TokenType == JsonTokenType.Null)
+                return null;
+
+            if (reader.TokenType != JsonTokenType.StartObject)
             {
-                if (reader.TokenType != JsonTokenType.None)
-                    reader.Skip();
+                reader.Skip();
                 return null;
             }
+
+            using var document = JsonDocument.ParseValue(ref reader);
+            var root = document.RootElement;
+
+            var filePath = root.TryGetProperty(nameof(ExtractedPackageModel.FilePath),
+                out var filePathElement)
+                ? filePathElement.GetString()
+                : null;
+
+            var fileName = root.TryGetProperty(nameof(ExtractedPackageModel.FileName),
+                out var fileNameElement)
+                ? fileNameElement.GetString()
+                : null;
+
+            if (string.IsNullOrWhiteSpace(fileName) && !string.IsNullOrWhiteSpace(filePath))
+                fileName = Path.GetFileName(filePath);
+
+            var date = DateTimeOffset.UtcNow;
+            if (root.TryGetProperty(nameof(ExtractedPackageModel.DateExtracted),
+                    out var dateElement) &&
+                dateElement.ValueKind != JsonValueKind.Null &&
+                dateElement.TryGetDateTimeOffset(out var parsedDate))
+                date = parsedDate;
+
+            if (string.IsNullOrWhiteSpace(fileName) && string.IsNullOrWhiteSpace(filePath))
+                return null;
+
+            return new ExtractedPackageModel
+            {
+                FileName = fileName ?? string.Empty,
+                FilePath = filePath ?? string.Empty,
+                DateExtracted = date
+            };
         }
 
         public override void Write(Utf8JsonWriter writer, ExtractedPackageModel value, JsonSerializerOptions options)

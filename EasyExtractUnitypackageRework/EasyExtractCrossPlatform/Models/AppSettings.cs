@@ -1,3 +1,5 @@
+using System.Text.Json.Serialization;
+
 namespace EasyExtractCrossPlatform.Models;
 
 public class AppSettings
@@ -58,6 +60,8 @@ public class AppSettings
     public double? WindowHeight { get; set; }
     public int? WindowPositionX { get; set; }
     public int? WindowPositionY { get; set; }
+
+    [JsonConverter(typeof(AppSettingsService.SafeWindowStateConverter))]
     public WindowState WindowState { get; set; } = WindowState.Normal;
 
     public Dictionary<string, WindowPlacementSettings> WindowPlacements { get; set; } =
@@ -94,5 +98,7 @@ public class WindowPlacementSettings
     public double? Height { get; set; }
     public int? PositionX { get; set; }
     public int? PositionY { get; set; }
+
+    [JsonConverter(typeof(AppSettingsService.SafeWindowStateConverter))]
     public WindowState WindowState { get; set; } = WindowState.Normal;
 }
