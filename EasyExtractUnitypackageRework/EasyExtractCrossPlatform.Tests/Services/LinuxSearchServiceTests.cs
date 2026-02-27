@@ -10,30 +10,34 @@ public sealed class LinuxSearchServiceTests
     private static readonly string[] SearchRoots = ["/home", "/mnt"];
 
     [Fact]
-    public void BuildFdArgumentsForQuery_AddsFullPathForForwardSlashQuery()
+    public void BuildFdArgumentsForQuery_UsesScopedRootForAbsoluteQuery()
     {
         var arguments = LinuxSearchService.BuildFdArgumentsForQuery("/home/bruno/Downloads", 50, SearchRoots);
 
-        Assert.Contains("--full-path", arguments);
-        Assert.Contains(Regex.Escape("/home/bruno/Downloads"), arguments);
+        Assert.DoesNotContain("--full-path", arguments);
+        Assert.Equal(".", arguments[^2]);
+        Assert.Equal("/home/bruno/Downloads", arguments[^1]);
+        Assert.DoesNotContain("/mnt", arguments);
     }
 
     [Fact]
-    public void BuildFdArgumentsForQuery_AddsFullPathForTrailingSlashQuery()
+    public void BuildFdArgumentsForQuery_NormalizesScopedRootForTrailingSlashQuery()
     {
         var arguments = LinuxSearchService.BuildFdArgumentsForQuery("/home/bruno/Downloads/", 50, SearchRoots);
 
-        Assert.Contains("--full-path", arguments);
-        Assert.Contains(Regex.Escape("/home/bruno/Downloads/"), arguments);
+        Assert.DoesNotContain("--full-path", arguments);
+        Assert.Equal(".", arguments[^2]);
+        Assert.Equal("/home/bruno/Downloads", arguments[^1]);
     }
 
     [Fact]
-    public void BuildFdArgumentsForQuery_AddsFullPathForRootQuery()
+    public void BuildFdArgumentsForQuery_UsesScopedRootForRootQuery()
     {
         var arguments = LinuxSearchService.BuildFdArgumentsForQuery("/", 50, SearchRoots);
 
-        Assert.Contains("--full-path", arguments);
-        Assert.Contains("/", arguments);
+        Assert.DoesNotContain("--full-path", arguments);
+        Assert.Equal(".", arguments[^2]);
+        Assert.Equal("/", arguments[^1]);
     }
 
     [Fact]
@@ -53,6 +57,7 @@ public sealed class LinuxSearchServiceTests
 
         Assert.Contains("--full-path", arguments);
         Assert.Contains(Regex.Escape("home/bruno/Downloads"), arguments);
+        Assert.Equal("/mnt", arguments[^1]);
     }
 
     [Theory]

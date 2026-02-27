@@ -1,3 +1,4 @@
+using System.Runtime.ExceptionServices;
 using System.Text.RegularExpressions;
 
 namespace EasyExtractCrossPlatform.Services;
@@ -120,8 +121,28 @@ internal sealed class LinuxSearchService : IEverythingSearchService
         if (FdPath is null)
             throw new InvalidOperationException("fd command could not be located on PATH.");
 
-        var arguments = BuildFdArgumentsForQuery(query, maxResults, DefaultSearchRoots);
-        return ExecuteCommand(FdPath, arguments, maxResults, cancellationToken);
+        var normalizedQuery = NormalizeFdQuery(query);
+        var arguments = BuildFdArgumentsForQuery(normalizedQuery, maxResults, DefaultSearchRoots);
+        if (!TryGetPathScopedRoot(normalizedQuery, out _))
+            return ExecuteCommand(FdPath, arguments, maxResults, cancellationToken);
+
+        try
+        {
+            return ExecuteCommand(FdPath, arguments, maxResults, cancellationToken);
+        }
+        catch (InvalidOperationException ex) when (ShouldRetryWithLegacyPathQuery(ex.Message))
+        {
+            var fallbackArguments = BuildFdLegacyArgumentsForQuery(normalizedQuery, maxResults, DefaultSearchRoots);
+            try
+            {
+                return ExecuteCommand(FdPath, fallbackArguments, maxResults, cancellationToken);
+            }
+            catch (Exception) when (!cancellationToken.IsCancellationRequested)
+            {
+                ExceptionDispatchInfo.Capture(ex).Throw();
+                throw;
+            }
+        }
     }
 
     internal static IReadOnlyList<string> BuildFdArgumentsForQuery(
@@ -129,7 +150,20 @@ internal sealed class LinuxSearchService : IEverythingSearchService
         int maxResults,
         IReadOnlyList<string>? searchRoots = null)
     {
-        var normalizedQuery = (query ?? string.Empty).Trim().Replace('\\', '/');
+        var normalizedQuery = NormalizeFdQuery(query);
+        if (TryGetPathScopedRoot(normalizedQuery, out var pathScopedRoot))
+            return BuildFdPathScopedArguments(pathScopedRoot, maxResults);
+
+        var roots = searchRoots is { Count: > 0 } ? searchRoots : DefaultSearchRoots;
+        return BuildFdLegacyArgumentsForQuery(normalizedQuery, maxResults, roots);
+    }
+
+    internal static IReadOnlyList<string> BuildFdLegacyArgumentsForQuery(
+        string query,
+        int maxResults,
+        IReadOnlyList<string>? searchRoots = null)
+    {
+        var normalizedQuery = NormalizeFdQuery(query);
         var pattern = string.IsNullOrWhiteSpace(normalizedQuery) ? ".*" : Regex.Escape(normalizedQuery);
         var arguments = new List<string>
         {
@@ -153,6 +187,53 @@ internal sealed class LinuxSearchService : IEverythingSearchService
             arguments.Add(root);
 
         return arguments;
+    }
+
+    private static IReadOnlyList<string> BuildFdPathScopedArguments(string pathScopedRoot, int maxResults)
+    {
+        return
+        [
+            "--absolute-path",
+            "--type",
+            "f",
+            "--extension",
+            "unitypackage",
+            "--max-results",
+            Math.Clamp(maxResults, 1, 2000).ToString(CultureInfo.InvariantCulture),
+            "--ignore-case",
+            ".",
+            pathScopedRoot
+        ];
+    }
+
+    private static string NormalizeFdQuery(string query)
+    {
+        return (query ?? string.Empty).Trim().Replace('\\', '/');
+    }
+
+    private static bool TryGetPathScopedRoot(string normalizedQuery, out string pathScopedRoot)
+    {
+        pathScopedRoot = string.Empty;
+        if (string.IsNullOrWhiteSpace(normalizedQuery))
+            return false;
+
+        if (!normalizedQuery.StartsWith("/", StringComparison.Ordinal))
+            return false;
+
+        pathScopedRoot = normalizedQuery == "/" ? "/" : normalizedQuery.TrimEnd('/');
+        if (pathScopedRoot.Length == 0)
+            pathScopedRoot = "/";
+
+        return true;
+    }
+
+    private static bool ShouldRetryWithLegacyPathQuery(string message)
+    {
+        if (string.IsNullOrWhiteSpace(message))
+            return false;
+
+        return message.Contains("No such file or directory", StringComparison.OrdinalIgnoreCase) ||
+               message.Contains("Not a directory", StringComparison.OrdinalIgnoreCase);
     }
 
     private static (List<EverythingSearchResult> Results, int FilteredCount) ExecuteLocateSearch(
