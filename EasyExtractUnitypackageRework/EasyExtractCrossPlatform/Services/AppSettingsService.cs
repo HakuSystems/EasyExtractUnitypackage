@@ -6,6 +6,12 @@ namespace EasyExtractCrossPlatform.Services;
 
 public static class AppSettingsService
 {
+    private const int MaxIoRetryAttempts = 6;
+    private static readonly TimeSpan InitialIoRetryDelay = TimeSpan.FromMilliseconds(30);
+    private static readonly TimeSpan MaxIoRetryDelay = TimeSpan.FromMilliseconds(400);
+    private static readonly TimeSpan TempFileCleanupAge = TimeSpan.FromMinutes(2);
+    private static readonly object FileIoSyncRoot = new();
+
     private static readonly JsonSerializerOptions SerializerOptions = new()
     {
         WriteIndented = true,
@@ -19,10 +25,37 @@ public static class AppSettingsService
         }
     };
 
-    public static string SettingsDirectory { get; } =
+    private static readonly string DefaultSettingsDirectory =
         Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "EasyExtract");
 
-    public static string SettingsFilePath { get; } = Path.Combine(SettingsDirectory, "settings.json");
+    private static string? _settingsDirectoryOverride;
+    private static string? _settingsFilePathOverride;
+
+    public static string SettingsDirectory
+    {
+        get
+        {
+            lock (FileIoSyncRoot)
+            {
+                return _settingsDirectoryOverride ?? DefaultSettingsDirectory;
+            }
+        }
+    }
+
+    public static string SettingsFilePath
+    {
+        get
+        {
+            lock (FileIoSyncRoot)
+            {
+                if (!string.IsNullOrWhiteSpace(_settingsFilePathOverride))
+                    return _settingsFilePathOverride;
+
+                var directory = _settingsDirectoryOverride ?? DefaultSettingsDirectory;
+                return Path.Combine(directory, "settings.json");
+            }
+        }
+    }
 
     public static Exception? LastError { get; private set; }
 
@@ -33,27 +66,37 @@ public static class AppSettingsService
         AppSettings? resolvedSettings = null;
         var source = "unknown";
         Exception? failure = null;
+        var settingsFilePath = SettingsFilePath;
 
-        LoggingService.LogInformation($"Loading application settings from '{SettingsFilePath}'.");
+        LoggingService.LogInformation($"Loading application settings from '{settingsFilePath}'.");
 
         try
         {
-            if (!File.Exists(SettingsFilePath))
+            lock (FileIoSyncRoot)
             {
-                LoggingService.LogInformation("Settings file not found. Creating default configuration.");
-                var defaults = CreateDefault();
-                Save(defaults);
-                LoggingService.LogInformation("Default settings persisted successfully.");
-                resolvedSettings = defaults;
-                source = "defaults";
-            }
-            else
-            {
-                using var stream = File.OpenRead(SettingsFilePath);
-                var settings = DeserializeSettings(stream);
-                LoggingService.LogInformation("Settings loaded successfully.");
-                resolvedSettings = settings;
-                source = "existing";
+                if (!File.Exists(settingsFilePath))
+                {
+                    LoggingService.LogInformation("Settings file not found. Creating default configuration.");
+                    var defaults = CreateDefault();
+                    Save(defaults);
+                    LoggingService.LogInformation("Default settings persisted successfully.");
+                    resolvedSettings = defaults;
+                    source = "defaults";
+                }
+                else
+                {
+                    var settings = ExecuteWithRetry(
+                        () =>
+                        {
+                            using var stream = OpenSettingsReadStream(settingsFilePath);
+                            return DeserializeSettings(stream);
+                        },
+                        "load",
+                        settingsFilePath);
+                    LoggingService.LogInformation("Settings loaded successfully.");
+                    resolvedSettings = settings;
+                    source = "existing";
+                }
             }
         }
         catch (Exception ex)
@@ -89,13 +132,28 @@ public static class AppSettingsService
         NormalizeExtractedPackageModels(settings);
         var stopwatch = Stopwatch.StartNew();
         var success = false;
+        var settingsFilePath = SettingsFilePath;
+        var settingsDirectory = Path.GetDirectoryName(settingsFilePath) ?? SettingsDirectory;
         LoggingService.ApplySettingsSnapshot(settings, "save");
         try
         {
-            LoggingService.LogInformation($"Saving application settings to '{SettingsFilePath}'.");
-            Directory.CreateDirectory(SettingsDirectory);
+            LoggingService.LogInformation($"Saving application settings to '{settingsFilePath}'.");
             var json = JsonSerializer.Serialize(settings, SerializerOptions);
-            File.WriteAllText(SettingsFilePath, json);
+
+            lock (FileIoSyncRoot)
+            {
+                Directory.CreateDirectory(settingsDirectory);
+                CleanupTemporarySettingsFiles(settingsDirectory, settingsFilePath);
+                ExecuteWithRetry(
+                    () =>
+                    {
+                        WriteSettingsAtomically(settingsFilePath, settingsDirectory, json);
+                        return true;
+                    },
+                    "save",
+                    settingsFilePath);
+            }
+
             LoggingService.LogInformation("Settings saved successfully.");
             success = true;
         }
@@ -103,11 +161,11 @@ public static class AppSettingsService
         {
             var diskFull = DiskSpaceHelper.IsDiskFull(ex);
             var message = diskFull
-                ? $"{DiskSpaceHelper.BuildFriendlyMessage(SettingsFilePath)} Unable to save application settings."
+                ? $"{DiskSpaceHelper.BuildFriendlyMessage(settingsFilePath)} Unable to save application settings."
                 : "Failed to save application settings.";
 
             var logMessage = diskFull
-                ? $"{message} | path='{SettingsFilePath}'"
+                ? $"{message} | path='{settingsFilePath}'"
                 : message;
 
             LoggingService.LogError(logMessage, ex);
@@ -164,6 +222,177 @@ public static class AppSettingsService
     {
         using var stream = new MemoryStream(Encoding.UTF8.GetBytes(json ?? "{}"));
         return DeserializeSettings(stream);
+    }
+
+    internal static void ConfigureForTests(string? settingsDirectoryOverride = null,
+        string? settingsFilePathOverride = null)
+    {
+        lock (FileIoSyncRoot)
+        {
+            _settingsDirectoryOverride = string.IsNullOrWhiteSpace(settingsDirectoryOverride)
+                ? null
+                : settingsDirectoryOverride;
+            _settingsFilePathOverride = string.IsNullOrWhiteSpace(settingsFilePathOverride)
+                ? null
+                : settingsFilePathOverride;
+
+            if (!string.IsNullOrWhiteSpace(_settingsFilePathOverride) &&
+                string.IsNullOrWhiteSpace(_settingsDirectoryOverride))
+                _settingsDirectoryOverride = Path.GetDirectoryName(_settingsFilePathOverride);
+        }
+    }
+
+    internal static void ResetForTests()
+    {
+        lock (FileIoSyncRoot)
+        {
+            _settingsDirectoryOverride = null;
+            _settingsFilePathOverride = null;
+        }
+
+        LastError = null;
+    }
+
+    private static T ExecuteWithRetry<T>(Func<T> action, string operation, string settingsFilePath)
+    {
+        var attempt = 0;
+        var delay = InitialIoRetryDelay;
+
+        while (true)
+            try
+            {
+                return action();
+            }
+            catch (Exception ex) when (IsTransientFileContention(ex) && attempt < MaxIoRetryAttempts - 1)
+            {
+                attempt++;
+                LoggingService.LogWarning(
+                    $"Transient settings file access failure during {operation} | path='{settingsFilePath}' | attempt={attempt}/{MaxIoRetryAttempts}. Retrying.",
+                    ex);
+                Thread.Sleep(delay);
+                var nextDelayMs = Math.Min(MaxIoRetryDelay.TotalMilliseconds, delay.TotalMilliseconds * 2);
+                delay = TimeSpan.FromMilliseconds(nextDelayMs);
+            }
+    }
+
+    private static FileStream OpenSettingsReadStream(string settingsFilePath)
+    {
+        return new FileStream(
+            settingsFilePath,
+            FileMode.Open,
+            FileAccess.Read,
+            FileShare.ReadWrite | FileShare.Delete);
+    }
+
+    private static void WriteSettingsAtomically(string settingsFilePath, string settingsDirectory, string json)
+    {
+        var fileName = Path.GetFileName(settingsFilePath);
+        if (string.IsNullOrWhiteSpace(fileName))
+            fileName = "settings.json";
+
+        var tempFilePath = Path.Combine(settingsDirectory, $"{fileName}.{Guid.NewGuid():N}.tmp");
+
+        try
+        {
+            using (var stream = new FileStream(tempFilePath, FileMode.CreateNew, FileAccess.Write, FileShare.None))
+            using (var writer = new StreamWriter(stream, new UTF8Encoding(false)))
+            {
+                writer.Write(json);
+                writer.Flush();
+                stream.Flush(true);
+            }
+
+            if (File.Exists(settingsFilePath))
+                try
+                {
+                    File.Replace(tempFilePath, settingsFilePath, null, true);
+                    return;
+                }
+                catch (FileNotFoundException)
+                {
+                }
+
+            try
+            {
+                File.Move(tempFilePath, settingsFilePath);
+            }
+            catch (IOException) when (File.Exists(settingsFilePath))
+            {
+                File.Replace(tempFilePath, settingsFilePath, null, true);
+            }
+        }
+        finally
+        {
+            TryDeleteFile(tempFilePath);
+        }
+    }
+
+    private static void CleanupTemporarySettingsFiles(string settingsDirectory, string settingsFilePath)
+    {
+        var fileName = Path.GetFileName(settingsFilePath);
+        if (string.IsNullOrWhiteSpace(fileName))
+            return;
+
+        var now = DateTime.UtcNow;
+        var pattern = $"{fileName}.*.tmp";
+
+        IEnumerable<string> tempFiles;
+        try
+        {
+            tempFiles = Directory.EnumerateFiles(settingsDirectory, pattern);
+        }
+        catch
+        {
+            return;
+        }
+
+        foreach (var tempFilePath in tempFiles)
+            try
+            {
+                var lastWrite = File.GetLastWriteTimeUtc(tempFilePath);
+                if (now - lastWrite < TempFileCleanupAge)
+                    continue;
+
+                File.Delete(tempFilePath);
+            }
+            catch (Exception ex)
+            {
+                LoggingService.LogWarning(
+                    $"Failed to clean temporary settings file '{tempFilePath}'.",
+                    ex);
+            }
+    }
+
+    private static void TryDeleteFile(string path)
+    {
+        if (string.IsNullOrWhiteSpace(path))
+            return;
+
+        try
+        {
+            if (File.Exists(path))
+                File.Delete(path);
+        }
+        catch
+        {
+        }
+    }
+
+    private static bool IsTransientFileContention(Exception ex)
+    {
+        const int sharingViolation = unchecked((int)0x80070020);
+        const int lockViolation = unchecked((int)0x80070021);
+        const int accessDenied = unchecked((int)0x80070005);
+
+        if (ex is IOException ioException)
+            return ioException.HResult == sharingViolation ||
+                   ioException.HResult == lockViolation ||
+                   ioException.HResult == accessDenied;
+
+        if (ex is UnauthorizedAccessException unauthorizedAccessException)
+            return unauthorizedAccessException.HResult == accessDenied;
+
+        return false;
     }
 
     private static void UpdateStoredVersion(AppSettings settings)

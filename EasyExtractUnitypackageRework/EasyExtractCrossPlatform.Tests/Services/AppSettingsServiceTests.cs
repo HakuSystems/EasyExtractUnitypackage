@@ -3,8 +3,35 @@ using Xunit;
 
 namespace EasyExtractCrossPlatform.Tests.Services;
 
-public sealed class AppSettingsServiceTests
+public sealed class AppSettingsServiceTests : IDisposable
 {
+  private readonly string _rootDirectory;
+  private readonly string _settingsDirectory;
+  private readonly string _settingsFilePath;
+
+  public AppSettingsServiceTests()
+  {
+    _rootDirectory = Path.Combine(
+      Path.GetTempPath(),
+      "EasyExtractTests",
+      nameof(AppSettingsServiceTests),
+      Guid.NewGuid().ToString("N"));
+    _settingsDirectory = Path.Combine(_rootDirectory, "Config");
+    _settingsFilePath = Path.Combine(_settingsDirectory, "settings.json");
+
+    Directory.CreateDirectory(_settingsDirectory);
+    AppSettingsService.ResetForTests();
+    AppSettingsService.ConfigureForTests(_settingsDirectory, _settingsFilePath);
+  }
+
+  public void Dispose()
+  {
+    AppSettingsService.ResetForTests();
+
+    if (Directory.Exists(_rootDirectory))
+      Directory.Delete(_rootDirectory, true);
+  }
+
     [Fact]
     public void DeserializeForTests_ObjectValueInFilePath_DoesNotFallbackToDefaults()
     {
@@ -128,5 +155,75 @@ public sealed class AppSettingsServiceTests
 
         Assert.Single(settings.ExtractedUnitypackages);
         Assert.Equal(DateTimeOffset.FromUnixTimeSeconds(1704067200), settings.ExtractedUnitypackages[0].DateExtracted);
+    }
+
+    [Fact]
+    public async Task Save_Retries_WhenSettingsFileTemporarilyLocked_AndEventuallySucceeds()
+    {
+      var initial = AppSettingsService.CreateDefault();
+      initial.DefaultOutputPath = @"C:\initial";
+      AppSettingsService.Save(initial);
+
+      var lockStream = new FileStream(_settingsFilePath, FileMode.Open, FileAccess.ReadWrite, FileShare.None);
+
+      var releaseTask = Task.Run(async () =>
+      {
+        await Task.Delay(250);
+        lockStream.Dispose();
+      });
+
+      var updated = AppSettingsService.CreateDefault();
+      updated.DefaultOutputPath = @"C:\updated";
+
+      AppSettingsService.Save(updated);
+      await releaseTask;
+
+      var loaded = AppSettingsService.Load();
+      Assert.Equal(@"C:\updated", loaded.DefaultOutputPath);
+      Assert.Null(AppSettingsService.LastError);
+    }
+
+    [Fact]
+    public async Task Load_Retries_WhenSettingsFileTemporarilyLocked_AndEventuallySucceeds()
+    {
+      const string json = """
+                          {
+                            "DefaultOutputPath": "C:\\load-retry"
+                          }
+                          """;
+
+      await File.WriteAllTextAsync(_settingsFilePath, json);
+
+      var lockStream = new FileStream(_settingsFilePath, FileMode.Open, FileAccess.ReadWrite, FileShare.None);
+
+      var releaseTask = Task.Run(async () =>
+      {
+        await Task.Delay(250);
+        lockStream.Dispose();
+      });
+
+      var loaded = AppSettingsService.Load();
+      await releaseTask;
+
+      Assert.Equal(@"C:\load-retry", loaded.DefaultOutputPath);
+      Assert.Null(AppSettingsService.LastError);
+    }
+
+    [Fact]
+    public void Save_UsesAtomicReplace_ProducesValidJson_AndNoTempLeak()
+    {
+      var staleTempPath = Path.Combine(_settingsDirectory, $"settings.json.{Guid.NewGuid():N}.tmp");
+      File.WriteAllText(staleTempPath, "stale");
+      File.SetLastWriteTimeUtc(staleTempPath, DateTime.UtcNow.AddMinutes(-10));
+
+      var settings = AppSettingsService.CreateDefault();
+      settings.DefaultOutputPath = @"C:\atomic";
+      AppSettingsService.Save(settings);
+
+      var content = File.ReadAllText(_settingsFilePath);
+      var parsed = AppSettingsService.DeserializeForTests(content);
+
+      Assert.Equal(@"C:\atomic", parsed.DefaultOutputPath);
+      Assert.Empty(Directory.GetFiles(_settingsDirectory, "settings.json.*.tmp"));
     }
 }
