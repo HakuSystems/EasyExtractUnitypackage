@@ -1,3 +1,4 @@
+using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
@@ -49,10 +50,7 @@ public static class AppSettingsService
             else
             {
                 using var stream = File.OpenRead(SettingsFilePath);
-                var settings = JsonSerializer.Deserialize<AppSettings>(stream, SerializerOptions) ?? CreateDefault();
-                settings.AppTitle = AppSettings.DefaultAppTitle;
-                UpdateStoredVersion(settings);
-                EnsureWindowPlacementsStorage(settings);
+                var settings = DeserializeSettings(stream);
                 LoggingService.LogInformation("Settings loaded successfully.");
                 resolvedSettings = settings;
                 source = "existing";
@@ -88,6 +86,7 @@ public static class AppSettingsService
     {
         settings.AppTitle = AppSettings.DefaultAppTitle;
         settings.ExtractionLimits = UnityPackageExtractionLimits.Normalize(settings.ExtractionLimits);
+        NormalizeExtractedPackageModels(settings);
         var stopwatch = Stopwatch.StartNew();
         var success = false;
         LoggingService.ApplySettingsSnapshot(settings, "save");
@@ -161,6 +160,12 @@ public static class AppSettingsService
         return defaults;
     }
 
+    internal static AppSettings DeserializeForTests(string json)
+    {
+        using var stream = new MemoryStream(Encoding.UTF8.GetBytes(json ?? "{}"));
+        return DeserializeSettings(stream);
+    }
+
     private static void UpdateStoredVersion(AppSettings settings)
     {
         var version = VersionProvider.GetApplicationVersion();
@@ -191,6 +196,75 @@ public static class AppSettingsService
 
         settings.WindowPlacements = new Dictionary<string, WindowPlacementSettings>(settings.WindowPlacements,
             StringComparer.OrdinalIgnoreCase);
+    }
+
+    private static AppSettings DeserializeSettings(Stream stream)
+    {
+        var settings = JsonSerializer.Deserialize<AppSettings>(stream, SerializerOptions) ?? CreateDefault();
+        settings.AppTitle = AppSettings.DefaultAppTitle;
+        UpdateStoredVersion(settings);
+        EnsureWindowPlacementsStorage(settings);
+        NormalizeExtractedPackageModels(settings);
+        settings.ExtractionLimits = UnityPackageExtractionLimits.Normalize(settings.ExtractionLimits);
+        return settings;
+    }
+
+    private static void NormalizeExtractedPackageModels(AppSettings settings)
+    {
+        if (settings.ExtractedUnitypackages is null || settings.ExtractedUnitypackages.Count == 0)
+        {
+            settings.ExtractedUnitypackages = new List<ExtractedPackageModel>();
+            return;
+        }
+
+        var normalized = new List<ExtractedPackageModel>(settings.ExtractedUnitypackages.Count);
+        var seenPaths = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+
+        foreach (var existing in settings.ExtractedUnitypackages)
+        {
+            if (existing is null)
+                continue;
+
+            var filePath = existing.FilePath?.Trim() ?? string.Empty;
+            var fileName = existing.FileName?.Trim() ?? string.Empty;
+
+            if (string.IsNullOrWhiteSpace(fileName) && !string.IsNullOrWhiteSpace(filePath))
+                fileName = GetFileNameSafe(filePath);
+
+            if (string.IsNullOrWhiteSpace(filePath) && string.IsNullOrWhiteSpace(fileName))
+                continue;
+
+            if (!string.IsNullOrWhiteSpace(filePath) && !seenPaths.Add(filePath))
+                continue;
+
+            var dateExtracted = existing.DateExtracted == default
+                ? DateTimeOffset.UtcNow
+                : existing.DateExtracted;
+
+            normalized.Add(new ExtractedPackageModel
+            {
+                FilePath = filePath,
+                FileName = fileName ?? string.Empty,
+                DateExtracted = dateExtracted
+            });
+        }
+
+        settings.ExtractedUnitypackages = normalized;
+    }
+
+    private static string GetFileNameSafe(string path)
+    {
+        if (string.IsNullOrWhiteSpace(path))
+            return string.Empty;
+
+        try
+        {
+            return Path.GetFileName(path);
+        }
+        catch
+        {
+            return string.Empty;
+        }
     }
 
     public class SafeWindowStateConverter : JsonConverter<WindowState>
@@ -251,23 +325,25 @@ public static class AppSettingsService
 
             var filePath = root.TryGetProperty(nameof(ExtractedPackageModel.FilePath),
                 out var filePathElement)
-                ? filePathElement.GetString()
+                ? TryReadString(filePathElement)
                 : null;
 
             var fileName = root.TryGetProperty(nameof(ExtractedPackageModel.FileName),
                 out var fileNameElement)
-                ? fileNameElement.GetString()
+                ? TryReadString(fileNameElement)
                 : null;
 
             if (string.IsNullOrWhiteSpace(fileName) && !string.IsNullOrWhiteSpace(filePath))
-                fileName = Path.GetFileName(filePath);
+                fileName = GetFileNameSafe(filePath);
 
             var date = DateTimeOffset.UtcNow;
             if (root.TryGetProperty(nameof(ExtractedPackageModel.DateExtracted),
-                    out var dateElement) &&
-                dateElement.ValueKind != JsonValueKind.Null &&
-                dateElement.TryGetDateTimeOffset(out var parsedDate))
-                date = parsedDate;
+                    out var dateElement))
+            {
+                var parsedDate = TryReadDate(dateElement);
+                if (parsedDate.HasValue)
+                    date = parsedDate.Value;
+            }
 
             if (string.IsNullOrWhiteSpace(fileName) && string.IsNullOrWhiteSpace(filePath))
                 return null;
@@ -287,6 +363,63 @@ public static class AppSettingsService
             writer.WriteString(nameof(ExtractedPackageModel.FilePath), value.FilePath);
             writer.WriteString(nameof(ExtractedPackageModel.DateExtracted), value.DateExtracted);
             writer.WriteEndObject();
+        }
+
+        private static string? TryReadString(JsonElement element)
+        {
+            return element.ValueKind switch
+            {
+                JsonValueKind.String => element.GetString(),
+                JsonValueKind.Number => element.GetRawText(),
+                JsonValueKind.True => element.GetRawText(),
+                JsonValueKind.False => element.GetRawText(),
+                _ => null
+            };
+        }
+
+        private static DateTimeOffset? TryReadDate(JsonElement element)
+        {
+            if (element.ValueKind == JsonValueKind.String)
+            {
+                var text = element.GetString();
+                if (DateTimeOffset.TryParse(text, CultureInfo.InvariantCulture, DateTimeStyles.None, out var parsed))
+                    return parsed;
+
+                return null;
+            }
+
+            if (element.ValueKind != JsonValueKind.Number)
+                return null;
+
+            if (!TryReadUnixTimestamp(element, out var unixTimestamp))
+                return null;
+
+            try
+            {
+                var absoluteValue = Math.Abs(unixTimestamp);
+                return absoluteValue > 9_999_999_999
+                    ? DateTimeOffset.FromUnixTimeMilliseconds(unixTimestamp)
+                    : DateTimeOffset.FromUnixTimeSeconds(unixTimestamp);
+            }
+            catch
+            {
+                return null;
+            }
+        }
+
+        private static bool TryReadUnixTimestamp(JsonElement element, out long value)
+        {
+            if (element.TryGetInt64(out value))
+                return true;
+
+            if (!element.TryGetDouble(out var number) || double.IsNaN(number) || double.IsInfinity(number))
+            {
+                value = 0;
+                return false;
+            }
+
+            value = Convert.ToInt64(Math.Round(number, MidpointRounding.AwayFromZero));
+            return true;
         }
     }
 
