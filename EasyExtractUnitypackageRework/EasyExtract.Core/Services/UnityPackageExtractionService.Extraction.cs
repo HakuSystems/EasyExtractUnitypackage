@@ -66,12 +66,9 @@ public sealed partial class UnityPackageExtractionService
         catch (InvalidDataException ex)
         {
             _logger.LogError(
-                $"Extraction failed: invalid gzip data (package may be corrupted) | path='{packagePath}' | correlationId={correlationId}",
+                $"Extraction failed: invalid package data | path='{packagePath}' | correlationId={correlationId}",
                 ex);
-
-            throw new InvalidDataException(
-                "The package appears to be corrupted (gzip checksum mismatch). Please download the .unitypackage again.",
-                ex);
+            throw;
         }
         finally
         {
