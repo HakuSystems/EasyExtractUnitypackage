@@ -1,4 +1,3 @@
-using Avalonia.Platform;
 using NAudio.Wave;
 using OpenTK.Audio.OpenAL;
 

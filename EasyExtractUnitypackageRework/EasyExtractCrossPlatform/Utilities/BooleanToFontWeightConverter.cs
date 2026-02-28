@@ -1,5 +1,3 @@
-using Avalonia.Data.Converters;
-
 namespace EasyExtractCrossPlatform.Utilities;
 
 public sealed class BooleanToFontWeightConverter : IValueConverter

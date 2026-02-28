@@ -1,5 +1,4 @@
 using Avalonia.Data;
-using Avalonia.Data.Converters;
 
 namespace EasyExtractCrossPlatform.Utilities;
 

@@ -1,5 +1,4 @@
 ﻿using System.Text;
-using Avalonia.Platform;
 
 namespace EasyExtractCrossPlatform.Services;
 
