@@ -151,6 +151,7 @@ public partial class MainWindow : Window
 
         _extractionElapsedTimer.Stop();
         _extractionElapsedTimer.Tick -= OnExtractionElapsedTick;
+        _dashboardOpenGate.Dispose();
         AppSettingsService.Save(_settings);
     }
 
@@ -213,22 +214,27 @@ public partial class MainWindow : Window
 
     private async void DashboardButton_OnClick(object? sender, RoutedEventArgs e)
     {
+        var gateAcquired = false;
+
         try
         {
-            // Sync last 25 entries to ensure dashboard is up to date
-            if (_settings.History.Count > 0)
-            {
-                var entriesToSync = _settings.History
-                    .OrderByDescending(x => x.AddedUtc)
-                    .Take(25);
+            if (!await _dashboardOpenGate.WaitAsync(0))
+                return;
 
-                await Task.WhenAll(entriesToSync.Select(entry =>
-                    _hakuSyncService.SyncActivityAsync(_settings.DeviceId, entry)));
-            }
+            gateAcquired = true;
+
+            var now = DateTimeOffset.UtcNow;
+            if (now - _lastDashboardOpenUtc < DashboardOpenDebounceWindow)
+                return;
 
             var url = $"https://easyextract.net/dashboard?sync_id={_settings.DeviceId}";
             Process.Start(new ProcessStartInfo(url) { UseShellExecute = true });
+            _lastDashboardOpenUtc = now;
             UiSoundService.Instance.Play(UiSoundEffect.Subtle);
+        }
+        catch (ObjectDisposedException)
+        {
+            // Ignore disposal races when the window is closing.
         }
         catch (Exception ex)
         {
@@ -238,6 +244,18 @@ public partial class MainWindow : Window
                 ex.Message,
                 TimeSpan.FromSeconds(4),
                 UiSoundEffect.Negative);
+        }
+        finally
+        {
+            if (gateAcquired)
+                try
+                {
+                    _dashboardOpenGate.Release();
+                }
+                catch (ObjectDisposedException)
+                {
+                    // Ignore disposal races when the window is closing.
+                }
         }
     }
 }

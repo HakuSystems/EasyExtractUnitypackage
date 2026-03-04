@@ -8,10 +8,12 @@ public partial class MainWindow : Window
     private const double CozyWidthBreakpoint = 1600;
 
     private static readonly HttpClient BackgroundHttpClient = new();
+    private static readonly TimeSpan DashboardOpenDebounceWindow = TimeSpan.FromMilliseconds(1200);
     private readonly Button? _batchExtractionButton;
     private readonly Button? _cancelExtractionButton;
     private readonly Button? _checkUpdatesButton;
     private readonly Button? _clearQueueButton;
+    private readonly SemaphoreSlim _dashboardOpenGate = new(1, 1);
     private readonly IBrush _defaultBackgroundBrush;
     private readonly Border? _dropZoneBorder;
     private readonly Grid? _dropZoneHostGrid;
@@ -110,6 +112,7 @@ public partial class MainWindow : Window
     private bool _isExtractionOverviewLive;
     private bool _isExtractionRunning;
     private bool _isSearchHover;
+    private DateTimeOffset _lastDashboardOpenUtc = DateTimeOffset.MinValue;
 
     private bool _lastDiscordPresenceEnabled;
     private PixelPoint? _lastNormalPosition;
