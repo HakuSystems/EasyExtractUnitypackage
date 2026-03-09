@@ -2,10 +2,12 @@ namespace EasyExtractCrossPlatform;
 
 public partial class UnityPackagePreviewWindow : Window
 {
+    private readonly TextBox? _assetSearchTextBox;
     private readonly Border? _assetTreeCard;
     private readonly Grid? _detailsGrid;
     private readonly Border? _inspectorCard;
     private readonly IDisposable? _responsiveLayoutSubscription;
+    private readonly IDisposable? _searchShortcutSubscription;
     private readonly IDisposable _windowPlacementTracker;
 
     public UnityPackagePreviewWindow()
@@ -14,9 +16,19 @@ public partial class UnityPackagePreviewWindow : Window
         LinuxUiHelper.ApplyWindowTweaks(this);
         _responsiveLayoutSubscription = ResponsiveWindowHelper.Enable(this);
         _windowPlacementTracker = WindowPlacementService.Attach(this, nameof(UnityPackagePreviewWindow));
+        _assetSearchTextBox = this.FindControl<TextBox>("AssetSearchTextBox");
         _detailsGrid = this.FindControl<Grid>("DetailsGrid");
         _assetTreeCard = this.FindControl<Border>("AssetTreeCard");
         _inspectorCard = this.FindControl<Border>("InspectorCard");
+        if (_assetSearchTextBox is not null)
+            _searchShortcutSubscription = DeferredTextBoxShortcutHandler.Attach(
+                _assetSearchTextBox,
+                new DeferredTextBoxShortcutHandler.DeferredTextBoxShortcut(
+                    Key.Escape,
+                    () => DataContext is UnityPackagePreviewViewModel viewModel &&
+                          viewModel.ClearCommand.CanExecute(null),
+                    () => (DataContext as UnityPackagePreviewViewModel)?.ClearCommand.Execute(null)));
+
         Classes.CollectionChanged += OnClassesChanged;
         ApplyResponsiveLayout();
         Opened += OnOpened;
@@ -46,6 +58,7 @@ public partial class UnityPackagePreviewWindow : Window
         Opened -= OnOpened;
         Closed -= OnClosed;
         Classes.CollectionChanged -= OnClassesChanged;
+        _searchShortcutSubscription?.Dispose();
         _responsiveLayoutSubscription?.Dispose();
         _windowPlacementTracker.Dispose();
     }

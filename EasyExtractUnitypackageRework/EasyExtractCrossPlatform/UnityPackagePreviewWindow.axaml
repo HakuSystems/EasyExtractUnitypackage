@@ -280,19 +280,15 @@
                                            VerticalAlignment="Center"
                                            HorizontalAlignment="Right"
                                            Margin="12,0,12,0" />
-                                <TextBox Grid.Column="3"
+                                <TextBox x:Name="AssetSearchTextBox"
+                                         Grid.Column="3"
                                          Classes="search-bar search-bar-small"
                                          Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}"
                                          Watermark="{loc:Loc UnityPackagePreviewWindow_SearchAssets}"
                                          MinWidth="220"
                                          HorizontalAlignment="Stretch"
                                          VerticalAlignment="Center"
-                                         Margin="12,0,0,0">
-                                    <TextBox.KeyBindings>
-                                        <KeyBinding Gesture="Escape"
-                                                    Command="{Binding ClearCommand}" />
-                                    </TextBox.KeyBindings>
-                                </TextBox>
+                                         Margin="12,0,0,0" />
                             </Grid>
 
                             <Grid Grid.Row="1">

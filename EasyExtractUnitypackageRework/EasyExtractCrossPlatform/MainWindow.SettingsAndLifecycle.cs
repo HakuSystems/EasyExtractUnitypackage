@@ -149,6 +149,7 @@ public partial class MainWindow : Window
         if (SearchViewModel is not null)
             SearchViewModel.PropertyChanged -= OnSearchViewModelPropertyChanged;
 
+        _searchShortcutSubscription?.Dispose();
         _extractionElapsedTimer.Stop();
         _extractionElapsedTimer.Tick -= OnExtractionElapsedTick;
         _dashboardOpenGate.Dispose();

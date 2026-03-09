@@ -3,7 +3,6 @@ using System.Net;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Security.Cryptography;
-using System.Text;
 
 namespace EasyExtractCrossPlatform.Services;
 
@@ -11,10 +10,10 @@ internal static class EverythingSdkBootstrapper
 {
     private const int DllPromotionMaxAttempts = 6;
     private static readonly TimeSpan DllPromotionInitialDelay = TimeSpan.FromMilliseconds(40);
-    private static readonly TimeSpan InstallMutexTimeout = TimeSpan.FromSeconds(30);
 
     private static readonly Uri SdkDownloadUri = new("https://www.voidtools.com/Everything-SDK.zip");
     private static readonly HttpClient HttpClient = new();
+    private static readonly SemaphoreSlim DllInstallGate = new(1, 1);
     private static readonly object InitializationLock = new();
 
     private static readonly string TargetDllFileName =
@@ -111,21 +110,14 @@ internal static class EverythingSdkBootstrapper
 
         var dllPath = Path.Combine(sdkDirectory, TargetDllFileName);
 
-        using var installationMutex = CreateInstallationMutex(dllPath);
-        var lockTaken = false;
+        await DllInstallGate.WaitAsync().ConfigureAwait(false);
         try
         {
-            try
+            if (_everythingDllPath is { Length: > 0 } existingPath && File.Exists(existingPath))
             {
-                lockTaken = installationMutex.WaitOne(InstallMutexTimeout);
+                LoggingService.LogInformation($"Everything SDK DLL already present at '{existingPath}'.");
+                return existingPath;
             }
-            catch (AbandonedMutexException)
-            {
-                lockTaken = true;
-            }
-
-            if (!lockTaken)
-                throw new IOException($"Timed out waiting for SDK installation mutex at '{dllPath}'.");
 
             if (await TryReuseExistingDllAsync(dllPath).ConfigureAwait(false))
             {
@@ -202,8 +194,7 @@ internal static class EverythingSdkBootstrapper
         }
         finally
         {
-            if (lockTaken)
-                installationMutex.ReleaseMutex();
+            DllInstallGate.Release();
         }
     }
 
@@ -286,15 +277,6 @@ internal static class EverythingSdkBootstrapper
             return;
 
         throw new IOException($"Unable to finalize Everything SDK DLL at '{destinationPath}'.");
-    }
-
-    private static Mutex CreateInstallationMutex(string dllPath)
-    {
-        var normalizedPath = Path.GetFullPath(dllPath);
-        var hashBytes = SHA256.HashData(Encoding.UTF8.GetBytes(normalizedPath));
-        var hash = Convert.ToHexString(hashBytes);
-        var mutexName = $"Local\\EasyExtract.EverythingSdk.{hash}";
-        return new Mutex(false, mutexName);
     }
 
     private static bool IsSharingViolation(IOException ex)

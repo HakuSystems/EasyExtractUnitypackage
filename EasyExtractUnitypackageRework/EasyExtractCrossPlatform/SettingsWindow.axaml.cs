@@ -429,7 +429,16 @@ public partial class SettingsWindow : Window
         var normalized = value ?? string.Empty;
         textBox.SetCurrentValue(TextBox.TextProperty, normalized);
 
-        var caretIndex = normalized.Length;
+        Dispatcher.UIThread.Post(
+            () => ApplyTextBoxSelection(textBox, normalized.Length),
+            DispatcherPriority.Background);
+    }
+
+    private static void ApplyTextBoxSelection(TextBox textBox, int desiredIndex)
+    {
+        var textLength = textBox.Text?.Length ?? 0;
+        var caretIndex = Math.Clamp(desiredIndex, 0, textLength);
+
         if (textBox.SelectionStart != caretIndex)
             textBox.SelectionStart = caretIndex;
         if (textBox.SelectionEnd != caretIndex)

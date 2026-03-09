@@ -5,6 +5,8 @@ namespace EasyExtractCrossPlatform.Tests.Services;
 
 public sealed class EverythingSdkBootstrapperTests : IDisposable
 {
+    private const int SharingViolationHResult = unchecked((int)0x80070020);
+
     public void Dispose()
     {
         EverythingSdkBootstrapper.ResetForTests();
@@ -123,5 +125,57 @@ public sealed class EverythingSdkBootstrapperTests : IDisposable
         Assert.Equal(originalBytes, currentBytes);
 
         Directory.Delete(root, true);
+    }
+
+    [Fact]
+    public async Task EnsureDllForTestsAsync_SerializesConcurrentReuseWhileValidationRetries()
+    {
+        if (!OperatingSystem.IsWindows())
+            return;
+
+        EverythingSdkBootstrapper.ResetForTests();
+
+        var root = Path.Combine(Path.GetTempPath(), "EasyExtractTests", Guid.NewGuid().ToString("N"));
+        var appDataPath = Path.Combine(root, "AppData");
+        var sdkDirectory = Path.Combine(appDataPath, "EasyExtract", "ThirdParty", "EverythingSdk");
+        Directory.CreateDirectory(sdkDirectory);
+
+        var dllName = Environment.Is64BitProcess ? "Everything64.dll" : "Everything32.dll";
+        var dllPath = Path.Combine(sdkDirectory, dllName);
+        await File.WriteAllBytesAsync(dllPath, new byte[] { 0xAA, 0xBB, 0xCC });
+
+        var validationAttempts = 0;
+        EverythingSdkBootstrapper.ConfigureForTests(
+            appDataPathOverride: () => appDataPath,
+            validateDllHashOverride: (path, _) =>
+            {
+                if (!string.Equals(Path.GetFullPath(path), Path.GetFullPath(dllPath),
+                        StringComparison.OrdinalIgnoreCase))
+                    return true;
+
+                if (Interlocked.Increment(ref validationAttempts) == 1)
+                    throw new SharingViolationIOException();
+
+                return true;
+            });
+
+        var callers = Enumerable.Range(0, 4)
+            .Select(_ => EverythingSdkBootstrapper.EnsureDllForTestsAsync())
+            .ToArray();
+
+        var resolvedPaths = await Task.WhenAll(callers);
+
+        Assert.All(resolvedPaths, path => Assert.Equal(dllPath, path, true));
+        Assert.True(validationAttempts >= 2);
+
+        Directory.Delete(root, true);
+    }
+
+    private sealed class SharingViolationIOException : IOException
+    {
+        public SharingViolationIOException() : base("Simulated sharing violation")
+        {
+            HResult = SharingViolationHResult;
+        }
     }
 }

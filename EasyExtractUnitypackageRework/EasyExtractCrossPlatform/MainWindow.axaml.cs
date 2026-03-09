@@ -62,6 +62,7 @@ public partial class MainWindow : Window
     private readonly Border? _searchIconBorder;
     private readonly Border? _searchResultsBorder;
     private readonly Border? _searchRevealHost;
+    private readonly IDisposable? _searchShortcutSubscription;
     private readonly HashSet<string> _securityInfoNotified = new(StringComparer.OrdinalIgnoreCase);
     private readonly object _securityScanGate = new();
 
@@ -198,17 +199,16 @@ public partial class MainWindow : Window
             if (_unityPackageSearchBox is not null)
             {
                 _unityPackageSearchBox.DataContext = SearchViewModel;
-                _unityPackageSearchBox.KeyBindings.Clear();
-                _unityPackageSearchBox.KeyBindings.Add(new KeyBinding
-                {
-                    Gesture = new KeyGesture(Key.Enter),
-                    Command = SearchViewModel.SearchCommand
-                });
-                _unityPackageSearchBox.KeyBindings.Add(new KeyBinding
-                {
-                    Gesture = new KeyGesture(Key.Escape),
-                    Command = SearchViewModel.ClearCommand
-                });
+                _searchShortcutSubscription = DeferredTextBoxShortcutHandler.Attach(
+                    _unityPackageSearchBox,
+                    new DeferredTextBoxShortcutHandler.DeferredTextBoxShortcut(
+                        Key.Enter,
+                        () => searchViewModel.SearchCommand.CanExecute(null),
+                        () => searchViewModel.SearchCommand.Execute(null)),
+                    new DeferredTextBoxShortcutHandler.DeferredTextBoxShortcut(
+                        Key.Escape,
+                        () => searchViewModel.ClearCommand.CanExecute(null),
+                        () => searchViewModel.ClearCommand.Execute(null)));
             }
         }
 
