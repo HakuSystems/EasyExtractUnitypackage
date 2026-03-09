@@ -33,6 +33,8 @@ public sealed partial class UnityPackageExtractionService : IUnityPackageExtract
 
         var correlationId = Guid.NewGuid().ToString("N")[..8];
         var limits = UnityPackageExtractionLimits.Normalize(options.Limits);
+        outputDirectory =
+            NormalizeAndValidateDirectoryRoot(outputDirectory, "Output directory", correlationId, _logger);
 
         _logger.LogInformation(
             $"ExtractAsync: package='{packagePath}' | output='{outputDirectory}' | organize={options.OrganizeByCategories} | temp='{options.TemporaryDirectory}' | limits=[maxAssets={limits.MaxAssets}, maxAssetBytes={limits.MaxAssetBytes:N0}, maxPackageBytes={limits.MaxPackageBytes:N0}] | correlationId={correlationId}");
@@ -74,6 +76,9 @@ public sealed partial class UnityPackageExtractionService : IUnityPackageExtract
         var activeTempDir = options.TemporaryDirectory;
         if (!string.IsNullOrWhiteSpace(activeTempDir))
         {
+            activeTempDir = NormalizeAndValidateDirectoryRoot(activeTempDir, "Temporary directory root", correlationId,
+                _logger);
+
             // We ensure we don't just dump into the root of provided temp, but a specific subfolder if not already unique.
             // But usually the desktop client provides a unique folder.
             // For API, the caller should likely handle uniqueness or we enforce it here.
@@ -121,6 +126,13 @@ public sealed partial class UnityPackageExtractionService : IUnityPackageExtract
                 _logger.LogInformation(
                     $"ExtractAsync cancelled | package='{packagePath}' | correlationId={correlationId}");
                 throw;
+            }
+            catch (ExtractionSecurityException ex)
+            {
+                _logger.LogError(
+                    $"ExtractAsync aborted: security validation failed | package='{packagePath}' | correlationId={correlationId}",
+                    ex);
+                throw new InvalidDataException(ex.Message, ex);
             }
             catch (InvalidDataException ex)
             {

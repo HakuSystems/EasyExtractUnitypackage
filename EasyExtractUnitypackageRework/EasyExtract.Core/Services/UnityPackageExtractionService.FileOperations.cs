@@ -292,7 +292,7 @@ public sealed partial class UnityPackageExtractionService
             {
                 logger.LogError(
                     $"Path entry exceeded max length | length={totalRead} | max={MaxPathEntryCharacters} | correlationId={correlationId}");
-                throw new InvalidDataException(
+                throw new ExtractionSecurityException(
                     $"Path entry exceeded the maximum supported length of {MaxPathEntryCharacters:N0} characters.");
             }
 
@@ -398,6 +398,7 @@ public sealed partial class UnityPackageExtractionService
         var root = string.IsNullOrWhiteSpace(baseDirectory)
             ? Path.Combine(Path.GetTempPath(), "EasyExtractCrossPlatform")
             : baseDirectory!;
+        root = NormalizeAndValidateDirectoryRoot(root, "Temporary directory root", correlationId, logger);
 
         try
         {
@@ -411,6 +412,11 @@ public sealed partial class UnityPackageExtractionService
         }
 
         var scopedDirectory = Path.Combine(root, Guid.NewGuid().ToString("N"));
+        EnsurePathIsUnderRoot(
+            NormalizeOutputDirectory(root),
+            scopedDirectory,
+            correlationId,
+            logger);
         try
         {
             Directory.CreateDirectory(scopedDirectory);

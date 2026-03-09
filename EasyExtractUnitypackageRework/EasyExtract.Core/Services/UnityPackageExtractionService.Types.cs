@@ -5,6 +5,13 @@ namespace EasyExtract.Core.Services;
 
 public sealed partial class UnityPackageExtractionService
 {
+    private sealed class ExtractionSecurityException : Exception
+    {
+        public ExtractionSecurityException(string message) : base(message)
+        {
+        }
+    }
+
     private readonly record struct AssetWritePlan(bool WriteAsset, bool WriteMeta, bool WritePreview)
     {
         public bool RequiresWrite => WriteAsset || WriteMeta || WritePreview;
@@ -37,7 +44,7 @@ public sealed partial class UnityPackageExtractionService
                 return;
 
             if (declaredLength > Limits.MaxAssetBytes)
-                throw new InvalidDataException(
+                throw new ExtractionSecurityException(
                     $"Entry '{entryName}' declares {declaredLength:N0} bytes which exceeds the per-file limit of {Limits.MaxAssetBytes:N0} bytes.");
         }
 
@@ -47,18 +54,19 @@ public sealed partial class UnityPackageExtractionService
                 return;
 
             if (Limits.MaxAssetBytes > 0 && bytes > Limits.MaxAssetBytes)
-                throw new InvalidDataException(
+                throw new ExtractionSecurityException(
                     $"Asset exceeded the per-file limit of {Limits.MaxAssetBytes:N0} bytes.");
 
             if (Limits.MaxPackageBytes <= 0)
                 return;
 
             if (long.MaxValue - _totalBytes < bytes)
-                throw new InvalidDataException("Extraction aborted due to overflow while tracking package size.");
+                throw new ExtractionSecurityException(
+                    "Extraction aborted due to overflow while tracking package size.");
 
             var next = _totalBytes + bytes;
             if (next > Limits.MaxPackageBytes)
-                throw new InvalidDataException(
+                throw new ExtractionSecurityException(
                     $"Extraction aborted. Total extracted bytes {next:N0} exceeded the configured limit of {Limits.MaxPackageBytes:N0} bytes.");
 
             _totalBytes = next;
@@ -70,7 +78,7 @@ public sealed partial class UnityPackageExtractionService
                 return;
 
             if (_assetCount + 1 > Limits.MaxAssets)
-                throw new InvalidDataException(
+                throw new ExtractionSecurityException(
                     $"Extraction aborted. Asset count exceeded the configured limit of {Limits.MaxAssets:N0} entries.");
 
             _assetCount++;

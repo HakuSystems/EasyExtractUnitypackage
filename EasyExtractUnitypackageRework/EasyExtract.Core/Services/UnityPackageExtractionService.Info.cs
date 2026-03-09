@@ -52,6 +52,13 @@ public sealed partial class UnityPackageExtractionService
                 $"ExtractInfoAsync completed | files={result.ExtractedFiles.Count} | size={result.TotalSize:N0} | correlationId={correlationId}");
             return result;
         }
+        catch (ExtractionSecurityException ex)
+        {
+            _logger.LogError(
+                $"ExtractInfoAsync aborted: security validation failed | package='{packagePath}' | correlationId={correlationId}",
+                ex);
+            throw new InvalidDataException(ex.Message, ex);
+        }
         catch (Exception ex)
         {
             _logger.LogError($"ExtractInfoAsync failed | package='{packagePath}' | correlationId={correlationId}", ex);

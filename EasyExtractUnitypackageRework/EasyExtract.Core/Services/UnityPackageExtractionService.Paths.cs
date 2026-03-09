@@ -6,9 +6,35 @@ public sealed partial class UnityPackageExtractionService
 {
     private static string NormalizeOutputDirectory(string directory)
     {
-        var full = Path.GetFullPath(directory);
+        var full = NormalizeAndValidateDirectoryRoot(directory, "Output directory", null, null);
         if (!Path.EndsInDirectorySeparator(full))
             full += Path.DirectorySeparatorChar;
+        return full;
+    }
+
+    private static string NormalizeAndValidateDirectoryRoot(
+        string directory,
+        string directoryType,
+        string? correlationId,
+        IEasyExtractLogger? logger)
+    {
+        if (string.IsNullOrWhiteSpace(directory))
+            throw new ArgumentException($"{directoryType} cannot be empty.", nameof(directory));
+
+        var full = Path.GetFullPath(directory);
+        var root = Path.GetPathRoot(full);
+        if (string.IsNullOrWhiteSpace(root))
+            throw new ExtractionSecurityException($"{directoryType} must resolve to an absolute filesystem path.");
+
+        var normalizedFull = full.TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
+        var normalizedRoot = root.TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
+        if (string.Equals(normalizedFull, normalizedRoot, StringComparison.OrdinalIgnoreCase))
+        {
+            logger?.LogError(
+                $"{directoryType} resolved to filesystem root | path='{full}' | correlationId={correlationId}");
+            throw new ExtractionSecurityException($"{directoryType} must not resolve to the filesystem root.");
+        }
+
         return full;
     }
 
@@ -103,7 +129,7 @@ public sealed partial class UnityPackageExtractionService
         IEasyExtractLogger logger)
     {
         if (string.IsNullOrWhiteSpace(input))
-            return new PathNormalizationResult(string.Empty, string.Empty, EmptySegmentNormalizations);
+            throw CreateInvalidArchivePathException(input, "Path entry is empty.", correlationId, logger);
 
         var sanitized = input.Replace('\\', '/')
             .Replace("\r", string.Empty, StringComparison.Ordinal)
@@ -111,24 +137,27 @@ public sealed partial class UnityPackageExtractionService
             .Trim();
 
         if (string.IsNullOrWhiteSpace(sanitized))
-            return new PathNormalizationResult(string.Empty, string.Empty, EmptySegmentNormalizations);
+            throw CreateInvalidArchivePathException(input, "Path entry is empty after normalization.", correlationId,
+                logger);
+
+        if (LooksLikeUnsafeRootedPath(sanitized))
+            throw CreateInvalidArchivePathException(input, "Path entry is rooted or absolute.", correlationId, logger);
 
         var segments = sanitized.Split('/', StringSplitOptions.RemoveEmptyEntries);
         if (segments.Length == 0)
-            return new PathNormalizationResult(string.Empty, string.Empty, EmptySegmentNormalizations);
+            throw CreateInvalidArchivePathException(input, "Path entry does not contain a usable relative path.",
+                correlationId, logger);
 
         var originalSegments = new List<string>(segments.Length);
         var normalizedSegments = new List<string>(segments.Length);
-        var hadDotDotSegments = false;
-        var filteredSegments = 0;
 
         foreach (var segment in segments)
         {
             if (segment is "." or "..")
-            {
-                hadDotDotSegments = true;
-                continue;
-            }
+                throw CreateInvalidArchivePathException(input,
+                    "Path entry contains '.' or '..' traversal segments.",
+                    correlationId,
+                    logger);
 
             var trimmed = segment.Trim();
             if (string.IsNullOrWhiteSpace(trimmed))
@@ -137,22 +166,20 @@ public sealed partial class UnityPackageExtractionService
             var filtered = new string(trimmed.Where(c => !InvalidFileNameCharacters.Contains(c)).ToArray());
             filtered = filtered.Trim();
             if (string.IsNullOrWhiteSpace(filtered))
-            {
-                filteredSegments++;
-                continue;
-            }
+                throw CreateInvalidArchivePathException(input,
+                    $"Path segment '{segment}' becomes empty after normalization.",
+                    correlationId,
+                    logger);
 
-            originalSegments.Add(filtered);
+            originalSegments.Add(trimmed);
             var normalizedSegment = FileExtensionNormalizer.Normalize(filtered);
             normalizedSegments.Add(normalizedSegment);
         }
 
         if (originalSegments.Count == 0)
-        {
-            logger.LogWarning(
-                $"Path normalization resulted in empty path | original='{input}' | hadDotDot={hadDotDotSegments} | filteredCount={filteredSegments} | correlationId={correlationId}");
-            return new PathNormalizationResult(string.Empty, string.Empty, EmptySegmentNormalizations);
-        }
+            throw CreateInvalidArchivePathException(input, "Path normalization resulted in an empty relative path.",
+                correlationId,
+                logger);
 
         var segmentPairs = new PathSegmentNormalization[originalSegments.Count];
         for (var i = 0; i < segmentPairs.Length; i++)
@@ -168,6 +195,58 @@ public sealed partial class UnityPackageExtractionService
         return new PathNormalizationResult(normalizedPath, originalPath, segmentPairs);
     }
 
+    private static bool LooksLikeUnsafeRootedPath(string path)
+    {
+        if (string.IsNullOrWhiteSpace(path))
+            return true;
+
+        if (path.StartsWith("/", StringComparison.Ordinal) || path.StartsWith("\\", StringComparison.Ordinal))
+            return true;
+
+        if (Path.IsPathRooted(path))
+            return true;
+
+        return path.Length >= 2 && char.IsLetter(path[0]) && path[1] == ':';
+    }
+
+    private static ExtractionSecurityException CreateInvalidArchivePathException(
+        string? originalPath,
+        string reason,
+        string correlationId,
+        IEasyExtractLogger logger)
+    {
+        logger.LogError(
+            $"Unsafe archive path rejected | original='{originalPath}' | reason='{reason}' | correlationId={correlationId}");
+        return new ExtractionSecurityException($"Archive path '{originalPath}' is invalid. {reason}");
+    }
+
+    private static void RegisterNormalizedPathOrigin(
+        string relativeOutputPath,
+        UnityPackageAssetState state,
+        bool organizeByCategories,
+        Dictionary<string, string> normalizedPathOrigins,
+        string correlationId,
+        IEasyExtractLogger logger)
+    {
+        if (organizeByCategories || string.IsNullOrWhiteSpace(relativeOutputPath))
+            return;
+
+        var originalPath = state.OriginalRelativePath ?? state.RelativePath ?? relativeOutputPath;
+        if (!normalizedPathOrigins.TryGetValue(relativeOutputPath, out var existingOriginal))
+        {
+            normalizedPathOrigins[relativeOutputPath] = originalPath;
+            return;
+        }
+
+        if (string.Equals(existingOriginal, originalPath, StringComparison.Ordinal))
+            return;
+
+        logger.LogError(
+            $"Normalized path collision detected | normalized='{relativeOutputPath}' | existing='{existingOriginal}' | incoming='{originalPath}' | correlationId={correlationId}");
+        throw new ExtractionSecurityException(
+            $"Archive contains a normalized path collision for output path '{relativeOutputPath}'.");
+    }
+
     private static bool TryGetAssetPaths(
         UnityPackageAssetState state,
         string outputDirectory,
@@ -175,6 +254,7 @@ public sealed partial class UnityPackageExtractionService
         bool organizeByCategories,
         HashSet<string> generatedRelativePaths,
         Dictionary<string, int> duplicateSuffixCounters,
+        Dictionary<string, string> normalizedPathOrigins,
         HashSet<string> directoriesToCleanup,
         string correlationId,
         IEasyExtractLogger logger,
@@ -193,6 +273,14 @@ public sealed partial class UnityPackageExtractionService
 
         if (string.IsNullOrWhiteSpace(relativeOutputPath))
             return false;
+
+        RegisterNormalizedPathOrigin(
+            relativeOutputPath,
+            state,
+            organizeByCategories,
+            normalizedPathOrigins,
+            correlationId,
+            logger);
 
         var originalPath = relativeOutputPath;
         relativeOutputPath = EnsureUniqueRelativePath(

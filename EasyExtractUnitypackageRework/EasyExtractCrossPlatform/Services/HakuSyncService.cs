@@ -10,7 +10,7 @@ public interface IHakuSyncService
 
 public class HakuSyncService : IHakuSyncService
 {
-    private const string ApiBaseUrl = "https://api.hakusystems.dev/api/v1/";
+    private const string ApiBaseUrl = "https://easyextract.net/api/haku/v1/";
     private const string UserAgent = "EasyExtractCrossPlatform-SyncService";
     private readonly HttpClient _httpClient;
     private readonly ConcurrentDictionary<string, Lazy<Task>> _inFlightSyncs = new(StringComparer.Ordinal);
@@ -33,10 +33,9 @@ public class HakuSyncService : IHakuSyncService
     public async Task SyncActivityAsync(string deviceId, HistoryEntry entry,
         CancellationToken cancellationToken = default)
     {
-        if (string.IsNullOrWhiteSpace(deviceId))
+        if (!TryNormalizeDeviceId(deviceId, out var normalizedDeviceId))
             return;
 
-        var normalizedDeviceId = deviceId.Trim();
         var dedupeKey = $"{normalizedDeviceId}:{entry.Id:D}";
         var lazyTask = new Lazy<Task>(
             () => SendSyncRequestAsync(normalizedDeviceId, entry),
@@ -89,6 +88,18 @@ public class HakuSyncService : IHakuSyncService
         {
             // Silently fail
         }
+    }
+
+    private static bool TryNormalizeDeviceId(string? deviceId, out string normalizedDeviceId)
+    {
+        if (Guid.TryParse(deviceId?.Trim(), out var parsedDeviceId))
+        {
+            normalizedDeviceId = parsedDeviceId.ToString("D");
+            return true;
+        }
+
+        normalizedDeviceId = string.Empty;
+        return false;
     }
 
     private static HttpClient CreateHttpClient()

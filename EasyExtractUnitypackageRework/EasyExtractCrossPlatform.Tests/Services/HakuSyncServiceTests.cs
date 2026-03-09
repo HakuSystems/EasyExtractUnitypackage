@@ -73,6 +73,20 @@ public sealed class HakuSyncServiceTests
     }
 
     [Fact]
+    public async Task SyncActivityAsync_DoesNotSend_WhenDeviceIdIsInvalid()
+    {
+        using var handler = new CountingHttpMessageHandler((_, _) =>
+            Task.FromResult(new HttpResponseMessage(HttpStatusCode.OK)));
+        using var httpClient = CreateHttpClient(handler);
+        var service = new HakuSyncService(httpClient);
+        var entry = CreateEntry(Guid.NewGuid());
+
+        await service.SyncActivityAsync("not-a-guid", entry);
+
+        Assert.Equal(0, handler.CallCount);
+    }
+
+    [Fact]
     public async Task SyncActivityAsync_CleansInFlightEntry_AfterFailure()
     {
         using var handler = new CountingHttpMessageHandler((_, _) =>
@@ -125,7 +139,7 @@ public sealed class HakuSyncServiceTests
     {
         return new HttpClient(handler)
         {
-            BaseAddress = new Uri("https://api.hakusystems.dev/api/v1/")
+            BaseAddress = new Uri("https://easyextract.net/api/haku/v1/")
         };
     }
 

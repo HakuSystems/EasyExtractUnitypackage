@@ -25,6 +25,7 @@ public sealed partial class UnityPackageExtractionService
         private readonly UnityPackageExtractionLimits _limits;
         private readonly IEasyExtractLogger _logger; // Logger Injected
         private readonly string _normalizedOutputDirectory;
+        private readonly Dictionary<string, string> _normalizedPathOrigins = new(StringComparer.OrdinalIgnoreCase);
         private readonly bool _organizeByCategories;
         private readonly string _outputDirectory;
         private readonly string _packagePath;
@@ -73,25 +74,33 @@ public sealed partial class UnityPackageExtractionService
 
         public async Task<UnityPackageExtractionResult> ExecuteAsync()
         {
-            await ProcessTarEntriesAsync().ConfigureAwait(false);
-            await ProcessRemainingAssetStatesAsync().ConfigureAwait(false);
+            try
+            {
+                await ProcessTarEntriesAsync().ConfigureAwait(false);
+                await ProcessRemainingAssetStatesAsync().ConfigureAwait(false);
 
-            if (!_extractionRequired)
-                return CompleteWithoutExtraction();
+                if (!_extractionRequired)
+                    return CompleteWithoutExtraction();
 
-            if (_pendingWrites.Count > 0)
-                await FlushPendingWritesAsync().ConfigureAwait(false);
+                if (_pendingWrites.Count > 0)
+                    await FlushPendingWritesAsync().ConfigureAwait(false);
 
-            CleanupCorruptedDirectories(_directoriesToCleanup, _correlationId, _logger);
+                CleanupCorruptedDirectories(_directoriesToCleanup, _correlationId, _logger);
 
-            _logger.LogInformation(
-                $"ExtractInternal completed | package='{_packagePath}' | assetsExtracted={_extractedCount} | filesWritten={_extractedFiles.Count} | size={_calculatedTotalSize} | tarEntries={_tarEntriesProcessed} | skippedNoPath={_assetsSkippedNoPath} | skippedNoContent={_assetsSkippedNoContent} | duplicated={_assetsDuplicated} | correlationId={_correlationId}");
+                _logger.LogInformation(
+                    $"ExtractInternal completed | package='{_packagePath}' | assetsExtracted={_extractedCount} | filesWritten={_extractedFiles.Count} | size={_calculatedTotalSize} | tarEntries={_tarEntriesProcessed} | skippedNoPath={_assetsSkippedNoPath} | skippedNoContent={_assetsSkippedNoContent} | duplicated={_assetsDuplicated} | correlationId={_correlationId}");
 
-            return new UnityPackageExtractionResult(
-                _packagePath,
-                _outputDirectory,
-                _extractedCount,
-                _extractedFiles.ToImmutableArray()) { TotalSize = _calculatedTotalSize };
+                return new UnityPackageExtractionResult(
+                    _packagePath,
+                    _outputDirectory,
+                    _extractedCount,
+                    _extractedFiles.ToImmutableArray()) { TotalSize = _calculatedTotalSize };
+            }
+            catch (ExtractionSecurityException)
+            {
+                RollbackWrittenFiles();
+                throw;
+            }
         }
 
         private async Task ProcessTarEntriesAsync()
@@ -209,7 +218,8 @@ public sealed partial class UnityPackageExtractionService
                     }
                 }
             }
-            catch (Exception ex) when (ex is IOException or InvalidDataException)
+            catch (Exception ex) when ((ex is IOException || ex is InvalidDataException) &&
+                                       ex is not ExtractionSecurityException)
             {
                 if (_tarEntriesProcessed > 0)
                 {
@@ -281,6 +291,7 @@ public sealed partial class UnityPackageExtractionService
                     _organizeByCategories,
                     _generatedRelativePaths,
                     _duplicateSuffixCounters,
+                    _normalizedPathOrigins,
                     _directoriesToCleanup,
                     _correlationId,
                     _logger,
@@ -393,6 +404,71 @@ public sealed partial class UnityPackageExtractionService
 
             _logger.LogInformation(
                 $"FlushPendingWrites completed | correlationId={_correlationId}");
+        }
+
+        private void RollbackWrittenFiles()
+        {
+            if (_extractedFiles.Count == 0)
+                return;
+
+            _logger.LogWarning(
+                $"Rolling back extracted files after security validation failure | fileCount={_extractedFiles.Count} | correlationId={_correlationId}");
+
+            foreach (var path in _extractedFiles
+                         .Distinct(StringComparer.OrdinalIgnoreCase)
+                         .OrderByDescending(static path => path.Length))
+                try
+                {
+                    if (File.Exists(path))
+                        File.Delete(path);
+                }
+                catch (IOException ex)
+                {
+                    _logger.LogWarning($"Failed to delete extracted file during rollback | path='{path}'", ex);
+                }
+                catch (UnauthorizedAccessException ex)
+                {
+                    _logger.LogWarning($"Access denied during extraction rollback | path='{path}'", ex);
+                }
+
+            var normalizedRoot =
+                _normalizedOutputDirectory.TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
+            foreach (var directory in _extractedFiles
+                         .Select(Path.GetDirectoryName)
+                         .Where(static path => !string.IsNullOrWhiteSpace(path))
+                         .Cast<string>()
+                         .Distinct(StringComparer.OrdinalIgnoreCase)
+                         .OrderByDescending(static path => path.Length))
+            {
+                var current = directory;
+                while (!string.IsNullOrWhiteSpace(current) &&
+                       current.StartsWith(normalizedRoot, StringComparison.OrdinalIgnoreCase) &&
+                       !string.Equals(current, normalizedRoot, StringComparison.OrdinalIgnoreCase))
+                    try
+                    {
+                        if (!Directory.Exists(current) || Directory.EnumerateFileSystemEntries(current).Any())
+                            break;
+
+                        Directory.Delete(current);
+                        current = Path.GetDirectoryName(current);
+                    }
+                    catch (IOException ex)
+                    {
+                        _logger.LogWarning($"Failed to delete extraction directory during rollback | path='{current}'",
+                            ex);
+                        break;
+                    }
+                    catch (UnauthorizedAccessException ex)
+                    {
+                        _logger.LogWarning($"Access denied during extraction rollback for directory | path='{current}'",
+                            ex);
+                        break;
+                    }
+            }
+
+            _extractedFiles.Clear();
+            _extractedCount = 0;
+            _calculatedTotalSize = 0;
         }
     }
 }
