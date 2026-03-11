@@ -45,7 +45,7 @@ public sealed partial class UnityPackageExtractionService
         var candidate = Path.GetFullPath(candidatePath);
         if (!candidate.StartsWith(normalizedRoot, StringComparison.OrdinalIgnoreCase))
         {
-            logger.LogError(
+            logger.LogWarning(
                 $"Path traversal detected | candidate='{candidate}' | root='{normalizedRoot}' | correlationId={correlationId}");
             throw new InvalidDataException(
                 $"Extraction aborted. Asset path '{candidate}' points outside of '{normalizedRoot}'.");
@@ -309,7 +309,7 @@ public sealed partial class UnityPackageExtractionService
         }
         catch (InvalidDataException ex)
         {
-            logger.LogError(
+            logger.LogWarning(
                 $"Path validation failed for asset | relativePath='{state.RelativePath}' | correlationId={correlationId}",
                 ex);
             throw;

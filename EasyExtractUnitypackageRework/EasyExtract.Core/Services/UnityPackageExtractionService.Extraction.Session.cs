@@ -234,7 +234,7 @@ public sealed partial class UnityPackageExtractionService
                 }
                 else
                 {
-                    _logger.LogError(
+                    _logger.LogWarning(
                         $"TAR processing failed | entriesProcessed={_tarEntriesProcessed} | skipped={_tarEntriesSkipped} | correlationId={_correlationId}",
                         ex);
 

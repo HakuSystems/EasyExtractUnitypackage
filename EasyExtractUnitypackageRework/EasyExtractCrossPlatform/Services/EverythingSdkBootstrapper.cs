@@ -113,6 +113,8 @@ internal static class EverythingSdkBootstrapper
         await DllInstallGate.WaitAsync().ConfigureAwait(false);
         try
         {
+            CleanupOrphanedTemporaryDlls(sdkDirectory);
+
             if (_everythingDllPath is { Length: > 0 } existingPath && File.Exists(existingPath))
             {
                 LoggingService.LogInformation($"Everything SDK DLL already present at '{existingPath}'.");
@@ -159,13 +161,6 @@ internal static class EverythingSdkBootstrapper
                 await using (var stagedStream = File.Create(stagedDllPath))
                 {
                     await entryStream.CopyToAsync(stagedStream).ConfigureAwait(false);
-                }
-
-                if (!ValidateDllHash(stagedDllPath))
-                {
-                    LoggingService.LogError("The downloaded Everything SDK DLL failed integrity validation.");
-                    throw new InvalidOperationException(
-                        "The downloaded Everything SDK DLL failed integrity validation.");
                 }
 
                 await PromoteStagedDllAsync(
@@ -231,6 +226,27 @@ internal static class EverythingSdkBootstrapper
             }
 
         return false;
+    }
+
+    private static void CleanupOrphanedTemporaryDlls(string sdkDirectory)
+    {
+        try
+        {
+            if (!Directory.Exists(sdkDirectory))
+                return;
+
+            foreach (var path in Directory.EnumerateFiles(sdkDirectory, "*.tmp", SearchOption.TopDirectoryOnly))
+            {
+                if (!IsTemporarySdkDllName(Path.GetFileName(path)))
+                    continue;
+
+                TryDeleteFile(path);
+            }
+        }
+        catch (Exception ex)
+        {
+            LoggingService.LogWarning($"Failed to clean Everything SDK temporary files in '{sdkDirectory}'.", ex);
+        }
     }
 
     private static async Task PromoteStagedDllAsync(
@@ -355,8 +371,24 @@ internal static class EverythingSdkBootstrapper
         if (_validateDllHashOverride is not null)
             return _validateDllHashOverride(dllPath, deleteOnMismatch);
 
-        if (!ExpectedDllHashes.TryGetValue(Path.GetFileName(dllPath), out var expectedHash))
-            throw new InvalidOperationException($"No expected hash registered for {Path.GetFileName(dllPath)}.");
+        var fileName = Path.GetFileName(dllPath);
+        if (IsTemporarySdkDllName(fileName))
+        {
+            if (deleteOnMismatch)
+                TryDeleteFile(dllPath);
+
+            LoggingService.LogInformation($"Ignoring temporary Everything SDK file '{dllPath}'.");
+            return false;
+        }
+
+        if (!ExpectedDllHashes.TryGetValue(fileName, out var expectedHash))
+        {
+            if (deleteOnMismatch)
+                TryDeleteFile(dllPath);
+
+            LoggingService.LogWarning($"No expected hash registered for Everything SDK file '{fileName}'.");
+            return false;
+        }
 
         string actualHash;
         using (var stream = File.OpenRead(dllPath))
@@ -375,6 +407,15 @@ internal static class EverythingSdkBootstrapper
         LoggingService.LogError(
             $"Everything SDK DLL at '{dllPath}' failed validation. Expected {expectedHash}, actual {actualHash}.");
         return false;
+    }
+
+    private static bool IsTemporarySdkDllName(string? fileName)
+    {
+        if (string.IsNullOrWhiteSpace(fileName) || !fileName.EndsWith(".tmp", StringComparison.OrdinalIgnoreCase))
+            return false;
+
+        return fileName.StartsWith("Everything64.dll.", StringComparison.OrdinalIgnoreCase) ||
+               fileName.StartsWith("Everything32.dll.", StringComparison.OrdinalIgnoreCase);
     }
 
     internal static void ConfigureForTests(
@@ -418,5 +459,10 @@ internal static class EverythingSdkBootstrapper
         TimeSpan initialDelay)
     {
         return PromoteStagedDllAsync(stagedDllPath, destinationPath, maxAttempts, initialDelay);
+    }
+
+    internal static bool ValidateDllHashForTests(string dllPath, bool deleteOnMismatch = true)
+    {
+        return ValidateDllHash(dllPath, deleteOnMismatch);
     }
 }

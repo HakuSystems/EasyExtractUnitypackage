@@ -129,14 +129,14 @@ public sealed partial class UnityPackageExtractionService : IUnityPackageExtract
             }
             catch (ExtractionSecurityException ex)
             {
-                _logger.LogError(
+                _logger.LogWarning(
                     $"ExtractAsync aborted: security validation failed | package='{packagePath}' | correlationId={correlationId}",
                     ex);
                 throw new InvalidDataException(ex.Message, ex);
             }
             catch (InvalidDataException ex)
             {
-                _logger.LogError(
+                _logger.LogWarning(
                     $"ExtractAsync aborted: invalid package data | package='{packagePath}' | correlationId={correlationId}",
                     ex);
                 throw;

@@ -290,7 +290,7 @@ public sealed partial class UnityPackageExtractionService
             totalRead += read;
             if (totalRead > MaxPathEntryCharacters)
             {
-                logger.LogError(
+                logger.LogWarning(
                     $"Path entry exceeded max length | length={totalRead} | max={MaxPathEntryCharacters} | correlationId={correlationId}");
                 throw new ExtractionSecurityException(
                     $"Path entry exceeded the maximum supported length of {MaxPathEntryCharacters:N0} characters.");
@@ -346,12 +346,8 @@ public sealed partial class UnityPackageExtractionService
                             totalWritten += read;
 
                             if (limits.MaxAssetBytes > 0 && totalWritten > limits.MaxAssetBytes)
-                            {
-                                logger.LogError(
-                                    $"Asset exceeded per-file limit | entry='{entryName}' | size={totalWritten} | limit={limits.MaxAssetBytes} | correlationId={correlationId}");
-                                throw new InvalidDataException(
+                                throw new ExtractionSecurityException(
                                     $"Asset '{entryName}' exceeded the configured per-file limit of {limits.MaxAssetBytes:N0} bytes.");
-                            }
                         }
                 }
                 finally

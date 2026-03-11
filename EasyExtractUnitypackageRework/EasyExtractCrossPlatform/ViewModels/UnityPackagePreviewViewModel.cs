@@ -124,6 +124,20 @@ public sealed partial class UnityPackagePreviewViewModel : INotifyPropertyChange
             // No-op: the window was closed.
             LoggingService.LogInformation($"Preview loading cancelled for '{PackagePath}'.");
         }
+        catch (InvalidDataException ex)
+        {
+            await Dispatcher.UIThread.InvokeAsync(
+                () =>
+                {
+                    _allAssets.Clear();
+                    RefreshCategories();
+                    ApplyCategoryFilter();
+                    HasError = true;
+                    StatusMessage = $"Failed to load preview: {ex.Message}";
+                },
+                DispatcherPriority.Background);
+            LoggingService.LogWarning($"Preview rejected invalid package data for '{PackagePath}'.", ex);
+        }
         catch (Exception ex)
         {
             await Dispatcher.UIThread.InvokeAsync(

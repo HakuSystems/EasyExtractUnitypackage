@@ -73,7 +73,7 @@ public sealed partial class UnityPackageExtractionService
         }
         catch (InvalidDataException ex)
         {
-            _logger.LogError(
+            _logger.LogWarning(
                 $"Extraction failed: invalid package data | path='{packagePath}' | correlationId={correlationId}",
                 ex);
             throw;
@@ -92,7 +92,7 @@ public sealed partial class UnityPackageExtractionService
     {
         var detected = UnityPackageFormatDetector.Describe(format);
 
-        _logger.LogError(
+        _logger.LogWarning(
             $"ExtractInternal aborted: unsupported package format | path='{packagePath}' | detected='{detected}' | correlationId={correlationId}");
 
         return new InvalidDataException(

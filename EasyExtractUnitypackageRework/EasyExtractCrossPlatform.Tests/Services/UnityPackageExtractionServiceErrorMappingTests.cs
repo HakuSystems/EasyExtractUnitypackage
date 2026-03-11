@@ -1,7 +1,7 @@
 using System.IO.Compression;
-using EasyExtract.Core;
 using EasyExtract.Core.Models;
 using EasyExtract.Core.Services;
+using EasyExtractCrossPlatform.Tests.Support;
 using Xunit;
 
 namespace EasyExtractCrossPlatform.Tests.Services;
@@ -26,7 +26,8 @@ public sealed class UnityPackageExtractionServiceErrorMappingTests
                 await gzipStream.WriteAsync(invalidTarPayload);
             }
 
-            var service = new UnityPackageExtractionService(new TestLogger());
+            var logger = new RecordingLogger();
+            var service = new UnityPackageExtractionService(logger);
             var options = new UnityPackageExtractionOptions(false, null);
 
             var exception = await Assert.ThrowsAsync<InvalidDataException>(async () =>
@@ -35,6 +36,8 @@ public sealed class UnityPackageExtractionServiceErrorMappingTests
             Assert.DoesNotContain("gzip checksum mismatch", exception.ToString(), StringComparison.OrdinalIgnoreCase);
             Assert.DoesNotContain("invalid gzip data", exception.ToString(), StringComparison.OrdinalIgnoreCase);
             Assert.Contains("valid .unitypackage", exception.Message, StringComparison.OrdinalIgnoreCase);
+            Assert.NotEmpty(logger.WarningEntries);
+            Assert.Empty(logger.ErrorEntries);
         }
         finally
         {
@@ -43,42 +46,9 @@ public sealed class UnityPackageExtractionServiceErrorMappingTests
         }
     }
 
-    private sealed class TestLogger : IEasyExtractLogger
+    [Fact]
+    public void DefaultMaxPackageBytes_Is16GiB()
     {
-        public void LogInformation(string message)
-        {
-        }
-
-        public void LogWarning(string message, Exception? exception = null)
-        {
-        }
-
-        public void LogError(string message, Exception? exception = null)
-        {
-        }
-
-        public void LogPerformance(string operation, TimeSpan duration, string? category = null, string? details = null,
-            long? processedBytes = null)
-        {
-        }
-
-        public void LogMemoryUsage(string context, bool includeGcBreakdown = false)
-        {
-        }
-
-        public IDisposable BeginPerformanceScope(string operation, string? category = null,
-            string? correlationId = null)
-        {
-            return NoOpDisposable.Instance;
-        }
-    }
-
-    private sealed class NoOpDisposable : IDisposable
-    {
-        public static readonly NoOpDisposable Instance = new();
-
-        public void Dispose()
-        {
-        }
+        Assert.Equal(16L * 1024 * 1024 * 1024, UnityPackageExtractionLimits.DefaultMaxPackageBytes);
     }
 }

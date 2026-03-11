@@ -1,9 +1,9 @@
 using System.Formats.Tar;
 using System.IO.Compression;
 using System.Text;
-using EasyExtract.Core;
 using EasyExtract.Core.Models;
 using EasyExtract.Core.Services;
+using EasyExtractCrossPlatform.Tests.Support;
 using Xunit;
 
 namespace EasyExtractCrossPlatform.Tests.Services;
@@ -64,7 +64,8 @@ public sealed class UnityPackageExtractionServiceSecurityTests
             ("asset-two/pathname", "Assets/second.txt"),
             ("asset-two/asset", Enumerable.Repeat((byte)'B', 128).ToArray()));
 
-        var service = harness.CreateService();
+        var logger = new RecordingLogger();
+        var service = harness.CreateService(logger);
         var options = new UnityPackageExtractionOptions(
             false,
             null,
@@ -82,6 +83,8 @@ public sealed class UnityPackageExtractionServiceSecurityTests
 
         Assert.Contains("limit", exception.Message, StringComparison.OrdinalIgnoreCase);
         Assert.False(File.Exists(Path.Combine(harness.OutputDirectory, "Assets", "first.txt")));
+        Assert.NotEmpty(logger.WarningEntries);
+        Assert.Empty(logger.ErrorEntries);
     }
 
     [Fact]
@@ -187,9 +190,9 @@ public sealed class UnityPackageExtractionServiceSecurityTests
             return Task.FromResult(new ExtractionHarness(rootDirectory, packagePath, outputDirectory));
         }
 
-        public UnityPackageExtractionService CreateService()
+        public UnityPackageExtractionService CreateService(RecordingLogger? logger = null)
         {
-            return new UnityPackageExtractionService(new TestLogger());
+            return new UnityPackageExtractionService(logger ?? new RecordingLogger());
         }
 
         public async Task CreatePackageAsync(params (string EntryName, object Content)[] entries)
@@ -216,45 +219,6 @@ public sealed class UnityPackageExtractionServiceSecurityTests
 
                 await writer.WriteEntryAsync(entry);
             }
-        }
-    }
-
-    private sealed class TestLogger : IEasyExtractLogger
-    {
-        public void LogInformation(string message)
-        {
-        }
-
-        public void LogWarning(string message, Exception? exception = null)
-        {
-        }
-
-        public void LogError(string message, Exception? exception = null)
-        {
-        }
-
-        public void LogPerformance(string operation, TimeSpan duration, string? category = null, string? details = null,
-            long? processedBytes = null)
-        {
-        }
-
-        public void LogMemoryUsage(string context, bool includeGcBreakdown = false)
-        {
-        }
-
-        public IDisposable BeginPerformanceScope(string operation, string? category = null,
-            string? correlationId = null)
-        {
-            return NoOpDisposable.Instance;
-        }
-    }
-
-    private sealed class NoOpDisposable : IDisposable
-    {
-        public static readonly NoOpDisposable Instance = new();
-
-        public void Dispose()
-        {
         }
     }
 }

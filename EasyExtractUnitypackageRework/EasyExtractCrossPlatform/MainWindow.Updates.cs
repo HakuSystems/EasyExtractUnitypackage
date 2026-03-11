@@ -6,7 +6,7 @@ public partial class MainWindow : Window
     {
         try
         {
-            var updateCheck = await _velopackUpdateService.CheckForUpdatesAsync();
+            var updateCheck = await _velopackUpdateService.CheckForUpdatesAsync(UpdateCheckMode.SilentBackground);
             if (updateCheck is { State: UpdateCheckState.UpdateAvailable, UpdateInfo: { } updateInfo })
                 await Dispatcher.UIThread.InvokeAsync(() =>
                 {
@@ -22,7 +22,7 @@ public partial class MainWindow : Window
         catch (Exception ex)
         {
             // Silent fail for startup check
-            LoggingService.LogError("Silent update check failed", ex);
+            LoggingService.LogWarning("Silent update check failed", ex);
         }
     }
 

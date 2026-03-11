@@ -11,28 +11,87 @@ permissions:
   contents: write
 
 jobs:
-  build-and-release:
+  prepare-release-notes:
+    name: Prepare release notes
+    runs-on: ubuntu-latest
+    outputs:
+      current_tag: ${{ steps.release.outputs.current_tag }}
+      previous_tag: ${{ steps.release.outputs.previous_tag }}
+      version: ${{ steps.release.outputs.version }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Resolve release metadata
+        id: release
+        shell: bash
+        run: |
+          tag_name="${GITHUB_REF#refs/tags/}"
+          clean_version="${tag_name#[vV]}"
+          previous_tag=""
+
+          if git rev-parse "${GITHUB_SHA}^" >/dev/null 2>&1; then
+            previous_tag="$(git describe --tags --abbrev=0 "${GITHUB_SHA}^" 2>/dev/null || true)"
+          fi
+
+          echo "current_tag=$tag_name" >> "$GITHUB_OUTPUT"
+          echo "previous_tag=$previous_tag" >> "$GITHUB_OUTPUT"
+          echo "version=$clean_version" >> "$GITHUB_OUTPUT"
+
+      - name: Generate release notes
+        shell: pwsh
+        run: |
+          $params = @{
+            RepositoryPath = (Get-Location).Path
+            CurrentTag = '${{ steps.release.outputs.current_tag }}'
+            RepoUrl = 'https://github.com/${{ github.repository }}'
+            OutputPath = 'release-notes.md'
+          }
+
+          if (-not [string]::IsNullOrWhiteSpace('${{ steps.release.outputs.previous_tag }}')) {
+            $params.PreviousTag = '${{ steps.release.outputs.previous_tag }}'
+          }
+
+          ./scripts/generate-release-notes.ps1 @params
+
+      - name: Upload release notes artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-notes
+          path: release-notes.md
+          if-no-files-found: error
+
+  build-packages:
     name: Build for ${{ matrix.os }}
+    needs: prepare-release-notes
     runs-on: ${{ matrix.os }}
-    # WICHTIG: Erzwingt Bash auf allen Systemen (fixet den Windows ParserError)
     defaults:
       run:
         shell: bash
-
     strategy:
       fail-fast: false
       matrix:
         include:
           - os: windows-latest
             rid: win-x64
+            main_exe: EasyExtractCrossPlatform.exe
           - os: ubuntu-latest
             rid: linux-x64
+            main_exe: EasyExtractCrossPlatform
           - os: macos-latest
             rid: osx-arm64
-
+            main_exe: EasyExtractCrossPlatform
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+
+      - name: Download release notes
+        uses: actions/download-artifact@v4
+        with:
+          name: release-notes
+          path: .
 
       - name: Setup .NET 9
         uses: actions/setup-dotnet@v4
@@ -48,47 +107,63 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y libfuse2
 
-      - name: Clean Version String
-        run: |
-          TAG_NAME=${GITHUB_REF#refs/tags/}
-          CLEAN_VERSION=$(echo "$TAG_NAME" | sed 's/^[vV]//')
-          echo "Processing Version: $CLEAN_VERSION"
-          echo "VERSION=$CLEAN_VERSION" >> $GITHUB_ENV
-
       - name: Publish DotNet
-        # FIX: Hier ist der korrekte, volle Pfad zu deiner .csproj
         run: |
           dotnet publish EasyExtractUnitypackageRework/EasyExtractCrossPlatform/EasyExtractCrossPlatform.csproj \
             -c Release \
             -r ${{ matrix.rid }} \
             --self-contained \
-            -p:Version=${{ env.VERSION }} \
+            -p:Version=${{ needs.prepare-release-notes.outputs.version }} \
             -o publish_output
 
-      # --- WINDOWS PACKING ---
-      - name: Pack with Velopack (Windows)
-        if: runner.os == 'Windows'
+      - name: Pack with Velopack
         run: |
-          vpk pack -u EasyExtractCrossPlatform -v ${{ env.VERSION }} -p publish_output -o release_output --mainExe EasyExtractCrossPlatform.exe
+          vpk pack \
+            -u EasyExtractCrossPlatform \
+            -v ${{ needs.prepare-release-notes.outputs.version }} \
+            -p publish_output \
+            -o release_output \
+            --mainExe ${{ matrix.main_exe }} \
+            --releaseNotes release-notes.md
 
-      # --- LINUX PACKING ---
-      - name: Pack with Velopack (Linux)
-        if: runner.os == 'Linux'
-        run: |
-          vpk pack -u EasyExtractCrossPlatform -v ${{ env.VERSION }} -p publish_output -o release_output --mainExe EasyExtractCrossPlatform
-
-      # --- MAC PACKING ---
-      - name: Pack with Velopack (macOS)
-        if: runner.os == 'macOS'
-        run: |
-          vpk pack -u EasyExtractCrossPlatform -v ${{ env.VERSION }} -p publish_output -o release_output --mainExe EasyExtractCrossPlatform
-
-      - name: Upload Release Assets
-        uses: softprops/action-gh-release@v2
-        if: startsWith(github.ref, 'refs/tags/')
+      - name: Upload packaged assets
+        uses: actions/upload-artifact@v4
         with:
+          name: release-assets-${{ matrix.rid }}
+          path: release_output/*
+          if-no-files-found: error
+
+  draft-release:
+    name: Draft GitHub release
+    needs:
+      - prepare-release-notes
+      - build-packages
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/')
+    steps:
+      - name: Download release notes
+        uses: actions/download-artifact@v4
+        with:
+          name: release-notes
+          path: .
+
+      - name: Download packaged assets
+        uses: actions/download-artifact@v4
+        with:
+          pattern: release-assets-*
+          path: release_output
+          merge-multiple: true
+
+      - name: Create draft release
+        uses: softprops/action-gh-release@v2
+        with:
+          name: ${{ needs.prepare-release-notes.outputs.current_tag }}
+          tag_name: ${{ needs.prepare-release-notes.outputs.current_tag }}
+          body_path: release-notes.md
           files: release_output/*
           draft: true
-          generate_release_notes: true
+          generate_release_notes: false
+          overwrite_files: true
+          fail_on_unmatched_files: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

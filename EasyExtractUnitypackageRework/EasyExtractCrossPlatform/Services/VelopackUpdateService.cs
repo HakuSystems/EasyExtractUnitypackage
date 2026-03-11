@@ -1,3 +1,4 @@
+using System.Net;
 using Velopack;
 using Velopack.Exceptions;
 using Velopack.Locators;
@@ -10,6 +11,12 @@ public enum UpdateCheckState
     UpToDate,
     UpdateAvailable,
     Unavailable
+}
+
+public enum UpdateCheckMode
+{
+    Interactive,
+    SilentBackground
 }
 
 public sealed record UpdateCheckResult(UpdateCheckState State, UpdateInfo? UpdateInfo = null)
@@ -26,17 +33,46 @@ public sealed record UpdateCheckResult(UpdateCheckState State, UpdateInfo? Updat
 
 public interface IVelopackUpdateService
 {
-    Task<UpdateCheckResult> CheckForUpdatesAsync(bool isPrerelease = false);
+    Task<UpdateCheckResult> CheckForUpdatesAsync(UpdateCheckMode mode = UpdateCheckMode.Interactive,
+        bool isPrerelease = false);
+
     Task DownloadUpdatesAsync(UpdateInfo update, Action<int> progress);
     void ApplyUpdates(UpdateInfo update);
+}
+
+internal interface IVelopackUpdateManager
+{
+    bool IsInstalled { get; }
+    Task<UpdateInfo?> CheckForUpdatesAsync();
+    Task DownloadUpdatesAsync(UpdateInfo update, Action<int> progress);
+    void ApplyUpdatesAndRestart(UpdateInfo update);
 }
 
 public class VelopackUpdateService : IVelopackUpdateService
 {
     private const string RepoUrl = "https://github.com/HakuSystems/EasyExtractUnitypackage";
     private const string MissingLocatorMessage = "No VelopackLocator has been set";
+    private readonly bool _requireLocator;
+    private readonly Func<bool, IVelopackUpdateManager?> _updateManagerFactory;
 
-    public async Task<UpdateCheckResult> CheckForUpdatesAsync(bool isPrerelease = false)
+    public VelopackUpdateService() : this(CreateUpdateManager, true)
+    {
+    }
+
+    internal VelopackUpdateService(Func<bool, IVelopackUpdateManager?> updateManagerFactory) : this(
+        updateManagerFactory,
+        false)
+    {
+    }
+
+    private VelopackUpdateService(Func<bool, IVelopackUpdateManager?> updateManagerFactory, bool requireLocator)
+    {
+        _updateManagerFactory = updateManagerFactory ?? throw new ArgumentNullException(nameof(updateManagerFactory));
+        _requireLocator = requireLocator;
+    }
+
+    public async Task<UpdateCheckResult> CheckForUpdatesAsync(UpdateCheckMode mode = UpdateCheckMode.Interactive,
+        bool isPrerelease = false)
     {
         try
         {
@@ -55,10 +91,21 @@ public class VelopackUpdateService : IVelopackUpdateService
                 ? UpdateCheckResult.UpToDate
                 : UpdateCheckResult.Available(newVersion);
         }
+        catch (HttpRequestException ex) when (mode == UpdateCheckMode.SilentBackground && IsGitHubRateLimit(ex))
+        {
+            LoggingService.LogInformation(
+                $"Skipping silent update check because GitHub rate limiting is active: {ex.Message}");
+            return UpdateCheckResult.Unavailable;
+        }
         catch (NotInstalledException)
         {
             LoggingService.LogInformation(
                 "Application is not installed (likely dev environment). Skipping update check.");
+            return UpdateCheckResult.Unavailable;
+        }
+        catch (Exception ex) when (mode == UpdateCheckMode.SilentBackground)
+        {
+            LoggingService.LogWarning("Silent update check failed.", ex);
             return UpdateCheckResult.Unavailable;
         }
         catch (Exception ex)
@@ -120,11 +167,11 @@ public class VelopackUpdateService : IVelopackUpdateService
         }
     }
 
-    private static bool TryCreateUpdateManager(bool isPrerelease, out UpdateManager? manager)
+    private bool TryCreateUpdateManager(bool isPrerelease, out IVelopackUpdateManager? manager)
     {
         manager = null;
 
-        if (!VelopackLocator.IsCurrentSet)
+        if (_requireLocator && !VelopackLocator.IsCurrentSet)
         {
             LoggingService.LogInformation("Skipping update operation: Velopack locator is not initialized.");
             return false;
@@ -132,7 +179,7 @@ public class VelopackUpdateService : IVelopackUpdateService
 
         try
         {
-            manager = new UpdateManager(new GithubSource(RepoUrl, null, isPrerelease));
+            manager = _updateManagerFactory(isPrerelease);
             return true;
         }
         catch (InvalidOperationException ex) when
@@ -140,6 +187,46 @@ public class VelopackUpdateService : IVelopackUpdateService
         {
             LoggingService.LogInformation("Skipping update operation: Velopack locator is not initialized.");
             return false;
+        }
+    }
+
+    private static IVelopackUpdateManager CreateUpdateManager(bool isPrerelease)
+    {
+        return new VelopackUpdateManagerAdapter(new UpdateManager(new GithubSource(RepoUrl, null, isPrerelease)));
+    }
+
+    private static bool IsGitHubRateLimit(HttpRequestException ex)
+    {
+        if (ex.StatusCode != HttpStatusCode.Forbidden)
+            return false;
+
+        return ex.Message.Contains("rate limit", StringComparison.OrdinalIgnoreCase);
+    }
+
+    private sealed class VelopackUpdateManagerAdapter : IVelopackUpdateManager
+    {
+        private readonly UpdateManager _inner;
+
+        public VelopackUpdateManagerAdapter(UpdateManager inner)
+        {
+            _inner = inner;
+        }
+
+        public bool IsInstalled => _inner.IsInstalled;
+
+        public Task<UpdateInfo?> CheckForUpdatesAsync()
+        {
+            return _inner.CheckForUpdatesAsync();
+        }
+
+        public Task DownloadUpdatesAsync(UpdateInfo update, Action<int> progress)
+        {
+            return _inner.DownloadUpdatesAsync(update, progress);
+        }
+
+        public void ApplyUpdatesAndRestart(UpdateInfo update)
+        {
+            _inner.ApplyUpdatesAndRestart(update);
         }
     }
 }

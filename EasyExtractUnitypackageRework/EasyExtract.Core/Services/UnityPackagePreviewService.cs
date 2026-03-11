@@ -53,6 +53,12 @@ public sealed class UnityPackagePreviewService : IUnityPackagePreviewService
                 $"Preview loaded for '{packagePath}' in {stopwatch.Elapsed.TotalMilliseconds:F0} ms. AssetCount={result.Assets.Count}.");
             return result;
         }
+        catch (InvalidDataException ex)
+        {
+            stopwatch.Stop();
+            _logger.LogWarning($"Preview rejected invalid package data for '{packagePath}'.", ex);
+            throw;
+        }
         catch (Exception ex) when (ex is not OperationCanceledException)
         {
             stopwatch.Stop();

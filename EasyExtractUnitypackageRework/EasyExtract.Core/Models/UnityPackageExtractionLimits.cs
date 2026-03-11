@@ -3,7 +3,7 @@ namespace EasyExtract.Core.Models;
 public sealed record class UnityPackageExtractionLimits
 {
     public const long DefaultMaxAssetBytes = 512L * 1024 * 1024; // 512 MB
-    public const long DefaultMaxPackageBytes = 4L * 1024 * 1024 * 1024; // 4 GB
+    public const long DefaultMaxPackageBytes = 16L * 1024 * 1024 * 1024; // 16 GB
     public const int DefaultMaxAssets = 25000;
 
     public const long MaxAllowedAssetBytes = 4L * 1024 * 1024 * 1024; // 4 GB

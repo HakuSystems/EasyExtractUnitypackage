@@ -171,6 +171,69 @@ public sealed class EverythingSdkBootstrapperTests : IDisposable
         Directory.Delete(root, true);
     }
 
+    [Fact]
+    public async Task EnsureDllForTestsAsync_CleansOrphanedTemporaryDlls()
+    {
+        if (!OperatingSystem.IsWindows())
+            return;
+
+        EverythingSdkBootstrapper.ResetForTests();
+
+        var root = Path.Combine(Path.GetTempPath(), "EasyExtractTests", Guid.NewGuid().ToString("N"));
+        var appDataPath = Path.Combine(root, "AppData");
+        var sdkDirectory = Path.Combine(appDataPath, "EasyExtract", "ThirdParty", "EverythingSdk");
+        Directory.CreateDirectory(sdkDirectory);
+
+        var dllName = Environment.Is64BitProcess ? "Everything64.dll" : "Everything32.dll";
+        var dllPath = Path.Combine(sdkDirectory, dllName);
+        var orphanedTempPath = Path.Combine(sdkDirectory, $"{dllName}.{Guid.NewGuid():N}.tmp");
+
+        await File.WriteAllBytesAsync(dllPath, new byte[] { 0xAA, 0xBB, 0xCC });
+        await File.WriteAllBytesAsync(orphanedTempPath, new byte[] { 0x10, 0x20, 0x30 });
+
+        EverythingSdkBootstrapper.ConfigureForTests(
+            appDataPathOverride: () => appDataPath,
+            validateDllHashOverride: (path, _) =>
+            {
+                if (string.Equals(Path.GetFullPath(path), Path.GetFullPath(orphanedTempPath),
+                        StringComparison.OrdinalIgnoreCase))
+                    throw new InvalidOperationException("Temporary DLL should not be hash validated.");
+
+                return string.Equals(Path.GetFullPath(path), Path.GetFullPath(dllPath),
+                    StringComparison.OrdinalIgnoreCase);
+            });
+
+        var resolvedPath = await EverythingSdkBootstrapper.EnsureDllForTestsAsync();
+
+        Assert.Equal(dllPath, resolvedPath, true);
+        Assert.False(File.Exists(orphanedTempPath));
+
+        Directory.Delete(root, true);
+    }
+
+    [Fact]
+    public async Task ValidateDllHashForTests_TemporarySdkFile_DoesNotThrowAndDeletesFile()
+    {
+        if (!OperatingSystem.IsWindows())
+            return;
+
+        EverythingSdkBootstrapper.ResetForTests();
+
+        var root = Path.Combine(Path.GetTempPath(), "EasyExtractTests", Guid.NewGuid().ToString("N"));
+        Directory.CreateDirectory(root);
+
+        var dllName = Environment.Is64BitProcess ? "Everything64.dll" : "Everything32.dll";
+        var tempDllPath = Path.Combine(root, $"{dllName}.{Guid.NewGuid():N}.tmp");
+        await File.WriteAllBytesAsync(tempDllPath, new byte[] { 0x01, 0x02, 0x03 });
+
+        var isValid = EverythingSdkBootstrapper.ValidateDllHashForTests(tempDllPath);
+
+        Assert.False(isValid);
+        Assert.False(File.Exists(tempDllPath));
+
+        Directory.Delete(root, true);
+    }
+
     private sealed class SharingViolationIOException : IOException
     {
         public SharingViolationIOException() : base("Simulated sharing violation")
