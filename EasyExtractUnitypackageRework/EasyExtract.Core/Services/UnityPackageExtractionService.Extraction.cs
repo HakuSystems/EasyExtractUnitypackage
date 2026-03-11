@@ -63,6 +63,14 @@ public sealed partial class UnityPackageExtractionService
         {
             return await session.ExecuteAsync().ConfigureAwait(false);
         }
+        catch (ExtractionSecurityException ex)
+        {
+            _logger.LogWarning(
+                $"Extraction rejected due to archive security validation failure | path='{packagePath}' | correlationId={correlationId}",
+                ex);
+
+            throw new InvalidDataException(ex.Message, ex);
+        }
         catch (InvalidDataException ex)
         {
             _logger.LogError(

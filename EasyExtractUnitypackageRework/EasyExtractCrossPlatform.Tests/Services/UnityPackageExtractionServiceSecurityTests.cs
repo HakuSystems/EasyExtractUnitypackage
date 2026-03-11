@@ -84,6 +84,75 @@ public sealed class UnityPackageExtractionServiceSecurityTests
         Assert.False(File.Exists(Path.Combine(harness.OutputDirectory, "Assets", "first.txt")));
     }
 
+    [Fact]
+    public async Task ExtractAsync_AbortsWhenTrackedAssetStatesExceedDerivedLimit()
+    {
+        await using var harness = await ExtractionHarness.CreateAsync();
+        await harness.CreatePackageAsync(
+            ("asset-one/pathname", "Assets/one.txt"),
+            ("asset-two/pathname", "Assets/two.txt"),
+            ("asset-three/pathname", "Assets/three.txt"),
+            ("asset-four/pathname", "Assets/four.txt"),
+            ("asset-five/pathname", "Assets/five.txt"));
+
+        var service = harness.CreateService();
+        var options = new UnityPackageExtractionOptions(
+            false,
+            null,
+            new UnityPackageExtractionLimits
+            {
+                MaxAssetBytes = 1024,
+                MaxPackageBytes = 4096,
+                MaxAssets = 1
+            });
+
+        var exception = await Assert.ThrowsAsync<InvalidDataException>(() => service.ExtractAsync(
+            harness.PackagePath,
+            harness.OutputDirectory,
+            options));
+
+        Assert.Contains("tracked asset states", exception.Message, StringComparison.OrdinalIgnoreCase);
+        Assert.Empty(Directory.EnumerateFileSystemEntries(harness.OutputDirectory));
+    }
+
+    [Fact]
+    public async Task ExtractAsync_AbortsWhenTarEntryCountExceedsDerivedLimit()
+    {
+        await using var harness = await ExtractionHarness.CreateAsync();
+        await harness.CreatePackageAsync(
+            ("asset-one/pathname", "Assets/one.txt"),
+            ("asset-one/ignored-1", Encoding.UTF8.GetBytes("x")),
+            ("asset-one/ignored-2", Encoding.UTF8.GetBytes("x")),
+            ("asset-one/ignored-3", Encoding.UTF8.GetBytes("x")),
+            ("asset-one/ignored-4", Encoding.UTF8.GetBytes("x")),
+            ("asset-one/ignored-5", Encoding.UTF8.GetBytes("x")),
+            ("asset-one/ignored-6", Encoding.UTF8.GetBytes("x")),
+            ("asset-one/ignored-7", Encoding.UTF8.GetBytes("x")),
+            ("asset-one/ignored-8", Encoding.UTF8.GetBytes("x")),
+            ("asset-one/ignored-9", Encoding.UTF8.GetBytes("x")),
+            ("asset-one/ignored-10", Encoding.UTF8.GetBytes("x")),
+            ("asset-one/ignored-11", Encoding.UTF8.GetBytes("x")));
+
+        var service = harness.CreateService();
+        var options = new UnityPackageExtractionOptions(
+            false,
+            null,
+            new UnityPackageExtractionLimits
+            {
+                MaxAssetBytes = 1024,
+                MaxPackageBytes = 4096,
+                MaxAssets = 1
+            });
+
+        var exception = await Assert.ThrowsAsync<InvalidDataException>(() => service.ExtractAsync(
+            harness.PackagePath,
+            harness.OutputDirectory,
+            options));
+
+        Assert.Contains("TAR entries", exception.Message, StringComparison.OrdinalIgnoreCase);
+        Assert.Empty(Directory.EnumerateFileSystemEntries(harness.OutputDirectory));
+    }
+
     private sealed class ExtractionHarness : IAsyncDisposable
     {
         private readonly string _rootDirectory;

@@ -25,15 +25,19 @@ public sealed class HakuWebhookClient
     internal const string ApiBaseUrl = "https://easyextract.net/";
     private const string EndpointPath = "api/haku/webhooks/send";
     private readonly string _appName;
-
+    private readonly Func<string?> _deviceIdProvider;
     private readonly HttpClient _httpClient;
+    private readonly HakuAnonymousSessionTokenProvider _tokenProvider;
 
-    public HakuWebhookClient(HttpClient httpClient, string appName)
+    public HakuWebhookClient(HttpClient httpClient, string appName, Func<string?>? deviceIdProvider = null)
     {
         _httpClient = httpClient ?? throw new ArgumentNullException(nameof(httpClient));
         _appName = string.IsNullOrWhiteSpace(appName)
             ? throw new ArgumentException("Application name must not be empty.", nameof(appName))
             : appName;
+        _deviceIdProvider = deviceIdProvider ?? ResolveDeviceIdFromSettings;
+        _tokenProvider = new HakuAnonymousSessionTokenProvider(_httpClient, "api/haku/v1/auth/anonymous-session",
+            "webhook:send");
 
         if (_httpClient.BaseAddress is null || !_httpClient.BaseAddress.IsAbsoluteUri)
             _httpClient.BaseAddress = new Uri(ApiBaseUrl);
@@ -94,8 +98,18 @@ public sealed class HakuWebhookClient
 
     private async Task SendAsync(WebhookRequest payload, CancellationToken cancellationToken)
     {
-        var response =
-            await _httpClient.PostAsJsonAsync(EndpointPath, payload, cancellationToken).ConfigureAwait(false);
+        var authorizationHeader = await _tokenProvider
+            .GetAuthorizationHeaderValueAsync(_deviceIdProvider(), cancellationToken)
+            .ConfigureAwait(false);
+
+        if (string.IsNullOrWhiteSpace(authorizationHeader))
+            throw new InvalidOperationException("A valid device identifier is required to send webhook requests.");
+
+        using var request = new HttpRequestMessage(HttpMethod.Post, EndpointPath);
+        request.Headers.TryAddWithoutValidation("Authorization", authorizationHeader);
+        request.Content = JsonContent.Create(payload);
+
+        using var response = await _httpClient.SendAsync(request, cancellationToken).ConfigureAwait(false);
 
         if (response.IsSuccessStatusCode)
             return;
@@ -131,6 +145,18 @@ public sealed class HakuWebhookClient
         builder.Append(normalized.AsSpan(0, 200));
         builder.Append("...");
         return builder.ToString();
+    }
+
+    private static string? ResolveDeviceIdFromSettings()
+    {
+        try
+        {
+            return AppSettingsService.Load().DeviceId;
+        }
+        catch
+        {
+            return null;
+        }
     }
 }
 

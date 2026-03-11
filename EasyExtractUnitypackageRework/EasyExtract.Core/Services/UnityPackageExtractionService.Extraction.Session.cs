@@ -121,6 +121,7 @@ public sealed partial class UnityPackageExtractionService
                     {
                         _cancellationToken.ThrowIfCancellationRequested();
                         _tarEntriesProcessed++;
+                        EnsureTarEntryLimit();
 
                         if (entry.EntryType is not (TarEntryType.RegularFile or TarEntryType.V7RegularFile))
                         {
@@ -131,6 +132,7 @@ public sealed partial class UnityPackageExtractionService
                         var entryName = entry.Name ?? string.Empty;
                         if (string.IsNullOrWhiteSpace(entryName))
                         {
+                            await DrainEntryDataAsync(entry.DataStream).ConfigureAwait(false);
                             _tarEntriesSkipped++;
                             continue;
                         }
@@ -138,6 +140,7 @@ public sealed partial class UnityPackageExtractionService
                         var (assetKey, componentName) = SplitEntryName(entryName);
                         if (string.IsNullOrWhiteSpace(assetKey) || string.IsNullOrWhiteSpace(componentName))
                         {
+                            await DrainEntryDataAsync(entry.DataStream).ConfigureAwait(false);
                             _tarEntriesSkipped++;
                             continue;
                         }
@@ -146,6 +149,7 @@ public sealed partial class UnityPackageExtractionService
                         {
                             state = new UnityPackageAssetState();
                             _assetStates[assetKey] = state;
+                            EnsureTrackedAssetStateLimit();
                         }
 
                         switch (componentName)
@@ -201,6 +205,7 @@ public sealed partial class UnityPackageExtractionService
                                 break;
                             }
                             default:
+                                await DrainEntryDataAsync(entry.DataStream).ConfigureAwait(false);
                                 _tarEntriesSkipped++;
                                 continue;
                         }
@@ -469,6 +474,46 @@ public sealed partial class UnityPackageExtractionService
             _extractedFiles.Clear();
             _extractedCount = 0;
             _calculatedTotalSize = 0;
+        }
+
+        private void EnsureTrackedAssetStateLimit()
+        {
+            var maxTrackedAssetStates = GetMaxTrackedAssetStates();
+            if (_assetStates.Count > maxTrackedAssetStates)
+                throw new ExtractionSecurityException(
+                    $"Extraction aborted. Archive declared {_assetStates.Count:N0} tracked asset states which exceeds the derived limit of {maxTrackedAssetStates:N0}.");
+        }
+
+        private void EnsureTarEntryLimit()
+        {
+            var maxTarEntries = GetMaxTarEntries();
+            if (_tarEntriesProcessed > maxTarEntries)
+                throw new ExtractionSecurityException(
+                    $"Extraction aborted. Archive contained more than {maxTarEntries:N0} TAR entries.");
+        }
+
+        private int GetMaxTrackedAssetStates()
+        {
+            var candidate = Math.Max(_limits.MaxAssets, 1) * 4L;
+            return candidate >= int.MaxValue
+                ? int.MaxValue
+                : (int)candidate;
+        }
+
+        private int GetMaxTarEntries()
+        {
+            var candidate = Math.Max(_limits.MaxAssets, 1) * 8L;
+            return candidate >= int.MaxValue
+                ? int.MaxValue
+                : (int)candidate;
+        }
+
+        private static async Task DrainEntryDataAsync(Stream? dataStream)
+        {
+            if (dataStream is null)
+                return;
+
+            await dataStream.CopyToAsync(Stream.Null).ConfigureAwait(false);
         }
     }
 }

@@ -14,6 +14,7 @@ public class HakuSyncService : IHakuSyncService
     private const string UserAgent = "EasyExtractCrossPlatform-SyncService";
     private readonly HttpClient _httpClient;
     private readonly ConcurrentDictionary<string, Lazy<Task>> _inFlightSyncs = new(StringComparer.Ordinal);
+    private readonly HakuAnonymousSessionTokenProvider _tokenProvider;
 
     public HakuSyncService() : this(CreateHttpClient())
     {
@@ -28,6 +29,9 @@ public class HakuSyncService : IHakuSyncService
 
         if (!_httpClient.DefaultRequestHeaders.UserAgent.Any())
             _httpClient.DefaultRequestHeaders.UserAgent.ParseAdd(UserAgent);
+
+        _tokenProvider = new HakuAnonymousSessionTokenProvider(_httpClient, "auth/anonymous-session",
+            "dashboard:write");
     }
 
     public async Task SyncActivityAsync(string deviceId, HistoryEntry entry,
@@ -64,6 +68,13 @@ public class HakuSyncService : IHakuSyncService
     {
         try
         {
+            var authorizationHeader = await _tokenProvider
+                .GetAuthorizationHeaderValueAsync(deviceId, CancellationToken.None)
+                .ConfigureAwait(false);
+
+            if (string.IsNullOrWhiteSpace(authorizationHeader))
+                return;
+
             var payload = new SyncActivityRequest
             {
                 Id = entry.Id,
@@ -78,7 +89,7 @@ public class HakuSyncService : IHakuSyncService
             };
 
             using var request = new HttpRequestMessage(HttpMethod.Post, "dashboard/activity");
-            request.Headers.Add("X-Device-Id", deviceId);
+            request.Headers.TryAddWithoutValidation("Authorization", authorizationHeader);
             request.Content = JsonContent.Create(payload);
 
             using var response = await _httpClient.SendAsync(request, CancellationToken.None).ConfigureAwait(false);
