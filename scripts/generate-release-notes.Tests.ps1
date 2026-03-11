@@ -30,6 +30,8 @@ Describe 'generate-release-notes.ps1' {
             [Parameter(Mandatory = $true)]
             [string] $Message,
 
+            [string] $MessageBody,
+
             [Parameter(Mandatory = $true)]
             [hashtable] $Files
         )
@@ -45,7 +47,13 @@ Describe 'generate-release-notes.ps1' {
         }
 
         Invoke-Git -RepositoryPath $RepositoryPath add .
-        Invoke-Git -RepositoryPath $RepositoryPath commit -m $Message | Out-Null
+
+        if ([string]::IsNullOrWhiteSpace($MessageBody)) {
+            Invoke-Git -RepositoryPath $RepositoryPath commit -m $Message | Out-Null
+        }
+        else {
+            Invoke-Git -RepositoryPath $RepositoryPath commit -m $Message -m $MessageBody | Out-Null
+        }
     }
 
     function New-TestRepository {
@@ -64,20 +72,36 @@ Describe 'generate-release-notes.ps1' {
         }
     }
 
-    It 'creates grouped house-style notes from tagged commits' {
-        $repoPath = Join-Path $TestDrive 'repo-grouped'
+    It 'renders commits since the previous tag in the new raw changelog format' {
+        $repoPath = Join-Path $TestDrive 'repo-raw-commits'
         New-TestRepository -Path $repoPath
         Invoke-Git -RepositoryPath $repoPath tag V1.0.0 | Out-Null
 
-        New-TestCommit -RepositoryPath $repoPath -Message 'feat(core): enhance path validation and extraction security' -Files @{
-            'EasyExtractUnitypackageRework/EasyExtract.Core/Services/UnityPackageExtractionService.Paths.cs' = 'security'
-        }
-        New-TestCommit -RepositoryPath $repoPath -Message 'fix(search): harden Everything SDK bootstrap locking' -Files @{
-            'EasyExtractUnitypackageRework/EasyExtractCrossPlatform/Services/EverythingSdkBootstrapper.cs' = 'search'
-        }
-        New-TestCommit -RepositoryPath $repoPath -Message 'chore(project): bump version to 1.1.0' -Files @{
-            'EasyExtractUnitypackageRework/EasyExtractCrossPlatform/EasyExtractCrossPlatform.csproj' = 'version'
-        }
+        New-TestCommit -RepositoryPath $repoPath `
+            -Message 'feat(core): enhance extraction security and sync authorization' `
+            -MessageBody @'
+Introduce security measures for UnityPackage extraction.
+
+Implement token-based authorization for synchronization services.
+'@ `
+            -Files @{
+                'EasyExtractUnitypackageRework/EasyExtract.Core/Services/UnityPackageExtractionService.Paths.cs' = 'security'
+            }
+
+        New-TestCommit -RepositoryPath $repoPath `
+            -Message 'refactor(logging): change error logs to warnings for invalid package data' `
+            -MessageBody 'Adjust log levels so invalid package data does not show up as a false hard failure.' `
+            -Files @{
+                'EasyExtractUnitypackageRework/EasyExtractCrossPlatform/Services/LoggingService.cs' = 'logging'
+            }
+
+        New-TestCommit -RepositoryPath $repoPath `
+            -Message 'chore(project): bump version to 1.1.0' `
+            -MessageBody 'Update project files to reflect the new version number.' `
+            -Files @{
+                'EasyExtractUnitypackageRework/EasyExtractCrossPlatform/EasyExtractCrossPlatform.csproj' = 'version'
+            }
+
         Invoke-Git -RepositoryPath $repoPath tag V1.1.0 | Out-Null
 
         $outputPath = Join-Path $TestDrive 'release-notes.md'
@@ -93,25 +117,50 @@ Describe 'generate-release-notes.ps1' {
 
         $content = Get-Content -Raw $outputPath
         $content | Should Match '^# V1.1.0'
-        $content | Should Match '## V1.1.0 - The .* Update'
-        $content | Should Match '### Security & Extraction'
-        $content | Should Match '### Search & UI'
+        $content | Should Match '## New Release Auto Generated Release Notes'
+        $content | Should Match 'Here are all commits since the last version:'
+        $content | Should Match 'feat\(core\): enhance extraction security and sync authorization'
+        $content | Should Match 'Introduce security measures for UnityPackage extraction\.'
+        $content | Should Match 'refactor\(logging\): change error logs to warnings for invalid package data'
+        $content | Should Match 'chore\(project\): bump version to 1\.1\.0'
+        $content | Should Match '### 📥 Installation Guides'
         $content | Should Match '\*\*Full Changelog\*\*: https://github.com/HakuSystems/EasyExtractUnitypackage/compare/V1.0.0\.\.\.V1.1.0'
-        $content | Should Not Match 'bump version'
     }
 
-    It 'adds the installation docs link when release workflow or installation files change' {
-        $repoPath = Join-Path $TestDrive 'repo-install-docs'
+    It 'skips merge commits but keeps normal commits including version bumps' {
+        $repoPath = Join-Path $TestDrive 'repo-skip-merges'
         New-TestRepository -Path $repoPath
         Invoke-Git -RepositoryPath $repoPath tag V2.0.0 | Out-Null
 
-        New-TestCommit -RepositoryPath $repoPath -Message 'feat(services): enhance update check logic with detailed states' -Files @{
-            '.github/workflows/publish.yml' = 'workflow'
-            'EasyExtractUnitypackageRework/EasyExtractCrossPlatform/docs/PlatformInstallation.md' = 'docs'
-        }
+        New-TestCommit -RepositoryPath $repoPath `
+            -Message 'fix(core): harden archive parser' `
+            -MessageBody 'Prevent malformed payloads from cascading into parser crashes.' `
+            -Files @{
+                'EasyExtractUnitypackageRework/EasyExtract.Core/Services/ArchiveParser.cs' = 'parser'
+            }
+
+        $mergeTree = Invoke-Git -RepositoryPath $repoPath write-tree
+        $parentHead = Invoke-Git -RepositoryPath $repoPath rev-parse HEAD
+        $mergeCommit = Invoke-Git -RepositoryPath $repoPath @(
+            'commit-tree',
+            $mergeTree,
+            '-p',
+            $parentHead,
+            '-m',
+            "Merge remote-tracking branch 'origin/main'"
+        )
+        Invoke-Git -RepositoryPath $repoPath reset --hard $mergeCommit | Out-Null
+
+        New-TestCommit -RepositoryPath $repoPath `
+            -Message 'chore(project): bump version to 2.1.0' `
+            -MessageBody 'Update project files to reflect version 2.1.0.' `
+            -Files @{
+                'EasyExtractUnitypackageRework/EasyExtractCrossPlatform/EasyExtractCrossPlatform.csproj' = 'version'
+            }
+
         Invoke-Git -RepositoryPath $repoPath tag V2.1.0 | Out-Null
 
-        $outputPath = Join-Path $TestDrive 'release-install-notes.md'
+        $outputPath = Join-Path $TestDrive 'release-merge-notes.md'
         & powershell -NoProfile -ExecutionPolicy Bypass -File $scriptPath `
             -RepositoryPath $repoPath `
             -CurrentTag 'V2.1.0' `
@@ -121,45 +170,22 @@ Describe 'generate-release-notes.ps1' {
 
         $LASTEXITCODE | Should Be 0
         $content = Get-Content -Raw $outputPath
-        $content | Should Match '### 📥 Installation Guides'
-        $content | Should Match 'View Platform Installation Docs'
-    }
-
-    It 'still emits valid notes when only release-noise commits exist' {
-        $repoPath = Join-Path $TestDrive 'repo-release-noise'
-        New-TestRepository -Path $repoPath
-        Invoke-Git -RepositoryPath $repoPath tag V3.0.0 | Out-Null
-
-        New-TestCommit -RepositoryPath $repoPath -Message 'chore(project): bump version to 3.0.1' -Files @{
-            'EasyExtractUnitypackageRework/EasyExtractCrossPlatform/EasyExtractCrossPlatform.csproj' = 'version'
-        }
-        New-TestCommit -RepositoryPath $repoPath -Message 'refactor(project): clean up formatting' -Files @{
-            'EasyExtractUnitypackageRework/EasyExtractCrossPlatform/App.axaml.cs' = 'cleanup'
-        }
-        Invoke-Git -RepositoryPath $repoPath tag V3.0.1 | Out-Null
-
-        $outputPath = Join-Path $TestDrive 'release-noise-notes.md'
-        & powershell -NoProfile -ExecutionPolicy Bypass -File $scriptPath `
-            -RepositoryPath $repoPath `
-            -CurrentTag 'V3.0.1' `
-            -PreviousTag 'V3.0.0' `
-            -RepoUrl 'https://github.com/HakuSystems/EasyExtractUnitypackage' `
-            -OutputPath $outputPath
-
-        $LASTEXITCODE | Should Be 0
-        $content = Get-Content -Raw $outputPath
-        $content | Should Match '^# V3.0.1'
-        $content | Should Match '### Under the Hood'
-        $content | Should Match '\*\*Full Changelog\*\*: https://github.com/HakuSystems/EasyExtractUnitypackage/compare/V3.0.0\.\.\.V3.0.1'
+        $content | Should Match 'fix\(core\): harden archive parser'
+        $content | Should Match 'chore\(project\): bump version to 2\.1\.0'
+        $content | Should Not Match 'Merge remote-tracking branch'
     }
 
     It 'falls back to a commits link when there is no previous tag' {
         $repoPath = Join-Path $TestDrive 'repo-no-previous-tag'
         New-TestRepository -Path $repoPath
 
-        New-TestCommit -RepositoryPath $repoPath -Message 'feat(search): improve keyboard shortcut handling' -Files @{
-            'EasyExtractUnitypackageRework/EasyExtractCrossPlatform/Utilities/DeferredTextBoxShortcutHandler.cs' = 'shortcut'
-        }
+        New-TestCommit -RepositoryPath $repoPath `
+            -Message 'feat(search): improve keyboard shortcut handling' `
+            -MessageBody 'Keep the search box responsive under repeated shortcut input.' `
+            -Files @{
+                'EasyExtractUnitypackageRework/EasyExtractCrossPlatform/Utilities/DeferredTextBoxShortcutHandler.cs' = 'shortcut'
+            }
+
         Invoke-Git -RepositoryPath $repoPath tag V4.0.0 | Out-Null
 
         $outputPath = Join-Path $TestDrive 'release-first-tag-notes.md'
@@ -175,17 +201,86 @@ Describe 'generate-release-notes.ps1' {
         $content | Should Match '\*\*Full Changelog\*\*: https://github.com/HakuSystems/EasyExtractUnitypackage/commits/V4.0.0'
     }
 
+    It 'preserves conventional commit body and footer sections' {
+        $repoPath = Join-Path $TestDrive 'repo-conventional-footer'
+        New-TestRepository -Path $repoPath
+        Invoke-Git -RepositoryPath $repoPath tag V4.1.0 | Out-Null
+
+        New-TestCommit -RepositoryPath $repoPath `
+            -Message 'feat(api): harden release notes parsing' `
+            -MessageBody @'
+Normalize commit bodies before rendering them into release notes.
+
+BREAKING CHANGE: release notes now split commit footers explicitly.
+'@ `
+            -Files @{
+                'EasyExtractUnitypackageRework/EasyExtractCrossPlatform/Services/ReleaseNotesParser.cs' = 'parser'
+            }
+
+        Invoke-Git -RepositoryPath $repoPath tag V4.2.0 | Out-Null
+
+        $outputPath = Join-Path $TestDrive 'release-footer-notes.md'
+        & powershell -NoProfile -ExecutionPolicy Bypass -File $scriptPath `
+            -RepositoryPath $repoPath `
+            -CurrentTag 'V4.2.0' `
+            -PreviousTag 'V4.1.0' `
+            -RepoUrl 'https://github.com/HakuSystems/EasyExtractUnitypackage' `
+            -OutputPath $outputPath
+
+        $LASTEXITCODE | Should Be 0
+        $content = Get-Content -Raw $outputPath
+        $content | Should Match 'feat\(api\): harden release notes parsing'
+        $content | Should Match 'Normalize commit bodies before rendering them into release notes\.'
+        $content | Should Match 'BREAKING CHANGE: release notes now split commit footers explicitly\.'
+    }
+
+    It 'filters out commits that do not match the supported Rider format' {
+        $repoPath = Join-Path $TestDrive 'repo-filter-invalid-subjects'
+        New-TestRepository -Path $repoPath
+        Invoke-Git -RepositoryPath $repoPath tag V4.2.0 | Out-Null
+
+        New-TestCommit -RepositoryPath $repoPath `
+            -Message 'Update README formatting' `
+            -MessageBody 'This should not be emitted because the subject is not in the supported format.' `
+            -Files @{
+                'README.md' = 'readme'
+            }
+
+        New-TestCommit -RepositoryPath $repoPath `
+            -Message 'docs(readme): clarify release notes format' `
+            -MessageBody 'Document the expected Rider-style commit message rules for release notes.' `
+            -Files @{
+                'docs/release-notes.md' = 'rules'
+            }
+
+        Invoke-Git -RepositoryPath $repoPath tag V4.3.0 | Out-Null
+
+        $outputPath = Join-Path $TestDrive 'release-filtered-notes.md'
+        & powershell -NoProfile -ExecutionPolicy Bypass -File $scriptPath `
+            -RepositoryPath $repoPath `
+            -CurrentTag 'V4.3.0' `
+            -PreviousTag 'V4.2.0' `
+            -RepoUrl 'https://github.com/HakuSystems/EasyExtractUnitypackage' `
+            -OutputPath $outputPath
+
+        $LASTEXITCODE | Should Be 0
+        $content = Get-Content -Raw $outputPath
+        $content | Should Not Match 'Update README formatting'
+        $content | Should Match 'docs\(readme\): clarify release notes format'
+    }
+
     It 'emits XML-safe notes for Velopack packaging' {
         $repoPath = Join-Path $TestDrive 'repo-velopack-safe'
         New-TestRepository -Path $repoPath
         Invoke-Git -RepositoryPath $repoPath tag V5.0.0 | Out-Null
 
-        New-TestCommit -RepositoryPath $repoPath -Message 'feat(core): enhance path validation and extraction security' -Files @{
-            'EasyExtractUnitypackageRework/EasyExtract.Core/Services/UnityPackageExtractionService.Paths.cs' = 'security'
-        }
-        New-TestCommit -RepositoryPath $repoPath -Message 'fix(search): harden Everything SDK bootstrap locking' -Files @{
-            'EasyExtractUnitypackageRework/EasyExtractCrossPlatform/Services/EverythingSdkBootstrapper.cs' = 'search'
-        }
+        New-TestCommit -RepositoryPath $repoPath `
+            -Message 'feat(core): support special characters in release notes' `
+            -MessageBody 'Handle A & B < C > D without breaking package metadata.' `
+            -Files @{
+                'EasyExtractUnitypackageRework/EasyExtract.Core/Services/ReleaseNotesService.cs' = 'special'
+            }
+
         Invoke-Git -RepositoryPath $repoPath tag V5.1.0 | Out-Null
 
         $outputPath = Join-Path $TestDrive 'release-velopack-notes.md'
@@ -199,8 +294,7 @@ Describe 'generate-release-notes.ps1' {
 
         $LASTEXITCODE | Should Be 0
         $content = Get-Content -Raw $outputPath
-        $content | Should Match '### Security &amp; Extraction'
-        $content | Should Match '### Search &amp; UI'
+        $content | Should Match 'A &amp; B &lt; C &gt; D'
 
         $wrappedXml = "<releaseNotes>$content</releaseNotes>"
         $xmlParseError = $null
@@ -213,7 +307,6 @@ Describe 'generate-release-notes.ps1' {
         }
 
         $xmlParseError | Should Be $null
-        $xml.DocumentElement.InnerText | Should Match 'Security & Extraction'
-        $xml.DocumentElement.InnerText | Should Match 'Search & UI'
+        $xml.DocumentElement.InnerText | Should Match 'A & B < C > D'
     }
 }
