@@ -174,4 +174,46 @@ Describe 'generate-release-notes.ps1' {
         $content | Should Match '^# V4.0.0'
         $content | Should Match '\*\*Full Changelog\*\*: https://github.com/HakuSystems/EasyExtractUnitypackage/commits/V4.0.0'
     }
+
+    It 'emits XML-safe notes for Velopack packaging' {
+        $repoPath = Join-Path $TestDrive 'repo-velopack-safe'
+        New-TestRepository -Path $repoPath
+        Invoke-Git -RepositoryPath $repoPath tag V5.0.0 | Out-Null
+
+        New-TestCommit -RepositoryPath $repoPath -Message 'feat(core): enhance path validation and extraction security' -Files @{
+            'EasyExtractUnitypackageRework/EasyExtract.Core/Services/UnityPackageExtractionService.Paths.cs' = 'security'
+        }
+        New-TestCommit -RepositoryPath $repoPath -Message 'fix(search): harden Everything SDK bootstrap locking' -Files @{
+            'EasyExtractUnitypackageRework/EasyExtractCrossPlatform/Services/EverythingSdkBootstrapper.cs' = 'search'
+        }
+        Invoke-Git -RepositoryPath $repoPath tag V5.1.0 | Out-Null
+
+        $outputPath = Join-Path $TestDrive 'release-velopack-notes.md'
+        & powershell -NoProfile -ExecutionPolicy Bypass -File $scriptPath `
+            -RepositoryPath $repoPath `
+            -CurrentTag 'V5.1.0' `
+            -PreviousTag 'V5.0.0' `
+            -RepoUrl 'https://github.com/HakuSystems/EasyExtractUnitypackage' `
+            -OutputPath $outputPath `
+            -OutputMode 'Velopack'
+
+        $LASTEXITCODE | Should Be 0
+        $content = Get-Content -Raw $outputPath
+        $content | Should Match '### Security &amp; Extraction'
+        $content | Should Match '### Search &amp; UI'
+
+        $wrappedXml = "<releaseNotes>$content</releaseNotes>"
+        $xmlParseError = $null
+        $xml = $null
+        try {
+            $xml = [xml] $wrappedXml
+        }
+        catch {
+            $xmlParseError = $_
+        }
+
+        $xmlParseError | Should Be $null
+        $xml.DocumentElement.InnerText | Should Match 'Security & Extraction'
+        $xml.DocumentElement.InnerText | Should Match 'Search & UI'
+    }
 }

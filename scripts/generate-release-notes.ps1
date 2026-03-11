@@ -10,7 +10,10 @@ param(
     [Parameter(Mandatory = $true)]
     [string] $OutputPath,
 
-    [string] $RepositoryPath = '.'
+    [string] $RepositoryPath = '.',
+
+    [ValidateSet('GitHub', 'Velopack')]
+    [string] $OutputMode = 'GitHub'
 )
 
 $ErrorActionPreference = 'Stop'
@@ -419,6 +422,15 @@ function Get-InstallationHeading {
     return "### $emoji Installation Guides"
 }
 
+function ConvertTo-XmlSafeContent {
+    param(
+        [Parameter(Mandatory = $true)]
+        [string] $Content
+    )
+
+    return [System.Security.SecurityElement]::Escape($Content)
+}
+
 function Get-ReleaseNotesContent {
     param(
         [Parameter(Mandatory = $true)]
@@ -493,6 +505,11 @@ if (-not [string]::IsNullOrWhiteSpace($PreviousTag)) {
 
 $commitEntries = Get-CommitEntries
 $releaseNotes = Get-ReleaseNotesContent -Commits $commitEntries
+
+if ($OutputMode -eq 'Velopack') {
+    $releaseNotes = ConvertTo-XmlSafeContent -Content $releaseNotes
+}
+
 $outputDirectory = Split-Path -Parent $OutputPath
 
 if ($outputDirectory -and -not (Test-Path $outputDirectory)) {
