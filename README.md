@@ -6,7 +6,7 @@
   <br/>
   
   [![GitHub Releases](https://img.shields.io/github/downloads/HakuSystems/EasyExtractUnitypackage/total?style=for-the-badge&color=blue)](https://github.com/HakuSystems/EasyExtractUnitypackage/releases)
-  [![Discord](https://img.shields.io/discord/11234567890?label=Discord&style=for-the-badge&color=5865F2)](https://discord.gg/Wn7XfhPCyD)
+  [![Discord](https://img.shields.io/discord/954774333283262514?label=Discord&style=for-the-badge&color=5865F2)](https://discord.gg/Wn7XfhPCyD)
   [![Platform](https://img.shields.io/badge/Platform-Win%20%7C%20Mac%20%7C%20Linux-lightgrey?style=for-the-badge)](https://github.com/HakuSystems/EasyExtractUnitypackage)
 
 </div>
