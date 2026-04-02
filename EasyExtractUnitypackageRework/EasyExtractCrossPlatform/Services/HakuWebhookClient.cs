@@ -23,7 +23,7 @@ public sealed class WebhookRequest
 public sealed class HakuWebhookClient
 {
     internal const string ApiBaseUrl = "https://easyextract.net/";
-    private const string EndpointPath = "api/haku/webhooks/send";
+    private const string EndpointPath = "api/haku/v1/webhooks/send";
     private readonly string _appName;
     private readonly Func<string?> _deviceIdProvider;
     private readonly HttpClient _httpClient;
