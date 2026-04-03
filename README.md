@@ -20,15 +20,23 @@ EasyExtract is the ultimate tool to unpack, inspect, and manage Unity packages (
 Whether you are a developer checking assets or a power user managing a massive library, EasyExtract provides a high-performance, cross-platform solution (built with **Avalonia**) to streamline your workflow.
 
 **Choose your weapon:**
-* **Desktop Client (Recommended):** Full offline power, auto-updates, system-wide search, and deep integration.
-* **Web App:** Instant, no-install extraction directly in your browser.
+* **Web App:** The fastest way to start. Instant, no-install extraction directly in your browser.
+* **Desktop Client:** Free offline power, auto-updates, system-wide search, and deep integration.
 
 ---
 
 ## 📥 Download & Quick Start
 
+### 🌐 Web Version
+*The fastest way to get value.*
+
+1.  Go to [https://easyextract.net/](https://easyextract.net/).
+2.  Drag & drop a `.unitypackage`.
+3.  Preview, scan, and extract immediately.
+4.  Free Web includes **3 extractions or 1 GB every 30 days**. Upgrade to **Premium Web** for unlimited browser extraction.
+
 ### 🖥️ Desktop App (Windows, macOS, Linux)
-*The complete experience with Auto-Updates.*
+*Free offline extraction with auto-updates.*
 
 1.  **Download** the latest release from [GitHub Releases](https://github.com/HakuSystems/EasyExtractUnitypackage/releases).
 2.  **Install & Run:**
@@ -38,13 +46,6 @@ Whether you are a developer checking assets or a power user managing a massive l
 3.  **Enjoy:** Drag & drop files, or let the auto-search find packages for you.
 
 *(Check [Installation Docs](https://github.com/HakuSystems/EasyExtractUnitypackage/blob/main/EasyExtractUnitypackageRework/EasyExtractCrossPlatform/docs/PlatformInstallation.md) for detailed steps)*
-
-### 🌐 Web Version
-*For quick, on-the-fly access.*
-
-1.  Go to [https://easyextract.net/](https://easyextract.net/).
-2.  Drag & drop a `.unitypackage`.
-3.  Extract immediately.
 
 ---
 
@@ -82,24 +83,25 @@ Don't import blind. Know what's inside.
 ## 🔒 Web App Features
 
 * **Zero Install:** Runs entirely in-browser using modern File System APIs.
+* **Free First Use:** Start with 3 extractions or 1 GB every 30 days before you ever need to pay.
+* **Premium Web:** Unlock unlimited browser extraction, account-linked access on any device, and priority support.
 * **Security:** Built-in scanner for webhooks and suspicious code patterns before you download.
-* **Privacy:** Standard extraction is ephemeral. *EasyExtract Paid* (Gumroad) allows enabling "Local Mode" to keep files private on your machine without server uploads.
 
 ---
 
 ## ⚔️ Feature Comparison
 
-| Feature | Desktop App (Recommended) | Web Version (Free) |
+| Feature | Web Version | Desktop App |
 | :--- | :---: | :---: |
-| **Platform** | **Windows, Linux, macOS** | Browser |
-| **Setup** | **One-Click Installer (Auto-Update)** | Instant |
-| **System Search** | **Yes (Everything / Spotlight)** | No |
-| **Zip Extraction** | **Yes** | No |
-| **Batch Processing** | **Unlimited Queue** | Limited |
-| **Security Scanning** | **Advanced (Deep Scan)** | Basic |
-| **Offline Access** | **Yes** | No |
-| **Context Menu** | **Yes** | No |
-| **Cost** | **Free** (Pro planned) | Free (Paid Add-on optional) |
+| **Platform** | Browser | **Windows, Linux, macOS** |
+| **Setup** | **Instant** | One-Click Installer (Auto-Update) |
+| **Account History** | **Yes** | No |
+| **Free Limit** | **3 extractions or 1 GB / 30 days** | Completely free |
+| **Paid Upgrade** | **Premium Web (Unlimited)** | None |
+| **Batch Processing** | Good for quick jobs | **Best for large local queues** |
+| **Offline Access** | No | **Yes** |
+| **Context Menu** | No | **Yes** |
+| **Cost** | Free to start, paid for unlimited | **Free** |
 
 ---
 
