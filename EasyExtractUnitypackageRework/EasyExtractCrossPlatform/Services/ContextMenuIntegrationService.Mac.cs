@@ -92,9 +92,7 @@ public static partial class ContextMenuIntegrationService
     {
 	    var candidates = new[]
 	    {
-		    Environment.GetEnvironmentVariable("HOME"),
-		    Environment.GetFolderPath(Environment.SpecialFolder.UserProfile),
-		    BuildUserProfileFromUserName()
+		    Environment.GetEnvironmentVariable("HOME"), Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), BuildUserProfileFromUserName()
 	    };
 
 	    foreach (var candidate in candidates)

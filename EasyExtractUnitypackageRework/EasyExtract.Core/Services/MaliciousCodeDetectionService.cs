@@ -44,14 +44,15 @@ public sealed class MaliciousCodeDetectionService : IMaliciousCodeDetectionServi
 
     private static readonly HashSet<string> ScannableExtensions = new(StringComparer.OrdinalIgnoreCase)
     {
-        ".cs", ".js", ".boo", ".dll.txt" // dll.txt sometimes used for stealth
+        ".cs",
+        ".js",
+        ".boo",
+        ".dll.txt" // dll.txt sometimes used for stealth
     };
 
     private static readonly string[] AllowedDomains =
     {
-        "unity.com", "unity3d.com", "github.com", "google.com", "microsoft.com", "stackoverflow.com",
-        "twitter.com", "x.com", "youtube.com", "discord.gg", "discord.com", "patreon.com", "ko-fi.com",
-        "paypal.com", "imgur.com", "pastebin.com", "hastebin.com", "gist.github.com"
+        "unity.com", "unity3d.com", "github.com", "google.com", "microsoft.com", "stackoverflow.com", "twitter.com", "x.com", "youtube.com", "discord.gg", "discord.com", "patreon.com", "ko-fi.com", "paypal.com", "imgur.com", "pastebin.com", "hastebin.com", "gist.github.com"
     };
 
     private static readonly SearchValues<string> FastPathKeywords = SearchValues.Create(
@@ -382,7 +383,7 @@ public sealed class MaliciousCodeDetectionService : IMaliciousCodeDetectionServi
             if (value == 0)
                 return false;
 
-            if (value < 9 || (value > 13 && value < 32))
+            if (value < 9 || value > 13 && value < 32)
                 controlCount++;
         }
 

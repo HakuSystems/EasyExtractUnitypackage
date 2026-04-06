@@ -120,8 +120,14 @@ public partial class UnityPackagePreviewWindow : Window
             DefaultExtension = ext.TrimStart('.'),
             FileTypeChoices =
             [
-                new FilePickerFileType("Asset file") { Patterns = [$"*{ext}"] },
-                new FilePickerFileType("All files") { Patterns = ["*"] }
+                new FilePickerFileType("Asset file")
+                {
+                    Patterns = [$"*{ext}"]
+                },
+                new FilePickerFileType("All files")
+                {
+                    Patterns = ["*"]
+                }
             ]
         });
 

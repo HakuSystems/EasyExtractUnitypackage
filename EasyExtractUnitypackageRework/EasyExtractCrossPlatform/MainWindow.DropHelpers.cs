@@ -202,7 +202,10 @@ public partial class MainWindow : Window
         if (string.IsNullOrWhiteSpace(input))
             yield break;
 
-        var segments = input.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
+        var segments = input.Split(new[]
+        {
+            '\r', '\n'
+        }, StringSplitOptions.RemoveEmptyEntries);
         foreach (var segment in segments)
         {
             var trimmed = segment.Trim();

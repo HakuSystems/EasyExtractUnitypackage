@@ -43,15 +43,11 @@ public sealed class CreditsViewModel : INotifyPropertyChanged
             "Keeps EasyExtract shipping on every platform and fixes things the second they break.",
             new[]
             {
-                "Vision keeper",
-                "Release captain",
-                "Systems designer"
+                "Vision keeper", "Release captain", "Systems designer"
             },
             new[]
             {
-                "Started EasyExtract to solve a rough Unity workflow and still leads every release.",
-                "Owns the extractor core, cross-platform search, and Discord status hook.",
-                "Turns late-night Discord threads into real fixes, docs, and builds."
+                "Started EasyExtract to solve a rough Unity workflow and still leads every release.", "Owns the extractor core, cross-platform search, and Discord status hook.", "Turns late-night Discord threads into real fixes, docs, and builds."
             },
             "#FF6B8D",
             "#FFC778",
@@ -65,15 +61,11 @@ public sealed class CreditsViewModel : INotifyPropertyChanged
             "\"EasyExtractUwUnitypackage\" legend who keeps the vibe light.",
             new[]
             {
-                "UX spark",
-                "Overlay hype",
-                "Queue guide"
+                "UX spark", "Overlay hype", "Queue guide"
             },
             new[]
             {
-                "Asked for a proper credits view instead of hidden shout-outs.",
-                "Coined the UwU module idea during a 2022 chat and it still makes us grin.",
-                "Breaks weird queue flows so we polish copy and animations."
+                "Asked for a proper credits view instead of hidden shout-outs.", "Coined the UwU module idea during a 2022 chat and it still makes us grin.", "Breaks weird queue flows so we polish copy and animations."
             },
             "#6ED5FF",
             "#9C6BFF",
@@ -87,15 +79,11 @@ public sealed class CreditsViewModel : INotifyPropertyChanged
             "Shared the long write-up that made us fix window size, position, and scaling.",
             new[]
             {
-                "Bug scout",
-                "High-DPI helper",
-                "Output-path fan"
+                "Bug scout", "High-DPI helper", "Output-path fan"
             },
             new[]
             {
-                "Showed how 140% scaling hid buttons, which led to saved window bounds.",
-                "Asked for manual GUI scaling sliders so we keep working on accessibility.",
-                "Requested a custom output path option and got it shipped."
+                "Showed how 140% scaling hid buttons, which led to saved window bounds.", "Asked for manual GUI scaling sliders so we keep working on accessibility.", "Requested a custom output path option and got it shipped."
             },
             "#58FFE0",
             "#3C9CFF",
@@ -109,15 +97,11 @@ public sealed class CreditsViewModel : INotifyPropertyChanged
             "Found the hosted extractor edge cases so others could finish their jobs.",
             new[]
             {
-                "Website tester",
-                "Browser sleuth",
-                "Support scout"
+                "Website tester", "Browser sleuth", "Support scout"
             },
             new[]
             {
-                "Hit the \"No destination folder\" wall on the site and shared repro steps.",
-                "Confirmed Brave-specific issues so we could warn users and suggest Firefox/Chrome.",
-                "Kept pinging us until the hosted UI had better copy and screenshots."
+                "Hit the \"No destination folder\" wall on the site and shared repro steps.", "Confirmed Brave-specific issues so we could warn users and suggest Firefox/Chrome.", "Kept pinging us until the hosted UI had better copy and screenshots."
             },
             "#FF8F70",
             "#FF4F84",
@@ -131,15 +115,11 @@ public sealed class CreditsViewModel : INotifyPropertyChanged
             "Shared the extension-fixer idea and tons of sample data.",
             new[]
             {
-                "Extension hunter",
-                "Beta partner",
-                "Freeze buster"
+                "Extension hunter", "Beta partner", "Freeze buster"
             },
             new[]
             {
-                "Explained the broken extension bug after processing 1,600 packages.",
-                "Sent ExtensionFixer + extensions.txt so we could improve our normalizer.",
-                "Asked for backend-only extraction and optional previews to stop UI freezes."
+                "Explained the broken extension bug after processing 1,600 packages.", "Sent ExtensionFixer + extensions.txt so we could improve our normalizer.", "Asked for backend-only extraction and optional previews to stop UI freezes."
             },
             "#FFB347",
             "#FFCC33",
@@ -153,15 +133,11 @@ public sealed class CreditsViewModel : INotifyPropertyChanged
             "Raised the extraction failure that sent us digging into mesh data.",
             new[]
             {
-                "Mesh guard",
-                "Error hunter",
-                "Early user"
+                "Mesh guard", "Error hunter", "Early user"
             },
             new[]
             {
-                "Shared the July 2024 package that failed after other tools lost materials.",
-                "Gave us logs that hardened the importer and error messages.",
-                "Reminds us that good meshes and animations matter more than speed."
+                "Shared the July 2024 package that failed after other tools lost materials.", "Gave us logs that hardened the importer and error messages.", "Reminds us that good meshes and animations matter more than speed."
             },
             "#7B61FF",
             "#C46CFF",
@@ -175,15 +151,11 @@ public sealed class CreditsViewModel : INotifyPropertyChanged
             "Forked the app when it was tiny and helped build the base we use today.",
             new[]
             {
-                "Fork pioneer",
-                "Feature buddy",
-                "Community glue"
+                "Fork pioneer", "Feature buddy", "Community glue"
             },
             new[]
             {
-                "Shared an early fork full of fixes we merged.",
-                "Paired on UX polish and pipeline choices back when EasyExtract was a rough prototype.",
-                "Still drops ideas even when they live only in code or docs."
+                "Shared an early fork full of fixes we merged.", "Paired on UX polish and pipeline choices back when EasyExtract was a rough prototype.", "Still drops ideas even when they live only in code or docs."
             },
             "#4CE5B6",
             "#4AA1FF",
@@ -197,15 +169,11 @@ public sealed class CreditsViewModel : INotifyPropertyChanged
             "Made the EasyExtract logo and gave us the color story we lean on.",
             new[]
             {
-                "Logo artist",
-                "Palette guide",
-                "UI mood-setter"
+                "Logo artist", "Palette guide", "UI mood-setter"
             },
             new[]
             {
-                "Designed the EasyExtract logo and app icon you see on every splash and build.",
-                "Shared palette and lighting notes that inspired the glass gradients.",
-                "Still gives quick feedback whenever we tweak the hero visuals."
+                "Designed the EasyExtract logo and app icon you see on every splash and build.", "Shared palette and lighting notes that inspired the glass gradients.", "Still gives quick feedback whenever we tweak the hero visuals."
             },
             "#6AD1FF",
             "#9BF0FF",

@@ -17,8 +17,7 @@ public sealed partial class EverythingSearchService
 
     private static readonly string[] ExcludedSearchScopes =
     {
-        @"!""C:\$RECYCLE.BIN\""",
-        @"!""E:\$RECYCLE.BIN\"""
+        @"!""C:\$RECYCLE.BIN\""", @"!""E:\$RECYCLE.BIN\"""
     };
 
     private static readonly string[] ExcludedPathFragments =

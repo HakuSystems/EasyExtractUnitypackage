@@ -77,7 +77,10 @@ public partial class MainWindow : Window
 
         try
         {
-            var result = QueueUnityPackages(new[] { packagePath });
+            var result = QueueUnityPackages(new[]
+            {
+                packagePath
+            });
             var fileName = Path.GetFileName(packagePath);
 
             if (result.AddedCount > 0)

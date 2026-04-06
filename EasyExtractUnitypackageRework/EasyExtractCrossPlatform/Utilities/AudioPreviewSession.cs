@@ -9,13 +9,35 @@ public sealed class AudioPreviewSession : IDisposable
 
     private static readonly HashSet<string> KnownAudioExtensions = new(StringComparer.OrdinalIgnoreCase)
     {
-        ".wav", ".wave", ".mp3", ".mp2", ".aiff", ".aif", ".aiffc", ".ogg", ".oga", ".flac", ".m4a", ".aac", ".wma",
-        ".opus", ".caf", ".au", ".mka", ".mpa"
+        ".wav",
+        ".wave",
+        ".mp3",
+        ".mp2",
+        ".aiff",
+        ".aif",
+        ".aiffc",
+        ".ogg",
+        ".oga",
+        ".flac",
+        ".m4a",
+        ".aac",
+        ".wma",
+        ".opus",
+        ".caf",
+        ".au",
+        ".mka",
+        ".mpa"
     };
 
     private static readonly HashSet<string> StreamCapableExtensions = new(StringComparer.OrdinalIgnoreCase)
     {
-        ".wav", ".wave", ".mp3", ".aiff", ".aif", ".ogg", ".oga"
+        ".wav",
+        ".wave",
+        ".mp3",
+        ".aiff",
+        ".aif",
+        ".ogg",
+        ".oga"
     };
 
     private readonly byte[]? _data;
@@ -153,7 +175,10 @@ public sealed class AudioPreviewSession : IDisposable
             if (_reader is null)
                 return false;
 
-            _waveOut = new WaveOutEvent { DesiredLatency = 120 };
+            _waveOut = new WaveOutEvent
+            {
+                DesiredLatency = 120
+            };
             _waveOut.Init(_reader);
             _waveOut.PlaybackStopped += OnPlaybackStopped;
             return true;

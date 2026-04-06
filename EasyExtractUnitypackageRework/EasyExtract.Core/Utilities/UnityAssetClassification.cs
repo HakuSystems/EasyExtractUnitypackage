@@ -5,57 +5,242 @@ public static class UnityAssetClassification
     private static readonly Dictionary<string, string> ExtensionToCategory = new(StringComparer.OrdinalIgnoreCase)
     {
         // Textures
-        { ".png", "Texture" }, { ".jpg", "Texture" }, { ".jpeg", "Texture" }, { ".tga", "Texture" },
-        { ".tif", "Texture" }, { ".tiff", "Texture" }, { ".psd", "Texture" }, { ".bmp", "Texture" },
-        { ".dds", "Texture" }, { ".gif", "Texture" }, { ".hdr", "Texture" }, { ".exr", "Texture" },
+        {
+            ".png", "Texture"
+        },
+        {
+            ".jpg", "Texture"
+        },
+        {
+            ".jpeg", "Texture"
+        },
+        {
+            ".tga", "Texture"
+        },
+        {
+            ".tif", "Texture"
+        },
+        {
+            ".tiff", "Texture"
+        },
+        {
+            ".psd", "Texture"
+        },
+        {
+            ".bmp", "Texture"
+        },
+        {
+            ".dds", "Texture"
+        },
+        {
+            ".gif", "Texture"
+        },
+        {
+            ".hdr", "Texture"
+        },
+        {
+            ".exr", "Texture"
+        },
 
         // 3D Models
-        { ".fbx", "3D Model" }, { ".obj", "3D Model" }, { ".dae", "3D Model" }, { ".blend", "3D Model" },
-        { ".3ds", "3D Model" }, { ".dxf", "3D Model" }, { ".stl", "3D Model" },
+        {
+            ".fbx", "3D Model"
+        },
+        {
+            ".obj", "3D Model"
+        },
+        {
+            ".dae", "3D Model"
+        },
+        {
+            ".blend", "3D Model"
+        },
+        {
+            ".3ds", "3D Model"
+        },
+        {
+            ".dxf", "3D Model"
+        },
+        {
+            ".stl", "3D Model"
+        },
 
         // Audio
-        { ".wav", "Audio" }, { ".wave", "Audio" }, { ".mp3", "Audio" }, { ".ogg", "Audio" },
-        { ".oga", "Audio" }, { ".aiff", "Audio" }, { ".aif", "Audio" }, { ".flac", "Audio" },
-        { ".m4a", "Audio" }, { ".aac", "Audio" }, { ".wma", "Audio" }, { ".opus", "Audio" },
-        { ".caf", "Audio" }, { ".au", "Audio" },
+        {
+            ".wav", "Audio"
+        },
+        {
+            ".wave", "Audio"
+        },
+        {
+            ".mp3", "Audio"
+        },
+        {
+            ".ogg", "Audio"
+        },
+        {
+            ".oga", "Audio"
+        },
+        {
+            ".aiff", "Audio"
+        },
+        {
+            ".aif", "Audio"
+        },
+        {
+            ".flac", "Audio"
+        },
+        {
+            ".m4a", "Audio"
+        },
+        {
+            ".aac", "Audio"
+        },
+        {
+            ".wma", "Audio"
+        },
+        {
+            ".opus", "Audio"
+        },
+        {
+            ".caf", "Audio"
+        },
+        {
+            ".au", "Audio"
+        },
 
         // Scripts & Code
-        { ".cs", "Script" }, { ".js", "Script" }, { ".boo", "Script" }, { ".asmdef", "Script" },
+        {
+            ".cs", "Script"
+        },
+        {
+            ".js", "Script"
+        },
+        {
+            ".boo", "Script"
+        },
+        {
+            ".asmdef", "Script"
+        },
 
         // Shaders
-        { ".shader", "Shader" }, { ".cg", "Shader" }, { ".cginc", "Shader" }, { ".compute", "Shader" },
-        { ".shadergraph", "Shader" }, { ".shadersubgraph", "Shader" }, { ".hlsl", "Shader" },
-        { ".glsl", "Shader" },
+        {
+            ".shader", "Shader"
+        },
+        {
+            ".cg", "Shader"
+        },
+        {
+            ".cginc", "Shader"
+        },
+        {
+            ".compute", "Shader"
+        },
+        {
+            ".shadergraph", "Shader"
+        },
+        {
+            ".shadersubgraph", "Shader"
+        },
+        {
+            ".hlsl", "Shader"
+        },
+        {
+            ".glsl", "Shader"
+        },
 
         // Plugins
-        { ".dll", "DLL" },
+        {
+            ".dll", "DLL"
+        },
 
         // Animations
-        { ".anim", "Animation" }, { ".controller", "Animation" },
-        { ".overridecontroller", "Animation" }, { ".mask", "Animation" },
+        {
+            ".anim", "Animation"
+        },
+        {
+            ".controller", "Animation"
+        },
+        {
+            ".overridecontroller", "Animation"
+        },
+        {
+            ".mask", "Animation"
+        },
 
         // Materials
-        { ".mat", "Material" }, { ".physicmaterial", "Material" },
+        {
+            ".mat", "Material"
+        },
+        {
+            ".physicmaterial", "Material"
+        },
 
         // Prefabs
-        { ".prefab", "Prefab" },
+        {
+            ".prefab", "Prefab"
+        },
 
         // Scenes
-        { ".unity", "Scene" },
+        {
+            ".unity", "Scene"
+        },
 
         // Fonts
-        { ".ttf", "Font" }, { ".otf", "Font" },
+        {
+            ".ttf", "Font"
+        },
+        {
+            ".otf", "Font"
+        },
 
         // Documents / Configs
-        { ".pdf", "Document" }, { ".txt", "Document" }, { ".md", "Document" }, { ".rtf", "Document" },
-        { ".json", "Document" }, { ".xml", "Document" }, { ".yml", "Document" }, { ".yaml", "Document" },
-        { ".uss", "Document" }, { ".uxml", "Document" },
+        {
+            ".pdf", "Document"
+        },
+        {
+            ".txt", "Document"
+        },
+        {
+            ".md", "Document"
+        },
+        {
+            ".rtf", "Document"
+        },
+        {
+            ".json", "Document"
+        },
+        {
+            ".xml", "Document"
+        },
+        {
+            ".yml", "Document"
+        },
+        {
+            ".yaml", "Document"
+        },
+        {
+            ".uss", "Document"
+        },
+        {
+            ".uxml", "Document"
+        },
 
         // Videos
-        { ".mp4", "Video" }, { ".mov", "Video" }, { ".webm", "Video" },
+        {
+            ".mp4", "Video"
+        },
+        {
+            ".mov", "Video"
+        },
+        {
+            ".webm", "Video"
+        },
 
         // Generic Asset
-        { ".asset", "Asset" }
+        {
+            ".asset", "Asset"
+        }
     };
 
     public static string ResolveCategory(string? relativePath, long assetSizeBytes, bool hasAssetData)

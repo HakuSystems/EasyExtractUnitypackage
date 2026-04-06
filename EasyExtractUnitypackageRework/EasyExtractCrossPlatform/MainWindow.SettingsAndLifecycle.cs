@@ -229,7 +229,10 @@ public partial class MainWindow : Window
                 return;
 
             var url = $"https://easyextract.net/dashboard?sync_id={_settings.DeviceId}";
-            Process.Start(new ProcessStartInfo(url) { UseShellExecute = true });
+            Process.Start(new ProcessStartInfo(url)
+            {
+                UseShellExecute = true
+            });
             _lastDashboardOpenUtc = now;
             UiSoundService.Instance.Play(UiSoundEffect.Subtle);
         }

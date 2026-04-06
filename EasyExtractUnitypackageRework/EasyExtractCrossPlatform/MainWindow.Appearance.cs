@@ -258,7 +258,10 @@ public partial class MainWindow : Window
         if (normalized.StartsWith("v", StringComparison.OrdinalIgnoreCase))
             normalized = normalized[1..].Trim();
 
-        var separatorIndex = normalized.IndexOfAny(new[] { ' ', '-', '+', '_' });
+        var separatorIndex = normalized.IndexOfAny(new[]
+        {
+            ' ', '-', '+', '_'
+        });
         if (separatorIndex > 0)
             normalized = normalized[..separatorIndex].Trim();
 
@@ -266,7 +269,7 @@ public partial class MainWindow : Window
         while (length < normalized.Length)
         {
             var c = normalized[length];
-            if ((c >= '0' && c <= '9') || c == '.')
+            if (c >= '0' && c <= '9' || c == '.')
             {
                 length++;
                 continue;

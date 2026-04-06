@@ -58,10 +58,7 @@ public sealed class HakuSyncServiceTests
         var second = CreateEntry(Guid.NewGuid());
         var tasks = new[]
         {
-            service.SyncActivityAsync(deviceId, first),
-            service.SyncActivityAsync(deviceId, first),
-            service.SyncActivityAsync(deviceId, second),
-            service.SyncActivityAsync(deviceId, second)
+            service.SyncActivityAsync(deviceId, first), service.SyncActivityAsync(deviceId, first), service.SyncActivityAsync(deviceId, second), service.SyncActivityAsync(deviceId, second)
         };
 
         await Task.WhenAll(tasks);
@@ -193,7 +190,10 @@ public sealed class HakuSyncServiceTests
                 token,
                 deviceId,
                 expiresAtUtc = DateTimeOffset.UtcNow.AddHours(1),
-                scopes = new[] { "dashboard:write" }
+                scopes = new[]
+                {
+                    "dashboard:write"
+                }
             }
         });
     }

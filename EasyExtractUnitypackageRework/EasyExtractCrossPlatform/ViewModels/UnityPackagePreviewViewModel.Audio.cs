@@ -177,7 +177,10 @@ public sealed partial class UnityPackagePreviewViewModel
 
     private void StartAudioTimer()
     {
-        _audioTimer ??= new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(200) };
+        _audioTimer ??= new DispatcherTimer
+        {
+            Interval = TimeSpan.FromMilliseconds(200)
+        };
         _audioTimer.Tick -= OnAudioTimerTick;
         _audioTimer.Tick += OnAudioTimerTick;
         _audioTimer.Start();

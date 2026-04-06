@@ -20,7 +20,10 @@ public sealed class UnityPackageExtractionServiceSecurityTests
         await using var harness = await ExtractionHarness.CreateAsync();
         await harness.CreatePackageAsync(
             ("asset-one/pathname", archivePath),
-            ("asset-one/asset", new byte[] { 0x1, 0x2, 0x3 }));
+            ("asset-one/asset", new byte[]
+            {
+                0x1, 0x2, 0x3
+            }));
 
         var service = harness.CreateService();
 
@@ -200,7 +203,7 @@ public sealed class UnityPackageExtractionServiceSecurityTests
             await using var fileStream =
                 new FileStream(PackagePath, FileMode.CreateNew, FileAccess.Write, FileShare.None);
             await using var gzipStream = new GZipStream(fileStream, CompressionMode.Compress);
-            await using var writer = new TarWriter(gzipStream, TarEntryFormat.Pax, false);
+            await using var writer = new TarWriter(gzipStream, TarEntryFormat.Pax);
 
             foreach (var (entryName, content) in entries)
             {

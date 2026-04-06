@@ -195,7 +195,10 @@ public sealed partial class UnityPackagePreviewViewModel : INotifyPropertyChange
         if (bytes <= 0)
             return "0 B";
 
-        var units = new[] { "B", "KB", "MB", "GB", "TB", "PB" };
+        var units = new[]
+        {
+            "B", "KB", "MB", "GB", "TB", "PB"
+        };
         var size = (double)bytes;
         var unitIndex = 0;
 

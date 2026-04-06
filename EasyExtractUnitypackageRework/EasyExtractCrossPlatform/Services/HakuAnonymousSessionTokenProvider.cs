@@ -124,7 +124,7 @@ internal sealed class HakuAnonymousSessionTokenProvider
 
     private sealed class AnonymousSessionResponse
     {
-        public string Token { get; set; } = string.Empty;
+        public string Token { get; } = string.Empty;
         public string DeviceId { get; set; } = string.Empty;
         public DateTimeOffset ExpiresAtUtc { get; set; }
         public string[] Scopes { get; set; } = [];

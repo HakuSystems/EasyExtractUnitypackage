@@ -10,7 +10,10 @@ public static class LinuxUiHelper
         if (window is null)
             return;
 
-        window.TransparencyLevelHint = new[] { WindowTransparencyLevel.None };
+        window.TransparencyLevelHint = new[]
+        {
+            WindowTransparencyLevel.None
+        };
 
         if (window.Background is null &&
             window.TryFindResource("EasyWindowBackgroundBrush", out var backgroundResource) &&

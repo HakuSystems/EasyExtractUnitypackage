@@ -215,7 +215,10 @@ public class HistoryViewModel
         if (bytes <= 0)
             return "0 B";
 
-        var units = new[] { "B", "KB", "MB", "GB", "TB" };
+        var units = new[]
+        {
+            "B", "KB", "MB", "GB", "TB"
+        };
         var order = (int)Math.Floor(Math.Log(bytes, 1024));
         order = Math.Clamp(order, 0, units.Length - 1);
         var value = bytes / Math.Pow(1024, order);

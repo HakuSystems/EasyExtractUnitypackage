@@ -140,9 +140,7 @@ public sealed class ModelPreviewControl : Control
         var axisLength = scale * 0.6;
         var axes = new[]
         {
-            (Brushes.Red, new Point(axisLength, 0.0)),
-            (Brushes.Lime, new Point(0.0, -axisLength)),
-            (Brushes.DeepSkyBlue, new Point(-axisLength * 0.3, axisLength * 0.3))
+            (Brushes.Red, new Point(axisLength, 0.0)), (Brushes.Lime, new Point(0.0, -axisLength)), (Brushes.DeepSkyBlue, new Point(-axisLength * 0.3, axisLength * 0.3))
         };
 
         foreach (var (brush, offset) in axes)

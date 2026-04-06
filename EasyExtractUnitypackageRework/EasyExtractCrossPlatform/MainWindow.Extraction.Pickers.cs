@@ -25,7 +25,10 @@ public partial class MainWindow : Window
             {
                 new FilePickerFileType("Unity package")
                 {
-                    Patterns = new[] { "*.unitypackage" }
+                    Patterns = new[]
+                    {
+                        "*.unitypackage"
+                    }
                 }
             }
         });
@@ -44,7 +47,10 @@ public partial class MainWindow : Window
             return;
         }
 
-        await RunExtractionSequenceAsync(new[] { new ExtractionItem(path, null) });
+        await RunExtractionSequenceAsync(new[]
+        {
+            new ExtractionItem(path, null)
+        });
     }
 
 
@@ -71,7 +77,10 @@ public partial class MainWindow : Window
             {
                 new FilePickerFileType("Unity packages")
                 {
-                    Patterns = new[] { "*.unitypackage" }
+                    Patterns = new[]
+                    {
+                        "*.unitypackage"
+                    }
                 }
             }
         });

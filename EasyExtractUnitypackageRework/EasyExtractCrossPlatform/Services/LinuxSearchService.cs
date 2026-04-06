@@ -413,7 +413,10 @@ internal sealed class LinuxSearchService : IEverythingSearchService
         if (!string.IsNullOrWhiteSpace(home) && Directory.Exists(home))
             roots.Add(home);
 
-        foreach (var candidate in new[] { "/mnt", "/media" })
+        foreach (var candidate in new[]
+                 {
+                     "/mnt", "/media"
+                 })
             if (Directory.Exists(candidate))
                 roots.Add(candidate);
 

@@ -55,7 +55,10 @@ public sealed class EverythingSearchResult
             return $"{bytes} B";
 
         double readable = bytes;
-        string[] suffixes = { "B", "KB", "MB", "GB", "TB", "PB" };
+        string[] suffixes =
+        {
+            "B", "KB", "MB", "GB", "TB", "PB"
+        };
         var suffixIndex = 0;
 
         while (readable >= 1024 && suffixIndex < suffixes.Length - 1)

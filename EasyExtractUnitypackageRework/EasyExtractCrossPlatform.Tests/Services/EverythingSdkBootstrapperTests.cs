@@ -52,10 +52,16 @@ public sealed class EverythingSdkBootstrapperTests : IDisposable
 
         var destinationPath = Path.Combine(root, "Everything64.dll");
         var stagedPath = Path.Combine(root, "Everything64.dll.stage");
-        var expectedBytes = new byte[] { 0x11, 0x22, 0x33, 0x44 };
+        var expectedBytes = new byte[]
+        {
+            0x11, 0x22, 0x33, 0x44
+        };
 
         await File.WriteAllBytesAsync(stagedPath, expectedBytes);
-        await File.WriteAllBytesAsync(destinationPath, new byte[] { 0x00, 0x00, 0x00, 0x00 });
+        await File.WriteAllBytesAsync(destinationPath, new byte[]
+        {
+            0x00, 0x00, 0x00, 0x00
+        });
 
         var lockStream = new FileStream(
             destinationPath,
@@ -106,7 +112,10 @@ public sealed class EverythingSdkBootstrapperTests : IDisposable
 
         var dllName = Environment.Is64BitProcess ? "Everything64.dll" : "Everything32.dll";
         var dllPath = Path.Combine(sdkDirectory, dllName);
-        var originalBytes = new byte[] { 0x10, 0x20, 0x30 };
+        var originalBytes = new byte[]
+        {
+            0x10, 0x20, 0x30
+        };
 
         await File.WriteAllBytesAsync(dllPath, originalBytes);
         var originalWriteTime = File.GetLastWriteTimeUtc(dllPath);
@@ -142,7 +151,10 @@ public sealed class EverythingSdkBootstrapperTests : IDisposable
 
         var dllName = Environment.Is64BitProcess ? "Everything64.dll" : "Everything32.dll";
         var dllPath = Path.Combine(sdkDirectory, dllName);
-        await File.WriteAllBytesAsync(dllPath, new byte[] { 0xAA, 0xBB, 0xCC });
+        await File.WriteAllBytesAsync(dllPath, new byte[]
+        {
+            0xAA, 0xBB, 0xCC
+        });
 
         var validationAttempts = 0;
         EverythingSdkBootstrapper.ConfigureForTests(
@@ -188,8 +200,14 @@ public sealed class EverythingSdkBootstrapperTests : IDisposable
         var dllPath = Path.Combine(sdkDirectory, dllName);
         var orphanedTempPath = Path.Combine(sdkDirectory, $"{dllName}.{Guid.NewGuid():N}.tmp");
 
-        await File.WriteAllBytesAsync(dllPath, new byte[] { 0xAA, 0xBB, 0xCC });
-        await File.WriteAllBytesAsync(orphanedTempPath, new byte[] { 0x10, 0x20, 0x30 });
+        await File.WriteAllBytesAsync(dllPath, new byte[]
+        {
+            0xAA, 0xBB, 0xCC
+        });
+        await File.WriteAllBytesAsync(orphanedTempPath, new byte[]
+        {
+            0x10, 0x20, 0x30
+        });
 
         EverythingSdkBootstrapper.ConfigureForTests(
             appDataPathOverride: () => appDataPath,
@@ -224,7 +242,10 @@ public sealed class EverythingSdkBootstrapperTests : IDisposable
 
         var dllName = Environment.Is64BitProcess ? "Everything64.dll" : "Everything32.dll";
         var tempDllPath = Path.Combine(root, $"{dllName}.{Guid.NewGuid():N}.tmp");
-        await File.WriteAllBytesAsync(tempDllPath, new byte[] { 0x01, 0x02, 0x03 });
+        await File.WriteAllBytesAsync(tempDllPath, new byte[]
+        {
+            0x01, 0x02, 0x03
+        });
 
         var isValid = EverythingSdkBootstrapper.ValidateDllHashForTests(tempDllPath);
 

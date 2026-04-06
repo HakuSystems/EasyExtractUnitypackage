@@ -272,9 +272,7 @@ public static class FileExtensionNormalizer
         var baseDirectory = AppContext.BaseDirectory;
         var candidates = new[]
         {
-            Path.Combine(baseDirectory, "extensions.txt"),
-            Path.Combine(baseDirectory, "Assets", "extensions.txt"),
-            Path.Combine(baseDirectory, "Assets", "ExtensionNormalization", "extensions.txt")
+            Path.Combine(baseDirectory, "extensions.txt"), Path.Combine(baseDirectory, "Assets", "extensions.txt"), Path.Combine(baseDirectory, "Assets", "ExtensionNormalization", "extensions.txt")
         };
 
         foreach (var candidate in candidates)

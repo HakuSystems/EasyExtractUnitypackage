@@ -220,7 +220,10 @@ public static partial class LoggingService
 
     private static string FormatBytes(long bytes)
     {
-        var units = new[] { "B", "KB", "MB", "GB", "TB" };
+        var units = new[]
+        {
+            "B", "KB", "MB", "GB", "TB"
+        };
         var value = (double)bytes;
         var unitIndex = 0;
 

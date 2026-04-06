@@ -23,7 +23,11 @@ public partial class MainWindow : Window
 
             if (!Directory.Exists(path)) Directory.CreateDirectory(path);
 
-            Process.Start(new ProcessStartInfo { FileName = path, UseShellExecute = true });
+            Process.Start(new ProcessStartInfo
+            {
+                FileName = path,
+                UseShellExecute = true
+            });
         }
         catch (Exception ex)
         {

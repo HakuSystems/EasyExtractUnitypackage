@@ -387,7 +387,7 @@ public sealed partial class UnityPackagePreviewViewModel
             if (b == 0)
                 return false;
 
-            if (b < 9 || (b > 13 && b < 32))
+            if (b < 9 || b > 13 && b < 32)
                 nonPrintable++;
         }
 
@@ -401,10 +401,7 @@ public sealed partial class UnityPackagePreviewViewModel
 
         var encodings = new[]
         {
-            new UTF8Encoding(false, true),
-            Encoding.Unicode,
-            Encoding.BigEndianUnicode,
-            Encoding.UTF32
+            new UTF8Encoding(false, true), Encoding.Unicode, Encoding.BigEndianUnicode, Encoding.UTF32
         };
 
         foreach (var candidate in encodings)

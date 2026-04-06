@@ -26,7 +26,10 @@ public sealed class HakuWebhookClientTests
                         token = "webhook-token",
                         deviceId,
                         expiresAtUtc = DateTimeOffset.UtcNow.AddHours(1),
-                        scopes = new[] { "webhook:send" }
+                        scopes = new[]
+                        {
+                            "webhook:send"
+                        }
                     }
                 }));
 

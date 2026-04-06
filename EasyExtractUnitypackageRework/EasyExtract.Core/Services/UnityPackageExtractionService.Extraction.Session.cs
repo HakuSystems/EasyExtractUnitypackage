@@ -94,7 +94,10 @@ public sealed partial class UnityPackageExtractionService
                     _packagePath,
                     _outputDirectory,
                     _extractedCount,
-                    _extractedFiles.ToImmutableArray()) { TotalSize = _calculatedTotalSize };
+                    _extractedFiles.ToImmutableArray())
+                {
+                    TotalSize = _calculatedTotalSize
+                };
             }
             catch (ExtractionSecurityException)
             {
@@ -284,7 +287,10 @@ public sealed partial class UnityPackageExtractionService
                 _packagePath,
                 _outputDirectory,
                 0,
-                _extractedFiles.ToImmutableArray()) { TotalSize = 0 };
+                _extractedFiles.ToImmutableArray())
+            {
+                TotalSize = 0
+            };
         }
 
         private async Task HandleReadyStateAsync(UnityPackageAssetState state)

@@ -103,7 +103,10 @@ public sealed partial class UnityPackageExtractionService : IUnityPackageExtract
         }
 
         // Use modified options for internal call
-        var activeOptions = options with { TemporaryDirectory = activeTempDir };
+        var activeOptions = options with
+        {
+            TemporaryDirectory = activeTempDir
+        };
 
         using (_logger.BeginPerformanceScope("UnityPackageExtraction", "Extraction", correlationId))
         {
