@@ -1,3 +1,5 @@
+using Avalonia.Input.Platform;
+
 namespace EasyExtractCrossPlatform;
 
 public partial class ErrorDialogWindow : Window

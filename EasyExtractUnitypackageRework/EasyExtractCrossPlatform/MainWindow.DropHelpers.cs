@@ -52,15 +52,13 @@ public partial class MainWindow : Window
 
     private static IEnumerable<string> EnumerateDroppedItemNames(DragEventArgs e)
     {
-        var dataObject = e.Data;
-        if (dataObject is null)
-            yield break;
+        var dataTransfer = e.DataTransfer;
 
         List<IStorageItem>? storageItems = null;
 
         try
         {
-            var files = dataObject.GetFiles();
+            var files = dataTransfer.TryGetFiles();
             if (files is not null)
                 storageItems = files.ToList();
         }
@@ -79,29 +77,19 @@ public partial class MainWindow : Window
                     yield return candidate;
             }
 
-        if (dataObject.Contains(DataFormats.FileNames))
+        string? textData = null;
+        try
         {
-            var rawFileNames = dataObject.Get(DataFormats.FileNames);
-            switch (rawFileNames)
-            {
-                case IEnumerable<string> names:
-                    foreach (var name in names)
-                        if (!string.IsNullOrWhiteSpace(name))
-                            yield return name;
-                    break;
-                case string singleName when !string.IsNullOrWhiteSpace(singleName):
-                    yield return singleName;
-                    break;
-            }
+            textData = dataTransfer.TryGetText();
+        }
+        catch (Exception ex)
+        {
+            Debug.WriteLine($"Failed to enumerate dropped text data: {ex}");
         }
 
-        if (dataObject.Contains(DataFormats.Text))
-        {
-            var textData = dataObject.Get(DataFormats.Text);
-            foreach (var entry in EnumerateTextDataEntries(textData))
-                if (!string.IsNullOrWhiteSpace(entry))
-                    yield return entry;
-        }
+        foreach (var entry in EnumerateTextDataEntries(textData))
+            if (!string.IsNullOrWhiteSpace(entry))
+                yield return entry;
     }
 
     private static IEnumerable<string> EnumerateStorageItemEntries(IStorageItem item)
