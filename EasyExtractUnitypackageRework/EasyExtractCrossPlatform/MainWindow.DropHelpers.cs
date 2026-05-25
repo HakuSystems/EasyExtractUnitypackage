@@ -6,11 +6,11 @@ public partial class MainWindow : Window
     {
         var validPaths = new List<string>();
         var detectedUnityPackage = false;
-        var uniquePaths = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        var uniquePaths = new HashSet<string>(GetDroppedPathComparer());
 
         foreach (var candidate in EnumerateDroppedItemNames(e))
         {
-            var trimmedCandidate = candidate?.Trim();
+            var trimmedCandidate = NormalizeDroppedTextEntry(candidate);
             if (string.IsNullOrWhiteSpace(trimmedCandidate))
                 continue;
 
@@ -129,14 +129,17 @@ public partial class MainWindow : Window
             yield return file.Name;
     }
 
-    private static bool TryResolveDroppedPath(string candidate, out string resolvedPath)
+    internal static bool TryResolveDroppedPath(string candidate, out string resolvedPath)
     {
         resolvedPath = string.Empty;
 
         if (string.IsNullOrWhiteSpace(candidate))
             return false;
 
-        var input = candidate.Trim();
+        var input = NormalizeDroppedTextEntry(candidate);
+
+        if (string.IsNullOrWhiteSpace(input))
+            return false;
 
         if (Uri.TryCreate(input, UriKind.Absolute, out var absoluteUri))
         {
@@ -203,16 +206,51 @@ public partial class MainWindow : Window
             if (trimmed[0] == '#')
                 continue;
 
-            yield return trimmed;
+            yield return NormalizeDroppedTextEntry(trimmed);
         }
     }
 
-    private static bool IsUnityPackage(string? pathOrName)
+    internal static StringComparer GetDroppedPathComparer()
+    {
+        return OperatingSystem.IsWindows()
+            ? StringComparer.OrdinalIgnoreCase
+            : StringComparer.Ordinal;
+    }
+
+    internal static string NormalizeDroppedTextEntry(string? input)
+    {
+        if (string.IsNullOrWhiteSpace(input))
+            return string.Empty;
+
+        var trimmed = input.Trim();
+        if (trimmed.Length >= 2 && IsMatchingQuotePair(trimmed[0], trimmed[^1]))
+            trimmed = trimmed[1..^1].Trim();
+
+        return trimmed;
+    }
+
+    private static bool IsMatchingQuotePair(char first, char last)
+    {
+        return first switch
+        {
+            '"' => last == '"',
+            '\'' => last == '\'',
+            '“' => last == '”',
+            '‘' => last == '’',
+            _ => false
+        };
+    }
+
+    internal static bool IsUnityPackage(string? pathOrName)
     {
         if (string.IsNullOrWhiteSpace(pathOrName))
             return false;
 
-        var extension = Path.GetExtension(pathOrName);
+        var normalizedPathOrName = NormalizeDroppedTextEntry(pathOrName);
+        if (string.IsNullOrWhiteSpace(normalizedPathOrName))
+            return false;
+
+        var extension = Path.GetExtension(normalizedPathOrName);
         return string.Equals(extension, UnityPackageExtension, StringComparison.OrdinalIgnoreCase);
     }
 }
