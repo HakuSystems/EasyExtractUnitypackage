@@ -2,7 +2,9 @@ name: Trigger HakuApi Re-Deploy
 
 on:
   push:
-    branches: [ "master" ]
+    # This repository's default branch is "main" — a "master" filter would
+    # never match, so the HakuApi re-deploy was never triggered.
+    branches: [ "main" ]
     paths:
       - 'EasyExtractUnitypackageRework/EasyExtract.Core/**'
 
