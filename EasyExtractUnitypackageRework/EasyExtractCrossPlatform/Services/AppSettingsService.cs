@@ -384,10 +384,18 @@ public static class AppSettingsService
         const int lockViolation = unchecked((int)0x80070021);
         const int accessDenied = unchecked((int)0x80070005);
 
+        // On Unix the same contention surfaces as errno-based HResults:
+        // EAGAIN/EWOULDBLOCK (11) for a held file lock, EACCES (13) for
+        // transient permission contention.
+        const int eagain = 11;
+        const int eacces = 13;
+
         if (ex is IOException ioException)
             return ioException.HResult == sharingViolation ||
                    ioException.HResult == lockViolation ||
-                   ioException.HResult == accessDenied;
+                   ioException.HResult == accessDenied ||
+                   ioException.HResult == eagain ||
+                   ioException.HResult == eacces;
 
         if (ex is UnauthorizedAccessException unauthorizedAccessException)
             return unauthorizedAccessException.HResult == accessDenied;
@@ -488,7 +496,9 @@ public static class AppSettingsService
 
         try
         {
-            return Path.GetFileName(path);
+            // Settings written on Windows may be loaded on Linux/macOS, where
+            // Path.GetFileName does not treat '\\' as a separator.
+            return Path.GetFileName(path.Replace('\\', '/'));
         }
         catch
         {
@@ -535,7 +545,7 @@ public static class AppSettingsService
                 return new ExtractedPackageModel
                 {
                     FilePath = path,
-                    FileName = Path.GetFileName(path),
+                    FileName = GetFileNameSafe(path),
                     DateExtracted = DateTimeOffset.UtcNow
                 };
             }
