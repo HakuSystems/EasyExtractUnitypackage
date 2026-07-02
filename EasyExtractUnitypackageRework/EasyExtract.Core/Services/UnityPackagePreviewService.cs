@@ -19,7 +19,23 @@ public sealed class UnityPackagePreviewService : IUnityPackagePreviewService
     private const long MaxEmbeddedAssetBytes = 8 * 1024 * 1024; // 8 MB
     private const string TemporaryExtractionFolderPrefix = "EasyExtractPreviewAudio";
     private const string TemporaryPackageFolderPrefix = "EasyExtractPreviewPackage";
-    private static readonly HashSet<char> InvalidFileNameCharacters = Path.GetInvalidFileNameChars().ToHashSet();
+    // Keep in sync with UnityPackageExtractionService: use the Windows superset
+    // of invalid characters on every platform for deterministic normalization.
+    private static readonly HashSet<char> InvalidFileNameCharacters =
+        BuildInvalidFileNameCharacters();
+
+    private static HashSet<char> BuildInvalidFileNameCharacters()
+    {
+        var characters = new HashSet<char>(Path.GetInvalidFileNameChars())
+        {
+            '"', '<', '>', '|', ':', '*', '?', '\\', '/'
+        };
+
+        for (var c = '\0'; c <= '\u001f'; c++)
+            characters.Add(c);
+
+        return characters;
+    }
 
     private static readonly PathSegmentNormalization[] EmptySegmentNormalizations =
         Array.Empty<PathSegmentNormalization>();

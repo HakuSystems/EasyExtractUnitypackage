@@ -8,8 +8,25 @@ public sealed partial class UnityPackageExtractionService : IUnityPackageExtract
     private const int StreamCopyBufferSize = 128 * 1024;
     private const int MaxPathEntryCharacters = 4096;
 
+    // Path.GetInvalidFileNameChars() is platform-dependent (on Linux it is only
+    // '/' and NUL), so the desktop app and the Linux-hosted HakuApi would
+    // normalize the same archive differently. Use the Windows superset on every
+    // platform so output paths and collision detection stay identical.
     private static readonly HashSet<char> InvalidFileNameCharacters =
-        Path.GetInvalidFileNameChars().ToHashSet();
+        BuildInvalidFileNameCharacters();
+
+    private static HashSet<char> BuildInvalidFileNameCharacters()
+    {
+        var characters = new HashSet<char>(Path.GetInvalidFileNameChars())
+        {
+            '"', '<', '>', '|', ':', '*', '?', '\\', '/'
+        };
+
+        for (var c = '\0'; c <= '\u001f'; c++)
+            characters.Add(c);
+
+        return characters;
+    }
 
     private static readonly PathSegmentNormalization[] EmptySegmentNormalizations =
         Array.Empty<PathSegmentNormalization>();
