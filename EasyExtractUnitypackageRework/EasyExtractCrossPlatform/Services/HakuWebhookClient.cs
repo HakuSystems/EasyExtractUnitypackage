@@ -24,6 +24,10 @@ public sealed class HakuWebhookClient
 {
     internal const string ApiBaseUrl = "https://easyextract.net/";
     private const string EndpointPath = "api/haku/v1/webhooks/send";
+
+    // HakuApi's SendWebhook handler rejects messages above 4000 characters;
+    // truncate client-side so long stack traces still arrive instead of 400ing.
+    private const int MaxMessageLength = 4000;
     private readonly string _appName;
     private readonly Func<string?> _deviceIdProvider;
     private readonly HttpClient _httpClient;
@@ -41,6 +45,12 @@ public sealed class HakuWebhookClient
 
         if (_httpClient.BaseAddress is null || !_httpClient.BaseAddress.IsAbsoluteUri)
             _httpClient.BaseAddress = new Uri(ApiBaseUrl);
+
+        // The website proxy rejects header-less cross-site mutations; this
+        // custom header (impossible to forge from a browser form without a
+        // CORS preflight) marks requests as coming from a non-browser client.
+        if (!_httpClient.DefaultRequestHeaders.Contains("X-Requested-With"))
+            _httpClient.DefaultRequestHeaders.Add("X-Requested-With", "EasyExtractCrossPlatform");
     }
 
     public Task SendFeedbackAsync(string feedbackText, string? currentVersion,
@@ -98,6 +108,9 @@ public sealed class HakuWebhookClient
 
     private async Task SendAsync(WebhookRequest payload, CancellationToken cancellationToken)
     {
+        if (payload.Message.Length > MaxMessageLength)
+            payload.Message = payload.Message[..(MaxMessageLength - 3)] + "...";
+
         var authorizationHeader = await _tokenProvider
             .GetAuthorizationHeaderValueAsync(_deviceIdProvider(), cancellationToken)
             .ConfigureAwait(false);

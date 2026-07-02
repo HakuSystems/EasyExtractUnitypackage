@@ -45,7 +45,8 @@ public sealed class HakuWebhookClientTests
         await client.SendFeedbackAsync("Test feedback", "1.0.0");
 
         Assert.NotNull(webhookRequest);
-        Assert.Equal(new Uri("https://easyextract.net/api/haku/webhooks/send"), webhookRequest!.Uri);
+        // The website proxy only allow-lists the versioned route (v1/webhooks/send).
+        Assert.Equal(new Uri("https://easyextract.net/api/haku/v1/webhooks/send"), webhookRequest!.Uri);
         Assert.Equal("Bearer webhook-token", webhookRequest.Authorization);
     }
 

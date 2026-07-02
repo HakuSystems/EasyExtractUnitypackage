@@ -30,6 +30,12 @@ public class HakuSyncService : IHakuSyncService
         if (!_httpClient.DefaultRequestHeaders.UserAgent.Any())
             _httpClient.DefaultRequestHeaders.UserAgent.ParseAdd(UserAgent);
 
+        // The website proxy rejects header-less cross-site mutations; this
+        // custom header (impossible to forge from a browser form without a
+        // CORS preflight) marks requests as coming from a non-browser client.
+        if (!_httpClient.DefaultRequestHeaders.Contains("X-Requested-With"))
+            _httpClient.DefaultRequestHeaders.Add("X-Requested-With", "EasyExtractCrossPlatform");
+
         _tokenProvider = new HakuAnonymousSessionTokenProvider(_httpClient, "auth/anonymous-session",
             "dashboard:write");
     }
