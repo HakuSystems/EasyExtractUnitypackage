@@ -2,11 +2,14 @@ using System.Runtime.InteropServices;
 using System.Text;
 using Docnet.Core;
 using Docnet.Core.Models;
+using StbImageSharp;
 
 namespace EasyExtractCrossPlatform.ViewModels;
 
 public sealed partial class UnityPackagePreviewViewModel
 {
+    // 8K x 8K RGBA is the largest texture the managed fallback decoder will inflate.
+    private const long MaxManagedDecodePixels = 8192L * 8192L;
     private static readonly PageDimensions PdfPreviewDimensions = new(2.0d);
     private Bitmap? _fallbackPreviewImage;
     private int _previewTabIndex;
@@ -161,8 +164,17 @@ public sealed partial class UnityPackagePreviewViewModel
             }
             catch
             {
+                // Skia cannot decode formats like TGA, PSD or HDR; try the managed decoder
+                // before treating the asset as preview-less.
                 DisposeBitmap(ref _primaryImagePreview);
-                LoggingService.LogError($"Failed to create primary image preview for '{asset.RelativePath}'.");
+                _primaryImagePreview = TryCreateManagedBitmap(asset.AssetData);
+
+                if (_primaryImagePreview is not null)
+                    LoggingService.LogInformation(
+                        $"Primary image preview created via managed decoder for '{asset.RelativePath}'.");
+                else
+                    LoggingService.LogWarning(
+                        $"No decoder available for image preview '{asset.RelativePath}'. Falling back to the embedded thumbnail.");
             }
 
             return;
@@ -175,11 +187,56 @@ public sealed partial class UnityPackagePreviewViewModel
         if (_primaryImagePreview is null)
         {
             DisposeBitmap(ref _primaryImagePreview);
-            LoggingService.LogError($"Failed to render PDF preview for '{asset.RelativePath}'.");
+            LoggingService.LogWarning($"Failed to render PDF preview for '{asset.RelativePath}'.");
         }
         else
         {
             LoggingService.LogInformation($"PDF preview generated for '{asset.RelativePath}'.");
+        }
+    }
+
+    private static Bitmap? TryCreateManagedBitmap(byte[] imageData)
+    {
+        if (imageData.Length == 0)
+            return null;
+
+        try
+        {
+            var image = ImageResult.FromMemory(imageData, ColorComponents.RedGreenBlueAlpha);
+            if (image?.Data is null || image.Width <= 0 || image.Height <= 0)
+                return null;
+
+            if ((long)image.Width * image.Height > MaxManagedDecodePixels)
+                return null;
+
+            var bitmap = new WriteableBitmap(
+                new PixelSize(image.Width, image.Height),
+                new Vector(96, 96),
+                PixelFormat.Rgba8888,
+                AlphaFormat.Unpremul);
+
+            using (var buffer = bitmap.Lock())
+            {
+                var srcStride = image.Width * 4;
+                var dstStride = buffer.RowBytes;
+                var rows = Math.Min(image.Height, buffer.Size.Height);
+
+                if (srcStride == dstStride)
+                    Marshal.Copy(image.Data, 0, buffer.Address, srcStride * rows);
+                else
+                    for (var row = 0; row < rows; row++)
+                    {
+                        var srcOffset = row * srcStride;
+                        var destPtr = buffer.Address + row * dstStride;
+                        Marshal.Copy(image.Data, srcOffset, destPtr, Math.Min(srcStride, dstStride));
+                    }
+            }
+
+            return bitmap;
+        }
+        catch
+        {
+            return null;
         }
     }
 
@@ -253,7 +310,7 @@ public sealed partial class UnityPackagePreviewViewModel
         catch
         {
             DisposeBitmap(ref _fallbackPreviewImage);
-            LoggingService.LogError($"Failed to create fallback preview for '{asset.RelativePath}'.");
+            LoggingService.LogWarning($"Failed to create fallback preview for '{asset.RelativePath}'.");
         }
     }
 
