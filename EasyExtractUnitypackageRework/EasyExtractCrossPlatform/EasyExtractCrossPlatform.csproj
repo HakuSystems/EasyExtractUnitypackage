@@ -9,11 +9,11 @@
         <AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
         <LangVersion>default</LangVersion>
         <ApplicationIcon>Assets\logo-flat.ico</ApplicationIcon>
-        <AssemblyVersion>2.9.4</AssemblyVersion>
-        <FileVersion>2.9.4</FileVersion>
-        <Version>2.9.4</Version>
+        <AssemblyVersion>2.9.5</AssemblyVersion>
+        <FileVersion>2.9.5</FileVersion>
+        <Version>2.9.5</Version>
         <IncludeSourceRevisionInInformationalVersion>false</IncludeSourceRevisionInInformationalVersion>
-        <AssemblyInformationalVersion>2.9.4</AssemblyInformationalVersion>
+        <AssemblyInformationalVersion>2.9.5</AssemblyInformationalVersion>
     </PropertyGroup>
 
     <ItemGroup>
