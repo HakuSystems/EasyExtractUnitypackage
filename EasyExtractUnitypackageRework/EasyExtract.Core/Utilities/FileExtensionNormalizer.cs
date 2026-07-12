@@ -8,6 +8,9 @@ public static class FileExtensionNormalizer
     private static readonly Lazy<IReadOnlyList<string>> KnownExtensions =
         new(LoadExtensions, true);
 
+    private static readonly Lazy<HashSet<string>> KnownExtensionSet =
+        new(() => new HashSet<string>(KnownExtensions.Value, StringComparer.OrdinalIgnoreCase), true);
+
     private static readonly IReadOnlyList<string> DefaultExtensions = new[]
     {
         ".scenewithbuildsettings",
@@ -206,11 +209,16 @@ public static class FileExtensionNormalizer
         var prefix = fileName[..lastDotIndex];
         var suffix = fileName[lastDotIndex..];
 
+        // Only strip trailing zeros when doing so repairs a known extension
+        // (e.g. ".png0" -> ".png"). Blindly trimming mangled legitimate names
+        // like "Material.029 10" into "Material.029 1", which then collided
+        // with sibling paths and aborted the whole extraction.
         var trimmedSuffix = TrimTrailingZeros(suffix);
-        if (!string.Equals(trimmedSuffix, suffix, StringComparison.Ordinal))
-            return trimmedSuffix.Length == 0
-                ? prefix
-                : prefix + trimmedSuffix;
+        if (!string.Equals(trimmedSuffix, suffix, StringComparison.Ordinal) &&
+            trimmedSuffix.Length > 1 &&
+            IsKnownExtension(trimmedSuffix) &&
+            !IsKnownExtension(suffix))
+            return prefix + trimmedSuffix;
 
         if (suffix.Length < MinimumCorruptedExtensionLength)
             return fileName;
@@ -227,6 +235,11 @@ public static class FileExtensionNormalizer
         }
 
         return fileName;
+    }
+
+    private static bool IsKnownExtension(string suffix)
+    {
+        return KnownExtensionSet.Value.Contains(suffix);
     }
 
     private static string TrimTrailingZeros(string suffix)
