@@ -171,7 +171,7 @@ public sealed partial class UnityPackageExtractionService : IUnityPackageExtract
                     ex);
                 throw;
             }
-            catch (IOException ex) when (IsFileLockContention(ex))
+            catch (IOException ex) when (FileLockHelper.IsFileLockContention(ex))
             {
                 // Typically Unity or a download manager still holds the .unitypackage.
                 _logger.LogWarning(
@@ -190,10 +190,4 @@ public sealed partial class UnityPackageExtractionService : IUnityPackageExtract
         }
     }
 
-    private static bool IsFileLockContention(IOException ex)
-    {
-        const int sharingViolation = unchecked((int)0x80070020);
-        const int lockViolation = unchecked((int)0x80070021);
-        return ex.HResult == sharingViolation || ex.HResult == lockViolation;
-    }
 }

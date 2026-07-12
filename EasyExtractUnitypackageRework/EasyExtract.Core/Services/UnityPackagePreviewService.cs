@@ -77,6 +77,16 @@ public sealed class UnityPackagePreviewService : IUnityPackagePreviewService
             _logger.LogWarning($"Preview rejected invalid package data for '{packagePath}'.", ex);
             throw;
         }
+        catch (IOException ex) when (FileLockHelper.IsFileLockContention(ex))
+        {
+            stopwatch.Stop();
+            // Typically Unity or a download manager still holds the .unitypackage.
+            _logger.LogWarning($"Preview aborted: package file is locked by another process | path='{packagePath}'.",
+                ex);
+            throw new InvalidDataException(
+                "The package file is currently in use by another program (for example Unity is still downloading it). Wait until it is finished or close the other program, then try again.",
+                ex);
+        }
         catch (Exception ex) when (ex is not OperationCanceledException)
         {
             stopwatch.Stop();

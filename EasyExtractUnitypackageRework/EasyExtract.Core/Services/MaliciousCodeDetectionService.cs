@@ -5,6 +5,7 @@ using System.IO.Compression;
 using System.Text;
 using System.Text.RegularExpressions;
 using EasyExtract.Core.Models;
+using EasyExtract.Core.Utilities;
 
 namespace EasyExtract.Core.Services;
 
@@ -114,6 +115,16 @@ public sealed class MaliciousCodeDetectionService : IMaliciousCodeDetectionServi
 
             _scanCache[packagePath] = new CachedScanResult(result, DateTimeOffset.UtcNow);
             return result;
+        }
+        catch (OperationCanceledException)
+        {
+            throw;
+        }
+        catch (IOException ex) when (FileLockHelper.IsFileLockContention(ex))
+        {
+            // Typically Unity or a download manager still holds the .unitypackage.
+            _logger.LogWarning($"Scan skipped for '{packagePath}': the file is in use by another process.", ex);
+            throw;
         }
         catch (Exception ex)
         {

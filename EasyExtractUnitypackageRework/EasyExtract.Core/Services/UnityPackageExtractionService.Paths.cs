@@ -215,7 +215,9 @@ public sealed partial class UnityPackageExtractionService
         string correlationId,
         IEasyExtractLogger logger)
     {
-        logger.LogError(
+        // Malformed or absolute paths are a property of the downloaded package,
+        // not an app defect; the session-level handling surfaces them to the user.
+        logger.LogWarning(
             $"Unsafe archive path rejected | original='{originalPath}' | reason='{reason}' | correlationId={correlationId}");
         return new ExtractionSecurityException($"Archive path '{originalPath}' is invalid. {reason}");
     }

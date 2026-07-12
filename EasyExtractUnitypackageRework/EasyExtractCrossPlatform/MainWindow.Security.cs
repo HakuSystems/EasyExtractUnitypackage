@@ -167,6 +167,21 @@ public partial class MainWindow : Window
 
             return null;
         }
+        catch (IOException ex) when (FileLockHelper.IsFileLockContention(ex))
+        {
+            LoggingService.LogWarning(
+                $"Security scan skipped for '{normalizedPath}': the file is in use by another process.", ex);
+            await Dispatcher.UIThread.InvokeAsync(() =>
+            {
+                if (!IsSecurityScanningEnabled)
+                    return;
+
+                if (_queueItemsByPath.TryGetValue(normalizedPath, out var display))
+                    display.SetSecurityInfo("Scan skipped: file is in use by another program");
+            });
+
+            return null;
+        }
         catch (Exception ex)
         {
             LoggingService.LogError($"Security scan failed for '{normalizedPath}'.", ex);
