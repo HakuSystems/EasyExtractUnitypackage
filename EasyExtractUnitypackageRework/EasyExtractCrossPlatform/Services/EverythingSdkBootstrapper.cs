@@ -391,7 +391,10 @@ internal static class EverythingSdkBootstrapper
         }
 
         string actualHash;
-        using (var stream = File.OpenRead(dllPath))
+        // Tolerant sharing flags: another instance may hold the DLL open (loaded library
+        // or an in-flight download) and File.OpenRead would fail with a sharing violation.
+        using (var stream = new FileStream(dllPath, FileMode.Open, FileAccess.Read,
+                   FileShare.ReadWrite | FileShare.Delete))
         using (var sha256 = SHA256.Create())
         {
             var hashBytes = sha256.ComputeHash(stream);

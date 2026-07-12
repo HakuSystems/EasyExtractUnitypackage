@@ -28,8 +28,13 @@ public static partial class ContextMenuIntegrationService
 
         var homeDirectory = Environment.GetFolderPath(Environment.SpecialFolder.Personal);
         if (string.IsNullOrWhiteSpace(homeDirectory))
+            homeDirectory = Environment.GetEnvironmentVariable("HOME");
+
+        if (string.IsNullOrWhiteSpace(homeDirectory))
         {
-            LoggingService.LogError(
+            // Sandboxed or misconfigured sessions may expose no home directory at all;
+            // skipping the integration is the correct outcome, not an error.
+            LoggingService.LogWarning(
                 "Unable to register Linux context menu because the user's home directory could not be resolved.");
             return;
         }
