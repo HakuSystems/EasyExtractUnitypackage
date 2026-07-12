@@ -51,6 +51,7 @@ public sealed partial class UnityPackagePreviewViewModel : INotifyPropertyChange
                 CollapseDescendants(node, true);
         });
         ClearCommand = new RelayCommand(() => SearchText = string.Empty, () => IsSearchActive);
+        InitializeSelectionCommands();
 
         if (_securityScanProvider is not null)
             _securityScanTask = RunSecurityScanAsync();
@@ -67,6 +68,9 @@ public sealed partial class UnityPackagePreviewViewModel : INotifyPropertyChange
 
         Assets.CollectionChanged -= OnAssetsCollectionChanged;
         SecurityThreats.CollectionChanged -= OnSecurityThreatsCollectionChanged;
+
+        foreach (var asset in _allAssets)
+            asset.PropertyChanged -= OnAssetCheckedChanged;
 
         DisposeBitmap(ref _primaryImagePreview);
         DisposeBitmap(ref _fallbackPreviewImage);
@@ -129,7 +133,7 @@ public sealed partial class UnityPackagePreviewViewModel : INotifyPropertyChange
             await Dispatcher.UIThread.InvokeAsync(
                 () =>
                 {
-                    _allAssets.Clear();
+                    ClearAllAssets();
                     RefreshCategories();
                     ApplyCategoryFilter();
                     HasError = true;
@@ -143,7 +147,7 @@ public sealed partial class UnityPackagePreviewViewModel : INotifyPropertyChange
             await Dispatcher.UIThread.InvokeAsync(
                 () =>
                 {
-                    _allAssets.Clear();
+                    ClearAllAssets();
                     RefreshCategories();
                     ApplyCategoryFilter();
                     HasError = true;
@@ -175,13 +179,17 @@ public sealed partial class UnityPackagePreviewViewModel : INotifyPropertyChange
         TotalAssetSizeText = FormatFileSize(preview.TotalAssetSizeBytes);
         PackageModifiedText = preview.LastModifiedUtc?.ToLocalTime().ToString("g");
 
-        _allAssets.Clear();
+        ClearAllAssets();
         _directoriesToPrune.Clear();
         if (preview.DirectoriesToPrune.Count > 0)
             _directoriesToPrune.UnionWith(preview.DirectoriesToPrune);
 
         foreach (var asset in preview.Assets)
-            _allAssets.Add(new UnityPackageAssetPreviewItem(asset));
+        {
+            var item = new UnityPackageAssetPreviewItem(asset);
+            item.PropertyChanged += OnAssetCheckedChanged;
+            _allAssets.Add(item);
+        }
 
         RefreshCategories();
         ApplyCategoryFilter();

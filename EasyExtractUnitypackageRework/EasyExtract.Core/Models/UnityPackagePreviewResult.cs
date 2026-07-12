@@ -17,4 +17,5 @@ public sealed record UnityPackagePreviewAsset(
     byte[]? PreviewImageData,
     byte[]? AssetData,
     bool IsAssetDataTruncated,
-    string? AssetFilePath);
+    string? AssetFilePath,
+    string? AssetKey = null);

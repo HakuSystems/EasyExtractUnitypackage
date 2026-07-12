@@ -129,6 +129,7 @@ public sealed partial class UnityPackagePreviewViewModel
             Assets.Add(item);
 
         UpdateCollectionsState();
+        RefreshSelectionSummary();
 
         LoggingService.LogInformation(
             $"Category filter applied. Selection='{normalizedSelection}', Search='{query}', ResultCount={Assets.Count}.");

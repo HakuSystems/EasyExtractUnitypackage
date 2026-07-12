@@ -21,6 +21,8 @@ public sealed partial class UnityPackageExtractionService
 
         private readonly List<string> _extractedFiles = new();
         private readonly HashSet<string> _generatedRelativePaths = new(StringComparer.OrdinalIgnoreCase);
+        private readonly HashSet<string>? _includedAssetKeys;
+        private readonly HashSet<string> _filteredAssetKeys = new(StringComparer.OrdinalIgnoreCase);
         private readonly ExtractionLimiter _limiter;
         private readonly UnityPackageExtractionLimits _limits;
         private readonly IEasyExtractLogger _logger; // Logger Injected
@@ -54,7 +56,8 @@ public sealed partial class UnityPackageExtractionService
             IProgress<UnityPackageExtractionProgress>? progress,
             CancellationToken cancellationToken,
             string correlationId,
-            IEasyExtractLogger logger) // Logger Injected
+            IEasyExtractLogger logger, // Logger Injected
+            IReadOnlyCollection<string>? includeAssetKeys = null)
         {
             _packagePath = packagePath;
             _outputDirectory = outputDirectory;
@@ -70,6 +73,22 @@ public sealed partial class UnityPackageExtractionService
             _logger = logger;
             _assetsDuplicated = 0;
             _calculatedTotalSize = 0;
+            _includedAssetKeys = BuildIncludedAssetKeys(includeAssetKeys);
+        }
+
+        // A non-null (even empty) collection means the caller asked for a specific
+        // subset, so an empty filter extracts nothing rather than everything.
+        private static HashSet<string>? BuildIncludedAssetKeys(IReadOnlyCollection<string>? includeAssetKeys)
+        {
+            if (includeAssetKeys is null)
+                return null;
+
+            var keys = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            foreach (var key in includeAssetKeys)
+                if (!string.IsNullOrWhiteSpace(key))
+                    keys.Add(key.Trim());
+
+            return keys;
         }
 
         public async Task<UnityPackageExtractionResult> ExecuteAsync()
@@ -88,7 +107,7 @@ public sealed partial class UnityPackageExtractionService
                 CleanupCorruptedDirectories(_directoriesToCleanup, _correlationId, _logger);
 
                 _logger.LogInformation(
-                    $"ExtractInternal completed | package='{_packagePath}' | assetsExtracted={_extractedCount} | filesWritten={_extractedFiles.Count} | size={_calculatedTotalSize} | tarEntries={_tarEntriesProcessed} | skippedNoPath={_assetsSkippedNoPath} | skippedNoContent={_assetsSkippedNoContent} | duplicated={_assetsDuplicated} | correlationId={_correlationId}");
+                    $"ExtractInternal completed | package='{_packagePath}' | assetsExtracted={_extractedCount} | filesWritten={_extractedFiles.Count} | size={_calculatedTotalSize} | tarEntries={_tarEntriesProcessed} | skippedNoPath={_assetsSkippedNoPath} | skippedNoContent={_assetsSkippedNoContent} | skippedByFilter={_filteredAssetKeys.Count} | duplicated={_assetsDuplicated} | correlationId={_correlationId}");
 
                 return new UnityPackageExtractionResult(
                     _packagePath,
@@ -109,7 +128,9 @@ public sealed partial class UnityPackageExtractionService
         private async Task ProcessTarEntriesAsync()
         {
             _logger.LogInformation(
-                $"Starting TAR entry processing loop | correlationId={_correlationId}");
+                _includedAssetKeys is null
+                    ? $"Starting TAR entry processing loop | correlationId={_correlationId}"
+                    : $"Starting TAR entry processing loop with selective filter | includedAssets={_includedAssetKeys.Count} | correlationId={_correlationId}");
 
             var lastBatchLog = Stopwatch.StartNew();
             const int batchLogInterval = 100;
@@ -145,6 +166,14 @@ public sealed partial class UnityPackageExtractionService
                         {
                             await DrainEntryDataAsync(entry.DataStream).ConfigureAwait(false);
                             _tarEntriesSkipped++;
+                            continue;
+                        }
+
+                        if (_includedAssetKeys is not null && !_includedAssetKeys.Contains(assetKey))
+                        {
+                            await DrainEntryDataAsync(entry.DataStream).ConfigureAwait(false);
+                            _tarEntriesSkipped++;
+                            _filteredAssetKeys.Add(assetKey);
                             continue;
                         }
 

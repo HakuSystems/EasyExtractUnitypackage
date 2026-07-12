@@ -139,7 +139,8 @@ public partial class MainWindow : Window
                 try
                 {
                     var result =
-                        await ExecuteExtractionAsync(packagePath, outputDirectory, progress, _extractionCts.Token);
+                        await ExecuteExtractionAsync(packagePath, outputDirectory, progress, _extractionCts.Token,
+                            item.IncludeAssetKeys);
                     extractionTimer.Stop();
                     if (result is not null)
                         await ApplyExtractionSuccessAsync(packagePath, result, queueEntry, extractionTimer.Elapsed,
@@ -217,9 +218,13 @@ public partial class MainWindow : Window
         string packagePath,
         string outputDirectory,
         IProgress<UnityPackageExtractionProgress> progress,
-        CancellationToken cancellationToken)
+        CancellationToken cancellationToken,
+        IReadOnlyCollection<string>? includeAssetKeys = null)
     {
-        var options = BuildExtractionOptions();
+        var options = BuildExtractionOptions() with
+        {
+            IncludeAssetKeys = includeAssetKeys
+        };
         return await _extractionService.ExtractAsync(packagePath, outputDirectory, options, progress,
             cancellationToken);
     }

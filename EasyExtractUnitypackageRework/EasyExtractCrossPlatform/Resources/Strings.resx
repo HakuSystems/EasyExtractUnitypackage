@@ -545,4 +545,16 @@
   <data name="MainWindow_ExportAsset" xml:space="preserve">
     <value>Export asset</value>
   </data>
+  <data name="UnityPackagePreviewWindow_SelectForExtraction" xml:space="preserve">
+    <value>Select for extraction</value>
+  </data>
+  <data name="UnityPackagePreviewWindow_SelectAll" xml:space="preserve">
+    <value>Select all</value>
+  </data>
+  <data name="UnityPackagePreviewWindow_ClearSelection" xml:space="preserve">
+    <value>Clear</value>
+  </data>
+  <data name="UnityPackagePreviewWindow_ExtractSelected" xml:space="preserve">
+    <value>Extract selected</value>
+  </data>
 </root>

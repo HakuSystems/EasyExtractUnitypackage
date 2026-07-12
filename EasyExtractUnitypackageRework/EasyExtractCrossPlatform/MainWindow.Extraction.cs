@@ -120,7 +120,11 @@ public partial class MainWindow : Window
             };
 
             previewWindow.WindowStartupLocation = WindowStartupLocation.CenterOwner;
-            await previewWindow.ShowDialog(this);
+            var extractionRequest =
+                await previewWindow.ShowDialog<PackagePreviewExtractionRequest?>(this);
+
+            if (extractionRequest is { AssetKeys.Count: > 0 })
+                await RunSelectiveExtractionAsync(extractionRequest);
         }
         catch (Exception ex)
         {
@@ -131,5 +135,28 @@ public partial class MainWindow : Window
                 TimeSpan.FromSeconds(4),
                 UiSoundEffect.Negative);
         }
+    }
+
+    private async Task RunSelectiveExtractionAsync(PackagePreviewExtractionRequest request)
+    {
+        if (!File.Exists(request.PackagePath))
+        {
+            ShowDropStatusMessage(
+                "Extraction unavailable",
+                "The selected package could not be found on disk.",
+                TimeSpan.FromSeconds(4),
+                UiSoundEffect.Negative);
+            return;
+        }
+
+        ShowDropStatusMessage(
+            "Selective extraction",
+            $"Extracting {request.AssetKeys.Count} selected asset(s) from {Path.GetFileName(request.PackagePath)}...",
+            TimeSpan.FromSeconds(3));
+
+        await RunExtractionSequenceAsync(new[]
+        {
+            new ExtractionItem(request.PackagePath, null, request.AssetKeys)
+        });
     }
 }

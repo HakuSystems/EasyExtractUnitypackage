@@ -95,6 +95,18 @@ public partial class UnityPackagePreviewWindow : Window
         }
     }
 
+    private void ExtractSelectedButton_OnClick(object? sender, RoutedEventArgs e)
+    {
+        if (DataContext is not UnityPackagePreviewViewModel vm)
+            return;
+
+        var assetKeys = vm.GetCheckedAssetKeys();
+        if (assetKeys.Count == 0)
+            return;
+
+        Close(new PackagePreviewExtractionRequest(vm.PackagePath, assetKeys));
+    }
+
     private async void ExportAssetButton_OnClick(object? sender, RoutedEventArgs e)
     {
         if (DataContext is not UnityPackagePreviewViewModel vm)

@@ -57,7 +57,8 @@ public sealed partial class UnityPackageExtractionService
             progress,
             cancellationToken,
             correlationId,
-            _logger); // Inject Logger
+            _logger, // Inject Logger
+            options.IncludeAssetKeys);
 
         try
         {

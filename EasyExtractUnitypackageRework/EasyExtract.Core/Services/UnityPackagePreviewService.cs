@@ -211,7 +211,8 @@ public sealed class UnityPackagePreviewService : IUnityPackagePreviewService
                     state.PreviewImageData,
                     state.AssetData,
                     state.IsAssetDataTruncated,
-                    state.AssetFilePath));
+                    state.AssetFilePath,
+                    state.AssetKey));
             }
 
             assets.Sort(static (left, right) =>

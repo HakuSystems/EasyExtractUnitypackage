@@ -1,7 +1,9 @@
 namespace EasyExtractCrossPlatform.ViewModels;
 
-public sealed class UnityPackageAssetPreviewItem
+public sealed class UnityPackageAssetPreviewItem : INotifyPropertyChanged
 {
+    private bool _isChecked;
+
     public UnityPackageAssetPreviewItem(UnityPackagePreviewAsset asset)
     {
         if (asset is null)
@@ -16,6 +18,7 @@ public sealed class UnityPackageAssetPreviewItem
         AssetData = asset.AssetData;
         IsAssetDataTruncated = asset.IsAssetDataTruncated;
         AssetFilePath = asset.AssetFilePath;
+        AssetKey = asset.AssetKey;
 
         Extension = Path.GetExtension(RelativePath)?.ToLowerInvariant() ?? string.Empty;
         Category = UnityAssetClassification.ResolveCategory(
@@ -23,6 +26,8 @@ public sealed class UnityPackageAssetPreviewItem
             asset.AssetSizeBytes,
             asset.AssetData is { Length: > 0 });
         SizeText = FormatFileSize(AssetSizeBytes);
+        IsSelectable = !string.IsNullOrWhiteSpace(AssetKey) &&
+                       !string.Equals(Category, "Folder", StringComparison.OrdinalIgnoreCase);
     }
 
     public string RelativePath { get; }
@@ -50,6 +55,25 @@ public sealed class UnityPackageAssetPreviewItem
     public bool HasPreview => PreviewImageData is { Length: > 0 };
 
     public string SizeText { get; }
+
+    public string? AssetKey { get; }
+
+    public bool IsSelectable { get; }
+
+    public bool IsChecked
+    {
+        get => _isChecked;
+        set
+        {
+            if (_isChecked == value || !IsSelectable)
+                return;
+
+            _isChecked = value;
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(IsChecked)));
+        }
+    }
+
+    public event PropertyChangedEventHandler? PropertyChanged;
 
     public Geometry IconGeometry => UnityAssetIconProvider.GetAssetIcon(Category);
 

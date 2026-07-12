@@ -73,6 +73,92 @@ public sealed class UnityPackageAssetTreeNode : INotifyPropertyChanged
         }
     }
 
+    public bool IsCheckable => IsFolder
+        ? ContainsSelectableAsset(this)
+        : Asset is { IsSelectable: true };
+
+    /// <summary>
+    ///     Tri-state check status: file nodes mirror their asset, folder nodes
+    ///     aggregate their descendants (null = partially checked).
+    /// </summary>
+    public bool? IsChecked
+    {
+        get
+        {
+            if (!IsFolder)
+                return Asset is { IsSelectable: true, IsChecked: true };
+
+            var sawChecked = false;
+            var sawUnchecked = false;
+            AggregateCheckState(this, ref sawChecked, ref sawUnchecked);
+
+            if (sawChecked && sawUnchecked)
+                return null;
+
+            return sawChecked;
+        }
+        set
+        {
+            var effective = value == true;
+
+            if (IsFolder)
+                SetDescendantsChecked(this, effective);
+            else if (Asset is { IsSelectable: true } asset)
+                asset.IsChecked = effective;
+        }
+    }
+
+    public void NotifyCheckStateChanged()
+    {
+        OnPropertyChanged(nameof(IsChecked));
+    }
+
+    private static bool ContainsSelectableAsset(UnityPackageAssetTreeNode node)
+    {
+        foreach (var child in node.Children)
+        {
+            if (child.Asset is { IsSelectable: true })
+                return true;
+
+            if (child.IsFolder && ContainsSelectableAsset(child))
+                return true;
+        }
+
+        return false;
+    }
+
+    private static void AggregateCheckState(UnityPackageAssetTreeNode node, ref bool sawChecked, ref bool sawUnchecked)
+    {
+        foreach (var child in node.Children)
+        {
+            if (sawChecked && sawUnchecked)
+                return;
+
+            if (child.Asset is { IsSelectable: true } asset)
+            {
+                if (asset.IsChecked)
+                    sawChecked = true;
+                else
+                    sawUnchecked = true;
+            }
+
+            if (child.IsFolder)
+                AggregateCheckState(child, ref sawChecked, ref sawUnchecked);
+        }
+    }
+
+    private static void SetDescendantsChecked(UnityPackageAssetTreeNode node, bool isChecked)
+    {
+        foreach (var child in node.Children)
+        {
+            if (child.Asset is { IsSelectable: true } asset)
+                asset.IsChecked = isChecked;
+
+            if (child.IsFolder)
+                SetDescendantsChecked(child, isChecked);
+        }
+    }
+
     public Geometry IconGeometry => IsFolder
         ? UnityAssetIconProvider.GetFolderIcon(IsExpanded)
         : UnityAssetIconProvider.GetAssetIcon(Asset);
