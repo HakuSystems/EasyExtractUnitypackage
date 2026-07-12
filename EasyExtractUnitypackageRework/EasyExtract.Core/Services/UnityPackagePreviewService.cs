@@ -17,7 +17,9 @@ public interface IUnityPackagePreviewService
 public sealed class UnityPackagePreviewService : IUnityPackagePreviewService
 {
     private const long MaxEmbeddedAssetBytes = 8 * 1024 * 1024; // 8 MB
-    private const string TemporaryExtractionFolderPrefix = "EasyExtractPreviewAudio";
+    private const long MaxExtractedModelBytes = 256 * 1024 * 1024; // 256 MB per model file
+    private const long MaxTotalExtractedModelBytes = 1024L * 1024 * 1024; // 1 GB across all models
+    private const string TemporaryExtractionFolderPrefix = "EasyExtractPreviewMedia";
     private const string TemporaryPackageFolderPrefix = "EasyExtractPreviewPackage";
     // Keep in sync with UnityPackageExtractionService: use the Windows superset
     // of invalid characters on every platform for deterministic normalization.
@@ -183,10 +185,10 @@ public sealed class UnityPackagePreviewService : IUnityPackagePreviewService
                     ex);
             }
 
-            var extractionRoot = ExtractLargeAudioAssets(resolvedPackage.ResolvedPath, assetStates, cancellationToken);
+            var extractionRoot = ExtractLargeMediaAssets(resolvedPackage.ResolvedPath, assetStates, cancellationToken);
             if (!string.IsNullOrWhiteSpace(extractionRoot))
                 _logger.LogInformation(
-                    $"Extracted large audio assets to temporary directory '{extractionRoot}'.");
+                    $"Extracted large media assets to temporary directory '{extractionRoot}'.");
 
             var assets = new List<UnityPackagePreviewAsset>(assetStates.Count);
             var directoriesToPrune = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
@@ -243,7 +245,7 @@ public sealed class UnityPackagePreviewService : IUnityPackagePreviewService
         }
     }
 
-    private string? ExtractLargeAudioAssets(
+    private string? ExtractLargeMediaAssets(
         string packagePath,
         IDictionary<string, UnityPackageAssetPreviewState> assetStates,
         CancellationToken cancellationToken)
@@ -252,13 +254,14 @@ public sealed class UnityPackagePreviewService : IUnityPackagePreviewService
             .Where(state =>
                 state.NeedsAssetExtraction &&
                 !string.IsNullOrWhiteSpace(state.RelativePath) &&
-                IsAudioExtension(Path.GetExtension(state.RelativePath)))
+                IsPreviewExtractionCandidate(Path.GetExtension(state.RelativePath)))
             .ToDictionary(state => state.AssetKey, state => state, StringComparer.OrdinalIgnoreCase);
 
         if (candidates.Count == 0)
             return null;
 
         string? extractionRoot = null;
+        long extractedModelBytes = 0;
 
         using var packageStream = File.OpenRead(packagePath);
         using var gzipStream = new GZipStream(packageStream, CompressionMode.Decompress);
@@ -286,11 +289,26 @@ public sealed class UnityPackagePreviewService : IUnityPackagePreviewService
                 if (!candidates.TryGetValue(assetKey, out var state))
                     continue;
 
+                var stateExtension = Path.GetExtension(state.RelativePath ?? string.Empty);
+                if (UnityAssetClassification.IsModelExtension(stateExtension))
+                {
+                    // Models are only pulled out for the 3D preview; keep the
+                    // disk footprint bounded for packages full of huge meshes.
+                    if (entry.Length > MaxExtractedModelBytes ||
+                        extractedModelBytes + Math.Max(entry.Length, 0) > MaxTotalExtractedModelBytes)
+                    {
+                        candidates.Remove(assetKey);
+                        continue;
+                    }
+
+                    extractedModelBytes += Math.Max(entry.Length, 0);
+                }
+
                 extractionRoot ??= CreateExtractionRoot();
 
-                var extension = Path.GetExtension(state.RelativePath ?? string.Empty);
+                var extension = stateExtension;
                 if (string.IsNullOrWhiteSpace(extension))
-                    extension = ".audio";
+                    extension = ".bin";
 
                 var safeName = SanitizeFileName(state.AssetKey);
                 if (string.IsNullOrWhiteSpace(safeName))
@@ -319,7 +337,7 @@ public sealed class UnityPackagePreviewService : IUnityPackagePreviewService
         catch (IOException ex)
         {
             _logger.LogWarning(
-                "Large audio asset extraction parsed partially before encountering an IOException. Proceeding with loaded assets.",
+                "Large media asset extraction parsed partially before encountering an IOException. Proceeding with loaded assets.",
                 ex);
         }
 
@@ -452,6 +470,12 @@ public sealed class UnityPackagePreviewService : IUnityPackagePreviewService
     private static bool IsAudioExtension(string? extension)
     {
         return UnityAssetClassification.IsAudioExtension(extension);
+    }
+
+    private static bool IsPreviewExtractionCandidate(string? extension)
+    {
+        return UnityAssetClassification.IsAudioExtension(extension) ||
+               UnityAssetClassification.IsModelExtension(extension);
     }
 
     private static (string AssetKey, string ComponentName) SplitEntryName(string entryName)

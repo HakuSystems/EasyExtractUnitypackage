@@ -294,24 +294,73 @@ public sealed partial class UnityPackagePreviewViewModel
 
     private void TryCreateModelPreview(UnityPackageAssetPreviewItem asset)
     {
-        if (asset.AssetData is not { Length: > 0 } || asset.IsAssetDataTruncated)
-            return;
-
-        if (!IsModelExtension(asset.Extension))
-            return;
-
-        if (string.Equals(asset.Extension, ".obj", StringComparison.OrdinalIgnoreCase))
+        if (IsModelExtension(asset.Extension))
         {
-            ModelPreview = ObjModelParser.TryParse(asset.AssetData);
+            ModelPreview = TryParseModelAsset(asset);
             LoggingService.LogInformation(
                 ModelPreview is null
-                    ? $"Failed to generate OBJ model preview for '{asset.RelativePath}'."
-                    : $"OBJ model preview generated for '{asset.RelativePath}'.");
+                    ? $"Failed to generate model preview for '{asset.RelativePath}'."
+                    : $"Model preview generated for '{asset.RelativePath}'.");
+            return;
         }
-        else
+
+        if (string.Equals(asset.Extension, ".prefab", StringComparison.OrdinalIgnoreCase))
+            TryCreatePrefabModelPreview(asset);
+    }
+
+    private void TryCreatePrefabModelPreview(UnityPackageAssetPreviewItem prefab)
+    {
+        if (prefab.AssetData is not { Length: > 0 })
+            return;
+
+        string yaml;
+        try
         {
-            ModelPreview = null;
+            yaml = Encoding.UTF8.GetString(prefab.AssetData);
         }
+        catch
+        {
+            return;
+        }
+
+        var meshGuids = PrefabMeshReferenceParser.ExtractMeshGuids(yaml);
+        if (meshGuids.Count == 0)
+            return;
+
+        var parsedMeshes = new List<ModelPreviewData>();
+        foreach (var guid in meshGuids)
+        {
+            var meshAsset = _allAssets.FirstOrDefault(candidate =>
+                string.Equals(candidate.AssetKey, guid, StringComparison.OrdinalIgnoreCase) &&
+                IsModelExtension(candidate.Extension));
+
+            if (meshAsset is null)
+                continue;
+
+            var parsed = TryParseModelAsset(meshAsset);
+            if (parsed is not null)
+                parsedMeshes.Add(parsed);
+        }
+
+        if (parsedMeshes.Count == 0)
+        {
+            LoggingService.LogInformation(
+                $"Prefab '{prefab.RelativePath}' references {meshGuids.Count} mesh guid(s) but none could be resolved to a previewable model.");
+            return;
+        }
+
+        ModelPreview = ModelPreviewParser.Combine(parsedMeshes);
+        LoggingService.LogInformation(
+            $"Prefab model preview generated for '{prefab.RelativePath}' from {parsedMeshes.Count} referenced mesh asset(s).");
+    }
+
+    private static ModelPreviewData? TryParseModelAsset(UnityPackageAssetPreviewItem asset)
+    {
+        var data = asset.AssetData is { Length: > 0 } && !asset.IsAssetDataTruncated
+            ? asset.AssetData
+            : null;
+
+        return ModelPreviewParser.TryParse(data, asset.AssetFilePath, asset.Extension);
     }
 
     private int DetermineDefaultPreviewTabIndex()

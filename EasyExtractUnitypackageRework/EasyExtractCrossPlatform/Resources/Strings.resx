@@ -522,7 +522,7 @@
     <value>Only a portion of this asset was loaded for preview.</value>
   </data>
     <data name="UnityPackagePreviewWindow_3DPreviewCurrentlySupportsOBJMeshes" xml:space="preserve">
-    <value>3D preview currently supports OBJ meshes.</value>
+    <value>3D preview supports OBJ, FBX, DAE, 3DS, STL and DXF meshes, plus prefabs that reference them.</value>
   </data>
     <data name="UnityPackagePreviewWindow_AudioPreviewSupportsWAVMP3And" xml:space="preserve">
     <value>Audio preview supports WAV, MP3, and AIFF assets.</value>
