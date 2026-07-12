@@ -171,6 +171,16 @@ public sealed partial class UnityPackageExtractionService : IUnityPackageExtract
                     ex);
                 throw;
             }
+            catch (IOException ex) when (IsFileLockContention(ex))
+            {
+                // Typically Unity or a download manager still holds the .unitypackage.
+                _logger.LogWarning(
+                    $"ExtractAsync aborted: package file is locked by another process | package='{packagePath}' | correlationId={correlationId}",
+                    ex);
+                throw new IOException(
+                    "The package file is currently in use by another program (for example Unity is still downloading it). Wait until it is finished or close the other program, then try again.",
+                    ex);
+            }
             catch (Exception ex)
             {
                 _logger.LogError(
@@ -178,5 +188,12 @@ public sealed partial class UnityPackageExtractionService : IUnityPackageExtract
                 throw;
             }
         }
+    }
+
+    private static bool IsFileLockContention(IOException ex)
+    {
+        const int sharingViolation = unchecked((int)0x80070020);
+        const int lockViolation = unchecked((int)0x80070021);
+        return ex.HResult == sharingViolation || ex.HResult == lockViolation;
     }
 }
