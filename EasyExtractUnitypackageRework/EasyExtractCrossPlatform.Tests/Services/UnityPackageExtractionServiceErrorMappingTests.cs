@@ -47,8 +47,34 @@ public sealed class UnityPackageExtractionServiceErrorMappingTests
     }
 
     [Fact]
-    public void DefaultMaxPackageBytes_Is16GiB()
+    public void DefaultMaxPackageBytes_Is32GiB()
     {
-        Assert.Equal(16L * 1024 * 1024 * 1024, UnityPackageExtractionLimits.DefaultMaxPackageBytes);
+        Assert.Equal(32L * 1024 * 1024 * 1024, UnityPackageExtractionLimits.DefaultMaxPackageBytes);
+    }
+
+    [Fact]
+    public void Normalize_LiftsLegacyDefaultPackageLimit()
+    {
+        var stored = new UnityPackageExtractionLimits
+        {
+            MaxPackageBytes = 16L * 1024 * 1024 * 1024
+        };
+
+        var normalized = UnityPackageExtractionLimits.Normalize(stored);
+
+        Assert.Equal(UnityPackageExtractionLimits.DefaultMaxPackageBytes, normalized.MaxPackageBytes);
+    }
+
+    [Fact]
+    public void Normalize_KeepsCustomPackageLimit()
+    {
+        var stored = new UnityPackageExtractionLimits
+        {
+            MaxPackageBytes = 20L * 1024 * 1024 * 1024
+        };
+
+        var normalized = UnityPackageExtractionLimits.Normalize(stored);
+
+        Assert.Equal(20L * 1024 * 1024 * 1024, normalized.MaxPackageBytes);
     }
 }

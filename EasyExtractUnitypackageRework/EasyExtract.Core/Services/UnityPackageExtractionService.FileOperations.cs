@@ -155,7 +155,7 @@ public sealed partial class UnityPackageExtractionService
                 await assetComponent.CopyToAsync(targetPath, cancellationToken).ConfigureAwait(false);
                 writtenFiles.Add(targetPath);
             }
-            catch (Exception ex)
+            catch (Exception ex) when (ex is not OperationCanceledException)
             {
                 if (DiskSpaceHelper.IsDiskFull(ex))
                 {
@@ -182,7 +182,7 @@ public sealed partial class UnityPackageExtractionService
                 await metaComponent.CopyToAsync(metaPath, cancellationToken).ConfigureAwait(false);
                 writtenFiles.Add(metaPath);
             }
-            catch (Exception ex)
+            catch (Exception ex) when (ex is not OperationCanceledException)
             {
                 if (DiskSpaceHelper.IsDiskFull(ex))
                 {
@@ -208,7 +208,7 @@ public sealed partial class UnityPackageExtractionService
                 await previewComponent.CopyToAsync(previewPath, cancellationToken).ConfigureAwait(false);
                 writtenFiles.Add(previewPath);
             }
-            catch (Exception ex)
+            catch (Exception ex) when (ex is not OperationCanceledException)
             {
                 if (DiskSpaceHelper.IsDiskFull(ex))
                 {
@@ -370,6 +370,15 @@ public sealed partial class UnityPackageExtractionService
                 limiter.TrackAssetBytes(totalWritten);
                 return new AssetComponent(tempPath, totalWritten, hash, logger);
             }
+        }
+        catch (ExtractionSecurityException ex)
+        {
+            if (output != null) await output.DisposeAsync().ConfigureAwait(false);
+            TryDeleteFile(tempPath, logger);
+            // Hitting a configured extraction limit is a policy stop, not a defect.
+            logger.LogWarning(
+                $"Extraction limit reached | entry='{entryName}' | correlationId={correlationId} | {ex.Message}");
+            throw;
         }
         catch (Exception ex) when (ex is not OperationCanceledException and not InvalidDataException)
         {

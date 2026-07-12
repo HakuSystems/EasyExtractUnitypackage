@@ -87,6 +87,16 @@ public sealed partial class UnityPackageExtractionService : IUnityPackageExtract
             throw new IOException(message, unchecked((int)0x80070070));
         }
 
+        // The package is a compressed archive, so its file size is a lower bound for the
+        // extracted volume. Failing here beats aborting hours into the extraction.
+        if (limits.MaxPackageBytes > 0 && packageSize > limits.MaxPackageBytes)
+        {
+            _logger.LogWarning(
+                $"ExtractAsync aborted early: package exceeds extraction budget | package='{packagePath}' | size={packageSize:N0} | limit={limits.MaxPackageBytes:N0} | correlationId={correlationId}");
+            throw new InvalidDataException(
+                $"Extraction aborted. The package file is {packageSize:N0} bytes and already exceeds the configured extraction limit of {limits.MaxPackageBytes:N0} bytes. Increase the limit in the settings to extract this package.");
+        }
+
         // HakuAPI Logic: Ensure Isolation if TemporaryDirectory is provided (or if we need one internally)
         // If the user (or API) provides a general temp root, we append a session-ID based folder to it to avoid collisions.
         // If options.TemporaryDirectory is null, we stick to null (Internal logic might use default temp if needed, but here we prep custom path).
