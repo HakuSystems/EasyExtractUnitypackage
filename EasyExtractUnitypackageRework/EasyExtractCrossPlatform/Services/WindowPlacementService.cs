@@ -157,7 +157,9 @@ public static class WindowPlacementService
         }
         catch (Exception ex)
         {
-            LoggingService.LogError("Failed to persist window placement settings.", ex);
+            // Losing a window placement update is cosmetic; the settings save path
+            // already reports persistent failures on its own.
+            LoggingService.LogWarning("Failed to persist window placement settings.", ex);
         }
     }
 
