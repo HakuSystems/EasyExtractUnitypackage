@@ -78,8 +78,19 @@ public static class AppSettingsService
                 {
                     LoggingService.LogInformation("Settings file not found. Creating default configuration.");
                     var defaults = CreateDefault();
-                    Save(defaults);
-                    LoggingService.LogInformation("Default settings persisted successfully.");
+                    try
+                    {
+                        Save(defaults);
+                        LoggingService.LogInformation("Default settings persisted successfully.");
+                    }
+                    catch (Exception saveEx)
+                    {
+                        // A failed initial save must not fail the whole load; the defaults
+                        // stay usable in memory and the next save gets another chance.
+                        LoggingService.LogWarning(
+                            "Could not persist default settings. Continuing with in-memory defaults.", saveEx);
+                    }
+
                     resolvedSettings = defaults;
                     source = "defaults";
                 }
@@ -311,6 +322,16 @@ public static class AppSettingsService
                 catch (FileNotFoundException)
                 {
                 }
+                catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+                {
+                    // Replace could not swap the files, typically ERROR_UNABLE_TO_REMOVE_REPLACED
+                    // while antivirus or cloud sync holds the destination. Rewriting the existing
+                    // file in place keeps the settings alive at the cost of atomicity.
+                    LoggingService.LogWarning(
+                        $"Atomic settings swap failed; rewriting '{settingsFilePath}' in place.", ex);
+                    WriteSettingsInPlace(settingsFilePath, json);
+                    return;
+                }
 
             try
             {
@@ -318,13 +339,32 @@ public static class AppSettingsService
             }
             catch (IOException) when (File.Exists(settingsFilePath))
             {
-                File.Replace(tempFilePath, settingsFilePath, null, true);
+                try
+                {
+                    File.Replace(tempFilePath, settingsFilePath, null, true);
+                }
+                catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+                {
+                    LoggingService.LogWarning(
+                        $"Atomic settings swap failed; rewriting '{settingsFilePath}' in place.", ex);
+                    WriteSettingsInPlace(settingsFilePath, json);
+                }
             }
         }
         finally
         {
             TryDeleteFile(tempFilePath);
         }
+    }
+
+    private static void WriteSettingsInPlace(string settingsFilePath, string json)
+    {
+        using var stream = new FileStream(settingsFilePath, FileMode.Create, FileAccess.Write,
+            FileShare.ReadWrite | FileShare.Delete);
+        using var writer = new StreamWriter(stream, new UTF8Encoding(false));
+        writer.Write(json);
+        writer.Flush();
+        stream.Flush(true);
     }
 
     private static void CleanupTemporarySettingsFiles(string settingsDirectory, string settingsFilePath)
@@ -383,6 +423,9 @@ public static class AppSettingsService
         const int sharingViolation = unchecked((int)0x80070020);
         const int lockViolation = unchecked((int)0x80070021);
         const int accessDenied = unchecked((int)0x80070005);
+        // ERROR_UNABLE_TO_REMOVE_REPLACED (1175): File.Replace could not delete the
+        // destination, typically because antivirus or cloud sync holds a handle.
+        const int unableToRemoveReplaced = unchecked((int)0x80070497);
 
         // On Unix the same contention surfaces as errno-based HResults:
         // EAGAIN/EWOULDBLOCK (11) for a held file lock, EACCES (13) for
@@ -394,6 +437,7 @@ public static class AppSettingsService
             return ioException.HResult == sharingViolation ||
                    ioException.HResult == lockViolation ||
                    ioException.HResult == accessDenied ||
+                   ioException.HResult == unableToRemoveReplaced ||
                    ioException.HResult == eagain ||
                    ioException.HResult == eacces;
 

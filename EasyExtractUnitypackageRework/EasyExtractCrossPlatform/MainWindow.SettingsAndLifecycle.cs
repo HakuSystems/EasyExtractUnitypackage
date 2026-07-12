@@ -153,7 +153,15 @@ public partial class MainWindow : Window
         _extractionElapsedTimer.Stop();
         _extractionElapsedTimer.Tick -= OnExtractionElapsedTick;
         _dashboardOpenGate.Dispose();
-        AppSettingsService.Save(_settings);
+        try
+        {
+            AppSettingsService.Save(_settings);
+        }
+        catch (Exception ex)
+        {
+            // Losing the very last settings write is acceptable; crashing on close is not.
+            LoggingService.LogWarning("Failed to persist settings while closing the main window.", ex);
+        }
     }
 
     private void SaveWindowPlacement()
