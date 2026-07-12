@@ -138,8 +138,8 @@ jobs:
           path: release_output/*
           if-no-files-found: error
 
-  draft-release:
-    name: Draft GitHub release
+  publish-release:
+    name: Publish GitHub release
     needs:
       - prepare-release-notes
       - build-packages
@@ -159,14 +159,15 @@ jobs:
           path: release_output
           merge-multiple: true
 
-      - name: Create draft release
+      - name: Create release
         uses: softprops/action-gh-release@v2
         with:
           name: ${{ needs.prepare-release-notes.outputs.current_tag }}
           tag_name: ${{ needs.prepare-release-notes.outputs.current_tag }}
           body_path: release-notes.md
           files: release_output/*
-          draft: true
+          draft: false
+          make_latest: true
           generate_release_notes: false
           overwrite_files: true
           fail_on_unmatched_files: true
