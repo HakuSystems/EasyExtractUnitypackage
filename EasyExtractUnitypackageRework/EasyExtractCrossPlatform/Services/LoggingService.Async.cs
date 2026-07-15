@@ -27,31 +27,8 @@ public static partial class LoggingService
 
     private static void WriteEntryCore(PendingLogEntry entry)
     {
-        var builder = new StringBuilder();
-        builder.Append('[')
-            .Append(entry.Level)
-            .Append("] ")
-            .Append(" V" + VersionProvider.GetApplicationVersion() + " ")
-            .Append(entry.Message);
-
-        if (entry.Exception is not null)
-        {
-            builder.AppendLine();
-            if (entry.Preferences.CaptureStackTraces)
-                builder.Append(entry.Exception);
-            else
-                builder.Append(entry.Exception.GetType().FullName)
-                    .Append(':')
-                    .Append(' ')
-                    .Append(entry.Exception.Message);
-        }
-        else if (!string.IsNullOrWhiteSpace(entry.StackTrace))
-        {
-            builder.AppendLine();
-            builder.Append(entry.StackTrace);
-        }
-
-        var formattedPayload = builder.ToString();
+        var formattedPayload = FormatLogPayload(entry.Level, entry.Message, entry.Exception, entry.StackTrace,
+            entry.Preferences.CaptureStackTraces);
         DispatchLogPayload(formattedPayload);
 
         if (string.Equals(entry.Level, "ERROR", StringComparison.OrdinalIgnoreCase))
@@ -59,6 +36,53 @@ public static partial class LoggingService
             if (entry.ForwardToWebhook && ErrorReportPolicy.ShouldForward(entry.Exception))
                 QueueHakuWebhookDispatch(formattedPayload);
             NotifyErrorObservers(entry, formattedPayload);
+        }
+    }
+
+    internal static string FormatLogPayload(string level, string message, Exception? exception, string? stackTrace,
+        bool captureStackTraces)
+    {
+        var builder = new StringBuilder();
+        builder.Append('[')
+            .Append(level)
+            .Append("] ")
+            .Append(" V" + VersionProvider.GetApplicationVersion() + " ")
+            .Append(message);
+
+        if (exception is not null)
+        {
+            builder.AppendLine();
+            builder.Append(DescribeExceptionSafely(exception, captureStackTraces));
+        }
+        else if (!string.IsNullOrWhiteSpace(stackTrace))
+        {
+            builder.AppendLine();
+            builder.Append(stackTrace);
+        }
+
+        return builder.ToString();
+    }
+
+    internal static string DescribeExceptionSafely(Exception exception, bool includeStackTrace)
+    {
+        if (includeStackTrace)
+            try
+            {
+                return exception.ToString();
+            }
+            catch
+            {
+                // Stack trace materialization can itself fail (e.g. under memory pressure);
+                // fall through to the cheaper representations instead of losing the entry.
+            }
+
+        try
+        {
+            return exception.GetType().FullName + ": " + exception.Message;
+        }
+        catch
+        {
+            return exception.GetType().FullName ?? "Unknown exception";
         }
     }
 
@@ -183,14 +207,36 @@ public static partial class LoggingService
         }
         finally
         {
-            FlushPendingEntries();
+            try
+            {
+                FlushPendingEntries();
+            }
+            catch
+            {
+                // Never let the logging worker fault the process during teardown.
+            }
         }
     }
 
     private static void FlushPendingEntries()
     {
         while (PendingEntries.TryDequeue(out var entry))
-            WriteEntryCore(entry);
+            try
+            {
+                WriteEntryCore(entry);
+            }
+            catch (Exception ex)
+            {
+                // Drop the poison entry but keep the pipeline alive for everything behind it.
+                try
+                {
+                    Trace.WriteLine($"[LoggingService] Dropped log entry that failed to write: {ex.GetType().Name}");
+                }
+                catch
+                {
+                    // Ignored: tracing is best effort here.
+                }
+            }
     }
 
     private static void QueueHakuWebhookDispatch(string payload)
