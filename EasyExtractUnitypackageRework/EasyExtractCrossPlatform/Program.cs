@@ -22,8 +22,16 @@ internal class Program
         AppDomain.CurrentDomain.UnhandledException += OnUnhandledException;
         TaskScheduler.UnobservedTaskException += OnUnobservedTaskException;
 
-        BuildAvaloniaApp()
-            .StartWithClassicDesktopLifetime(args);
+        try
+        {
+            BuildAvaloniaApp()
+                .StartWithClassicDesktopLifetime(args);
+        }
+        catch (Exception exception)
+        {
+            FatalCrashHandler.Handle(exception, "Fatal exception escaped the application lifetime.");
+            Environment.Exit(1);
+        }
     }
 
     // Avalonia configuration, don't remove; also used by visual designer.
@@ -46,15 +54,38 @@ internal class Program
 
     private static void OnUnhandledException(object? sender, UnhandledExceptionEventArgs eventArgs)
     {
-        if (eventArgs.ExceptionObject is Exception exception)
-            LoggingService.LogError("Unhandled exception", exception);
-        else
-            LoggingService.LogError($"Unhandled exception: {eventArgs.ExceptionObject}");
+        try
+        {
+            if (eventArgs.ExceptionObject is Exception exception)
+            {
+                // Free some headroom first so formatting and forwarding the report can succeed.
+                if (FatalCrashHandler.IsOutOfMemory(exception))
+                    GC.Collect();
+
+                LoggingService.LogError("Unhandled exception", exception);
+            }
+            else
+            {
+                LoggingService.LogError($"Unhandled exception: {eventArgs.ExceptionObject}");
+            }
+        }
+        catch
+        {
+            // The process is going down; never throw from the crash reporter.
+        }
     }
 
     private static void OnUnobservedTaskException(object? sender, UnobservedTaskExceptionEventArgs eventArgs)
     {
-        LoggingService.LogError("Unobserved task exception", eventArgs.Exception);
+        try
+        {
+            LoggingService.LogError("Unobserved task exception", eventArgs.Exception);
+        }
+        catch
+        {
+            // Reporting is best effort; observing the exception below is what matters.
+        }
+
         eventArgs.SetObserved();
     }
 }
