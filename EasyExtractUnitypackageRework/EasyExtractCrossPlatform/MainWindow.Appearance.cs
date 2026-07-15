@@ -89,13 +89,17 @@ public partial class MainWindow : Window
                     if (!File.Exists(localPath))
                         return null;
 
-                    return await Task.Run(() => new Bitmap(localPath));
+                    return await Task.Run(() => BackgroundImageDecoder.DecodeFile(localPath));
                 }
 
                 if (uri.Scheme is "http" or "https")
                 {
                     var bytes = await BackgroundHttpClient.GetByteArrayAsync(uri);
-                    return await Task.Run(() => new Bitmap(new MemoryStream(bytes)));
+                    return await Task.Run(() =>
+                    {
+                        using var stream = new MemoryStream(bytes);
+                        return BackgroundImageDecoder.Decode(stream);
+                    });
                 }
 
                 return null;
@@ -104,11 +108,11 @@ public partial class MainWindow : Window
             if (!File.Exists(path))
                 return null;
 
-            return await Task.Run(() => new Bitmap(path));
+            return await Task.Run(() => BackgroundImageDecoder.DecodeFile(path));
         }
         catch (Exception ex)
         {
-            Debug.WriteLine($"Failed to load background image from '{path}': {ex}");
+            LoggingService.LogWarning($"Failed to load background image from '{path}'.", ex);
             return null;
         }
     }
