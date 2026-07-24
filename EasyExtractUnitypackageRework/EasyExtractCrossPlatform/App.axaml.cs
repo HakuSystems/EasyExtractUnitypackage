@@ -18,6 +18,8 @@ public class App : Application
 
     public override void OnFrameworkInitializationCompleted()
     {
+        UiThreadExceptionGuard.Install();
+
         ApplyThemeResources(RequestedThemeVariant ?? ThemeVariant.Default);
 
         if (OperatingSystem.IsWindows())
