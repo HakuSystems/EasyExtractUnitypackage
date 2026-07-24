@@ -422,6 +422,12 @@
   <data name="MainWindow_History" xml:space="preserve">
     <value>History</value>
   </data>
+  <data name="MainWindow_FindDuplicates" xml:space="preserve">
+    <value>Duplicates</value>
+  </data>
+  <data name="MainWindow_FindDuplicatesTooltip" xml:space="preserve">
+    <value>Find assets stored more than once across your .unitypackage library</value>
+  </data>
   <data name="MainWindow_Credits" xml:space="preserve">
     <value>Credits</value>
   </data>

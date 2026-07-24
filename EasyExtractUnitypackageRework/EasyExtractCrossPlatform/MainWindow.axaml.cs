@@ -107,6 +107,7 @@ public partial class MainWindow : Window
     private DateTimeOffset? _extractionOverviewStartTime;
     private Stopwatch? _extractionStopwatch;
     private FeedbackWindow? _feedbackWindow;
+    private DuplicateFinderWindow? _duplicateFinderWindow;
     private HistoryWindow? _historyWindow;
 
     private bool _isExtractionCancelling;

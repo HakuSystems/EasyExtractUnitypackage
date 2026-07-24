@@ -37,6 +37,41 @@ public partial class MainWindow : Window
         QueueDiscordPresenceUpdate("Credits", "Celebrating contributors");
     }
 
+    private void DuplicateFinderButton_OnClick(object? sender, RoutedEventArgs e)
+    {
+        if (_duplicateFinderWindow is { IsVisible: true })
+        {
+            _duplicateFinderWindow.Activate();
+            return;
+        }
+
+        try
+        {
+            var scanner = _serviceProvider.GetRequiredService<IDuplicateLibraryScanner>();
+            var window = new DuplicateFinderWindow(new DuplicateFinderViewModel(scanner));
+
+            window.Closed += (_, _) =>
+            {
+                if (ReferenceEquals(_duplicateFinderWindow, window))
+                    _duplicateFinderWindow = null;
+            };
+
+            _duplicateFinderWindow = window;
+            window.Show(this);
+            UiSoundService.Instance.Play(UiSoundEffect.Subtle);
+            QueueDiscordPresenceUpdate("Duplicate finder", "Looking for assets stored twice");
+        }
+        catch (Exception ex)
+        {
+            LoggingService.LogError("Failed to open the duplicate finder.", ex);
+            ShowDropStatusMessage(
+                "Unable to open duplicate finder",
+                ex.Message,
+                TimeSpan.FromSeconds(4),
+                UiSoundEffect.Negative);
+        }
+    }
+
     private void HistoryButton_OnClick(object? sender, RoutedEventArgs e)
     {
         if (_historyWindow is { IsVisible: true })

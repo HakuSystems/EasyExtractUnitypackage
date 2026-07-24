@@ -68,7 +68,10 @@ public static class AppServiceLocator
             .RegisterSingleton<IErrorDialogService>(() => new ErrorDialogService())
             .RegisterSingleton<IUnityPackagePreviewService>(() => new UnityPackagePreviewService(logger))
             .RegisterSingleton<IVelopackUpdateService>(() => new VelopackUpdateService())
-            .RegisterSingleton<IHakuSyncService>(() => new HakuSyncService());
+            .RegisterSingleton<IHakuSyncService>(() => new HakuSyncService())
+            .RegisterSingleton<IDuplicateAssetScanner>(() => new DuplicateAssetScanner(logger))
+            .RegisterSingleton<IDuplicateLibraryScanner>(() =>
+                new DuplicateLibraryScanner(provider.GetRequiredService<IDuplicateAssetScanner>()));
 
         return provider;
     }
