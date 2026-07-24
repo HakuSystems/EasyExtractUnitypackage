@@ -160,7 +160,8 @@ public class HistoryViewModel
         {
             var entry = sample[index];
             var value = values[index];
-            var height = value / maxValue * VelocityGraphHeight;
+            // Both operands are int, so without the cast this truncates every non peak bar to zero.
+            var height = (double)value / maxValue * VelocityGraphHeight;
             points.Add(new HistoryVelocityPoint(
                 $"{entry.FileName}",
                 $"{value:N0} {(entry.AssetsExtracted > 0 ? "assets" : "MB")}",
