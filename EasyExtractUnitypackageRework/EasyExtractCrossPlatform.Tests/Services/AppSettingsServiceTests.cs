@@ -1,3 +1,4 @@
+using EasyExtractCrossPlatform.Tests.Support;
 using EasyExtractCrossPlatform.Services;
 using Xunit;
 
@@ -158,25 +159,19 @@ public sealed class AppSettingsServiceTests : IDisposable
     }
 
     [Fact]
-    public async Task Save_Retries_WhenSettingsFileTemporarilyLocked_AndEventuallySucceeds()
+    public void Save_Retries_WhenSettingsFileTemporarilyLocked_AndEventuallySucceeds()
     {
       var initial = AppSettingsService.CreateDefault();
       initial.DefaultOutputPath = @"C:\initial";
       AppSettingsService.Save(initial);
 
       var lockStream = new FileStream(_settingsFilePath, FileMode.Open, FileAccess.ReadWrite, FileShare.None);
-
-      var releaseTask = Task.Run(async () =>
-      {
-        await Task.Delay(250);
-        lockStream.Dispose();
-      });
+      using var release = DelayedRelease.After(TimeSpan.FromMilliseconds(250), lockStream);
 
       var updated = AppSettingsService.CreateDefault();
       updated.DefaultOutputPath = @"C:\updated";
 
       AppSettingsService.Save(updated);
-      await releaseTask;
 
       var loaded = AppSettingsService.Load();
       Assert.Equal(@"C:\updated", loaded.DefaultOutputPath);
@@ -195,15 +190,9 @@ public sealed class AppSettingsServiceTests : IDisposable
       await File.WriteAllTextAsync(_settingsFilePath, json);
 
       var lockStream = new FileStream(_settingsFilePath, FileMode.Open, FileAccess.ReadWrite, FileShare.None);
-
-      var releaseTask = Task.Run(async () =>
-      {
-        await Task.Delay(250);
-        lockStream.Dispose();
-      });
+      using var release = DelayedRelease.After(TimeSpan.FromMilliseconds(250), lockStream);
 
       var loaded = AppSettingsService.Load();
-      await releaseTask;
 
       Assert.Equal(@"C:\load-retry", loaded.DefaultOutputPath);
       Assert.Null(AppSettingsService.LastError);

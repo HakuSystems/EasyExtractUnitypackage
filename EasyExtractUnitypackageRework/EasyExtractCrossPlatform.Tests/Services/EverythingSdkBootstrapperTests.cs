@@ -1,3 +1,4 @@
+using EasyExtractCrossPlatform.Tests.Support;
 using EasyExtractCrossPlatform.Services;
 using Xunit;
 
@@ -71,19 +72,13 @@ public sealed class EverythingSdkBootstrapperTests : IDisposable
 
         try
         {
-            var releaseTask = Task.Run(async () =>
-            {
-                await Task.Delay(120);
-                lockStream.Dispose();
-            });
+            using var release = DelayedRelease.After(TimeSpan.FromMilliseconds(120), lockStream);
 
             await EverythingSdkBootstrapper.PromoteStagedDllForTestsAsync(
                 stagedPath,
                 destinationPath,
                 8,
                 TimeSpan.FromMilliseconds(25));
-
-            await releaseTask;
         }
         finally
         {
