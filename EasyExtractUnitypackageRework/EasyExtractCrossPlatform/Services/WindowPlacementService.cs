@@ -197,6 +197,21 @@ public static class WindowPlacementService
         return value.HasValue ? value.Value.ToString() : "n/a";
     }
 
+    // Keeps a usable grab area on screen when the window has no measured size yet.
+    private const int FallbackVisibleExtent = 200;
+
+    /// <summary>
+    ///     An auto sized window reports NaN for Width and Height. Casting that to int collapses the
+    ///     bounds to a single pixel, which lets a restored window sit almost entirely off screen.
+    /// </summary>
+    internal static int ToPixelExtent(double extent)
+    {
+        if (double.IsNaN(extent) || double.IsInfinity(extent) || extent < 1)
+            return FallbackVisibleExtent;
+
+        return (int)Math.Round(Math.Min(extent, int.MaxValue));
+    }
+
     private sealed class WindowPlacementTracker : IDisposable
     {
         private readonly bool _persistWindowState;
@@ -367,8 +382,10 @@ public static class WindowPlacementService
             if (_window.Screens is null)
                 return desiredPosition;
 
-            var pixelWidth = Math.Max(1, (int)Math.Round(windowSize.Width));
-            var pixelHeight = Math.Max(1, (int)Math.Round(windowSize.Height));
+            // An auto sized window reports NaN here, and (int)NaN would collapse the bounds to a
+            // single pixel, which lets the window be restored almost entirely off screen.
+            var pixelWidth = WindowPlacementService.ToPixelExtent(windowSize.Width);
+            var pixelHeight = WindowPlacementService.ToPixelExtent(windowSize.Height);
             var targetScreen = _window.Screens.ScreenFromPoint(desiredPosition) ?? _window.Screens.Primary;
 
             if (targetScreen is null)
