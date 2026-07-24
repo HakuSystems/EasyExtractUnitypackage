@@ -38,4 +38,14 @@ public static class HeadlessUi
         var session = HeadlessUnitTestSession.GetOrStartForAssembly(Assembly.GetExecutingAssembly());
         return session.Dispatch(body, CancellationToken.None);
     }
+
+    public static Task RunAsync(Func<Task> body)
+    {
+        var session = HeadlessUnitTestSession.GetOrStartForAssembly(Assembly.GetExecutingAssembly());
+        return session.Dispatch(async () =>
+        {
+            await body().ConfigureAwait(true);
+            return true;
+        }, CancellationToken.None);
+    }
 }

@@ -275,10 +275,13 @@ public sealed class EverythingSearchViewModel : INotifyPropertyChanged, IDisposa
             stopwatch.Stop();
             if (_activeSearchCts == cts)
             {
-                _activeSearchCts.Dispose();
                 _activeSearchCts = null;
                 IsSearching = false;
             }
+
+            // Each run owns its source. Disposing only the current one leaked every search that a
+            // later keystroke superseded, which is the common case with the auto search timer.
+            cts.Dispose();
         }
     }
 
