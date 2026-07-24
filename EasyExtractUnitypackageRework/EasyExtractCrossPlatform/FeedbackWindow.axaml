@@ -68,7 +68,7 @@
                                  AcceptsReturn="True"
                                  TextWrapping="Wrap"
                                  MinHeight="180"
-                                 Watermark="{loc:Loc FeedbackWindow_Watermark}"
+                                 PlaceholderText="{loc:Loc FeedbackWindow_Watermark}"
                                  ScrollViewer.VerticalScrollBarVisibility="Auto" />
 
                         <Grid Grid.Row="1"

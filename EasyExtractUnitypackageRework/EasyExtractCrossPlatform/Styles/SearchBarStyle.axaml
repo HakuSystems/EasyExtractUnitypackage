@@ -10,10 +10,10 @@
                            FontWeight="SemiBold"
                            Foreground="{DynamicResource EasyTextColorBrush}" />
                 <TextBox Classes="search-bar"
-                         Watermark="Search packages..."
+                         PlaceholderText="Search packages..."
                          Text="XR interaction toolkit" />
                 <TextBox Classes="search-bar"
-                         Watermark="Disabled example"
+                         PlaceholderText="Disabled example"
                          IsEnabled="False" />
             </StackPanel>
         </Border>
@@ -97,7 +97,7 @@
                                                 HorizontalAlignment="Left"
                                                 VerticalAlignment="Center"
                                                 IsVisible="{Binding Text, RelativeSource={RelativeSource TemplatedParent}, Converter={StaticResource SearchBarWatermarkVisibilityConverter}}"
-                                                Content="{TemplateBinding Watermark}"
+                                                Content="{TemplateBinding PlaceholderText}"
                                                 FontSize="{TemplateBinding FontSize}" />
                             </Grid>
                             <Button Grid.Column="2"

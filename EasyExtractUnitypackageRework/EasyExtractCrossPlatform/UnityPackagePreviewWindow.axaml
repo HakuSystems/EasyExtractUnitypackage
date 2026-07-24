@@ -292,7 +292,7 @@
                                          Grid.Column="3"
                                          Classes="search-bar search-bar-small"
                                          Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}"
-                                         Watermark="{loc:Loc UnityPackagePreviewWindow_SearchAssets}"
+                                         PlaceholderText="{loc:Loc UnityPackagePreviewWindow_SearchAssets}"
                                          MinWidth="220"
                                          HorizontalAlignment="Stretch"
                                          VerticalAlignment="Center"

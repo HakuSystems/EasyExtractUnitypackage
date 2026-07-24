@@ -77,6 +77,29 @@ public sealed class SearchBarTextBoxTests
         });
     }
 
+    [Fact]
+    public Task PlaceholderText_IsShownWhileTheBoxIsEmpty()
+    {
+        return HeadlessUi.RunAsync(() =>
+        {
+            var (window, textBox) = CreateSearchBar();
+            textBox.PlaceholderText = "Search packages...";
+            Dispatcher.UIThread.RunJobs();
+
+            var placeholder = textBox.GetVisualDescendants()
+                .OfType<ContentControl>()
+                .Single(control => control.Name == "PART_Watermark");
+
+            Assert.Equal("Search packages...", placeholder.Content);
+            Assert.True(placeholder.IsVisible);
+
+            window.KeyTextInput("shader");
+            Dispatcher.UIThread.RunJobs();
+
+            Assert.False(placeholder.IsVisible);
+        });
+    }
+
     private static (Window Window, TextBox TextBox) CreateSearchBar()
     {
         var textBox = new TextBox
