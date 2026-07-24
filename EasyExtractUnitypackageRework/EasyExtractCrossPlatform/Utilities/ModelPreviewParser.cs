@@ -1,5 +1,5 @@
 using System.Numerics;
-using Assimp;
+using SharpAssimp;
 
 namespace EasyExtractCrossPlatform.Utilities;
 
@@ -111,12 +111,18 @@ public static class ModelPreviewParser
 
             return new ModelPreviewData(vertices.ToArray(), indices.ToArray(), center, boundingRadius);
         }
-        catch (AssimpException)
+        catch (AssimpException ex)
         {
+            // A model the importer cannot read is a property of the package, not an app defect.
+            LoggingService.LogInformation($"Model preview import rejected by Assimp: {ex.Message}");
             return null;
         }
-        catch
+        catch (Exception ex)
         {
+            // Anything else means the importer itself is broken, typically a missing or unloadable
+            // native library. That used to fail silently, which hid model preview being dead on a
+            // whole platform.
+            LoggingService.LogWarning("Model preview import failed unexpectedly.", ex);
             return null;
         }
     }
