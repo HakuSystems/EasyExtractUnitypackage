@@ -255,6 +255,117 @@ public sealed class EverythingSdkBootstrapperTests : IDisposable
         Directory.Delete(root, true);
     }
 
+    [Fact]
+    public async Task EnsureInitializedAsync_TruncatedDownload_ReportsServiceUnavailableInsteadOfMissingLibrary()
+    {
+        if (!OperatingSystem.IsWindows())
+            return;
+
+        EverythingSdkBootstrapper.ResetForTests();
+
+        EverythingSdkBootstrapper.ConfigureForTests(
+            () => throw new HttpIOException(HttpRequestError.ResponseEnded, "The response ended prematurely."),
+            _ => { },
+            _ => { });
+
+        var exception = await Assert.ThrowsAsync<EverythingSearchException>(
+            () => EverythingSdkBootstrapper.EnsureInitializedAsync());
+
+        Assert.Equal(EverythingErrorCode.ServiceUnavailable, exception.ErrorCode);
+        Assert.DoesNotContain("was not found", exception.Message, StringComparison.OrdinalIgnoreCase);
+    }
+
+    [Theory]
+    [InlineData(typeof(InvalidDataException), true)]
+    [InlineData(typeof(TaskCanceledException), true)]
+    [InlineData(typeof(TimeoutException), true)]
+    [InlineData(typeof(InvalidOperationException), false)]
+    [InlineData(typeof(UnauthorizedAccessException), false)]
+    public void IsTransientDownloadFailure_ClassifiesRetryableFailures(Type exceptionType, bool expected)
+    {
+        var exception = (Exception)Activator.CreateInstance(exceptionType)!;
+
+        Assert.Equal(expected, EverythingSdkBootstrapper.IsTransientDownloadFailure(exception));
+    }
+
+    [Fact]
+    public void IsTransientDownloadFailure_TruncatedHttpResponse_IsRetryable()
+    {
+        var exception = new HttpIOException(HttpRequestError.ResponseEnded, "The response ended prematurely.");
+
+        Assert.True(EverythingSdkBootstrapper.IsTransientDownloadFailure(exception));
+    }
+
+    [Fact]
+    public async Task EnsureDllForTestsAsync_FallsBackToDllNextToTheExecutable()
+    {
+        if (!OperatingSystem.IsWindows())
+            return;
+
+        EverythingSdkBootstrapper.ResetForTests();
+
+        var root = Path.Combine(Path.GetTempPath(), "EasyExtractTests", Guid.NewGuid().ToString("N"));
+        var appDataPath = Path.Combine(root, "AppData");
+        var installDirectory = Path.Combine(root, "Install");
+        Directory.CreateDirectory(installDirectory);
+
+        var dllName = Environment.Is64BitProcess ? "Everything64.dll" : "Everything32.dll";
+        var localDllPath = Path.Combine(installDirectory, dllName);
+        await File.WriteAllBytesAsync(localDllPath, new byte[]
+        {
+            0x4D, 0x5A
+        });
+
+        EverythingSdkBootstrapper.ConfigureForTests(
+            appDataPathOverride: () => appDataPath,
+            validateDllHashOverride: (path, _) =>
+                string.Equals(Path.GetFullPath(path), Path.GetFullPath(localDllPath),
+                    StringComparison.OrdinalIgnoreCase),
+            localProbeDirectoriesOverride: () => new[] { installDirectory });
+
+        var resolvedPath = await EverythingSdkBootstrapper.EnsureDllForTestsAsync();
+
+        Assert.Equal(localDllPath, resolvedPath, true);
+        Assert.True(File.Exists(localDllPath));
+
+        Directory.Delete(root, true);
+    }
+
+    [Fact]
+    public async Task TryUseLocallyShippedDllForTests_BadHash_IsIgnoredAndTheFileIsKept()
+    {
+        if (!OperatingSystem.IsWindows())
+            return;
+
+        EverythingSdkBootstrapper.ResetForTests();
+
+        var root = Path.Combine(Path.GetTempPath(), "EasyExtractTests", Guid.NewGuid().ToString("N"));
+        var installDirectory = Path.Combine(root, "Install");
+        Directory.CreateDirectory(installDirectory);
+
+        var dllName = Environment.Is64BitProcess ? "Everything64.dll" : "Everything32.dll";
+        var localDllPath = Path.Combine(installDirectory, dllName);
+        await File.WriteAllBytesAsync(localDllPath, new byte[]
+        {
+            0xDE, 0xAD
+        });
+
+        EverythingSdkBootstrapper.ConfigureForTests(
+            validateDllHashOverride: (_, deleteOnMismatch) =>
+            {
+                Assert.False(deleteOnMismatch, "A user supplied DLL must never be deleted.");
+                return false;
+            },
+            localProbeDirectoriesOverride: () => new[] { installDirectory });
+
+        var resolved = EverythingSdkBootstrapper.TryUseLocallyShippedDllForTests(out _);
+
+        Assert.False(resolved);
+        Assert.True(File.Exists(localDllPath));
+
+        Directory.Delete(root, true);
+    }
+
     private sealed class SharingViolationIOException : IOException
     {
         public SharingViolationIOException() : base("Simulated sharing violation")

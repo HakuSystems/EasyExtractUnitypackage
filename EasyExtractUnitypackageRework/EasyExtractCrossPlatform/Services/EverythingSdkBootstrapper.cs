@@ -9,7 +9,9 @@ namespace EasyExtractCrossPlatform.Services;
 internal static class EverythingSdkBootstrapper
 {
     private const int DllPromotionMaxAttempts = 6;
+    private const int DownloadMaxAttempts = 3;
     private static readonly TimeSpan DllPromotionInitialDelay = TimeSpan.FromMilliseconds(40);
+    private static readonly TimeSpan DownloadInitialRetryDelay = TimeSpan.FromMilliseconds(500);
 
     private static readonly Uri SdkDownloadUri = new("https://www.voidtools.com/Everything-SDK.zip");
     private static readonly HttpClient HttpClient = new();
@@ -35,6 +37,7 @@ internal static class EverythingSdkBootstrapper
     private static Action<string>? _loadLibraryOverride;
     private static Func<string>? _appDataPathOverride;
     private static Func<string, bool, bool>? _validateDllHashOverride;
+    private static Func<IEnumerable<string>>? _localProbeDirectoriesOverride;
 
     public static Task EnsureInitializedAsync(CancellationToken cancellationToken = default)
     {
@@ -73,11 +76,10 @@ internal static class EverythingSdkBootstrapper
             loadLibrary(dllPath);
             LoggingService.LogInformation($"Everything SDK initialized using '{dllPath}'.");
         }
-        catch (HttpRequestException ex)
+        catch (Exception ex) when (ex is HttpRequestException or HttpIOException or InvalidDataException
+                                       or TaskCanceledException or TimeoutException)
         {
-            var status = ex.StatusCode is HttpStatusCode code
-                ? $"{(int)code} {code}"
-                : "No response from voidtools.com";
+            var status = DescribeNetworkFailure(ex);
 
             LoggingService.LogError($"Failed to initialize Everything SDK due to network error ({status}).", ex,
                 false);
@@ -127,62 +129,15 @@ internal static class EverythingSdkBootstrapper
                 return dllPath;
             }
 
-            var tempZipPath = Path.Combine(Path.GetTempPath(), $"Everything-SDK-{Guid.NewGuid():N}.zip");
-            var stagedDllPath = Path.Combine(sdkDirectory, $"{TargetDllFileName}.{Guid.NewGuid():N}.tmp");
-
-            try
+            // The error messages tell users to drop the SDK DLL next to the executable, so honour
+            // that before going to the network. It is also the only way out on an offline machine.
+            if (TryUseLocallyShippedDll(out var localDllPath))
             {
-                LoggingService.LogInformation($"Downloading Everything SDK from '{SdkDownloadUri}'.");
-                using (var response = await HttpClient
-                           .GetAsync(SdkDownloadUri, HttpCompletionOption.ResponseHeadersRead)
-                           .ConfigureAwait(false))
-                {
-                    response.EnsureSuccessStatusCode();
-
-                    await using var downloadStream = await response.Content.ReadAsStreamAsync().ConfigureAwait(false);
-                    await using (var tempFileStream = File.Create(tempZipPath))
-                    {
-                        await downloadStream.CopyToAsync(tempFileStream).ConfigureAwait(false);
-                    }
-                }
-
-                LoggingService.LogInformation($"Everything SDK archive downloaded to '{tempZipPath}'.");
-
-                using var archive = ZipFile.OpenRead(tempZipPath);
-                var dllEntry = archive.Entries
-                    .FirstOrDefault(entry =>
-                        entry.FullName.EndsWith(TargetDllFileName, StringComparison.OrdinalIgnoreCase));
-
-                if (dllEntry is null)
-                    throw new InvalidOperationException(
-                        $"The Everything SDK package did not contain {TargetDllFileName}.");
-
-                await using (var entryStream = dllEntry.Open())
-                await using (var stagedStream = File.Create(stagedDllPath))
-                {
-                    await entryStream.CopyToAsync(stagedStream).ConfigureAwait(false);
-                }
-
-                await PromoteStagedDllAsync(
-                        stagedDllPath,
-                        dllPath,
-                        DllPromotionMaxAttempts,
-                        DllPromotionInitialDelay)
-                    .ConfigureAwait(false);
-
-                if (!ValidateDllHash(dllPath, false))
-                {
-                    LoggingService.LogError("The promoted Everything SDK DLL failed integrity validation.");
-                    throw new InvalidOperationException("The promoted Everything SDK DLL failed integrity validation.");
-                }
-
-                LoggingService.LogInformation($"Everything SDK DLL extracted to '{dllPath}'.");
+                _everythingDllPath = localDllPath;
+                return localDllPath;
             }
-            finally
-            {
-                TryDeleteFile(tempZipPath);
-                TryDeleteFile(stagedDllPath);
-            }
+
+            await DownloadDllWithRetryAsync(sdkDirectory, dllPath).ConfigureAwait(false);
 
             _everythingDllPath = dllPath;
             return dllPath;
@@ -191,6 +146,169 @@ internal static class EverythingSdkBootstrapper
         {
             DllInstallGate.Release();
         }
+    }
+
+    private static bool TryUseLocallyShippedDll(out string dllPath)
+    {
+        foreach (var directory in GetLocalProbeDirectories())
+        {
+            if (string.IsNullOrWhiteSpace(directory))
+                continue;
+
+            var candidate = Path.Combine(directory, TargetDllFileName);
+
+            try
+            {
+                if (!File.Exists(candidate))
+                    continue;
+
+                // Never delete a file the user placed there, even when the hash does not match.
+                if (!ValidateDllHash(candidate, false))
+                {
+                    LoggingService.LogWarning(
+                        $"Ignoring Everything SDK DLL at '{candidate}' because it failed integrity validation.");
+                    continue;
+                }
+
+                LoggingService.LogInformation($"Using locally shipped Everything SDK DLL at '{candidate}'.");
+                dllPath = candidate;
+                return true;
+            }
+            catch (Exception ex)
+            {
+                LoggingService.LogWarning($"Failed to inspect Everything SDK DLL at '{candidate}'.", ex);
+            }
+        }
+
+        dllPath = string.Empty;
+        return false;
+    }
+
+    private static IEnumerable<string> GetLocalProbeDirectories()
+    {
+        if (_localProbeDirectoriesOverride is not null)
+            return _localProbeDirectoriesOverride();
+
+        var directories = new List<string> { AppContext.BaseDirectory };
+
+        if (Environment.ProcessPath is { Length: > 0 } processPath)
+        {
+            var processDirectory = Path.GetDirectoryName(processPath);
+            if (!string.IsNullOrWhiteSpace(processDirectory))
+                directories.Add(processDirectory);
+        }
+
+        return directories.Distinct(StringComparer.OrdinalIgnoreCase);
+    }
+
+    private static async Task DownloadDllWithRetryAsync(string sdkDirectory, string dllPath)
+    {
+        var delay = DownloadInitialRetryDelay;
+
+        for (var attempt = 1;; attempt++)
+            try
+            {
+                await DownloadDllAsync(sdkDirectory, dllPath).ConfigureAwait(false);
+                return;
+            }
+            catch (Exception ex) when (IsTransientDownloadFailure(ex) && attempt < DownloadMaxAttempts)
+            {
+                LoggingService.LogWarning(
+                    $"Everything SDK download attempt {attempt}/{DownloadMaxAttempts} failed ({ex.GetType().Name}). Retrying.",
+                    ex);
+
+                await Task.Delay(delay).ConfigureAwait(false);
+                delay = TimeSpan.FromMilliseconds(Math.Min(4000, delay.TotalMilliseconds * 2));
+            }
+    }
+
+    private static async Task DownloadDllAsync(string sdkDirectory, string dllPath)
+    {
+        var tempZipPath = Path.Combine(Path.GetTempPath(), $"Everything-SDK-{Guid.NewGuid():N}.zip");
+        var stagedDllPath = Path.Combine(sdkDirectory, $"{TargetDllFileName}.{Guid.NewGuid():N}.tmp");
+
+        try
+        {
+            LoggingService.LogInformation($"Downloading Everything SDK from '{SdkDownloadUri}'.");
+            using (var response = await HttpClient
+                       .GetAsync(SdkDownloadUri, HttpCompletionOption.ResponseHeadersRead)
+                       .ConfigureAwait(false))
+            {
+                response.EnsureSuccessStatusCode();
+
+                await using var downloadStream = await response.Content.ReadAsStreamAsync().ConfigureAwait(false);
+                await using (var tempFileStream = File.Create(tempZipPath))
+                {
+                    await downloadStream.CopyToAsync(tempFileStream).ConfigureAwait(false);
+                }
+            }
+
+            LoggingService.LogInformation($"Everything SDK archive downloaded to '{tempZipPath}'.");
+
+            using var archive = ZipFile.OpenRead(tempZipPath);
+            var dllEntry = archive.Entries
+                .FirstOrDefault(entry =>
+                    entry.FullName.EndsWith(TargetDllFileName, StringComparison.OrdinalIgnoreCase));
+
+            if (dllEntry is null)
+                throw new InvalidOperationException(
+                    $"The Everything SDK package did not contain {TargetDllFileName}.");
+
+            await using (var entryStream = dllEntry.Open())
+            await using (var stagedStream = File.Create(stagedDllPath))
+            {
+                await entryStream.CopyToAsync(stagedStream).ConfigureAwait(false);
+            }
+
+            await PromoteStagedDllAsync(
+                    stagedDllPath,
+                    dllPath,
+                    DllPromotionMaxAttempts,
+                    DllPromotionInitialDelay)
+                .ConfigureAwait(false);
+
+            if (!ValidateDllHash(dllPath, false))
+            {
+                LoggingService.LogError("The promoted Everything SDK DLL failed integrity validation.");
+                throw new InvalidOperationException("The promoted Everything SDK DLL failed integrity validation.");
+            }
+
+            LoggingService.LogInformation($"Everything SDK DLL extracted to '{dllPath}'.");
+        }
+        finally
+        {
+            TryDeleteFile(tempZipPath);
+            TryDeleteFile(stagedDllPath);
+        }
+    }
+
+    /// <summary>
+    ///     A truncated response, a timeout or a corrupt archive all mean the same thing: the download
+    ///     did not survive the trip. Retrying is worthwhile, telling the user their DLL is missing is not.
+    /// </summary>
+    internal static bool IsTransientDownloadFailure(Exception? exception)
+    {
+        return exception switch
+        {
+            HttpIOException => true,
+            HttpRequestException => true,
+            InvalidDataException => true,
+            TaskCanceledException => true,
+            TimeoutException => true,
+            _ => false
+        };
+    }
+
+    private static string DescribeNetworkFailure(Exception exception)
+    {
+        return exception switch
+        {
+            HttpRequestException { StatusCode: HttpStatusCode code } => $"{(int)code} {code}",
+            HttpIOException => "The download from voidtools.com ended prematurely",
+            InvalidDataException => "The downloaded Everything SDK archive was corrupt",
+            TaskCanceledException or TimeoutException => "The download from voidtools.com timed out",
+            _ => "No response from voidtools.com"
+        };
     }
 
     private static async Task<bool> TryReuseExistingDllAsync(string dllPath)
@@ -426,13 +544,15 @@ internal static class EverythingSdkBootstrapper
         Action<string>? registerResolverOverride = null,
         Action<string>? loadLibraryOverride = null,
         Func<string>? appDataPathOverride = null,
-        Func<string, bool, bool>? validateDllHashOverride = null)
+        Func<string, bool, bool>? validateDllHashOverride = null,
+        Func<IEnumerable<string>>? localProbeDirectoriesOverride = null)
     {
         _ensureDllOverride = ensureDllOverride;
         _registerResolverOverride = registerResolverOverride;
         _loadLibraryOverride = loadLibraryOverride;
         _appDataPathOverride = appDataPathOverride;
         _validateDllHashOverride = validateDllHashOverride;
+        _localProbeDirectoriesOverride = localProbeDirectoriesOverride;
     }
 
     internal static void ResetForTests()
@@ -448,11 +568,17 @@ internal static class EverythingSdkBootstrapper
         _loadLibraryOverride = null;
         _appDataPathOverride = null;
         _validateDllHashOverride = null;
+        _localProbeDirectoriesOverride = null;
     }
 
     internal static Task<string> EnsureDllForTestsAsync()
     {
         return EnsureDllAsync();
+    }
+
+    internal static bool TryUseLocallyShippedDllForTests(out string dllPath)
+    {
+        return TryUseLocallyShippedDll(out dllPath);
     }
 
     internal static Task PromoteStagedDllForTestsAsync(
