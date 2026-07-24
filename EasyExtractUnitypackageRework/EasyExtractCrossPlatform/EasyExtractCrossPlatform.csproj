@@ -24,7 +24,9 @@
         <PackageReference Include="DiscordRichPresence" Version="1.143.0" />
         <PackageReference Include="Markdown.Avalonia" Version="11.0.3-a1" />
         <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.2" />
-        <PackageReference Include="Microsoft.Windows.Compatibility" Version="10.0.8" />
+        <!-- DiscordRichPresence pins Newtonsoft.Json 12.0.2, which has a high severity
+             advisory (GHSA-5crp-9r3c-p9vr). Lift it to a patched version. -->
+        <PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
         <PackageReference Include="NAudio" Version="2.3.0" />
         <PackageReference Include="NAudio.Vorbis" Version="1.5.0" />
         <PackageReference Include="AssimpNet" Version="5.0.0-beta1" />
