@@ -64,11 +64,31 @@
                             <Grid Grid.Column="1"
                                   Margin="12,0"
                                   VerticalAlignment="Center">
-                                <ScrollViewer x:Name="PART_ContentHost"
+                                <!-- The presenter needs the full set of template bindings. Without them it
+                                     only ever learns about text the user typed, so a programmatic change
+                                     (clear button, Esc, view model) leaves it holding the previous, longer
+                                     string and TextBox.OnKeyDown deletes past the end of Text. -->
+                                <ScrollViewer x:Name="PART_ScrollViewer"
                                               HorizontalScrollBarVisibility="Hidden"
                                               VerticalScrollBarVisibility="Disabled">
                                     <TextPresenter x:Name="PART_TextPresenter"
-                                                   Background="Transparent" />
+                                                   Background="Transparent"
+                                                   Text="{TemplateBinding Text, Mode=TwoWay}"
+                                                   CaretIndex="{TemplateBinding CaretIndex}"
+                                                   CaretBlinkInterval="{TemplateBinding CaretBlinkInterval}"
+                                                   CaretBrush="{TemplateBinding CaretBrush}"
+                                                   SelectionStart="{TemplateBinding SelectionStart}"
+                                                   SelectionEnd="{TemplateBinding SelectionEnd}"
+                                                   SelectionBrush="{TemplateBinding SelectionBrush}"
+                                                   SelectionForegroundBrush="{TemplateBinding SelectionForegroundBrush}"
+                                                   TextAlignment="{TemplateBinding TextAlignment}"
+                                                   TextWrapping="{TemplateBinding TextWrapping}"
+                                                   LineHeight="{TemplateBinding LineHeight}"
+                                                   LetterSpacing="{TemplateBinding LetterSpacing}"
+                                                   PasswordChar="{TemplateBinding PasswordChar}"
+                                                   RevealPassword="{TemplateBinding RevealPassword}"
+                                                   HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                                   VerticalAlignment="{TemplateBinding VerticalContentAlignment}" />
                                 </ScrollViewer>
                                 <ContentControl x:Name="PART_Watermark"
                                                 IsHitTestVisible="False"
