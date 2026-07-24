@@ -104,6 +104,9 @@ internal sealed class SpotlightSearchService : IEverythingSearchService
         using var process = Process.Start(processStartInfo) ??
                             throw new InvalidOperationException("Unable to start the Spotlight search process.");
 
+        // Must start before stdout is read, otherwise a chatty backend fills the stderr pipe and deadlocks.
+        var errorDrain = SearchUtilities.BeginDrainingStandardError(process);
+
         using var cancellationRegistration = cancellationToken.Register(() => { TryTerminate(process); });
 
         var results = new List<EverythingSearchResult>();
@@ -144,7 +147,7 @@ internal sealed class SpotlightSearchService : IEverythingSearchService
         }
 
         process.WaitForExit();
-        var errorOutput = process.StandardError.ReadToEnd();
+        var errorOutput = SearchUtilities.CollectStandardError(errorDrain);
 
         if (process.ExitCode != 0 && !cancellationToken.IsCancellationRequested)
         {

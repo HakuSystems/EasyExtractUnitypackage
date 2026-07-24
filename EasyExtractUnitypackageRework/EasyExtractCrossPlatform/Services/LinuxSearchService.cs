@@ -300,12 +300,15 @@ internal sealed class LinuxSearchService : IEverythingSearchService
         var commandSummary = $"{commandPath} {string.Join(' ', arguments)}".Trim();
         LoggingService.LogInformation($"Executing Linux search backend command: {commandSummary}");
 
+        // Must start before stdout is read, otherwise a chatty backend fills the stderr pipe and deadlocks.
+        var errorDrain = SearchUtilities.BeginDrainingStandardError(process);
+
         using var cancellationRegistration = cancellationToken.Register(() => { TryTerminate(process); });
 
         var (results, excluded) = CollectResults(process, maxResults, cancellationToken);
 
         process.WaitForExit();
-        var errorOutput = process.StandardError.ReadToEnd();
+        var errorOutput = SearchUtilities.CollectStandardError(errorDrain);
 
         var noMatchExit = treatNoMatchesAsSuccess &&
                           process.ExitCode == 1 &&
