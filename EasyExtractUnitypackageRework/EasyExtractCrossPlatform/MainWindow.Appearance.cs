@@ -89,7 +89,7 @@ public partial class MainWindow : Window
                     if (!File.Exists(localPath))
                         return null;
 
-                    return await Task.Run(() => BackgroundImageDecoder.DecodeFile(localPath));
+                    return await Task.Run(() => BoundedImageDecoder.DecodeFile(localPath));
                 }
 
                 if (uri.Scheme is "http" or "https")
@@ -98,7 +98,7 @@ public partial class MainWindow : Window
                     return await Task.Run(() =>
                     {
                         using var stream = new MemoryStream(bytes);
-                        return BackgroundImageDecoder.Decode(stream);
+                        return BoundedImageDecoder.Decode(stream);
                     });
                 }
 
@@ -108,7 +108,7 @@ public partial class MainWindow : Window
             if (!File.Exists(path))
                 return null;
 
-            return await Task.Run(() => BackgroundImageDecoder.DecodeFile(path));
+            return await Task.Run(() => BoundedImageDecoder.DecodeFile(path));
         }
         catch (Exception ex)
         {

@@ -159,7 +159,7 @@ public sealed partial class UnityPackagePreviewViewModel
             try
             {
                 using var memoryStream = new MemoryStream(asset.AssetData);
-                _primaryImagePreview = new Bitmap(memoryStream);
+                _primaryImagePreview = BoundedImageDecoder.Decode(memoryStream);
                 LoggingService.LogInformation($"Primary image preview created for '{asset.RelativePath}'.");
             }
             catch
@@ -304,7 +304,7 @@ public sealed partial class UnityPackagePreviewViewModel
         try
         {
             using var memoryStream = new MemoryStream(asset.PreviewImageData);
-            _fallbackPreviewImage = new Bitmap(memoryStream);
+            _fallbackPreviewImage = BoundedImageDecoder.Decode(memoryStream);
             LoggingService.LogInformation($"Fallback preview image created for '{asset.RelativePath}'.");
         }
         catch

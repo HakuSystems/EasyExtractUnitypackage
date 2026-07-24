@@ -3,11 +3,12 @@ using StbImageSharp;
 namespace EasyExtractCrossPlatform.Services;
 
 /// <summary>
-///     Decodes user-provided background images with an upper bound on the decoded width, so a
-///     giant wallpaper cannot exhaust memory during startup. The window never renders wider
-///     than the bound, so the visual result stays identical.
+///     Decodes images with an upper bound on the decoded width, so a single huge image cannot
+///     exhaust memory. Nothing renders wider than the bound, so the visual result is unchanged.
+///     Every image decode belongs here: the background wallpaper, which is the user's own file,
+///     and asset previews, which come out of downloaded packages and are not trusted at all.
 /// </summary>
-internal static class BackgroundImageDecoder
+internal static class BoundedImageDecoder
 {
     internal const int MaxDecodeWidth = 3840;
 

@@ -17,6 +17,20 @@ public sealed class HeadlessTestApplication : Application
 {
     private const string SearchBarStyleUri = "avares://EasyExtractCrossPlatform/Styles/SearchBarStyle.axaml";
 
+    /// <summary>
+    ///     Picked up by AppBuilder.Configure(Type). Real Skia rendering instead of the headless
+    ///     drawing stub, so tests that decode images see the same pixels production does.
+    /// </summary>
+    public static AppBuilder BuildAvaloniaApp()
+    {
+        return AppBuilder.Configure<HeadlessTestApplication>()
+            .UseSkia()
+            .UseHeadless(new AvaloniaHeadlessPlatformOptions
+            {
+                UseHeadlessDrawing = false
+            });
+    }
+
     public override void Initialize()
     {
         Styles.Add(new FluentTheme());

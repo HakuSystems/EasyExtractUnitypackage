@@ -3,7 +3,7 @@ using Xunit;
 
 namespace EasyExtractCrossPlatform.Tests.Services;
 
-public sealed class BackgroundImageDecoderTests
+public sealed class BoundedImageDecoderTests
 {
     [Theory]
     [InlineData(null)]
@@ -11,7 +11,7 @@ public sealed class BackgroundImageDecoderTests
     [InlineData(3840)]
     public void SelectBoundedDecodeWidth_ReturnsNullWhenNoDownscaleNeeded(int? sourceWidth)
     {
-        Assert.Null(BackgroundImageDecoder.SelectBoundedDecodeWidth(sourceWidth, 3840));
+        Assert.Null(BoundedImageDecoder.SelectBoundedDecodeWidth(sourceWidth, 3840));
     }
 
     [Theory]
@@ -20,7 +20,7 @@ public sealed class BackgroundImageDecoderTests
     [InlineData(20000)]
     public void SelectBoundedDecodeWidth_CapsOversizedImages(int sourceWidth)
     {
-        Assert.Equal(3840, BackgroundImageDecoder.SelectBoundedDecodeWidth(sourceWidth, 3840));
+        Assert.Equal(3840, BoundedImageDecoder.SelectBoundedDecodeWidth(sourceWidth, 3840));
     }
 
     [Fact]
@@ -28,7 +28,7 @@ public sealed class BackgroundImageDecoderTests
     {
         using var stream = new MemoryStream(CreatePngHeader(8000, 2));
 
-        Assert.Equal(8000, BackgroundImageDecoder.TryProbeImageWidth(stream));
+        Assert.Equal(8000, BoundedImageDecoder.TryProbeImageWidth(stream));
     }
 
     [Fact]
@@ -36,7 +36,7 @@ public sealed class BackgroundImageDecoderTests
     {
         using var stream = new MemoryStream(CreatePngHeader(640, 480));
 
-        BackgroundImageDecoder.TryProbeImageWidth(stream);
+        BoundedImageDecoder.TryProbeImageWidth(stream);
 
         Assert.Equal(0, stream.Position);
     }
@@ -46,7 +46,7 @@ public sealed class BackgroundImageDecoderTests
     {
         using var stream = new MemoryStream(new byte[] { 1, 2, 3, 4, 5, 6, 7, 8, 9 });
 
-        Assert.Null(BackgroundImageDecoder.TryProbeImageWidth(stream));
+        Assert.Null(BoundedImageDecoder.TryProbeImageWidth(stream));
     }
 
     [Fact]
@@ -54,7 +54,7 @@ public sealed class BackgroundImageDecoderTests
     {
         using var stream = new NonSeekableStream(CreatePngHeader(640, 480));
 
-        Assert.Null(BackgroundImageDecoder.TryProbeImageWidth(stream));
+        Assert.Null(BoundedImageDecoder.TryProbeImageWidth(stream));
     }
 
     private static byte[] CreatePngHeader(int width, int height)
