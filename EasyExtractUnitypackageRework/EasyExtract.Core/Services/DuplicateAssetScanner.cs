@@ -3,6 +3,7 @@ using System.IO.Compression;
 using System.Security.Cryptography;
 using EasyExtract.Core;
 using EasyExtract.Core.Models;
+using EasyExtract.Core.Utilities;
 
 namespace EasyExtract.Core.Services;
 
@@ -215,7 +216,7 @@ public sealed class DuplicateAssetScanner : IDuplicateAssetScanner
         if (string.IsNullOrWhiteSpace(entryName))
             return (string.Empty, string.Empty);
 
-        var normalized = entryName.Replace('\\', '/');
+        var normalized = TarEntryNames.StripArchiveRootPrefix(entryName.Replace('\\', '/'));
         var slash = normalized.IndexOf('/');
         if (slash < 0)
             return (string.Empty, string.Empty);

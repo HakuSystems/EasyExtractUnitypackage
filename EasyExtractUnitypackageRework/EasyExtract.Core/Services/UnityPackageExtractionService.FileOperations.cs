@@ -459,7 +459,7 @@ public sealed partial class UnityPackageExtractionService
 
     private static (string AssetKey, string ComponentName) SplitEntryName(string entryName)
     {
-        var normalized = entryName.Replace('\\', '/');
+        var normalized = TarEntryNames.StripArchiveRootPrefix(entryName.Replace('\\', '/'));
         var firstSlash = normalized.IndexOf('/');
         if (firstSlash < 0)
             return (string.Empty, string.Empty);
