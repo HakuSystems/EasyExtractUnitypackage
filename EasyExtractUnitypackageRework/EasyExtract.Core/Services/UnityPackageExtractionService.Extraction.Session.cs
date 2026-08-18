@@ -37,11 +37,13 @@ public sealed partial class UnityPackageExtractionService
 
         private readonly TarReader _tarReader;
         private readonly string _temporaryDirectoryPath;
+        private int _assetsAlreadyUpToDate;
         private int _assetsSkippedNoContent;
         private int _assetsSkippedNoPath;
         private long _calculatedTotalSize; // To store accumulated size
         private int _extractedCount;
         private bool _extractionRequired;
+        private int _knownComponentsSeen;
         private int _tarEntriesProcessed;
         private int _tarEntriesSkipped;
 
@@ -106,8 +108,17 @@ public sealed partial class UnityPackageExtractionService
 
                 CleanupCorruptedDirectories(_directoriesToCleanup, _correlationId, _logger);
 
-                _logger.LogInformation(
-                    $"ExtractInternal completed | package='{_packagePath}' | assetsExtracted={_extractedCount} | filesWritten={_extractedFiles.Count} | size={_calculatedTotalSize} | tarEntries={_tarEntriesProcessed} | skippedNoPath={_assetsSkippedNoPath} | skippedNoContent={_assetsSkippedNoContent} | skippedByFilter={_filteredAssetKeys.Count} | duplicated={_assetsDuplicated} | correlationId={_correlationId}");
+                // Reached even when every queued write produced no files, so classify here too
+                // instead of assuming this path always extracted something.
+                var outcome = DetermineOutcome();
+                var detail = BuildOutcomeDetail(outcome);
+                var summary =
+                    $"ExtractInternal completed | package='{_packagePath}' | outcome={outcome} | assetsExtracted={_extractedCount} | filesWritten={_extractedFiles.Count} | size={_calculatedTotalSize} | tarEntries={_tarEntriesProcessed} | knownComponents={_knownComponentsSeen} | alreadyUpToDate={_assetsAlreadyUpToDate} | skippedNoPath={_assetsSkippedNoPath} | skippedNoContent={_assetsSkippedNoContent} | skippedByFilter={_filteredAssetKeys.Count} | duplicated={_assetsDuplicated} | correlationId={_correlationId}";
+
+                if (outcome == UnityPackageExtractionOutcome.NoAssetsRecognized)
+                    _logger.LogWarning(summary);
+                else
+                    _logger.LogInformation(summary);
 
                 return new UnityPackageExtractionResult(
                     _packagePath,
@@ -115,7 +126,9 @@ public sealed partial class UnityPackageExtractionService
                     _extractedCount,
                     _extractedFiles.ToImmutableArray())
                 {
-                    TotalSize = _calculatedTotalSize
+                    TotalSize = _calculatedTotalSize,
+                    Outcome = outcome,
+                    OutcomeDetail = detail
                 };
             }
             catch (ExtractionSecurityException)
@@ -242,6 +255,11 @@ public sealed partial class UnityPackageExtractionService
                                 continue;
                         }
 
+                        // Only reached for the four component names above; the default arm above
+                        // skips the entry. A package where this stays zero was never parsed as a
+                        // Unity package at all, no matter how many entries it had.
+                        _knownComponentsSeen++;
+
                         if (state.CanWriteToDisk && !_queuedStates.Contains(state))
                             await HandleReadyStateAsync(state).ConfigureAwait(false);
 
@@ -300,6 +318,54 @@ public sealed partial class UnityPackageExtractionService
                     $"Processed remaining assets | count={remainingProcessed} | correlationId={_correlationId}");
         }
 
+        // Zero extracted assets has three very different meanings and the count cannot tell them
+        // apart. Without this, a package whose layout we failed to parse reported the same
+        // "done" as a package that was already fully extracted.
+        private UnityPackageExtractionOutcome DetermineOutcome()
+        {
+            if (_extractedCount > 0)
+                return UnityPackageExtractionOutcome.Extracted;
+
+            // The caller asked for a subset, and the entries it excluded are the reason nothing
+            // was written. Filtered entries are dropped before they are parsed, so they cannot
+            // prove the package was readable either way.
+            if (_filteredAssetKeys.Count > 0 && _knownComponentsSeen == 0)
+                return UnityPackageExtractionOutcome.NothingToDo;
+
+            // At least one asset was parsed and found unchanged on disk, which proves the layout
+            // was understood.
+            if (_assetsAlreadyUpToDate > 0)
+                return UnityPackageExtractionOutcome.NothingToDo;
+
+            return UnityPackageExtractionOutcome.NoAssetsRecognized;
+        }
+
+        private string? BuildOutcomeDetail(UnityPackageExtractionOutcome outcome)
+        {
+            switch (outcome)
+            {
+                case UnityPackageExtractionOutcome.Extracted:
+                    return null;
+
+                case UnityPackageExtractionOutcome.NothingToDo when _assetsAlreadyUpToDate > 0:
+                    return $"All {_assetsAlreadyUpToDate} assets are already extracted and unchanged.";
+
+                case UnityPackageExtractionOutcome.NothingToDo:
+                    return "None of the selected assets are in this package.";
+
+                case UnityPackageExtractionOutcome.NoAssetsRecognized when _knownComponentsSeen == 0:
+                    return $"The package holds {_tarEntriesProcessed} entries but none of them use Unity's " +
+                           "asset layout. It was most likely repacked outside Unity.";
+
+                case UnityPackageExtractionOutcome.NoAssetsRecognized:
+                    return $"{_assetStates.Count} assets were found but none of them had both a path and " +
+                           $"content (missing path: {_assetsSkippedNoPath}, missing content: {_assetsSkippedNoContent}).";
+
+                default:
+                    return null;
+            }
+        }
+
         private UnityPackageExtractionResult CompleteWithoutExtraction()
         {
             foreach (var pending in _pendingWrites)
@@ -309,8 +375,17 @@ public sealed partial class UnityPackageExtractionService
             _queuedStates.Clear();
             CleanupCorruptedDirectories(_directoriesToCleanup, _correlationId, _logger);
 
-            _logger.LogInformation(
-                $"No writable assets detected | package='{_packagePath}' | totalAssets={_assetStates.Count} | skippedNoPath={_assetsSkippedNoPath} | skippedNoContent={_assetsSkippedNoContent} | correlationId={_correlationId}");
+            var outcome = DetermineOutcome();
+            var detail = BuildOutcomeDetail(outcome);
+            var summary =
+                $"No writable assets detected | package='{_packagePath}' | outcome={outcome} | detail='{detail}' | totalAssets={_assetStates.Count} | knownComponents={_knownComponentsSeen} | alreadyUpToDate={_assetsAlreadyUpToDate} | skippedByFilter={_filteredAssetKeys.Count} | skippedNoPath={_assetsSkippedNoPath} | skippedNoContent={_assetsSkippedNoContent} | tarEntries={_tarEntriesProcessed} | correlationId={_correlationId}";
+
+            // An unexplained empty run is the failure this guard exists for, so it must not hide
+            // at information level next to the routine no-ops.
+            if (outcome == UnityPackageExtractionOutcome.NoAssetsRecognized)
+                _logger.LogWarning(summary);
+            else
+                _logger.LogInformation(summary);
 
             return new UnityPackageExtractionResult(
                 _packagePath,
@@ -318,7 +393,9 @@ public sealed partial class UnityPackageExtractionService
                 0,
                 _extractedFiles.ToImmutableArray())
             {
-                TotalSize = 0
+                TotalSize = 0,
+                Outcome = outcome,
+                OutcomeDetail = detail
             };
         }
 
@@ -355,6 +432,7 @@ public sealed partial class UnityPackageExtractionService
 
             if (!plan.RequiresWrite)
             {
+                _assetsAlreadyUpToDate++;
                 _logger.LogInformation(
                     $"Asset skipped (already up-to-date) | path='{state.RelativePath}' | target='{targetPath}' | correlationId={_correlationId}");
                 state.MarkAsCompleted();

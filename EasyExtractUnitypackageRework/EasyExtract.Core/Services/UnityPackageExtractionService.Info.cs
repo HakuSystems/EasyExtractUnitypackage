@@ -143,7 +143,11 @@ public sealed partial class UnityPackageExtractionService
             0, // No assets extracted to disk
             extractedFiles)
         {
-            TotalSize = totalSize
+            TotalSize = totalSize,
+            // Inspection never writes, so zero assets is the expected result and must not be
+            // mistaken for a package we failed to read.
+            Outcome = UnityPackageExtractionOutcome.NothingToDo,
+            OutcomeDetail = "Package was inspected without extracting."
         };
     }
 }

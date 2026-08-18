@@ -25,9 +25,32 @@ public partial class MainWindow : Window
             });
         }
 
+        // The run did not throw, which is not the same as the package having been understood.
+        // Reporting every non-exception as a success is what let an empty output folder pass
+        // for a finished extraction.
+        var fileName = Path.GetFileName(packagePath);
+        switch (result.Outcome)
+        {
+            case UnityPackageExtractionOutcome.NoAssetsRecognized:
+                ShowDropStatusMessage(
+                    "Nothing was extracted",
+                    result.OutcomeDetail ?? $"{fileName} produced no assets.",
+                    TimeSpan.FromSeconds(10),
+                    UiSoundEffect.Negative);
+                return;
+
+            case UnityPackageExtractionOutcome.NothingToDo:
+                ShowDropStatusMessage(
+                    "Nothing to extract",
+                    result.OutcomeDetail ?? $"{fileName} had nothing left to extract.",
+                    TimeSpan.FromSeconds(6),
+                    UiSoundEffect.Subtle);
+                return;
+        }
+
         ShowDropStatusMessage(
             "Extraction complete",
-            $"{Path.GetFileName(packagePath)} extracted.",
+            $"{fileName} extracted.",
             TimeSpan.FromSeconds(4),
             UiSoundEffect.Positive);
         if (_settings.EnableNotifications)
