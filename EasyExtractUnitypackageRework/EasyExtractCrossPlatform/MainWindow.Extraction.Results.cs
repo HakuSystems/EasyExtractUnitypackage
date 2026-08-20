@@ -166,6 +166,12 @@ public partial class MainWindow : Window
     }
 
 
+    /// <summary>
+    ///     Resolves the target path without creating it. The extraction service creates it as its
+    ///     first step and removes it again if the run leaves it empty, and creating it here would
+    ///     make that directory look pre-existing, which is exactly the case the service leaves
+    ///     alone. Callers only pass the path along, none of them need it to exist yet.
+    /// </summary>
     private string ResolveOutputDirectory(string packagePath)
     {
         var baseOutput = _settings.DefaultOutputPath;
@@ -176,8 +182,6 @@ public partial class MainWindow : Window
         if (string.IsNullOrWhiteSpace(folderName))
             folderName = "ExtractedPackage";
 
-        var targetPath = Path.Combine(baseOutput, folderName);
-        Directory.CreateDirectory(targetPath);
-        return targetPath;
+        return Path.Combine(baseOutput, folderName);
     }
 }

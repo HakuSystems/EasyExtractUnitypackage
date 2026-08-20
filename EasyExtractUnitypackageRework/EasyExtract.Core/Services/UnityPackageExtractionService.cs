@@ -63,6 +63,8 @@ public sealed partial class UnityPackageExtractionService : IUnityPackageExtract
             throw new FileNotFoundException("Unitypackage file was not found.", packagePath);
         }
 
+        var outputDirectoryExistedBefore = Directory.Exists(outputDirectory);
+
         try
         {
             Directory.CreateDirectory(outputDirectory);
@@ -75,6 +77,11 @@ public sealed partial class UnityPackageExtractionService : IUnityPackageExtract
                 $"Failed to create output directory | path='{outputDirectory}' | correlationId={correlationId}", ex);
             throw;
         }
+
+        // Declared right after the directory exists so it also covers the checks below, which throw
+        // before extraction even starts and would otherwise leave the folder behind.
+        using var outputDirectoryScope = new EmptyOutputDirectoryScope(
+            outputDirectory, outputDirectoryExistedBefore, correlationId, _logger);
 
         var packageSize = new FileInfo(packagePath).Length;
         var requiredSpace = packageSize * 3;

@@ -154,6 +154,68 @@ public sealed partial class UnityPackageExtractionService
     }
 
 
+    /// <summary>
+    ///     Takes the output directory back if the run created it and left it without a single file.
+    ///     A package we cannot read used to leave a freshly created empty folder behind, and on disk
+    ///     that is indistinguishable from a package which genuinely held nothing. Runs on every exit
+    ///     path, because a failure that throws leaves the same empty folder as one that does not.
+    /// </summary>
+    private sealed class EmptyOutputDirectoryScope : IDisposable
+    {
+        private readonly string _correlationId;
+        private readonly string _directoryPath;
+        private readonly bool _existedBefore;
+        private readonly IEasyExtractLogger _logger;
+
+        public EmptyOutputDirectoryScope(
+            string directoryPath,
+            bool existedBefore,
+            string correlationId,
+            IEasyExtractLogger logger)
+        {
+            _directoryPath = directoryPath;
+            _existedBefore = existedBefore;
+            _correlationId = correlationId;
+            _logger = logger;
+        }
+
+        public void Dispose()
+        {
+            // A directory the caller already had is theirs, empty or not.
+            if (_existedBefore)
+                return;
+
+            try
+            {
+                if (!Directory.Exists(_directoryPath))
+                    return;
+
+                // Only files decide. Organising by categories can leave empty category folders,
+                // and those were created by the same run, so they go with it.
+                if (Directory.EnumerateFiles(_directoryPath, "*", SearchOption.AllDirectories).Any())
+                    return;
+
+                Directory.Delete(_directoryPath, true);
+                _logger.LogInformation(
+                    $"Removed output directory the run left empty | path='{_directoryPath}' | correlationId={_correlationId}");
+            }
+            catch (IOException ex)
+            {
+                // Keeping an empty folder is harmless. Failing the extraction over it is not.
+                _logger.LogWarning(
+                    $"Failed to remove empty output directory | path='{_directoryPath}' | correlationId={_correlationId}",
+                    ex);
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                _logger.LogWarning(
+                    $"Access denied when removing empty output directory | path='{_directoryPath}' | correlationId={_correlationId}",
+                    ex);
+            }
+        }
+    }
+
+
     private sealed class TemporaryDirectoryScope : IDisposable
     {
         private readonly IEasyExtractLogger _logger;
