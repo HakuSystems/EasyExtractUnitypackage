@@ -60,25 +60,29 @@ public partial class MainWindow : Window
     }
 
 
-    private void OnExtractionOverviewPackageCompleted(int assetsExtracted)
+    private void OnExtractionOverviewPackageCompleted(UnityPackageExtractionResult result)
     {
         if (!_isExtractionOverviewLive)
             return;
 
         if (!Dispatcher.UIThread.CheckAccess())
         {
-            Dispatcher.UIThread.Post(() => OnExtractionOverviewPackageCompleted(assetsExtracted));
+            Dispatcher.UIThread.Post(() => OnExtractionOverviewPackageCompleted(result));
             return;
         }
 
-        var sanitized = Math.Max(0, assetsExtracted);
+        var sanitized = Math.Max(0, result.AssetsExtracted);
         if (sanitized > _extractionOverviewCurrentPackageAssets)
         {
             _extractionOverviewSessionAssets += sanitized - _extractionOverviewCurrentPackageAssets;
             _extractionOverviewCurrentPackageAssets = sanitized;
         }
 
-        _extractionOverviewSessionPackages++;
+        // Same rule as the persisted total: a run that wrote nothing is not a completed package.
+        // If the two disagreed, the live number would jump the next time the baseline is read.
+        if (CountsAsCompletedPackage(result))
+            _extractionOverviewSessionPackages++;
+
         UpdateExtractionOverviewLiveCounts();
     }
 

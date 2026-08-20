@@ -9,7 +9,7 @@ public partial class MainWindow : Window
         TimeSpan duration,
         string outputDirectory)
     {
-        OnExtractionOverviewPackageCompleted(result.AssetsExtracted);
+        OnExtractionOverviewPackageCompleted(result);
         UpdateExtractionStatistics(packagePath, result);
         UpdateHistoryAfterExtraction(packagePath, result, duration, outputDirectory);
 
@@ -93,17 +93,32 @@ public partial class MainWindow : Window
     }
 
 
+    /// <summary>
+    ///     Whether a finished run counts as an extracted package. A run that wrote nothing did not
+    ///     complete one, no matter that it returned without throwing, so the statistics must not
+    ///     treat it as one. The persisted totals and the live session counter both branch on this
+    ///     so the two cannot drift apart.
+    /// </summary>
+    internal static bool CountsAsCompletedPackage(UnityPackageExtractionResult? result)
+    {
+        return result is { Outcome: UnityPackageExtractionOutcome.Extracted, AssetsExtracted: > 0 };
+    }
+
     private void UpdateExtractionStatistics(string packagePath, UnityPackageExtractionResult result)
     {
-        _settings.LastExtractionTime = DateTimeOffset.Now;
-        _settings.TotalExtracted = Math.Max(0, _settings.TotalExtracted) + 1;
-        if (result.AssetsExtracted > 0)
+        var completed = CountsAsCompletedPackage(result);
+
+        if (completed)
+        {
+            _settings.LastExtractionTime = DateTimeOffset.Now;
+            _settings.TotalExtracted = Math.Max(0, _settings.TotalExtracted) + 1;
             _settings.TotalFilesExtracted = Math.Max(0, _settings.TotalFilesExtracted) + result.AssetsExtracted;
+        }
 
         if (_settings.ExtractedUnitypackages is null)
             _settings.ExtractedUnitypackages = new List<ExtractedPackageModel>();
 
-        if (_settings.ExtractedUnitypackages.All(existing =>
+        if (completed && _settings.ExtractedUnitypackages.All(existing =>
                 !string.Equals(existing.FilePath, packagePath, StringComparison.OrdinalIgnoreCase)))
             _settings.ExtractedUnitypackages.Add(new ExtractedPackageModel
             {
