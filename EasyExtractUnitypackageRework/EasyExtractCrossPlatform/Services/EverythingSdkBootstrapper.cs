@@ -13,6 +13,7 @@ internal static class EverythingSdkBootstrapper
     private static readonly TimeSpan DllPromotionInitialDelay = TimeSpan.FromMilliseconds(40);
     private static readonly TimeSpan DownloadInitialRetryDelay = TimeSpan.FromMilliseconds(500);
 
+    // Legacy helpers and their tests remain below, but EnsureDllAsync no longer calls the network path.
     private static readonly Uri SdkDownloadUri = new("https://www.voidtools.com/Everything-SDK.zip");
     private static readonly HttpClient HttpClient = new();
     private static readonly SemaphoreSlim DllInstallGate = new(1, 1);
@@ -24,7 +25,7 @@ internal static class EverythingSdkBootstrapper
     private static readonly IReadOnlyDictionary<string, string> ExpectedDllHashes =
         new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
-            ["Everything64.dll"] = "C7AB8B47F7DD4C41AA735F4BA40B35AD5460A86FA7ABE0C94383F12BCE33BFB6",
+            ["Everything64.dll"] = "81B5BE18126ACD2C2B913F8F4A821E476B18393CDD3DEBD03387C50AFD8DB88F",
             ["Everything32.dll"] = "C28CD066AF36CAE4403A9933847AFF01DB928787D86751F014A1FA60D8B97FDA"
         };
 
@@ -105,42 +106,17 @@ internal static class EverythingSdkBootstrapper
             return _everythingDllPath;
         }
 
-        var appData = (_appDataPathOverride?.Invoke() ??
-                       Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData)).Trim();
-        var sdkDirectory = Path.Combine(appData, "EasyExtract", "ThirdParty", "EverythingSdk");
-        Directory.CreateDirectory(sdkDirectory);
-
-        var dllPath = Path.Combine(sdkDirectory, TargetDllFileName);
-
         await DllInstallGate.WaitAsync().ConfigureAwait(false);
         try
         {
-            CleanupOrphanedTemporaryDlls(sdkDirectory);
-
-            if (_everythingDllPath is { Length: > 0 } existingPath && File.Exists(existingPath))
-            {
-                LoggingService.LogInformation($"Everything SDK DLL already present at '{existingPath}'.");
-                return existingPath;
-            }
-
-            if (await TryReuseExistingDllAsync(dllPath).ConfigureAwait(false))
-            {
-                _everythingDllPath = dllPath;
-                return dllPath;
-            }
-
-            // The error messages tell users to drop the SDK DLL next to the executable, so honour
-            // that before going to the network. It is also the only way out on an offline machine.
             if (TryUseLocallyShippedDll(out var localDllPath))
             {
                 _everythingDllPath = localDllPath;
                 return localDllPath;
             }
 
-            await DownloadDllWithRetryAsync(sdkDirectory, dllPath).ConfigureAwait(false);
-
-            _everythingDllPath = dllPath;
-            return dllPath;
+            throw new FileNotFoundException(
+                $"Bundled {TargetDllFileName} was not found next to the EasyExtract executable.");
         }
         finally
         {

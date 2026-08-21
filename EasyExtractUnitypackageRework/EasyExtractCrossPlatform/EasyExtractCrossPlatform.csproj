@@ -49,6 +49,14 @@
         <AvaloniaResource Include="Assets\**" />
     </ItemGroup>
     <ItemGroup>
+        <None Remove="ThirdParty\EverythingSdk\Everything64.dll" />
+        <Content Include="ThirdParty\EverythingSdk\Everything64.dll">
+            <TargetPath>Everything64.dll</TargetPath>
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+            <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+        </Content>
+    </ItemGroup>
+    <ItemGroup>
         <ProjectReference Include="..\EasyExtract.Core\EasyExtract.Core.csproj" />
     </ItemGroup>
     <ItemGroup>
