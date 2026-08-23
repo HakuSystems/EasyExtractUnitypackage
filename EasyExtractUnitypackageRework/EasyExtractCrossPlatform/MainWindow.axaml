@@ -12,6 +12,14 @@
         x:Class="EasyExtractCrossPlatform.MainWindow"
         Title="{loc:Loc MainWindow_Easyextract}"
         Icon="/Assets/logo-flat.ico"
+        Width="1207"
+        Height="918"
+        MinWidth="1207"
+        MaxWidth="1207"
+        MinHeight="918"
+        MaxHeight="918"
+        CanResize="False"
+        WindowStartupLocation="CenterScreen"
         TransparencyLevelHint="AcrylicBlur"
         TransparencyBackgroundFallback="{DynamicResource EasyWindowBackgroundBrush}">
     <Window.Styles>
@@ -20,7 +28,7 @@
             <Setter Property="Background" Value="{DynamicResource EasySurfaceBrush}" />
             <Setter Property="BorderBrush" Value="{DynamicResource EasyGlassNeutralBorderBrush}" />
             <Setter Property="BorderThickness" Value="1" />
-            <Setter Property="Padding" Value="36" />
+            <Setter Property="Padding" Value="24" />
             <Setter Property="BoxShadow" Value="0 24 40 0 #12000000" />
             <Setter Property="Transitions">
                 <Transitions>
@@ -86,11 +94,11 @@
         </Style>
 
         <Style Selector="Window.compact Border.drop-zone">
-            <Setter Property="Padding" Value="24" />
+            <Setter Property="Padding" Value="20" />
         </Style>
 
         <Style Selector="Window.cozy Border.drop-zone">
-            <Setter Property="Padding" Value="30" />
+            <Setter Property="Padding" Value="24" />
         </Style>
 
         <Style Selector="Window.compact Border.hero-logo">
@@ -121,6 +129,34 @@
             <Setter Property="HorizontalAlignment" Value="Stretch" />
         </Style>
 
+        <Style Selector="Window.compact Border#SearchRevealHost">
+            <Setter Property="Grid.Column" Value="0" />
+            <Setter Property="Grid.Row" Value="1" />
+            <Setter Property="HorizontalAlignment" Value="Stretch" />
+            <Setter Property="Margin" Value="0,16,0,0" />
+        </Style>
+
+        <Style Selector="Window.compact Border#SearchRevealHost:pointerover TextBox.search-bar">
+            <Setter Property="Width" Value="200" />
+        </Style>
+
+        <Style Selector="Window.compact Border#SearchRevealHost.search-active TextBox.search-bar">
+            <Setter Property="Width" Value="200" />
+        </Style>
+
+        <Style Selector="Window.compact StackPanel#QueueHeaderActions">
+            <Setter Property="Grid.Column" Value="0" />
+            <Setter Property="Grid.ColumnSpan" Value="2" />
+            <Setter Property="Grid.Row" Value="1" />
+            <Setter Property="HorizontalAlignment" Value="Stretch" />
+            <Setter Property="Orientation" Value="Vertical" />
+            <Setter Property="Margin" Value="0,12,0,0" />
+        </Style>
+
+        <Style Selector="Window.compact StackPanel#QueueHeaderActions Button">
+            <Setter Property="HorizontalAlignment" Value="Stretch" />
+        </Style>
+
         <Style Selector="Window.compact StackPanel.footer-primary">
             <Setter Property="Grid.Column" Value="0" />
             <Setter Property="Grid.Row" Value="0" />
@@ -146,6 +182,8 @@
 
     <Grid>
         <ScrollViewer x:Name="MainScrollViewer"
+                      HorizontalContentAlignment="Stretch"
+                      VerticalContentAlignment="Stretch"
                       HorizontalScrollBarVisibility="Disabled"
                       VerticalScrollBarVisibility="Auto">
             <Grid x:Name="PageGrid"
@@ -154,8 +192,8 @@
                   HorizontalAlignment="Stretch"
                   MaxWidth="1600"
                   RowDefinitions="Auto,*,Auto">
-                <Border Grid.Row="0" Margin="0,0,0,32"
-                        Padding="28"
+                <Border Grid.Row="0" Margin="0,0,0,24"
+                        Padding="20"
                         CornerRadius="28"
                         Background="{DynamicResource EasyGlassGradientBrush}"
                         BorderBrush="{DynamicResource EasyGlassBorderBrush}"
@@ -167,15 +205,15 @@
                           VerticalAlignment="Top"
                           Classes="hero-grid">
                         <Border Grid.Column="0"
-                                Width="128"
-                                Height="128"
-                                CornerRadius="32"
+                                Width="110"
+                                Height="110"
+                                CornerRadius="28"
                                 Background="{DynamicResource EasyGlassOverlayBrush}"
                                 HorizontalAlignment="Left"
                                 VerticalAlignment="Top"
                                 BorderBrush="{DynamicResource EasyGlassNeutralBorderBrush}"
                                 BorderThickness="1"
-                                Margin="0,0,24,0"
+                                Margin="0,0,20,0"
                                 Classes="hero-logo">
                             <Image Source="avares://EasyExtractCrossPlatform/Assets/AppLogo.png"
                                    Stretch="Uniform"
@@ -255,18 +293,20 @@
                       Classes="main-content-grid"
                       ColumnDefinitions="2*,*"
                       RowDefinitions="Auto,Auto"
-                      Margin="0,0,0,32">
+                      Margin="0,0,0,24">
                     <Border Grid.Column="0"
-                            Padding="34"
+                            Padding="24"
                             CornerRadius="28"
                             Background="{DynamicResource EasyGlassGradientBrush}"
                             BorderBrush="{DynamicResource EasyGlassBorderBrush}"
                             BorderThickness="1"
                             BoxShadow="0 30 60 0 #14000000">
-                        <StackPanel Spacing="28">
+                        <StackPanel Spacing="18">
                             <Grid x:Name="StartExtractionHeaderGrid"
                                   RowDefinitions="Auto,Auto">
-                                <Grid ColumnDefinitions="Auto,*" HorizontalAlignment="Right"
+                                <Grid x:Name="StartExtractionHeaderContent"
+                                      ColumnDefinitions="Auto,*"
+                                      HorizontalAlignment="Stretch"
                                       VerticalAlignment="Center">
                                     <StackPanel Orientation="Horizontal"
                                                 Spacing="10"
@@ -374,16 +414,16 @@
                                         DragDrop.DragLeave="DropZoneBorder_OnDragLeave"
                                         DragDrop.Drop="DropZoneBorder_OnDrop"
                                         DragDrop.DragOver="DropZoneBorder_OnDragOver">
-                                    <StackPanel Spacing="22" HorizontalAlignment="Center">
-                                        <Border Width="88" Height="88"
-                                                CornerRadius="28"
+                                    <StackPanel Spacing="16" HorizontalAlignment="Center">
+                                        <Border Width="64" Height="64"
+                                                CornerRadius="20"
                                                 Background="{DynamicResource EasyGlassOverlayFaintBrush}"
                                                 BorderBrush="{DynamicResource EasyGlassNeutralBorderBrush}"
                                                 BorderThickness="1"
                                                 HorizontalAlignment="Center">
                                             <PathIcon Data="M21 20V18H3V20H21Z M12 2L4 10H9V17H15V10H20L12 2Z"
-                                                      Width="34"
-                                                      Height="34"
+                                                      Width="28"
+                                                      Height="28"
                                                       Foreground="{DynamicResource EasyAccentBrush}"
                                                       HorizontalAlignment="Center"
                                                       VerticalAlignment="Center" />
@@ -687,7 +727,9 @@
                                 BorderThickness="1"
                                 BoxShadow="0 26 50 0 #14000000">
                             <StackPanel Spacing="18">
-                                <Grid ColumnDefinitions="Auto,*,Auto" VerticalAlignment="Center">
+                                <Grid x:Name="QueueHeaderGrid"
+                                      ColumnDefinitions="Auto,*,Auto"
+                                      VerticalAlignment="Center">
                                     <Border Grid.Column="0"
                                             Width="36" Height="36" CornerRadius="18"
                                             Margin="0,0,12,0"
@@ -709,7 +751,8 @@
                                                    Text="{loc:Loc MainWindow_QueueIsEmpty}"
                                                    Classes="subtle" />
                                     </StackPanel>
-                                    <StackPanel Grid.Column="2"
+                                    <StackPanel x:Name="QueueHeaderActions"
+                                                Grid.Column="2"
                                                 Orientation="Horizontal"
                                                 Spacing="8"
                                                 HorizontalAlignment="Right">

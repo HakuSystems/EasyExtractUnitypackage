@@ -2,7 +2,7 @@ namespace EasyExtractCrossPlatform.Utilities;
 
 public static class ResponsiveWindowHelper
 {
-    private const double DefaultCompactBreakpoint = 1200;
+    private const double DefaultCompactBreakpoint = 960;
     private const double DefaultCozyBreakpoint = 1600;
 
     public static IDisposable Enable(Window window, double compactBreakpoint = DefaultCompactBreakpoint,

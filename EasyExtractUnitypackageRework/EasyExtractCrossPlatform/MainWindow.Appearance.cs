@@ -171,6 +171,21 @@ public partial class MainWindow : Window
         if (_heroGrid is not null)
             _heroGrid.ColumnDefinitions = new ColumnDefinitions(isCompact ? "*" : "Auto,*");
 
+        if (_startExtractionHeaderContent is not null)
+        {
+            _startExtractionHeaderContent.ColumnDefinitions =
+                new ColumnDefinitions(isCompact ? "*" : "Auto,*");
+            _startExtractionHeaderContent.RowDefinitions =
+                new RowDefinitions(isCompact ? "Auto,Auto" : "Auto");
+        }
+
+        if (_queueHeaderGrid is not null)
+        {
+            _queueHeaderGrid.ColumnDefinitions =
+                new ColumnDefinitions(isCompact ? "Auto,*" : "Auto,*,Auto");
+            _queueHeaderGrid.RowDefinitions = new RowDefinitions(isCompact ? "Auto,Auto" : "Auto");
+        }
+
         if (_footerGrid is not null)
         {
             if (isCompact)

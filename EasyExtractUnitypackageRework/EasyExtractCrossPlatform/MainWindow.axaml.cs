@@ -2,11 +2,10 @@ namespace EasyExtractCrossPlatform;
 
 public partial class MainWindow : Window
 {
+    private const double FixedWindowWidth = 1207;
+    private const double FixedWindowHeight = 918;
     private const string UnityPackageExtension = ".unitypackage";
     private const string UnknownVersionLabel = "Version unknown";
-    private const double CompactWidthBreakpoint = 1200;
-    private const double CozyWidthBreakpoint = 1600;
-
     private static readonly HttpClient BackgroundHttpClient = new();
     private static readonly TimeSpan DashboardOpenDebounceWindow = TimeSpan.FromMilliseconds(1200);
     private readonly Button? _batchExtractionButton;
@@ -42,6 +41,7 @@ public partial class MainWindow : Window
     private readonly IHakuSyncService _hakuSyncService;
     private readonly Grid? _heroGrid;
     private readonly Grid? _mainContentGrid;
+    private readonly Grid? _queueHeaderGrid;
 
     private readonly IMaliciousCodeDetectionService _maliciousCodeDetectionService;
 
@@ -78,6 +78,7 @@ public partial class MainWindow : Window
     private readonly string _standardDropSecondaryText = "Supports batch extraction and live progress updates.";
     private readonly Button? _startExtractionButton;
     private readonly Grid? _startExtractionHeaderGrid;
+    private readonly Grid? _startExtractionHeaderContent;
     private readonly string[] _startupArguments;
     private readonly TextBox? _unityPackageSearchBox;
 
@@ -164,6 +165,8 @@ public partial class MainWindow : Window
         _heroGrid = this.FindControl<Grid>("HeroGrid");
         _mainContentGrid = this.FindControl<Grid>("MainContentGrid");
         _footerGrid = this.FindControl<Grid>("FooterGrid");
+        _queueHeaderGrid = this.FindControl<Grid>("QueueHeaderGrid");
+        _startExtractionHeaderContent = this.FindControl<Grid>("StartExtractionHeaderContent");
         if (_dropZonePrimaryTextBlock?.Text is { Length: > 0 } primaryText)
         {
             _defaultDropPrimaryText = primaryText;

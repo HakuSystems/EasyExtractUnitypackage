@@ -16,24 +16,8 @@ public partial class MainWindow : Window
         if (sharedPlacement is not null)
         {
             ApplyWindowPlacementState(sharedPlacement);
-            return;
         }
-
-        var savedWidth = settings.WindowWidth;
-        var savedHeight = settings.WindowHeight;
-
-        if (savedWidth.HasValue && savedWidth.Value > 0 && !double.IsNaN(savedWidth.Value))
-            Width = savedWidth.Value;
-
-        if (savedHeight.HasValue && savedHeight.Value > 0 && !double.IsNaN(savedHeight.Value))
-            Height = savedHeight.Value;
-
-        if (savedWidth.HasValue && savedHeight.HasValue &&
-            savedWidth.Value > 0 && savedHeight.Value > 0 &&
-            !double.IsNaN(savedWidth.Value) && !double.IsNaN(savedHeight.Value))
-            _lastNormalSize = new Size(savedWidth.Value, savedHeight.Value);
-
-        if (settings.WindowPositionX.HasValue && settings.WindowPositionY.HasValue)
+        else if (settings.WindowPositionX.HasValue && settings.WindowPositionY.HasValue)
         {
             var requestedPosition = new PixelPoint(settings.WindowPositionX.Value, settings.WindowPositionY.Value);
             var adjustedPosition = EnsureWindowIsVisible(requestedPosition, new Size(Width, Height));
@@ -41,35 +25,11 @@ public partial class MainWindow : Window
             _lastNormalPosition = adjustedPosition;
         }
 
-        var restoredState = settings.WindowState == WindowState.Minimized
-            ? WindowState.Normal
-            : settings.WindowState;
-
-        WindowState = Enum.IsDefined(typeof(WindowState), restoredState)
-            ? restoredState
-            : WindowState.Normal;
-
-        CaptureCurrentBoundsIfNormal();
+        EnforceFixedWindowSize();
     }
 
     private void ApplyWindowPlacementState(WindowPlacementService.WindowPlacementState placement)
     {
-        if (placement.Width.HasValue && placement.Width.Value > 0 && !double.IsNaN(placement.Width.Value))
-        {
-            Width = placement.Width.Value;
-            _settings.WindowWidth = placement.Width.Value;
-        }
-
-        if (placement.Height.HasValue && placement.Height.Value > 0 && !double.IsNaN(placement.Height.Value))
-        {
-            Height = placement.Height.Value;
-            _settings.WindowHeight = placement.Height.Value;
-        }
-
-        if (placement.Width.HasValue && placement.Height.HasValue &&
-            placement.Width.Value > 0 && placement.Height.Value > 0)
-            _lastNormalSize = new Size(placement.Width.Value, placement.Height.Value);
-
         if (placement.PositionX.HasValue && placement.PositionY.HasValue)
         {
             var requestedPosition = new PixelPoint(placement.PositionX.Value, placement.PositionY.Value);
@@ -80,15 +40,20 @@ public partial class MainWindow : Window
             _settings.WindowPositionY = adjustedPosition.Y;
         }
 
-        var restoredState = placement.WindowState == WindowState.Minimized
-            ? WindowState.Normal
-            : placement.WindowState;
+    }
 
-        if (Enum.IsDefined(typeof(WindowState), restoredState))
-        {
-            WindowState = restoredState;
-            _settings.WindowState = restoredState;
-        }
+    private void EnforceFixedWindowSize()
+    {
+        WindowState = WindowState.Normal;
+        Width = FixedWindowWidth;
+        Height = FixedWindowHeight;
+        _lastNormalSize = new Size(FixedWindowWidth, FixedWindowHeight);
+        _settings.WindowWidth = FixedWindowWidth;
+        _settings.WindowHeight = FixedWindowHeight;
+        _settings.WindowState = WindowState.Normal;
+
+        if (_lastNormalPosition.HasValue)
+            Position = EnsureWindowIsVisible(_lastNormalPosition.Value, _lastNormalSize.Value);
 
         CaptureCurrentBoundsIfNormal();
     }
