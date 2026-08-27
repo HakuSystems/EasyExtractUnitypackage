@@ -1,4 +1,3 @@
-using EasyExtractCrossPlatform.Tests.Support;
 using EasyExtractCrossPlatform.Services;
 using Xunit;
 
@@ -6,8 +5,6 @@ namespace EasyExtractCrossPlatform.Tests.Services;
 
 public sealed class EverythingSdkBootstrapperTests : IDisposable
 {
-    private const int SharingViolationHResult = unchecked((int)0x80070020);
-
     public void Dispose()
     {
         EverythingSdkBootstrapper.ResetForTests();
@@ -41,58 +38,6 @@ public sealed class EverythingSdkBootstrapperTests : IDisposable
     }
 
     [Fact]
-    public async Task PromoteStagedDllForTestsAsync_RetriesSharingViolationAndSucceeds()
-    {
-        if (!OperatingSystem.IsWindows())
-            return;
-
-        EverythingSdkBootstrapper.ResetForTests();
-
-        var root = Path.Combine(Path.GetTempPath(), "EasyExtractTests", Guid.NewGuid().ToString("N"));
-        Directory.CreateDirectory(root);
-
-        var destinationPath = Path.Combine(root, "Everything64.dll");
-        var stagedPath = Path.Combine(root, "Everything64.dll.stage");
-        var expectedBytes = new byte[]
-        {
-            0x11, 0x22, 0x33, 0x44
-        };
-
-        await File.WriteAllBytesAsync(stagedPath, expectedBytes);
-        await File.WriteAllBytesAsync(destinationPath, new byte[]
-        {
-            0x00, 0x00, 0x00, 0x00
-        });
-
-        var lockStream = new FileStream(
-            destinationPath,
-            FileMode.Open,
-            FileAccess.ReadWrite,
-            FileShare.None);
-
-        try
-        {
-            using var release = DelayedRelease.After(TimeSpan.FromMilliseconds(120), lockStream);
-
-            await EverythingSdkBootstrapper.PromoteStagedDllForTestsAsync(
-                stagedPath,
-                destinationPath,
-                8,
-                TimeSpan.FromMilliseconds(25));
-        }
-        finally
-        {
-            lockStream.Dispose();
-        }
-
-        var actualBytes = await File.ReadAllBytesAsync(destinationPath);
-        Assert.Equal(expectedBytes, actualBytes);
-        Assert.False(File.Exists(stagedPath));
-
-        Directory.Delete(root, true);
-    }
-
-    [Fact]
     public async Task EnsureDllForTestsAsync_ReusesValidExistingDllWithoutRewrite()
     {
         if (!OperatingSystem.IsWindows())
@@ -101,8 +46,7 @@ public sealed class EverythingSdkBootstrapperTests : IDisposable
         EverythingSdkBootstrapper.ResetForTests();
 
         var root = Path.Combine(Path.GetTempPath(), "EasyExtractTests", Guid.NewGuid().ToString("N"));
-        var appDataPath = Path.Combine(root, "AppData");
-        var sdkDirectory = Path.Combine(appDataPath, "EasyExtract", "ThirdParty", "EverythingSdk");
+        var sdkDirectory = Path.Combine(root, "Install");
         Directory.CreateDirectory(sdkDirectory);
 
         var dllName = Environment.Is64BitProcess ? "Everything64.dll" : "Everything32.dll";
@@ -116,7 +60,6 @@ public sealed class EverythingSdkBootstrapperTests : IDisposable
         var originalWriteTime = File.GetLastWriteTimeUtc(dllPath);
 
         EverythingSdkBootstrapper.ConfigureForTests(
-            appDataPathOverride: () => appDataPath,
             validateDllHashOverride: (path, _) =>
                 string.Equals(Path.GetFullPath(path), Path.GetFullPath(dllPath), StringComparison.OrdinalIgnoreCase),
             localProbeDirectoriesOverride: () => new[] { sdkDirectory });
@@ -141,8 +84,7 @@ public sealed class EverythingSdkBootstrapperTests : IDisposable
         EverythingSdkBootstrapper.ResetForTests();
 
         var root = Path.Combine(Path.GetTempPath(), "EasyExtractTests", Guid.NewGuid().ToString("N"));
-        var appDataPath = Path.Combine(root, "AppData");
-        var sdkDirectory = Path.Combine(appDataPath, "EasyExtract", "ThirdParty", "EverythingSdk");
+        var sdkDirectory = Path.Combine(root, "Install");
         Directory.CreateDirectory(sdkDirectory);
 
         var dllName = Environment.Is64BitProcess ? "Everything64.dll" : "Everything32.dll";
@@ -154,7 +96,6 @@ public sealed class EverythingSdkBootstrapperTests : IDisposable
 
         var validationAttempts = 0;
         EverythingSdkBootstrapper.ConfigureForTests(
-            appDataPathOverride: () => appDataPath,
             validateDllHashOverride: (path, _) =>
             {
                 if (!string.Equals(Path.GetFullPath(path), Path.GetFullPath(dllPath),
@@ -187,8 +128,7 @@ public sealed class EverythingSdkBootstrapperTests : IDisposable
         EverythingSdkBootstrapper.ResetForTests();
 
         var root = Path.Combine(Path.GetTempPath(), "EasyExtractTests", Guid.NewGuid().ToString("N"));
-        var appDataPath = Path.Combine(root, "AppData");
-        var sdkDirectory = Path.Combine(appDataPath, "EasyExtract", "ThirdParty", "EverythingSdk");
+        var sdkDirectory = Path.Combine(root, "Install");
         Directory.CreateDirectory(sdkDirectory);
 
         var dllName = Environment.Is64BitProcess ? "Everything64.dll" : "Everything32.dll";
@@ -205,7 +145,6 @@ public sealed class EverythingSdkBootstrapperTests : IDisposable
         });
 
         EverythingSdkBootstrapper.ConfigureForTests(
-            appDataPathOverride: () => appDataPath,
             validateDllHashOverride: (path, _) =>
             {
                 if (string.Equals(Path.GetFullPath(path), Path.GetFullPath(orphanedTempPath),
@@ -251,49 +190,12 @@ public sealed class EverythingSdkBootstrapperTests : IDisposable
         Directory.Delete(root, true);
     }
 
+    /// <summary>
+    ///     Without a bundled DLL there is nowhere else to look. Reaching for the network here is what
+    ///     broke V2.10.x, so the failure has to stay local and immediate.
+    /// </summary>
     [Fact]
-    public async Task EnsureInitializedAsync_TruncatedDownload_ReportsServiceUnavailableInsteadOfMissingLibrary()
-    {
-        if (!OperatingSystem.IsWindows())
-            return;
-
-        EverythingSdkBootstrapper.ResetForTests();
-
-        EverythingSdkBootstrapper.ConfigureForTests(
-            () => throw new HttpIOException(HttpRequestError.ResponseEnded, "The response ended prematurely."),
-            _ => { },
-            _ => { });
-
-        var exception = await Assert.ThrowsAsync<EverythingSearchException>(
-            () => EverythingSdkBootstrapper.EnsureInitializedAsync());
-
-        Assert.Equal(EverythingErrorCode.ServiceUnavailable, exception.ErrorCode);
-        Assert.DoesNotContain("was not found", exception.Message, StringComparison.OrdinalIgnoreCase);
-    }
-
-    [Theory]
-    [InlineData(typeof(InvalidDataException), true)]
-    [InlineData(typeof(TaskCanceledException), true)]
-    [InlineData(typeof(TimeoutException), true)]
-    [InlineData(typeof(InvalidOperationException), false)]
-    [InlineData(typeof(UnauthorizedAccessException), false)]
-    public void IsTransientDownloadFailure_ClassifiesRetryableFailures(Type exceptionType, bool expected)
-    {
-        var exception = (Exception)Activator.CreateInstance(exceptionType)!;
-
-        Assert.Equal(expected, EverythingSdkBootstrapper.IsTransientDownloadFailure(exception));
-    }
-
-    [Fact]
-    public void IsTransientDownloadFailure_TruncatedHttpResponse_IsRetryable()
-    {
-        var exception = new HttpIOException(HttpRequestError.ResponseEnded, "The response ended prematurely.");
-
-        Assert.True(EverythingSdkBootstrapper.IsTransientDownloadFailure(exception));
-    }
-
-    [Fact]
-    public async Task EnsureDllForTestsAsync_MissingBundledDll_DoesNotDownload()
+    public async Task EnsureDllForTestsAsync_MissingBundledDll_FailsWithoutLookingElsewhere()
     {
         if (!OperatingSystem.IsWindows())
             return;
@@ -305,7 +207,7 @@ public sealed class EverythingSdkBootstrapperTests : IDisposable
     }
 
     [Fact]
-    public async Task EnsureDllForTestsAsync_FallsBackToDllNextToTheExecutable()
+    public async Task EnsureDllForTestsAsync_ResolvesTheDllNextToTheExecutable()
     {
         if (!OperatingSystem.IsWindows())
             return;
@@ -313,7 +215,6 @@ public sealed class EverythingSdkBootstrapperTests : IDisposable
         EverythingSdkBootstrapper.ResetForTests();
 
         var root = Path.Combine(Path.GetTempPath(), "EasyExtractTests", Guid.NewGuid().ToString("N"));
-        var appDataPath = Path.Combine(root, "AppData");
         var installDirectory = Path.Combine(root, "Install");
         Directory.CreateDirectory(installDirectory);
 
@@ -325,7 +226,6 @@ public sealed class EverythingSdkBootstrapperTests : IDisposable
         });
 
         EverythingSdkBootstrapper.ConfigureForTests(
-            appDataPathOverride: () => appDataPath,
             validateDllHashOverride: (path, _) =>
                 string.Equals(Path.GetFullPath(path), Path.GetFullPath(localDllPath),
                     StringComparison.OrdinalIgnoreCase),
@@ -393,13 +293,5 @@ public sealed class EverythingSdkBootstrapperTests : IDisposable
         Assert.True(EverythingSdkBootstrapper.ValidateDllHashForTests(bundledPath, false),
             "The bundled Everything64.dll no longer matches its entry in ExpectedDllHashes. " +
             "Update the constant whenever the SDK DLL is refreshed.");
-    }
-
-    private sealed class SharingViolationIOException : IOException
-    {
-        public SharingViolationIOException() : base("Simulated sharing violation")
-        {
-            HResult = SharingViolationHResult;
-        }
     }
 }
