@@ -824,6 +824,7 @@ FodyWeavers.xml.bak
 *.exe
 *.pdb
 *.dll
+!EasyExtractUnitypackageRework/EasyExtractCrossPlatform/ThirdParty/EverythingSdk/Everything64.dll
 *.dylib
 
 # Other

@@ -118,7 +118,8 @@ public sealed class EverythingSdkBootstrapperTests : IDisposable
         EverythingSdkBootstrapper.ConfigureForTests(
             appDataPathOverride: () => appDataPath,
             validateDllHashOverride: (path, _) =>
-                string.Equals(Path.GetFullPath(path), Path.GetFullPath(dllPath), StringComparison.OrdinalIgnoreCase));
+                string.Equals(Path.GetFullPath(path), Path.GetFullPath(dllPath), StringComparison.OrdinalIgnoreCase),
+            localProbeDirectoriesOverride: () => new[] { sdkDirectory });
 
         var resolvedPath = await EverythingSdkBootstrapper.EnsureDllForTestsAsync();
         var currentWriteTime = File.GetLastWriteTimeUtc(dllPath);
@@ -132,7 +133,7 @@ public sealed class EverythingSdkBootstrapperTests : IDisposable
     }
 
     [Fact]
-    public async Task EnsureDllForTestsAsync_SerializesConcurrentReuseWhileValidationRetries()
+    public async Task EnsureDllForTestsAsync_SerializesConcurrentBundledDllResolution()
     {
         if (!OperatingSystem.IsWindows())
             return;
@@ -160,11 +161,10 @@ public sealed class EverythingSdkBootstrapperTests : IDisposable
                         StringComparison.OrdinalIgnoreCase))
                     return true;
 
-                if (Interlocked.Increment(ref validationAttempts) == 1)
-                    throw new SharingViolationIOException();
-
+                Interlocked.Increment(ref validationAttempts);
                 return true;
-            });
+            },
+            localProbeDirectoriesOverride: () => new[] { sdkDirectory });
 
         var callers = Enumerable.Range(0, 4)
             .Select(_ => EverythingSdkBootstrapper.EnsureDllForTestsAsync())
@@ -173,13 +173,13 @@ public sealed class EverythingSdkBootstrapperTests : IDisposable
         var resolvedPaths = await Task.WhenAll(callers);
 
         Assert.All(resolvedPaths, path => Assert.Equal(dllPath, path, true));
-        Assert.True(validationAttempts >= 2);
+        Assert.Equal(1, validationAttempts);
 
         Directory.Delete(root, true);
     }
 
     [Fact]
-    public async Task EnsureDllForTestsAsync_CleansOrphanedTemporaryDlls()
+    public async Task EnsureDllForTestsAsync_LeavesUnrelatedTemporaryFilesUntouched()
     {
         if (!OperatingSystem.IsWindows())
             return;
@@ -214,12 +214,13 @@ public sealed class EverythingSdkBootstrapperTests : IDisposable
 
                 return string.Equals(Path.GetFullPath(path), Path.GetFullPath(dllPath),
                     StringComparison.OrdinalIgnoreCase);
-            });
+            },
+            localProbeDirectoriesOverride: () => new[] { sdkDirectory });
 
         var resolvedPath = await EverythingSdkBootstrapper.EnsureDllForTestsAsync();
 
         Assert.Equal(dllPath, resolvedPath, true);
-        Assert.False(File.Exists(orphanedTempPath));
+        Assert.True(File.Exists(orphanedTempPath));
 
         Directory.Delete(root, true);
     }
@@ -289,6 +290,18 @@ public sealed class EverythingSdkBootstrapperTests : IDisposable
         var exception = new HttpIOException(HttpRequestError.ResponseEnded, "The response ended prematurely.");
 
         Assert.True(EverythingSdkBootstrapper.IsTransientDownloadFailure(exception));
+    }
+
+    [Fact]
+    public async Task EnsureDllForTestsAsync_MissingBundledDll_DoesNotDownload()
+    {
+        if (!OperatingSystem.IsWindows())
+            return;
+
+        EverythingSdkBootstrapper.ResetForTests();
+        EverythingSdkBootstrapper.ConfigureForTests(localProbeDirectoriesOverride: Array.Empty<string>);
+
+        await Assert.ThrowsAsync<FileNotFoundException>(() => EverythingSdkBootstrapper.EnsureDllForTestsAsync());
     }
 
     [Fact]
