@@ -50,6 +50,10 @@
     </ItemGroup>
     <ItemGroup>
         <None Remove="ThirdParty\EverythingSdk\Everything64.dll" />
+    </ItemGroup>
+    <!-- Everything is Windows only, so the SDK DLL has no business in the Linux and macOS
+         packages. An empty RuntimeIdentifier means a plain local build, which still gets it. -->
+    <ItemGroup Condition="!$(RuntimeIdentifier.StartsWith('linux')) And !$(RuntimeIdentifier.StartsWith('osx'))">
         <Content Include="ThirdParty\EverythingSdk\Everything64.dll">
             <TargetPath>Everything64.dll</TargetPath>
             <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
