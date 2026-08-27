@@ -374,6 +374,27 @@ public sealed class EverythingSdkBootstrapperTests : IDisposable
         Directory.Delete(root, true);
     }
 
+    /// <summary>
+    ///     The bundled DLL and the hash it is checked against both live in this repository, so nothing
+    ///     stops the two from drifting apart. Refreshing the SDK without touching ExpectedDllHashes
+    ///     would ship a build whose search silently refuses to start, which is the exact failure that
+    ///     made the download path untenable in the first place. This is the tripwire for it.
+    /// </summary>
+    [Fact]
+    public void BundledDll_MatchesTheHashTheBootstrapperValidatesAgainst()
+    {
+        EverythingSdkBootstrapper.ResetForTests();
+
+        var bundledPath = Path.Combine(AppContext.BaseDirectory, "Everything64.dll");
+
+        Assert.True(File.Exists(bundledPath),
+            $"The bundled Everything SDK DLL is missing from the build output at '{bundledPath}'.");
+
+        Assert.True(EverythingSdkBootstrapper.ValidateDllHashForTests(bundledPath, false),
+            "The bundled Everything64.dll no longer matches its entry in ExpectedDllHashes. " +
+            "Update the constant whenever the SDK DLL is refreshed.");
+    }
+
     private sealed class SharingViolationIOException : IOException
     {
         public SharingViolationIOException() : base("Simulated sharing violation")

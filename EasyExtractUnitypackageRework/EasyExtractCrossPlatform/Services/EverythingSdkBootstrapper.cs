@@ -25,8 +25,10 @@ internal static class EverythingSdkBootstrapper
     private static readonly IReadOnlyDictionary<string, string> ExpectedDllHashes =
         new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
+            // Both measured against the Voidtools SDK archive on 2026-08-27. Only the x64 file is
+            // bundled; the x86 entry exists to validate a DLL a user drops next to the executable.
             ["Everything64.dll"] = "81B5BE18126ACD2C2B913F8F4A821E476B18393CDD3DEBD03387C50AFD8DB88F",
-            ["Everything32.dll"] = "C28CD066AF36CAE4403A9933847AFF01DB928787D86751F014A1FA60D8B97FDA"
+            ["Everything32.dll"] = "1FFE69D856A8A071A7531D54D7B05AE04A87814B812E649521A67A606C7F93E0"
         };
 
     private static Task? _initializationTask;

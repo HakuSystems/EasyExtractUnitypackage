@@ -21,4 +21,11 @@
     <ItemGroup>
         <ProjectReference Include="..\EasyExtractCrossPlatform\EasyExtractCrossPlatform.csproj" />
     </ItemGroup>
+    <!-- Pulled in so the guard test can hash the exact file the application ships. -->
+    <ItemGroup>
+        <Content Include="..\EasyExtractCrossPlatform\ThirdParty\EverythingSdk\Everything64.dll">
+            <Link>Everything64.dll</Link>
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </Content>
+    </ItemGroup>
 </Project>
