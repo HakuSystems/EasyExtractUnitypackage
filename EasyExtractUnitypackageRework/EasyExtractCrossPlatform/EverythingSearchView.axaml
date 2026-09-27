@@ -14,17 +14,16 @@
             <Setter Property="Background" Value="{DynamicResource EasyGlassGradientBrush}" />
             <Setter Property="BorderBrush" Value="{DynamicResource EasyGlassBorderBrush}" />
             <Setter Property="BorderThickness" Value="1" />
-            <Setter Property="CornerRadius" Value="18" />
+            <Setter Property="CornerRadius" Value="10" />
             <Setter Property="Padding" Value="18" />
             <Setter Property="Margin" Value="0" />
-            <Setter Property="BoxShadow" Value="0 16 32 0 #12000000" />
         </Style>
 
         <Style Selector="Border.status">
             <Setter Property="Background" Value="{DynamicResource EasyGlassOverlayBrush}" />
             <Setter Property="BorderBrush" Value="{DynamicResource EasyGlassNeutralBorderBrush}" />
             <Setter Property="BorderThickness" Value="1" />
-            <Setter Property="CornerRadius" Value="14" />
+            <Setter Property="CornerRadius" Value="8" />
             <Setter Property="Padding" Value="14" />
             <Setter Property="Margin" Value="0,16,0,0" />
         </Style>
@@ -38,7 +37,7 @@
             <Setter Property="Background" Value="{DynamicResource EasyGlassOverlayFaintBrush}" />
             <Setter Property="BorderBrush" Value="{DynamicResource EasyGlassNeutralBorderBrush}" />
             <Setter Property="BorderThickness" Value="1" />
-            <Setter Property="CornerRadius" Value="16" />
+            <Setter Property="CornerRadius" Value="8" />
             <Setter Property="Padding" Value="16" />
             <Setter Property="Margin" Value="0,0,0,12" />
         </Style>
@@ -77,9 +76,8 @@
         </Style>
 
         <Style Selector="views|EverythingSearchView.compact Border.search-card">
-            <Setter Property="CornerRadius" Value="18" />
+            <Setter Property="CornerRadius" Value="10" />
             <Setter Property="Padding" Value="18" />
-            <Setter Property="BoxShadow" Value="0 14 28 0 #14000000" />
         </Style>
 
         <Style Selector="views|EverythingSearchView.compact Button.link">
@@ -96,7 +94,7 @@
 
         <Style Selector="views|EverythingSearchView.compact Border.status">
             <Setter Property="Padding" Value="12" />
-            <Setter Property="CornerRadius" Value="12" />
+            <Setter Property="CornerRadius" Value="8" />
         </Style>
 
         <Style Selector="views|EverythingSearchView.compact ScrollViewer#ResultsScrollViewer">
@@ -108,7 +106,6 @@
             <Setter Property="Background" Value="Transparent" />
             <Setter Property="BorderThickness" Value="0" />
             <Setter Property="Padding" Value="0" />
-            <Setter Property="BoxShadow" Value="0 0 0 0 #00000000" />
         </Style>
 
         <Style Selector="views|EverythingSearchView.minimal ScrollViewer#ResultsScrollViewer">

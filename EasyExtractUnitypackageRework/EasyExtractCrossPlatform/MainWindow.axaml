@@ -16,12 +16,11 @@
         TransparencyBackgroundFallback="{DynamicResource EasyWindowBackgroundBrush}">
     <Window.Styles>
         <Style Selector="Border.drop-zone">
-            <Setter Property="CornerRadius" Value="24" />
+            <Setter Property="CornerRadius" Value="10" />
             <Setter Property="Background" Value="{DynamicResource EasySurfaceBrush}" />
             <Setter Property="BorderBrush" Value="{DynamicResource EasyGlassNeutralBorderBrush}" />
             <Setter Property="BorderThickness" Value="1" />
             <Setter Property="Padding" Value="36" />
-            <Setter Property="BoxShadow" Value="0 24 40 0 #12000000" />
             <Setter Property="Transitions">
                 <Transitions>
                     <BrushTransition Property="{x:Static Border.BackgroundProperty}" Duration="0:0:0.22" />
@@ -156,11 +155,10 @@
                   RowDefinitions="Auto,*,Auto">
                 <Border Grid.Row="0" Margin="0,0,0,32"
                         Padding="28"
-                        CornerRadius="28"
+                        CornerRadius="10"
                         Background="{DynamicResource EasyGlassGradientBrush}"
                         BorderBrush="{DynamicResource EasyGlassBorderBrush}"
-                        BorderThickness="1"
-                        BoxShadow="0 40 80 0 #12000000">
+                        BorderThickness="1">
                     <Grid x:Name="HeroGrid"
                           ColumnDefinitions="Auto,*"
                           RowDefinitions="Auto,Auto"
@@ -169,17 +167,15 @@
                         <Border Grid.Column="0"
                                 Width="128"
                                 Height="128"
-                                CornerRadius="32"
-                                Background="{DynamicResource EasyGlassOverlayBrush}"
                                 HorizontalAlignment="Left"
                                 VerticalAlignment="Top"
-                                BorderBrush="{DynamicResource EasyGlassNeutralBorderBrush}"
-                                BorderThickness="1"
                                 Margin="0,0,24,0"
                                 Classes="hero-logo">
+                            <!-- No tile behind the logo: on the flat grey surface a tile only
+                                 swallowed the dark box of the icon. -->
                             <Image Source="avares://EasyExtractCrossPlatform/Assets/AppLogo.png"
                                    Stretch="Uniform"
-                                   Margin="12" />
+                                   Margin="4" />
                         </Border>
 
                         <StackPanel Grid.Column="1"
@@ -197,7 +193,7 @@
                                         Classes="hero-action-row action-row">
                                 <Border Padding="12,6"
                                         Background="{DynamicResource EasyGlassOverlayStrongBrush}"
-                                        CornerRadius="12">
+                                        CornerRadius="8">
                                     <StackPanel Orientation="Horizontal"
                                                 Spacing="8">
                                         <Ellipse Width="10"
@@ -229,7 +225,7 @@
                                     IsVisible="False"
                                     Margin="0,8,0,0"
                                     Padding="12"
-                                    CornerRadius="14"
+                                    CornerRadius="8"
                                     Background="{DynamicResource EasyAccentSoftBrush}"
                                     BorderBrush="{DynamicResource EasyAccentBrush}"
                                     BorderThickness="1">
@@ -258,15 +254,14 @@
                       Margin="0,0,0,32">
                     <Border Grid.Column="0"
                             Padding="34"
-                            CornerRadius="28"
+                            CornerRadius="10"
                             Background="{DynamicResource EasyGlassGradientBrush}"
                             BorderBrush="{DynamicResource EasyGlassBorderBrush}"
-                            BorderThickness="1"
-                            BoxShadow="0 30 60 0 #14000000">
+                            BorderThickness="1">
                         <StackPanel Spacing="28">
                             <Grid x:Name="StartExtractionHeaderGrid"
                                   RowDefinitions="Auto,Auto">
-                                <Grid ColumnDefinitions="Auto,*" HorizontalAlignment="Right"
+                                <Grid ColumnDefinitions="Auto,*" HorizontalAlignment="Stretch"
                                       VerticalAlignment="Center">
                                     <StackPanel Orientation="Horizontal"
                                                 Spacing="10"
@@ -279,7 +274,7 @@
                                             VerticalAlignment="Center" />
                                         <TextBlock Text="{loc:Loc MainWindow_StartANewExtraction}"
                                                    FontSize="26"
-                                                   FontWeight="Bold"
+                                                   FontWeight="SemiBold"
                                                    VerticalAlignment="Center"
                                                    HorizontalAlignment="Center" />
                                     </StackPanel>
@@ -317,7 +312,7 @@
                                                         Background="{DynamicResource EasyGlassOverlayStrongBrush}"
                                                         BorderBrush="{DynamicResource EasyAccentSoftBrush}"
                                                         BorderThickness="1"
-                                                        CornerRadius="16"
+                                                        CornerRadius="8"
                                                         Padding="10,6"
                                                         HorizontalAlignment="Right"
                                                         Opacity="0"
@@ -376,7 +371,7 @@
                                         DragDrop.DragOver="DropZoneBorder_OnDragOver">
                                     <StackPanel Spacing="22" HorizontalAlignment="Center">
                                         <Border Width="88" Height="88"
-                                                CornerRadius="28"
+                                                CornerRadius="10"
                                                 Background="{DynamicResource EasyGlassOverlayFaintBrush}"
                                                 BorderBrush="{DynamicResource EasyGlassNeutralBorderBrush}"
                                                 BorderThickness="1"
@@ -466,7 +461,7 @@
                                         Background="{DynamicResource EasyGlassOverlayStrongBrush}"
                                         BorderBrush="{DynamicResource EasyGlassNeutralBorderBrush}"
                                         BorderThickness="1"
-                                        CornerRadius="24"
+                                        CornerRadius="10"
                                         Opacity="0"
                                         IsVisible="False"
                                         IsHitTestVisible="False">
@@ -479,11 +474,10 @@
 
                             <Border x:Name="ExtractionDashboard"
                                     Padding="28"
-                                    CornerRadius="24"
+                                    CornerRadius="10"
                                     Background="{DynamicResource EasyGlassGradientBrush}"
                                     BorderBrush="{DynamicResource EasyAccentSoftBrush}"
                                     BorderThickness="1"
-                                    BoxShadow="0 26 60 0 #18000000"
                                     Opacity="0"
                                     IsVisible="False">
                                 <Border.Transitions>
@@ -535,7 +529,7 @@
                                                 HorizontalAlignment="Right"
                                                 VerticalAlignment="Center"
                                                 Padding="10,4"
-                                                CornerRadius="12"
+                                                CornerRadius="8"
                                                 Background="{DynamicResource EasyGlassOverlayStrongBrush}"
                                                 BorderBrush="{DynamicResource EasyAccentSoftBrush}"
                                                 BorderThickness="1">
@@ -572,7 +566,7 @@
                                     </Grid>
                                     <Border x:Name="ExtractionDashboardSecurityBanner"
                                             Padding="14"
-                                            CornerRadius="16"
+                                            CornerRadius="8"
                                             Margin="0,6,0,0"
                                             Background="{DynamicResource EasyGlassOverlayFaintBrush}"
                                             BorderBrush="{DynamicResource EasyGlassNeutralBorderBrush}"
@@ -635,7 +629,7 @@
                                                        Margin="12,8,0,0"
                                                        TextTrimming="CharacterEllipsis" />
                                         </Grid>
-                                        <Border CornerRadius="18"
+                                        <Border CornerRadius="10"
                                                 BorderThickness="1"
                                                 BorderBrush="{DynamicResource EasyGlassNeutralBorderBrush}"
                                                 Background="{DynamicResource EasyGlassOverlayFaintBrush}"
@@ -681,13 +675,14 @@
                                 Spacing="28"
                                 Margin="28,0,0,0">
                         <Border Padding="28"
-                                CornerRadius="24"
+                                CornerRadius="10"
                                 Background="{DynamicResource EasyGlassGradientBrush}"
                                 BorderBrush="{DynamicResource EasyGlassBorderBrush}"
-                                BorderThickness="1"
-                                BoxShadow="0 26 50 0 #14000000">
+                                BorderThickness="1">
                             <StackPanel Spacing="18">
-                                <Grid ColumnDefinitions="Auto,*,Auto" VerticalAlignment="Center">
+                                <!-- Title row on top, actions below: side by side, the two buttons
+                                     squeezed the title to one character per line at 1280px. -->
+                                <Grid ColumnDefinitions="Auto,*" RowDefinitions="Auto,Auto" VerticalAlignment="Center">
                                     <Border Grid.Column="0"
                                             Width="36" Height="36" CornerRadius="18"
                                             Margin="0,0,12,0"
@@ -709,10 +704,12 @@
                                                    Text="{loc:Loc MainWindow_QueueIsEmpty}"
                                                    Classes="subtle" />
                                     </StackPanel>
-                                    <StackPanel Grid.Column="2"
+                                    <StackPanel Grid.Row="1"
+                                                Grid.ColumnSpan="2"
+                                                Margin="0,14,0,0"
                                                 Orientation="Horizontal"
                                                 Spacing="8"
-                                                HorizontalAlignment="Right">
+                                                HorizontalAlignment="Left">
                                         <Button x:Name="ProcessQueueButton"
                                                 Click="ProcessQueueButton_OnClick"
                                                 ToolTip.Tip="{loc:Loc MainWindow_ExtractEveryPackageCurrentlyQueued}"
@@ -752,7 +749,7 @@
                                         </ItemsControl.ItemsPanel>
                                         <ItemsControl.ItemTemplate>
                                             <DataTemplate x:CompileBindings="False">
-                                                <Border CornerRadius="18"
+                                                <Border CornerRadius="10"
                                                         Background="{DynamicResource EasyGlassOverlayFaintBrush}"
                                                         BorderBrush="{DynamicResource EasyGlassNeutralBorderBrush}"
                                                         BorderThickness="1"
@@ -807,11 +804,10 @@
                             </StackPanel>
                         </Border>
                         <Border Padding="28"
-                                CornerRadius="24"
+                                CornerRadius="10"
                                 Background="{DynamicResource EasyGlassGradientBrush}"
                                 BorderBrush="{DynamicResource EasyGlassBorderBrush}"
-                                BorderThickness="1"
-                                BoxShadow="0 26 50 0 #14000000">
+                                BorderThickness="1">
                             <StackPanel Spacing="18">
                                 <StackPanel Orientation="Horizontal" Spacing="12" VerticalAlignment="Center">
                                     <Border Width="36" Height="36" CornerRadius="18"
@@ -834,7 +830,7 @@
                                                Grid.Column="1"
                                                Text="0"
                                                FontSize="26"
-                                               FontWeight="Bold"
+                                               FontWeight="SemiBold"
                                                Foreground="{DynamicResource EasyAccentBrush}" />
 
                                     <TextBlock Grid.Row="1"
@@ -847,7 +843,7 @@
                                                Margin="0,16,0,0"
                                                Text="0"
                                                FontSize="26"
-                                               FontWeight="Bold"
+                                               FontWeight="SemiBold"
                                                Foreground="{DynamicResource EasyGlassMutedBrush}" />
 
                                     <TextBlock Grid.Row="2"
@@ -868,12 +864,11 @@
                 </Grid>
 
                 <Border Grid.Row="2"
-                        CornerRadius="22"
+                        CornerRadius="10"
                         Padding="18"
                         Background="{DynamicResource EasyGlassOverlayFaintBrush}"
                         BorderBrush="{DynamicResource EasyGlassNeutralBorderBrush}"
-                        BorderThickness="1"
-                        BoxShadow="0 20 40 0 #12000000">
+                        BorderThickness="1">
                     <Grid x:Name="FooterGrid"
                           ColumnDefinitions="Auto,*,Auto"
                           RowDefinitions="Auto"
@@ -1015,10 +1010,9 @@
                         Background="{DynamicResource EasyWindowBackgroundBrush}"
                         BorderBrush="{DynamicResource EasyGlassBorderBrush}"
                         BorderThickness="1"
-                        CornerRadius="36"
+                        CornerRadius="10"
                         ClipToBounds="True"
                         Padding="0"
-                        BoxShadow="0 48 120 0 #22000000"
                         RenderTransformOrigin="0.5,0.5">
                     <Border.RenderTransform>
                         <ScaleTransform ScaleX="0.94"

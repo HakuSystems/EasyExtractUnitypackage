@@ -27,6 +27,14 @@
             <Setter Property="BorderThickness" Value="0" />
             <Setter Property="Background" Value="Transparent" />
         </Style>
+        <!-- Fluent paints the selected item in the system accent; the card border
+             already marks the selection. -->
+        <Style Selector="ListBox.credits-list ListBoxItem:selected /template/ ContentPresenter#PART_ContentPresenter">
+            <Setter Property="Background" Value="Transparent" />
+        </Style>
+        <Style Selector="ListBox.credits-list ListBoxItem:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+            <Setter Property="Background" Value="Transparent" />
+        </Style>
         <Style Selector="ListBox.credits-list ListBoxItem:selected Border.credit-card">
             <Setter Property="BorderBrush" Value="{DynamicResource EasyAccentBrush}" />
             <Setter Property="Background" Value="{DynamicResource EasyGlassOverlayBrush}" />
@@ -46,7 +54,7 @@
         <Style Selector="Window.compact Border.header-card">
             <Setter Property="Margin" Value="16" />
             <Setter Property="Padding" Value="22" />
-            <Setter Property="CornerRadius" Value="24" />
+            <Setter Property="CornerRadius" Value="10" />
         </Style>
         <Style Selector="Window.compact Border.list-panel">
             <Setter Property="Margin" Value="0,16,0,16" />
@@ -62,11 +70,10 @@
                 <Border Classes="header-card"
                         Padding="28"
                         Margin="32"
-                        CornerRadius="28"
+                        CornerRadius="10"
                         Background="{DynamicResource EasyGlassGradientBrush}"
                         BorderBrush="{DynamicResource EasyGlassBorderBrush}"
-                        BorderThickness="1"
-                        BoxShadow="0 36 72 0 #16000000">
+                        BorderThickness="1">
                     <StackPanel>
                         <TextBlock Text="{loc:Loc CreditsWindow_Title}"
                                    Classes="display" />
@@ -76,7 +83,7 @@
                                    TextWrapping="Wrap" />
                         <Border Margin="0,12,0,0"
                                 Padding="12"
-                                CornerRadius="14"
+                                CornerRadius="8"
                                 Background="{DynamicResource EasyGlassOverlayBrush}"
                                 BorderBrush="{DynamicResource EasyGlassNeutralBorderBrush}"
                                 BorderThickness="1">
@@ -97,10 +104,9 @@
                             Background="{DynamicResource EasyGlassOverlayFaintBrush}"
                             BorderBrush="{DynamicResource EasyGlassNeutralBorderBrush}"
                             BorderThickness="1"
-                            CornerRadius="24"
+                            CornerRadius="10"
                             Padding="18"
-                            Margin="0,0,26,0"
-                            BoxShadow="0 22 46 0 #14000000">
+                            Margin="0,0,26,0">
                         <ListBox x:Name="CreditsList"
                                  Classes="credits-list"
                                  ItemsSource="{Binding Profiles}"
@@ -111,14 +117,14 @@
                                             Background="{DynamicResource EasyGlassOverlayFaintBrush}"
                                             BorderBrush="{DynamicResource EasyGlassNeutralBorderBrush}"
                                             BorderThickness="1"
-                                            CornerRadius="20"
+                                            CornerRadius="10"
                                             Padding="16">
                                         <StackPanel Spacing="10">
                                             <StackPanel Orientation="Horizontal"
                                                         Spacing="12">
                                                 <Border Width="38"
                                                         Height="38"
-                                                        CornerRadius="12"
+                                                        CornerRadius="8"
                                                         Background="{Binding EmblemBackgroundBrush}"
                                                         HorizontalAlignment="Center"
                                                         VerticalAlignment="Center">
@@ -174,9 +180,8 @@
                             Background="{DynamicResource EasyGlassOverlayFaintBrush}"
                             BorderBrush="{DynamicResource EasyGlassNeutralBorderBrush}"
                             BorderThickness="1"
-                            CornerRadius="28"
-                            Padding="6"
-                            BoxShadow="0 22 46 0 #14000000">
+                            CornerRadius="10"
+                            Padding="6">
                         <ScrollViewer HorizontalScrollBarVisibility="Disabled">
                             <TransitioningContentControl Content="{Binding SelectedProfile}">
                                 <TransitioningContentControl.PageTransition>
@@ -186,12 +191,12 @@
                                     <DataTemplate x:DataType="viewmodels:CreditsViewModel+CreditProfileViewModel">
                                         <StackPanel Spacing="18" Margin="18">
                                             <Border Background="{Binding HeroBrush}"
-                                                    CornerRadius="26"
+                                                    CornerRadius="10"
                                                     Padding="24">
                                                 <Grid ColumnDefinitions="Auto,*">
                                                     <Border Width="60"
                                                             Height="60"
-                                                            CornerRadius="20"
+                                                            CornerRadius="10"
                                                             Background="{Binding EmblemBackgroundBrush}">
                                                         <TextBlock Text="{Binding Emoji}"
                                                                    FontSize="28"
@@ -202,7 +207,7 @@
                                                                 Margin="18,0,0,0">
                                                         <TextBlock Text="{Binding DisplayName}"
                                                                    FontSize="28"
-                                                                   FontWeight="Bold" />
+                                                                   FontWeight="SemiBold" />
                                                         <TextBlock Text="{Binding Role}"
                                                                    FontWeight="SemiBold"
                                                                    Opacity="0.9" />
@@ -225,13 +230,13 @@
                                                                     Background="{DynamicResource EasyGlassOverlayBrush}"
                                                                     BorderBrush="{Binding DataContext.AccentBorderBrush, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
                                                                     BorderThickness="1"
-                                                                    CornerRadius="18"
+                                                                    CornerRadius="10"
                                                                     Padding="16">
                                                                 <StackPanel Orientation="Horizontal"
                                                                             Spacing="12">
                                                                     <Border Width="28"
                                                                             Height="28"
-                                                                            CornerRadius="9"
+                                                                            CornerRadius="6"
                                                                             Background="{Binding DataContext.EmblemBackgroundBrush, RelativeSource={RelativeSource AncestorType=ItemsControl}}">
                                                                         <PathIcon Data="M5 13L9 17L19 7"
                                                                                 Width="16"

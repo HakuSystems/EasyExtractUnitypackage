@@ -19,9 +19,12 @@
         <Setter Property="Foreground" Value="{DynamicResource EasyMutedBrush}" />
     </Style>
 
+    <!-- Headlines as on easyextract.net: Inter SemiBold with tightened tracking,
+         not Black. -->
     <Style Selector="TextBlock.display">
-        <Setter Property="FontSize" Value="36" />
-        <Setter Property="FontWeight" Value="Black" />
+        <Setter Property="FontSize" Value="34" />
+        <Setter Property="FontWeight" Value="SemiBold" />
+        <Setter Property="LetterSpacing" Value="-1" />
         <Setter Property="Foreground" Value="{DynamicResource EasyTextColorBrush}" />
     </Style>
 </Styles>

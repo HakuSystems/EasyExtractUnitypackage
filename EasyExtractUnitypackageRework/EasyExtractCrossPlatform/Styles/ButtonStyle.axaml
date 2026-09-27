@@ -3,55 +3,76 @@
     <Design.PreviewWith>
         <Border Padding="24" Background="{DynamicResource EasyWindowBackgroundBrush}">
             <StackPanel Spacing="12">
-                <Button Content="Primary Action" />
-                <Button Classes="ghost" Content="Secondary" />
+                <Button Classes="accent" Content="Primary Action" />
+                <Button Content="Secondary" />
+                <Button Classes="ghost" Content="Ghost" />
             </StackPanel>
         </Border>
     </Design.PreviewWith>
 
+    <!-- Same button language as easyextract.net: flat, 6px corners, a hairline border.
+         The Fluent template paints its own hover and pressed backgrounds on the inner
+         ContentPresenter, so the states below target that part directly. -->
     <Style Selector="Button">
         <Setter Property="Foreground" Value="{DynamicResource EasyOnPrimaryBrush}" />
-        <Setter Property="Background" Value="{DynamicResource EasyGlassGradientBrush}" />
-        <Setter Property="BorderBrush" Value="{DynamicResource EasyGlassBorderBrush}" />
+        <Setter Property="Background" Value="{DynamicResource EasyButtonBrush}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource EasyGlassStrongBorderBrush}" />
         <Setter Property="BorderThickness" Value="1" />
-        <Setter Property="CornerRadius" Value="16" />
-        <Setter Property="Padding" Value="18,12" />
+        <Setter Property="CornerRadius" Value="6" />
+        <Setter Property="Padding" Value="16,10" />
         <Setter Property="FontWeight" Value="SemiBold" />
         <Setter Property="HorizontalAlignment" Value="Stretch" />
         <Setter Property="VerticalAlignment" Value="Center" />
-        <Setter Property="MinHeight" Value="44" />
-        <Setter Property="Opacity" Value="0.95" />
+        <Setter Property="MinHeight" Value="40" />
     </Style>
 
-    <Style Selector="Button:pointerover">
-        <Setter Property="Opacity" Value="1" />
-        <Setter Property="BorderBrush" Value="{DynamicResource EasyAccentBrush}" />
+    <Style Selector="Button:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+        <Setter Property="Background" Value="{DynamicResource EasyButtonHoverBrush}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource EasyGlassMutedBrush}" />
+        <Setter Property="Foreground" Value="{DynamicResource EasyTextColorBrush}" />
     </Style>
 
-    <Style Selector="Button:pressed">
-        <Setter Property="Opacity" Value="0.8" />
+    <Style Selector="Button:pressed /template/ ContentPresenter#PART_ContentPresenter">
+        <Setter Property="Background" Value="{DynamicResource EasyGlassOverlayStrongBrush}" />
     </Style>
 
     <Style Selector="Button:disabled">
-        <Setter Property="Opacity" Value="0.4" />
+        <Setter Property="Opacity" Value="0.45" />
+    </Style>
+
+    <Style Selector="Button:disabled /template/ ContentPresenter#PART_ContentPresenter">
+        <Setter Property="Background" Value="{DynamicResource EasyButtonBrush}" />
         <Setter Property="BorderBrush" Value="{DynamicResource EasyGlassDisabledBorderBrush}" />
+    </Style>
+
+    <!-- Primary action: the logo turquoise with dark text, in both themes. -->
+    <Style Selector="Button.accent">
+        <Setter Property="Background" Value="#04D3BE" />
+        <Setter Property="Foreground" Value="{DynamicResource EasyOnAccentBrush}" />
+        <Setter Property="BorderBrush" Value="#04D3BE" />
+    </Style>
+
+    <Style Selector="Button.accent:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+        <Setter Property="Background" Value="{DynamicResource EasyAccentHoverBrush}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource EasyAccentHoverBrush}" />
+        <Setter Property="Foreground" Value="{DynamicResource EasyOnAccentBrush}" />
     </Style>
 
     <Style Selector="Button.ghost">
         <Setter Property="Foreground" Value="{DynamicResource EasyMutedBrush}" />
         <Setter Property="Background" Value="Transparent" />
         <Setter Property="BorderThickness" Value="0" />
-        <Setter Property="Padding" Value="12,10" />
-        <Setter Property="MinHeight" Value="38" />
+        <Setter Property="Padding" Value="10,8" />
+        <Setter Property="MinHeight" Value="36" />
     </Style>
 
-    <Style Selector="Button.ghost:pointerover">
+    <Style Selector="Button.ghost:pointerover /template/ ContentPresenter#PART_ContentPresenter">
         <Setter Property="Foreground" Value="{DynamicResource EasyTextColorBrush}" />
         <Setter Property="Background" Value="{DynamicResource EasyGlassOverlayBrush}" />
         <Setter Property="BorderThickness" Value="0" />
     </Style>
 
-    <Style Selector="Button.ghost:pressed">
-        <Setter Property="Opacity" Value="0.6" />
+    <Style Selector="Button.ghost:pressed /template/ ContentPresenter#PART_ContentPresenter">
+        <Setter Property="Background" Value="{DynamicResource EasyGlassOverlayStrongBrush}" />
     </Style>
 </Styles>

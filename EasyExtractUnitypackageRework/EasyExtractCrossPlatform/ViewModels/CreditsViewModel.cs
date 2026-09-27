@@ -202,7 +202,7 @@ public sealed class CreditsViewModel : INotifyPropertyChanged
             Highlights = highlights;
             Contributions = contributions;
             Emoji = emoji;
-            HeroBrush = CreateHeroBrush(accentStart, accentEnd);
+            HeroBrush = CreateHeroBrush(accentStart);
             AccentForegroundBrush = CreateSolidBrush(accentEnd);
             AccentBorderBrush = CreateSolidBrush(accentStart);
             ChipBackgroundBrush = CreateSolidBrush(glowColor);
@@ -233,18 +233,11 @@ public sealed class CreditsViewModel : INotifyPropertyChanged
 
         public IBrush EmblemBackgroundBrush { get; }
 
-        private static IBrush CreateHeroBrush(string startHex, string endHex)
+        // A flat tint of the person's colour instead of a two-colour gradient: the app
+        // follows the flat look of easyextract.net, and the chips still carry the colour.
+        private static IBrush CreateHeroBrush(string accentHex)
         {
-            return new LinearGradientBrush
-            {
-                StartPoint = new RelativePoint(0, 0.5, RelativeUnit.Relative),
-                EndPoint = new RelativePoint(1, 0.5, RelativeUnit.Relative),
-                GradientStops = new GradientStops
-                {
-                    new GradientStop(ParseColor(startHex), 0),
-                    new GradientStop(ParseColor(endHex), 1)
-                }
-            };
+            return CreateSolidBrush(accentHex, 0.14);
         }
 
         private static SolidColorBrush CreateSolidBrush(string hex, double? overrideOpacity = null)

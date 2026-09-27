@@ -12,9 +12,8 @@
     <Border Background="{DynamicResource EasyGlassGradientBrush}"
             BorderBrush="{DynamicResource EasyDangerBorderBrush}"
             BorderThickness="1.5"
-            CornerRadius="22"
-            Padding="22"
-            BoxShadow="0 36 90 0 #22000000">
+            CornerRadius="10"
+            Padding="22">
         <Grid RowDefinitions="Auto,Auto,*,Auto"
               ColumnDefinitions="Auto,*">
             <Border Grid.Row="0"
@@ -24,7 +23,7 @@
                     Background="{DynamicResource EasyDangerOverlayBrush}"
                     BorderBrush="{DynamicResource EasyDangerBorderBrush}"
                     BorderThickness="1"
-                    CornerRadius="18"
+                    CornerRadius="10"
                     HorizontalAlignment="Center"
                     VerticalAlignment="Center">
                 <PathIcon Width="32"
@@ -60,7 +59,7 @@
                     Background="{DynamicResource EasyGlassOverlayFaintBrush}"
                     BorderBrush="{DynamicResource EasyGlassBorderBrush}"
                     BorderThickness="1"
-                    CornerRadius="12"
+                    CornerRadius="8"
                     Padding="12">
                 <ScrollViewer VerticalScrollBarVisibility="Auto">
                     <TextBox x:Name="DetailsTextBox"

@@ -10,6 +10,17 @@
     </Application.Styles>
 
     <Application.Resources>
-        <ResourceDictionary />
+        <!-- Fluent draws toggles, focus borders and selections in the system accent
+             (Windows blue). Pin it to the logo turquoise so the controls match the
+             app and easyextract.net. -->
+        <ResourceDictionary>
+            <Color x:Key="SystemAccentColor">#04D3BE</Color>
+            <Color x:Key="SystemAccentColorDark1">#03B8A6</Color>
+            <Color x:Key="SystemAccentColorDark2">#029A8B</Color>
+            <Color x:Key="SystemAccentColorDark3">#037A6D</Color>
+            <Color x:Key="SystemAccentColorLight1">#35DFCC</Color>
+            <Color x:Key="SystemAccentColorLight2">#66E8DA</Color>
+            <Color x:Key="SystemAccentColorLight3">#99F0E7</Color>
+        </ResourceDictionary>
     </Application.Resources>
 </Application>

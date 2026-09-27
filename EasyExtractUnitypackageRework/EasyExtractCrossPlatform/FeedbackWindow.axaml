@@ -23,7 +23,7 @@
         </Style>
         <Style Selector="Window.compact Border.feedback-card">
             <Setter Property="Padding" Value="22" />
-            <Setter Property="CornerRadius" Value="26" />
+            <Setter Property="CornerRadius" Value="10" />
         </Style>
         <Style Selector="Window.compact Border.feedback-card.header-card">
             <Setter Property="Margin" Value="12,12,12,8" />
@@ -41,9 +41,8 @@
                         Background="{DynamicResource EasyGlassGradientBrush}"
                         BorderBrush="{DynamicResource EasyGlassBorderBrush}"
                         BorderThickness="1"
-                        CornerRadius="32"
-                        Margin="24,24,24,12"
-                        BoxShadow="0 36 72 0 #16000000">
+                        CornerRadius="10"
+                        Margin="24,24,24,12">
                     <StackPanel Spacing="8">
                         <TextBlock Text="{loc:Loc FeedbackWindow_Header}" Classes="display" />
                         <TextBlock Text="{loc:Loc FeedbackWindow_Description}"
@@ -57,11 +56,10 @@
                 <Border Classes="feedback-card content-card"
                         Margin="24,0,24,24"
                         Padding="28"
-                        CornerRadius="28"
+                        CornerRadius="10"
                         Background="{DynamicResource EasyGlassGradientBrush}"
                         BorderBrush="{DynamicResource EasyGlassBorderBrush}"
-                        BorderThickness="1"
-                        BoxShadow="0 32 68 0 #15000000">
+                        BorderThickness="1">
                     <Grid RowDefinitions="Auto,Auto">
                         <TextBox x:Name="FeedbackTextBox"
                                  Grid.Row="0"

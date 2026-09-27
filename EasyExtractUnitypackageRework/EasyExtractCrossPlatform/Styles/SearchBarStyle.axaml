@@ -29,7 +29,7 @@
         <Setter Property="Background" Value="{DynamicResource EasyGlassGradientBrush}" />
         <Setter Property="BorderBrush" Value="{DynamicResource EasyGlassBorderBrush}" />
         <Setter Property="BorderThickness" Value="1" />
-        <Setter Property="CornerRadius" Value="26" />
+        <Setter Property="CornerRadius" Value="10" />
         <Setter Property="Padding" Value="0" />
         <Setter Property="MinHeight" Value="54" />
         <Setter Property="FontSize" Value="16" />
@@ -149,7 +149,7 @@
         <Setter Property="Background" Value="{DynamicResource EasyGlassOverlayFaintBrush}" />
         <Setter Property="BorderBrush" Value="{DynamicResource EasyGlassNeutralBorderBrush}" />
         <Setter Property="BorderThickness" Value="1" />
-        <Setter Property="CornerRadius" Value="21" />
+        <Setter Property="CornerRadius" Value="10" />
         <Setter Property="Padding" Value="0" />
         <Setter Property="Focusable" Value="False" />
     </Style>
