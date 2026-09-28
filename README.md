@@ -132,6 +132,16 @@ https://github.com/user-attachments/assets/7492bc68-1279-4599-b041-3588657e4378
 
 ---
 
+## License
+
+EasyExtract is released under the [MIT License](LICENSE). Third-party components keep their own licenses,
+listed in [THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md).
+
+The license covers the code. It grants no rights to the EasyExtract name or logo, so a fork needs its own
+name and logo.
+
+---
+
 ## 🤝 Connect & Support
 
 * **Discord:** [Join the Community](https://discord.gg/Wn7XfhPCyD)

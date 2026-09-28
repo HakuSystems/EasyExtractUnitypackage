@@ -60,6 +60,20 @@
             <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
         </Content>
     </ItemGroup>
+    <!-- The app's own license and the notices of the bundled third-party components travel with
+         every build, since their licenses (MIT, BSD, LGPL, OFL) require the texts to be included. -->
+    <ItemGroup>
+        <Content Include="..\..\LICENSE;..\..\THIRD-PARTY-NOTICES.md">
+            <TargetPath>%(Filename)%(Extension)</TargetPath>
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+            <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+        </Content>
+        <Content Include="..\..\third-party-licenses\*.txt">
+            <TargetPath>third-party-licenses\%(Filename)%(Extension)</TargetPath>
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+            <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+        </Content>
+    </ItemGroup>
     <ItemGroup>
         <ProjectReference Include="..\EasyExtract.Core\EasyExtract.Core.csproj" />
     </ItemGroup>
