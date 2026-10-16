@@ -1,7 +1,7 @@
 # EasyExtract.net
 
 <div align="center">
-  <img src="https://github.com/user-attachments/assets/84d5c498-2f6b-45f9-895f-ac04471941f1" width="100%" alt="EasyExtract Desktop App"/>
+  <img src="docs/images/main-window.png" width="100%" alt="EasyExtract Desktop App"/>
   
   <br/>
   
