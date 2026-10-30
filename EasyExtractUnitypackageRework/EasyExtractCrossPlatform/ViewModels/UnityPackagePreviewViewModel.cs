@@ -96,6 +96,7 @@ public sealed partial class UnityPackagePreviewViewModel : INotifyPropertyChange
         var cancellationToken = loadCts.Token;
         LoggingService.LogInformation($"Loading package preview for '{PackagePath}'.");
         var stopwatch = Stopwatch.StartNew();
+        var previewServiceSucceeded = false;
 
         try
         {
@@ -110,6 +111,7 @@ public sealed partial class UnityPackagePreviewViewModel : INotifyPropertyChange
 
             var preview = await _previewService.LoadPreviewAsync(PackagePath, cancellationToken)
                 .ConfigureAwait(false);
+            previewServiceSucceeded = true;
 
             LoggingService.LogInformation(
                 $"Preview service returned {preview.Assets.Count} assets (totalSize={preview.TotalAssetSizeBytes}) for '{PackagePath}'.");
@@ -151,10 +153,14 @@ public sealed partial class UnityPackagePreviewViewModel : INotifyPropertyChange
                     RefreshCategories();
                     ApplyCategoryFilter();
                     HasError = true;
-                    StatusMessage = $"Failed to load preview: {ex.Message}";
+                    StatusMessage = BuildLoadFailureMessage(ex);
                 },
                 DispatcherPriority.Background);
-            LoggingService.LogError($"Failed to load package preview for '{PackagePath}'.", ex);
+
+            // The preview service already reported its own failures; forwarding them
+            // again would post every failed preview to the report channel twice.
+            LoggingService.LogError($"Failed to load package preview for '{PackagePath}'.", ex,
+                previewServiceSucceeded);
         }
         finally
         {
@@ -170,6 +176,13 @@ public sealed partial class UnityPackagePreviewViewModel : INotifyPropertyChange
                 },
                 DispatcherPriority.Background);
         }
+    }
+
+    internal static string BuildLoadFailureMessage(Exception exception)
+    {
+        return exception is OutOfMemoryException
+            ? "Not enough free memory to preview this package. Close other programs or extract it directly."
+            : $"Failed to load preview: {exception.Message}";
     }
 
     private void ApplyPreview(UnityPackagePreviewResult preview)

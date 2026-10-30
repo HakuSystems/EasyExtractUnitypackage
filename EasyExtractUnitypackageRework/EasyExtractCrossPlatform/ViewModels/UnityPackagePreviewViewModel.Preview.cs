@@ -31,6 +31,7 @@ public sealed partial class UnityPackagePreviewViewModel
             OnPropertyChanged(nameof(SelectedAssetCategory));
             OnPropertyChanged(nameof(SelectedAssetFolder));
             OnPropertyChanged(nameof(IsAssetDataTruncated));
+            OnPropertyChanged(nameof(CanExportSelectedAsset));
             UpdateSelectedPreviewContent();
             OnPropertyChanged(nameof(ShowUnsupportedModelMessage));
             OnPropertyChanged(nameof(ShowUnsupportedAudioMessage));
@@ -49,6 +50,8 @@ public sealed partial class UnityPackagePreviewViewModel
     public string? SelectedAssetFolder => SelectedAsset?.Directory;
 
     public bool IsAssetDataTruncated => SelectedAsset?.IsAssetDataTruncated == true;
+
+    public bool CanExportSelectedAsset => SelectedAsset is { IsAssetDataTruncated: false };
 
     public Bitmap? ImagePreview => _primaryImagePreview;
 

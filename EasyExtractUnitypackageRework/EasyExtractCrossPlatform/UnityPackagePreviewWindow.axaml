@@ -703,7 +703,7 @@
                                         Margin="0,16,0,0"
                                         HorizontalAlignment="Right"
                                         Click="ExportAssetButton_OnClick"
-                                        IsEnabled="{Binding SelectedAsset, Converter={x:Static ObjectConverters.IsNotNull}}">
+                                        IsEnabled="{Binding CanExportSelectedAsset}">
                                     <Button.Content>
                                         <StackPanel Orientation="Horizontal" Spacing="8"
                                                     VerticalAlignment="Center">

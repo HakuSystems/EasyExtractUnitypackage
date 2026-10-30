@@ -17,8 +17,11 @@ public interface IUnityPackagePreviewService
 public sealed class UnityPackagePreviewService : IUnityPackagePreviewService
 {
     private const long MaxEmbeddedAssetBytes = 8 * 1024 * 1024; // 8 MB
+    private const long DefaultMaxTotalEmbeddedAssetBytes = 512L * 1024 * 1024; // 512 MB across all assets
+    private const long DefaultMaxTotalPreviewImageBytes = 256L * 1024 * 1024; // 256 MB across all thumbnails
     private const long MaxExtractedModelBytes = 256 * 1024 * 1024; // 256 MB per model file
-    private const long MaxTotalExtractedModelBytes = 1024L * 1024 * 1024; // 1 GB across all models
+    private const long DefaultMaxTotalExtractedBytes = 1024L * 1024 * 1024; // 1 GB across all extracted media
+    private const int CopyBufferBytes = 81920;
     private const string TemporaryExtractionFolderPrefix = "EasyExtractPreviewMedia";
     private const string TemporaryPackageFolderPrefix = "EasyExtractPreviewPackage";
     // Keep in sync with UnityPackageExtractionService: use the Windows superset
@@ -43,10 +46,26 @@ public sealed class UnityPackagePreviewService : IUnityPackagePreviewService
         Array.Empty<PathSegmentNormalization>();
 
     private readonly IEasyExtractLogger _logger;
+    private readonly long _maxTotalEmbeddedAssetBytes;
+    private readonly long _maxTotalExtractedBytes;
+    private readonly long _maxTotalPreviewImageBytes;
 
     public UnityPackagePreviewService(IEasyExtractLogger logger)
+        : this(logger, DefaultMaxTotalEmbeddedAssetBytes, DefaultMaxTotalPreviewImageBytes,
+            DefaultMaxTotalExtractedBytes)
+    {
+    }
+
+    internal UnityPackagePreviewService(
+        IEasyExtractLogger logger,
+        long maxTotalEmbeddedAssetBytes,
+        long maxTotalPreviewImageBytes,
+        long maxTotalExtractedBytes)
     {
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+        _maxTotalEmbeddedAssetBytes = maxTotalEmbeddedAssetBytes;
+        _maxTotalPreviewImageBytes = maxTotalPreviewImageBytes;
+        _maxTotalExtractedBytes = maxTotalExtractedBytes;
     }
 
     public async Task<UnityPackagePreviewResult> LoadPreviewAsync(
@@ -113,6 +132,8 @@ public sealed class UnityPackagePreviewService : IUnityPackagePreviewService
             using var tarReader = new TarReader(gzipStream);
 
             var assetStates = new Dictionary<string, UnityPackageAssetPreviewState>(StringComparer.OrdinalIgnoreCase);
+            long embeddedAssetBytes = 0;
+            long embeddedPreviewBytes = 0;
 
             TarEntry? entry;
             try
@@ -157,13 +178,14 @@ public sealed class UnityPackagePreviewService : IUnityPackagePreviewService
                             state.AssetFilePath = null;
                             state.NeedsAssetExtraction = false;
 
-                            if (entry.Length >= 0 && entry.Length <= MaxEmbeddedAssetBytes)
+                            // The per-asset limit alone bounds nothing: icon packs with thousands of
+                            // small files stayed on the heap until the app ran out of memory.
+                            if (entry.Length >= 0 && entry.Length <= MaxEmbeddedAssetBytes &&
+                                embeddedAssetBytes + entry.Length <= _maxTotalEmbeddedAssetBytes)
                             {
-                                using var assetBuffer = new MemoryStream();
-                                if (entry.DataStream != null)
-                                    CopyStreamWithCancellation(entry.DataStream, assetBuffer, cancellationToken);
-                                state.AssetData = assetBuffer.ToArray();
+                                state.AssetData = ReadEntryData(entry, cancellationToken);
                                 state.IsAssetDataTruncated = false;
+                                embeddedAssetBytes += entry.Length;
                             }
                             else
                             {
@@ -177,11 +199,11 @@ public sealed class UnityPackagePreviewService : IUnityPackagePreviewService
                             state.HasMetaFile = true;
                             break;
                         case "preview.png":
-                            using (var memoryStream = new MemoryStream())
+                            if (entry.Length >= 0 && entry.Length <= MaxEmbeddedAssetBytes &&
+                                embeddedPreviewBytes + entry.Length <= _maxTotalPreviewImageBytes)
                             {
-                                if (entry.DataStream != null)
-                                    CopyStreamWithCancellation(entry.DataStream, memoryStream, cancellationToken);
-                                state.PreviewImageData = memoryStream.ToArray();
+                                state.PreviewImageData = ReadEntryData(entry, cancellationToken);
+                                embeddedPreviewBytes += entry.Length;
                             }
 
                             break;
@@ -194,6 +216,9 @@ public sealed class UnityPackagePreviewService : IUnityPackagePreviewService
                     "Preview parsed partially before encountering an IOException (e.g. EndOfStreamException). The package may be truncated or have trailing junk data. Proceeding with loaded assets.",
                     ex);
             }
+
+            _logger.LogInformation(
+                $"Preview embedded {embeddedAssetBytes} asset bytes and {embeddedPreviewBytes} thumbnail bytes for '{packagePath}'.");
 
             var extractionRoot = ExtractLargeMediaAssets(resolvedPackage.ResolvedPath, assetStates, cancellationToken);
             if (!string.IsNullOrWhiteSpace(extractionRoot))
@@ -271,7 +296,7 @@ public sealed class UnityPackagePreviewService : IUnityPackagePreviewService
             return null;
 
         string? extractionRoot = null;
-        long extractedModelBytes = 0;
+        long extractedBytes = 0;
 
         using var packageStream = File.OpenRead(packagePath);
         using var gzipStream = new GZipStream(packageStream, CompressionMode.Decompress);
@@ -300,20 +325,18 @@ public sealed class UnityPackagePreviewService : IUnityPackagePreviewService
                     continue;
 
                 var stateExtension = Path.GetExtension(state.RelativePath ?? string.Empty);
-                if (UnityAssetClassification.IsModelExtension(stateExtension))
-                {
-                    // Models are only pulled out for the 3D preview; keep the
-                    // disk footprint bounded for packages full of huge meshes.
-                    if (entry.Length > MaxExtractedModelBytes ||
-                        extractedModelBytes + Math.Max(entry.Length, 0) > MaxTotalExtractedModelBytes)
-                    {
-                        candidates.Remove(assetKey);
-                        continue;
-                    }
 
-                    extractedModelBytes += Math.Max(entry.Length, 0);
+                // Media is only pulled out for the preview players; keep the disk footprint
+                // bounded for packages full of huge meshes or thousands of sound files.
+                var isOversizedModel = UnityAssetClassification.IsModelExtension(stateExtension) &&
+                                       entry.Length > MaxExtractedModelBytes;
+                if (isOversizedModel || extractedBytes + Math.Max(entry.Length, 0) > _maxTotalExtractedBytes)
+                {
+                    candidates.Remove(assetKey);
+                    continue;
                 }
 
+                extractedBytes += Math.Max(entry.Length, 0);
                 extractionRoot ??= CreateExtractionRoot();
 
                 var extension = stateExtension;
@@ -579,9 +602,32 @@ public sealed class UnityPackagePreviewService : IUnityPackagePreviewService
         }
     }
 
+    private static byte[] ReadEntryData(TarEntry entry, CancellationToken token)
+    {
+        var source = entry.DataStream;
+        if (source is null || entry.Length <= 0)
+            return [];
+
+        // Sized from the tar header: a growing MemoryStream plus ToArray would allocate
+        // every asset several times over on the large object heap.
+        var data = GC.AllocateUninitializedArray<byte>((int)entry.Length);
+        var filled = 0;
+        while (filled < data.Length)
+        {
+            token.ThrowIfCancellationRequested();
+            var read = source.Read(data, filled, Math.Min(data.Length - filled, CopyBufferBytes));
+            if (read == 0)
+                return data[..filled];
+
+            filled += read;
+        }
+
+        return data;
+    }
+
     private static void CopyStreamWithCancellation(Stream source, Stream destination, CancellationToken token)
     {
-        var buffer = new byte[81920];
+        var buffer = new byte[CopyBufferBytes];
         int read;
         while ((read = source.Read(buffer, 0, buffer.Length)) > 0)
         {
