@@ -359,6 +359,12 @@ public static class AppSettingsService
 
     private static void WriteSettingsInPlace(string settingsFilePath, string json)
     {
+        // Read-only blocks File.Replace and, like hidden and system, the truncate below with
+        // access denied, even though the file belongs to the user.
+        const FileAttributes blockingAttributes =
+            FileAttributes.ReadOnly | FileAttributes.Hidden | FileAttributes.System;
+        File.SetAttributes(settingsFilePath, File.GetAttributes(settingsFilePath) & ~blockingAttributes);
+
         using var stream = new FileStream(settingsFilePath, FileMode.Create, FileAccess.Write,
             FileShare.ReadWrite | FileShare.Delete);
         using var writer = new StreamWriter(stream, new UTF8Encoding(false));

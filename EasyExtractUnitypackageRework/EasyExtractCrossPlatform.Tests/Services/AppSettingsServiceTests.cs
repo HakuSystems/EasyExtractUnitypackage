@@ -33,6 +33,21 @@ public sealed class AppSettingsServiceTests : IDisposable
       Directory.Delete(_rootDirectory, true);
   }
 
+    [Theory]
+    [InlineData(FileAttributes.ReadOnly)]
+    [InlineData(FileAttributes.Hidden)]
+    public void Save_RewritesASettingsFileCarryingABlockingAttribute(FileAttributes attribute)
+    {
+        AppSettingsService.Save(AppSettingsService.CreateDefault());
+        File.SetAttributes(_settingsFilePath, File.GetAttributes(_settingsFilePath) | attribute);
+
+        var settings = AppSettingsService.CreateDefault();
+        settings.TotalExtracted = 1234;
+        AppSettingsService.Save(settings);
+
+        Assert.Equal(1234, AppSettingsService.Load().TotalExtracted);
+    }
+
     [Fact]
     public void DeserializeForTests_ObjectValueInFilePath_DoesNotFallbackToDefaults()
     {
