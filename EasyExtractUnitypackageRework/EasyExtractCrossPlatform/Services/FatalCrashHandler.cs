@@ -43,13 +43,22 @@ internal static class FatalCrashHandler
 
         // The blocking dialog doubles as a grace period for the webhook dispatch. Without a
         // dialog (non-Windows or dialog failure) wait briefly so the report can leave.
-        if (!TryShowNativeErrorDialog(message))
-            Thread.Sleep(2000);
+        if (TryShowNativeErrorDialog(message))
+            return;
+
+        TryWriteToConsole(message);
+        Thread.Sleep(2000);
     }
 
     internal static bool IsOutOfMemory(Exception? exception)
     {
         return ContainsOutOfMemory(exception, 0);
+    }
+
+    internal static bool IsMissingDisplay(Exception? exception)
+    {
+        // Avalonia's X11 backend throws a plain Exception here, so the message is all there is.
+        return exception?.Message.Contains("XOpenDisplay failed", StringComparison.Ordinal) == true;
     }
 
     internal static string BuildUserMessage(Exception exception, string? logFilePath)
@@ -60,6 +69,10 @@ internal static class FatalCrashHandler
             builder.AppendLine("EasyExtract had to close because the system is critically low on memory.")
                 .AppendLine()
                 .AppendLine("Close some other applications or restart your PC, then try again.");
+        else if (IsMissingDisplay(exception))
+            builder.AppendLine("EasyExtract could not start because no display is available.")
+                .AppendLine()
+                .AppendLine("Start it from a desktop session, or make sure the DISPLAY variable is set.");
         else
             builder.AppendLine("EasyExtract hit an unexpected error and had to close.")
                 .AppendLine()
@@ -91,6 +104,18 @@ internal static class FatalCrashHandler
         {
             GC.Collect();
             GC.WaitForPendingFinalizers();
+        }
+        catch
+        {
+            // Best effort only.
+        }
+    }
+
+    private static void TryWriteToConsole(string message)
+    {
+        try
+        {
+            Console.Error.WriteLine(message);
         }
         catch
         {

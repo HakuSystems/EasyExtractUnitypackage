@@ -71,6 +71,22 @@ public sealed class FatalCrashHandlerTests
     }
 
     [Fact]
+    public void BuildUserMessage_ExplainsAMissingDisplayInsteadOfClaimingAReport()
+    {
+        var message = FatalCrashHandler.BuildUserMessage(new Exception("XOpenDisplay failed"), null);
+
+        Assert.Contains("no display", message, StringComparison.OrdinalIgnoreCase);
+        Assert.DoesNotContain("reported", message, StringComparison.OrdinalIgnoreCase);
+    }
+
+    [Fact]
+    public void IsMissingDisplay_IgnoresUnrelatedExceptions()
+    {
+        Assert.False(FatalCrashHandler.IsMissingDisplay(new InvalidOperationException("boom")));
+        Assert.False(FatalCrashHandler.IsMissingDisplay(null));
+    }
+
+    [Fact]
     public void BuildUserMessage_IncludesLogPathWhenAvailable()
     {
         var logPath = Path.Combine("C:", "logs", "easyextract_20260714.log");
