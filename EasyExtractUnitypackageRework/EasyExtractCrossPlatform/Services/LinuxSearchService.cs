@@ -272,7 +272,20 @@ internal sealed class LinuxSearchService : IEverythingSearchService
         arguments.Add("-iregex");
         arguments.Add(BuildRegexPattern(query));
 
-        return ExecuteCommand(FindPath, arguments, maxResults, cancellationToken);
+        return ExecuteCommand(FindPath, arguments, maxResults, cancellationToken,
+            tolerateUnreadableDirectories: true);
+    }
+
+    // find exits with 1 as soon as one directory under a root is unreadable (e.g. /media/root
+    // owned by another user), even though every readable path was searched.
+    internal static bool IsOnlyPermissionDenied(string? errorOutput)
+    {
+        if (string.IsNullOrWhiteSpace(errorOutput))
+            return false;
+
+        var lines = errorOutput.Split('\n', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+        return lines.Length > 0 &&
+               lines.All(line => line.EndsWith("Permission denied", StringComparison.OrdinalIgnoreCase));
     }
 
     private static (List<EverythingSearchResult> Results, int FilteredCount) ExecuteCommand(
@@ -280,7 +293,8 @@ internal sealed class LinuxSearchService : IEverythingSearchService
         IReadOnlyList<string> arguments,
         int maxResults,
         CancellationToken cancellationToken,
-        bool treatNoMatchesAsSuccess = false)
+        bool treatNoMatchesAsSuccess = false,
+        bool tolerateUnreadableDirectories = false)
     {
         var processStartInfo = new ProcessStartInfo
         {
@@ -313,6 +327,15 @@ internal sealed class LinuxSearchService : IEverythingSearchService
         var noMatchExit = treatNoMatchesAsSuccess &&
                           process.ExitCode == 1 &&
                           string.IsNullOrWhiteSpace(errorOutput);
+
+        if (tolerateUnreadableDirectories &&
+            process.ExitCode == 1 &&
+            IsOnlyPermissionDenied(errorOutput))
+        {
+            LoggingService.LogWarning(
+                $"{Path.GetFileName(commandPath)} skipped unreadable directories: {errorOutput.Trim()}");
+            return (results, excluded);
+        }
 
         if (process.ExitCode != 0 &&
             !cancellationToken.IsCancellationRequested &&

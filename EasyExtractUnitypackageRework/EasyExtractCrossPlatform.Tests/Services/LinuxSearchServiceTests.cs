@@ -72,4 +72,22 @@ public sealed class LinuxSearchServiceTests
         Assert.True(maxResultsIndex + 1 < arguments.Count);
         Assert.Equal(expected.ToString(CultureInfo.InvariantCulture), arguments[maxResultsIndex + 1]);
     }
+
+    [Theory]
+    [InlineData("/usr/bin/find: ‘/media/root’: Permission denied")]
+    [InlineData("find: '/media/root': Permission denied\nfind: '/mnt/backup/lost+found': Permission denied\n")]
+    public void IsOnlyPermissionDenied_AcceptsUnreadableDirectoryNoise(string errorOutput)
+    {
+        Assert.True(LinuxSearchService.IsOnlyPermissionDenied(errorOutput));
+    }
+
+    [Theory]
+    [InlineData(null)]
+    [InlineData("")]
+    [InlineData("find: '/media/root': Permission denied\nfind: invalid regular expression")]
+    [InlineData("find: '/mnt/nas': Input/output error")]
+    public void IsOnlyPermissionDenied_RejectsRealFailures(string? errorOutput)
+    {
+        Assert.False(LinuxSearchService.IsOnlyPermissionDenied(errorOutput));
+    }
 }
