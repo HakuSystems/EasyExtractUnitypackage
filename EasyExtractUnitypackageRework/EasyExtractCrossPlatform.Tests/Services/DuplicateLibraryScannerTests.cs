@@ -55,15 +55,14 @@ public sealed class DuplicateLibraryScannerTests : IDisposable
         await new UnityPackageBuilder().WithAsset("Assets/A.txt", "a").WriteAsync(_library, "a.unitypackage");
         await new UnityPackageBuilder().WithAsset("Assets/B.txt", "b").WriteAsync(_library, "b.unitypackage");
 
-        var updates = new List<DuplicateScanProgress>();
+        // Progress<T> without a synchronization context posts each callback to the thread pool, so
+        // updates can land out of order. Record synchronously to see them in the order they were sent.
+        var recorder = new SynchronousProgress<DuplicateScanProgress>();
         var scanner = CreateScanner();
 
-        await scanner.ScanAsync(scanner.FindPackages(_library), new Progress<DuplicateScanProgress>(updates.Add));
+        await scanner.ScanAsync(scanner.FindPackages(_library), recorder);
 
-        // Progress is posted through the synchronization context, so allow it to drain.
-        for (var attempt = 0; attempt < 50 && updates.Count < 3; attempt++)
-            await Task.Delay(10);
-
+        var updates = recorder.Updates;
         Assert.NotEmpty(updates);
         Assert.All(updates, update => Assert.Equal(2, update.PackagesTotal));
         Assert.Equal(2, updates[^1].PackagesCompleted);
@@ -193,6 +192,26 @@ public sealed class DuplicateLibraryScannerTests : IDisposable
         {
             Calls++;
             return _inner.FingerprintPackageAsync(packagePath, cancellationToken);
+        }
+    }
+
+    private sealed class SynchronousProgress<T> : IProgress<T>
+    {
+        private readonly List<T> _updates = [];
+
+        public IReadOnlyList<T> Updates
+        {
+            get
+            {
+                lock (_updates)
+                    return _updates.ToList();
+            }
+        }
+
+        public void Report(T value)
+        {
+            lock (_updates)
+                _updates.Add(value);
         }
     }
 }
